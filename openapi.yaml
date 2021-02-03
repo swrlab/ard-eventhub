@@ -1,0 +1,310 @@
+openapi: 3.0.1
+info:
+  title: ARD Eventhub
+  description: 'ARD system to distribute real-time (live) metadata for primarily radio broadcasts.'
+  termsOfService: "https://www.ard.de"
+  contact:
+    email: lab@swr.de
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+externalDocs:
+  description: Eventhub Repository
+  url: https://github.com/swrlab/ard-eventhub
+servers:
+- url: https://eventhub.ard.de/
+tags:
+- name: event
+  description: Publish new events
+- name: subscription
+  description: Access to subscription management
+paths:
+  /event/v1:
+    post:
+      tags:
+      - event
+      summary: Publish a new event
+      operationId: eventPost
+      requestBody:
+        description: New event to be distributed to subscribers.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/eventPostV1'
+        required: true
+      responses:
+        201:
+          description: Invalid input
+          content: {}
+        405:
+          description: Invalid input
+          content: {}
+  /subscription:
+    get:
+      tags:
+      - subscription
+      summary: List all subscriptions for this user
+      operationId: subscriptionGet
+      responses:
+        200:
+          description: Subscription created
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: ID of the subscription to be referenced in API calls
+                      example: 'abc-123-def'
+        401:
+          description: Missing authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorUnauthorized'
+        403:
+          description: Invalid authorization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorForbidden'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorServer'
+    post:
+      tags:
+      - subscription
+      summary: Add a new subscription
+      operationId: subscriptionPost
+      requestBody:
+        description: New event to be distributed to subscribers.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/subscriptionPost'
+        required: true
+      responses:
+        201:
+          description: Subscription created
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ID of the subscription to be referenced in future API calls
+                    example: 'abc-123-def'
+        400:
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorInvalidInput'
+        401:
+          description: Missing authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorUnauthorized'
+        403:
+          description: Invalid authorization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorForbidden'
+components:
+  schemas:
+    errorInvalidInput:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "request.body should have required property 'XYZ'"
+        errors:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+                example: ".body.XYZ"
+              message:
+                type: string
+                example: "should have required property 'XYZ'"
+              errorCode:
+                type: string
+                example: "required.openapi.validation"
+    errorUnauthorized:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "request.headers should have required property 'Authorization'"
+        errors:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+                example: ".headers.authorization"
+              message:
+                type: string
+                example: "should have required property 'authorization'"
+              errorCode:
+                type: string
+                example: "required.user"
+    errorForbidden:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "user is missing required permission"
+        errors:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+                example: ".headers.authorization"
+              message:
+                type: string
+                example: "should have required permission"
+              errorCode:
+                type: string
+                example: "required.user.permission"
+    errorServer:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Internal Server Error"
+    eventPostV1:
+      required:
+      - event
+      - start
+      - title
+      - serviceId
+      - playlistId
+      type: object
+      properties:
+        event:
+          type: string
+          example: de.ard.eventhub.v1.radio.track.playing
+          enum: [
+            de.ard.eventhub.v1.radio.track.playing,
+            de.ard.eventhub.v1.radio.track.next
+          ]
+        start:
+          type: string
+          description: ISO8601 compliant timestamp
+          example: '2020-01-19T06:00:00+01:00'
+        length:
+          type: number
+          format: float
+          description: Scheduled length of the element in seconds
+          example: 240
+        title:
+          type: string
+          description: Representative title for external use
+          example: Song name
+        artist:
+          type: string
+          description: Pre-formatted artist information
+          example: Artist name
+        serviceId: 
+          type: string
+          description: The playing station's unique Service-ID
+          example: 1234
+        playlistId:
+          type: string
+          description: Unique identifier (within a publisher) to connect next and playing items if needed
+          example: 'swr3-1234'
+        externalId:
+          type: string
+          description: Can reference the original ID in the publisher's system
+          example: 'M012345.001'
+        ardConfId:
+          type: string
+          description: Reference to an original ARD title package
+          example: 'ardhfdb1.KONF.12345'
+        isrc:
+          type: string
+          description: Appropriate ISRC code if track is a music element
+          example: 'DE012345678'
+        upc:
+          type: string
+          description: Corresponding reference to an album where such ISRC was published
+        mpn:
+          type: string
+          description: If available the reference to the original delivery from MPN
+        isInternal:
+          type: boolean
+          description: Flag to prevent usage by Eventhub on external platforms
+          example: false
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/media'
+    media:
+      required:
+        - type
+        - url
+        - description
+        - attribution
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [cover, artist, audio, video]
+          example: cover
+        url:
+          type: string
+          example: 'https://example.com/cover.jpg'
+        templateUrl:
+          type: string
+          example: 'https://example.com/cover.jpg?width={width}'
+        description:
+          type: string
+          example: Cover Demo Artist
+        attribution:
+          type: string
+          example: Photographer XYZ
+    subscriptionPost:
+      required:
+      - event
+      - start
+      - title
+      - serviceId
+      - playlistId
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - pubsub
+          example: pubsub
+        url:
+          type: string
+          description: Publicly accessible URL that should receive the events
+          example: 'https://example.com/my/webhook/for/this/subscription'
+        email:
+          type: string
+          description: Email address to be contacted in case of problems with this subscription
+          example: 'my-emergency-and-notifications-contact@ard.de'
+        topic:
+          type: string
+          description: Name of the topic to subscribe to
+          example: 'topic-name-to-subscribe-to'
