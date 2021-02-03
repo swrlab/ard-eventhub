@@ -137,7 +137,7 @@ jobs:
           --timeout $GCP_RUN_TIMEOUT \
           --memory $GCP_RUN_MEMORY \
           --update-env-vars STAGE=DEV \
-          --service-account ${{ secrects.GCP_SERVICE_ACCOUNT_INGEST }}
+          --service-account ${{ secrets.GCP_SERVICE_ACCOUNT_INGEST }}
 
   cloud-run-prod:
     environment: prod
@@ -169,4 +169,4 @@ jobs:
           --timeout $GCP_RUN_TIMEOUT \
           --memory $GCP_RUN_MEMORY \
           --update-env-vars STAGE=PROD \
-          --service-account ${{ secrects.GCP_SERVICE_ACCOUNT_INGEST }}
+          --service-account ${{ secrets.GCP_SERVICE_ACCOUNT_INGEST }}
