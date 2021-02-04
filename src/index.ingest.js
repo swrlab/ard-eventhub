@@ -20,6 +20,12 @@ if (!stageConfig[global.STAGE]) {
 	global.STAGE_CONFIG = stageConfig[global.STAGE];
 }
 
+// check existence of several process vars
+if (!process.env.GCP_PROJECT_ID) {
+	console.error('process.env.GCP_PROJECT_ID not found');
+	process.exit();
+}
+
 // enable datadog tracing
 if (global.HOST_TYPE == 'GKE') {
 	require('dd-trace').init({
@@ -51,7 +57,7 @@ server.listen(global.PORT);
 console.log(
 	'/// service is running >',
 	global.PORT,
-	'/ VERION >',
+	'/ VERSION >',
 	global.VERSION,
 	'/ STAGE >',
 	global.STAGE,

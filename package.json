@@ -5,8 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"ingest:test": "echo \"DEV: tests are yet to be implemented\" && exit 0",
-		"ingest:local:dev": "STAGE=DEV nodemon ./src/index.ingest.js",
-		"ingest:local:prod": "STAGE=PROD nodemon ./src/index.ingest.js",
+		"ingest:local": "nodemon ./src/index.ingest.js",
 		"ingest:cloud": "node ./src/index.ingest.js"
 	},
 	"keywords": [
@@ -17,13 +16,14 @@
 	"author": "SWR audio lab <lab@swr.de>",
 	"license": "ISC",
 	"dependencies": {
+		"@google-cloud/datastore": "^6.3.1",
 		"@google-cloud/pubsub": "^2.8.0",
 		"body-parser": "^1.19.0",
 		"compression": "^1.7.4",
 		"dd-trace": "^0.30.5",
 		"express": "4.17.1",
 		"express-openapi-validator": "^4.10.11",
-		"moment": "2.29.1",
+		"moment": "^2.29.1",
 		"node-fetch": "2.6.1",
 		"swagger-ui-express": "^4.1.6"
 	},

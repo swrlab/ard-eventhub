@@ -44,7 +44,14 @@ const swaggerConfig = require('../../config/swaggerUI');
 router.use('/openapi', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerConfig));
 
 // register API endpoints
-router.post('/event/v1', require('./event/post'));
+router.post('/events/v1', require('./events/post'));
+
+router.get('/subscriptions/', require('./subscriptions/list'));
+router.get('/subscriptions/:subscriptionName', require('./subscriptions/get'));
+router.post('/subscriptions/', require('./subscriptions/post'));
+
+router.get('/topics/', require('./topics/list'));
+router.get('/topics/:topicName', require('./topics/list'));
 
 // export router object to server
 module.exports = router;

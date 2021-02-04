@@ -63,13 +63,13 @@
         }
       }
     },
-    "/subscription": {
+    "/subscriptions": {
       "get": {
         "tags": [
           "subscription"
         ],
         "summary": "List all subscriptions for this user",
-        "operationId": "subscriptionGet",
+        "operationId": "subscriptionList",
         "responses": {
           "200": {
             "description": "Subscription created",
@@ -184,6 +184,98 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/errorForbidden"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionName}": {
+      "get": {
+        "tags": [
+          "subscription"
+        ],
+        "summary": "Get details about a single subscription from this user",
+        "operationId": "subscriptionsGet",
+        "parameters": [
+          {
+            "name": "subscriptionName",
+            "in": "path",
+            "description": "`name` of the desired subscription",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/subscriptionResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUnauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invalid authorization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorForbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorServer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/topics": {
+      "get": {
+        "tags": [
+          "topic"
+        ],
+        "summary": "List all available topics",
+        "operationId": "topicsGet",
+        "responses": {
+          "200": {
+            "description": "Topics found",
+            "content": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorServer"
                 }
               }
             }
@@ -335,7 +427,7 @@
           "serviceId": {
             "type": "string",
             "description": "The playing station's unique Service-ID",
-            "example": 1234
+            "example": "1234"
           },
           "playlistId": {
             "type": "string",
@@ -417,20 +509,59 @@
       },
       "subscriptionPost": {
         "required": [
-          "event",
-          "start",
-          "title",
-          "serviceId",
-          "playlistId"
+          "type",
+          "method",
+          "url",
+          "email",
+          "topic"
         ],
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
             "enum": [
-              "pubsub"
+              "PUBSUB"
             ],
-            "example": "pubsub"
+            "example": "PUBSUB"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "PUSH"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "description": "Publicly accessible URL that should receive the events",
+            "example": "https://example.com/my/webhook/for/this/subscription"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address to be contacted in case of problems with this subscription",
+            "example": "my-emergency-and-notifications-contact@ard.de"
+          },
+          "topic": {
+            "type": "string",
+            "description": "Name of the topic to subscribe to",
+            "example": "topic-name-to-subscribe-to"
+          }
+        }
+      },
+      "subscriptionResponse": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "PUBSUB"
+            ],
+            "example": "PUBSUB"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "PUSH"
+            ]
           },
           "url": {
             "type": "string",
