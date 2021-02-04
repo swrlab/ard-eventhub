@@ -40,10 +40,10 @@ paths:
           ```json
           {
             "event": "de.ard.eventhub.v1.radio.track.playing",
-            "start": "2020xxx",
+            "start": "2020-01-19T06:00:00+01:00",
             "title": "Song name",
-            "serviceId": "123",
-            "playlistId": "ddd"
+            "serviceId": "1234",
+            "playlistId": "swr3-5678"
           }
           ```
           Fields not specified in the Schema, will cause your request to fail.   
@@ -363,21 +363,45 @@ components:
           type: string
           description: Pre-formatted artist information
           example: Sam Feldt feat. Someone Else
-        artists:
+        contributors:
           type: array
           description: Full details about involved artists if available
           items:
             type: object
+            required:
+              - name
+              - role
             properties:
               name:
                 type: string
                 example: Sam Feldt
-              normDbType:
+              role:
+                  type: string
+                  example: 'artist'
+                  enum:
+                    - artist
+                    - author
+                    - composer
+                    - performer
+              normDb:
+                type: object
+                description: Reference to an entity in ARD's Norm-DB catalog
+                properties:
+                  type:
+                    type: string
+                    example: Person
+                  id:
+                    type: string
+                    example: "1641010"
+              isni:
                 type: string
-                example: Person
-              normDbId:
-                type: string
-                example: "1641010"
+                description: ISNI ID if available
+                externalDocs:
+                  description: International Standard Name Identifier
+                  url: https://kb.ddex.net/display/HBK/Communication+of+Identifiers+in+DDEX+Messages
+              url:
+                  type: string
+                  description: Can link to external reference
         serviceId:
           type: string
           description: The playing station's unique Service-ID
@@ -385,7 +409,7 @@ components:
         playlistId:
           type: string
           description: Unique identifier (within a publisher) to connect next and playing items if needed
-          example: 'swr3-1234'
+          example: 'swr3-5678'
         externalId:
           type: string
           description: Can reference the original ID in the publisher's system
@@ -412,18 +436,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/media'
-        performers:
-          type: array
-          description: Array of composer names, primarily used for classical music
-          items:
-            type: string
-            example: "BRSO"
-        composers:
-          type: array
-          description: Array of composer names, primarily used for classical music
-          items:
-            type: string
-            example: "Claude Debussy (1862-1918)"
         plugins:
           type: array
           description: Highly optional field for future third-party metadata distribution or other connected services
@@ -437,6 +449,7 @@ components:
         id:
           type: string
           description: ID gets inserted by Eventhub as string-formated number, but might be a true string in the future, do not expect this string to remain numbers only!
+          example: "1234567890"
     media:
       required:
         - type
