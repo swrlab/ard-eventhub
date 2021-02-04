@@ -362,8 +362,23 @@ components:
         artist:
           type: string
           description: Pre-formatted artist information
-          example: Artist name
-        serviceId: 
+          example: Sam Feldt feat. Someone Else
+        artists:
+          type: array
+          description: Full details about involved artists if available
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: Sam Feldt
+              normDbType:
+                type: string
+                example: Person
+              normDbId:
+                type: string
+                example: "1641010"
+        serviceId:
           type: string
           description: The playing station's unique Service-ID
           example: "1234"
@@ -375,7 +390,7 @@ components:
           type: string
           description: Can reference the original ID in the publisher's system
           example: 'M012345.001'
-        ardConfId:
+        confId:
           type: string
           description: Reference to an original ARD title package
           example: 'ardhfdb1.KONF.12345'
@@ -397,6 +412,28 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/media'
+        performers:
+          type: array
+          description: Array of composer names, primarily used for classical music
+          items:
+            type: string
+            example: "BRSO"
+        composers:
+          type: array
+          description: Array of composer names, primarily used for classical music
+          items:
+            type: string
+            example: "Claude Debussy (1862-1918)"
+        plugins:
+          type: array
+          description: Highly optional field for future third-party metadata distribution or other connected services
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: 'postToThirdPartyPlatformXYZ'
+
         id:
           type: string
           description: ID gets inserted by Eventhub as string-formated number, but might be a true string in the future, do not expect this string to remain numbers only!
