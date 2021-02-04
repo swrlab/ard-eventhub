@@ -17,12 +17,20 @@ router.use(bodyParser.json());
 
 // load openapi validator
 const OpenApiValidator = require('express-openapi-validator');
+const moment = require('moment');
 router.use(
 	OpenApiValidator.middleware({
 		apiSpec: './openapi.yaml',
 		validateRequests: true,
 		validateResponses: false,
 		ignorePaths: (path) => path.startsWith('/openapi'),
+		formats: [
+			{
+				name: 'iso8601-timestamp',
+				type: 'string',
+				validate: (value) => moment(value, moment.ISO_8601).isValid(),
+			},
+		],
 	})
 );
 

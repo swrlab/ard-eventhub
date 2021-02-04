@@ -349,6 +349,7 @@ components:
         start:
           type: string
           description: ISO8601 compliant timestamp
+          format: 'iso8601-timestamp'
           example: '2020-01-19T06:00:00+01:00'
         length:
           type: number
