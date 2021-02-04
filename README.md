@@ -13,5 +13,8 @@ A separate Changelog will be available in [CHANGELOG.md](CHANGELOG.md)
 
 ## Modules
 
-This project will include two modules: Ingest and API. The first development step is to only supply the Ingest service. You'll find the core code in [`./src/ingest/`](./src/ingest/).
-Each module uses their own endpoints and checks, while some parts are shared across both (`utils`). They also both have their own Dockerfiles to start the appropriate service.
+This project will include two modules: Ingest and API. The first development step is to only supply the Ingest service. Each module uses their own endpoints and checks, while some parts are shared across both (`utils`). They also both have their own Dockerfiles to start the appropriate service.
+
+### Ingest
+
+The Ingest service is responsible for receiving and publishing events and managing subscriptions. You'll find the core code in [`./src/ingest/`](./src/ingest/).

@@ -5,23 +5,38 @@
 
 */
 
+// load eventhub utils
+const datastore = require('../../utils/datastore');
 const pubsub = require('../../utils/pubsub');
+const response = require('../../utils/response');
 
 module.exports = async (req, res) => {
 	try {
 		// DEV do more case-secific checks here
 
-		// DEV this is a very random test
-		let messageIds = await pubsub.publishMessage(['dev', 'dev2'], {
-			body: req.body,
-			headers: req.headers,
-		});
+		// use entire POST body to include potentially new fields
+		let message = req.body;
 
-		res.status(201).json({
-			messageIds,
-			body: req.body,
-			headers: req.headers,
-		});
+		// save message to datastore
+		message = await datastore.save(message, 'events');
+
+		// DEV this is a very random topic test
+		let topics = await pubsub.publishMessage(['dev', 'dev2'], message);
+
+		// return ok
+		return response.ok(
+			req,
+			res,
+			{
+				topics,
+				message,
+				debug: {
+					body: req.body,
+					headers: req.headers,
+				},
+			},
+			201
+		);
 	} catch (err) {
 		console.error(
 			'ingest/events/post',
@@ -32,6 +47,6 @@ module.exports = async (req, res) => {
 				error: err.stack || err,
 			})
 		);
-		return res.sendStatus(500);
+		return response.internalServerError(req, res, err);
 	}
 };

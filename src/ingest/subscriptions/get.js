@@ -5,7 +5,9 @@
 
 */
 
+// load eventhub utils
 const pubsub = require('../../utils/pubsub');
+const response = require('../../utils/response');
 
 module.exports = async (req, res) => {
 	try {
@@ -28,6 +30,6 @@ module.exports = async (req, res) => {
 				error: err.stack || err,
 			})
 		);
-		return res.sendStatus(500);
+		return response.internalServerError(req, res, err);
 	}
 };

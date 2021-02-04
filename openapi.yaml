@@ -14,36 +14,44 @@ externalDocs:
   url: https://github.com/swrlab/ard-eventhub
 servers:
 - url: https://eventhub.ard.de/
+  description: (Potential) Production URL
+- url: /
+  description: Local environment
 tags:
-- name: event
+- name: events
   description: Publish new events
-- name: subscription
+- name: subscriptions
   description: Access to subscription management
+- name: topics
+  description: Access to topics details
 paths:
-  /event/v1:
+  /events/v1:
     post:
       tags:
-      - event
+      - events
       summary: Publish a new event
-      operationId: eventPost
+      operationId: eventV1Post
       requestBody:
         description: New event to be distributed to subscribers.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/eventPostV1'
+              $ref: '#/components/schemas/eventV1Post'
         required: true
       responses:
         201:
-          description: Invalid input
+          description: Event created
           content: {}
-        405:
-          description: Invalid input
-          content: {}
+        400:
+          description: Bad Request (invalid input)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorBadRequest'
   /subscriptions:
     get:
       tags:
-      - subscription
+      - subscriptions
       summary: List all subscriptions for this user
       operationId: subscriptionList
       responses:
@@ -77,10 +85,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/errorServer'
+                $ref: '#/components/schemas/errorInternalServerError'
     post:
       tags:
-      - subscription
+      - subscriptions
       summary: Add a new subscription
       operationId: subscriptionPost
       requestBody:
@@ -103,11 +111,11 @@ paths:
                     description: ID of the subscription to be referenced in future API calls
                     example: 'abc-123-def'
         400:
-          description: Invalid input
+          description: Bad Request (invalid input)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/errorInvalidInput'
+                $ref: '#/components/schemas/errorBadRequest'
         401:
           description: Missing authentication
           content:
@@ -123,7 +131,7 @@ paths:
   /subscriptions/{subscriptionName}:
     get:
       tags:
-      - subscription
+      - subscriptions
       summary: Get details about a single subscription from this user
       operationId: subscriptionsGet
       parameters:
@@ -161,11 +169,53 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/errorServer'
+                $ref: '#/components/schemas/errorInternalServerError'
+    delete:
+      tags:
+      - subscriptions
+      summary: Remove a single subscription by this user
+      operationId: subscriptionsDelete
+      parameters:
+      - name: subscriptionName
+        in: path
+        description: '`name` of the desired subscription'
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        200:
+          description: Subscription deleted
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+        401:
+          description: Missing authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorUnauthorized'
+        403:
+          description: Invalid authorization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorForbidden'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorInternalServerError'
   /topics:
     get:
       tags:
-      - topic
+      - topics
       summary: List all available topics
       operationId: topicsGet
       responses:
@@ -177,10 +227,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/errorServer'
+                $ref: '#/components/schemas/errorInternalServerError'
 components:
   schemas:
-    errorInvalidInput:
+    errorBadRequest:
       type: object
       properties:
         message:
@@ -201,6 +251,9 @@ components:
               errorCode:
                 type: string
                 example: "required.openapi.validation"
+        trace:
+          type: string
+          example: null
     errorUnauthorized:
       type: object
       properties:
@@ -222,6 +275,9 @@ components:
               errorCode:
                 type: string
                 example: "required.user"
+        trace:
+          type: string
+          example: null
     errorForbidden:
       type: object
       properties:
@@ -243,13 +299,19 @@ components:
               errorCode:
                 type: string
                 example: "required.user.permission"
-    errorServer:
+        trace:
+          type: string
+          example: null
+    errorInternalServerError:
       type: object
       properties:
         message:
           type: string
           example: "Internal Server Error"
-    eventPostV1:
+        trace:
+          type: string
+          example: null
+    eventV1Post:
       required:
       - event
       - start

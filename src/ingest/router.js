@@ -7,6 +7,7 @@
 
 // import express.router
 const express = require('express');
+const response = require('../utils/response');
 const router = express.Router();
 router.use(express.urlencoded({ extended: true }));
 
@@ -27,12 +28,7 @@ router.use(
 
 // set openapi error handler
 router.use((err, req, res, next) => {
-	console.log({ err });
-	// format errors
-	res.status(err.status || 500).json({
-		message: err.message,
-		errors: err.errors,
-	});
+	return response.badRequest(req, res, err);
 });
 
 // load swagger UI
@@ -47,8 +43,9 @@ router.use('/openapi', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swagger
 router.post('/events/v1', require('./events/post'));
 
 router.get('/subscriptions/', require('./subscriptions/list'));
-router.get('/subscriptions/:subscriptionName', require('./subscriptions/get'));
 router.post('/subscriptions/', require('./subscriptions/post'));
+router.get('/subscriptions/:subscriptionName', require('./subscriptions/get'));
+router.delete('/subscriptions/:subscriptionName', require('./subscriptions/delete'));
 
 router.get('/topics/', require('./topics/list'));
 router.get('/topics/:topicName', require('./topics/list'));

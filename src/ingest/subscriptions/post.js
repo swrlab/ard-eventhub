@@ -5,9 +5,13 @@
 
 */
 
+// load node utils
+const moment = require('moment');
+
+// load eventhub utils
 const datastore = require('../../utils/datastore');
 const pubsub = require('../../utils/pubsub');
-const moment = require('moment');
+const response = require('../../utils/response');
 
 module.exports = async (req, res) => {
 	try {
@@ -40,11 +44,11 @@ module.exports = async (req, res) => {
 			return res.sendStatus(404);
 		}
 
-		// create subscription
+		// request creation of subscription
 		let createdSubscription = await pubsub.createSubscription(subscription);
 
 		// return data
-		res.status(200).json({ createdSubscription });
+		res.status(201).json(createdSubscription);
 	} catch (err) {
 		console.error(
 			'ingest/subscriptions/post',
@@ -54,6 +58,6 @@ module.exports = async (req, res) => {
 				error: err.stack || err,
 			})
 		);
-		return res.sendStatus(500);
+		return response.internalServerError(req, res, err);
 	}
 };
