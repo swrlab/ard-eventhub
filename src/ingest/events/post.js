@@ -19,9 +19,10 @@ module.exports = async (req, res) => {
 
 		// save message to datastore
 		message = await datastore.save(message, 'events');
+		message.id = message.id.toString();
 
 		// DEV this is a very random topic test
-		let topics = await pubsub.publishMessage(['dev', 'dev2'], message);
+		let topics = await pubsub.publishMessage(['demo'], message);
 
 		// return ok
 		return response.ok(

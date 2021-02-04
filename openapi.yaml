@@ -32,11 +32,27 @@ paths:
       summary: Publish a new event
       operationId: eventV1Post
       requestBody:
-        description: New event to be distributed to subscribers.
+        description: |
+          New event to be distributed to subscribers.  
+            
+          The Eventhub format validation expects only a subset of these variables as minumum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.  
+          The subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:  
+          ```json
+          {
+            "event": "de.ard.eventhub.v1.radio.track.playing",
+            "start": "2020xxx",
+            "title": "Song name",
+            "serviceId": "123",
+            "playlistId": "ddd"
+          }
+          ```
+          Fields not specified in the Schema, will cause your request to fail.   
+            
+          The `id` is inserted by Eventhub as string-formated number, but might be a true string in the future, do not expect this string to remain numbers only!
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/eventV1Post'
+              $ref: '#/components/schemas/eventV1PostBody'
         required: true
       responses:
         201:
@@ -311,7 +327,8 @@ components:
         trace:
           type: string
           example: null
-    eventV1Post:
+    eventV1PostBody:
+      additionalProperties: false
       required:
       - event
       - start
@@ -319,6 +336,8 @@ components:
       - serviceId
       - playlistId
       type: object
+      description: |
+        **Please also note the details in the `POST /events/v1` endpoint above!**
       properties:
         event:
           type: string
@@ -378,6 +397,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/media'
+        id:
+          type: string
+          description: ID gets inserted by Eventhub as string-formated number, but might be a true string in the future, do not expect this string to remain numbers only!
     media:
       required:
         - type

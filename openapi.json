@@ -50,11 +50,11 @@
         "summary": "Publish a new event",
         "operationId": "eventV1Post",
         "requestBody": {
-          "description": "New event to be distributed to subscribers.",
+          "description": "New event to be distributed to subscribers.  \n  \nThe Eventhub format validation expects only a subset of these variables as minumum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.  \nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:  \n```json\n{\n  \"event\": \"de.ard.eventhub.v1.radio.track.playing\",\n  \"start\": \"2020xxx\",\n  \"title\": \"Song name\",\n  \"serviceId\": \"123\",\n  \"playlistId\": \"ddd\"\n}\n```\nFields not specified in the Schema, will cause your request to fail.   \n  \nThe `id` is inserted by Eventhub as string-formated number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/eventV1Post"
+                "$ref": "#/components/schemas/eventV1PostBody"
               }
             }
           },
@@ -483,7 +483,8 @@
           }
         }
       },
-      "eventV1Post": {
+      "eventV1PostBody": {
+        "additionalProperties": false,
         "required": [
           "event",
           "start",
@@ -492,6 +493,7 @@
           "playlistId"
         ],
         "type": "object",
+        "description": "**Please also note the details in the `POST /events/v1` endpoint above!**\n",
         "properties": {
           "event": {
             "type": "string",
@@ -565,6 +567,10 @@
             "items": {
               "$ref": "#/components/schemas/media"
             }
+          },
+          "id": {
+            "type": "string",
+            "description": "ID gets inserted by Eventhub as string-formated number, but might be a true string in the future, do not expect this string to remain numbers only!"
           }
         }
       },
