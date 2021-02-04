@@ -331,6 +331,7 @@ components:
       additionalProperties: false
       required:
       - event
+      - type
       - start
       - title
       - serviceId
@@ -346,6 +347,19 @@ components:
             de.ard.eventhub.v1.radio.track.playing,
             de.ard.eventhub.v1.radio.track.next
           ]
+        type:
+          type: string
+          description: The type of the element that triggered this event. See additional file in docs for details.
+          example: "music"
+          enum:
+            - music
+            - news
+            - audio
+            - live
+            - weather
+            - traffic
+            - commercial
+            - jingle
         start:
           type: string
           description: ISO8601 compliant timestamp
@@ -436,7 +450,29 @@ components:
         media:
           type: array
           items:
-            $ref: '#/components/schemas/media'
+            required:
+              - type
+              - url
+              - description
+              - attribution
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [cover, artist, anchor, audio, video]
+                example: cover
+              url:
+                type: string
+                example: 'https://example.com/cover.jpg'
+              templateUrl:
+                type: string
+                example: 'https://example.com/cover.jpg?width={width}'
+              description:
+                type: string
+                example: Cover Demo Artist
+              attribution:
+                type: string
+                example: Photographer XYZ
         plugins:
           type: array
           description: Highly optional field for future third-party metadata distribution or other connected services
@@ -451,30 +487,6 @@ components:
           type: string
           description: ID gets inserted by Eventhub as string-formated number, but might be a true string in the future, do not expect this string to remain numbers only!
           example: "1234567890"
-    media:
-      required:
-        - type
-        - url
-        - description
-        - attribution
-      type: object
-      properties:
-        type:
-          type: string
-          enum: [cover, artist, audio, video]
-          example: cover
-        url:
-          type: string
-          example: 'https://example.com/cover.jpg'
-        templateUrl:
-          type: string
-          example: 'https://example.com/cover.jpg?width={width}'
-        description:
-          type: string
-          example: Cover Demo Artist
-        attribution:
-          type: string
-          example: Photographer XYZ
     subscriptionPost:
       required:
       - type

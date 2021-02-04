@@ -5,8 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"ingest:test": "echo \"DEV: tests are yet to be implemented\" && exit 0",
-		"ingest:local": "nodemon ./src/index.ingest.js",
-		"ingest:cloud": "node ./src/index.ingest.js"
+		"ingest:local": "nodemon ./src/ingest/index.js",
+		"ingest:cloud": "node ./src/ingest/index.js"
 	},
 	"keywords": [
 		"ard",

@@ -8,11 +8,11 @@
 // detect host environment
 global.PORT = process.env.PORT || 8080;
 global.STAGE = process.env.STAGE || 'DEV';
-global.HOST_TYPE = require('./utils/getHostType')();
-global.VERSION = require('../package.json').version;
+global.HOST_TYPE = require('../utils/getHostType')();
+global.VERSION = require('../../package.json').version;
 
 // configure stage
-const stageConfig = require('../config/stageConfig');
+const stageConfig = require('../../config/stageConfig');
 if (!stageConfig[global.STAGE]) {
 	console.error('stageConfig[STAGE] not found >', global.STAGE);
 	process.exit();
@@ -48,7 +48,7 @@ server.use(function (req, res, next) {
 });
 
 // import router
-server.use('/', require('./ingest/router'));
+server.use('/', require('./router'));
 
 // start express server
 server.use(compression());
