@@ -48,6 +48,10 @@ const swaggerConfig = require('../../config/swaggerUI');
 router.use('/openapi', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerConfig));
 
 // register API endpoints
+router.post('/auth/login', require('./auth/login/post'));
+router.post('/auth/refresh', require('./auth/refresh/post'));
+router.post('/auth/reset', require('./auth/reset/post'));
+
 router.post('/events/v1', require('./events/post'));
 
 router.get('/subscriptions/', require('./subscriptions/list'));

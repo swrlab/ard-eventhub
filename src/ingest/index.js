@@ -16,13 +16,18 @@ const stageConfig = require('../../config/stageConfig');
 if (!stageConfig[global.STAGE]) {
 	console.error('stageConfig[STAGE] not found >', global.STAGE);
 	process.exit();
-} else {
-	global.STAGE_CONFIG = stageConfig[global.STAGE];
 }
+
+// else set remaining globals
+global.STAGE_CONFIG = stageConfig[global.STAGE];
+global.AGENT = global.STAGE_CONFIG.serviceName + '/' + global.VERSION;
 
 // check existence of several process vars
 if (!process.env.GCP_PROJECT_ID) {
 	console.error('process.env.GCP_PROJECT_ID not found');
+	process.exit();
+} else if (!process.env.FIREBASE_API_KEY) {
+	console.error('process.env.FIREBASE_API_KEY not found');
 	process.exit();
 }
 
@@ -41,7 +46,7 @@ const server = express();
 // add debugging information to all headers
 server.use(function (req, res, next) {
 	// add service information
-	res.set('x-service', global.STAGE_CONFIG.serviceName + '/' + global.VERSION);
+	res.set('x-service', global.AGENT);
 
 	// continue with normal workflow
 	next();

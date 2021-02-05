@@ -18,6 +18,8 @@ servers:
 - url: /
   description: Local environment
 tags:
+- name: auth
+  description: Authentication services for Eventhub
 - name: events
   description: Publish new events
 - name: subscriptions
@@ -25,6 +27,110 @@ tags:
 - name: topics
   description: Access to topics details
 paths:
+  /auth/login:
+    post:
+      tags:
+      - auth
+      summary: Swap login credentials for a token
+      operationId: authLoginPost
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: my-email@example.com
+                password:
+                  type: string
+                  example: my-password
+      responses:
+        200:
+          description: Authentication successfull
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/authResponse'
+        400:
+          description: Bad Request (invalid input)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorBadRequest'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorInternalServerError'
+  /auth/refresh:
+    post:
+      tags:
+      - auth
+      summary: Swap refresh token for new id token
+      operationId: authRefreshPost
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                  example: abcXYZ...
+      responses:
+        200:
+          description: Authentication successfull
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/authResponse'
+        400:
+          description: Bad Request (invalid input)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorBadRequest'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorInternalServerError'
+  /auth/reset:
+    post:
+      tags:
+      - auth
+      summary: Request password reset email
+      operationId: authResetPost
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: my-email@example.com
+      responses:
+        200:
+          description: Request successfull
+          content: {}
+        400:
+          description: Bad Request (invalid input)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorBadRequest'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorInternalServerError'
   /events/v1:
     post:
       tags:
@@ -246,6 +352,32 @@ paths:
                 $ref: '#/components/schemas/errorInternalServerError'
 components:
   schemas:
+    authResponse:
+      type: object
+      properties:
+        expiresIn:
+          type: number
+          description: TTL for the token in seconds
+          example: 3600
+        expires:
+          type: string
+          description: ISO8601 compliant timestamp for the token expiry
+          format: 'iso8601-timestamp'
+          example: '2020-01-19T06:00:00+01:00'
+        token:
+          type: string
+          description: ready to use token for API queries
+          example: "ey..."
+        refreshToken:
+          type: string
+          description: refresh token to be used with `/auth/refresh`/ endpoint
+          example: "A0..."
+        user:
+          type: object
+          description: Firebase-type user object obtained by decoding the JWT token
+        trace:
+          type: string
+          example: null
     errorBadRequest:
       type: object
       properties:

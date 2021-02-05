@@ -29,6 +29,10 @@
   ],
   "tags": [
     {
+      "name": "auth",
+      "description": "Authentication services for Eventhub"
+    },
+    {
       "name": "events",
       "description": "Publish new events"
     },
@@ -42,6 +46,174 @@
     }
   ],
   "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Swap login credentials for a token",
+        "operationId": "authLoginPost",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "my-email@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "my-password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successfull",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/authResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (invalid input)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorBadRequest"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Swap refresh token for new id token",
+        "operationId": "authRefreshPost",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "example": "abcXYZ..."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successfull",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/authResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (invalid input)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorBadRequest"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/reset": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Request password reset email",
+        "operationId": "authResetPost",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "my-email@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request successfull",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad Request (invalid input)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorBadRequest"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/events/v1": {
       "post": {
         "tags": [
@@ -368,6 +540,40 @@
   },
   "components": {
     "schemas": {
+      "authResponse": {
+        "type": "object",
+        "properties": {
+          "expiresIn": {
+            "type": "number",
+            "description": "TTL for the token in seconds",
+            "example": 3600
+          },
+          "expires": {
+            "type": "string",
+            "description": "ISO8601 compliant timestamp for the token expiry",
+            "format": "iso8601-timestamp",
+            "example": "2020-01-19T06:00:00+01:00"
+          },
+          "token": {
+            "type": "string",
+            "description": "ready to use token for API queries",
+            "example": "ey..."
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "refresh token to be used with `/auth/refresh`/ endpoint",
+            "example": "A0..."
+          },
+          "user": {
+            "type": "object",
+            "description": "Firebase-type user object obtained by decoding the JWT token"
+          },
+          "trace": {
+            "type": "string",
+            "example": null
+          }
+        }
+      },
       "errorBadRequest": {
         "type": "object",
         "properties": {
@@ -487,6 +693,7 @@
         "additionalProperties": false,
         "required": [
           "event",
+          "type",
           "start",
           "title",
           "serviceId",
@@ -501,6 +708,21 @@
             "enum": [
               "de.ard.eventhub.v1.radio.track.playing",
               "de.ard.eventhub.v1.radio.track.next"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the element that triggered this event. See additional file in docs for details.",
+            "example": "music",
+            "enum": [
+              "music",
+              "news",
+              "audio",
+              "live",
+              "weather",
+              "traffic",
+              "commercial",
+              "jingle"
             ]
           },
           "start": {
@@ -619,7 +841,42 @@
           "media": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/media"
+              "required": [
+                "type",
+                "url",
+                "description",
+                "attribution"
+              ],
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "cover",
+                    "artist",
+                    "anchor",
+                    "audio",
+                    "video"
+                  ],
+                  "example": "cover"
+                },
+                "url": {
+                  "type": "string",
+                  "example": "https://example.com/cover.jpg"
+                },
+                "templateUrl": {
+                  "type": "string",
+                  "example": "https://example.com/cover.jpg?width={width}"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Cover Demo Artist"
+                },
+                "attribution": {
+                  "type": "string",
+                  "example": "Photographer XYZ"
+                }
+              }
             }
           },
           "plugins": {
@@ -639,43 +896,6 @@
             "type": "string",
             "description": "ID gets inserted by Eventhub as string-formated number, but might be a true string in the future, do not expect this string to remain numbers only!",
             "example": "1234567890"
-          }
-        }
-      },
-      "media": {
-        "required": [
-          "type",
-          "url",
-          "description",
-          "attribution"
-        ],
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "cover",
-              "artist",
-              "audio",
-              "video"
-            ],
-            "example": "cover"
-          },
-          "url": {
-            "type": "string",
-            "example": "https://example.com/cover.jpg"
-          },
-          "templateUrl": {
-            "type": "string",
-            "example": "https://example.com/cover.jpg?width={width}"
-          },
-          "description": {
-            "type": "string",
-            "example": "Cover Demo Artist"
-          },
-          "attribution": {
-            "type": "string",
-            "example": "Photographer XYZ"
           }
         }
       },

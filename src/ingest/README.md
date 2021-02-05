@@ -12,6 +12,7 @@ It needs several environment variables to work:
 
 - REQUIRED `STAGE` - can be one of the Stages below to switch several settings
 - REQUIRED `GCP_PROJECT_ID` - which GCP project ID to use for Pub/Sub and Datastore requests
+- REQUIRED `FIREBASE_API_KEY` - corresponding `API_KET` which matches the `GCP_PROJECT_ID`
 - OPTIONAL `PORT` - override server port setting, default is 8080
 
 ### Stages
