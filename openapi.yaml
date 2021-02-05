@@ -21,7 +21,7 @@ tags:
 - name: auth
   description: Authentication services for Eventhub
 - name: events
-  description: Publish new events
+  description: Manage events
 - name: subscriptions
   description: Access to subscription management
 - name: topics
@@ -137,6 +137,8 @@ paths:
       - events
       summary: Publish a new event
       operationId: eventV1Post
+      security:
+      - bearerAuth: []
       requestBody:
         description: |
           New event to be distributed to subscribers.  
@@ -176,6 +178,8 @@ paths:
       - subscriptions
       summary: List all subscriptions for this user
       operationId: subscriptionList
+      security:
+      - bearerAuth: []
       responses:
         200:
           description: Subscription created
@@ -213,6 +217,8 @@ paths:
       - subscriptions
       summary: Add a new subscription
       operationId: subscriptionPost
+      security:
+      - bearerAuth: []
       requestBody:
         description: New event to be distributed to subscribers.
         content:
@@ -250,14 +256,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorForbidden'
-  /subscriptions/{subscriptionName}:
+  /subscriptions/{name}:
     get:
       tags:
       - subscriptions
       summary: Get details about a single subscription from this user
       operationId: subscriptionsGet
+      security:
+      - bearerAuth: []
       parameters:
-      - name: subscriptionName
+      - name: name
         in: path
         description: '`name` of the desired subscription'
         required: true
@@ -297,8 +305,10 @@ paths:
       - subscriptions
       summary: Remove a single subscription by this user
       operationId: subscriptionsDelete
+      security:
+      - bearerAuth: []
       parameters:
-      - name: subscriptionName
+      - name: name
         in: path
         description: '`name` of the desired subscription'
         required: true
@@ -340,6 +350,8 @@ paths:
       - topics
       summary: List all available topics
       operationId: topicsGet
+      security:
+      - bearerAuth: []
       responses:
         200:
           description: Topics found
@@ -351,6 +363,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorInternalServerError'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     authResponse:
       type: object

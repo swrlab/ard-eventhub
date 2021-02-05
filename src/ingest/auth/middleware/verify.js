@@ -14,7 +14,7 @@ module.exports = async (req, res, next) => {
 	try {
 		// parse input, preset vars
 		const regexp = /(?!Bearer\s{1})([a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+)/g;
-		let authorization = req.headers['x-authorization'];
+		let authorization = req.headers['x-authorization'] || req.headers['authorization'];
 
 		// check existence of x-auth... header
 		if (!authorization || !regexp.test(authorization)) {

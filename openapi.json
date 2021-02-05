@@ -34,7 +34,7 @@
     },
     {
       "name": "events",
-      "description": "Publish new events"
+      "description": "Manage events"
     },
     {
       "name": "subscriptions",
@@ -221,6 +221,11 @@
         ],
         "summary": "Publish a new event",
         "operationId": "eventV1Post",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "description": "New event to be distributed to subscribers.  \n  \nThe Eventhub format validation expects only a subset of these variables as minumum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.  \nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:  \n```json\n{\n  \"event\": \"de.ard.eventhub.v1.radio.track.playing\",\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"title\": \"Song name\",\n  \"serviceId\": \"1234\",\n  \"playlistId\": \"swr3-5678\"\n}\n```\nFields not specified in the Schema, will cause your request to fail.   \n  \nThe `id` is inserted by Eventhub as string-formated number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
           "content": {
@@ -257,6 +262,11 @@
         ],
         "summary": "List all subscriptions for this user",
         "operationId": "subscriptionList",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Subscription created",
@@ -316,6 +326,11 @@
         ],
         "summary": "Add a new subscription",
         "operationId": "subscriptionPost",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "description": "New event to be distributed to subscribers.",
           "content": {
@@ -378,16 +393,21 @@
         }
       }
     },
-    "/subscriptions/{subscriptionName}": {
+    "/subscriptions/{name}": {
       "get": {
         "tags": [
           "subscriptions"
         ],
         "summary": "Get details about a single subscription from this user",
         "operationId": "subscriptionsGet",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
-            "name": "subscriptionName",
+            "name": "name",
             "in": "path",
             "description": "`name` of the desired subscription",
             "required": true,
@@ -450,9 +470,14 @@
         ],
         "summary": "Remove a single subscription by this user",
         "operationId": "subscriptionsDelete",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
-            "name": "subscriptionName",
+            "name": "name",
             "in": "path",
             "description": "`name` of the desired subscription",
             "required": true,
@@ -519,6 +544,11 @@
         ],
         "summary": "List all available topics",
         "operationId": "topicsGet",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Topics found",
@@ -539,6 +569,13 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
     "schemas": {
       "authResponse": {
         "type": "object",
