@@ -150,8 +150,8 @@ paths:
             "event": "de.ard.eventhub.v1.radio.track.playing",
             "start": "2020-01-19T06:00:00+01:00",
             "title": "Song name",
-            "serviceId": "1234",
-            "playlistId": "swr3-5678"
+            "serviceIds": [ "1234" ],
+            "playlistItemId": "swr3-5678"
           }
           ```
           Fields not specified in the Schema, will cause your request to fail.   
@@ -483,8 +483,8 @@ components:
       - type
       - start
       - title
-      - serviceId
-      - playlistId
+      - serviceIds
+      - playlistItemId
       type: object
       description: |
         **Please also note the details in the `POST /events/v1` endpoint above!**
@@ -566,22 +566,30 @@ components:
               url:
                   type: string
                   description: Can link to external reference
-        serviceId:
-          type: string
-          description: The playing station's unique Service-ID
-          example: "1234"
-        playlistId:
+        serviceIds:
+          type: array
+          description: The playing stations unique Service-IDs. Do not include the Service-Type suffix.
+          items: 
+            type: string
+          example: 
+          - "284680"
+          - "284700"
+        playlistItemId:
           type: string
           description: Unique identifier (within a publisher) to connect next and playing items if needed
           example: 'swr3-5678'
+        hfdbIds:
+          type: array
+          description: Can reference all available tracks in ARD HFDB instances. Should ideally at least include the common ZSK instance.
+          items:
+            type: string
+          example:
+          - 'swrhfdb1.KONF.12345'
+          - 'zskhfdb1.KONF.12345'
         externalId:
           type: string
           description: Can reference the original ID in the publisher's system
           example: 'M012345.001'
-        confId:
-          type: string
-          description: Reference to an original ARD title package
-          example: 'ardhfdb1.KONF.12345'
         isrc:
           type: string
           description: Appropriate ISRC code if track is a music element
