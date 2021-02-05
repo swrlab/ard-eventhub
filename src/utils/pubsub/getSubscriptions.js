@@ -13,6 +13,8 @@ module.exports = async () => {
 	// fetch topic list
 	let [subscriptions] = await pubSubClient.getSubscriptions();
 
+	// DEV filter subscriptions by prefix
+
 	// map and filter values
 	subscriptions = await Promise.all(
 		subscriptions.map(async (subscription) => await mapSubscription(subscription))

@@ -14,7 +14,8 @@ module.exports = async (req, res) => {
 		// load all subscriptions
 		let subscriptions = await pubsub.getSubscriptions();
 
-		// DEV filter subscriptions by authenticated user
+		// filter subscriptions by authenticated user
+		subscriptions = subscriptions.filter((subscription) => subscription.owner && subscription.owner === req.user.email);
 
 		// return data
 		res.status(200).json(subscriptions);

@@ -6,6 +6,7 @@
 */
 
 // load eventhub utils
+const datastore = require('../../utils/datastore');
 const pubsub = require('../../utils/pubsub');
 const response = require('../../utils/response');
 
@@ -45,10 +46,16 @@ module.exports = async (req, res) => {
 			});
 		}
 
-		// DEV check permissions
+		// check subscription permission by authenticated user
+		if (!subscription.owner || subscription.owner !== req.user.email) {
+			return res.sendStatus(404);
+		}
 
 		// request actual deletion
 		let deletedSubscription = await pubsub.deleteSubscription(subscriptionName);
+
+		// also delete from datastore
+		await datastore.delete('subscriptions', subscription.id);
 
 		// return data
 		return response.ok(req, res, {

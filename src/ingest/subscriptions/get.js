@@ -13,11 +13,19 @@ module.exports = async (req, res) => {
 	try {
 		// preset vars
 		const subscriptionName = req.params.subscriptionName;
+		let subscription;
 
 		// load single subscription
-		let subscription = await pubsub.getSubscription(subscriptionName);
+		try {
+			subscription = await pubsub.getSubscription(subscriptionName);
+		} catch (err) {
+			return res.sendStatus(404);
+		}
 
-		// DEV filter subscription by authenticated user
+		// filter subscription by authenticated user
+		if (!subscription.owner || subscription.owner !== req.user.email) {
+			return res.sendStatus(404);
+		}
 
 		// return data
 		res.status(200).json(subscription);

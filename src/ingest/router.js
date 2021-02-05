@@ -47,20 +47,23 @@ const swaggerConfig = require('../../config/swaggerUI');
 // register swagger UI endpoint
 router.use('/openapi', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerConfig));
 
+// load auth middleware
+const authVerify = require('./auth/middleware/verify');
+
 // register API endpoints
 router.post('/auth/login', require('./auth/login/post'));
 router.post('/auth/refresh', require('./auth/refresh/post'));
 router.post('/auth/reset', require('./auth/reset/post'));
 
-router.post('/events/v1', require('./events/post'));
+router.post('/events/v1', authVerify, require('./events/post'));
 
-router.get('/subscriptions/', require('./subscriptions/list'));
-router.post('/subscriptions/', require('./subscriptions/post'));
-router.get('/subscriptions/:subscriptionName', require('./subscriptions/get'));
-router.delete('/subscriptions/:subscriptionName', require('./subscriptions/delete'));
+router.get('/subscriptions/', authVerify, require('./subscriptions/list'));
+router.post('/subscriptions/', authVerify, require('./subscriptions/post'));
+router.get('/subscriptions/:subscriptionName', authVerify, require('./subscriptions/get'));
+router.delete('/subscriptions/:subscriptionName', authVerify, require('./subscriptions/delete'));
 
-router.get('/topics/', require('./topics/list'));
-router.get('/topics/:topicName', require('./topics/list'));
+router.get('/topics/', authVerify, require('./topics/list'));
+router.get('/topics/:topicName', authVerify, require('./topics/list'));
 
 // export router object to server
 module.exports = router;

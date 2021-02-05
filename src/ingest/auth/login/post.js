@@ -38,8 +38,8 @@ module.exports = async (req, res) => {
 		});
 	} catch (err) {
 		console.error(
-			'ingest/events/post',
-			'failed to publish event',
+			'ingest/auth/login',
+			'failed to sign in w/ email+password',
 			JSON.stringify({
 				headers: req.headers,
 				error: err.stack || err,

@@ -13,6 +13,8 @@ module.exports = async (name) => {
 	// fetch topic list
 	let [subscription] = await pubSubClient.subscription(name).getMetadata();
 
+	// DEV filter subscriptions by prefix
+
 	// map and filter values
 	subscription = await mapSubscription(subscription);
 

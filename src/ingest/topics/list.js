@@ -13,8 +13,6 @@ module.exports = async (req, res) => {
 		// load all topics
 		let topics = await pubsub.getTopics();
 
-		// DEV filter topics by prefix
-
 		// return data
 		res.status(200).json(topics);
 	} catch (err) {

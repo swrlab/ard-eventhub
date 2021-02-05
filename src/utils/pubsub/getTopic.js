@@ -12,6 +12,8 @@ module.exports = async (topicName) => {
 	// fetch topic list
 	let [topic] = await pubSubClient.topic(topicName).get();
 
+	// DEV filter topics by prefix
+
 	// map values
 	topic = {
 		type: 'PUBSUB',

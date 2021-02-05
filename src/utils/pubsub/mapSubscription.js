@@ -55,7 +55,8 @@ module.exports = async (subscription) => {
 		labels: subscription.metadata.labels,
 
 		created: lookup ? lookup.created : null,
-		email: lookup ? lookup.email : null,
+		contact: lookup ? lookup.contact : null,
+		owner: lookup ? lookup.owner : null,
 	};
 
 	// return data

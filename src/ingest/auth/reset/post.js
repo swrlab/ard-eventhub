@@ -25,8 +25,8 @@ module.exports = async (req, res) => {
 		return response.ok(req, res, { valid: true });
 	} catch (err) {
 		console.error(
-			'ingest/events/post',
-			'failed to publish event',
+			'ingest/auth/reset',
+			'failed to reset password',
 			JSON.stringify({
 				headers: req.headers,
 				error: err.stack || err,

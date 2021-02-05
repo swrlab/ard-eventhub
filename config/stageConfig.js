@@ -7,11 +7,11 @@
 
 module.exports = {
 	DEV: {
-		pubsubPrefix: 'DEV-',
+		pubsubPrefix: 'dev-',
 		serviceName: 'ard-eventhub-dev',
 	},
 	PROD: {
-		pubsubPrefix: '',
+		pubsubPrefix: 'prod-',
 		serviceName: 'ard-eventhub',
 	},
 };

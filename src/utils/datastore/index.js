@@ -6,6 +6,7 @@
 */
 
 module.exports = {
+	delete: require('./delete'),
 	load: require('./load'),
 	save: require('./save'),
 };

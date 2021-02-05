@@ -624,7 +624,7 @@ components:
       - type
       - method
       - url
-      - email
+      - contact
       - topic
       type: object
       properties:
@@ -641,7 +641,7 @@ components:
           type: string
           description: Publicly accessible URL that should receive the events
           example: 'https://example.com/my/webhook/for/this/subscription'
-        email:
+        contact:
           type: string
           description: Email address to be contacted in case of problems with this subscription
           example: 'my-emergency-and-notifications-contact@ard.de'
@@ -669,6 +669,10 @@ components:
           type: string
           description: Email address to be contacted in case of problems with this subscription
           example: 'my-emergency-and-notifications-contact@ard.de'
+        owner:
+          type: string
+          description: Email address of this subscription's owner
+          example: 'my-email@ard.de'
         topic:
           type: string
           description: Name of the topic to subscribe to

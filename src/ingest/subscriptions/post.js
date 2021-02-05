@@ -17,12 +17,17 @@ module.exports = async (req, res) => {
 	try {
 		// map inputs
 		let subscription = {
-			name: `dev-auth-user-${moment().format('YYYY-DDDD--x')}`,
+			name:
+				global.STAGE_CONFIG.pubsubPrefix +
+				`${req.user.organization}-${moment().format('YYYY-DDDD--x')}`,
 			type: req.body.type,
 			method: req.body.method,
 			url: req.body.url,
-			email: req.body.email,
+			contact: req.body.contact,
 			topic: req.body.topic,
+
+			owner: req.user.email,
+			organization: req.user.organization,
 			created: moment().toISOString(),
 		};
 
@@ -33,6 +38,7 @@ module.exports = async (req, res) => {
 		try {
 			await pubsub.getTopic(subscription.topic);
 		} catch (topicErr) {
+			// log error
 			console.error(
 				'ingest/subscription/post',
 				'failed to find desired topic',
@@ -41,6 +47,11 @@ module.exports = async (req, res) => {
 					error: topicErr.stack || topicErr,
 				})
 			);
+
+			// delete datastore object
+			await datastore.delete('subscriptions', subscription.id);
+
+			// return error
 			return res.sendStatus(404);
 		}
 
