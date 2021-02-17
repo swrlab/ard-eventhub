@@ -41,4 +41,13 @@ To run this project locally in your development environment you'll need these pr
    6. `roles/monitoring.metricWriter`
    7. `roles/pubsub.admin`
 3. Install dependencies (`yarn`)
-4. Run the project `STAGE=DEV GCP_PROJECT_ID=my-gcp-project yarn ingest:local`
+4. Run the project (replace `gcp-project` and `fb-api-key`)
+
+   ```sh
+   STAGE=DEV \
+   GCP_PROJECT_ID=gcp-project \
+   FIREBASE_API_KEY=fb-api-key \
+   yarn ingest:local
+   ```
+
+5. Open http://localhost:8080/openapi/
