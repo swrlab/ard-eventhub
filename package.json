@@ -1,0 +1,39 @@
+{
+	"name": "ard-eventhub",
+	"version": "0.0.1",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"ingest:test": "echo \"DEV: tests are yet to be implemented\" && exit 0",
+		"ingest:local": "nodemon ./src/ingest/index.js",
+		"ingest:cloud": "node ./src/ingest/index.js"
+	},
+	"keywords": [
+		"ard",
+		"metadata",
+		"pubsub"
+	],
+	"author": "SWR audio lab <lab@swr.de>",
+	"license": "ISC",
+	"dependencies": {
+		"@google-cloud/datastore": "^6.3.1",
+		"@google-cloud/pubsub": "^2.8.0",
+		"body-parser": "^1.19.0",
+		"compression": "^1.7.4",
+		"dd-trace": "^0.30.5",
+		"express": "4.17.1",
+		"express-openapi-validator": "^4.10.11",
+		"firebase-admin": "^9.4.2",
+		"jsonwebtoken": "^8.5.1",
+		"moment": "^2.29.1",
+		"node-fetch": "2.6.1",
+		"swagger-ui-express": "^4.1.6"
+	},
+	"devDependencies": {
+		"@swrlab/swr-prettier-config": "^0.0.2",
+		"eslint": "7.18.0",
+		"eslint-plugin-swr": "0.0.5",
+		"nodemon": "^2.0.7"
+	},
+	"prettier": "@swrlab/swr-prettier-config"
+}
