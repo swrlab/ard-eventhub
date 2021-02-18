@@ -69,3 +69,5 @@ console.log(
 	'/ HOST_TYPE >',
 	global.HOST_TYPE
 );
+
+module.exports = server
