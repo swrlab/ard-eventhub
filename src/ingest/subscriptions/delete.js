@@ -52,10 +52,11 @@ module.exports = async (req, res) => {
 		}
 
 		// request actual deletion
-		let deletedSubscription = await pubsub.deleteSubscription(subscriptionName);
+		await pubsub.deleteSubscription(subscriptionName);
 
 		// also delete from datastore
-		await datastore.delete('subscriptions', subscription.id);
+		let subscriptionId = parseInt(subscription.labels.id);
+		await datastore.delete('subscriptions', subscriptionId);
 
 		// return data
 		return response.ok(req, res, {
