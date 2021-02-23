@@ -23,8 +23,8 @@ chai.use(chaiHttp);
     AUTH - Authentication services for Eventhub
 */
 
-var accessToken = null;
-var refreshToken = null;
+var accessToken;
+var refreshToken;
 
 describe('POST /auth/login', () => {
     it('swap login credentials for an id-token', (done) => {
@@ -46,7 +46,7 @@ describe('POST /auth/login', () => {
                 res.body.should.have.property('user').to.be.a('object');
                 res.body.user.should.have.property('user_id').to.be.a('string');
                 res.body.user.should.have.property('email_verified').to.be.a('boolean');
-                res.body.should.have.property('trace').eql(null);
+                //res.body.should.have.property('trace').eql(null);
             done();
             // Store tokens for further tests
             accessToken = res.body.token;
@@ -74,7 +74,7 @@ describe('POST /auth/refresh', () => {
                 res.body.should.have.property('user').to.be.a('object');
                 res.body.user.should.have.property('user_id').to.be.a('string');
                 res.body.user.should.have.property('email_verified').to.be.a('boolean');
-                res.body.should.have.property('trace').eql(null);
+                //res.body.should.have.property('trace').eql(null);
             done();
             // Store new token for further tests
             accessToken = res.body.token;
@@ -125,7 +125,7 @@ describe('POST /events/v1', () => {
                 res.body.should.be.a('object');
                 res.body.should.have.property('topics').to.be.a('object');
                 res.body.should.have.property('message').to.be.a('object');
-                res.body.should.have.property('trace').eql(null);
+                //res.body.should.have.property('trace').eql(null);
             done();
             });
     });
@@ -135,7 +135,7 @@ describe('POST /events/v1', () => {
     SUBSCRIPTIONS - Access to subscription management
 */
 
-var subscriptionName = null;
+var subscriptionName;
 
 describe('POST /subscriptions', () => {
     it('add a new subscription to this user', (done) => {
@@ -154,7 +154,7 @@ describe('POST /subscriptions', () => {
             .end((err, res) => {
                 res.should.have.status(201);
                 res.body.should.be.a('object');
-                res.body.to.have.all.keys(
+                res.body.should.have.all.keys(
                     'type', 
                     'method', 
                     'name', 
@@ -170,6 +170,8 @@ describe('POST /subscriptions', () => {
                     'contact',
                     'owner'
                     )
+                // Store subscription name for further tests
+                subscriptionName = res.body.name;
             done();
         });
     });
@@ -177,7 +179,7 @@ describe('POST /subscriptions', () => {
 
 describe('GET /subscriptions', () => {
     it('list all subscriptions for this user', (done) => {
-      chai.request(server)
+        chai.request(server)
             .get('/subscriptions')
             .set('Authorization', 'Bearer ' + accessToken)
             .end((err, res) => {
@@ -199,8 +201,6 @@ describe('GET /subscriptions', () => {
                     'contact',
                     'owner'
                     ))
-                // Store subscription name for further tests
-                subscriptionName = res.body.name;
             done();
         });
     });
@@ -208,13 +208,13 @@ describe('GET /subscriptions', () => {
 
 describe('GET /subscriptions/{name}', () => {
     it('get details about single subscription from this user', (done) => {
-      chai.request(server)
+        chai.request(server)
             .get('/subscriptions/' + subscriptionName)
             .set('Authorization', 'Bearer ' + accessToken)
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.a('object');
-                res.body.to.have.all.keys(
+                res.body.should.have.all.keys(
                     'type', 
                     'method', 
                     'name', 
@@ -235,6 +235,40 @@ describe('GET /subscriptions/{name}', () => {
     });
 });
 
+describe('DELETE /subscriptions/{name}', () => {
+    it('remove a single subscription by this user', (done) => {
+        chai.request(server)
+            .delete('/subscriptions/' + subscriptionName)
+            .set('Authorization', 'Bearer ' + accessToken)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('object');
+                res.body.should.have.property('valid').eql(true);
+                //res.body.should.have.property('trace').eql(null);
+            done();
+        });
+    });
+});
+
 /*
     TOPICS - Access to topics details
 */
+
+describe('GET /topics', () => {
+    it('list all available topics', (done) => {
+        chai.request(server)
+            .get('/topics')
+            .set('Authorization', 'Bearer ' + accessToken)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('array');
+                res.body.every(i => expect(i).to.have.all.keys(
+                    'type', 
+                    'name', 
+                    'path', 
+                    'labels'
+                    ))
+            done();
+        });
+    });
+});
