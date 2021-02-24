@@ -20,8 +20,11 @@ env:
 
 
 jobs:
-  test-node:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        STAGES: [DEV]
     steps:
     - uses: actions/setup-node@v2
       with:
@@ -29,9 +32,6 @@ jobs:
 
     - name: Checkout repo 👀
       uses: actions/checkout@v2
-
-    - name: Install yarn
-      run: npm install -g yarn
 
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
@@ -50,13 +50,19 @@ jobs:
     - name: 🔐 Write GCP Ingest key
       run: echo '${{ secrets.KEYS_INGEST }}' > ./keys/ingest.json
 
-    - name: Run index
+    - name: Run Ingest Tests
+      env:
+        STAGE: ${{ matrix.STAGES }}
+        GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
+        TEST_USER: ${{ secrets.TEST_USER }}
+        TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
       run: yarn ingest:test
 
 
   docker:
     runs-on: ubuntu-latest
-    needs: test-node
+    needs: test
     environment: dev
     outputs:
       BRANCH: ${{ steps.push.outputs.BRANCH }}

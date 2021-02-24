@@ -1,0 +1,56 @@
+
+name: ingest pull
+
+
+on:
+  pull_request:
+
+
+env:
+  NODE_VERSION: 14.5
+  IMAGE_NAME: ingest
+  REGISTRY_DOMAIN: eu.gcr.io
+  GCP_RUN_REGION: europe-west1
+  GCP_RUN_MEMORY: 256Mi
+  GCP_RUN_TIMEOUT: 60
+
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        STAGES: [DEV]
+    steps:
+    - uses: actions/setup-node@v2
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Checkout repo 👀
+      uses: actions/checkout@v2
+
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+
+    - uses: actions/cache@v2
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Install Dependencies
+      run: yarn
+
+    - name: 🔐 Write GCP Ingest key
+      run: echo '${{ secrets.KEYS_INGEST }}' > ./keys/ingest.json
+
+    - name: Run Ingest Tests
+      env:
+        STAGE: ${{ matrix.STAGES }}
+        GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
+        TEST_USER: ${{ secrets.TEST_USER }}
+        TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
+      run: yarn ingest:test

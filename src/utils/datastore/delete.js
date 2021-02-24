@@ -15,8 +15,8 @@ module.exports = async (kind, id) => {
 		path: id ? [kind, id] : [kind],
 	});
 
-	await datastoreClient.delete(key)
+	let result = await datastoreClient.delete(key)
 
-	// return data
-	return Promise.resolve(data);
+	// return result
+	return Promise.resolve(result);
 };

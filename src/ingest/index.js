@@ -15,7 +15,7 @@ global.VERSION = require('../../package.json').version;
 const stageConfig = require('../../config/stageConfig');
 if (!stageConfig[global.STAGE]) {
 	console.error('stageConfig[STAGE] not found >', global.STAGE);
-	process.exit();
+	process.exit(1);
 }
 
 // else set remaining globals
@@ -25,10 +25,10 @@ global.AGENT = global.STAGE_CONFIG.serviceName + '/' + global.VERSION;
 // check existence of several process vars
 if (!process.env.GCP_PROJECT_ID) {
 	console.error('process.env.GCP_PROJECT_ID not found');
-	process.exit();
+	process.exit(1);
 } else if (!process.env.FIREBASE_API_KEY) {
 	console.error('process.env.FIREBASE_API_KEY not found');
-	process.exit();
+	process.exit(1);
 }
 
 // enable datadog tracing
@@ -69,3 +69,5 @@ console.log(
 	'/ HOST_TYPE >',
 	global.HOST_TYPE
 );
+
+module.exports = server
