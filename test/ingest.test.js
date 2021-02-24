@@ -3,7 +3,7 @@
 	ard-eventhub
 	by SWR audio lab
 
-    unit tests for the ARD-Eventhub API
+    unit tests for the ingest service
 
 */
 

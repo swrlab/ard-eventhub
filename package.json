@@ -1,8 +1,8 @@
 {
 	"name": "ard-eventhub",
 	"version": "0.0.1",
-	"description": "",
-	"main": "index.js",
+	"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
+	"main": "./src/ingest/index.js",
 	"scripts": {
 		"ingest:test": "mocha test/api.test.js --timeout 10000 --exit",
 		"ingest:local": "nodemon ./src/ingest/index.js",

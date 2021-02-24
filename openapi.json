@@ -75,7 +75,7 @@
         },
         "responses": {
           "200": {
-            "description": "Authentication successfull",
+            "description": "Authentication successful",
             "content": {
               "application/json": {
                 "schema": {
@@ -132,7 +132,7 @@
         },
         "responses": {
           "200": {
-            "description": "Authentication successfull",
+            "description": "Authentication successful",
             "content": {
               "application/json": {
                 "schema": {
@@ -188,7 +188,7 @@
         },
         "responses": {
           "200": {
-            "description": "Request successfull",
+            "description": "Request successful",
             "content": {}
           },
           "400": {
@@ -227,7 +227,7 @@
           }
         ],
         "requestBody": {
-          "description": "New event to be distributed to subscribers.  \n  \nThe Eventhub format validation expects only a subset of these variables as minumum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.  \nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:  \n```json\n{\n  \"event\": \"de.ard.eventhub.v1.radio.track.playing\",\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"title\": \"Song name\",\n  \"serviceIds\": [ \"1234\" ],\n  \"playlistItemId\": \"swr3-5678\"\n}\n```\nFields not specified in the Schema, will cause your request to fail.   \n  \nThe `id` is inserted by Eventhub as string-formated number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
+          "description": "New event to be distributed to subscribers.  \n  \nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.  \nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:  \n```json\n{\n  \"event\": \"de.ard.eventhub.v1.radio.track.playing\",\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"title\": \"Song name\",\n  \"serviceIds\": [ \"1234\" ],\n  \"playlistItemId\": \"swr3-5678\"\n}\n```\nFields not specified in the Schema, will cause your request to fail.   \n  \nThe `id` is inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
           "content": {
             "application/json": {
               "schema": {
@@ -943,7 +943,7 @@
           },
           "id": {
             "type": "string",
-            "description": "ID gets inserted by Eventhub as string-formated number, but might be a true string in the future, do not expect this string to remain numbers only!",
+            "description": "ID gets inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!",
             "example": "1234567890"
           }
         }
