@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"ingest:test": "mocha test/api.test.js --timeout 6000 --exit",
+		"ingest:test": "mocha test/api.test.js --timeout 10000 --exit",
 		"ingest:local": "nodemon ./src/ingest/index.js",
 		"ingest:cloud": "node ./src/ingest/index.js",
 		"test": "mocha test/example.test.js"
