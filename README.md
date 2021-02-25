@@ -22,7 +22,9 @@ The Ingest service is responsible for receiving and publishing events and managi
 ## License
 
 This project is licensed under **European Union Public License 1.2** ([`EUPL-1.2`](https://spdx.org/licenses/EUPL-1.2.html)), which can be found in [LICENSE.txt](LICENSE.txt). Detailed information and translations to all 23 official languages of the European Union are available at [joinup.ec.europa.eu](https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12). The usage of this license does not imply any relationship to or endorsement by the European Union, the joinup initiative or other participating parties.  
-A [compatibility matrix](https://joinup.ec.europa.eu/collection/eupl/matrix-eupl-compatible-open-source-licences) is also available and describes the relationships between EUPL-1.2 in upstream and downstream projects.
+A [compatibility matrix](https://joinup.ec.europa.eu/collection/eupl/matrix-eupl-compatible-open-source-licences) is also available and describes the relationships between EUPL-1.2 in upstream and downstream projects.  
+
+This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`](https://www.npmjs.com/package/spdx-exceptions) package, which uses the `CC-BY-3.0` license, without adding any legal or technical restrictions guaranteed by their license.  
 
 ## Third-Party Components
 

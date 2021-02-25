@@ -9,6 +9,18 @@
 # you might need to execute this command first:
 # chmod +x license.sh
 # 
+
+#
+# --- EXCLUDE ---
+#
+# doctrine for undetected Apache-2.0 license (allowed)
+# hdr-histogram-js for undetected BSD-2 license (allowed)
+# spdx-exceptions due to CC license (excluded in README)
+#
+
+#
+# --- ALLOW --- 
+#
 # The list of allowed licenses was copied from 
 # https://joinup.ec.europa.eu/collection/eupl/matrix-eupl-compatible-open-source-licences
 # as of February 25th, 2021
@@ -21,8 +33,12 @@
 #
 
 license-compliance \
-	--report detailed \
-	-t \
+	--report summary \
+	--exclude "\
+		doctrine;\
+		hdr-histogram-js;\
+		spdx-exceptions\
+		"\
 	--allow "\
 		AFL-3.0;\
 		APL-1.0;\
@@ -81,5 +97,5 @@ license-compliance \
 		ZPL-2.0;\
 		Zlib;\
 		0BSD;\
-		CC0-1.0;\
+		CC0-1.0\
 		"
