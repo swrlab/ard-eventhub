@@ -15,7 +15,7 @@
 		"pubsub"
 	],
 	"author": "SWR audio lab <lab@swr.de>",
-	"license": "ISC",
+	"license": "EUPL-1.2",
 	"dependencies": {
 		"@google-cloud/datastore": "^6.3.1",
 		"@google-cloud/pubsub": "^2.8.0",
