@@ -1,8 +1,8 @@
-# ARD Eventhub - Unit Tests
+# ARD-Eventhub - Unit Tests
 
 ## API-Tests
 
-API unit tests are designed to check and verify existing and new implementations with the ARD Eventhub.  
+API unit tests are designed to check and verify existing and new implementations with the ARD-Eventhub.  
 As test-environment [Mocha](https://mochajs.org/) is used in combination with [Chai](https://www.chaijs.com/) for a readable chaining of test-arguments.
 
 ### Environments

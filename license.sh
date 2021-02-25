@@ -2,8 +2,8 @@
 # ard-eventhub
 # by SWR audio lab
 # 
-# This helper runs the license-compliance toolkit using a pre-defined list 
-# of allowed licencses 
+# This helper runs the license-compliance toolkit using
+# a pre-defined list of allowed licencses 
 # 
 # To make it runnable on your system, 
 # you might need to execute this command first:
@@ -19,10 +19,6 @@
 # CC0-1.0 added as it looks compatible and credit to sources is given 
 # https://creativecommons.org/publicdomain/zero/1.0/
 #
-# CC-BY-3.0 added 
-# https://creativecommons.org/licenses/by/3.0/
-#
-
 
 license-compliance \
 	--report detailed \
