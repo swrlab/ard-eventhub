@@ -1,4 +1,4 @@
-# ARD Eventhub / Types
+# ARD-Eventhub / Types
 
 Each triggered `track` can and must be of a certain type, to be properly displayed by receiving subscribers.
 

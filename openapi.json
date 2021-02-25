@@ -1,17 +1,17 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "ARD Eventhub",
+    "title": "ARD-Eventhub",
     "description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
     "termsOfService": "https://www.ard.de",
     "contact": {
       "email": "lab@swr.de"
     },
     "license": {
-      "name": "Apache 2.0",
-      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+      "name": "European Union Public License 1.2",
+      "url": "https://spdx.org/licenses/EUPL-1.2.html"
     },
-    "version": "0.0.1"
+    "version": "0.0.2"
   },
   "externalDocs": {
     "description": "Eventhub Repository",
@@ -19,12 +19,12 @@
   },
   "servers": [
     {
-      "url": "https://eventhub.ard.de/",
-      "description": "(Potential) Production URL"
-    },
-    {
       "url": "/",
       "description": "Local environment"
+    },
+    {
+      "url": "https://eventhub.ard.de/",
+      "description": "(Potential) Production URL"
     }
   ],
   "tags": [

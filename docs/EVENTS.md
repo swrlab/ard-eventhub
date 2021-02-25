@@ -1,6 +1,6 @@
-# ARD Eventhub / Events
+# ARD-Eventhub / Events
 
-In its first version ARD Eventhub expects the `event` value to be one of the following:
+In its first version ARD-Eventhub expects the `event` value to be one of the following:
 
 ## `de.ard.eventhub.v1.radio.track.playing`
 

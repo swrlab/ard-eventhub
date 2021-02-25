@@ -1,5 +1,5 @@
-# ARD Eventhub
+# ARD-Eventhub
 
-Welcome to the documentation of ARD Eventhub.  
+Welcome to the documentation of ARD-Eventhub.  
 
 coming soon.

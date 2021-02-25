@@ -1,4 +1,4 @@
-# ARD Eventhub (Working Title)
+# ARD-Eventhub (Working Title)
 
 ## Changelog
 
