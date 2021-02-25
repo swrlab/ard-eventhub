@@ -1,3 +1,8 @@
+This source code is provided under EUPL v1.2, except for the ‘spdx-exceptions’
+package, which uses the ‘CC-BY-3.0’ license, without adding any legal or 
+technical restrictions guaranteed by their license.
+
+
                       EUROPEAN UNION PUBLIC LICENCE v. 1.2
                       EUPL © the European Union 2007, 2016
 
