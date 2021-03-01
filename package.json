@@ -35,7 +35,7 @@
 		"@swrlab/swr-prettier-config": "^0.0.2",
 		"chai": "^4.3.0",
 		"chai-http": "^4.3.0",
-		"eslint": "7.20.0",
+		"eslint": "7.21.0",
 		"eslint-plugin-swr": "0.0.5",
 		"license-compliance": "^1.0.3",
 		"mocha": "^8.3.0",
