@@ -8,11 +8,10 @@
 // load pubsub for internal queues
 const pubSubClient = require('./_client');
 
-module.exports = async (topic) => {
-	// Creates a new topic
-	let name = 'te-' + topic.id; //TODO: id or name?
+module.exports = async (newTopic) => {
+	let name = newTopic.name;
 	let metadata = {
-		labels: { name: topic.name },
+		labels: { name: newTopic.label },
 	};
 
 	let result = pubSubClient.createTopic(name, function (err, topic, apiResponse) {

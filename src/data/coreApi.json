@@ -1,0 +1,15 @@
+[
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:38d399827bf88295",
+		"externalId": "284650",
+		"title": "SWR1 Baden-Württemberg",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:baa7e9a52223a090",
+			"externalId": "SWR",
+			"title": "Südwestrundfunk",
+			"acronym": "SWR"
+		}
+	}
+]

@@ -9,11 +9,11 @@
 const datastore = require('../../utils/datastore');
 const pubsub = require('../../utils/pubsub');
 const response = require('../../utils/response');
+//TODO: check IDs in ARD Core-API instead of dump
+const coreApi = require('../../data/coreApi.json');
 
 module.exports = async (req, res) => {
 	try {
-		// DEV do more case-specific checks here
-
 		// use entire POST body to include potentially new fields
 		let message = req.body;
 
@@ -22,38 +22,57 @@ module.exports = async (req, res) => {
 		message.id = message.id.toString();
 
 		// get serviceIds from message
-		let serviceIds = message.serviceIds;
+		let serviceIds = message.serviceIds.map((serviceId) => {
+			let prefix = 'de.ard.eventhub.publisher';
+			let stage = global.STAGE.toLowerCase();
+			return prefix + '.' + stage + '.' + serviceId;
+		});
 
-		// let topics = await pubsub.publishMessage(['demo'], message);
+		// try to publish message under given topics
 		let topics = await pubsub.publishMessage(serviceIds, message);
 		let unknownTopics = [];
 
-		// collect unknown topics
-		Object.keys(topics).map((i) => {
-			if (topics[i] == 'TOPIC_ERROR') {
-				let topic = {
-					id: i,
+		// collect unknown topics from returning errors
+		Object.keys(topics).forEach((topic) => {
+			if (topics[topic] == 'TOPIC_ERROR' || topics[topic] == 'TOPIC_NOT_FOUND') {
+				let newTopic = {
+					id: topic,
 					name: undefined,
+					label: undefined,
 					verified: false,
 					created: false,
 				};
-				unknownTopics.push(topic);
+				unknownTopics.push(newTopic);
 			}
 		});
 
 		// check unknown topic ids
 		if (unknownTopics.length > 0) {
-			//TODO: check IDs in ARD Core-API
-			// if (result && result.name) {
-			// 	unknownTopics[i].name = result.name;
-			// 	unknownTopics[i].verified = true;
-			// }
+			// find IDs of unknownTopics in coreApi dump
+			unknownTopics.forEach((topic) => {
+				coreApi.forEach((entry) => {
+					//TODO: store id with and without prefix
+					if (topic.id == entry.externalId) {
+						topic.name = entry.title;
+						topic.label = entry.title
+							.toLowerCase()
+							.replace(' ', '_')
+							.replace('ä', 'ae')
+							.replace('ü', 'ue')
+							.replace('ö', 'oe')
+							.replace('ß', 'ss');
+						topic.verified = true;
+					}
+				});
+			});
 
-			unknownTopics.map(async (i) => {
-				let result = await pubsub.createTopic(i);
-				if (result) {
-					unknownTopics[i].created = true;
-					//TODO: how to handle the result?
+			unknownTopics.map(async (topic) => {
+				if (topic.verified) {
+					let result = await pubsub.createTopic(topic);
+					if (result) {
+						unknownTopics[topic].created = true;
+						//TODO: how to handle the result?
+					}
 				}
 			});
 		}
