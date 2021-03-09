@@ -5,10 +5,14 @@
 
 */
 
+// Load packages
+const slug = require('slug');
+
 // load eventhub utils
 const datastore = require('../../utils/datastore');
 const pubsub = require('../../utils/pubsub');
 const response = require('../../utils/response');
+
 //TODO: check IDs in ARD Core-API instead of dump
 const coreApi = require('../../data/coreApi.json');
 
@@ -22,21 +26,25 @@ module.exports = async (req, res) => {
 		message.id = message.id.toString();
 
 		// get serviceIds from message
-		let serviceIds = message.serviceIds.map((serviceId) => {
+		let serviceIds = message.serviceIds;
+
+		// generate pubsub IDs with prefix
+		let pubSubIds = serviceIds.map((serviceId) => {
 			let prefix = 'de.ard.eventhub.publisher';
 			let stage = global.STAGE.toLowerCase();
 			return prefix + '.' + stage + '.' + serviceId;
 		});
 
 		// try to publish message under given topics
-		let topics = await pubsub.publishMessage(serviceIds, message);
+		let topics = await pubsub.publishMessage(pubSubIds, message);
 		let unknownTopics = [];
 
 		// collect unknown topics from returning errors
 		Object.keys(topics).forEach((topic) => {
 			if (topics[topic] == 'TOPIC_ERROR' || topics[topic] == 'TOPIC_NOT_FOUND') {
 				let newTopic = {
-					id: topic,
+					id: topic.split('.').pop(),
+					pubsub: topic,
 					name: undefined,
 					label: undefined,
 					verified: false,
@@ -46,35 +54,35 @@ module.exports = async (req, res) => {
 			}
 		});
 
-		// check unknown topic ids
+		// check unknown topic IDs
 		if (unknownTopics.length > 0) {
-			// find IDs of unknownTopics in coreApi dump
+			// verify IDs of unknownTopics with coreApi
 			unknownTopics.forEach((topic) => {
 				coreApi.forEach((entry) => {
-					//TODO: store id with and without prefix
 					if (topic.id == entry.externalId) {
 						topic.name = entry.title;
-						topic.label = entry.title
-							.toLowerCase()
-							.replace(' ', '_')
-							.replace('ä', 'ae')
-							.replace('ü', 'ue')
-							.replace('ö', 'oe')
-							.replace('ß', 'ss');
+						topic.label = slug(entry.title);
 						topic.verified = true;
 					}
 				});
 			});
 
-			unknownTopics.map(async (topic) => {
-				if (topic.verified) {
-					let result = await pubsub.createTopic(topic);
-					if (result) {
-						unknownTopics[topic].created = true;
-						//TODO: how to handle the result?
+			// create topics for verified IDs
+			await Promise.all(
+				unknownTopics.map(async (topic) => {
+					if (topic.verified) {
+						let result = await pubsub.createTopic(topic);
+						if (result && result.name && result.name.indexOf(topic.id) != -1) {
+							topic.created = true;
+							// Update api result that topic was created
+							topics[topic.pubsub] = 'TOPIC_CREATED';
+						} else {
+							// Update api result that topic was not created
+							topics[topic.pubsub] = 'TOPIC_NOT_CREATED';
+						}
 					}
-				}
-			});
+				})
+			);
 		}
 
 		// return ok

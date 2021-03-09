@@ -9,29 +9,30 @@
 const pubSubClient = require('./_client');
 
 module.exports = async (newTopic) => {
-	let name = newTopic.name;
+	let topicId = newTopic.pubsub;
 	let metadata = {
 		labels: { name: newTopic.label },
 	};
 
-	let result = pubSubClient.createTopic(name, function (err, topic, apiResponse) {
-		if (!err) {
-			// The topic was created successfully.
-			console.log(`Topic ${name} was created.`);
+	return new Promise((resolve, reject) => {
+		pubSubClient.createTopic(topicId, function (err, topic, apiResponse) {
+			if (!err) {
+				// The topic was created successfully.
+				console.log(`Topic for "${newTopic.name}" was created`);
 
-			topic.setMetadata(metadata, (err) => {
-				if (!err) {
-					// The metadata was added successfully.
-					console.log(`Metadata ${JSON.stringify(metadata)} was added to topic ${name}`);
-				} else {
-					console.error(err);
-				}
-			});
-		} else {
-			console.error(err);
-		}
+				topic.setMetadata(metadata, (err) => {
+					if (!err) {
+						// The metadata was added successfully.
+						console.log(`Metadata ${JSON.stringify(metadata)} were added`);
+					} else {
+						reject(err);
+					}
+				});
+			} else {
+				reject(err);
+			}
+			// return response
+			resolve(apiResponse);
+		});
 	});
-
-	// return data
-	return Promise.resolve(result);
 };
