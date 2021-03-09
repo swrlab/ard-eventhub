@@ -20,6 +20,7 @@ module.exports = async (req, res) => {
 	try {
 		// use entire POST body to include potentially new fields
 		let message = req.body;
+		let user = req.user;
 
 		// save message to datastore
 		message = await datastore.save(message, 'events');
@@ -27,12 +28,25 @@ module.exports = async (req, res) => {
 
 		// get serviceIds from message
 		let serviceIds = message.serviceIds;
+		let unauthorizedServiceIds = [];
+
+		// check allowed serviceIds for current user
+		serviceIds.forEach((serviceId) => {
+			if (user.serviceIds.indexOf(serviceId) == -1) {
+				unauthorizedServiceIds.push(serviceId);
+			}
+		});
+
+		// avoid usage of unauthorized serviceIds by user
+		if (unauthorizedServiceIds.length > 0) {
+			let err = `User '${user.email}' is not allowed to publish events for serviceIds: [${unauthorizedServiceIds}]`;
+			console.error(err);
+			return response.forbidden(req, res, err);
+		}
 
 		// generate pubsub IDs with prefix
 		let pubSubIds = serviceIds.map((serviceId) => {
-			let prefix = 'de.ard.eventhub.publisher';
-			let stage = global.STAGE.toLowerCase();
-			return prefix + '.' + stage + '.' + serviceId;
+			return `${global.PREFIX}.publisher.${global.STAGE}.${serviceId}`;
 		});
 
 		// try to publish message under given topics
