@@ -10,6 +10,7 @@ global.PORT = process.env.PORT || 8080;
 global.STAGE = process.env.STAGE || 'DEV';
 global.HOST_TYPE = require('../utils/getHostType')();
 global.VERSION = require('../../package.json').version;
+global.PREFIX = 'de.ard.eventhub';
 
 // configure stage
 const stageConfig = require('../../config/stageConfig');
@@ -70,4 +71,4 @@ console.log(
 	global.HOST_TYPE
 );
 
-module.exports = server
+module.exports = server;

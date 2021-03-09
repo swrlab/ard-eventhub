@@ -7,6 +7,7 @@
 
 // load node utils
 const moment = require('moment');
+const { v4: uuidv4 } = require('uuid');
 
 // load eventhub utils
 const datastore = require('../../utils/datastore');
@@ -15,11 +16,12 @@ const response = require('../../utils/response');
 
 module.exports = async (req, res) => {
 	try {
+		// generate subscription name
+		let prefix = `${global.PREFIX}.subscription.${global.STAGE}`;
+
 		// map inputs
 		let subscription = {
-			name:
-				global.STAGE_CONFIG.pubsubPrefix +
-				`${req.user.organization}-${moment().format('YYYY-DDDD--x')}`,
+			name: `${prefix}.${req.user.organization}.${uuidv4()}`,
 			type: req.body.type,
 			method: req.body.method,
 			url: req.body.url,
