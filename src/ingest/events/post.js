@@ -32,21 +32,19 @@ module.exports = async (req, res) => {
 
 		// check allowed serviceIds for current user
 		serviceIds.forEach((serviceId) => {
-			if (user.serviceIds.indexOf(serviceId) == -1) {
+			let allowedIds = JSON.parse(user.serviceIds);
+			if (allowedIds.indexOf(serviceId) == -1) {
+				// add forbidden ids to unauthorized array
 				unauthorizedServiceIds.push(serviceId);
+
+				// remove forbidden ids from serviceId array
+				serviceIds.splice(serviceIds.indexOf(serviceId), 1);
 			}
 		});
 
-		// avoid usage of unauthorized serviceIds by user
-		if (unauthorizedServiceIds.length > 0) {
-			let err = `User '${user.email}' is not allowed to publish events for serviceIds: [${unauthorizedServiceIds}]`;
-			console.error(err);
-			return response.forbidden(req, res, err);
-		}
-
 		// generate pubsub IDs with prefix
 		let pubSubIds = serviceIds.map((serviceId) => {
-			return `${global.PREFIX}.publisher.${global.STAGE}.${serviceId}`;
+			return getPubSubId(serviceId);
 		});
 
 		// try to publish message under given topics
@@ -57,7 +55,7 @@ module.exports = async (req, res) => {
 		Object.keys(topics).forEach((topic) => {
 			if (topics[topic] == 'TOPIC_ERROR' || topics[topic] == 'TOPIC_NOT_FOUND') {
 				let newTopic = {
-					id: topic.split('.').pop(),
+					id: getServiceId(topic),
 					pubsub: topic,
 					name: undefined,
 					label: undefined,
@@ -99,6 +97,17 @@ module.exports = async (req, res) => {
 			);
 		}
 
+		// check forbidden serviceIds
+		if (unauthorizedServiceIds.length > 0) {
+			let err = `User '${user.email}' is not allowed to publish events for serviceIds: [${unauthorizedServiceIds}]`;
+			console.error(err);
+			//return response.forbidden(req, res, err);
+			unauthorizedServiceIds.forEach((unauthorizedServiceId) => {
+				let pubSubId = getPubSubId(unauthorizedServiceId);
+				topics[pubSubId] = 'TOPIC_NOT_ALLOWED';
+			});
+		}
+
 		// return ok
 		return response.ok(
 			req,
@@ -126,3 +135,11 @@ module.exports = async (req, res) => {
 		return response.internalServerError(req, res, err);
 	}
 };
+
+function getPubSubId(serviceId) {
+	return `${global.PREFIX}.publisher.${global.STAGE}.${serviceId}`;
+}
+
+function getServiceId(pubSubId) {
+	return pubSubId.split('.').pop();
+}
