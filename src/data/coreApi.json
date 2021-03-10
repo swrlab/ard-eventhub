@@ -1,6 +1,1020 @@
 [
 	{
 		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:bc4c1d8fda224a6e",
+		"externalId": "990110",
+		"title": "103.7 UnserDing",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:35b40a1e275391f3",
+			"externalId": "SR",
+			"title": "Saarländischer Rundfunk",
+			"acronym": "SR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:1b3d6e1d412f9a52",
+		"externalId": "284750",
+		"title": "1LIVE",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:61360167e3bad00c",
+			"externalId": "WDR",
+			"title": "Westdeutscher Rundfunk",
+			"acronym": "WDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:94c79fa887b731ae",
+		"externalId": "284810",
+		"title": "1LIVE diggi",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:61360167e3bad00c",
+			"externalId": "WDR",
+			"title": "Westdeutscher Rundfunk",
+			"acronym": "WDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:bd2f0c2522555e9f",
+		"externalId": "280070",
+		"title": "3sat",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a4a6338705fb41b7",
+			"externalId": "3sat",
+			"title": "3sat",
+			"acronym": "3sat"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:684cbc753da9b2f6",
+		"externalId": "990141",
+		"title": "ARD",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:f492342e76dcc34a",
+			"externalId": "ARD.de",
+			"title": "ARD.de",
+			"acronym": "ARD.de"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:b1c840ef94afa82d",
+		"externalId": "284870",
+		"title": "ARD-alpha",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:d8b13084e85330a8",
+			"externalId": "ARD-alpha",
+			"title": "ARD-alpha",
+			"acronym": "ARD-alpha"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:2abc5d9e94438465",
+		"externalId": "990140",
+		"title": "ARD.de",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:f492342e76dcc34a",
+			"externalId": "ARD.de",
+			"title": "ARD.de",
+			"acronym": "ARD.de"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:743959757feeb1ae",
+		"externalId": "287240",
+		"title": "ARTE",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:3af76b3110ddf1ed",
+			"externalId": "ARTE",
+			"title": "ARTE",
+			"acronym": "ARTE"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:f3e5ab48670f74d5",
+		"externalId": "284540",
+		"title": "Antenne Brandenburg",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:8e518f3cb1c8b7bb",
+			"externalId": "RBB",
+			"title": "Rundfunk Berlin-Brandenburg",
+			"acronym": "RBB"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:0fb382d9875b1de6",
+		"externalId": "990120",
+		"title": "AntenneSaar",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:35b40a1e275391f3",
+			"externalId": "SR",
+			"title": "Saarländischer Rundfunk",
+			"acronym": "SR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:5fb082abb6840f0e",
+		"externalId": "284040",
+		"title": "B5 aktuell",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:7d64899d03610af2",
+			"externalId": "BR",
+			"title": "Bayerischer Rundfunk",
+			"acronym": "BR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:15af3c2590b53c08",
+		"externalId": "284080",
+		"title": "B5 plus",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:7d64899d03610af2",
+			"externalId": "BR",
+			"title": "Bayerischer Rundfunk",
+			"acronym": "BR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:6645e8d1ab6b1e0c",
+		"externalId": "284000",
+		"title": "BAYERN 1",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:7d64899d03610af2",
+			"externalId": "BR",
+			"title": "Bayerischer Rundfunk",
+			"acronym": "BR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:7abf5deca59c968d",
+		"externalId": "284020",
+		"title": "BAYERN 3",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:7d64899d03610af2",
+			"externalId": "BR",
+			"title": "Bayerischer Rundfunk",
+			"acronym": "BR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:baad3557f3edcb2a",
+		"externalId": "990070",
+		"title": "BR Fernsehen",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:7d64899d03610af2",
+			"externalId": "BR",
+			"title": "Bayerischer Rundfunk",
+			"acronym": "BR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:f157426f54f197b9",
+		"externalId": "281100",
+		"title": "BR Fernsehen Nord",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:7d64899d03610af2",
+			"externalId": "BR",
+			"title": "Bayerischer Rundfunk",
+			"acronym": "BR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:58b340dc2eb0c9f4",
+		"externalId": "281070",
+		"title": "BR Fernsehen Süd",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:7d64899d03610af2",
+			"externalId": "BR",
+			"title": "Bayerischer Rundfunk",
+			"acronym": "BR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:f0b5a8c0e50ad007",
+		"externalId": "284050",
+		"title": "BR Schlager",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:7d64899d03610af2",
+			"externalId": "BR",
+			"title": "Bayerischer Rundfunk",
+			"acronym": "BR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:d5ba7787f6124984",
+		"externalId": "284030",
+		"title": "BR-KLASSIK",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:7d64899d03610af2",
+			"externalId": "BR",
+			"title": "Bayerischer Rundfunk",
+			"acronym": "BR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:486e6de7f2f52c68",
+		"externalId": "990320",
+		"title": "Bayern 1 Oberbayern",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:7d64899d03610af2",
+			"externalId": "BR",
+			"title": "Bayerischer Rundfunk",
+			"acronym": "BR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:c940c2baf8e5c105",
+		"externalId": "284010",
+		"title": "Bayern 2",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:7d64899d03610af2",
+			"externalId": "BR",
+			"title": "Bayerischer Rundfunk",
+			"acronym": "BR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:9a14e2597be95f14",
+		"externalId": "284480",
+		"title": "Bremen Eins",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:6a3d641e111b03e9",
+			"externalId": "RadioBremen",
+			"title": "RadioBremen",
+			"acronym": "RadioBremen"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:ca10c1327ae065d7",
+		"externalId": "284500",
+		"title": "Bremen Vier",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:6a3d641e111b03e9",
+			"externalId": "RadioBremen",
+			"title": "RadioBremen",
+			"acronym": "RadioBremen"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:3511c8322867801d",
+		"externalId": "284490",
+		"title": "Bremen Zwei",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:6a3d641e111b03e9",
+			"externalId": "RadioBremen",
+			"title": "RadioBremen",
+			"acronym": "RadioBremen"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:3bc2b5c3d439eea7",
+		"externalId": "284800",
+		"title": "Cosmo",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:61360167e3bad00c",
+			"externalId": "WDR",
+			"title": "Westdeutscher Rundfunk",
+			"acronym": "WDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:22c804675cc08b50",
+		"externalId": "284710",
+		"title": "DASDING",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:baa7e9a52223a090",
+			"externalId": "SWR",
+			"title": "Südwestrundfunk",
+			"acronym": "SWR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:f7b66ab77d3e16fd",
+		"externalId": "281060",
+		"title": "Das Erste",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:693ef7a09403e169",
+			"externalId": "Das Erste",
+			"title": "Das Erste",
+			"acronym": "Das Erste"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:777a2f45c6d5bc2e",
+		"externalId": "990200",
+		"title": "Deutsche Welle",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:53a8d174b7d1493d",
+			"externalId": "DW",
+			"title": "Deutsche Welle",
+			"acronym": "DW"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:ec483ee4db2b70ad",
+		"externalId": "990090",
+		"title": "Deutsche Welle",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:53a8d174b7d1493d",
+			"externalId": "DW",
+			"title": "Deutsche Welle",
+			"acronym": "DW"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:a73491c0056d575a",
+		"externalId": "280130",
+		"title": "Deutschlandfunk",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:bd7d4fd02fb2ffb3",
+			"externalId": "Deutschlandradio",
+			"title": "Deutschlandradio",
+			"acronym": "Deutschlandradio"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:0831bbab56e38853",
+		"externalId": "280120",
+		"title": "Deutschlandfunk Kultur",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:bd7d4fd02fb2ffb3",
+			"externalId": "Deutschlandradio",
+			"title": "Deutschlandradio",
+			"acronym": "Deutschlandradio"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:9ec1fbba18824658",
+		"externalId": "280170",
+		"title": "Deutschlandfunk Nova",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:bd7d4fd02fb2ffb3",
+			"externalId": "Deutschlandradio",
+			"title": "Deutschlandradio",
+			"acronym": "Deutschlandradio"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:273800fedace6626",
+		"externalId": "284820",
+		"title": "Die Maus",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:61360167e3bad00c",
+			"externalId": "WDR",
+			"title": "Westdeutscher Rundfunk",
+			"acronym": "WDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:0d121e468f9b57d8",
+		"externalId": "282030",
+		"title": "EinsPlus",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:86d27654217e9163",
+			"externalId": "Plus",
+			"title": "Plus",
+			"acronym": "Plus"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:b9fa15c6413e47d3",
+		"externalId": "284580",
+		"title": "Fritz",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:8e518f3cb1c8b7bb",
+			"externalId": "RBB",
+			"title": "Rundfunk Berlin-Brandenburg",
+			"acronym": "RBB"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:434d148f88a5afa4",
+		"externalId": "990080",
+		"title": "Hörfunk in der ARD",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:7a6b21c32a3eba55",
+			"externalId": "ARD",
+			"title": "ARD",
+			"acronym": "ARD"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:d6ea740f7417ed56",
+		"externalId": "284520",
+		"title": "Inforadio",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:8e518f3cb1c8b7bb",
+			"externalId": "RBB",
+			"title": "Rundfunk Berlin-Brandenburg",
+			"acronym": "RBB"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:44cf2dfd591d3a11",
+		"externalId": "280080",
+		"title": "KiKA",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:f0aeb4d9ab35e548",
+			"externalId": "KiKA",
+			"title": "KiKA",
+			"acronym": "KiKA"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:3b839a0af9fd2647",
+		"externalId": "284340",
+		"title": "MDR AKTUELL",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:c062096f17e3f07f",
+			"externalId": "MDR",
+			"title": "Mitteldeutscher Rundfunk",
+			"acronym": "MDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:8718eb6acf0d1152",
+		"externalId": "282040",
+		"title": "MDR Fernsehen",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:c062096f17e3f07f",
+			"externalId": "MDR",
+			"title": "Mitteldeutscher Rundfunk",
+			"acronym": "MDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:1e8c454deae5bfc4",
+		"externalId": "284320",
+		"title": "MDR JUMP",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:c062096f17e3f07f",
+			"externalId": "MDR",
+			"title": "Mitteldeutscher Rundfunk",
+			"acronym": "MDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:9486b061aa73f94e",
+		"externalId": "284350",
+		"title": "MDR KLASSIK",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:c062096f17e3f07f",
+			"externalId": "MDR",
+			"title": "Mitteldeutscher Rundfunk",
+			"acronym": "MDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:ad73da1bb79ce84c",
+		"externalId": "284310",
+		"title": "MDR KULTUR",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:c062096f17e3f07f",
+			"externalId": "MDR",
+			"title": "Mitteldeutscher Rundfunk",
+			"acronym": "MDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:5272d31be51b0d86",
+		"externalId": "284280",
+		"title": "MDR SACHSEN",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:c062096f17e3f07f",
+			"externalId": "MDR",
+			"title": "Mitteldeutscher Rundfunk",
+			"acronym": "MDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:8adabada9c9213da",
+		"externalId": "282280",
+		"title": "MDR SACHSEN",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:c062096f17e3f07f",
+			"externalId": "MDR",
+			"title": "Mitteldeutscher Rundfunk",
+			"acronym": "MDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:fd77f970b695d28f",
+		"externalId": "284290",
+		"title": "MDR SACHSEN-ANHALT",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:c062096f17e3f07f",
+			"externalId": "MDR",
+			"title": "Mitteldeutscher Rundfunk",
+			"acronym": "MDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:25df90b1cf1cccd3",
+		"externalId": "282290",
+		"title": "MDR SACHSEN-ANHALT",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:c062096f17e3f07f",
+			"externalId": "MDR",
+			"title": "Mitteldeutscher Rundfunk",
+			"acronym": "MDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:b1896f26b96b60cd",
+		"externalId": "284330",
+		"title": "MDR SPUTNIK",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:c062096f17e3f07f",
+			"externalId": "MDR",
+			"title": "Mitteldeutscher Rundfunk",
+			"acronym": "MDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:0276f070e4123745",
+		"externalId": "284300",
+		"title": "MDR THÜRINGEN",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:c062096f17e3f07f",
+			"externalId": "MDR",
+			"title": "Mitteldeutscher Rundfunk",
+			"acronym": "MDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:dade99b19d9b2919",
+		"externalId": "282300",
+		"title": "MDR THÜRINGEN",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:c062096f17e3f07f",
+			"externalId": "MDR",
+			"title": "Mitteldeutscher Rundfunk",
+			"acronym": "MDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:e9fe36ad40377d10",
+		"externalId": "284400",
+		"title": "N-JOY",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:d00b5cd75dd86c12",
+		"externalId": "284440",
+		"title": "NDR 1 Niedersachsen",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:5a01a9fb1d4e2a98",
+		"externalId": "284430",
+		"title": "NDR 1 Radio MV",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:f50483904ec0f591",
+		"externalId": "284420",
+		"title": "NDR 1 Welle Nord",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:887c055ca48471cf",
+		"externalId": "284370",
+		"title": "NDR 2",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:46fb1cc613b9a219",
+		"externalId": "284410",
+		"title": "NDR 90,3",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:ccf1e9ea532fe493",
+		"externalId": "284460",
+		"title": "NDR Blue",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:9fa2ea10e0f552a9",
+		"externalId": "990010",
+		"title": "NDR Fernsehen",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:6fc02e3fe92dffd5",
+		"externalId": "282250",
+		"title": "NDR Hamburg",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:de990eef8c42ca48",
+		"externalId": "284390",
+		"title": "NDR Info",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:7f0e76bc0e56b31b",
+		"externalId": "284450",
+		"title": "NDR Info Spezial",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:719c2484dfcc1541",
+		"externalId": "284380",
+		"title": "NDR Kultur",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:c0c50454baa320dc",
+		"externalId": "282240",
+		"title": "NDR Mecklenburg-Vorpommern",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:dc3fb169b454a85d",
+		"externalId": "282260",
+		"title": "NDR Niedersachsen",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:63f4c38100a13b9a",
+		"externalId": "284470",
+		"title": "NDR Plus",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:733a9b02e7da7754",
+		"externalId": "282270",
+		"title": "NDR Schleswig-Holstein",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:a45111ce589ad936",
+			"externalId": "NDR",
+			"title": "Norddeutscher Rundfunk",
+			"acronym": "NDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:a217342ddc1588d1",
+		"externalId": "282020",
+		"title": "ONE",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:00b0bb1e33f959f1",
+			"externalId": "ONE",
+			"title": "ONE",
+			"acronym": "ONE"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:434a3796b873878f",
+		"externalId": "284060",
+		"title": "PULS",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:7d64899d03610af2",
+			"externalId": "BR",
+			"title": "Bayerischer Rundfunk",
+			"acronym": "BR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:ad32f5d29a5820ac",
+		"externalId": "284850",
+		"title": "Radio Bremen Fernsehen",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:6a3d641e111b03e9",
+			"externalId": "RadioBremen",
+			"title": "RadioBremen",
+			"acronym": "RadioBremen"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:0126f3f866179397",
+		"externalId": "284610",
+		"title": "SR 1",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:35b40a1e275391f3",
+			"externalId": "SR",
+			"title": "Saarländischer Rundfunk",
+			"acronym": "SR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:b2d96cae3b6ec41f",
+		"externalId": "284620",
+		"title": "SR 2 KulturRadio",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:35b40a1e275391f3",
+			"externalId": "SR",
+			"title": "Saarländischer Rundfunk",
+			"acronym": "SR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:1ddc46c568e01b16",
+		"externalId": "284630",
+		"title": "SR 3 Saarlandwelle",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:35b40a1e275391f3",
+			"externalId": "SR",
+			"title": "Saarländischer Rundfunk",
+			"acronym": "SR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:1ecd6a84c7217724",
+		"externalId": "284860",
+		"title": "SR Fernsehen",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:35b40a1e275391f3",
+			"externalId": "SR",
+			"title": "Saarländischer Rundfunk",
+			"acronym": "SR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:91379b3101b9dcd8",
+		"externalId": "284720",
+		"title": "SWR Aktuell",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:baa7e9a52223a090",
+			"externalId": "SWR",
+			"title": "Südwestrundfunk",
+			"acronym": "SWR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:42a8dd390988c031",
+		"externalId": "281130",
+		"title": "SWR Baden-Württemberg",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:baa7e9a52223a090",
+			"externalId": "SWR",
+			"title": "Südwestrundfunk",
+			"acronym": "SWR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:83585f2dee02da28",
+		"externalId": "990030",
+		"title": "SWR Fernsehen",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:baa7e9a52223a090",
+			"externalId": "SWR",
+			"title": "Südwestrundfunk",
+			"acronym": "SWR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:75dbb3dace15f610",
+		"externalId": "282310",
+		"title": "SWR Rheinland-Pfalz",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:baa7e9a52223a090",
+			"externalId": "SWR",
+			"title": "Südwestrundfunk",
+			"acronym": "SWR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:a657806afd1a43ab",
+		"externalId": "990050",
+		"title": "SWR1",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:baa7e9a52223a090",
+			"externalId": "SWR",
+			"title": "Südwestrundfunk",
+			"acronym": "SWR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
 		"id": "urn:ard:publisher:38d399827bf88295",
 		"externalId": "284650",
 		"title": "SWR1 Baden-Württemberg",
@@ -10,6 +1024,422 @@
 			"externalId": "SWR",
 			"title": "Südwestrundfunk",
 			"acronym": "SWR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:8b2c06d42681d51d",
+		"externalId": "284660",
+		"title": "SWR1 Rheinland-Pfalz",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:baa7e9a52223a090",
+			"externalId": "SWR",
+			"title": "Südwestrundfunk",
+			"acronym": "SWR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:24292cbf750f0a14",
+		"externalId": "284670",
+		"title": "SWR2",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:baa7e9a52223a090",
+			"externalId": "SWR",
+			"title": "Südwestrundfunk",
+			"acronym": "SWR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:ddc90d670e476e9a",
+		"externalId": "284680",
+		"title": "SWR3",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:baa7e9a52223a090",
+			"externalId": "SWR",
+			"title": "Südwestrundfunk",
+			"acronym": "SWR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:15a81f3ca0631423",
+		"externalId": "990060",
+		"title": "SWR4",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:baa7e9a52223a090",
+			"externalId": "SWR",
+			"title": "Südwestrundfunk",
+			"acronym": "SWR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:72cc270c5dc9b193",
+		"externalId": "284690",
+		"title": "SWR4 Baden-Württemberg",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:baa7e9a52223a090",
+			"externalId": "SWR",
+			"title": "Südwestrundfunk",
+			"acronym": "SWR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:8dcd2e0c0f4e5459",
+		"externalId": "284700",
+		"title": "SWR4 Rheinland-Pfalz",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:baa7e9a52223a090",
+			"externalId": "SWR",
+			"title": "Südwestrundfunk",
+			"acronym": "SWR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:134937e489ac9567",
+		"externalId": "990100",
+		"title": "Sorbischer Rundfunk",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:8e518f3cb1c8b7bb",
+			"externalId": "RBB",
+			"title": "Rundfunk Berlin-Brandenburg",
+			"acronym": "RBB"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:a8c2f14b1c56cdda",
+		"externalId": "284760",
+		"title": "WDR 2",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:61360167e3bad00c",
+			"externalId": "WDR",
+			"title": "Westdeutscher Rundfunk",
+			"acronym": "WDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:07c7db204fd812d3",
+		"externalId": "284770",
+		"title": "WDR 3",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:61360167e3bad00c",
+			"externalId": "WDR",
+			"title": "Westdeutscher Rundfunk",
+			"acronym": "WDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:fe27faf83490765d",
+		"externalId": "284780",
+		"title": "WDR 4",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:61360167e3bad00c",
+			"externalId": "WDR",
+			"title": "Westdeutscher Rundfunk",
+			"acronym": "WDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:5122d093671ea954",
+		"externalId": "284790",
+		"title": "WDR 5",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:61360167e3bad00c",
+			"externalId": "WDR",
+			"title": "Westdeutscher Rundfunk",
+			"acronym": "WDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:c2e563cefbef39ad",
+		"externalId": "285360",
+		"title": "WDR Bonn",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:61360167e3bad00c",
+			"externalId": "WDR",
+			"title": "Westdeutscher Rundfunk",
+			"acronym": "WDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:289b191de5d9b53f",
+		"externalId": "283080",
+		"title": "WDR Düsseldorf",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:61360167e3bad00c",
+			"externalId": "WDR",
+			"title": "Westdeutscher Rundfunk",
+			"acronym": "WDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:883d2a958940b92f",
+		"externalId": "284830",
+		"title": "WDR Event",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:61360167e3bad00c",
+			"externalId": "WDR",
+			"title": "Westdeutscher Rundfunk",
+			"acronym": "WDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:0952aa01ae949ca2",
+		"externalId": "990040",
+		"title": "WDR Fernsehen",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:61360167e3bad00c",
+			"externalId": "WDR",
+			"title": "Westdeutscher Rundfunk",
+			"acronym": "WDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:5e526804077f48b0",
+		"externalId": "281110",
+		"title": "WDR Köln",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:61360167e3bad00c",
+			"externalId": "WDR",
+			"title": "Westdeutscher Rundfunk",
+			"acronym": "WDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:926798b983bc780a",
+		"externalId": "284230",
+		"title": "YOU-FM",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:1274e8543648a077",
+			"externalId": "HR",
+			"title": "Hessischer Rundfunk",
+			"acronym": "HR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:3b9e448ac7ff5783",
+		"externalId": "991501",
+		"title": "funk",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:4117b29aef7698c9",
+			"externalId": "funk",
+			"title": "funk",
+			"acronym": "funk"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:a153610455f8ad7a",
+		"externalId": "281080",
+		"title": "hr-fernsehen",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:1274e8543648a077",
+			"externalId": "HR",
+			"title": "Hessischer Rundfunk",
+			"acronym": "HR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:186d6d95c32a3e80",
+		"externalId": "284240",
+		"title": "hr-iNFO",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:1274e8543648a077",
+			"externalId": "HR",
+			"title": "Hessischer Rundfunk",
+			"acronym": "HR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:9944e1d1f9ecfbc6",
+		"externalId": "284190",
+		"title": "hr1",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:1274e8543648a077",
+			"externalId": "HR",
+			"title": "Hessischer Rundfunk",
+			"acronym": "HR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:219807efdec52f82",
+		"externalId": "284200",
+		"title": "hr2-kultur",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:1274e8543648a077",
+			"externalId": "HR",
+			"title": "Hessischer Rundfunk",
+			"acronym": "HR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:8e9d2d848d4bf08b",
+		"externalId": "284210",
+		"title": "hr3",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:1274e8543648a077",
+			"externalId": "HR",
+			"title": "Hessischer Rundfunk",
+			"acronym": "HR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:3d62b2d2d032a703",
+		"externalId": "284220",
+		"title": "hr4",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:1274e8543648a077",
+			"externalId": "HR",
+			"title": "Hessischer Rundfunk",
+			"acronym": "HR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:db3c731e2c606ea7",
+		"externalId": "287250",
+		"title": "phoenix",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:64bc7136df85080d",
+			"externalId": "Phoenix",
+			"title": "Phoenix",
+			"acronym": "Phoenix"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:ef1f1e7569f8fc54",
+		"externalId": "284560",
+		"title": "radioeins",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:8e518f3cb1c8b7bb",
+			"externalId": "RBB",
+			"title": "Rundfunk Berlin-Brandenburg",
+			"acronym": "RBB"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:5ce081233481abdc",
+		"externalId": "284550",
+		"title": "rbb 88.8",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:8e518f3cb1c8b7bb",
+			"externalId": "RBB",
+			"title": "Rundfunk Berlin-Brandenburg",
+			"acronym": "RBB"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:2c5d7546bd8c0521",
+		"externalId": "990020",
+		"title": "rbb Fernsehen",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:8e518f3cb1c8b7bb",
+			"externalId": "RBB",
+			"title": "Rundfunk Berlin-Brandenburg",
+			"acronym": "RBB"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:9be25e57c1fa99d3",
+		"externalId": "282060",
+		"title": "rbb Fernsehen Berlin",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:8e518f3cb1c8b7bb",
+			"externalId": "RBB",
+			"title": "Rundfunk Berlin-Brandenburg",
+			"acronym": "RBB"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:281dc1019c83ce5b",
+		"externalId": "282050",
+		"title": "rbb Fernsehen Brandenburg",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:8e518f3cb1c8b7bb",
+			"externalId": "RBB",
+			"title": "Rundfunk Berlin-Brandenburg",
+			"acronym": "RBB"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:79ef5e642799325f",
+		"externalId": "284530",
+		"title": "rbbKultur",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:8e518f3cb1c8b7bb",
+			"externalId": "RBB",
+			"title": "Rundfunk Berlin-Brandenburg",
+			"acronym": "RBB"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:11e8ab7b816cdf59",
+		"externalId": "282010",
+		"title": "tagesschau24",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:927b9bff42d41de4",
+			"externalId": "Tagesschau24",
+			"title": "Tagesschau24",
+			"acronym": "Tagesschau24"
 		}
 	}
 ]
