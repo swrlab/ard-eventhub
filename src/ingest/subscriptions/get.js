@@ -22,9 +22,16 @@ module.exports = async (req, res) => {
 			return res.sendStatus(404);
 		}
 
-		// filter subscription by authenticated user
-		if (!subscription.owner || subscription.owner !== req.user.email) {
-			return res.sendStatus(404);
+		// verify if user is allowed to get subscription (same organization)
+		if (subscription.organization?.id !== req.user.organization?.id) {
+			let subsOrg = subscription.organization?.name;
+			let userOrg = req.user.organization?.name;
+			// return 400 error
+			return response.badRequest(req, res, {
+				status: 400,
+				message: `Mismatch of user and subscription organization`,
+				errors: `Subscription of organization '${subsOrg}' is not visible for user of organization '${userOrg}'`,
+			});
 		}
 
 		// return data

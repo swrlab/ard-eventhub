@@ -5,7 +5,7 @@
 
 */
 
-// Load packages
+// load node utils
 const slug = require('slug');
 
 // load eventhub utils
@@ -15,6 +15,16 @@ const response = require('../../utils/response');
 
 //TODO: check IDs in ARD Core-API instead of dump
 const coreApi = require('../../data/coreApi.json');
+
+// define functions
+function getPubSubId(serviceId) {
+	let pubIdent = 'publisher';
+	return `${global.PREFIX}.${pubIdent}.${global.STAGE}.${serviceId}`;
+}
+
+function getServiceId(pubSubId) {
+	return pubSubId.split('.').pop();
+}
 
 module.exports = async (req, res) => {
 	try {
@@ -32,8 +42,7 @@ module.exports = async (req, res) => {
 
 		// check allowed serviceIds for current user
 		serviceIds.forEach((serviceId) => {
-			let allowedIds = JSON.parse(user.serviceIds);
-			if (allowedIds.indexOf(serviceId) == -1) {
+			if (user.serviceIds.indexOf(serviceId) == -1) {
 				// add forbidden ids to unauthorized array
 				unauthorizedServiceIds.push(serviceId);
 
@@ -99,9 +108,9 @@ module.exports = async (req, res) => {
 
 		// check forbidden serviceIds
 		if (unauthorizedServiceIds.length > 0) {
-			let err = `User '${user.email}' is not allowed to publish events for serviceIds: [${unauthorizedServiceIds}]`;
-			console.error(err);
-			//return response.forbidden(req, res, err);
+			console.error(
+				`User '${user.email}' is not allowed to publish events for serviceIds: [${unauthorizedServiceIds}]`
+			);
 			unauthorizedServiceIds.forEach((unauthorizedServiceId) => {
 				let pubSubId = getPubSubId(unauthorizedServiceId);
 				topics[pubSubId] = 'TOPIC_NOT_ALLOWED';
@@ -135,11 +144,3 @@ module.exports = async (req, res) => {
 		return response.internalServerError(req, res, err);
 	}
 };
-
-function getPubSubId(serviceId) {
-	return `${global.PREFIX}.publisher.${global.STAGE}.${serviceId}`;
-}
-
-function getServiceId(pubSubId) {
-	return pubSubId.split('.').pop();
-}
