@@ -44,7 +44,7 @@ module.exports = async (req, res, next) => {
 
 		// add user details to request profile
 		req.user.serviceIds = userDb.serviceIds;
-		req.user.organization = userDb.organization;
+		req.user.institution = userDb.institution;
 
 		// continue with normal workflow, user is authenticated 🎉
 		next();

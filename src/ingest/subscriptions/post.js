@@ -23,27 +23,27 @@ module.exports = async (req, res) => {
 		let subIdent = 'subscription';
 		let prefix = `${global.PREFIX}.${subIdent}.${global.STAGE}`;
 
-		// check existence of user organization
-		let organizationExists = coreApi.some((entry) => {
-			if (req.user.organization?.id == entry.institution.id) {
+		// check existence of user institution
+		let institutionExists = coreApi.some((entry) => {
+			if (req.user.institution.id == entry.institution.id) {
 				return true;
 			}
 		});
 
-		if (!organizationExists) {
-			let orgId = req.user.organization?.id;
-			let orgName = req.user.organization?.name;
+		if (!institutionExists) {
+			let orgId = req.user.institution.id;
+			let orgName = req.user.institution.name;
 			// return 401 error
 			return response.badRequest(req, res, {
 				status: 401,
 				message: `New subscriptions are not allowed for user '${req.user.email}'`,
-				errors: `The organization '${orgId}' (${orgName}) wasn't found in ARD Core-API`,
+				errors: `The institution '${orgId}' (${orgName}) wasn't found in ARD Core-API`,
 			});
 		}
 
 		// map inputs
 		let subscription = {
-			name: `${prefix}.${req.user.organization?.name}.${uuidv4()}`,
+			name: `${prefix}.${req.user.institution.name}.${uuidv4()}`,
 			type: req.body.type,
 			method: req.body.method,
 			url: req.body.url,
@@ -51,7 +51,7 @@ module.exports = async (req, res) => {
 			topic: req.body.topic,
 
 			owner: req.user.email,
-			organization: req.user.organization,
+			institution: req.user.institution,
 			created: moment().toISOString(),
 		};
 

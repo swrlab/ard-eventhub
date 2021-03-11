@@ -46,15 +46,15 @@ module.exports = async (req, res) => {
 			});
 		}
 
-		// check subscription permission by user organization
-		if (subscription.organization?.id !== req.user.organization?.id) {
-			let subsOrg = subscription.organization?.name;
-			let userOrg = req.user.organization?.name;
+		// check subscription permission by user institution
+		if (subscription.institution.id !== req.user.institution.id) {
+			let subsOrg = subscription.institution.name;
+			let userOrg = req.user.institution.name;
 			// return 400 error
 			return response.badRequest(req, res, {
 				status: 400,
-				message: `Mismatch of user and subscription organization`,
-				errors: `Subscription of organization '${subsOrg}' cannot be deleted by user of organization '${userOrg}'`,
+				message: `Mismatch of user and subscription institution`,
+				errors: `Subscription of institution '${subsOrg}' cannot be deleted by user of institution '${userOrg}'`,
 			});
 		}
 

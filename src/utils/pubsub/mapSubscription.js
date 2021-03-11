@@ -45,7 +45,7 @@ module.exports = async (subscription) => {
 		created: lookup?.created ?? null,
 		contact: lookup?.contact ?? null,
 		owner: lookup?.owner ?? null,
-		organization: lookup?.organization ?? null,
+		institution: lookup?.institution ?? null,
 	};
 
 	// return data
