@@ -93,7 +93,7 @@ module.exports = async (req, res) => {
 				unknownTopics.map(async (topic) => {
 					if (topic.verified) {
 						let result = await pubsub.createTopic(topic);
-						if (result && result.name && result.name.indexOf(topic.id) != -1) {
+						if (result?.[0]?.name?.indexOf(topic.id) !== -1) {
 							topic.created = true;
 							// Update api result that topic was created
 							topics[topic.pubsub] = 'TOPIC_CREATED';
