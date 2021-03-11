@@ -76,7 +76,10 @@ module.exports = async (req, res) => {
 			await datastore.delete('subscriptions', subscription.id);
 
 			// return 404 error
-			return res.sendStatus(404);
+			return response.notFound(req, res, {
+				status: 404,
+				message: `Topic '${subscription.topic}' not found`,
+			});
 		}
 
 		// request creation of subscription

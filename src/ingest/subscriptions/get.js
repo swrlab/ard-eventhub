@@ -19,7 +19,10 @@ module.exports = async (req, res) => {
 		try {
 			subscription = await pubsub.getSubscription(subscriptionName);
 		} catch (err) {
-			return res.sendStatus(404);
+			return response.notFound(req, res, {
+				status: 404,
+				message: `Subscription '${subscriptionName}' not found`,
+			});
 		}
 
 		// verify if user is allowed to get subscription (same institution)

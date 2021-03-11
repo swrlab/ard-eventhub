@@ -389,6 +389,16 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Topic not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorNotFound"
+                }
+              }
+            }
           }
         }
       }
@@ -448,6 +458,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/errorForbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Subscription not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorNotFound"
                 }
               }
             }
@@ -520,6 +540,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/errorForbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Subscription not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorNotFound"
                 }
               }
             }
@@ -672,6 +702,19 @@
                 }
               }
             }
+          },
+          "trace": {
+            "type": "string",
+            "example": null
+          }
+        }
+      },
+      "errorNotFound": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "object 'object.name' not found"
           },
           "trace": {
             "type": "string",

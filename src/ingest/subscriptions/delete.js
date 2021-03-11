@@ -33,9 +33,9 @@ module.exports = async (req, res) => {
 
 			if (err && err.code == 5) {
 				// pubsub error code 5 seems to be 'Resource not found'
-				return response.badRequest(req, res, {
+				return response.notFound(req, res, {
 					status: 404,
-					message: 'Subscription not found',
+					message: `Subscription '${subscriptionName}' not found`,
 				});
 			}
 
