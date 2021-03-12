@@ -412,10 +412,10 @@
   resolved "https://registry.yarnpkg.com/@swr/prettier-config/-/prettier-config-0.0.1.tgz#11891e5834dc3b5e21c74367b7cbf3caa3a9cbf5"
   integrity sha512-V2uiMYMaajqWdTnFDOdM4t4CB2JLUzwfJFzGdRqLwlWZaV6TenzQvsu+0t3wnlUMuFOmfpx7Pq+cyOi+SbQ2tQ==
 
-"@swrlab/swr-prettier-config@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@swrlab/swr-prettier-config/-/swr-prettier-config-0.0.2.tgz#e961e11520a1ca8eaf8f409721c675cbf3f7e1ed"
-  integrity sha512-NPiEQvDNLAREIHrGkJU6CJoCqLoVjMgM6mL2wDcd1RHq+CaZ/xHtsMfUF/4Ay11BxPSkd4JWjc+pTgypz6U7WQ==
+"@swrlab/swr-prettier-config@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@swrlab/swr-prettier-config/-/swr-prettier-config-0.1.2.tgz#e7fd79f72ceeb05a8b631ecc12a2bcae6ae2386b"
+  integrity sha512-MyUTKRzzvQPexXINH7ASW9dDPtE/OrFfz6UngwyNMpPjAfUu+zJKCzNpiEagUxLGU/8s76oRHqDz5jsN2vyaHw==
 
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
