@@ -10,9 +10,9 @@ To authenticate and work with Eventhub API you will need a valid user. For now t
 
 ## Authentication Overview
 
-The app uses an authentication service, that is kept very similar to the new ARD Core API, so once it goes live there, it can be easily migrated (variations may apply).  
-You can find the documentation for ARD in the [developer portal](https://developer.ard.de/core-api-v2-roles-and-access-control). This page explicitly covers the login methods for the ARD-Eventhub API.  
-Compared to the ARD API the token exchange for ARD-Eventhub is handled in this service as well, so it does not need to expose the `API_KEY` to clients.  
+The app uses an authentication workflow, that is kept very similar to the new ARD Core API, so once it goes live there, it can be easily migrated (variations may apply). You can find their documentation for ARD in the [developer portal](https://developer.ard.de/core-api-v2-roles-and-access-control).  
+
+This page explicitly covers the login methods for the ARD-Eventhub API. Compared to the ARD Core API the token exchange for ARD-Eventhub is handled in this service directly, not externally so it does not need to expose the `API_KEY` to clients.  
 
 ## Exchange Credentials for Tokens
 
@@ -40,11 +40,11 @@ Returns `200 OK`
 }
 ```
 
-This endpoint will return a `token` and `refreshToken` alongside an expiry time and date. The `token` can be used immediately for the returned time frame.
+This endpoint will return a `token` and `refreshToken` alongside an expiry duration and date. The `token` can be used immediately during the returned time frame.
 
 ## Refresh Token
 
-While the normal `token` expires, the `refreshToken` can be used for a longer period of time. Therefore it needs to be exchanged for a new `token`.  
+While the normal `token` expires, the `refreshToken` can be used for a longer period of time. Therefore it can be used to be exchanged for a new `token`.  
 
 **POST `{HOST}/auth/refresh`**
 

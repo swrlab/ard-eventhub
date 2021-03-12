@@ -10,7 +10,7 @@ info:
   license:
     name: European Union Public License 1.2
     url: 'https://spdx.org/licenses/EUPL-1.2.html'
-  version: 0.0.2
+  version: 0.1.0
 externalDocs:
   description: Eventhub Repository
   url: 'https://github.com/swrlab/ard-eventhub'
@@ -546,14 +546,14 @@ components:
             file in docs for details.
           example: music
           enum:
-            - music
-            - news
             - audio
-            - live
-            - weather
-            - traffic
             - commercial
             - jingle
+            - live
+            - music
+            - news
+            - traffic
+            - weather
         start:
           type: string
           description: ISO8601 compliant timestamp
