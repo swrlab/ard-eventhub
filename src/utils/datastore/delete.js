@@ -7,15 +7,16 @@
 
 // load pubsub for internal queues
 const datastoreClient = require('./_client');
+const config = require('../../../config');
 
 module.exports = async (kind, id) => {
 	// set key
-	let key = datastoreClient.key({
-		namespace: global.STAGE,
+	const key = datastoreClient.key({
+		namespace: config.stage,
 		path: id ? [kind, id] : [kind],
 	});
 
-	let result = await datastoreClient.delete(key)
+	const result = await datastoreClient.delete(key);
 
 	// return result
 	return Promise.resolve(result);

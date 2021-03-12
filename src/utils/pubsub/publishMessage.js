@@ -8,24 +8,28 @@
 // load pubsub for internal queues
 const loggerDev = require('../loggerDev');
 const pubSubClient = require('./_client');
+const config = require('../../../config');
+
+// set local config
+const functionName = 'utils/pubsub/publishMessage';
 
 module.exports = async (topics, message) => {
-	loggerDev('log', ['utils/pubsub/publishMessage', 'triggered', JSON.stringify({ topics, message })]);
+	loggerDev('log', [functionName, 'triggered', JSON.stringify({ topics, message })]);
 
 	// initialize output object
-	let messageIds = {};
+	const messageIds = {};
 
 	// prepare buffer object
-	let messageBuffer = Buffer.from(JSON.stringify(message));
+	const messageBuffer = Buffer.from(JSON.stringify(message));
 
 	// add runtime information as attributes
-	let customAttributes = {
-		STAGE: global.STAGE,
-		VERSION: global.VERSION,
+	const customAttributes = {
+		stage: config.stage,
+		version: config.version,
 	};
 
 	// send message for each topic
-	for (let topicName of topics) {
+	topics.forEach(async (topicName) => {
 		try {
 			// attempt to send message
 			messageIds[topicName] = await pubSubClient
@@ -33,20 +37,15 @@ module.exports = async (topics, message) => {
 				.publish(messageBuffer, customAttributes);
 
 			// log progress
-			loggerDev('log', ['utils/pubsub/publishMessage', 'success', topicName, messageIds[topicName]]);
+			loggerDev('log', [functionName, 'success', topicName, messageIds[topicName]]);
 		} catch (err) {
-			if (err && err.code && err.code == 5) {
+			if (err && err.code && err.code === 5) {
 				messageIds[topicName] = 'TOPIC_NOT_FOUND';
-				loggerDev('error', [
-					'utils/pubsub/publishMessage',
-					'topic missing',
-					topicName,
-					messageIds[topicName],
-				]);
+				loggerDev('error', [functionName, 'topic missing', topicName, messageIds[topicName]]);
 			} else {
 				messageIds[topicName] = 'TOPIC_ERROR';
 				loggerDev('error', [
-					'utils/pubsub/publishMessage',
+					functionName,
 					'other error',
 					topicName,
 					messageIds[topicName],
@@ -54,7 +53,7 @@ module.exports = async (topics, message) => {
 				]);
 			}
 		}
-	}
+	});
 
 	return Promise.resolve(messageIds);
 };

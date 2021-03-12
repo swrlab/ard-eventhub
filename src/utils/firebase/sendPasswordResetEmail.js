@@ -9,21 +9,21 @@
 const fetch = require('node-fetch');
 
 // load eventhub utils
-const loggerDev = require('../loggerDev');
+const config = require('../../../config');
 
-module.exports = async (email, password) => {
+module.exports = async (email) => {
 	// set firebase sign in url
-	let url = `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${process.env.FIREBASE_API_KEY}`;
+	const url = `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${process.env.FIREBASE_API_KEY}`;
 
 	// query firebase
-	let request = await fetch(url, {
+	const request = await fetch(url, {
 		method: 'post',
 		timeout: 4 * 1000,
 		headers: {
 			Accept: 'application/json',
 			Connection: 'keep-alive',
 			'Content-Type': 'application/json',
-			'User-Agent': global.AGENT,
+			'User-Agent': config.userAgent,
 		},
 		body: JSON.stringify({
 			requestType: 'PASSWORD_RESET',
@@ -32,10 +32,10 @@ module.exports = async (email, password) => {
 	});
 
 	// parse json response
-	let response = await request.json();
+	const response = await request.json();
 
 	// handle errors
-	if (request.status != 200) {
+	if (request.status !== 200) {
 		console.warn(
 			'utils/firebase/refreshToken',
 			'failed with status',

@@ -7,27 +7,30 @@
 
 // load pubsub for internal queues
 const datastoreClient = require('./_client');
+const config = require('../../../config');
 
 module.exports = async (data, kind, id) => {
+	const thisData = data;
+
 	// set key
-	let key = datastoreClient.key({
-		namespace: global.STAGE,
+	const key = datastoreClient.key({
+		namespace: config.stage,
 		path: id ? [kind, id] : [kind],
 	});
 
 	// save data
-	let [saved] = await datastoreClient.save({
+	await datastoreClient.save({
 		key,
 		data,
 	});
 
 	// insert key
 	if (key.id) {
-		data.id = parseInt(key.id);
+		thisData.id = parseFloat(key.id);
 	} else if (key.name) {
-		data.id = key.name;
+		thisData.id = key.name;
 	}
 
 	// return data
-	return Promise.resolve(data);
+	return Promise.resolve(thisData);
 };

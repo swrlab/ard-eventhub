@@ -13,21 +13,20 @@ const { v4: uuidv4 } = require('uuid');
 const datastore = require('../../utils/datastore');
 const pubsub = require('../../utils/pubsub');
 const response = require('../../utils/response');
+const config = require('../../../config');
 
-//TODO: check IDs in ARD Core-API instead of dump
+// TODO: check IDs in ARD Core-API instead of dump
 const coreApi = require('../../data/coreApi.json');
 
 module.exports = async (req, res) => {
 	try {
 		// generate subscription name
-		let subIdent = 'subscription';
-		let prefix = `${global.PREFIX}.${subIdent}.${global.STAGE}`;
+		const subIdent = 'subscription';
+		const prefix = `${config.pubsubPrefix}.${subIdent}.${config.stage}`;
 
 		// check existence of user institution
 		let institutionExists = coreApi.some((entry) => {
-			if (req.user.institution.id == entry.institution.id) {
-				return true;
-			}
+			return req.user.institution.id === entry.institution.id;
 		});
 
 		if (!institutionExists) {
@@ -83,10 +82,10 @@ module.exports = async (req, res) => {
 		}
 
 		// request creation of subscription
-		let createdSubscription = await pubsub.createSubscription(subscription);
+		const createdSubscription = await pubsub.createSubscription(subscription);
 
 		// return data
-		res.status(201).json(createdSubscription);
+		return res.status(201).json(createdSubscription);
 	} catch (err) {
 		console.error(
 			'ingest/subscriptions/post',

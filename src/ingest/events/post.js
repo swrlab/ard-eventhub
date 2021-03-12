@@ -12,14 +12,15 @@ const slug = require('slug');
 const datastore = require('../../utils/datastore');
 const pubsub = require('../../utils/pubsub');
 const response = require('../../utils/response');
+const config = require('../../../config');
 
-//TODO: check IDs in ARD Core-API instead of dump
+// TODO: check IDs in ARD Core-API instead of dump
 const coreApi = require('../../data/coreApi.json');
 
 // define functions
 function getPubSubId(serviceId) {
-	let pubIdent = 'publisher';
-	return `${global.PREFIX}.${pubIdent}.${global.STAGE}.${serviceId}`;
+	const pubIdent = 'publisher';
+	return `${config.pubsubPrefix}.${pubIdent}.${config.stage}.${serviceId}`;
 }
 
 function getServiceId(pubSubId) {
@@ -30,19 +31,19 @@ module.exports = async (req, res) => {
 	try {
 		// use entire POST body to include potentially new fields
 		let message = req.body;
-		let user = req.user;
+		const { user } = req;
 
 		// save message to datastore
 		message = await datastore.save(message, 'events');
 		message.id = message.id.toString();
 
 		// get serviceIds from message
-		let serviceIds = message.serviceIds;
-		let unauthorizedServiceIds = [];
+		const { serviceIds } = message;
+		const unauthorizedServiceIds = [];
 
 		// check allowed serviceIds for current user
 		serviceIds.forEach((serviceId) => {
-			if (user.serviceIds.indexOf(serviceId) == -1) {
+			if (user.serviceIds.indexOf(serviceId) === -1) {
 				// add forbidden ids to unauthorized array
 				unauthorizedServiceIds.push(serviceId);
 
@@ -52,18 +53,18 @@ module.exports = async (req, res) => {
 		});
 
 		// generate pubsub IDs with prefix
-		let pubSubIds = serviceIds.map((serviceId) => {
+		const pubSubIds = serviceIds.map((serviceId) => {
 			return getPubSubId(serviceId);
 		});
 
 		// try to publish message under given topics
-		let topics = await pubsub.publishMessage(pubSubIds, message);
-		let unknownTopics = [];
+		const topics = await pubsub.publishMessage(pubSubIds, message);
+		const unknownTopics = [];
 
 		// collect unknown topics from returning errors
 		Object.keys(topics).forEach((topic) => {
-			if (topics[topic] == 'TOPIC_ERROR' || topics[topic] == 'TOPIC_NOT_FOUND') {
-				let newTopic = {
+			if (topics[topic] === 'TOPIC_ERROR' || topics[topic] === 'TOPIC_NOT_FOUND') {
+				const newTopic = {
 					id: getServiceId(topic),
 					pubsub: topic,
 					name: undefined,
@@ -80,7 +81,7 @@ module.exports = async (req, res) => {
 			// verify IDs of unknownTopics with coreApi
 			unknownTopics.forEach((topic) => {
 				coreApi.forEach((entry) => {
-					if (topic.id == entry.externalId) {
+					if (topic.id === entry.externalId) {
 						topic.name = entry.title;
 						topic.label = slug(entry.title);
 						topic.verified = true;
@@ -92,8 +93,9 @@ module.exports = async (req, res) => {
 			await Promise.all(
 				unknownTopics.map(async (topic) => {
 					if (topic.verified) {
-						let result = await pubsub.createTopic(topic);
-						if (result?.[0]?.name?.indexOf(topic.id) !== -1) {
+						const [result] = await pubsub.createTopic(topic);
+
+						if (result?.name?.indexOf(topic.id) !== -1) {
 							topic.created = true;
 							// Update api result that topic was created
 							topics[topic.pubsub] = 'TOPIC_CREATED';
@@ -112,7 +114,7 @@ module.exports = async (req, res) => {
 				`User '${user.email}' is not allowed to publish events for serviceIds: [${unauthorizedServiceIds}]`
 			);
 			unauthorizedServiceIds.forEach((unauthorizedServiceId) => {
-				let pubSubId = getPubSubId(unauthorizedServiceId);
+				const pubSubId = getPubSubId(unauthorizedServiceId);
 				topics[pubSubId] = 'TOPIC_NOT_ALLOWED';
 			});
 		}
