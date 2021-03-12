@@ -44,7 +44,7 @@ To run this project locally in your development environment you'll need these pr
 4. Run the project (replace `gcp-project` and `fb-api-key`)
 
    ```sh
-   STAGE=DEV \
+   STAGE=dev \
    GCP_PROJECT_ID=gcp-project \
    FIREBASE_API_KEY=fb-api-key \
    yarn ingest:local

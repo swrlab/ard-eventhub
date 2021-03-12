@@ -9,14 +9,14 @@
 const { version } = require('../package.json');
 
 // read env vars
-const { STAGE } = process.env;
+const stage = process.env.STAGE;
 
 // set config
 const serviceName = 'ard-eventhub';
 const baseConfig = {
 	userAgent: `${serviceName}/${version}`,
 	pubsubPrefix: 'de.ard.eventhub',
-	stage: STAGE,
+	stage,
 	version,
 };
 
@@ -33,8 +33,8 @@ const config = {
 };
 
 // check stage and config
-if (!STAGE || !config[STAGE]) {
-	console.error('stageConfig[STAGE] not found >', STAGE);
+if (!stage || !config[stage]) {
+	console.error('STAGE not found >', stage);
 	process.exit(1);
 }
 
@@ -47,4 +47,4 @@ if (!process.env.GCP_PROJECT_ID) {
 	process.exit(1);
 }
 
-module.exports = config[STAGE];
+module.exports = config[stage];

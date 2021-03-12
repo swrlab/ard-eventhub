@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        STAGES: [DEV]
+        STAGES: [dev]
     steps:
     - uses: actions/setup-node@v2
       with:

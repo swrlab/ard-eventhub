@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        STAGES: [DEV]
+        STAGES: [dev]
     steps:
     - uses: actions/setup-node@v2
       with:
@@ -142,7 +142,7 @@ jobs:
           --allow-unauthenticated \
           --timeout $GCP_RUN_TIMEOUT \
           --memory $GCP_RUN_MEMORY \
-          --update-env-vars STAGE=DEV \
+          --update-env-vars STAGE=dev \
           --service-account ${{ secrets.GCP_SERVICE_ACCOUNT_INGEST }}
 
   cloud-run-prod:
@@ -176,5 +176,5 @@ jobs:
           --allow-unauthenticated \
           --timeout $GCP_RUN_TIMEOUT \
           --memory $GCP_RUN_MEMORY \
-          --update-env-vars STAGE=PROD \
+          --update-env-vars STAGE=prod \
           --service-account ${{ secrets.GCP_SERVICE_ACCOUNT_INGEST }}

@@ -23,7 +23,7 @@ To run the tests follow the [ingest-setup](../src/ingest/README.md) first
 Run the project (replace `gcp-project`, `fb-api-key`, `test-user-email` and `test-user-password`)
 
    ```sh
-   STAGE=DEV \
+   STAGE=dev \
    GCP_PROJECT_ID=gcp-project \
    FIREBASE_API_KEY=fb-api-key \
    TEST_USER=test-user-email \
