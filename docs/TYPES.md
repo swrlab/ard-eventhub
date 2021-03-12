@@ -2,6 +2,16 @@
 
 Each triggered `track` can and must be of a certain type, to be properly displayed by receiving subscribers.
 
+- [ARD-Eventhub / Types](#ard-eventhub--types)
+  - [`audio`](#audio)
+  - [`commercial`](#commercial)
+  - [`jingle`](#jingle)
+  - [`live`](#live)
+  - [`music`](#music)
+  - [`news`](#news)
+  - [`traffic`](#traffic)
+  - [`weather`](#weather)
+
 ## `audio`
 
 This type is the least descriptive and should only be used for pre-recorded elements that don't fit any of the other categories.

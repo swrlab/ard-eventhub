@@ -5,6 +5,7 @@ To authenticate and work with Eventhub API you will need a valid user. For now t
 - [ARD-Eventhub / Users](#ard-eventhub--users)
   - [Authentication](#authentication)
   - [Registering new users](#registering-new-users)
+  - [Removing users](#removing-users)
 
 ## Authentication
 

@@ -2,6 +2,83 @@
 
 To authenticate and work with Eventhub API you will need a valid user. For now these user logins are kept separate from the ARD Core API, but are using a similar login method. This page covers the authentication process.  
 
-## Authentication
+- [ARD-Eventhub / Authentication](#ard-eventhub--authentication)
+  - [Authentication Overview](#authentication-overview)
+  - [Exchange Credentials for Tokens](#exchange-credentials-for-tokens)
+  - [Refresh Token](#refresh-token)
+  - [Reset password](#reset-password)
 
-coming soon...
+## Authentication Overview
+
+The app uses an authentication service, that is kept very similar to the new ARD Core API, so once it goes live there, it can be easily migrated (variations may apply).  
+You can find the documentation for ARD in the [developer portal](https://developer.ard.de/core-api-v2-roles-and-access-control). This page explicitly covers the login methods for the ARD-Eventhub API.  
+Compared to the ARD API the token exchange for ARD-Eventhub is handled in this service as well, so it does not need to expose the `API_KEY` to clients.  
+
+## Exchange Credentials for Tokens
+
+**POST `{HOST}/auth/login`**
+
+```json
+{
+  "email": "my-email@example.com",
+  "password": "my-password"
+}
+```
+
+Returns `200 OK`
+
+```js
+{
+  "expiresIn": 3600,
+  "expires": "2021-03-12T12:55:22.995Z",
+  "token": "eyABCDEF.GHIJKL....",
+  "refreshToken": "AOabcdefghijkl",
+  "user": {
+    /* ... */
+  },
+  "trace": null
+}
+```
+
+This endpoint will return a `token` and `refreshToken` alongside an expiry time and date. The `token` can be used immediately for the returned time frame.
+
+## Refresh Token
+
+While the normal `token` expires, the `refreshToken` can be used for a longer period of time. Therefore it needs to be exchanged for a new `token`.  
+
+**POST `{HOST}/auth/refresh`**
+
+```json
+{
+  "refreshToken": "abcXYZ..."
+}
+```
+
+Returns `200 OK`
+
+```js
+{
+  "expiresIn": 3600,
+  "expires": "2021-03-12T12:55:22.995Z",
+  "token": "eyABCDEF.GHIJKL....",
+  "refreshToken": "AOabcdefghijkl",
+  "user": {
+    /* ... */
+  },
+  "trace": null
+}
+```
+
+## Reset password
+
+Sometimes you might loose your old password and need to reset it. If this happens, use this endpoint to request a password reset email. This endpoint might be subject to throttling/ rate-limits in the future.  
+
+**POST `{HOST}/auth/reset`**
+
+```json
+{
+  "email": "my-email@example.com"
+}
+```
+
+Returns `200 OK`

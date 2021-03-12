@@ -12,8 +12,8 @@ ARD system to distribute real-time (live) metadata for primarily radio broadcast
 
 ## Get involved
 
-- Join [./discussions](https://github.com/swrlab/ard-eventhub/discussions)
-- Join _#eventhub_ in the ARD Entwickler Slack
+- Join [ard-eventhub/discussions](https://github.com/swrlab/ard-eventhub/discussions)
+- Join _#eventhub_ in the _ARD Entwickler_ Slack
 
 ## Modules
 
