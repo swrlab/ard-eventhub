@@ -22,9 +22,9 @@ The Ingest service is responsible for receiving and publishing events and managi
 ## License
 
 This project is licensed under **European Union Public License 1.2** ([`EUPL-1.2`](https://spdx.org/licenses/EUPL-1.2.html)), which can be found in [LICENSE.txt](LICENSE.txt). Detailed information and translations to all 23 official languages of the European Union are available at [joinup.ec.europa.eu](https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12). The usage of this license does not imply any relationship to or endorsement by the European Union, the joinup initiative or other participating parties.  
-A [compatibility matrix](https://joinup.ec.europa.eu/collection/eupl/matrix-eupl-compatible-open-source-licences) is also available and describes the relationships between EUPL-1.2 in upstream and downstream projects.  
+A [compatibility matrix](https://joinup.ec.europa.eu/collection/eupl/matrix-eupl-compatible-open-source-licences) is also available and describes the relationships between EUPL-1.2 in upstream and downstream projects.
 
-This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`](https://www.npmjs.com/package/spdx-exceptions) package, which uses the `CC-BY-3.0` license, without adding any legal or technical restrictions guaranteed by their license.  
+This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`](https://www.npmjs.com/package/spdx-exceptions) package, which uses the `CC-BY-3.0` license, without adding any legal or technical restrictions guaranteed by their license.
 
 ## Third-Party Components
 
@@ -45,6 +45,7 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `slug`                        | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                  |
 | NPM     | `swagger-ui-express`          | [MIT](https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE)              |
 | NPM     | `uuid`                        | [MIT](https://github.com/uuidjs/uuid/blob/master/LICENSE.md)                              |
+| NPM DEV | `@swrlab/eslint-plugin-swr`   | [ISC](https://github.com/swrlab/eslint-plugin-swr/)                                       |
 | NPM DEV | `@swrlab/swr-prettier-config` | [ISC](https://github.com/swrlab/prettier-config/blob/main/license.md)                     |
 | NPM DEV | `chai`                        | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                 |
 | NPM DEV | `chai-http`                   | [MIT](https://github.com/chaijs/chai-http/blob/master/package.json)                       |
@@ -53,3 +54,4 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM DEV | `license-compliance`          | [MIT](https://github.com/tmorell/license-compliance/blob/master/LICENSE)                  |
 | NPM DEV | `mocha`                       | [MIT](https://github.com/mochajs/mocha/blob/master/LICENSE)                               |
 | NPM DEV | `nodemon`                     | [MIT](https://github.com/remy/nodemon/blob/master/LICENSE)                                |
+| NPM DEV | `prettier`                    | [MIT](https://github.com/prettier/prettier/blob/main/LICENSE)                             |
