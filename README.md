@@ -2,14 +2,18 @@
 
 ARD system to distribute real-time (live) metadata for primarily radio broadcasts. During development, please head over to [./issues](https://github.com/swrlab/ard-eventhub/issues) and [./discussions](https://github.com/swrlab/ard-eventhub/discussions) for current topics and updates.
 
+- [ARD-Eventhub](#ard-eventhub)
+  - [Get involved](#get-involved)
+  - [Modules](#modules)
+    - [Ingest](#ingest)
+  - [Documentation](#documentation)
+  - [License](#license)
+  - [Third-Party Components](#third-party-components)
+
 ## Get involved
 
 - Join [./discussions](https://github.com/swrlab/ard-eventhub/discussions)
 - Join _#eventhub_ in the ARD Entwickler Slack
-
-## Changelog
-
-A separate Changelog will be available in [CHANGELOG.md](CHANGELOG.md)
 
 ## Modules
 
@@ -18,6 +22,16 @@ This project will include two modules: Ingest and API. The first development ste
 ### Ingest
 
 The Ingest service is responsible for receiving and publishing events and managing subscriptions. You'll find the core code in [`./src/ingest/`](./src/ingest/).
+
+## Documentation
+
+There are several documents available, that explain different parts of this service in detail:
+
+- [CHANGELOG.md](./CHANGELOG.md) - Release note for new Eventhub versions
+- [docs/AUTHENTICATION.md](./docs/AUTHENTICATION.md) - This guides you through the steps needed to login and work with this API
+- [docs/EVENTS.md](docs/EVENTS.md) - These are the events, that you can currently distribute through Eventhub
+- [docs/TYPES.md](docs/TYPES.md) - The different content types inside events, that can be used
+- [docs/USERS.md](docs/USERS.md) - How to work with user accounts
 
 ## License
 

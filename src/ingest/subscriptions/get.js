@@ -12,7 +12,7 @@ const response = require('../../utils/response');
 module.exports = async (req, res) => {
 	try {
 		// preset vars
-		const subscriptionName = req.params.subscriptionName;
+		const { subscriptionName } = req.params;
 		let subscription;
 
 		// load single subscription
@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
 		}
 
 		// return data
-		res.status(200).json(subscription);
+		return res.status(200).json(subscription);
 	} catch (err) {
 		console.error(
 			'ingest/subscriptions/get',
