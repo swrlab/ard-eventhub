@@ -151,7 +151,7 @@ function testSubscriptionKeys(body) {
 	body.should.have.property('serviceAccount').to.be.a('string');
 	body.should.have.property('labels').to.be.a('object');
 	body.labels.should.have.property('id').to.be.a('string');
-	body.labels.should.have.property('organization').to.be.a('string');
+	body.labels.should.have.property('institution').to.be.a('string');
 	body.should.have.property('created').to.be.a('string');
 	body.should.have.property('contact').to.be.a('string');
 	body.should.have.property('owner').to.be.a('string');

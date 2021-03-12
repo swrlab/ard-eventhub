@@ -10,7 +10,7 @@ const pubSubClient = require('./_client');
 const mapSubscription = require('./mapSubscription');
 
 module.exports = async () => {
-	// fetch topic list
+	// fetch subscriptions list
 	let [subscriptions] = await pubSubClient.getSubscriptions();
 
 	// DEV filter subscriptions by prefix

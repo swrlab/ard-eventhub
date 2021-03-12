@@ -33,9 +33,9 @@ module.exports = async (req, res) => {
 
 			if (err && err.code == 5) {
 				// pubsub error code 5 seems to be 'Resource not found'
-				return response.badRequest(req, res, {
+				return response.notFound(req, res, {
 					status: 404,
-					message: 'Subscription not found',
+					message: `Subscription '${subscriptionName}' not found`,
 				});
 			}
 
@@ -46,9 +46,16 @@ module.exports = async (req, res) => {
 			});
 		}
 
-		// check subscription permission by authenticated user
-		if (!subscription.owner || subscription.owner !== req.user.email) {
-			return res.sendStatus(404);
+		// check subscription permission by user institution
+		if (subscription.institution.id !== req.user.institution.id) {
+			let subsOrg = subscription.institution.name;
+			let userOrg = req.user.institution.name;
+			// return 400 error
+			return response.badRequest(req, res, {
+				status: 400,
+				message: `Mismatch of user and subscription institution`,
+				errors: `Subscription of institution '${subsOrg}' cannot be deleted by user of institution '${userOrg}'`,
+			});
 		}
 
 		// request actual deletion

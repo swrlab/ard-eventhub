@@ -19,12 +19,22 @@ module.exports = async (req, res) => {
 		try {
 			subscription = await pubsub.getSubscription(subscriptionName);
 		} catch (err) {
-			return res.sendStatus(404);
+			return response.notFound(req, res, {
+				status: 404,
+				message: `Subscription '${subscriptionName}' not found`,
+			});
 		}
 
-		// filter subscription by authenticated user
-		if (!subscription.owner || subscription.owner !== req.user.email) {
-			return res.sendStatus(404);
+		// verify if user is allowed to get subscription (same institution)
+		if (subscription.institution.id !== req.user.institution.id) {
+			let subsOrg = subscription.institution.name;
+			let userOrg = req.user.institution.name;
+			// return 400 error
+			return response.badRequest(req, res, {
+				status: 400,
+				message: `Mismatch of user and subscription institution`,
+				errors: `Subscription of institution '${subsOrg}' is not visible for user of institution '${userOrg}'`,
+			});
 		}
 
 		// return data

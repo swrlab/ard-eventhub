@@ -12,5 +12,6 @@ module.exports = {
 	getSubscriptions: require('./getSubscriptions'),
 	getTopic: require('./getTopic'),
 	getTopics: require('./getTopics'),
-	publishMessage: require('./publishMessage')
-}
+	createTopic: require('./createTopic'),
+	publishMessage: require('./publishMessage'),
+};

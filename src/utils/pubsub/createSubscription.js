@@ -25,7 +25,7 @@ module.exports = async (subscription) => {
 		},
 		labels: {
 			id: subscription.id,
-			organization: subscription.organization,
+			institution: subscription.institution.name,
 		},
 		ackDeadlineSeconds: 20,
 	};

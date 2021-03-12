@@ -5,24 +5,117 @@
 
 */
 
+// load node utils
+const slug = require('slug');
+
 // load eventhub utils
 const datastore = require('../../utils/datastore');
 const pubsub = require('../../utils/pubsub');
 const response = require('../../utils/response');
 
+//TODO: check IDs in ARD Core-API instead of dump
+const coreApi = require('../../data/coreApi.json');
+
+// define functions
+function getPubSubId(serviceId) {
+	let pubIdent = 'publisher';
+	return `${global.PREFIX}.${pubIdent}.${global.STAGE}.${serviceId}`;
+}
+
+function getServiceId(pubSubId) {
+	return pubSubId.split('.').pop();
+}
+
 module.exports = async (req, res) => {
 	try {
-		// DEV do more case-secific checks here
-
 		// use entire POST body to include potentially new fields
 		let message = req.body;
+		let user = req.user;
 
 		// save message to datastore
 		message = await datastore.save(message, 'events');
 		message.id = message.id.toString();
 
-		// DEV this is a very random topic test
-		let topics = await pubsub.publishMessage(['demo'], message);
+		// get serviceIds from message
+		let serviceIds = message.serviceIds;
+		let unauthorizedServiceIds = [];
+
+		// check allowed serviceIds for current user
+		serviceIds.forEach((serviceId) => {
+			if (user.serviceIds.indexOf(serviceId) == -1) {
+				// add forbidden ids to unauthorized array
+				unauthorizedServiceIds.push(serviceId);
+
+				// remove forbidden ids from serviceId array
+				serviceIds.splice(serviceIds.indexOf(serviceId), 1);
+			}
+		});
+
+		// generate pubsub IDs with prefix
+		let pubSubIds = serviceIds.map((serviceId) => {
+			return getPubSubId(serviceId);
+		});
+
+		// try to publish message under given topics
+		let topics = await pubsub.publishMessage(pubSubIds, message);
+		let unknownTopics = [];
+
+		// collect unknown topics from returning errors
+		Object.keys(topics).forEach((topic) => {
+			if (topics[topic] == 'TOPIC_ERROR' || topics[topic] == 'TOPIC_NOT_FOUND') {
+				let newTopic = {
+					id: getServiceId(topic),
+					pubsub: topic,
+					name: undefined,
+					label: undefined,
+					verified: false,
+					created: false,
+				};
+				unknownTopics.push(newTopic);
+			}
+		});
+
+		// check unknown topic IDs
+		if (unknownTopics.length > 0) {
+			// verify IDs of unknownTopics with coreApi
+			unknownTopics.forEach((topic) => {
+				coreApi.forEach((entry) => {
+					if (topic.id == entry.externalId) {
+						topic.name = entry.title;
+						topic.label = slug(entry.title);
+						topic.verified = true;
+					}
+				});
+			});
+
+			// create topics for verified IDs
+			await Promise.all(
+				unknownTopics.map(async (topic) => {
+					if (topic.verified) {
+						let result = await pubsub.createTopic(topic);
+						if (result?.[0]?.name?.indexOf(topic.id) !== -1) {
+							topic.created = true;
+							// Update api result that topic was created
+							topics[topic.pubsub] = 'TOPIC_CREATED';
+						} else {
+							// Update api result that topic was not created
+							topics[topic.pubsub] = 'TOPIC_NOT_CREATED';
+						}
+					}
+				})
+			);
+		}
+
+		// check forbidden serviceIds
+		if (unauthorizedServiceIds.length > 0) {
+			console.error(
+				`User '${user.email}' is not allowed to publish events for serviceIds: [${unauthorizedServiceIds}]`
+			);
+			unauthorizedServiceIds.forEach((unauthorizedServiceId) => {
+				let pubSubId = getPubSubId(unauthorizedServiceId);
+				topics[pubSubId] = 'TOPIC_NOT_ALLOWED';
+			});
+		}
 
 		// return ok
 		return response.ok(

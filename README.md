@@ -42,7 +42,9 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `jsonwebtoken`                | [MIT](https://github.com/auth0/node-jsonwebtoken/blob/master/LICENSE)                     |
 | NPM     | `moment`                      | [MIT](https://github.com/moment/moment/blob/develop/LICENSE)                              |
 | NPM     | `node-fetch`                  | [MIT](https://github.com/node-fetch/node-fetch/blob/master/LICENSE.md)                    |
+| NPM     | `slug`                        | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                  |
 | NPM     | `swagger-ui-express`          | [MIT](https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE)              |
+| NPM     | `uuid`                        | [MIT](https://github.com/uuidjs/uuid/blob/master/LICENSE.md)                              |
 | NPM DEV | `@swrlab/swr-prettier-config` | [ISC](https://github.com/swrlab/prettier-config/blob/main/license.md)                     |
 | NPM DEV | `chai`                        | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                 |
 | NPM DEV | `chai-http`                   | [MIT](https://github.com/chaijs/chai-http/blob/master/package.json)                       |

@@ -272,6 +272,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorForbidden'
+        '404':
+          description: Topic not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorNotFound'
   '/subscriptions/{name}':
     get:
       tags:
@@ -310,6 +316,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorForbidden'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorNotFound'
         '500':
           description: Internal server error
           content:
@@ -354,6 +366,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorForbidden'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorNotFound'
         '500':
           description: Internal server error
           content:
@@ -456,6 +474,15 @@ components:
               errorCode:
                 type: string
                 example: required.user
+        trace:
+          type: string
+          example: null
+    errorNotFound:
+      type: object
+      properties:
+        message:
+          type: string
+          example: object 'object.name' not found
         trace:
           type: string
           example: null

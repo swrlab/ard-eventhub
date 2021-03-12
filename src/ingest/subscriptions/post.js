@@ -7,19 +7,43 @@
 
 // load node utils
 const moment = require('moment');
+const { v4: uuidv4 } = require('uuid');
 
 // load eventhub utils
 const datastore = require('../../utils/datastore');
 const pubsub = require('../../utils/pubsub');
 const response = require('../../utils/response');
 
+//TODO: check IDs in ARD Core-API instead of dump
+const coreApi = require('../../data/coreApi.json');
+
 module.exports = async (req, res) => {
 	try {
+		// generate subscription name
+		let subIdent = 'subscription';
+		let prefix = `${global.PREFIX}.${subIdent}.${global.STAGE}`;
+
+		// check existence of user institution
+		let institutionExists = coreApi.some((entry) => {
+			if (req.user.institution.id == entry.institution.id) {
+				return true;
+			}
+		});
+
+		if (!institutionExists) {
+			let orgId = req.user.institution.id;
+			let orgName = req.user.institution.name;
+			// return 401 error
+			return response.badRequest(req, res, {
+				status: 401,
+				message: `New subscriptions are not allowed for user '${req.user.email}'`,
+				errors: `The institution '${orgId}' (${orgName}) wasn't found in ARD Core-API`,
+			});
+		}
+
 		// map inputs
 		let subscription = {
-			name:
-				global.STAGE_CONFIG.pubsubPrefix +
-				`${req.user.organization}-${moment().format('YYYY-DDDD--x')}`,
+			name: `${prefix}.${req.user.institution.name}.${uuidv4()}`,
 			type: req.body.type,
 			method: req.body.method,
 			url: req.body.url,
@@ -27,7 +51,7 @@ module.exports = async (req, res) => {
 			topic: req.body.topic,
 
 			owner: req.user.email,
-			organization: req.user.organization,
+			institution: req.user.institution,
 			created: moment().toISOString(),
 		};
 
@@ -51,8 +75,11 @@ module.exports = async (req, res) => {
 			// delete datastore object
 			await datastore.delete('subscriptions', subscription.id);
 
-			// return error
-			return res.sendStatus(404);
+			// return 404 error
+			return response.notFound(req, res, {
+				status: 404,
+				message: `Topic '${subscription.topic}' not found`,
+			});
 		}
 
 		// request creation of subscription

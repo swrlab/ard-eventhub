@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
 	} catch (err) {
 		console.error(
 			'ingest/topics/post',
-			'failed to create subscription',
+			'failed to list topics',
 			JSON.stringify({
 				body: req.body,
 				error: err.stack || err,
