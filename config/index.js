@@ -8,6 +8,15 @@
 // import version from package.json
 const { version } = require('../package.json')
 
+// check existence of several process vars
+if (!process.env.GCP_PROJECT_ID) {
+	console.error('process.env.GCP_PROJECT_ID not found')
+	process.exit(1)
+} else if (!process.env.FIREBASE_API_KEY) {
+	console.error('process.env.FIREBASE_API_KEY not found')
+	process.exit(1)
+}
+
 // read env vars
 const stage = process.env.STAGE
 
@@ -35,15 +44,6 @@ const config = {
 // check stage and config
 if (!stage || !config[stage]) {
 	console.error('STAGE not found >', stage)
-	process.exit(1)
-}
-
-// check existence of several process vars
-if (!process.env.GCP_PROJECT_ID) {
-	console.error('process.env.GCP_PROJECT_ID not found')
-	process.exit(1)
-} else if (!process.env.FIREBASE_API_KEY) {
-	console.error('process.env.FIREBASE_API_KEY not found')
 	process.exit(1)
 }
 

@@ -5,11 +5,8 @@
 
 */
 
-// enable datadog tracing
-require('dd-trace').init({
-	enabled: process.env.DD_TRACER_ENABLED === 'true',
-	logInjection: true,
-})
+// enable tracing
+require('../utils/tracer')
 
 // load node utils and config
 const compression = require('compression')
