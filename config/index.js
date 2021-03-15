@@ -6,19 +6,19 @@
 */
 
 // import version from package.json
-const { version } = require('../package.json');
+const { version } = require('../package.json')
 
 // read env vars
-const stage = process.env.STAGE;
+const stage = process.env.STAGE
 
 // set config
-const serviceName = 'ard-eventhub';
+const serviceName = 'ard-eventhub'
 const baseConfig = {
 	userAgent: `${serviceName}/${version}`,
 	pubsubPrefix: 'de.ard.eventhub',
 	stage,
 	version,
-};
+}
 
 // set config based on stages
 const config = {
@@ -30,21 +30,21 @@ const config = {
 		...baseConfig,
 		serviceName,
 	},
-};
+}
 
 // check stage and config
 if (!stage || !config[stage]) {
-	console.error('STAGE not found >', stage);
-	process.exit(1);
+	console.error('STAGE not found >', stage)
+	process.exit(1)
 }
 
 // check existence of several process vars
 if (!process.env.GCP_PROJECT_ID) {
-	console.error('process.env.GCP_PROJECT_ID not found');
-	process.exit(1);
+	console.error('process.env.GCP_PROJECT_ID not found')
+	process.exit(1)
 } else if (!process.env.FIREBASE_API_KEY) {
-	console.error('process.env.FIREBASE_API_KEY not found');
-	process.exit(1);
+	console.error('process.env.FIREBASE_API_KEY not found')
+	process.exit(1)
 }
 
-module.exports = config[stage];
+module.exports = config[stage]

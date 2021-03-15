@@ -6,27 +6,27 @@
 */
 
 // load pubsub for internal queues
-const loggerDev = require('../loggerDev');
-const pubSubClient = require('./_client');
-const config = require('../../../config');
+const loggerDev = require('../loggerDev')
+const pubSubClient = require('./_client')
+const config = require('../../../config')
 
 // set local config
-const functionName = 'utils/pubsub/publishMessage';
+const functionName = 'utils/pubsub/publishMessage'
 
 module.exports = async (topics, message) => {
-	loggerDev('log', [functionName, 'triggered', JSON.stringify({ topics, message })]);
+	loggerDev('log', [functionName, 'triggered', JSON.stringify({ topics, message })])
 
 	// initialize output object
-	const messageIds = {};
+	const messageIds = {}
 
 	// prepare buffer object
-	const messageBuffer = Buffer.from(JSON.stringify(message));
+	const messageBuffer = Buffer.from(JSON.stringify(message))
 
 	// add runtime information as attributes
 	const customAttributes = {
 		stage: config.stage,
 		version: config.version,
-	};
+	}
 
 	// send message for each topic
 	topics.forEach(async (topicName) => {
@@ -34,26 +34,26 @@ module.exports = async (topics, message) => {
 			// attempt to send message
 			messageIds[topicName] = await pubSubClient
 				.topic(topicName)
-				.publish(messageBuffer, customAttributes);
+				.publish(messageBuffer, customAttributes)
 
 			// log progress
-			loggerDev('log', [functionName, 'success', topicName, messageIds[topicName]]);
+			loggerDev('log', [functionName, 'success', topicName, messageIds[topicName]])
 		} catch (err) {
 			if (err && err.code && err.code === 5) {
-				messageIds[topicName] = 'TOPIC_NOT_FOUND';
-				loggerDev('error', [functionName, 'topic missing', topicName, messageIds[topicName]]);
+				messageIds[topicName] = 'TOPIC_NOT_FOUND'
+				loggerDev('error', [functionName, 'topic missing', topicName, messageIds[topicName]])
 			} else {
-				messageIds[topicName] = 'TOPIC_ERROR';
+				messageIds[topicName] = 'TOPIC_ERROR'
 				loggerDev('error', [
 					functionName,
 					'other error',
 					topicName,
 					messageIds[topicName],
 					JSON.stringify(err),
-				]);
+				])
 			}
 		}
-	});
+	})
 
-	return Promise.resolve(messageIds);
-};
+	return Promise.resolve(messageIds)
+}

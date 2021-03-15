@@ -8,6 +8,7 @@ on:
 
 env:
   NODE_VERSION: 14.5
+  GOOGLE_APPLICATION_CREDENTIALS: ./keys/ingest.json
 
 
 jobs:

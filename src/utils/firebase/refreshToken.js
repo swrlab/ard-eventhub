@@ -6,15 +6,15 @@
 */
 
 // load node utils
-const fetch = require('node-fetch');
-const jwt = require('jsonwebtoken');
+const fetch = require('node-fetch')
+const jwt = require('jsonwebtoken')
 
 // load eventhub utils
-const config = require('../../../config');
+const config = require('../../../config')
 
 module.exports = async (refreshToken) => {
 	// set firebase sign in url
-	const url = `https://securetoken.googleapis.com/v1/token?key=${process.env.FIREBASE_API_KEY}`;
+	const url = `https://securetoken.googleapis.com/v1/token?key=${process.env.FIREBASE_API_KEY}`
 
 	// query firebase
 	const request = await fetch(url, {
@@ -30,10 +30,10 @@ module.exports = async (refreshToken) => {
 			grant_type: 'refresh_token',
 			refresh_token: refreshToken,
 		}),
-	});
+	})
 
 	// parse json response
-	const response = await request.json();
+	const response = await request.json()
 
 	// handle errors
 	if (request.status !== 200) {
@@ -43,14 +43,14 @@ module.exports = async (refreshToken) => {
 			request.status,
 			'>',
 			JSON.stringify(response)
-		);
+		)
 
-		return Promise.reject(response);
+		return Promise.reject(response)
 	}
 
 	// decode JWT token to receive user object
-	const user = jwt.decode(response.id_token);
+	const user = jwt.decode(response.id_token)
 
 	// return data
-	return Promise.resolve({ login: response, user });
-};
+	return Promise.resolve({ login: response, user })
+}

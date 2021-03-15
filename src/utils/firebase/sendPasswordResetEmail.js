@@ -6,14 +6,14 @@
 */
 
 // load node utils
-const fetch = require('node-fetch');
+const fetch = require('node-fetch')
 
 // load eventhub utils
-const config = require('../../../config');
+const config = require('../../../config')
 
 module.exports = async (email) => {
 	// set firebase sign in url
-	const url = `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${process.env.FIREBASE_API_KEY}`;
+	const url = `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${process.env.FIREBASE_API_KEY}`
 
 	// query firebase
 	const request = await fetch(url, {
@@ -29,10 +29,10 @@ module.exports = async (email) => {
 			requestType: 'PASSWORD_RESET',
 			email,
 		}),
-	});
+	})
 
 	// parse json response
-	const response = await request.json();
+	const response = await request.json()
 
 	// handle errors
 	if (request.status !== 200) {
@@ -42,11 +42,11 @@ module.exports = async (email) => {
 			request.status,
 			'>',
 			JSON.stringify(response)
-		);
+		)
 
-		return Promise.reject(response);
+		return Promise.reject(response)
 	}
 
 	// return data
-	return Promise.resolve();
-};
+	return Promise.resolve()
+}

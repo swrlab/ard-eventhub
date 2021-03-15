@@ -17,6 +17,7 @@ env:
   GCP_RUN_REGION: europe-west1
   GCP_RUN_MEMORY: 256Mi
   GCP_RUN_TIMEOUT: 60
+  GOOGLE_APPLICATION_CREDENTIALS: ./keys/ingest.json
 
 
 jobs:
@@ -80,9 +81,6 @@ jobs:
     - name: 🔑 Login to Registry
       run: "gcloud auth configure-docker $REGISTRY_DOMAIN"
 
-    - name: 🔐 Write GCP Ingest key
-      run: echo '${{ secrets.KEYS_INGEST }}' > ./keys/ingest.json
-
     - name: 🚧 Building docker image
       run: "docker build ./ --file ./Dockerfile.ingest -t image"
 
@@ -142,7 +140,7 @@ jobs:
           --allow-unauthenticated \
           --timeout $GCP_RUN_TIMEOUT \
           --memory $GCP_RUN_MEMORY \
-          --update-env-vars STAGE=dev \
+          --update-env-vars STAGE=dev,DD_TRACER_ENABLED=false \
           --service-account ${{ secrets.GCP_SERVICE_ACCOUNT_INGEST }}
 
   cloud-run-prod:
@@ -176,5 +174,5 @@ jobs:
           --allow-unauthenticated \
           --timeout $GCP_RUN_TIMEOUT \
           --memory $GCP_RUN_MEMORY \
-          --update-env-vars STAGE=prod \
+          --update-env-vars STAGE=prod,DD_TRACER_ENABLED=false \
           --service-account ${{ secrets.GCP_SERVICE_ACCOUNT_INGEST }}
