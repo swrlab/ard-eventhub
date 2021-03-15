@@ -30,6 +30,7 @@ There are several documents available, that explain different parts of this serv
 - [CHANGELOG.md](./CHANGELOG.md) - Release note for new Eventhub versions
 - [docs/AUTHENTICATION.md](./docs/AUTHENTICATION.md) - This guides you through the steps needed to login and work with this API
 - [docs/EVENTS.md](docs/EVENTS.md) - These are the events, that you can currently distribute through Eventhub
+- [docs/SECRETS.md](docs/SECRETS.md) - List of secrets that are used and stored in different places
 - [docs/TYPES.md](docs/TYPES.md) - The different content types inside events, that can be used
 - [docs/USERS.md](docs/USERS.md) - How to work with user accounts
 

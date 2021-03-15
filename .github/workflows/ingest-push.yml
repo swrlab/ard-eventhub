@@ -47,15 +47,17 @@ jobs:
     - name: Install Dependencies
       run: yarn
 
-    - name: 🔐 Write GCP Ingest key
-      run: echo '${{ secrets.KEYS_INGEST }}' > ./keys/ingest.json
+    - name: 🔑 Setup Google Cloud Auth
+      uses: google-github-actions/setup-gcloud@master
+      with:
+        service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
+        export_default_credentials: true
 
     - name: Run Ingest Tests
       env:
         STAGE: ${{ matrix.STAGES }}
         GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
         FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
-        GOOGLE_APPLICATION_CREDENTIALS: ./keys/ingest.json
         TEST_USER: ${{ secrets.TEST_USER }}
         TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
       run: yarn ingest:test
@@ -96,8 +98,8 @@ jobs:
         # Add custom wrapper syntax
         VERSION=g${{ github.run_number }}-d$(date +%j)-$BRANCH-${{ github.actor }}-$GITHUB_SHA
 
-        # Build
-        IMAGE_URI=$REGISTRY_DOMAIN/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME:$VERSION
+        # Set registry
+        IMAGE_URI=$REGISTRY_DOMAIN/${{ secrets.REGISTRY_GCP_PROJECT_ID }}/$IMAGE_NAME:$VERSION
 
         # Push image to registry
         docker tag image $IMAGE_URI
@@ -106,6 +108,10 @@ jobs:
         # Update vars
         echo "::set-output name=BRANCH::$BRANCH"
         echo "::set-output name=VERSION::$VERSION"
+
+        # Print vars
+        echo "::warning docker::BRANCH=$BRANCH"
+        echo "::warning docker::VERSION=$VERSION"
 
     - name: 👋 Logout
       run: "docker logout"
