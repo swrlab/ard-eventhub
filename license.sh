@@ -34,6 +34,7 @@
 
 license-compliance \
 	--report summary \
+	-t \
 	--exclude "\
 		doctrine;\
 		hdr-histogram-js;\

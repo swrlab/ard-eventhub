@@ -12,12 +12,11 @@ on:
 
 env:
   NODE_VERSION: 14.5
-  IMAGE_NAME: ingest
+  IMAGE_NAME: de.swr.ard.eventhub/ingest
   REGISTRY_DOMAIN: eu.gcr.io
   GCP_RUN_REGION: europe-west1
   GCP_RUN_MEMORY: 256Mi
   GCP_RUN_TIMEOUT: 60
-  GOOGLE_APPLICATION_CREDENTIALS: ./keys/ingest.json
 
 
 jobs:
@@ -56,6 +55,7 @@ jobs:
         STAGE: ${{ matrix.STAGES }}
         GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
         FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
+        GOOGLE_APPLICATION_CREDENTIALS: ./keys/ingest.json
         TEST_USER: ${{ secrets.TEST_USER }}
         TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
       run: yarn ingest:test

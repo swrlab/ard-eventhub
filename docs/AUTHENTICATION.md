@@ -6,6 +6,7 @@ To authenticate and work with Eventhub API you will need a valid user. For now t
   - [Authentication Overview](#authentication-overview)
   - [Exchange Credentials for Tokens](#exchange-credentials-for-tokens)
   - [Refresh Token](#refresh-token)
+    - [Expiration](#expiration)
   - [Reset password](#reset-password)
 
 ## Authentication Overview
@@ -68,6 +69,16 @@ Returns `200 OK`
   "trace": null
 }
 ```
+
+### Expiration
+
+> Refresh tokens expire only when one of the following occurs:
+>
+> - The user is deleted
+> - The user is disabled
+> - A major account change is detected for the user. This includes events like password or email address updates.  
+
+[Source: Firebase docs](https://firebase.google.com/docs/auth/admin/manage-sessions)
 
 ## Reset password
 
