@@ -79,6 +79,7 @@ describe('POST /auth/refresh', () => {
 });
 
 // 🚨 firebase limit is 150 requests per day 🚨
+/*
 describe('POST /auth/reset', () => {
 	it('request password reset email', (done) => {
 		let resetRequest = {
@@ -93,7 +94,7 @@ describe('POST /auth/reset', () => {
 				done();
 			});
 	});
-});
+});*/
 
 /*
     EVENTS - Manage events
