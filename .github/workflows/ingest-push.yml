@@ -99,7 +99,7 @@ jobs:
         VERSION=g${{ github.run_number }}-d$(date +%j)-$BRANCH-${{ github.actor }}-$GITHUB_SHA
 
         # Set registry
-        IMAGE_URI=$REGISTRY_DOMAIN/${{ secrets.REGISTRY_GCP_PROJECT_ID }}/$IMAGE_NAME:$VERSION
+        IMAGE_URI=$REGISTRY_DOMAIN/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME:$VERSION
 
         # Push image to registry
         docker tag image $IMAGE_URI
