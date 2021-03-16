@@ -133,58 +133,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorInternalServerError'
-  '/events/{eventName}':
+  '/events/de.ard.eventhub.v1.radio.track.next':
     post:
       tags:
         - events
       summary: Publish a new event
-      operationId: eventV1Post
+      operationId: eventPostV1RadioTrackNext
       security:
         - bearerAuth: []
-      parameters:
-        - name: eventName
-          in: path
-          description: 'Same name of the event, that is added in the POST body'
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
       requestBody:
-        description: >
-          New event to be distributed to subscribers.  
-            
-          The Eventhub format validation expects only a subset of these
-          variables as minimum set. All other fields are technically optional,
-          but **highly encouraged** to be included, so a best-possible metadata
-          exchange is possible.  
-
-          The subset is defined in the list of required fields of Schemas
-          `eventV1PostBody`, resulting in this body:  
-
-          ```json
-
-          {
-            "event": "de.ard.eventhub.v1.radio.track.playing",
-            "start": "2020-01-19T06:00:00+01:00",
-            "title": "Song name",
-            "serviceIds": [ "1234" ],
-            "playlistItemId": "swr3-5678"
-          }
-
-          ```
-
-          Fields not specified in the Schema, will cause your request to
-          fail.   
-            
-          The `id` is inserted by Eventhub as string-formatted number, but might
-          be a true string in the future, do not expect this string to remain
-          numbers only!
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/eventV1PostBody'
-        required: true
+        $ref: '#/components/requestBodies/eventV1RadioTrack'
+      responses:
+        '201':
+          description: Event created
+          content: {}
+        '400':
+          description: Bad Request (invalid input)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorBadRequest'
+  '/events/de.ard.eventhub.v1.radio.track.playing':
+    post:
+      tags:
+        - events
+      summary: Publish a new event
+      operationId: eventPostV1RadioTrackPlaying
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/eventV1RadioTrack'
       responses:
         '201':
           description: Event created
@@ -406,6 +384,42 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorInternalServerError'
 components:
+  requestBodies:
+    eventV1RadioTrack:
+      description: >
+          New event to be distributed to subscribers.  
+            
+          The Eventhub format validation expects only a subset of these
+          variables as minimum set. All other fields are technically optional,
+          but **highly encouraged** to be included, so a best-possible metadata
+          exchange is possible.  
+
+          The subset is defined in the list of required fields of Schemas
+          `eventV1PostBody`, resulting in this body:  
+
+          ```json
+
+          {
+            "event": "de.ard.eventhub.v1.radio.track.playing",
+            "start": "2020-01-19T06:00:00+01:00",
+            "title": "Song name",
+            "serviceIds": [ "1234" ],
+            "playlistItemId": "swr3-5678"
+          }
+
+          ```
+
+          Fields not specified in the Schema, will cause your request to
+          fail.   
+            
+          The `id` is inserted by Eventhub as string-formatted number, but might
+          be a true string in the future, do not expect this string to remain
+          numbers only!
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/eventV1PostBody'
+      required: true
   securitySchemes:
     bearerAuth:
       type: http
@@ -528,6 +542,7 @@ components:
         trace:
           type: string
           example: null
+    
     eventV1PostBody:
       additionalProperties: false
       required:
