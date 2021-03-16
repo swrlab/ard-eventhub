@@ -7,6 +7,6 @@
 	"extends": ["plugin:@swrlab/eslint-plugin-swr/recommended"],
 	"ignorePatterns": ["docs/_SIDEBAR.md"],
 	"rules": {
-		"eslint-disable-next-line": "no-await-in-loop"
+		"no-restricted-syntax": 0
 	}
 }

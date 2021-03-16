@@ -17,7 +17,7 @@ module.exports = async (topics, message) => {
 	loggerDev('log', [functionName, 'triggered', JSON.stringify({ topics, message })])
 
 	// initialize output object
-	let messageIds = {}
+	const messageIds = {}
 
 	// prepare buffer object
 	const messageBuffer = Buffer.from(JSON.stringify(message))

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Hotfix `content-type` bug for error responses
 - Updated endpoint structure for `/events`
+- Changed order in test.ingest to check topics first, then subscriptions
 
 ## [0.1.2] - 2021-03-16
 
