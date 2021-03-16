@@ -59,6 +59,6 @@ New users cannot sign up themselves, but need to go through the ARD Online team 
 If a user needs to be removed from this service, do the following steps:
 
 - Check if there are open subscriptions that they created, that might need to be removed (both in Pub/Sub and Datastore)
-  - Note that subcription permissions are given institution-wide, so even if one user gets removed, their colleagues would still be able to modify these entries.
+  - Note that subscription permissions are given institution-wide, so even if one user gets removed, their colleagues would still be able to modify these entries.
 - Next, remove the user from Datastore by selecting and deleting their entry.
 - Then also remove their profile from Firebase Console.

@@ -7,11 +7,12 @@ Since this project is designed to be kept public to allow a collaborative develo
   - [Code](#code)
   - [Github](#github)
   - [Google Cloud](#google-cloud)
+    - [Docker Image](#docker-image)
 
 ## Code
 
 Different modules might need varying sets of variables. Check the README of each provided module to see more about those.  
-Usually it only requires few API keys to external services. Access to Google Cloud services is given by a [service account](https://cloud.google.com/iam/docs/service-accounts) (SA), with only the minumum set of permissions needed. This SA is added using an environment variable.  
+Usually it only requires few API keys to external services. Access to Google Cloud services is given by a [service account](https://cloud.google.com/iam/docs/service-accounts) (SA), with only the minimum set of permissions needed. This SA is added using an environment variable.  
 
 ## Github
 
