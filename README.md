@@ -3,12 +3,12 @@
 ARD system to distribute real-time (live) metadata for primarily radio broadcasts. During development, please head over to [./issues](https://github.com/swrlab/ard-eventhub/issues) and [./discussions](https://github.com/swrlab/ard-eventhub/discussions) for current topics and updates.
 
 - [ARD-Eventhub](#ard-eventhub)
-     - [Get involved](#get-involved)
-     - [Modules](#modules)
-          - [Ingest](#ingest)
-     - [Documentation](#documentation)
-     - [License](#license)
-     - [Third-Party Components](#third-party-components)
+  - [Get involved](#get-involved)
+  - [Modules](#modules)
+    - [Ingest](#ingest)
+  - [Documentation](#documentation)
+  - [License](#license)
+  - [Third-Party Components](#third-party-components)
 
 ## Get involved
 
@@ -31,6 +31,7 @@ There are several documents available, that explain different parts of this serv
 - [docs/AUTHENTICATION.md](./docs/AUTHENTICATION.md) - This guides you through the steps needed to login and work with this API
 - [docs/EVENTS.md](docs/EVENTS.md) - These are the events, that you can currently distribute through Eventhub
 - [docs/SECRETS.md](docs/SECRETS.md) - List of secrets that are used and stored in different places
+- [docs/STAGES.md](docs/STAGES.md) - Stage configuration for all modules
 - [docs/TYPES.md](docs/TYPES.md) - The different content types inside events, that can be used
 - [docs/USERS.md](docs/USERS.md) - How to work with user accounts
 

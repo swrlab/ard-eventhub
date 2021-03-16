@@ -19,7 +19,7 @@ This page explicitly covers the login methods for the ARD-Eventhub API. Compared
 
 **POST `{HOST}/auth/login`**
 
-```js
+```json
 {
   "email": "my-email@example.com",
   "password": "my-password"
@@ -28,14 +28,14 @@ This page explicitly covers the login methods for the ARD-Eventhub API. Compared
 
 Returns `200 OK`
 
-```js
+```json
 {
   "expiresIn": 3600,
   "expires": "2021-03-12T12:55:22.995Z",
   "token": "eyABCDEF.GHIJKL....",
   "refreshToken": "AOabcdefghijkl",
   "user": {
-    /* ... */
+    "some": "objects"
   },
   "trace": null
 }
@@ -49,7 +49,7 @@ While the normal `token` expires, the `refreshToken` can be used for a longer pe
 
 **POST `{HOST}/auth/refresh`**
 
-```js
+```json
 {
   "refreshToken": "abcXYZ..."
 }
@@ -57,14 +57,14 @@ While the normal `token` expires, the `refreshToken` can be used for a longer pe
 
 Returns `200 OK`
 
-```js
+```json
 {
   "expiresIn": 3600,
   "expires": "2021-03-12T12:55:22.995Z",
   "token": "eyABCDEF.GHIJKL....",
   "refreshToken": "AOabcdefghijkl",
   "user": {
-    /* ... */
+    "some": "objects"
   },
   "trace": null
 }
@@ -86,7 +86,7 @@ Sometimes you might loose your old password and need to reset it. If this happen
 
 **POST `{HOST}/auth/reset`**
 
-```js
+```json
 {
   "email": "my-email@example.com"
 }
