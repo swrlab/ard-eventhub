@@ -5,5 +5,8 @@
 	"root": true,
 	"plugins": ["@swrlab/eslint-plugin-swr"],
 	"extends": ["plugin:@swrlab/eslint-plugin-swr/recommended"],
-	"ignorePatterns": ["docs/_SIDEBAR.md"]
+	"ignorePatterns": ["docs/_SIDEBAR.md"],
+	"rules": {
+		"eslint-disable-next-line": "no-await-in-loop"
+	}
 }

@@ -107,7 +107,7 @@ function testEventKeys(body) {
 	//body.should.have.property('trace').eql(null);
 }
 
-describe('POST /events/v1', () => {
+describe('POST /events/de.ard.eventhub.v1.radio.track.playing', () => {
 	it('publish a new event', (done) => {
 		const event = {
 			event: 'de.ard.eventhub.v1.radio.track.playing',
@@ -119,7 +119,7 @@ describe('POST /events/v1', () => {
 		};
 
 		chai.request(server)
-			.post('/events/v1')
+			.post('/events/de.ard.eventhub.v1.radio.track.playing')
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send(event)
 			.end((err, res) => {

@@ -91,12 +91,15 @@ module.exports = async (req, res) => {
 			}
 		})
 
+		console.log({serviceIds, pubSubIds});
+
 		// check unknown topic IDs
 		if (unknownTopics.length > 0) {
 			// verify IDs of unknownTopics with coreApi
 			unknownTopics.forEach((topic) => {
 				coreApi.forEach((entry) => {
 					if (topic.id === entry.externalId) {
+						console.log({topic});
 						topic.name = entry.title
 						topic.label = slug(entry.title)
 						topic.verified = true
