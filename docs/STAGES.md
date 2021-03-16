@@ -1,6 +1,6 @@
 # ARD-Eventhub / Stages
 
-The Eventhub differentiates by stages given to the service via env `STAGE` and different runtime environments, such as a deployment to beta, test, or similar.
+The Eventhub differentiates between stages given to the service via env `STAGE` and different runtime environments or deployments, such as beta, test, or similar.
 
 - [ARD-Eventhub / Stages](#ard-eventhub--stages)
   - [Ingest](#ingest)
@@ -11,17 +11,19 @@ The Eventhub differentiates by stages given to the service via env `STAGE` and d
 
 ### Ingest Service Stages
 
-| Module      | `dev`           | `prod`           |
-| ----------- | --------------- | ---------------- |
-| Database    | Namespace `dev` | Namespace `prod` |
-| Dev Logging | true            | false            |
+| Module / Stage | `dev`                 | `prod`                 |
+| -------------- | --------------------- | ---------------------- |
+| Database       | Namespace `dev`       | Namespace `prod`       |
+| Pub/Sub        | Prefix includes `dev` | Prefix includes `prod` |
+| Dev Logging    | true                  | false                  |
 
 ### Ingest Deployment Stages
 
-| Module             | `dev`                       | `test`                              | `beta`           | `prod`           |
-| ------------------ | --------------------------- | ----------------------------------- | ---------------- | ---------------- |
-| Used Ingest Stage  | `dev`                       | `dev`                               | `prod`           | `prod`           |
-| Stable             | No, used for internal tests | Yes, can be used for external tests | Ususally         | Yes              |
-| Runtime            | Cloud Run                   | Kubernetes                          | Kubernetes       | Kubernetes       |
-| Container Registry | Eventhub project            | Eventhub project                    | Eventhub project | Eventhub project |
-| URL                | n/a                         | n/a                                 | n/a              | n/a              |
+| Module / Stage       | `dev`                       | `test`                              | `beta`           | `prod`           |
+| -------------------- | --------------------------- | ----------------------------------- | ---------------- | ---------------- |
+| Used Ingest Stage    | `dev`                       | `dev`                               | `prod`           | `prod`           |
+| Stable               | No, used for internal tests | Yes, can be used for external tests | Yes, usually     | Yes              |
+| Runtime              | Cloud Run                   | Kubernetes                          | Kubernetes       | Kubernetes       |
+| Container Registry   | Eventhub project            | Eventhub project                    | Eventhub project | Eventhub project |
+| URL                  | n/a                         | n/a                                 | n/a              | n/a              |
+| Automatic Deployment | Yes, through Github Actions | No                                  | No               | No               |

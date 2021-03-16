@@ -21,6 +21,13 @@ server.use((req, res, next) => {
 	// add service information
 	res.set('x-service', config.userAgent)
 
+	// DEV temporarily log all headers to validate ingress
+	const logHeaders = {
+		...req.headers,
+		authorization: 'hidden',
+	}
+	console.log('DEV middleware', JSON.stringify(logHeaders))
+
 	// continue with normal workflow
 	next()
 })

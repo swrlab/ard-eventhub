@@ -110,8 +110,8 @@ jobs:
         echo "::set-output name=VERSION::$VERSION"
 
         # Print vars
-        echo "::warning docker::BRANCH=$BRANCH"
-        echo "::warning docker::VERSION=$VERSION"
+        echo "::warning docker::BRANCH $BRANCH"
+        echo "::warning docker::VERSION $VERSION"
 
     - name: 👋 Logout
       run: "docker logout"

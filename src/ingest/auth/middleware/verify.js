@@ -6,48 +6,53 @@
 */
 
 // load node utils
-const jwt = require('jsonwebtoken');
-const datastore = require('../../../utils/datastore');
-const firebase = require('../../../utils/firebase');
+const datastore = require('../../../utils/datastore')
+const firebase = require('../../../utils/firebase')
 
 module.exports = async (req, res, next) => {
 	try {
 		// parse input, preset vars
-		const regexp = /(?!Bearer\s{1})([a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+)/g;
-		let authorization = req.headers['x-authorization'] || req.headers['authorization'];
+		const regexp = /(?!Bearer\s{1})([a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+)/g
+		let authorization = req.headers['x-authorization'] || req.headers.authorization
 
 		// check existence of x-auth... header
 		if (!authorization || !regexp.test(authorization)) {
-			return res.sendStatus(401);
+			return res.sendStatus(401)
 		}
 
 		// extract token
-		[authorization] = authorization.match(regexp);
+		;[authorization] = authorization.match(regexp)
 
 		// validate JWT token with firebase
 		try {
 			// successfull verifications will save JWT user profile to req
-			req.user = await firebase.verifyToken(authorization);
-			res.set('x-ard-eventhub-uid', req.user.uid);
+			req.user = await firebase.verifyToken(authorization)
+			res.set('x-ard-eventhub-uid', req.user.uid)
 		} catch (err) {
-			console.error({ err });
-			return res.sendStatus(403);
+			console.warn(
+				'ingest/auth/middleware/verify',
+				'user token invalid',
+				JSON.stringify({
+					error: err.stack || err,
+				})
+			)
+			return res.sendStatus(403)
 		}
 
 		// lookup user in DB
-		let userDb = await datastore.load('users', req.user.email);
+		const userDb = await datastore.load('users', req.user.email)
 
 		// check if profile exists and valid
 		if (!userDb || userDb.active !== true) {
-			return res.sendStatus(403);
+			return res.sendStatus(403)
 		}
 
 		// add user details to request profile
-		req.user.serviceIds = userDb.serviceIds;
-		req.user.institution = userDb.institution;
+		req.user.serviceIds = userDb.serviceIds
+		req.user.institution = userDb.institution
 
 		// continue with normal workflow, user is authenticated 🎉
-		next();
+		return next()
 	} catch (err) {
 		console.error(
 			'ingest/auth/middleware/verify',
@@ -55,7 +60,7 @@ module.exports = async (req, res, next) => {
 			JSON.stringify({
 				error: err.stack || err,
 			})
-		);
-		return res.sendStatus(500);
+		)
+		return res.sendStatus(500)
 	}
-};
+}
