@@ -54,7 +54,7 @@ router.post('/auth/login', require('./auth/login/post'))
 router.post('/auth/refresh', require('./auth/refresh/post'))
 router.post('/auth/reset', require('./auth/reset/post'))
 
-router.post('/events/v1', authVerify, require('./events/post'))
+router.post('/events/:eventName', authVerify, require('./events/post'))
 
 router.get('/subscriptions/', authVerify, require('./subscriptions/list'))
 router.post('/subscriptions/', authVerify, require('./subscriptions/post'))
@@ -70,7 +70,8 @@ router.get(['/', '/health'], (req, res) => {
 })
 
 // set openapi error handler
-router.use((err, req, res) => {
+// eslint-disable-next-line no-unused-vars
+router.use((err, req, res, next) => {
 	return response.badRequest(req, res, err)
 })
 

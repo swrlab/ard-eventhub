@@ -29,7 +29,7 @@ module.exports = async (topics, message) => {
 	}
 
 	// send message for each topic
-	topics.forEach(async (topicName) => {
+	for await (const topicName of topics) {
 		try {
 			// attempt to send message
 			messageIds[topicName] = await pubSubClient
@@ -39,7 +39,7 @@ module.exports = async (topics, message) => {
 			// log progress
 			loggerDev('log', [functionName, 'success', topicName, messageIds[topicName]])
 		} catch (err) {
-			if (err && err.code && err.code === 5) {
+			if (err?.code === 5) {
 				messageIds[topicName] = 'TOPIC_NOT_FOUND'
 				loggerDev('error', [functionName, 'topic missing', topicName, messageIds[topicName]])
 			} else {
@@ -53,7 +53,7 @@ module.exports = async (topics, message) => {
 				])
 			}
 		}
-	})
+	}
 
 	return Promise.resolve(messageIds)
 }
