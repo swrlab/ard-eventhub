@@ -155,11 +155,11 @@ jobs:
     steps:
     - name: 🚀 Trigger deployment to test
       run: |
-        curl --location --request POST '{{ secrets.ARD_DEPLOYMENT_HOST }}' \
-        --header 'Authorization: Basic {{ secrets.ARD_DEPLOYMENT_TOKEN }}' \
+        curl --location --request POST '${{ secrets.ARD_DEPLOYMENT_HOST }}' \
+        --header 'Authorization: Basic ${{ secrets.ARD_DEPLOYMENT_TOKEN }}' \
         --form 'UMGEBUNG="test"' \
         --form 'COMPONENT="eventhub-ingest"' \
-        --form 'VERSION="{{ needs.docker.outputs.VERSION }}"'
+        --form 'VERSION="${{ needs.docker.outputs.VERSION }}"'
 
   deploy-C-beta-kubernetes:
     environment: beta
@@ -169,8 +169,8 @@ jobs:
     steps:
     - name: 🚀 Trigger deployment to beta
       run: |
-        curl --location --request POST '{{ secrets.ARD_DEPLOYMENT_HOST }}' \
-        --header 'Authorization: Basic {{ secrets.ARD_DEPLOYMENT_TOKEN }}' \
+        curl --location --request POST '${{ secrets.ARD_DEPLOYMENT_HOST }}' \
+        --header 'Authorization: Basic ${{ secrets.ARD_DEPLOYMENT_TOKEN }}' \
         --form 'UMGEBUNG="beta"' \
         --form 'COMPONENT="eventhub-ingest"' \
-        --form 'VERSION="{{ needs.docker.outputs.VERSION }}"'
+        --form 'VERSION="${{ needs.docker.outputs.VERSION }}"'
