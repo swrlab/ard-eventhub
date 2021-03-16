@@ -31,7 +31,22 @@ module.exports = async (req, res) => {
 	try {
 		// use entire POST body to include potentially new fields
 		let message = req.body
+		const { eventName } = req.params
 		const { user } = req
+
+		// check eventName
+		if (eventName !== message.event) {
+			return response.badRequest(req, res, {
+				message: 'request.body.event should match URL parameter',
+				errors: [
+					{
+						path: '.body.event',
+						message: 'should match URL parameter',
+						errorCode: 'required.openapi.validation',
+					},
+				],
+			})
+		}
 
 		// save message to datastore
 		message = await datastore.save(message, 'events')
@@ -126,10 +141,6 @@ module.exports = async (req, res) => {
 			{
 				topics,
 				message,
-				debug: {
-					body: req.body,
-					headers: req.headers,
-				},
 			},
 			201
 		)

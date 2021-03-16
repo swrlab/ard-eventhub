@@ -14,6 +14,7 @@
 				"argsIgnorePattern": "next"
 			}
 		],
-		"no-param-reassign": [2, { "props": false }]
+		"no-param-reassign": [2, { "props": false }],
+		"no-restricted-syntax": 0
 	}
 }
