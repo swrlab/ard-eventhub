@@ -5,16 +5,16 @@
 
 */
 
-const pubsub = require('../../utils/pubsub');
-const response = require('../../utils/response');
+const pubsub = require('../../utils/pubsub')
+const response = require('../../utils/response')
 
 module.exports = async (req, res) => {
 	try {
 		// load all topics
-		const topics = await pubsub.getTopics();
+		const topics = await pubsub.getTopics()
 
 		// return data
-		res.status(200).json(topics);
+		res.status(200).json(topics)
 	} catch (err) {
 		console.error(
 			'ingest/topics/post',
@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
 				body: req.body,
 				error: err.stack || err,
 			})
-		);
-		return response.internalServerError(req, res, err);
+		)
+		return response.internalServerError(req, res, err)
 	}
-};
+}

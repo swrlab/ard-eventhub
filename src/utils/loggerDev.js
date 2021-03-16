@@ -6,24 +6,24 @@
 */
 
 // load config
-const config = require('../../config');
+const config = require('../../config')
 
 module.exports = (level, msg) => {
 	if (config.stage !== 'dev') {
-		return;
+		return
 	}
 
-	let thisMsg = msg;
+	let thisMsg = msg
 
 	if (msg instanceof Array) {
-		thisMsg = msg.join(' > ');
+		thisMsg = msg.join(' > ')
 	}
 
 	if (level === 'log') {
-		console.log(thisMsg);
+		console.log(thisMsg)
 	} else if (level === 'warn') {
-		console.warn(thisMsg);
+		console.warn(thisMsg)
 	} else if (level === 'error') {
-		console.error(thisMsg);
+		console.error(thisMsg)
 	}
-};
+}

@@ -6,24 +6,24 @@
 */
 
 // load node utils
-const moment = require('moment');
+const moment = require('moment')
 
 // load eventhub utils
-const firebase = require('../../../utils/firebase');
-const response = require('../../../utils/response');
+const firebase = require('../../../utils/firebase')
+const response = require('../../../utils/response')
 
 module.exports = async (req, res) => {
 	try {
-		let login;
+		let login
 
 		// swap previously received refresh token for new id token
 		try {
-			login = await firebase.refreshToken(req.body.refreshToken);
+			login = await firebase.refreshToken(req.body.refreshToken)
 		} catch (err) {
 			return response.badRequest(req, res, {
 				status: err.error && err.error.code ? err.error.code : 500,
 				data: err,
-			});
+			})
 		}
 
 		// return ok
@@ -33,9 +33,9 @@ module.exports = async (req, res) => {
 
 			token: login.login.id_token,
 			refreshToken: login.login.refresh_token,
-			
+
 			user: login.user,
-		});
+		})
 	} catch (err) {
 		console.error(
 			'ingest/auth/refresh',
@@ -44,7 +44,7 @@ module.exports = async (req, res) => {
 				headers: req.headers,
 				error: err.stack || err,
 			})
-		);
-		return response.internalServerError(req, res, err);
+		)
+		return response.internalServerError(req, res, err)
 	}
-};
+}

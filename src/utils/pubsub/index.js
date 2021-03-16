@@ -14,4 +14,4 @@ module.exports = {
 	getTopics: require('./getTopics'),
 	createTopic: require('./createTopic'),
 	publishMessage: require('./publishMessage'),
-};
+}

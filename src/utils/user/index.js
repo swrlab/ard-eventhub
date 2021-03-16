@@ -7,4 +7,4 @@
 
 module.exports = {
 	resolvePermissions: require('./resolvePermissions'),
-};
+}
