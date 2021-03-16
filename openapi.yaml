@@ -10,7 +10,7 @@ info:
   license:
     name: European Union Public License 1.2
     url: 'https://spdx.org/licenses/EUPL-1.2.html'
-  version: 0.1.1
+  version: 0.1.3
 externalDocs:
   description: Eventhub Repository
   url: 'https://github.com/swrlab/ard-eventhub'
@@ -133,7 +133,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorInternalServerError'
-  /events/v1:
+  '/events/{eventName}':
     post:
       tags:
         - events
@@ -141,6 +141,15 @@ paths:
       operationId: eventV1Post
       security:
         - bearerAuth: []
+      parameters:
+        - name: eventName
+          in: path
+          description: 'Same name of the event, that is added in the POST body'
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: >
           New event to be distributed to subscribers.  
