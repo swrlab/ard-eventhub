@@ -26,7 +26,7 @@ module.exports = async (data, kind, id) => {
 
 	// insert key
 	if (key.id) {
-		thisData.id = parseFloat(key.id);
+		thisData.id = parseInt(key.id);
 	} else if (key.name) {
 		thisData.id = key.name;
 	}

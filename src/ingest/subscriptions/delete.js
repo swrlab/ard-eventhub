@@ -62,7 +62,7 @@ module.exports = async (req, res) => {
 		await pubsub.deleteSubscription(subscriptionName);
 
 		// also delete from datastore
-		const subscriptionId = parseFloat(subscription.labels.id);
+		const subscriptionId = parseInt(subscription.labels.id);
 		await datastore.delete('subscriptions', subscriptionId);
 
 		// return data
