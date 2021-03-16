@@ -663,7 +663,6 @@ components:
               - type
               - url
               - description
-              - attribution
             type: object
             properties:
               type:

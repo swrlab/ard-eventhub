@@ -936,8 +936,7 @@
               "required": [
                 "type",
                 "url",
-                "description",
-                "attribution"
+                "description"
               ],
               "type": "object",
               "properties": {
