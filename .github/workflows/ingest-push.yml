@@ -115,7 +115,7 @@ jobs:
     - name: 👋 Logout
       run: "docker logout"
 
-  deploy-0-dev-cloud-run:
+  deploy-A-dev-cloud-run:
     environment: dev
     needs: docker
     runs-on: ubuntu-latest
@@ -148,7 +148,7 @@ jobs:
           --update-env-vars STAGE=dev,DD_TRACER_ENABLED=false \
           --service-account ${{ secrets.GCP_SERVICE_ACCOUNT_INGEST }}
 
-  deploy-1-test-kubernetes:
+  deploy-B-test-kubernetes:
     environment: test
     needs: docker
     runs-on: ubuntu-latest
@@ -161,7 +161,7 @@ jobs:
         --form 'COMPONENT="eventhub-ingest"' \
         --form 'VERSION="{{ needs.docker.outputs.VERSION }}"'
 
-  deploy-2-beta-kubernetes:
+  deploy-C-beta-kubernetes:
     environment: beta
     if: "github.ref == 'refs/heads/main'"
     needs: docker
