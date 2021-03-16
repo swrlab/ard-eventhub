@@ -4,6 +4,7 @@
 	"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
 	"main": "./src/ingest/index.js",
 	"scripts": {
+		"docs:serve": "docsify serve . --port 3000",
 		"ingest:test": "mocha test/ingest.test.js --timeout 10000 --exit",
 		"ingest:local": "nodemon ./src/ingest/index.js",
 		"ingest:cloud": "node ./src/ingest/index.js",
@@ -38,6 +39,7 @@
 		"@swrlab/swr-prettier-config": "^0.1.2",
 		"chai": "^4.3.4",
 		"chai-http": "^4.3.0",
+		"docsify-cli": "^4.4.3",
 		"eslint": "^7.22.0",
 		"eslint-plugin-swr": "0.0.5",
 		"license-compliance": "^1.0.3",

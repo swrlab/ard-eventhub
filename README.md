@@ -3,12 +3,12 @@
 ARD system to distribute real-time (live) metadata for primarily radio broadcasts. During development, please head over to [./issues](https://github.com/swrlab/ard-eventhub/issues) and [./discussions](https://github.com/swrlab/ard-eventhub/discussions) for current topics and updates.
 
 - [ARD-Eventhub](#ard-eventhub)
-  - [Get involved](#get-involved)
-  - [Modules](#modules)
-    - [Ingest](#ingest)
-  - [Documentation](#documentation)
-  - [License](#license)
-  - [Third-Party Components](#third-party-components)
+     - [Get involved](#get-involved)
+     - [Modules](#modules)
+          - [Ingest](#ingest)
+     - [Documentation](#documentation)
+     - [License](#license)
+     - [Third-Party Components](#third-party-components)
 
 ## Get involved
 
@@ -64,6 +64,7 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM DEV | `@swrlab/swr-prettier-config` | [ISC](https://github.com/swrlab/prettier-config/blob/main/license.md)                     |
 | NPM DEV | `chai`                        | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                 |
 | NPM DEV | `chai-http`                   | [MIT](https://github.com/chaijs/chai-http/blob/master/package.json)                       |
+| NPM DEV | `docsify-cli`                 | [MIT](https://github.com/docsifyjs/docsify-cli/blob/master/LICENSE)                       |
 | NPM DEV | `eslint`                      | [MIT](https://github.com/eslint/eslint/blob/master/LICENSE)                               |
 | NPM DEV | `eslint-plugin-swr`           | [ISC](https://github.com/swrlab/eslint-plugin-swr/blob/main/package.json)                 |
 | NPM DEV | `license-compliance`          | [MIT](https://github.com/tmorell/license-compliance/blob/master/LICENSE)                  |
