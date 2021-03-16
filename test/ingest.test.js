@@ -107,19 +107,21 @@ function testEventKeys(body) {
 	//body.should.have.property('trace').eql(null);
 }
 
-describe('POST /events/de.ard.eventhub.v1.radio.track.playing', () => {
+const eventName = 'de.ard.eventhub.v1.radio.track.playing'
+
+describe(`POST /events/${eventName}`, () => {
 	it('publish a new event', (done) => {
 		const event = {
-			event: 'de.ard.eventhub.v1.radio.track.playing',
+			event: eventName,
 			type: 'music',
 			start: '2020-01-19T06:00:00+01:00',
 			title: 'Song name',
-			serviceIds: ['284680', '284700'],
+			serviceIds: ['990030', '990140'],
 			playlistItemId: 'swr3-5678',
 		}
 
 		chai.request(server)
-			.post('/events/de.ard.eventhub.v1.radio.track.playing')
+			.post(`/events/${eventName}`)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send(event)
 			.end((err, res) => {
