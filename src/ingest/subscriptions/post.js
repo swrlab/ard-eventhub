@@ -25,13 +25,13 @@ module.exports = async (req, res) => {
 		const prefix = `${config.pubsubPrefix}.${subIdent}.${config.stage}`;
 
 		// check existence of user institution
-		let institutionExists = coreApi.some((entry) => {
+		const institutionExists = coreApi.some((entry) => {
 			return req.user.institution.id === entry.institution.id;
 		});
 
 		if (!institutionExists) {
-			let orgId = req.user.institution.id;
-			let orgName = req.user.institution.name;
+			const orgId = req.user.institution.id;
+			const orgName = req.user.institution.name;
 			// return 401 error
 			return response.badRequest(req, res, {
 				status: 401,

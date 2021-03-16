@@ -17,7 +17,7 @@ module.exports = async () => {
 
 	// map and filter values
 	subscriptions = await Promise.all(
-		subscriptions.map(async (subscription) => await mapSubscription(subscription))
+		subscriptions.map(async (subscription) => mapSubscription(subscription))
 	);
 
 	// return data

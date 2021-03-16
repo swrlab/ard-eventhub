@@ -28,8 +28,8 @@ module.exports = async (req, res) => {
 
 		// return ok
 		return response.ok(req, res, {
-			expiresIn: parseInt(login.login.expiresIn),
-			expires: moment().add(parseInt(login.login.expiresIn), 's').toISOString(),
+			expiresIn: parseFloat(login.login.expiresIn),
+			expires: moment().add(parseFloat(login.login.expiresIn), 's').toISOString(),
 			
 			token: login.login.idToken,
 			refreshToken: login.login.refreshToken,

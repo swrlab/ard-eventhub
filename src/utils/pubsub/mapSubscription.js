@@ -6,7 +6,7 @@
 */
 
 // load pubsub for internal queues
-const datastore = require('../../utils/datastore');
+const datastore = require('../datastore');
 
 module.exports = async (subscription) => {
 	// remap vars to metadata object
@@ -16,8 +16,8 @@ module.exports = async (subscription) => {
 	}
 
 	// preset vars
-	let lookup = subscription.metadata?.labels?.id
-		? await datastore.load('subscriptions', parseInt(subscription.metadata.labels.id))
+	const lookup = subscription.metadata?.labels?.id
+		? await datastore.load('subscriptions', parseFloat(subscription.metadata.labels.id))
 		: null;
 
 	// remap values

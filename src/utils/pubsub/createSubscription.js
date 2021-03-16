@@ -12,7 +12,7 @@ const mapSubscription = require('./mapSubscription');
 
 module.exports = async (subscription) => {
 	// map inputs for pubsub
-	let options = {
+	const options = {
 		name: `projects/${process.env.GCP_PROJECT_ID}/subscriptions/${subscription.name}`,
 		topic: `projects/${process.env.GCP_PROJECT_ID}/topics/${subscription.topic}`,
 		pushConfig: {

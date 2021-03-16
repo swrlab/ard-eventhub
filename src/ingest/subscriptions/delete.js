@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
 				})
 			);
 
-			if (err && err.code == 5) {
+			if (err && err.code === 5) {
 				// pubsub error code 5 seems to be 'Resource not found'
 				return response.notFound(req, res, {
 					status: 404,
@@ -48,8 +48,8 @@ module.exports = async (req, res) => {
 
 		// check subscription permission by user institution
 		if (subscription.institution.id !== req.user.institution.id) {
-			let subsOrg = subscription.institution.name;
-			let userOrg = req.user.institution.name;
+			const subsOrg = subscription.institution.name;
+			const userOrg = req.user.institution.name;
 			// return 400 error
 			return response.badRequest(req, res, {
 				status: 400,
@@ -62,7 +62,7 @@ module.exports = async (req, res) => {
 		await pubsub.deleteSubscription(subscriptionName);
 
 		// also delete from datastore
-		let subscriptionId = parseInt(subscription.labels.id);
+		const subscriptionId = parseFloat(subscription.labels.id);
 		await datastore.delete('subscriptions', subscriptionId);
 
 		// return data

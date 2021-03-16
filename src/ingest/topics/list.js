@@ -11,7 +11,7 @@ const response = require('../../utils/response');
 module.exports = async (req, res) => {
 	try {
 		// load all topics
-		let topics = await pubsub.getTopics();
+		const topics = await pubsub.getTopics();
 
 		// return data
 		res.status(200).json(topics);
