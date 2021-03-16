@@ -21,7 +21,7 @@ module.exports = async (subscription) => {
 		: null;
 
 	// remap values
-	subscription = {
+	const subscriptionRemap = {
 		type: 'PUBSUB',
 		method: subscription.metadata.pushConfig?.pushEndpoint ? 'PUSH' : 'PULL',
 
@@ -49,5 +49,5 @@ module.exports = async (subscription) => {
 	};
 
 	// return data
-	return Promise.resolve(subscription);
+	return Promise.resolve(subscriptionRemap);
 };
