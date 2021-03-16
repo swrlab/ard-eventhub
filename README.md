@@ -1,10 +1,9 @@
 # ARD-Eventhub
 
-ARD system to distribute real-time (live) metadata for primarily radio broadcasts. During development, please head over to [./issues](https://github.com/swrlab/ard-eventhub/issues) and [./discussions](https://github.com/swrlab/ard-eventhub/discussions) for current topics and updates.
-
-This documentation is available on Github in the [ard-eventhub](https://github.com/swrlab/ard-eventhub) repository and as a website on [swrlab.github.io/ard-eventhub/](https://swrlab.github.io/ard-eventhub/).
+ARD system to distribute real-time (live) metadata for primarily radio broadcasts.
 
 - [ARD-Eventhub](#ard-eventhub)
+  - [Get Started](#get-started)
   - [Get involved](#get-involved)
   - [Modules](#modules)
     - [Ingest](#ingest)
@@ -12,9 +11,18 @@ This documentation is available on Github in the [ard-eventhub](https://github.c
   - [License](#license)
   - [Third-Party Components](#third-party-components)
 
+## Get Started
+
+Important places to go ahead:
+
+- The [ard-eventhub](https://github.com/swrlab/ard-eventhub) repository
+- Documentation on [swrlab.github.io/ard-eventhub/](https://swrlab.github.io/ard-eventhub/)
+- OpenAPI documentation on [eventhub-ingest.ard.de/openapi](https://eventhub-ingest.ard.de/openapi)
+
 ## Get involved
 
-- Join [ard-eventhub/discussions](https://github.com/swrlab/ard-eventhub/discussions)
+- Open an [issue](https://github.com/swrlab/ard-eventhub/issues) for problems, that you might experience
+- Join [ard-eventhub/discussions](https://github.com/swrlab/ard-eventhub/discussions) for ongoing topics about formats, etc.
 - Join _#eventhub_ in the _ARD Entwickler_ Slack
 
 ## Modules
