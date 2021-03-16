@@ -10,7 +10,7 @@ info:
   license:
     name: European Union Public License 1.2
     url: 'https://spdx.org/licenses/EUPL-1.2.html'
-  version: 0.1.3
+  version: 0.1.4
 externalDocs:
   description: Eventhub Repository
   url: 'https://github.com/swrlab/ard-eventhub'
