@@ -16,11 +16,11 @@ module.exports = async (req, res) => {
 
 		// verify if user is allowed to list subscriptions (same institution)
 		subscriptions = subscriptions.filter(
-			(subscription) => subscription.institution.id === req.user.institution.id
+			(subscription) => subscription?.institution?.id === req.user.institution?.id
 		);
 
 		// return data
-		res.status(200).json(subscriptions);
+		return res.status(200).json(subscriptions);
 	} catch (err) {
 		console.error(
 			'ingest/subscriptions/list',

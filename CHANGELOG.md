@@ -1,5 +1,3 @@
-# ARD-Eventhub (Working Title)
-
-## Changelog
+# ARD-Eventhub / Changelog
 
 Coming soon...

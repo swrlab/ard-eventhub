@@ -23,8 +23,7 @@ chai.use(chaiHttp);
     AUTH - Authentication services for Eventhub
 */
 
-var accessToken;
-var refreshToken;
+let accessToken, refreshToken;
 
 function testAuthKeys(body) {
 	body.should.be.a('object');
@@ -40,7 +39,7 @@ function testAuthKeys(body) {
 
 describe('POST /auth/login', () => {
 	it('swap login credentials for an id-token', (done) => {
-		let loginRequest = {
+		const loginRequest = {
 			email: process.env.TEST_USER,
 			password: process.env.TEST_USER_PW,
 		};
@@ -61,7 +60,7 @@ describe('POST /auth/login', () => {
 
 describe('POST /auth/refresh', () => {
 	it('swap refresh-token for new id-token', (done) => {
-		let refreshRequest = {
+		const refreshRequest = { 
 			refreshToken: refreshToken,
 		};
 
@@ -79,21 +78,23 @@ describe('POST /auth/refresh', () => {
 });
 
 // 🚨 firebase limit is 150 requests per day 🚨
-describe('POST /auth/reset', () => {
-	it('request password reset email', (done) => {
-		let resetRequest = {
-			email: process.env.TEST_USER,
-		};
+if (process.env.TEST_USER_RESET) {
+	describe('POST /auth/reset', () => {
+		it('request password reset email', (done) => {
+			const resetRequest = {
+				email: process.env.TEST_USER,
+			};
 
-		chai.request(server)
-			.post('/auth/reset')
-			.send(resetRequest)
-			.end((err, res) => {
-				res.should.have.status(200);
-				done();
-			});
+			chai.request(server)
+				.post('/auth/reset')
+				.send(resetRequest)
+				.end((err, res) => {
+					res.should.have.status(200);
+					done();
+				});
+		});
 	});
-});
+}
 
 /*
     EVENTS - Manage events
@@ -108,7 +109,7 @@ function testEventKeys(body) {
 
 describe('POST /events/v1', () => {
 	it('publish a new event', (done) => {
-		let event = {
+		const event = {
 			event: 'de.ard.eventhub.v1.radio.track.playing',
 			type: 'music',
 			start: '2020-01-19T06:00:00+01:00',
@@ -119,7 +120,7 @@ describe('POST /events/v1', () => {
 
 		chai.request(server)
 			.post('/events/v1')
-			.set('Authorization', 'Bearer ' + accessToken)
+			.set('Authorization', `Bearer ${accessToken}`)
 			.send(event)
 			.end((err, res) => {
 				res.should.have.status(201);
@@ -133,7 +134,7 @@ describe('POST /events/v1', () => {
     SUBSCRIPTIONS - Access to subscription management
 */
 
-var subscriptionName;
+let subscriptionName;
 
 function testSubscriptionKeys(body) {
 	body.should.be.a('object');
@@ -159,7 +160,7 @@ function testSubscriptionKeys(body) {
 
 describe('POST /subscriptions', () => {
 	it('add a new subscription to this user', (done) => {
-		let subscription = {
+		const subscription = {
 			type: 'PUBSUB',
 			method: 'PUSH',
 			url: 'https://example.com/my/webhook/for/this/subscription',
@@ -169,7 +170,7 @@ describe('POST /subscriptions', () => {
 
 		chai.request(server)
 			.post('/subscriptions')
-			.set('Authorization', 'Bearer ' + accessToken)
+			.set('Authorization', `Bearer ${accessToken}`)
 			.send(subscription)
 			.end((err, res) => {
 				res.should.have.status(201);
@@ -185,7 +186,7 @@ describe('GET /subscriptions', () => {
 	it('list all subscriptions for this user', (done) => {
 		chai.request(server)
 			.get('/subscriptions')
-			.set('Authorization', 'Bearer ' + accessToken)
+			.set('Authorization', `Bearer ${accessToken}`)
 			.end((err, res) => {
 				res.should.have.status(200);
 				res.body.should.be.a('array');
@@ -198,8 +199,8 @@ describe('GET /subscriptions', () => {
 describe('GET /subscriptions/{name}', () => {
 	it('get details about single subscription from this user', (done) => {
 		chai.request(server)
-			.get('/subscriptions/' + subscriptionName)
-			.set('Authorization', 'Bearer ' + accessToken)
+			.get(`/subscriptions/${subscriptionName}`)
+			.set('Authorization', `Bearer ${accessToken}`)
 			.end((err, res) => {
 				res.should.have.status(200);
 				testSubscriptionKeys(res.body);
@@ -211,8 +212,8 @@ describe('GET /subscriptions/{name}', () => {
 describe('DELETE /subscriptions/{name}', () => {
 	it('remove a single subscription by this user', (done) => {
 		chai.request(server)
-			.delete('/subscriptions/' + subscriptionName)
-			.set('Authorization', 'Bearer ' + accessToken)
+			.delete(`/subscriptions/${subscriptionName}`)
+			.set('Authorization', `Bearer ${accessToken}`)
 			.end((err, res) => {
 				res.should.have.status(200);
 				res.body.should.be.a('object');
@@ -239,7 +240,7 @@ describe('GET /topics', () => {
 	it('list all available topics', (done) => {
 		chai.request(server)
 			.get('/topics')
-			.set('Authorization', 'Bearer ' + accessToken)
+			.set('Authorization', `Bearer ${accessToken}`)
 			.end((err, res) => {
 				res.should.have.status(200);
 				res.body.should.be.a('array');

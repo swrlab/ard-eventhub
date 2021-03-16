@@ -13,7 +13,7 @@ const response = require('../../utils/response');
 module.exports = async (req, res) => {
 	try {
 		// preset vars
-		const subscriptionName = req.params.subscriptionName;
+		const { subscriptionName } = req.params;
 		let subscription;
 
 		// load single subscription to get owner

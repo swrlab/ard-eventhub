@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        STAGES: [DEV]
+        STAGES: [dev]
     steps:
     - uses: actions/setup-node@v2
       with:
@@ -38,8 +38,11 @@ jobs:
     - name: Install Dependencies
       run: yarn
 
-    - name: 🔐 Write GCP Ingest key
-      run: echo '${{ secrets.KEYS_INGEST }}' > ./keys/ingest.json
+    - name: 🔑 Setup Google Cloud Auth
+      uses: google-github-actions/setup-gcloud@master
+      with:
+        service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
+        export_default_credentials: true
 
     - name: Run Ingest Tests
       env:

@@ -4,7 +4,7 @@ In its first version ARD-Eventhub expects the `event` value to be one of the fol
 
 ## `de.ard.eventhub.v1.radio.track.playing`
 
-This event marks the beginning of a new playling element/ track for the providing radio station. It should have the `start` time information of the source information, to provide an as detailed as possible start time and avoid missalignments during network latecies.  
+This event marks the beginning of a new playing element/ track for the providing radio station. It should have the `start` time information of the source information, to provide an as detailed as possible start time and avoid misalignments during network latencies.  
 
 ## `de.ard.eventhub.v1.radio.track.next`
 

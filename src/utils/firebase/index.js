@@ -10,4 +10,4 @@ module.exports = {
 	sendPasswordResetEmail: require('./sendPasswordResetEmail'),
 	signInWithEmailAndPassword: require('./signInWithEmailAndPassword'),
 	verifyToken: require('./verifyToken'),
-};
+}

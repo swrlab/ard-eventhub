@@ -1,4 +1,4 @@
-# ARD-Eventhub (Working Title)
+# ARD-Eventhub
 
 ## Ingest
 
@@ -10,10 +10,11 @@ Designated host is Kubernetes but the Docker container will also be used in othe
 
 It needs several environment variables to work:
 
-- REQUIRED `STAGE` - can be one of the Stages below to switch several settings
-- REQUIRED `GCP_PROJECT_ID` - which GCP project ID to use for Pub/Sub and Datastore requests
 - REQUIRED `FIREBASE_API_KEY` - corresponding `API_KET` which matches the `GCP_PROJECT_ID`
+- REQUIRED `GOOGLE_APPLICATION_CREDENTIALS` - where the Google Cloud Service Account Key can be found (usually a path to a .json file)
+- REQUIRED `GCP_PROJECT_ID` - which GCP project ID to use for Pub/Sub and Datastore requests
 - OPTIONAL `PORT` - override server port setting, default is 8080
+- REQUIRED `STAGE` - can be one of the Stages below to switch several settings
 
 ### Stages
 
@@ -44,7 +45,7 @@ To run this project locally in your development environment you'll need these pr
 4. Run the project (replace `gcp-project` and `fb-api-key`)
 
    ```sh
-   STAGE=DEV \
+   STAGE=dev \
    GCP_PROJECT_ID=gcp-project \
    FIREBASE_API_KEY=fb-api-key \
    yarn ingest:local

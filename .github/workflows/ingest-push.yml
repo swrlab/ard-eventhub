@@ -12,7 +12,7 @@ on:
 
 env:
   NODE_VERSION: 14.5
-  IMAGE_NAME: ingest
+  IMAGE_NAME: de.swr.ard.eventhub/ingest
   REGISTRY_DOMAIN: eu.gcr.io
   GCP_RUN_REGION: europe-west1
   GCP_RUN_MEMORY: 256Mi
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        STAGES: [DEV]
+        STAGES: [dev]
     steps:
     - uses: actions/setup-node@v2
       with:
@@ -47,8 +47,11 @@ jobs:
     - name: Install Dependencies
       run: yarn
 
-    - name: 🔐 Write GCP Ingest key
-      run: echo '${{ secrets.KEYS_INGEST }}' > ./keys/ingest.json
+    - name: 🔑 Setup Google Cloud Auth
+      uses: google-github-actions/setup-gcloud@master
+      with:
+        service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
+        export_default_credentials: true
 
     - name: Run Ingest Tests
       env:
@@ -63,7 +66,6 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     needs: test
-    environment: dev
     outputs:
       BRANCH: ${{ steps.push.outputs.BRANCH }}
       VERSION: ${{ steps.push.outputs.VERSION }}
@@ -80,9 +82,6 @@ jobs:
     - name: 🔑 Login to Registry
       run: "gcloud auth configure-docker $REGISTRY_DOMAIN"
 
-    - name: 🔐 Write GCP Ingest key
-      run: echo '${{ secrets.KEYS_INGEST }}' > ./keys/ingest.json
-
     - name: 🚧 Building docker image
       run: "docker build ./ --file ./Dockerfile.ingest -t image"
 
@@ -98,7 +97,7 @@ jobs:
         # Add custom wrapper syntax
         VERSION=g${{ github.run_number }}-d$(date +%j)-$BRANCH-${{ github.actor }}-$GITHUB_SHA
 
-        # Build
+        # Set registry
         IMAGE_URI=$REGISTRY_DOMAIN/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME:$VERSION
 
         # Push image to registry
@@ -109,10 +108,14 @@ jobs:
         echo "::set-output name=BRANCH::$BRANCH"
         echo "::set-output name=VERSION::$VERSION"
 
+        # Print vars
+        echo "::warning docker::BRANCH $BRANCH"
+        echo "::warning docker::VERSION $VERSION"
+
     - name: 👋 Logout
       run: "docker logout"
 
-  cloud-run-dev:
+  deploy-A-dev-cloud-run:
     environment: dev
     needs: docker
     runs-on: ubuntu-latest
@@ -142,39 +145,32 @@ jobs:
           --allow-unauthenticated \
           --timeout $GCP_RUN_TIMEOUT \
           --memory $GCP_RUN_MEMORY \
-          --update-env-vars STAGE=DEV \
+          --update-env-vars STAGE=dev,DD_TRACER_ENABLED=false \
           --service-account ${{ secrets.GCP_SERVICE_ACCOUNT_INGEST }}
 
-  cloud-run-prod:
-    environment: prod
+  deploy-B-test-kubernetes:
+    environment: test
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+    - name: 🚀 Trigger deployment to test
+      run: |
+        curl --location --request POST '${{ secrets.ARD_DEPLOYMENT_HOST }}' \
+        --header 'Authorization: Basic ${{ secrets.ARD_DEPLOYMENT_TOKEN }}' \
+        --form 'UMGEBUNG="test"' \
+        --form 'COMPONENT="eventhub-ingest"' \
+        --form 'VERSION="${{ needs.docker.outputs.VERSION }}"'
+
+  deploy-C-beta-kubernetes:
+    environment: beta
     if: "github.ref == 'refs/heads/main'"
     needs: docker
     runs-on: ubuntu-latest
     steps:
-    - name: 🔑 Setup Google Cloud Auth
-      uses: google-github-actions/setup-gcloud@master
-      with:
-        service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
-        export_default_credentials: true
-
-    - name: 🧪 Add gcloud beta
-      run: "gcloud components install beta"
-
-    - name: 🏠 Set Cloud Run environment
-      run: "gcloud config set run/platform managed"
-
-    - name: 🗺 Set Cloud Run region
-      run: "gcloud config set run/region $GCP_RUN_REGION"
-
-    - name: 🚀 Deploy main revision
+    - name: 🚀 Trigger deployment to beta
       run: |
-        gcloud beta run deploy ard-eventhub-ingest-prod \
-          --image $REGISTRY_DOMAIN/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME:${{ needs.docker.outputs.VERSION }} \
-          --quiet \
-          --verbosity error \
-          --project ${{ secrets.GCP_PROJECT_ID }} \
-          --allow-unauthenticated \
-          --timeout $GCP_RUN_TIMEOUT \
-          --memory $GCP_RUN_MEMORY \
-          --update-env-vars STAGE=PROD \
-          --service-account ${{ secrets.GCP_SERVICE_ACCOUNT_INGEST }}
+        curl --location --request POST '${{ secrets.ARD_DEPLOYMENT_HOST }}' \
+        --header 'Authorization: Basic ${{ secrets.ARD_DEPLOYMENT_TOKEN }}' \
+        --form 'UMGEBUNG="beta"' \
+        --form 'COMPONENT="eventhub-ingest"' \
+        --form 'VERSION="${{ needs.docker.outputs.VERSION }}"'

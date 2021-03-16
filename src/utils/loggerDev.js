@@ -5,20 +5,25 @@
 
 */
 
-module.exports = function (level, msg) {
-	if (global.STAGE != 'DEV') {
+// load config
+const config = require('../../config');
+
+module.exports = (level, msg) => {
+	if (config.stage !== 'dev') {
 		return;
 	}
 
+	let thisMsg = msg;
+
 	if (msg instanceof Array) {
-		msg = msg.join(' > ');
+		thisMsg = msg.join(' > ');
 	}
 
-	if (level == 'log') {
-		console.log(msg);
-	} else if (level == 'warn') {
-		console.warn(msg);
-	} else if (level == 'error') {
-		console.error(msg);
+	if (level === 'log') {
+		console.log(thisMsg);
+	} else if (level === 'warn') {
+		console.warn(thisMsg);
+	} else if (level === 'error') {
+		console.error(thisMsg);
 	}
 };

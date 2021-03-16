@@ -1,0 +1,9 @@
+{
+	"parserOptions": {
+		"ecmaVersion": 2020
+	},
+	"root": true,
+	"plugins": ["@swrlab/eslint-plugin-swr"],
+	"extends": ["plugin:@swrlab/eslint-plugin-swr/recommended"],
+	"ignorePatterns": ["docs/_SIDEBAR.md"]
+}

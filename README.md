@@ -2,14 +2,20 @@
 
 ARD system to distribute real-time (live) metadata for primarily radio broadcasts. During development, please head over to [./issues](https://github.com/swrlab/ard-eventhub/issues) and [./discussions](https://github.com/swrlab/ard-eventhub/discussions) for current topics and updates.
 
+This documentation is available on Github in the [ard-eventhub](https://github.com/swrlab/ard-eventhub) repository and as a website on [swrlab.github.io/ard-eventhub/](https://swrlab.github.io/ard-eventhub/).
+
+- [ARD-Eventhub](#ard-eventhub)
+  - [Get involved](#get-involved)
+  - [Modules](#modules)
+    - [Ingest](#ingest)
+  - [Documentation](#documentation)
+  - [License](#license)
+  - [Third-Party Components](#third-party-components)
+
 ## Get involved
 
-- Join [./discussions](https://github.com/swrlab/ard-eventhub/discussions)
-- Join _#eventhub_ in the ARD Entwickler Slack
-
-## Changelog
-
-A separate Changelog will be available in [CHANGELOG.md](CHANGELOG.md)
+- Join [ard-eventhub/discussions](https://github.com/swrlab/ard-eventhub/discussions)
+- Join _#eventhub_ in the _ARD Entwickler_ Slack
 
 ## Modules
 
@@ -19,12 +25,24 @@ This project will include two modules: Ingest and API. The first development ste
 
 The Ingest service is responsible for receiving and publishing events and managing subscriptions. You'll find the core code in [`./src/ingest/`](./src/ingest/).
 
+## Documentation
+
+There are several documents available, that explain different parts of this service in detail:
+
+- [CHANGELOG.md](./CHANGELOG.md) - Release note for new Eventhub versions
+- [docs/AUTHENTICATION.md](./docs/AUTHENTICATION.md) - This guides you through the steps needed to login and work with this API
+- [docs/EVENTS.md](docs/EVENTS.md) - These are the events, that you can currently distribute through Eventhub
+- [docs/SECRETS.md](docs/SECRETS.md) - List of secrets that are used and stored in different places
+- [docs/STAGES.md](docs/STAGES.md) - Stage configuration for all modules
+- [docs/TYPES.md](docs/TYPES.md) - The different content types inside events, that can be used
+- [docs/USERS.md](docs/USERS.md) - How to work with user accounts
+
 ## License
 
 This project is licensed under **European Union Public License 1.2** ([`EUPL-1.2`](https://spdx.org/licenses/EUPL-1.2.html)), which can be found in [LICENSE.txt](LICENSE.txt). Detailed information and translations to all 23 official languages of the European Union are available at [joinup.ec.europa.eu](https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12). The usage of this license does not imply any relationship to or endorsement by the European Union, the joinup initiative or other participating parties.  
-A [compatibility matrix](https://joinup.ec.europa.eu/collection/eupl/matrix-eupl-compatible-open-source-licences) is also available and describes the relationships between EUPL-1.2 in upstream and downstream projects.  
+A [compatibility matrix](https://joinup.ec.europa.eu/collection/eupl/matrix-eupl-compatible-open-source-licences) is also available and describes the relationships between EUPL-1.2 in upstream and downstream projects.
 
-This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`](https://www.npmjs.com/package/spdx-exceptions) package, which uses the `CC-BY-3.0` license, without adding any legal or technical restrictions guaranteed by their license.  
+This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`](https://www.npmjs.com/package/spdx-exceptions) package, which uses the `CC-BY-3.0` license, without adding any legal or technical restrictions guaranteed by their license.
 
 ## Third-Party Components
 
@@ -45,11 +63,14 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `slug`                        | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                  |
 | NPM     | `swagger-ui-express`          | [MIT](https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE)              |
 | NPM     | `uuid`                        | [MIT](https://github.com/uuidjs/uuid/blob/master/LICENSE.md)                              |
+| NPM DEV | `@swrlab/eslint-plugin-swr`   | [ISC](https://github.com/swrlab/eslint-plugin-swr/)                                       |
 | NPM DEV | `@swrlab/swr-prettier-config` | [ISC](https://github.com/swrlab/prettier-config/blob/main/license.md)                     |
 | NPM DEV | `chai`                        | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                 |
 | NPM DEV | `chai-http`                   | [MIT](https://github.com/chaijs/chai-http/blob/master/package.json)                       |
+| NPM DEV | `docsify-cli`                 | [MIT](https://github.com/docsifyjs/docsify-cli/blob/master/LICENSE)                       |
 | NPM DEV | `eslint`                      | [MIT](https://github.com/eslint/eslint/blob/master/LICENSE)                               |
 | NPM DEV | `eslint-plugin-swr`           | [ISC](https://github.com/swrlab/eslint-plugin-swr/blob/main/package.json)                 |
 | NPM DEV | `license-compliance`          | [MIT](https://github.com/tmorell/license-compliance/blob/master/LICENSE)                  |
 | NPM DEV | `mocha`                       | [MIT](https://github.com/mochajs/mocha/blob/master/LICENSE)                               |
 | NPM DEV | `nodemon`                     | [MIT](https://github.com/remy/nodemon/blob/master/LICENSE)                                |
+| NPM DEV | `prettier`                    | [MIT](https://github.com/prettier/prettier/blob/main/LICENSE)                             |
