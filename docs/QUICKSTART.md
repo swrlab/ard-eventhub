@@ -14,6 +14,8 @@ If you are a radio station that wants to start publishing events to ARD-Eventhub
 - Use the POST `/events/{eventName}` endpoint to add your events
   - Note: Even if GET `/topics` does not list your radio station(s) beforehand, the topic(s) will be created during your first published event
 
+It is recommended to use the Eventhub `test` system first, to make sure everything works. Then bring it to production on `prod`. The host names are listed in the Stages document.
+
 Security Note: Every user account has a list of permitted `serviceIds` that they can publish to. If you are receiving an error, the Id could be misspelled, or the user account was wrongly configured by an admin.  
 
 ## Subscribers

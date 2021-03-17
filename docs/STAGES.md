@@ -26,5 +26,5 @@ The Eventhub differentiates between stages given to the service via env `STAGE` 
 | Runtime                      | Cloud Run                       | Kubernetes                          | Kubernetes                    | Kubernetes               |
 | Container Registry           | Eventhub project                | Eventhub project                    | Eventhub project              | Eventhub project         |
 | Host                         | For internal use only           | `eventhub-ingest-test.ard.de`       | `eventhub-ingest-beta.ard.de` | `eventhub-ingest.ard.de` |
-| Automatic Deployment         | Yes, Github Actions with Review | Yes, through API with Review        | Yes, through API with Review  | No, manual trigger       |
-| Deployment Branch Protection | `main`, `dev/*`, `feature/*`    | `main`, `dev/*`, `feature/*`        | `main`                        | `main`                   |
+| Automatic Deployment         | Yes, with Github Actions | Yes, through API with Review        | Yes, through API with Review  | No, manual trigger       |
+| Deployment Branch Protection | `main`, `dev/*`, `feature/*`    | `main`                              | `main`                        | `main`                   |
