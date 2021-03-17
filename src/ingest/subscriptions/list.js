@@ -6,21 +6,21 @@
 */
 
 // load eventhub utils
-const pubsub = require('../../utils/pubsub');
-const response = require('../../utils/response');
+const pubsub = require('../../utils/pubsub')
+const response = require('../../utils/response')
 
 module.exports = async (req, res) => {
 	try {
 		// load all subscriptions
-		let subscriptions = await pubsub.getSubscriptions();
+		let subscriptions = await pubsub.getSubscriptions()
 
 		// verify if user is allowed to list subscriptions (same institution)
 		subscriptions = subscriptions.filter(
 			(subscription) => subscription?.institution?.id === req.user.institution?.id
-		);
+		)
 
 		// return data
-		return res.status(200).json(subscriptions);
+		return res.status(200).json(subscriptions)
 	} catch (err) {
 		console.error(
 			'ingest/subscriptions/list',
@@ -29,7 +29,7 @@ module.exports = async (req, res) => {
 				body: req.body,
 				error: err.stack || err,
 			})
-		);
-		return response.internalServerError(req, res, err);
+		)
+		return response.internalServerError(req, res, err)
 	}
-};
+}

@@ -6,12 +6,12 @@
 */
 
 // load pubsub for internal queues
-const pubSubClient = require('./_client');
+const pubSubClient = require('./_client')
 
 module.exports = async (name) => {
 	// fetch topic list
-	let [subscription] = await pubSubClient.subscription(name).delete();
+	const [subscription] = await pubSubClient.subscription(name).delete()
 
 	// return data
-	return Promise.resolve(subscription);
-};
+	return Promise.resolve(subscription)
+}

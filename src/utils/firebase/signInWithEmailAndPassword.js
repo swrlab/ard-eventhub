@@ -6,15 +6,15 @@
 */
 
 // load node utils
-const fetch = require('node-fetch');
-const jwt = require('jsonwebtoken');
+const fetch = require('node-fetch')
+const jwt = require('jsonwebtoken')
 
 // load eventhub utils
-const config = require('../../../config');
+const config = require('../../../config')
 
 module.exports = async (email, password) => {
 	// set firebase sign in url
-	const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY}`;
+	const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY}`
 
 	// query firebase
 	const request = await fetch(url, {
@@ -31,10 +31,10 @@ module.exports = async (email, password) => {
 			password,
 			returnSecureToken: true,
 		}),
-	});
+	})
 
 	// parse json response
-	const response = await request.json();
+	const response = await request.json()
 
 	// handle errors
 	if (request.status !== 200) {
@@ -44,14 +44,14 @@ module.exports = async (email, password) => {
 			request.status,
 			'>',
 			JSON.stringify(response)
-		);
+		)
 
-		return Promise.reject(response);
+		return Promise.reject(response)
 	}
 
 	// decode JWT token to receive user object
-	const user = jwt.decode(response.idToken);
+	const user = jwt.decode(response.idToken)
 
 	// return data
-	return Promise.resolve({ user, login: response });
-};
+	return Promise.resolve({ user, login: response })
+}

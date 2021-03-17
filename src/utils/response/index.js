@@ -10,4 +10,4 @@ module.exports = {
 	badRequest: require('./badRequest'),
 	internalServerError: require('./internalServerError'),
 	ok: require('./ok'),
-};
+}

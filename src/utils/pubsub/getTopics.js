@@ -6,11 +6,11 @@
 */
 
 // load pubsub for internal queues
-const pubSubClient = require('./_client');
+const pubSubClient = require('./_client')
 
 module.exports = async () => {
 	// fetch topic list
-	let [topics] = await pubSubClient.getTopics();
+	let [topics] = await pubSubClient.getTopics()
 
 	// DEV filter topics by prefix
 
@@ -21,9 +21,9 @@ module.exports = async () => {
 			name: topic.name.split('/').pop(),
 			path: topic.name,
 			labels: topic.metadata.labels,
-		};
-	});
+		}
+	})
 
 	// return data
-	return Promise.resolve(topics);
-};
+	return Promise.resolve(topics)
+}

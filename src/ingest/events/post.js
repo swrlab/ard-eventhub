@@ -105,22 +105,20 @@ module.exports = async (req, res) => {
 			})
 
 			// create topics for verified IDs
-			await Promise.all(
-				unknownTopics.map(async (topic) => {
-					if (topic.verified) {
-						const [result] = await pubsub.createTopic(topic)
+			for await (const topic of unknownTopics) {
+				if (topic.verified) {
+					const [result] = await pubsub.createTopic(topic)
 
-						if (result?.name?.indexOf(topic.id) !== -1) {
-							topic.created = true
-							// Update api result that topic was created
-							topics[topic.pubsub] = 'TOPIC_CREATED'
-						} else {
-							// Update api result that topic was not created
-							topics[topic.pubsub] = 'TOPIC_NOT_CREATED'
-						}
+					if (result?.name?.indexOf(topic.id) !== -1) {
+						topic.created = true
+						// Update api result that topic was created
+						topics[topic.pubsub] = 'TOPIC_CREATED'
+					} else {
+						// Update api result that topic was not created
+						topics[topic.pubsub] = 'TOPIC_NOT_CREATED'
 					}
-				})
-			)
+				}
+			}
 		}
 
 		// check forbidden serviceIds

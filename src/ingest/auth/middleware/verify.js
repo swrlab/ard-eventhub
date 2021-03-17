@@ -25,7 +25,7 @@ module.exports = async (req, res, next) => {
 
 		// validate JWT token with firebase
 		try {
-			// successfull verifications will save JWT user profile to req
+			// successful verifications will save JWT user profile to req
 			req.user = await firebase.verifyToken(authorization)
 			res.set('x-ard-eventhub-uid', req.user.uid)
 		} catch (err) {

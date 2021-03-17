@@ -27,8 +27,8 @@ module.exports = async (req, res) => {
 
 		// verify if user is allowed to get subscription (same institution)
 		if (subscription.institution.id !== req.user.institution.id) {
-			let subsOrg = subscription.institution.name
-			let userOrg = req.user.institution.name
+			const subsOrg = subscription.institution.name
+			const userOrg = req.user.institution.name
 			// return 400 error
 			return response.badRequest(req, res, {
 				status: 400,

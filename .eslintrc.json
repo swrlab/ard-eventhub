@@ -7,6 +7,14 @@
 	"extends": ["plugin:@swrlab/eslint-plugin-swr/recommended"],
 	"ignorePatterns": ["docs/_SIDEBAR.md"],
 	"rules": {
+		"radix": 0,
+		"no-unused-vars": [
+			"error",
+			{
+				"argsIgnorePattern": "next"
+			}
+		],
+		"no-param-reassign": [2, { "props": false }],
 		"no-restricted-syntax": 0
 	}
 }

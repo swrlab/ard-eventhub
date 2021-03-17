@@ -2,6 +2,7 @@
 - [Authentication](/docs/AUTHENTICATION.md)
 - [Changelog](/CHANGELOG.md)
 - [Events](/docs/EVENTS.md)
+- [OpenAPI](/docs/OPENAPI.md)
 - [Secrets](/docs/SECRETS.md)
 - [Stages](/docs/STAGES.md)
 - [Types](/docs/TYPES.md)
