@@ -24,7 +24,7 @@ If you plan to receive events published by other stations, add yourself as one o
 
 Please be aware that the type of events published to this service may be extended in the future. Make sure to filter them appropriately. The data format should and will always be backwards-compatible, but new fields may be added to this service as needed.  
 
-In case of nightly rebroadcasts you should create a permanent subscription and keep this one running 24/7. The filter based on the program schedule should be done on your side. Pub/Sub should not be used to create and delete subscriptions once the rebroadcast starts and ends.  
+In case of nightly re-broadcasts you should create a permanent subscription and keep this one running 24/7. The filter based on the program schedule should be done on your side. Pub/Sub should not be used to create and delete subscriptions once the re-broadcast starts and ends.  
 
 Start receiving events with these steps:  
 
