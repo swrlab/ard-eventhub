@@ -27,13 +27,14 @@ module.exports = async (req, res) => {
 
 		// verify if user is allowed to get subscription (same institution)
 		if (subscription.institution.id !== req.user.institution.id) {
-			const subsOrg = subscription.institution.name
-			const userOrg = req.user.institution.name
+			const subsInstitution = subscription.institution.name
+			const userInstitution = req.user.institution.name
+
 			// return 400 error
 			return response.badRequest(req, res, {
 				status: 400,
 				message: `Mismatch of user and subscription institution`,
-				errors: `Subscription of institution '${subsOrg}' is not visible for user of institution '${userOrg}'`,
+				errors: `Subscription of institution '${subsInstitution}' is not visible for user of institution '${userInstitution}'`,
 			})
 		}
 

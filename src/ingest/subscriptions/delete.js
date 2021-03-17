@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
 				})
 			)
 
-			if (err && err.code === 5) {
+			if (err?.code === 5) {
 				// pubsub error code 5 seems to be 'Resource not found'
 				return response.notFound(req, res, {
 					status: 404,
@@ -64,6 +64,13 @@ module.exports = async (req, res) => {
 		// also delete from datastore
 		const subscriptionId = parseInt(subscription.labels.id)
 		await datastore.delete('subscriptions', subscriptionId)
+
+		// log progress
+		console.log(
+			'ingest/subscriptions/delete',
+			'removed subscription',
+			JSON.stringify({ subscriptionName, subscriptionId, email: req.user.email })
+		)
 
 		// return data
 		return response.ok(req, res, {

@@ -18,25 +18,64 @@ const config = require('../../../config')
 // TODO: check IDs in ARD Core-API instead of dump
 const coreApi = require('../../data/coreApi.json')
 
+const functionName = 'ingest/subscription/post'
+
 module.exports = async (req, res) => {
 	try {
 		// generate subscription name
 		const subIdent = 'subscription'
 		const prefix = `${config.pubsubPrefix}.${subIdent}.${config.stage}`
+		const topicName = req.body.topic
 
 		// check existence of user institution
 		const institutionExists = coreApi.some((entry) => {
 			return req.user.institution.id === entry.institution.id
 		})
 
+		// check if user has institution set
 		if (!institutionExists) {
-			const orgId = req.user.institution.id
-			const orgName = req.user.institution.name
+			const institutionId = req.user.institution.id
+			const institutionName = req.user.institution.name
+
+			// log action
+			console.warn(
+				functionName,
+				'user attempted to create subscription without institution',
+				JSON.stringify({
+					topicName,
+					stage: config.stage,
+					email: req.user.email,
+					institutionExists,
+					userInstitution: req.user.institution,
+				})
+			)
+
 			// return 401 error
 			return response.badRequest(req, res, {
 				status: 401,
 				message: `New subscriptions are not allowed for user '${req.user.email}'`,
-				errors: `The institution '${orgId}' (${orgName}) wasn't found in ARD Core-API`,
+				errors: `The institution '${institutionId}' (${institutionName}) wasn't found in ARD Core-API`,
+			})
+		}
+
+		// check if topic is from this stage
+		if (topicName.indexOf(`.${config.stage}.`) === -1) {
+			// log action
+			console.warn(
+				functionName,
+				'user attempted to create subscription from other stage',
+				JSON.stringify({
+					topicName,
+					stage: config.stage,
+					email: req.user.email,
+				})
+			)
+
+			// return 401 error
+			return response.badRequest(req, res, {
+				status: 400,
+				message: `Topic is not from this stage environment`,
+				errors: `The topic '${topicName}' does not belong to this stage (${config.stage})`,
 			})
 		}
 
@@ -47,7 +86,7 @@ module.exports = async (req, res) => {
 			method: req.body.method,
 			url: req.body.url,
 			contact: req.body.contact,
-			topic: req.body.topic,
+			topic: topicName,
 
 			owner: req.user.email,
 			institution: req.user.institution,
@@ -63,7 +102,7 @@ module.exports = async (req, res) => {
 		} catch (topicErr) {
 			// log error
 			console.error(
-				'ingest/subscription/post',
+				functionName,
 				'failed to find desired topic',
 				JSON.stringify({
 					subscription,
@@ -88,7 +127,7 @@ module.exports = async (req, res) => {
 		return res.status(201).json(createdSubscription)
 	} catch (err) {
 		console.error(
-			'ingest/subscriptions/post',
+			functionName,
 			'failed to create subscription',
 			JSON.stringify({
 				body: req.body,
