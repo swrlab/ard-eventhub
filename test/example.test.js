@@ -7,7 +7,10 @@
 
 */
 
-const expect = require('chai').expect
+// Add eslint exceptions for chai
+/* global describe it */
+
+const { expect } = require('chai')
 
 describe('Simple Math Test', () => {
 	it('1 + 1 = 2', () => {

@@ -7,17 +7,28 @@
 
 */
 
+// Add eslint exceptions
+/* eslint-disable spaced-comment */
+/* eslint-disable object-shorthand */
+/* global describe it */
+
 // Require dependencies
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 const server = require('../src/ingest/index')
 
-// Init functions
+// Init chai functions
+const { expect } = chai
 const should = chai.should()
-const expect = chai.expect
 
 // Use chaiHttp
 chai.use(chaiHttp)
+
+// define general tests
+function testResponse(res, status) {
+	expect(res).to.be.json
+	res.should.have.status(status)
+}
 
 /*
     AUTH - Authentication services for Eventhub
@@ -48,12 +59,13 @@ describe('POST /auth/login', () => {
 			.post('/auth/login')
 			.send(loginRequest)
 			.end((err, res) => {
-				res.should.have.status(200)
+				testResponse(res, 200)
 				testAuthKeys(res.body)
 				done()
 				// Store tokens for further tests
 				accessToken = res.body.token
 				refreshToken = res.body.refreshToken
+				process.exit(0)
 			})
 	})
 })
@@ -68,7 +80,7 @@ describe('POST /auth/refresh', () => {
 			.post('/auth/refresh')
 			.send(refreshRequest)
 			.end((err, res) => {
-				res.should.have.status(200)
+				testResponse(res, 200)
 				testAuthKeys(res.body)
 				done()
 				// Store new token for further tests
@@ -89,7 +101,7 @@ if (process.env.TEST_USER_RESET) {
 				.post('/auth/reset')
 				.send(resetRequest)
 				.end((err, res) => {
-					res.should.have.status(200)
+					testResponse(res, 200)
 					done()
 				})
 		})
@@ -125,7 +137,7 @@ describe(`POST /events/${eventName}`, () => {
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send(event)
 			.end((err, res) => {
-				res.should.have.status(201)
+				testResponse(res, 201)
 				testEventKeys(res.body)
 				done()
 			})
@@ -152,7 +164,7 @@ describe('GET /topics', () => {
 			.get('/topics')
 			.set('Authorization', `Bearer ${accessToken}`)
 			.end((err, res) => {
-				res.should.have.status(200)
+				testResponse(res, 200)
 				res.body.should.be.a('array')
 				res.body.every((i) => testTopicKeys(i))
 				topicName = res.body[0].name
@@ -204,7 +216,7 @@ describe('POST /subscriptions', () => {
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send(subscription)
 			.end((err, res) => {
-				res.should.have.status(201)
+				testResponse(res, 201)
 				testSubscriptionKeys(res.body)
 				// Store subscription name for further tests
 				subscriptionName = res.body.name
@@ -219,7 +231,7 @@ describe('GET /subscriptions', () => {
 			.get('/subscriptions')
 			.set('Authorization', `Bearer ${accessToken}`)
 			.end((err, res) => {
-				res.should.have.status(200)
+				testResponse(res, 200)
 				res.body.should.be.a('array')
 				res.body.every((i) => testSubscriptionKeys(i))
 				done()
@@ -233,7 +245,7 @@ describe('GET /subscriptions/{name}', () => {
 			.get(`/subscriptions/${subscriptionName}`)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.end((err, res) => {
-				res.should.have.status(200)
+				testResponse(res, 200)
 				testSubscriptionKeys(res.body)
 				done()
 			})
@@ -246,7 +258,7 @@ describe('DELETE /subscriptions/{name}', () => {
 			.delete(`/subscriptions/${subscriptionName}`)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.end((err, res) => {
-				res.should.have.status(200)
+				testResponse(res, 200)
 				res.body.should.be.a('object')
 				res.body.should.have.property('valid').eql(true)
 				//res.body.should.have.property('trace').eql(null);
