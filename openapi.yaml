@@ -10,7 +10,7 @@ info:
   license:
     name: European Union Public License 1.2
     url: 'https://spdx.org/licenses/EUPL-1.2.html'
-  version: 0.1.5
+  version: 0.1.6
 externalDocs:
   description: ARD-Eventhub Documentation
   url: 'https://swrlab.github.io/ard-eventhub/'
@@ -407,8 +407,8 @@ components:
 
           ```
 
-          Fields not specified in the Schema, will cause your request to
-          fail.   
+          Required fields not specified in the Schema, will cause your request to
+          fail.  
             
           The `id` is inserted by Eventhub as string-formatted number, but might
           be a true string in the future, do not expect this string to remain
@@ -586,6 +586,7 @@ components:
           format: float
           description: Scheduled length of the element in seconds
           example: 240
+          nullable: true
         title:
           type: string
           description: Representative title for external use
@@ -594,9 +595,11 @@ components:
           type: string
           description: Pre-formatted artist information
           example: Sam Feldt feat. Someone Else
+          nullable: true
         contributors:
           type: array
           description: Full details about involved artists if available
+          nullable: true
           items:
             type: object
             required:
@@ -617,6 +620,7 @@ components:
               normDb:
                 type: object
                 description: Reference to an entity in ARD's Norm-DB catalog
+                nullable: true
                 properties:
                   type:
                     type: string
@@ -627,6 +631,7 @@ components:
               isni:
                 type: string
                 description: ISNI ID if available
+                nullable: true
                 externalDocs:
                   description: International Standard Name Identifier
                   url: >-
@@ -634,6 +639,7 @@ components:
               url:
                 type: string
                 description: Can link to external reference
+                nullable: true
         serviceIds:
           type: array
           description: >-
@@ -655,6 +661,7 @@ components:
           description: >-
             Can reference all available tracks in ARD HFDB instances. Should
             ideally at least include the common ZSK instance.
+          nullable: true
           items:
             type: string
           example:
@@ -664,22 +671,24 @@ components:
           type: string
           description: Can reference the original ID in the publisher's system
           example: M012345.001
+          nullable: true
         isrc:
           type: string
           description: Appropriate ISRC code if track is a music element
           example: DE012345678
+          nullable: true
         upc:
           type: string
           description: Corresponding reference to an album where such ISRC was published
+          nullable: true
         mpn:
           type: string
           description: If available the reference to the original delivery from MPN
-        isInternal:
-          type: boolean
-          description: Flag to prevent usage by Eventhub on external platforms
-          example: false
+          nullable: true
         media:
           type: array
+          description: Can contain an array of media files like cover, artist, etc.
+          nullable: true
           items:
             required:
               - type
@@ -702,17 +711,20 @@ components:
               templateUrl:
                 type: string
                 example: 'https://example.com/cover.jpg?width={width}'
+                nullable: true
               description:
                 type: string
                 example: Cover Demo Artist
               attribution:
                 type: string
                 example: Photographer XYZ
+                nullable: true
         plugins:
           type: array
           description: >-
             Highly optional field for future third-party metadata distribution
             or other connected services
+          nullable: true
           items:
             type: object
             properties:
