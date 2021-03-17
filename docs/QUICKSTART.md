@@ -20,7 +20,7 @@ Security Note: Every user account has a list of permitted `serviceIds` that they
 
 ## Subscribers
 
-If you plan to receive events published by other stations, add yourself as one of their subscribers and receive real-time POST webhooks for all published events. Those can then be used to improve your products such as websites and apps during rebroadcasts in the nightly tracks.  
+If you plan to receive events published by other stations, add yourself as one of their subscribers and receive real-time POST webhooks for all published events. Those can then be used to improve your products such as websites and apps during re-broadcasts in the nightly tracks.  
 
 Please be aware that the type of events published to this service may be extended in the future. Make sure to filter them appropriately. The data format should and will always be backwards-compatible, but new fields may be added to this service as needed.  
 
