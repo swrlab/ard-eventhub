@@ -14,10 +14,10 @@ module.exports = async (req, res) => {
 		const topics = await pubsub.getTopics()
 
 		// return data
-		res.status(200).json(topics)
+		return res.status(200).json(topics)
 	} catch (err) {
 		console.error(
-			'ingest/topics/post',
+			'ingest/topics/list',
 			'failed to list topics',
 			JSON.stringify({
 				body: req.body,

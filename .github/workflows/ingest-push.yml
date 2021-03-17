@@ -149,6 +149,7 @@ jobs:
           --service-account ${{ secrets.GCP_SERVICE_ACCOUNT_INGEST }}
 
   deploy-B-test-kubernetes:
+    if: "github.ref == 'refs/heads/main'"
     environment: test
     needs: docker
     runs-on: ubuntu-latest
@@ -162,8 +163,8 @@ jobs:
         --form 'VERSION="${{ needs.docker.outputs.VERSION }}"'
 
   deploy-C-beta-kubernetes:
-    environment: beta
     if: "github.ref == 'refs/heads/main'"
+    environment: beta
     needs: docker
     runs-on: ubuntu-latest
     steps:

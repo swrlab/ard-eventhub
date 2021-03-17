@@ -6,6 +6,9 @@
 */
 
 // load node utils
+const slug = require('slug')
+
+// load utils
 const datastore = require('../../../utils/datastore')
 const firebase = require('../../../utils/firebase')
 
@@ -50,6 +53,7 @@ module.exports = async (req, res, next) => {
 		// add user details to request profile
 		req.user.serviceIds = userDb.serviceIds
 		req.user.institution = userDb.institution
+		req.user.institution.name = slug(req.user.institution.name)
 
 		// continue with normal workflow, user is authenticated 🎉
 		return next()

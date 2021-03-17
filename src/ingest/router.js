@@ -70,7 +70,6 @@ router.get(['/', '/health'], (req, res) => {
 })
 
 // set openapi error handler
-// eslint-disable-next-line no-unused-vars
 router.use((err, req, res, next) => {
 	return response.badRequest(req, res, err)
 })

@@ -17,7 +17,7 @@ New users cannot sign up themselves, but need to go through the ARD Online team 
 
 - Open Datastore in the GCP Eventhub project, go to the appropriate namespace (usually `prod`) and kind `users`
 - Check that the user really hasn't been registered, then add a new entity
-  - The entity key needs to be '_Custom Name_', with the user's email address (in lowercase)
+  - The entity key needs to be '_Custom Name_', with the user's email address (**in lowercase**)
   - Set `active` to `true`
   - In the `institution` field, you will need to add an object with `name` and `id`. You can use this template and fill in the name and id strings. Make sure that `name` does not contain any special characters.  
 

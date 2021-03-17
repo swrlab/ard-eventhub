@@ -7,12 +7,14 @@
 
 // load pubsub for internal queues
 const pubSubClient = require('./_client')
+const config = require('../../../config')
 
 module.exports = async () => {
 	// fetch topic list
 	let [topics] = await pubSubClient.getTopics()
 
-	// DEV filter topics by prefix
+	// filter topics by stage
+	topics = topics.filter((topic) => topic.name.split('/').pop().indexOf(`.${config.stage}.`) !== -1)
 
 	// map values
 	topics = topics.map((topic) => {

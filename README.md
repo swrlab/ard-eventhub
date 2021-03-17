@@ -3,21 +3,21 @@
 ARD system to distribute real-time (live) metadata for primarily radio broadcasts.
 
 - [ARD-Eventhub](#ard-eventhub)
-  - [Get Started](#get-started)
+  - [Get Started and Documentation](#get-started-and-documentation)
   - [Get involved](#get-involved)
   - [Modules](#modules)
     - [Ingest](#ingest)
-  - [Documentation](#documentation)
   - [License](#license)
   - [Third-Party Components](#third-party-components)
 
-## Get Started
+## Get Started and Documentation
 
 Important places to go ahead:
 
 - The [ard-eventhub](https://github.com/swrlab/ard-eventhub) repository
-- Documentation on [swrlab.github.io/ard-eventhub/](https://swrlab.github.io/ard-eventhub/)
-- OpenAPI documentation on [eventhub-ingest.ard.de/openapi](https://eventhub-ingest.ard.de/openapi)
+- Our [Quickstart](docs/QUICKSTART.md) documentation
+- The full docs on [swrlab.github.io/ard-eventhub](https://swrlab.github.io/ard-eventhub/)
+- OpenAPI specification on [eventhub-ingest.ard.de/openapi](https://eventhub-ingest.ard.de/openapi)
 
 ## Get involved
 
@@ -32,19 +32,6 @@ This project will include two modules: Ingest and API. The first development ste
 ### Ingest
 
 The Ingest service is responsible for receiving and publishing events and managing subscriptions. You'll find the core code in [`./src/ingest/`](./src/ingest/).
-
-## Documentation
-
-There are several documents available, that explain different parts of this service in detail:
-
-- [CHANGELOG.md](./CHANGELOG.md) - Release note for new Eventhub versions
-- [docs/AUTHENTICATION.md](./docs/AUTHENTICATION.md) - This guides you through the steps needed to login and work with this API
-- [docs/EVENTS.md](docs/EVENTS.md) - These are the events, that you can currently distribute through Eventhub
-- [docs/OPENAPI.md](docs/OPENAPI.md) - Update API-reference with OpenAPI specification and Swagger-UI
-- [docs/SECRETS.md](docs/SECRETS.md) - List of secrets that are used and stored in different places
-- [docs/STAGES.md](docs/STAGES.md) - Stage configuration for all modules
-- [docs/TYPES.md](docs/TYPES.md) - The different content types inside events, that can be used
-- [docs/USERS.md](docs/USERS.md) - How to work with user accounts
 
 ## License
 
