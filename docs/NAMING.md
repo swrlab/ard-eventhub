@@ -21,7 +21,7 @@ Pub/Sub includes a number of restrictions around names, keys and values. For all
 
 ```txt
 <domain-prefix> . <service> . <module>  . <stage> . <service-id>
-     de.ard     . eventhub  . publisher .   swr   .  284680
+     de.ard     . eventhub  . publisher .   dev   .  284680
 
 => de.ard.eventhub.publisher.dev.284680
 ```
