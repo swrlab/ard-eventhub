@@ -8,9 +8,8 @@
 */
 
 // Add eslint exceptions
-/* eslint-disable spaced-comment */
 /* eslint-disable object-shorthand */
-/* global describe it */
+/* global describe it before */
 
 // Require dependencies
 const chai = require('chai')
@@ -27,13 +26,18 @@ chai.use(chaiHttp)
 // define general tests
 function testResponse(res, status) {
 	expect(res).to.be.json
-	res.should.have.status(status)
+	expect(res).to.have.status(status)
+}
+
+function testAuth(res) {
+	expect(res).to.have.status(403)
 }
 
 /*
     AUTH - Authentication services for Eventhub
 */
 
+const loginPath = '/auth/login'
 let accessToken, refreshToken
 
 function testAuthKeys(body) {
@@ -45,10 +49,9 @@ function testAuthKeys(body) {
 	body.should.have.property('user').to.be.a('object')
 	body.user.should.have.property('user_id').to.be.a('string')
 	body.user.should.have.property('email_verified').to.be.a('boolean')
-	//body.should.have.property('trace').eql(null);
 }
 
-describe('POST /auth/login', () => {
+describe(`POST ${loginPath}`, () => {
 	it('swap login credentials for an id-token', (done) => {
 		const loginRequest = {
 			email: process.env.TEST_USER,
@@ -56,7 +59,7 @@ describe('POST /auth/login', () => {
 		}
 
 		chai.request(server)
-			.post('/auth/login')
+			.post(loginPath)
 			.send(loginRequest)
 			.end((err, res) => {
 				testResponse(res, 200)
@@ -65,19 +68,20 @@ describe('POST /auth/login', () => {
 				// Store tokens for further tests
 				accessToken = res.body.token
 				refreshToken = res.body.refreshToken
-				process.exit(0)
 			})
 	})
 })
 
-describe('POST /auth/refresh', () => {
+const refreshPath = '/auth/refresh'
+
+describe(`POST ${refreshPath}`, () => {
 	it('swap refresh-token for new id-token', (done) => {
 		const refreshRequest = {
 			refreshToken: refreshToken,
 		}
 
 		chai.request(server)
-			.post('/auth/refresh')
+			.post(refreshPath)
 			.send(refreshRequest)
 			.end((err, res) => {
 				testResponse(res, 200)
@@ -90,15 +94,17 @@ describe('POST /auth/refresh', () => {
 })
 
 // 🚨 firebase limit is 150 requests per day 🚨
+const resetPath = '/auth/reset'
+
 if (process.env.TEST_USER_RESET) {
-	describe('POST /auth/reset', () => {
+	describe(`POST ${resetPath}`, () => {
 		it('request password reset email', (done) => {
 			const resetRequest = {
 				email: process.env.TEST_USER,
 			}
 
 			chai.request(server)
-				.post('/auth/reset')
+				.post(resetPath)
 				.send(resetRequest)
 				.end((err, res) => {
 					testResponse(res, 200)
@@ -116,24 +122,37 @@ function testEventKeys(body) {
 	body.should.be.a('object')
 	body.should.have.property('topics').to.be.a('object')
 	body.should.have.property('message').to.be.a('object')
-	//body.should.have.property('trace').eql(null);
 }
 
 const eventName = 'de.ard.eventhub.v1.radio.track.playing'
+const eventPath = `/events/${eventName}`
 
-describe(`POST /events/${eventName}`, () => {
-	it('publish a new event', (done) => {
-		const event = {
-			event: eventName,
-			type: 'music',
-			start: '2020-01-19T06:00:00+01:00',
-			title: 'Song name',
-			serviceIds: ['990030', '990140'],
-			playlistItemId: 'swr3-5678',
-		}
+const swrTV = '990030'
+const ardDE = '990140'
+const event = {
+	event: eventName,
+	type: 'music',
+	start: '2020-01-01T06:00:00+01:00',
+	title: 'Unit Test Song',
+	serviceIds: [swrTV, ardDE],
+	playlistItemId: 'unit-test-playlist',
+}
 
+describe(`POST ${eventPath}`, () => {
+	it('test auth for POST /event', (done) => {
 		chai.request(server)
-			.post(`/events/${eventName}`)
+			.post(eventPath)
+			.set('Authorization', `Bearer invalid${accessToken}`)
+			.send(event)
+			.end((err, res) => {
+				testAuth(res)
+				done()
+			})
+	})
+
+	it('publish a new event', (done) => {
+		chai.request(server)
+			.post(eventPath)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send(event)
 			.end((err, res) => {
@@ -144,10 +163,11 @@ describe(`POST /events/${eventName}`, () => {
 	})
 })
 
-// /*
-//     TOPICS - Access to topics details
-// */
+/*
+    TOPICS - Access to topics details
+*/
 
+const topicPath = '/topics'
 let topicName
 
 function testTopicKeys(body) {
@@ -158,16 +178,30 @@ function testTopicKeys(body) {
 	body.should.have.property('labels').to.be.a('object')
 }
 
-describe('GET /topics', () => {
+describe(`GET ${topicPath}`, () => {
+	it(`test auth for GET ${topicPath}`, (done) => {
+		chai.request(server)
+			.get(topicPath)
+			.set('Authorization', `Bearer invalid${accessToken}`)
+			.end((err, res) => {
+				testAuth(res)
+				done()
+			})
+	})
+
 	it('list all available topics', (done) => {
 		chai.request(server)
-			.get('/topics')
+			.get(topicPath)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.end((err, res) => {
 				testResponse(res, 200)
 				res.body.should.be.a('array')
 				res.body.every((i) => testTopicKeys(i))
-				topicName = res.body[0].name
+				res.body.forEach((topic) => {
+					if (topic.name.indexOf(swrTV) !== -1) {
+						topicName = topic.name
+					}
+				})
 				done()
 			})
 	})
@@ -177,6 +211,7 @@ describe('GET /topics', () => {
     SUBSCRIPTIONS - Access to subscription management
 */
 
+const subscriptPath = '/subscriptions'
 let subscriptionName
 
 function testSubscriptionKeys(body) {
@@ -191,7 +226,6 @@ function testSubscriptionKeys(body) {
 	body.topic.should.have.property('path').to.be.a('string')
 	body.should.have.property('ackDeadlineSeconds').to.be.a('number')
 	body.should.have.property('retainAckedMessages').to.be.a('boolean')
-	//body.should.have.property('retryPolicy').eql(null);
 	body.should.have.property('serviceAccount').to.be.a('string')
 	body.should.have.property('labels').to.be.a('object')
 	body.labels.should.have.property('id').to.be.a('string')
@@ -201,18 +235,34 @@ function testSubscriptionKeys(body) {
 	body.should.have.property('owner').to.be.a('string')
 }
 
-describe('POST /subscriptions', () => {
-	it('add a new subscription to this user', (done) => {
-		const subscription = {
+describe(`POST ${subscriptPath}`, () => {
+	let subscription
+
+	before((done) => {
+		subscription = {
 			type: 'PUBSUB',
 			method: 'PUSH',
-			url: 'https://example.com/my/webhook/for/this/subscription',
-			contact: 'my-emergency-and-notifications-contact@ard.de',
+			url: 'https://unit.test/eventhub/subscription',
+			contact: 'eventhub-unit-test@ard.de',
 			topic: topicName,
 		}
+		done()
+	})
 
+	it(`test auth for POST ${subscriptPath}`, (done) => {
 		chai.request(server)
-			.post('/subscriptions')
+			.post(subscriptPath)
+			.set('Authorization', `Bearer invalid${accessToken}`)
+			.send(subscription)
+			.end((err, res) => {
+				testAuth(res)
+				done()
+			})
+	})
+
+	it('add a new subscription to this user', (done) => {
+		chai.request(server)
+			.post(subscriptPath)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send(subscription)
 			.end((err, res) => {
@@ -225,10 +275,20 @@ describe('POST /subscriptions', () => {
 	})
 })
 
-describe('GET /subscriptions', () => {
+describe(`GET ${subscriptPath}`, () => {
+	it(`test auth for GET ${subscriptPath}`, (done) => {
+		chai.request(server)
+			.get(subscriptPath)
+			.set('Authorization', `Bearer invalid${accessToken}`)
+			.end((err, res) => {
+				testAuth(res)
+				done()
+			})
+	})
+
 	it('list all subscriptions for this user', (done) => {
 		chai.request(server)
-			.get('/subscriptions')
+			.get(subscriptPath)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.end((err, res) => {
 				testResponse(res, 200)
@@ -239,10 +299,20 @@ describe('GET /subscriptions', () => {
 	})
 })
 
-describe('GET /subscriptions/{name}', () => {
+describe(`GET ${subscriptPath}/{name}`, () => {
+	it(`test auth for GET ${subscriptPath}/{name}`, (done) => {
+		chai.request(server)
+			.get(`${subscriptPath}/${subscriptionName}`)
+			.set('Authorization', `Bearer invalid${accessToken}`)
+			.end((err, res) => {
+				testAuth(res)
+				done()
+			})
+	})
+
 	it('get details about single subscription from this user', (done) => {
 		chai.request(server)
-			.get(`/subscriptions/${subscriptionName}`)
+			.get(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.end((err, res) => {
 				testResponse(res, 200)
@@ -252,16 +322,25 @@ describe('GET /subscriptions/{name}', () => {
 	})
 })
 
-describe('DELETE /subscriptions/{name}', () => {
+describe(`DELETE ${subscriptPath}/{name}`, () => {
+	it(`test auth for DELETE ${subscriptPath}/{name}`, (done) => {
+		chai.request(server)
+			.delete(`${subscriptPath}/${subscriptionName}`)
+			.set('Authorization', `Bearer invalid${accessToken}`)
+			.end((err, res) => {
+				testAuth(res)
+				done()
+			})
+	})
+
 	it('remove a single subscription by this user', (done) => {
 		chai.request(server)
-			.delete(`/subscriptions/${subscriptionName}`)
+			.delete(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.end((err, res) => {
 				testResponse(res, 200)
 				res.body.should.be.a('object')
 				res.body.should.have.property('valid').eql(true)
-				//res.body.should.have.property('trace').eql(null);
 				done()
 			})
 	})
