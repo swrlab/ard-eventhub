@@ -15,6 +15,7 @@ It needs several environment variables to work:
 - OPTIONAL `PORT` - override server port setting, default is 8080
 - REQUIRED `TEST_USER` - test user email
 - REQUIRED `TEST_USER_PW` - test user password
+- OPTIONAL `TEST_USER_RESET` - test email reset (request limit)
 
 ## Setup
 
