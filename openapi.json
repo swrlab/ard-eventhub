@@ -11,7 +11,7 @@
       "name": "European Union Public License 1.2",
       "url": "https://spdx.org/licenses/EUPL-1.2.html"
     },
-    "version": "0.1.5"
+    "version": "0.1.6"
   },
   "externalDocs": {
     "description": "ARD-Eventhub Documentation",
@@ -622,7 +622,7 @@
   "components": {
     "requestBodies": {
       "eventV1RadioTrack": {
-        "description": "New event to be distributed to subscribers.  \n  \nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.  \nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:  \n```json\n{\n  \"event\": \"de.ard.eventhub.v1.radio.track.playing\",\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"title\": \"Song name\",\n  \"serviceIds\": [ \"1234\" ],\n  \"playlistItemId\": \"swr3-5678\"\n}\n```\nFields not specified in the Schema, will cause your request to fail.   \n  \nThe `id` is inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
+        "description": "New event to be distributed to subscribers.  \n  \nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.  \nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:  \n```json\n{\n  \"event\": \"de.ard.eventhub.v1.radio.track.playing\",\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"title\": \"Song name\",\n  \"serviceIds\": [ \"1234\" ],\n  \"playlistItemId\": \"swr3-5678\"\n}\n```\nRequired fields not specified in the Schema, will cause your request to fail.  \n  \nThe `id` is inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
         "content": {
           "application/json": {
             "schema": {
@@ -849,7 +849,8 @@
             "type": "number",
             "format": "float",
             "description": "Scheduled length of the element in seconds",
-            "example": 240
+            "example": 240,
+            "nullable": true
           },
           "title": {
             "type": "string",
@@ -859,11 +860,13 @@
           "artist": {
             "type": "string",
             "description": "Pre-formatted artist information",
-            "example": "Sam Feldt feat. Someone Else"
+            "example": "Sam Feldt feat. Someone Else",
+            "nullable": true
           },
           "contributors": {
             "type": "array",
             "description": "Full details about involved artists if available",
+            "nullable": true,
             "items": {
               "type": "object",
               "required": [
@@ -888,6 +891,7 @@
                 "normDb": {
                   "type": "object",
                   "description": "Reference to an entity in ARD's Norm-DB catalog",
+                  "nullable": true,
                   "properties": {
                     "type": {
                       "type": "string",
@@ -902,6 +906,7 @@
                 "isni": {
                   "type": "string",
                   "description": "ISNI ID if available",
+                  "nullable": true,
                   "externalDocs": {
                     "description": "International Standard Name Identifier",
                     "url": "https://kb.ddex.net/display/HBK/Communication+of+Identifiers+in+DDEX+Messages"
@@ -909,7 +914,8 @@
                 },
                 "url": {
                   "type": "string",
-                  "description": "Can link to external reference"
+                  "description": "Can link to external reference",
+                  "nullable": true
                 }
               }
             }
@@ -933,6 +939,7 @@
           "hfdbIds": {
             "type": "array",
             "description": "Can reference all available tracks in ARD HFDB instances. Should ideally at least include the common ZSK instance.",
+            "nullable": true,
             "items": {
               "type": "string"
             },
@@ -944,28 +951,29 @@
           "externalId": {
             "type": "string",
             "description": "Can reference the original ID in the publisher's system",
-            "example": "M012345.001"
+            "example": "M012345.001",
+            "nullable": true
           },
           "isrc": {
             "type": "string",
             "description": "Appropriate ISRC code if track is a music element",
-            "example": "DE012345678"
+            "example": "DE012345678",
+            "nullable": true
           },
           "upc": {
             "type": "string",
-            "description": "Corresponding reference to an album where such ISRC was published"
+            "description": "Corresponding reference to an album where such ISRC was published",
+            "nullable": true
           },
           "mpn": {
             "type": "string",
-            "description": "If available the reference to the original delivery from MPN"
-          },
-          "isInternal": {
-            "type": "boolean",
-            "description": "Flag to prevent usage by Eventhub on external platforms",
-            "example": false
+            "description": "If available the reference to the original delivery from MPN",
+            "nullable": true
           },
           "media": {
             "type": "array",
+            "description": "Can contain an array of media files like cover, artist, etc.",
+            "nullable": true,
             "items": {
               "required": [
                 "type",
@@ -991,7 +999,8 @@
                 },
                 "templateUrl": {
                   "type": "string",
-                  "example": "https://example.com/cover.jpg?width={width}"
+                  "example": "https://example.com/cover.jpg?width={width}",
+                  "nullable": true
                 },
                 "description": {
                   "type": "string",
@@ -999,7 +1008,8 @@
                 },
                 "attribution": {
                   "type": "string",
-                  "example": "Photographer XYZ"
+                  "example": "Photographer XYZ",
+                  "nullable": true
                 }
               }
             }
@@ -1007,6 +1017,7 @@
           "plugins": {
             "type": "array",
             "description": "Highly optional field for future third-party metadata distribution or other connected services",
+            "nullable": true,
             "items": {
               "type": "object",
               "properties": {
