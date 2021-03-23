@@ -3,15 +3,16 @@
 		"ecmaVersion": 2020
 	},
 	"root": true,
-	"plugins": ["@swrlab/eslint-plugin-swr"],
-	"extends": ["plugin:@swrlab/eslint-plugin-swr/recommended"],
+	"plugins": ["@swrlab/eslint-plugin-swr", "chai-friendly"],
+	"extends": ["plugin:@swrlab/eslint-plugin-swr/recommended", "plugin:chai-friendly/recommended"],
 	"ignorePatterns": ["docs/_SIDEBAR.md"],
 	"rules": {
 		"radix": 0,
 		"no-unused-vars": [
 			"error",
 			{
-				"argsIgnorePattern": "next"
+				"argsIgnorePattern": "next",
+				"varsIgnorePattern": "should"
 			}
 		],
 		"no-param-reassign": [2, { "props": false }],

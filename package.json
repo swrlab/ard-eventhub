@@ -1,6 +1,6 @@
 {
 	"name": "ard-eventhub",
-	"version": "0.1.6",
+	"version": "0.1.7",
 	"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
 	"main": "./src/ingest/index.js",
 	"scripts": {
@@ -41,6 +41,7 @@
 		"chai-http": "^4.3.0",
 		"docsify-cli": "^4.4.3",
 		"eslint": "^7.22.0",
+		"eslint-plugin-chai-friendly": "^0.6.0",
 		"eslint-plugin-swr": "0.0.5",
 		"license-compliance": "^1.0.3",
 		"mocha": "^8.3.2",
