@@ -11,17 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New detailed output when posting events for each service (`published`, `blocked`, `failed`)
+- New detailed return output when posting events for each service (`published`, `blocked`, `failed`)
+- Improved log output in JSON format for better monitoring
 
 ### Changed
 
-- Now using `services` with required fields `type`, `externalId` and `publisherId` to identify a channel
-- Improved log output in JSON format for better monitoring
+- Now using `services` with required fields `type`, `externalId` and `publisherId` to identify a publishers' channel
 
 ### Removed
 
-- No longer using `serviceIds` as required keys
-- `event` in the POST body for new events is now called `name` and is no longer required (provided by URL)
+- No longer using `serviceIds` as required identification keys
+- `event` in the POST body for new events is now called `name` and is no longer required
+  - variable is inserted using the event name provided by the URL
 
 ## [0.1.7] - 2021-03-18
 
