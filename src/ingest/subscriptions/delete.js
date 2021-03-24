@@ -7,6 +7,7 @@
 
 // load eventhub utils
 const datastore = require('../../utils/datastore')
+const logger = require('../../utils/logger')
 const pubsub = require('../../utils/pubsub')
 const response = require('../../utils/response')
 
@@ -19,6 +20,7 @@ module.exports = async (req, res) => {
 		// load single subscription to get owner
 		try {
 			subscription = await pubsub.getSubscription(subscriptionName)
+			subscription = subscription.full
 		} catch (err) {
 			console.error(
 				'ingest/subscription/delete',
@@ -47,14 +49,14 @@ module.exports = async (req, res) => {
 		}
 
 		// check subscription permission by user institution
-		if (subscription.institution.id !== req.user.institution.id) {
-			const subsOrg = subscription.institution.name
-			const userOrg = req.user.institution.name
+		if (subscription.institutionId !== req.user.institutionId) {
+			const userInstitution = req.user.institutionId
+
 			// return 400 error
 			return response.badRequest(req, res, {
 				status: 400,
 				message: `Mismatch of user and subscription institution`,
-				errors: `Subscription of institution '${subsOrg}' cannot be deleted by user of institution '${userOrg}'`,
+				errors: `Subscription of this institution cannot be deleted by user of institution '${userInstitution}'`,
 			})
 		}
 
@@ -66,25 +68,26 @@ module.exports = async (req, res) => {
 		await datastore.delete('subscriptions', subscriptionId)
 
 		// log progress
-		console.log(
-			'ingest/subscriptions/delete',
-			'removed subscription',
-			JSON.stringify({ subscriptionName, subscriptionId, email: req.user.email })
-		)
+		logger.log({
+			level: 'info',
+			message: 'removed subscription',
+			source: 'ingest/subscriptions/delete',
+			data: { email: req.user.email, subscriptionName, subscriptionId, subscription },
+		})
 
 		// return data
 		return response.ok(req, res, {
 			valid: true,
 		})
-	} catch (err) {
-		console.error(
-			'ingest/subscriptions/delete',
-			'failed to delete subscription',
-			JSON.stringify({
-				body: req.body,
-				error: err.stack || err,
-			})
-		)
-		return response.internalServerError(req, res, err)
+	} catch (error) {
+		logger.log({
+			level: 'error',
+			message: 'failed to delete subscription',
+			source: 'ingest/subscriptions/delete',
+			error,
+			data: { params: req.params },
+		})
+
+		return response.internalServerError(req, res, error)
 	}
 }
