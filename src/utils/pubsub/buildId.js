@@ -15,5 +15,5 @@ const convertId = require('./convertId')
 const config = require('../../../config')
 
 module.exports = (input) => {
-	return `${config.pubsubPrefix}${convertId.encode(input)}`
+	return `${config.pubSubPrefix}${convertId.encode(input)}`
 }

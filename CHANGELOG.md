@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.co,m/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0-beta] - 2021-03-24
+## [1.0.0-beta1] - 2021-03-24
 
 🚧 BREAKING CHANGES for `serviceIds` 🚧
 
@@ -15,9 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- No longer using `serviceIds` as required keys
 - Now using `services` with required fields `type`, `externalId` and `publisherId` to identify a channel
 - Improved log output in JSON format for better monitoring
+
+### Removed
+
+- No longer using `serviceIds` as required keys
+- `event` in the POST body for new events is now called `name` and is no longer required (provided by URL)
 
 ## [0.1.7] - 2021-03-18
 

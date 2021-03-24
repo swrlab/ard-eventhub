@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
 	try {
 		// generate subscription name
 		const subIdent = 'subscription'
-		const prefix = `${config.pubsubPrefix}${subIdent}.`
+		const prefix = `${config.pubSubPrefix}${subIdent}.`
 		const topicName = req.body.topic
 
 		// check existence of user institution
