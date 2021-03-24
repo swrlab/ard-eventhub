@@ -400,7 +400,7 @@ components:
           {
             "start": "2020-01-19T06:00:00+01:00",
             "title": "Song name",
-            "assets": [ { ... } ],
+            "services": [ { ... } ],
             "playlistItemId": "swr3-5678"
           }
 
@@ -540,7 +540,7 @@ components:
           type: string
           example: null
 
-    assets:
+    services:
       type: object
       required:
         - type
@@ -573,7 +573,7 @@ components:
         - type
         - start
         - title
-        - assets
+        - services
         - playlistItemId
       type: object
       description: >
@@ -666,14 +666,14 @@ components:
                 type: string
                 description: Can link to external reference
                 nullable: true
-        assets:
+        services:
           type: array
           description: >-
             The playing stations unique Service-IDs. Do not include the
             Service-Type suffix.
           items:
             minItems: 1
-            $ref: '#/components/schemas/assets'
+            $ref: '#/components/schemas/services'
         playlistItemId:
           type: string
           description: >-

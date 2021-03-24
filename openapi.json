@@ -622,7 +622,7 @@
   "components": {
     "requestBodies": {
       "eventV1RadioTrack": {
-        "description": "New event to be distributed to subscribers.  \n  \nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.  \nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:  \n```json\n{\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"title\": \"Song name\",\n  \"assets\": [ { ... } ],\n  \"playlistItemId\": \"swr3-5678\"\n}\n```\nRequired fields not specified in the Schema, will cause your request to fail.  \n  \nThe `id` is inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
+        "description": "New event to be distributed to subscribers.  \n  \nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.  \nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:  \n```json\n{\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"title\": \"Song name\",\n  \"services\": [ { ... } ],\n  \"playlistItemId\": \"swr3-5678\"\n}\n```\nRequired fields not specified in the Schema, will cause your request to fail.  \n  \nThe `id` is inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
         "content": {
           "application/json": {
             "schema": {
@@ -803,7 +803,7 @@
           }
         }
       },
-      "assets": {
+      "services": {
         "type": "object",
         "required": [
           "type",
@@ -841,7 +841,7 @@
           "type",
           "start",
           "title",
-          "assets",
+          "services",
           "playlistItemId"
         ],
         "type": "object",
@@ -952,12 +952,12 @@
               }
             }
           },
-          "assets": {
+          "services": {
             "type": "array",
             "description": "The playing stations unique Service-IDs. Do not include the Service-Type suffix.",
             "items": {
               "minItems": 1,
-              "$ref": "#/components/schemas/assets"
+              "$ref": "#/components/schemas/services"
             }
           },
           "playlistItemId": {

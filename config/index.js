@@ -25,7 +25,7 @@ const stage = process.env.STAGE
 const serviceName = 'ard-eventhub'
 const baseConfig = {
 	coreIdPrefixes,
-	pubsubPrefix: '',
+	pubsubPrefix: `de.ard.eventhub.${stage}.`,
 	stage,
 	userAgent: `${serviceName}/${version}`,
 	version,

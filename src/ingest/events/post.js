@@ -6,7 +6,6 @@
 */
 
 // load node utils
-const slug = require('slug')
 const moment = require('moment')
 
 // load eventhub utils
@@ -20,10 +19,6 @@ const response = require('../../utils/response')
 const config = require('../../../config')
 
 const source = 'ingest/events/post'
-
-function getServiceId(pubSubId) {
-	return pubSubId.split('.').pop()
-}
 
 module.exports = async (req, res) => {
 	try {
@@ -93,9 +88,16 @@ module.exports = async (req, res) => {
 			...message,
 		}
 
+		// use collector to check duplicates for externalId in services
+		const externalIdCollector = []
+
 		// compile core hashes for every service
-		message.assets = await Promise.all(
-			message.assets.map(async (service) => {
+		message.services = await Promise.all(
+			message.services.map(async (service) => {
+				// check for duplicates
+				if (externalIdCollector.includes(service.externalId)) service.blocked = true
+				externalIdCollector.push(service.externalId)
+
 				// fetch prefix from configured list
 				const urnPrefix = config.coreIdPrefixes[service.type]
 
@@ -153,7 +155,8 @@ module.exports = async (req, res) => {
 					})
 				}
 
-				if (!service.blocked) service.topic = pubsub.buildId(service.id)
+				// create pub/sub-compliant name
+				if (!service.blocked) service.topic = { id: pubsub.buildId(service.id) }
 
 				// final data
 				return service
@@ -165,66 +168,92 @@ module.exports = async (req, res) => {
 		message.id = message.id.toString()
 		delete message.creator
 
-		// try to publish message using given topics
-		//const topics = await pubsub.publishMessage(pubSubIds, message)
-		const topics = []
-		const unknownTopics = []
-
 		// collect unknown topics from returning errors
-		Object.keys(topics).forEach((topic) => {
-			if (topics[topic] === 'TOPIC_ERROR' || topics[topic] === 'TOPIC_NOT_FOUND') {
-				const newTopic = {
-					id: getServiceId(topic),
-					pubsub: topic,
-					name: undefined,
-					label: undefined,
-					verified: false,
-					created: false,
-				}
-				unknownTopics.push(newTopic)
-			}
-		})
+		const newServices = []
+		for await (const service of message.services) {
+			// ignoring blocked services
+			if (!service.blocked && service.topic?.id) {
+				// try sending message
+				const messageId = await pubsub.publishMessage(service.topic.id, message)
 
-		// check unknown topic IDs
-		if (unknownTopics.length > 0) {
-			// verify IDs of unknownTopics with coreApi
-			unknownTopics.forEach((topic) => {
-				coreApi.forEach((entry) => {
-					if (topic.id === entry.externalId) {
-						topic.name = entry.title
-						topic.label = slug(entry.title)
-						topic.verified = true
+				// handle errors
+				if (messageId === 'TOPIC_ERROR') {
+					// insert error message and empty id
+					service.topic.status = 'TOPIC_ERROR_1'
+					service.topic.messageId = null
+				} else if (messageId === 'TOPIC_NOT_FOUND') {
+					// fetch publisher
+					const publisher = await core.getPublisher(service.publisherId)
+
+					// try creating new topic
+					const newTopic = {
+						name: service.topic.id,
+						pubTitle: publisher.title,
+						institutionTitle: publisher.institution.title,
 					}
-				})
-			})
+					const [result] = await pubsub.createTopic(newTopic)
 
-			// create topics for verified IDs
-			for await (const topic of unknownTopics) {
-				if (topic.verified) {
-					const [result] = await pubsub.createTopic(topic)
-
-					if (result?.name?.indexOf(topic.id) !== -1) {
-						topic.created = true
+					// handle feedback
+					if (result?.name?.indexOf(service.topic.id) !== -1) {
 						// Update api result that topic was created
-						topics[topic.pubsub] = 'TOPIC_CREATED'
+						service.topic.status = 'TOPIC_CREATED'
+
+						logger.log({
+							level: 'notice',
+							message: `topic created > ${service.topic.id}`,
+							source,
+							data: { service, result },
+						})
 					} else {
 						// Update api result that topic was not created
-						topics[topic.pubsub] = 'TOPIC_NOT_CREATED'
+						service.topic.status = 'TOPIC_ERROR_2'
+
+						logger.log({
+							level: 'error',
+							message: `failed creating topic > ${service.topic.id}`,
+							source,
+							data: { service, result },
+						})
 					}
+
+					// insert empty id
+					service.topic.messageId = null
+				} else {
+					// insert messageId
+					service.topic.status = 'MESSAGE_SENT'
+					service.topic.messageId = messageId
 				}
 			}
+
+			// send to new array
+			newServices.push(service)
 		}
 
-		// return ok
-		return response.ok(
-			req,
-			res,
-			{
-				topics,
-				event: message,
+		// replace services
+		message.services = newServices
+
+		// prepare output data
+		const data = {
+			statuses: {
+				published: message.services.filter((service) => service.topic?.messageId).length,
+				blocked: message.services.filter((service) => service.blocked).length,
+				failed: message.services.filter(
+					(service) => !service.topic?.messageId && !service.blocked
+				).length,
 			},
-			201
-		)
+			event: message,
+		}
+
+		// log success
+		logger.log({
+			level: 'notice',
+			message: `event published > ${eventName}`,
+			source,
+			data,
+		})
+
+		// return ok
+		return response.ok(req, res, data, 201)
 	} catch (error) {
 		logger.log({
 			level: 'error',

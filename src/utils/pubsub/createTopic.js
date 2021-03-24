@@ -5,17 +5,22 @@
 
 */
 
+// load node utils
+const slug = require('slug')
+const moment = require('moment')
+
 // load pubsub for internal queues
 const publisherClient = require('./_publisherClient')
 const config = require('../../../config')
 
 module.exports = async (newTopic) => {
 	// create new topic
-	const prefix = 'projects/ard-eventhub/topics/'
 	const topic = {
-		name: prefix + newTopic.pubsub,
+		name: `projects/${process.env.GCP_PROJECT_ID}/topics/${newTopic.name}`,
 		labels: {
-			name: newTopic.label,
+			created: moment().valueOf(),
+			'publication-title': slug(newTopic.pubTitle),
+			'institution-title': slug(newTopic.institutionTitle),
 			stage: config.stage,
 		},
 	}
