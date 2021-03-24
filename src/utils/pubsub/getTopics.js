@@ -26,11 +26,9 @@ module.exports = async () => {
 		return {
 			type: 'PUBSUB',
 			id: convertId.decode(name).replace(config.pubSubPrefix, ''),
+			name,
+			path: topic.name,
 			labels: topic.metadata.labels,
-			pubSub: {
-				name,
-				path: topic.name,
-			},
 		}
 	})
 

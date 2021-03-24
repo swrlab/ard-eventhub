@@ -957,7 +957,11 @@
             "description": "The playing stations unique Service-IDs. Do not include the Service-Type suffix.",
             "items": {
               "minItems": 1,
-              "$ref": "#/components/schemas/services"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/services"
+                }
+              ]
             }
           },
           "playlistItemId": {

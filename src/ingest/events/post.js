@@ -102,7 +102,7 @@ module.exports = async (req, res) => {
 				const urnPrefix = config.coreIdPrefixes[service.type]
 
 				// create hash based on prefix and id
-				service.id = `${urnPrefix}${core.createHashedId(service.externalId)}`
+				service.topic = { id: `${urnPrefix}${core.createHashedId(service.externalId)}` }
 
 				// convert publisher if needed
 				const urnRegex = /(?=urn:ard:publisher:[a-z0-9]{16})/g
@@ -156,7 +156,7 @@ module.exports = async (req, res) => {
 				}
 
 				// create pub/sub-compliant name
-				if (!service.blocked) service.topic = { id: pubsub.buildId(service.id) }
+				if (!service.blocked) service.topic.name = pubsub.buildId(service.topic.id)
 
 				// final data
 				return service
@@ -172,9 +172,9 @@ module.exports = async (req, res) => {
 		const newServices = []
 		for await (const service of message.services) {
 			// ignoring blocked services
-			if (!service.blocked && service.topic?.id) {
+			if (!service.blocked && service.topic?.name) {
 				// try sending message
-				const messageId = await pubsub.publishMessage(service.topic.id, message)
+				const messageId = await pubsub.publishMessage(service.topic.name, message)
 
 				// handle errors
 				if (messageId === 'TOPIC_ERROR') {
@@ -187,20 +187,20 @@ module.exports = async (req, res) => {
 
 					// try creating new topic
 					const newTopic = {
-						name: service.topic.id,
+						name: service.topic.name,
 						pubTitle: publisher.title,
 						institutionTitle: publisher.institution.title,
 					}
 					const [result] = await pubsub.createTopic(newTopic)
 
 					// handle feedback
-					if (result?.name?.indexOf(service.topic.id) !== -1) {
+					if (result?.name?.indexOf(service.topic.name) !== -1) {
 						// Update api result that topic was created
 						service.topic.status = 'TOPIC_CREATED'
 
 						logger.log({
 							level: 'notice',
-							message: `topic created > ${service.topic.id}`,
+							message: `topic created > ${service.topic.name}`,
 							source,
 							data: { service, result },
 						})
@@ -210,7 +210,7 @@ module.exports = async (req, res) => {
 
 						logger.log({
 							level: 'error',
-							message: `failed creating topic > ${service.topic.id}`,
+							message: `failed creating topic > ${service.topic.name}`,
 							source,
 							data: { service, result },
 						})
@@ -247,7 +247,7 @@ module.exports = async (req, res) => {
 		// log success
 		logger.log({
 			level: 'notice',
-			message: `event published > ${eventName}`,
+			message: `event processed > ${eventName}`,
 			source,
 			data,
 		})

@@ -11,13 +11,13 @@ const mapSubscription = require('./mapSubscription')
 
 module.exports = async (name) => {
 	// fetch subscription list
-	let [subscription] = await pubSubClient.subscription(name).getMetadata()
+	const [subscription] = await pubSubClient.subscription(name).getMetadata()
 
 	// DEV filter subscriptions by prefix
 
 	// map and filter values
-	subscription = await mapSubscription(subscription)
+	const mappedSubscription = await mapSubscription(subscription)
 
 	// return data
-	return Promise.resolve(subscription)
+	return Promise.resolve(mappedSubscription)
 }

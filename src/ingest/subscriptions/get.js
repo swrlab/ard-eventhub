@@ -6,6 +6,7 @@
 */
 
 // load eventhub utils
+const logger = require('../../utils/logger')
 const pubsub = require('../../utils/pubsub')
 const response = require('../../utils/response')
 
@@ -18,6 +19,7 @@ module.exports = async (req, res) => {
 		// load single subscription
 		try {
 			subscription = await pubsub.getSubscription(subscriptionName)
+			subscription = subscription.limited
 		} catch (err) {
 			return response.notFound(req, res, {
 				status: 404,
@@ -26,29 +28,28 @@ module.exports = async (req, res) => {
 		}
 
 		// verify if user is allowed to get subscription (same institution)
-		if (subscription.institution.id !== req.user.institution.id) {
-			const subsInstitution = subscription.institution.name
-			const userInstitution = req.user.institution.name
+		if (subscription.institutionId !== req.user.institutionId) {
+			const userInstitution = req.user.institutionId
 
 			// return 400 error
 			return response.badRequest(req, res, {
 				status: 400,
 				message: `Mismatch of user and subscription institution`,
-				errors: `Subscription of institution '${subsInstitution}' is not visible for user of institution '${userInstitution}'`,
+				errors: `Subscription of this institution is not visible for user of institution '${userInstitution}'`,
 			})
 		}
 
 		// return data
 		return res.status(200).json(subscription)
-	} catch (err) {
-		console.error(
-			'ingest/subscriptions/get',
-			'failed to get subscription',
-			JSON.stringify({
-				body: req.body,
-				error: err.stack || err,
-			})
-		)
-		return response.internalServerError(req, res, err)
+	} catch (error) {
+		logger.log({
+			level: 'error',
+			message: 'failed to get subscription',
+			source: 'ingest/subscriptions/get',
+			error,
+			data: { params: req.params },
+		})
+
+		return response.internalServerError(req, res, error)
 	}
 }

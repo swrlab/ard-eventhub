@@ -16,7 +16,12 @@ module.exports = async () => {
 	// DEV filter subscriptions by prefix
 
 	// map and filter values
-	subscriptions = await Promise.all(subscriptions.map(async (subscription) => mapSubscription(subscription)))
+	subscriptions = await Promise.all(
+		subscriptions.map(async (subscription) => {
+			const { limited } = await mapSubscription(subscription)
+			return Promise.resolve(limited)
+		})
+	)
 
 	// return data
 	return Promise.resolve(subscriptions)
