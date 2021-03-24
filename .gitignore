@@ -8,9 +8,13 @@ yarn-error.log*
 
 # keys
 keys/*.json
+.env
 
 # Dependency directories
 node_modules/
+coverage
+lib-cov
+.nyc_output
 
 # Optional npm cache directory
 .npm

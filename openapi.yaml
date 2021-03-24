@@ -10,7 +10,7 @@ info:
   license:
     name: European Union Public License 1.2
     url: 'https://spdx.org/licenses/EUPL-1.2.html'
-  version: 0.1.7
+  version: 1.0.0-beta
 externalDocs:
   description: ARD-Eventhub Documentation
   url: 'https://swrlab.github.io/ard-eventhub/'
@@ -135,7 +135,7 @@ paths:
     post:
       tags:
         - events
-      summary: Publish a new event
+      summary: Distribute a next track
       operationId: eventPostV1RadioTrackNext
       security:
         - bearerAuth: []
@@ -155,7 +155,7 @@ paths:
     post:
       tags:
         - events
-      summary: Publish a new event
+      summary: Distribute a now-playing track
       operationId: eventPostV1RadioTrackPlaying
       security:
         - bearerAuth: []
@@ -398,10 +398,9 @@ components:
           ```json
 
           {
-            "event": "de.ard.eventhub.v1.radio.track.playing",
             "start": "2020-01-19T06:00:00+01:00",
             "title": "Song name",
-            "serviceIds": [ "1234" ],
+            "assets": [ { ... } ],
             "playlistItemId": "swr3-5678"
           }
 
@@ -540,15 +539,41 @@ components:
         trace:
           type: string
           example: null
+
+    assets:
+      type: object
+      required:
+        - type
+        - externalId
+        - publisherId
+      properties:
+        type:
+          type: string
+          example: 'PermanentLivestream'
+          enum:
+          - 'EventLivestream'
+          - 'PermanentLivestream'
+        externalId:
+          type: string
+          example: 'crid://swr.de/123450'
+        publisherId:
+          type: string
+          description: |
+            External ID or globally unique identifier (Core ID) for the associated publisher.
+            When no Core ID is provided, the External ID will be converted by Eventhub.
+          example: '248000'
+        id:
+          type: string
+          description: Globally unique identifier, created by Eventhub
+          example: 'urn:ard:permanent-livestream:49267f7d67be180d'
     
     eventV1PostBody:
       additionalProperties: false
       required:
-        - event
         - type
         - start
         - title
-        - serviceIds
+        - assets
         - playlistItemId
       type: object
       description: >
@@ -557,6 +582,7 @@ components:
       properties:
         event:
           type: string
+          description: If set, it needs to match the URL event parameter
           example: de.ard.eventhub.v1.radio.track.playing
           enum:
             - de.ard.eventhub.v1.radio.track.playing
@@ -640,16 +666,14 @@ components:
                 type: string
                 description: Can link to external reference
                 nullable: true
-        serviceIds:
+        assets:
           type: array
           description: >-
             The playing stations unique Service-IDs. Do not include the
             Service-Type suffix.
           items:
-            type: string
-          example:
-            - '284680'
-            - '284700'
+            minItems: 1
+            $ref: '#/components/schemas/assets'
         playlistItemId:
           type: string
           description: >-
