@@ -110,6 +110,10 @@ module.exports = async (req, res) => {
 					// fetch prefix
 					const urnPublisherPrefix = config.coreIdPrefixes.Publisher
 
+					// add trailing 0 if number is only 5 digits
+					if (service.publisherId.length === 5)
+						service.publisherId = `${service.publisherId}0`
+
 					// create hash using given publisherId
 					service.publisherId = `${urnPublisherPrefix}${core.createHashedId(
 						service.publisherId
