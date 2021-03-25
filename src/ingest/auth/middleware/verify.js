@@ -5,12 +5,10 @@
 
 */
 
-// load node utils
-const slug = require('slug')
-
 // load utils
 const datastore = require('../../../utils/datastore')
 const firebase = require('../../../utils/firebase')
+const logger = require('../../../utils/logger')
 
 module.exports = async (req, res, next) => {
 	try {
@@ -32,13 +30,12 @@ module.exports = async (req, res, next) => {
 			req.user = await firebase.verifyToken(authorization)
 			res.set('x-ard-eventhub-uid', req.user.uid)
 		} catch (err) {
-			console.warn(
-				'ingest/auth/middleware/verify',
-				'user token invalid',
-				JSON.stringify({
-					error: err.stack || err,
-				})
-			)
+			logger.log({
+				level: 'notice',
+				message: 'user token invalid',
+				source: 'ingest/auth/middleware/verify',
+				data: { ...req.headers, authorization: 'hidden' },
+			})
 			return res.sendStatus(403)
 		}
 
@@ -51,20 +48,19 @@ module.exports = async (req, res, next) => {
 		}
 
 		// add user details to request profile
-		req.user.serviceIds = userDb.serviceIds
-		req.user.institution = userDb.institution
-		req.user.institution.name = slug(req.user.institution.name)
+		req.user.institutionId = userDb.institutionId
 
 		// continue with normal workflow, user is authenticated 🎉
 		return next()
-	} catch (err) {
-		console.error(
-			'ingest/auth/middleware/verify',
-			'failed to verify user',
-			JSON.stringify({
-				error: err.stack || err,
-			})
-		)
+	} catch (error) {
+		logger.log({
+			level: 'error',
+			message: 'failed to verify user',
+			source: 'ingest/auth/middleware/verify',
+			error,
+			data: { ...req.headers, authorization: 'hidden' },
+		})
+
 		return res.sendStatus(500)
 	}
 }

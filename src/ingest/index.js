@@ -8,9 +8,14 @@
 // enable tracing
 require('../utils/tracer')
 
-// load node utils and config
+// load node utils
 const compression = require('compression')
 const express = require('express')
+
+// load utils
+const logger = require('../utils/logger')
+
+// load config
 const config = require('../../config')
 
 // set up express server
@@ -26,7 +31,12 @@ server.use((req, res, next) => {
 		...req.headers,
 		authorization: 'hidden',
 	}
-	console.log('DEV middleware', JSON.stringify(logHeaders))
+	logger.log({
+		level: 'debug',
+		message: `middleware logging`,
+		source: 'DEV',
+		data: logHeaders,
+	})
 
 	// continue with normal workflow
 	next()

@@ -9,15 +9,20 @@
 const pubSubClient = require('./_client')
 const mapSubscription = require('./mapSubscription')
 
+// load config
+const config = require('../../../config')
+
 module.exports = async (name) => {
 	// fetch subscription list
-	let [subscription] = await pubSubClient.subscription(name).getMetadata()
+	const [subscription] = await pubSubClient.subscription(name).getMetadata()
 
-	// DEV filter subscriptions by prefix
+	// filter subscriptions by prefix
+	if (!subscription || subscription.name.indexOf(config.pubSubPrefix) === -1)
+		return Promise.reject(new Error(`subscription not found > ${name}`))
 
 	// map and filter values
-	subscription = await mapSubscription(subscription)
+	const mappedSubscription = await mapSubscription(subscription)
 
 	// return data
-	return Promise.resolve(subscription)
+	return Promise.resolve(mappedSubscription)
 }

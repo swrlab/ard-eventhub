@@ -11,7 +11,7 @@
       "name": "European Union Public License 1.2",
       "url": "https://spdx.org/licenses/EUPL-1.2.html"
     },
-    "version": "0.1.7"
+    "version": "1.0.0-beta2"
   },
   "externalDocs": {
     "description": "ARD-Eventhub Documentation",
@@ -215,7 +215,7 @@
         "tags": [
           "events"
         ],
-        "summary": "Publish a new event",
+        "summary": "Distribute a next track",
         "operationId": "eventPostV1RadioTrackNext",
         "security": [
           {
@@ -248,7 +248,7 @@
         "tags": [
           "events"
         ],
-        "summary": "Publish a new event",
+        "summary": "Distribute a now-playing track",
         "operationId": "eventPostV1RadioTrackPlaying",
         "security": [
           {
@@ -622,7 +622,7 @@
   "components": {
     "requestBodies": {
       "eventV1RadioTrack": {
-        "description": "New event to be distributed to subscribers.  \n  \nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.  \nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:  \n```json\n{\n  \"event\": \"de.ard.eventhub.v1.radio.track.playing\",\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"title\": \"Song name\",\n  \"serviceIds\": [ \"1234\" ],\n  \"playlistItemId\": \"swr3-5678\"\n}\n```\nRequired fields not specified in the Schema, will cause your request to fail.  \n  \nThe `id` is inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
+        "description": "New event to be distributed to subscribers.  \n  \nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.  \nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:  \n```json\n{\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"title\": \"Song name\",\n  \"services\": [ { ... } ],\n  \"playlistItemId\": \"swr3-5678\"\n}\n```\nRequired fields not specified in the Schema, will cause your request to fail.  \n  \nThe `id` is inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
         "content": {
           "application/json": {
             "schema": {
@@ -803,14 +803,45 @@
           }
         }
       },
+      "services": {
+        "type": "object",
+        "required": [
+          "type",
+          "externalId",
+          "publisherId"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "PermanentLivestream",
+            "enum": [
+              "EventLivestream",
+              "PermanentLivestream"
+            ]
+          },
+          "externalId": {
+            "type": "string",
+            "example": "crid://swr.de/123450"
+          },
+          "publisherId": {
+            "type": "string",
+            "description": "External ID or globally unique identifier (Core ID) for the associated publisher.\nWhen no Core ID is provided, the External ID will be converted by Eventhub.\n",
+            "example": "248000"
+          },
+          "id": {
+            "type": "string",
+            "description": "Globally unique identifier, created by Eventhub",
+            "example": "urn:ard:permanent-livestream:49267f7d67be180d"
+          }
+        }
+      },
       "eventV1PostBody": {
         "additionalProperties": false,
         "required": [
-          "event",
           "type",
           "start",
           "title",
-          "serviceIds",
+          "services",
           "playlistItemId"
         ],
         "type": "object",
@@ -818,6 +849,7 @@
         "properties": {
           "event": {
             "type": "string",
+            "description": "If set, it needs to match the URL event parameter",
             "example": "de.ard.eventhub.v1.radio.track.playing",
             "enum": [
               "de.ard.eventhub.v1.radio.track.playing",
@@ -920,16 +952,17 @@
               }
             }
           },
-          "serviceIds": {
+          "services": {
             "type": "array",
             "description": "The playing stations unique Service-IDs. Do not include the Service-Type suffix.",
             "items": {
-              "type": "string"
-            },
-            "example": [
-              "284680",
-              "284700"
-            ]
+              "minItems": 1,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/services"
+                }
+              ]
+            }
           },
           "playlistItemId": {
             "type": "string",

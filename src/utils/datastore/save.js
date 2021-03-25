@@ -22,6 +22,7 @@ module.exports = async (data, kind, id) => {
 	await datastoreClient.save({
 		key,
 		data,
+		excludeFromIndexes: ['contributors'],
 	})
 
 	// insert key

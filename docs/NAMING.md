@@ -20,17 +20,17 @@ Pub/Sub includes a number of restrictions around names, keys and values. For all
 ## Pub/Sub Topics
 
 ```txt
-<domain-prefix> . <service> . <module>  . <stage> . <service-id>
-     de.ard     . eventhub  . publisher .   dev   .  284680
+<domain-prefix> . <service> . <stage> . <encoded-core-id>
+     de.ard     . eventhub  .   dev   . urn%3Aard%3Aper...
 
-=> de.ard.eventhub.publisher.dev.284680
+=> de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3Aa315d3e482f09e1b
 ```
 
 ## Pub/Sub Subscriptions
 
 ```txt
-<domain-prefix> . <service> . <module>     . <stage> . <institution> . <uid>
-     de.ard     . eventhub  . subscription .   dev   .      swr      . 9bdb9316-c78a-4ebe-a131-30b2738435a3
+<domain-prefix> . <service> . <module>     . <stage> .   <uid>
+     de.ard     . eventhub  . subscription .   dev   . 9bdb9316-c78a-4ebe-a131-30b2738435a3
 
-=> de.ard.eventhub.subscription.dev.swr.9bdb9316-c78a-4ebe-a131-30b2738435a3
+=> de.ard.eventhub.subscription.dev.9bdb9316-c78a-4ebe-a131-30b2738435a3
 ```

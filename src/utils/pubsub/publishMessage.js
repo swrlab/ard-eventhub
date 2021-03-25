@@ -6,18 +6,23 @@
 */
 
 // load pubsub for internal queues
-const loggerDev = require('../loggerDev')
+const logger = require('../logger')
 const pubSubClient = require('./_client')
 const config = require('../../../config')
 
 // set local config
-const functionName = 'utils/pubsub/publishMessage'
+const source = 'pubsub.publishMessage'
 
-module.exports = async (topics, message) => {
-	loggerDev('log', [functionName, 'triggered', JSON.stringify({ topics, message })])
+module.exports = async (topic, message) => {
+	logger.log({
+		level: 'info',
+		message: `sending message > ${topic}`,
+		source,
+		data: { topic },
+	})
 
-	// initialize output object
-	const messageIds = {}
+	// initialize output
+	let output
 
 	// prepare buffer object
 	const messageBuffer = Buffer.from(JSON.stringify(message))
@@ -29,31 +34,32 @@ module.exports = async (topics, message) => {
 	}
 
 	// send message for each topic
-	for await (const topicName of topics) {
-		try {
-			// attempt to send message
-			messageIds[topicName] = await pubSubClient
-				.topic(topicName)
-				.publish(messageBuffer, customAttributes)
+	try {
+		// attempt to send message
+		output = await pubSubClient.topic(topic).publish(messageBuffer, customAttributes)
+	} catch (error) {
+		if (error?.code === 5) {
+			output = 'TOPIC_NOT_FOUND'
 
-			// log progress
-			loggerDev('log', [functionName, 'success', topicName, messageIds[topicName]])
-		} catch (err) {
-			if (err?.code === 5) {
-				messageIds[topicName] = 'TOPIC_NOT_FOUND'
-				loggerDev('error', [functionName, 'topic missing', topicName, messageIds[topicName]])
-			} else {
-				messageIds[topicName] = 'TOPIC_ERROR'
-				loggerDev('error', [
-					functionName,
-					'other error',
-					topicName,
-					messageIds[topicName],
-					JSON.stringify(err),
-				])
-			}
+			logger.log({
+				level: 'warning',
+				message: `topic not found > ${topic}`,
+				source,
+				error,
+				data: { topic },
+			})
+		} else {
+			output = 'TOPIC_ERROR'
+
+			logger.log({
+				level: 'error',
+				message: `failed sending message > ${topic}`,
+				source,
+				error,
+				data: { topic, message },
+			})
 		}
 	}
 
-	return Promise.resolve(messageIds)
+	return Promise.resolve(output)
 }

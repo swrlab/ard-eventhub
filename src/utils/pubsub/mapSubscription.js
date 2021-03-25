@@ -5,8 +5,12 @@
 
 */
 
-// load pubsub for internal queues
+// load utils
+const convertId = require('./convertId')
 const datastore = require('../datastore')
+
+// load config
+const config = require('../../../config')
 
 module.exports = async (subscription) => {
 	// remap vars to metadata object
@@ -21,33 +25,35 @@ module.exports = async (subscription) => {
 		: null
 
 	// remap values
-	const subscriptionRemap = {
+	const topicName = subscription.metadata.topic.split('/').pop()
+	const limited = {
 		type: 'PUBSUB',
 		method: subscription.metadata.pushConfig?.pushEndpoint ? 'PUSH' : 'PULL',
 
 		name: subscription.name.split('/').pop(),
 		path: subscription.name,
 
-		url: subscription.metadata.pushConfig?.pushEndpoint ?? null,
-
 		topic: {
-			name: subscription.metadata.topic.split('/').pop(),
+			id: convertId.decode(topicName).replace(config.pubSubPrefix, ''),
+			name: topicName,
 			path: subscription.metadata.topic,
 		},
 
 		ackDeadlineSeconds: subscription.metadata.ackDeadlineSeconds,
-		retainAckedMessages: subscription.metadata.retainAckedMessages,
 		retryPolicy: subscription.metadata.retryPolicy,
 		serviceAccount: subscription.metadata.pushConfig?.oidcToken?.serviceAccountEmail ?? null,
 
-		labels: subscription.metadata.labels,
-
-		created: lookup?.created ?? null,
+		url: subscription.metadata.pushConfig?.pushEndpoint ?? null,
 		contact: lookup?.contact ?? null,
-		owner: lookup?.owner ?? null,
-		institution: lookup?.institution ?? null,
+		institutionId: lookup?.institutionId ?? null,
+	}
+
+	const full = {
+		...limited,
+
+		labels: subscription.metadata.labels,
 	}
 
 	// return data
-	return Promise.resolve(subscriptionRemap)
+	return Promise.resolve({ limited, full })
 }

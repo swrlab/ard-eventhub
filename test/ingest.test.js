@@ -13,6 +13,7 @@
 
 // Require dependencies
 const chai = require('chai')
+const moment = require('moment')
 const chaiHttp = require('chai-http')
 const server = require('../src/ingest/index')
 
@@ -120,21 +121,26 @@ if (process.env.TEST_USER_RESET) {
 
 function testEventKeys(body) {
 	body.should.be.a('object')
-	body.should.have.property('topics').to.be.a('object')
-	body.should.have.property('message').to.be.a('object')
+	body.should.have.property('statuses').to.be.a('object')
+	body.should.have.property('event').to.be.a('object')
 }
 
 const eventName = 'de.ard.eventhub.v1.radio.track.playing'
 const eventPath = `/events/${eventName}`
 
 const swrTV = '990030'
-const ardDE = '990140'
 const event = {
 	event: eventName,
 	type: 'music',
-	start: '2020-01-01T06:00:00+01:00',
+	start: moment().toISOString(),
 	title: 'Unit Test Song',
-	serviceIds: [swrTV, ardDE],
+	services: [
+		{
+			type: 'PermanentLivestream',
+			externalId: 'crid://swr.de/282310/unit',
+			publisherId: '282310',
+		},
+	],
 	playlistItemId: 'unit-test-playlist',
 }
 
@@ -173,8 +179,8 @@ let topicName
 function testTopicKeys(body) {
 	body.should.be.a('object')
 	body.should.have.property('type').to.be.a('string')
+	body.should.have.property('id').to.be.a('string')
 	body.should.have.property('name').to.be.a('string')
-	body.should.have.property('path').to.be.a('string')
 	body.should.have.property('labels').to.be.a('object')
 }
 
@@ -197,11 +203,7 @@ describe(`GET ${topicPath}`, () => {
 				testResponse(res, 200)
 				res.body.should.be.a('array')
 				res.body.every((i) => testTopicKeys(i))
-				res.body.forEach((topic) => {
-					if (topic.name.indexOf(swrTV) !== -1) {
-						topicName = topic.name
-					}
-				})
+				topicName = res.body[0].id
 				done()
 			})
 	})
@@ -220,19 +222,15 @@ function testSubscriptionKeys(body) {
 	body.should.have.property('method').to.be.a('string')
 	body.should.have.property('name').to.be.a('string')
 	body.should.have.property('path').to.be.a('string')
-	body.should.have.property('url').to.be.a('string')
 	body.should.have.property('topic').to.be.a('object')
+	body.topic.should.have.property('id').to.be.a('string')
 	body.topic.should.have.property('name').to.be.a('string')
 	body.topic.should.have.property('path').to.be.a('string')
 	body.should.have.property('ackDeadlineSeconds').to.be.a('number')
-	body.should.have.property('retainAckedMessages').to.be.a('boolean')
 	body.should.have.property('serviceAccount').to.be.a('string')
-	body.should.have.property('labels').to.be.a('object')
-	body.labels.should.have.property('id').to.be.a('string')
-	body.labels.should.have.property('institution').to.be.a('string')
-	body.should.have.property('created').to.be.a('string')
+	body.should.have.property('url').to.be.a('string')
 	body.should.have.property('contact').to.be.a('string')
-	body.should.have.property('owner').to.be.a('string')
+	body.should.have.property('institutionId').to.be.a('string')
 }
 
 describe(`POST ${subscriptPath}`, () => {

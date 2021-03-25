@@ -7,13 +7,17 @@
 
 // load node utils
 const moment = require('moment')
+const slug = require('slug')
 
 // load utils
+const logger = require('../logger')
 const pubSubSubscriberClient = require('./_subscriberClient')
 const mapSubscription = require('./mapSubscription')
+
+// load config
 const config = require('../../../config')
 
-const functionName = 'utils/pubsub/createSubscription'
+const source = 'utils/pubsub/createSubscription'
 
 module.exports = async (subscription) => {
 	// map inputs for pubsub
@@ -30,23 +34,38 @@ module.exports = async (subscription) => {
 		},
 		labels: {
 			id: subscription.id,
-			institution: subscription.institution.name,
 			stage: config.stage,
-			created: moment().format('YYYY-MM-DD--x'),
+			'creator-slug': slug(subscription.creator),
+			created: moment().format('YYYY-MM-DD'),
 		},
 		ackDeadlineSeconds: 20,
 		expirationPolicy: {},
 	}
-	console.log(functionName, 'built options', JSON.stringify({ subscription, options }))
+	logger.log({
+		level: 'info',
+		message: 'built options',
+		source,
+		data: { subscription, options },
+	})
 
 	// submit subscription
-	let [createdSubscription] = await pubSubSubscriberClient.createSubscription(options)
-	console.log(functionName, 'created subscription', JSON.stringify({ createdSubscription }))
+	const [createdSubscription] = await pubSubSubscriberClient.createSubscription(options)
+	logger.log({
+		level: 'info',
+		message: 'created subscription',
+		source,
+		data: { createdSubscription },
+	})
 
 	// map and filter values
-	createdSubscription = await mapSubscription(createdSubscription)
-	console.log(functionName, 'mapped subscription', JSON.stringify({ createdSubscription }))
+	const { limited: mappedSubscription } = await mapSubscription(createdSubscription)
+	logger.log({
+		level: 'info',
+		message: 'mapped subscription',
+		source,
+		data: { mappedSubscription },
+	})
 
 	// return data
-	return Promise.resolve(createdSubscription)
+	return Promise.resolve(mappedSubscription)
 }

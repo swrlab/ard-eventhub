@@ -6,6 +6,7 @@
 */
 
 // load eventhub utils
+const logger = require('../../utils/logger')
 const pubsub = require('../../utils/pubsub')
 const response = require('../../utils/response')
 
@@ -16,20 +17,20 @@ module.exports = async (req, res) => {
 
 		// verify if user is allowed to list subscriptions (same institution)
 		subscriptions = subscriptions.filter(
-			(subscription) => subscription?.institution?.id === req.user.institution?.id
+			(subscription) => subscription?.institutionId === req.user.institutionId
 		)
 
 		// return data
 		return res.status(200).json(subscriptions)
-	} catch (err) {
-		console.error(
-			'ingest/subscriptions/list',
-			'failed to list subscriptions',
-			JSON.stringify({
-				body: req.body,
-				error: err.stack || err,
-			})
-		)
-		return response.internalServerError(req, res, err)
+	} catch (error) {
+		logger.log({
+			level: 'error',
+			message: 'failed to list subscriptions',
+			source: 'ingest/subscriptions/list',
+			error,
+			data: {},
+		})
+
+		return response.internalServerError(req, res, error)
 	}
 }

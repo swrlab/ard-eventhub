@@ -7,6 +7,7 @@
 
 // import version from package.json
 const { version } = require('../package.json')
+const coreIdPrefixes = require('./coreIdPrefixes.json')
 
 // check existence of several process vars
 if (!process.env.GCP_PROJECT_ID) {
@@ -23,10 +24,12 @@ const stage = process.env.STAGE
 // set config
 const serviceName = 'ard-eventhub'
 const baseConfig = {
-	userAgent: `${serviceName}/${version}`,
-	pubsubPrefix: 'de.ard.eventhub',
+	coreIdPrefixes,
+	pubSubPrefix: `de.ard.eventhub.${stage}.`,
 	stage,
+	userAgent: `${serviceName}/${version}`,
 	version,
+	isDebug: process.env.DEBUG === 'true',
 }
 
 // set config based on stages
@@ -34,6 +37,10 @@ const config = {
 	dev: {
 		...baseConfig,
 		serviceName: `${serviceName}-dev`,
+	},
+	test: {
+		...baseConfig,
+		serviceName: `${serviceName}-test`,
 	},
 	prod: {
 		...baseConfig,

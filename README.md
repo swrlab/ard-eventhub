@@ -55,15 +55,18 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `firebase-admin`              | [Apache License 2.0](https://github.com/firebase/firebase-admin-node/blob/master/LICENSE) |
 | NPM     | `jsonwebtoken`                | [MIT](https://github.com/auth0/node-jsonwebtoken/blob/master/LICENSE)                     |
 | NPM     | `moment`                      | [MIT](https://github.com/moment/moment/blob/develop/LICENSE)                              |
+| NPM     | `node-crc`                    | [MIT](https://github.com/magiclen/node-crc/blob/master/LICENSE)                           |
 | NPM     | `node-fetch`                  | [MIT](https://github.com/node-fetch/node-fetch/blob/master/LICENSE.md)                    |
 | NPM     | `slug`                        | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                  |
 | NPM     | `swagger-ui-express`          | [MIT](https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE)              |
 | NPM     | `uuid`                        | [MIT](https://github.com/uuidjs/uuid/blob/master/LICENSE.md)                              |
+| NPM     | `winston`                     | [MIT](hhttps://github.com/winstonjs/winston/blob/master/LICENSE)                          |
 | NPM DEV | `@swrlab/eslint-plugin-swr`   | [ISC](https://github.com/swrlab/eslint-plugin-swr/)                                       |
 | NPM DEV | `@swrlab/swr-prettier-config` | [ISC](https://github.com/swrlab/prettier-config/blob/main/license.md)                     |
 | NPM DEV | `chai`                        | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                 |
 | NPM DEV | `chai-http`                   | [MIT](https://github.com/chaijs/chai-http/blob/master/package.json)                       |
 | NPM DEV | `docsify-cli`                 | [MIT](https://github.com/docsifyjs/docsify-cli/blob/master/LICENSE)                       |
+| NPM DEV | `dotenv`                      | [BSD-2-Clause](<[BSD-2-Clause](https://github.com/motdotla/dotenv/blob/master/LICENSE)>)  |
 | NPM DEV | `eslint`                      | [MIT](https://github.com/eslint/eslint/blob/master/LICENSE)                               |
 | NPM DEV | `eslint-plugin-swr`           | [ISC](https://github.com/swrlab/eslint-plugin-swr/blob/main/package.json)                 |
 | NPM DEV | `eslint-plugin-chai-friendly` | [MIT](https://github.com/ihordiachenko/eslint-plugin-chai-friendly/blob/master/LICENSE)   |
