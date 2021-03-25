@@ -38,6 +38,10 @@ const config = {
 		...baseConfig,
 		serviceName: `${serviceName}-dev`,
 	},
+	test: {
+		...baseConfig,
+		serviceName: `${serviceName}-test`,
+	},
 	prod: {
 		...baseConfig,
 		serviceName,
