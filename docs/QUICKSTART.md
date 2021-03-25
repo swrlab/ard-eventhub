@@ -20,7 +20,35 @@ If you are a radio station that wants to start publishing events to ARD-Eventhub
 
 - Set up your account and understand the authentication process
 - Use the POST `/events/{eventName}` endpoint to add your events
-- Note: Even if GET `/topics` does not list your radio station(s) beforehand, the topic(s) will be created during your first published event (response will contain: `"topic": { ..., "status": "TOPIC_CREATED" }`)
+- Note: Even if GET `/topics` does not list your radio station(s) beforehand, the topic(s) will be created during your first published event (response will contain:
+
+```js
+{
+    "statuses": {
+        "published": 0,
+        "blocked": 0,
+        "failed": 1
+    },
+    "event": {
+        "name": "de.ard.eventhub.v1.radio.track.next",
+        // ...
+        "services": [
+            {
+                "type": "PermanentLivestream",
+                "externalId": "crid://swr.de/282310/demo7",
+                "publisherId": "urn:ard:publisher:75dbb3dace15f610",
+                "topic": {
+                    "id": "urn:ard:permanent-livestream:234690e18c2c7863",
+                    "name": "de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3A234690e18c2c7863",
+                    "status": "TOPIC_CREATED",
+                    "messageId": null
+                }
+            }
+        ],
+        // ...
+    }
+}
+```
 
 It is recommended to use the Eventhub `test` system first, to make sure everything works. Then bring it to production on `prod`. The host names are listed in the Stages document.
 
@@ -85,7 +113,7 @@ In your system for every new event, you might follow a workflow like this:
    "media": [
       {
          "type": "cover",
-         "url": "http://rdz-dev:4001/covers/M0589810.001",
+         "url": "http://my-server/covers/M0589810.001",
          "templateUrl": null,
          "description": "SWR Cover zu Save your tears von The Weeknd",
          "attribution": ""
