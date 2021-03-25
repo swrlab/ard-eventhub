@@ -35,7 +35,7 @@ module.exports = async (subscription) => {
 		labels: {
 			id: subscription.id,
 			stage: config.stage,
-			creator: slug(subscription.creator),
+			'creator-slug': slug(subscription.creator),
 			created: moment().format('YYYY-MM-DD'),
 		},
 		ackDeadlineSeconds: 20,
