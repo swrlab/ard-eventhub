@@ -136,7 +136,7 @@ module.exports = async (req, res) => {
 					})
 				}
 
-				// check allowed serviceIds for current user
+				// check allowed institutions for current user
 				if (!service.blocked && user.institutionId !== publisher?.institution?.id) {
 					// set blocked flag to be filtered out
 					service.blocked = true
@@ -187,10 +187,28 @@ module.exports = async (req, res) => {
 
 					// try creating new topic
 					const newTopic = {
+						created: moment().toISOString(),
+						creator: user.email,
+
+						coreId: service.topic.id,
+						externalId: service.externalId,
 						name: service.topic.name,
-						pubTitle: publisher.title,
-						institutionTitle: publisher.institution.title,
+
+						institution: {
+							id: user.institutionId,
+							title: publisher.institution.title,
+						},
+						publisher: {
+							id: service.publisherId,
+							title: publisher.title,
+						},
 					}
+
+					// save topic to datastore
+					await datastore.save(newTopic, 'topics')
+					newTopic.id = newTopic.id.toString()
+
+					// create topic
 					const [result] = await pubsub.createTopic(newTopic)
 
 					// handle feedback

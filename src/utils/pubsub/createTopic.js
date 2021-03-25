@@ -18,8 +18,10 @@ module.exports = async (newTopic) => {
 	const topic = {
 		name: `projects/${process.env.GCP_PROJECT_ID}/topics/${newTopic.name}`,
 		labels: {
+			id: newTopic.id,
+			creator: slug(newTopic.creator),
 			created: moment().format('YYYY-MM-DD'),
-			'publication-title': slug(newTopic.pubTitle),
+			'publisher-title': slug(newTopic.publisherTitle),
 			'institution-title': slug(newTopic.institutionTitle),
 			stage: config.stage,
 		},
