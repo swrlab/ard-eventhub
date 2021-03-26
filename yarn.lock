@@ -1600,10 +1600,10 @@ date-and-time@^0.14.2:
   resolved "https://registry.yarnpkg.com/date-and-time/-/date-and-time-0.14.2.tgz#a4266c3dead460f6c231fe9674e585908dac354e"
   integrity sha512-EFTCh9zRSEpGPmJaexg7HTuzZHh6cnJj1ui7IGCFNXzd2QdpsNh05Db5TF3xzJm30YN+A8/6xHSuRcQqoc3kFA==
 
-dd-trace@^0.31.2:
-  version "0.31.2"
-  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-0.31.2.tgz#0fe6a8720e57b884c8fb2765e9119cc62c895b9d"
-  integrity sha512-z7nZWJw8q074yM6l8sn+iB4MfF00P1ZheXcnuEc4r/Za4IsUdIXUTIOoXKC6w6wDHt8uQTrVWwAGfUyQJIIneg==
+dd-trace@^0.31.3:
+  version "0.31.3"
+  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-0.31.3.tgz#694ec4133d6862e9573dfb8b4668e4e0ea49a09b"
+  integrity sha512-JyRnSe6AgCYyHmGSjG2bhlrZTL7z318FI3tWQ+TNPHccfSu3AAZI+o1dL8w2YFgyJ6OYFGnu+w73aI0/Wkb9HQ==
   dependencies:
     "@types/node" "^10.12.18"
     axios "^0.21.1"

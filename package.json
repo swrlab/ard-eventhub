@@ -23,7 +23,7 @@
 		"@google-cloud/pubsub": "^2.10.0",
 		"body-parser": "^1.19.0",
 		"compression": "^1.7.4",
-		"dd-trace": "^0.31.2",
+		"dd-trace": "^0.31.3",
 		"express": "4.17.1",
 		"express-openapi-validator": "^4.12.6",
 		"firebase-admin": "^9.5.0",
