@@ -97,7 +97,7 @@ describe(`POST ${refreshPath}`, () => {
 // 🚨 firebase limit is 150 requests per day 🚨
 const resetPath = '/auth/reset'
 
-if (process.env.TEST_USER_RESET) {
+if (process.env.TEST_USER_RESET === true) {
 	describe(`POST ${resetPath}`, () => {
 		it('request password reset email', (done) => {
 			const resetRequest = {
@@ -128,7 +128,6 @@ function testEventKeys(body) {
 const eventName = 'de.ard.eventhub.v1.radio.track.playing'
 const eventPath = `/events/${eventName}`
 
-const swrTV = '990030'
 const event = {
 	event: eventName,
 	type: 'music',
