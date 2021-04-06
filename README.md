@@ -85,6 +85,6 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 
 This project was realized by
 
-- [Daniel Freytag](https://twitter.com/FRYTG)
-- [Rafael Mäuer](https://twitter.com/rafaelmaeuer)
-- [Christian Hufnagel](https://twitter.com/hufnagel)
+- [Daniel Freytag](https://github.com/frytg)
+- [Rafael Mäuer](https://github.com/rafaelmaeuer)
+- [Christian Hufnagel](https://github.com/chhufnagel)
