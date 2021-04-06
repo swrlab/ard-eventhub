@@ -8,13 +8,14 @@ The Ingest service is used to accept incoming events, distribute them via Pub/Su
 
 Designated host is Kubernetes but the Docker container will also be used in other environments such as Google Cloud Run for testing purposes.
 
-It needs several environment variables to work:
+Several environment variables need to be set in `.env` config in order to run the project:
 
-- REQUIRED `FIREBASE_API_KEY` - corresponding `API_KET` which matches the `GCP_PROJECT_ID`
-- REQUIRED `GOOGLE_APPLICATION_CREDENTIALS` - where the Google Cloud Service Account Key can be found (usually a path to a .json file)
 - REQUIRED `GCP_PROJECT_ID` - which GCP project ID to use for Pub/Sub and Datastore requests
-- OPTIONAL `PORT` - override server port setting, default is 8080
+- REQUIRED `FIREBASE_API_KEY` - corresponding `API_KEY` which matches the `GCP_PROJECT_ID`
+- REQUIRED `GOOGLE_APPLICATION_CREDENTIALS` - where the Google Cloud Service Account Key can be found (usually a path to a .json file)
 - REQUIRED `STAGE` - can be one of the Stages below to switch several settings
+- OPTIONAL `PORT` - override server port setting, default is 8080
+- OPTIONAL `DEBUG` - set true to enable more detailed logging
 
 ### Stages
 
@@ -42,12 +43,9 @@ To run this project locally in your development environment you'll need these pr
    6. `roles/monitoring.metricWriter`
    7. `roles/pubsub.admin`
 3. Install dependencies (`yarn`)
-4. Run the project (replace `gcp-project` and `fb-api-key`)
+4. Run the project
 
    ```sh
-   STAGE=dev \
-   GCP_PROJECT_ID=gcp-project \
-   FIREBASE_API_KEY=fb-api-key \
    yarn ingest:local
    ```
 

@@ -5,9 +5,9 @@
 	"main": "./src/ingest/index.js",
 	"scripts": {
 		"docs:serve": "docsify serve . --port 3000",
-		"ingest:test": "mocha test/ingest.test.js --timeout 15000 --exit",
+		"ingest:test": "mocha test/ingest.test.js --timeout 15000 --exit -r dotenv/config",
 		"ingest:local": "nodemon -r dotenv/config ./src/ingest/index.js",
-		"ingest:cloud": "node ./src/ingest/index.js",
+		"ingest:cloud": "node -r dotenv/config ./src/ingest/index.js",
 		"license": "chmod +x license.sh && ./license.sh",
 		"test": "mocha test/example.test.js"
 	},
