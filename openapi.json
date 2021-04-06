@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.0.3",
   "info": {
     "title": "ARD-Eventhub",
     "description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
@@ -239,6 +239,36 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUnauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invalid authorization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorForbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
+                }
+              }
+            }
           }
         }
       }
@@ -269,6 +299,36 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/errorBadRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUnauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invalid authorization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorForbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
                 }
               }
             }
@@ -417,6 +477,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/errorNotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
                 }
               }
             }

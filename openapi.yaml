@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: ARD-Eventhub
   description: >-
@@ -151,6 +151,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorBadRequest'
+        '401':
+          description: Missing authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorUnauthorized'
+        '403':
+          description: Invalid authorization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorForbidden'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorInternalServerError'
   '/events/de.ard.eventhub.v1.radio.track.playing':
     post:
       tags:
@@ -171,6 +189,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorBadRequest'
+        '401':
+          description: Missing authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorUnauthorized'
+        '403':
+          description: Invalid authorization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorForbidden'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorInternalServerError'
   /subscriptions:
     get:
       tags:
@@ -263,6 +299,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorInternalServerError'
   '/subscriptions/{name}':
     get:
       tags:
