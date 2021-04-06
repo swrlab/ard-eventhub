@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
 		const { user } = req
 
 		// check eventName
-		if (message.event && eventName !== message.event) {
+		if (message?.event !== eventName) {
 			// log access attempt
 			logger.log({
 				level: 'warning',
@@ -183,7 +183,7 @@ module.exports = async (req, res) => {
 				// handle errors
 				if (messageId === 'TOPIC_ERROR') {
 					// insert error message and empty id
-					service.topic.status = 'TOPIC_ERROR_1'
+					service.topic.status = 'TOPIC_ERROR'
 					service.topic.messageId = null
 				} else if (messageId === 'TOPIC_NOT_FOUND') {
 					// fetch publisher
@@ -228,7 +228,7 @@ module.exports = async (req, res) => {
 						})
 					} else {
 						// Update api result that topic was not created
-						service.topic.status = 'TOPIC_ERROR_2'
+						service.topic.status = 'TOPIC_NOT_CREATED'
 
 						logger.log({
 							level: 'error',
