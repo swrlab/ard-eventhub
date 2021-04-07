@@ -64,7 +64,7 @@ router.delete('/subscriptions/:subscriptionName', authVerify, require('./subscri
 router.get('/topics/', authVerify, require('./topics/list'))
 router.get('/topics/:topicName', authVerify, require('./topics/list'))
 
-// send healthcheck ok
+// send health-check ok
 router.get(['/', '/health'], (req, res) => {
 	res.sendStatus(200)
 })

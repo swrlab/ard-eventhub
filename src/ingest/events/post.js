@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
 			// log access attempt
 			logger.log({
 				level: 'warning',
-				message: 'User attempted event with missmatching names',
+				message: 'User attempted event with mismatching names',
 				source,
 				data: {
 					email: req.user.email,
