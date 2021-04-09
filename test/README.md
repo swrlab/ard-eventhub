@@ -7,27 +7,16 @@ As test-environment [Mocha](https://mochajs.org/) is used in combination with [C
 
 ### Environments
 
-It needs several environment variables to work:
+In addition to the [ingest-env](../src/ingest/README.md#Environments), following variables are needed in `.env` config for unit tests to work:
 
-- REQUIRED `STAGE` - can be one of the Stages DEV / PROD
-- REQUIRED `GCP_PROJECT_ID` - which GCP project ID to use for Pub/Sub and Datastore requests
-- REQUIRED `FIREBASE_API_KEY` - corresponding `API_KEY` which matches the `GCP_PROJECT_ID`
-- OPTIONAL `PORT` - override server port setting, default is 8080
 - REQUIRED `TEST_USER` - test user email
 - REQUIRED `TEST_USER_PW` - test user password
-- OPTIONAL `TEST_USER_RESET` - test email reset (request limit)
+- OPTIONAL `TEST_USER_RESET` - set true for email reset (request limit)
 
 ## Setup
 
-To run the tests follow the [ingest-setup](../src/ingest/README.md) first
-
-Run the project (replace `gcp-project`, `fb-api-key`, `test-user-email` and `test-user-password`)
+Follow the [ingest-setup](../src/ingest/README.md) first, then run tests with
 
    ```sh
-   STAGE=dev \
-   GCP_PROJECT_ID=gcp-project \
-   FIREBASE_API_KEY=fb-api-key \
-   TEST_USER=test-user-email \
-   TEST_USER_PW=test-user-password \
    yarn ingest:test
    ```
