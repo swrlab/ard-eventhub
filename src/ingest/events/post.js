@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
 		const { user } = req
 
 		// check eventName
-		if (message?.event !== eventName) {
+		if (message?.event && message.event !== eventName) {
 			// log access attempt
 			logger.log({
 				level: 'warning',
@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
 				source,
 				data: {
 					email: req.user.email,
-					body: message.event,
+					body: req.body,
 					params: eventName,
 				},
 			})
