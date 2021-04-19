@@ -2313,10 +2313,10 @@ event-target-shim@^5.0.0:
   resolved "https://registry.yarnpkg.com/event-target-shim/-/event-target-shim-5.0.1.tgz#5d4d3ebdf9583d63a5333ce2deb7480ab2b05789"
   integrity sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==
 
-express-openapi-validator@^4.12.7:
-  version "4.12.7"
-  resolved "https://registry.yarnpkg.com/express-openapi-validator/-/express-openapi-validator-4.12.7.tgz#af7635d5c1890aa749d12bbfa786700e99eb33fa"
-  integrity sha512-W9IWH7P3L/2NYubhpfXbT2lt1i+U7ZMmAt/UDLn5xDfMYxl7zlXo7LtjcO0hOItYGicFLgQleBsw9cNHDZBkug==
+express-openapi-validator@^4.12.8:
+  version "4.12.8"
+  resolved "https://registry.yarnpkg.com/express-openapi-validator/-/express-openapi-validator-4.12.8.tgz#e1ca0fd39cf7921cba8530d3b5d927bfcfd41035"
+  integrity sha512-5U5wdMbBS4U408eAgwr1HMlkIEEujAM/l4rmrdRva4CLJuUADizxinhH0ECjgDkEuc4y8RBF7qX/DNXTSSZXvA==
   dependencies:
     "@types/multer" "^1.4.5"
     ajv "^6.12.6"
