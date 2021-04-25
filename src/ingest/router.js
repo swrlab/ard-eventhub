@@ -43,8 +43,9 @@ router.use(
 // load response util
 const response = require('../utils/response')
 
-// register swagger UI endpoint
-router.use('/openapi', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerConfig))
+// register swagger endpoints
+router.get('/openapi/openapi.json', (req, res) => res.json(swaggerDocument));
+router.use('/openapi', swaggerUi.serve, swaggerUi.setup({}, swaggerConfig))
 
 // load auth middleware
 const authVerify = require('./auth/middleware/verify')
