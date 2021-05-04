@@ -3,14 +3,18 @@
 Each triggered `track` can and must be of a certain type, to be properly displayed by receiving subscribers.
 
 - [ARD-Eventhub / Types](#ard-eventhub--types)
+  - [`music`](#music)
+  - [`live`](#live)
+  - [`news`](#news)
+  - [`weather`](#weather)
+  - [`traffic`](#traffic)
   - [`audio`](#audio)
   - [`commercial`](#commercial)
   - [`jingle`](#jingle)
-  - [`live`](#live)
-  - [`music`](#music)
-  - [`news`](#news)
-  - [`traffic`](#traffic)
-  - [`weather`](#weather)
+
+
+
+
 
 
 ## `music`
