@@ -104,7 +104,7 @@ Similar to `news` it marks the beginning of a weather segment.
 ```json
 {
   "event": "de.ard.eventhub.v1.radio.track.playing",
-  "type": "traffic",
+  "type": "weather",
   "start": "2020-01-19T06:03:00+01:00",
   "length": 30,
   "title": "Wetter",
@@ -138,5 +138,4 @@ Use this to provide triggers for playing commercials, such as ad breaks before t
 ## `jingle`
 
 Unfavorable but can be used to signalize a new item that ends the previous element. Should only be used if no information about its contents are available. E.g. a jingle that starts the news, should not be sent as `jingle`, but as `news`. The `title` field must be a value that can be displayed externally and must not be the jingle's filename.
-
 
