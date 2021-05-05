@@ -12,11 +12,6 @@ Each triggered `track` can and must be of a certain type, to be properly display
   - [`commercial`](#commercial)
   - [`jingle`](#jingle)
 
-
-
-
-
-
 ## `music`
 
 A song or commercially produced piece of music. It is highly recommended and expected to set both `title` and `artist`. Full details about participating artists inside `contributors` is a bonus. This type should ideally also include references to its source element, like `confId` from ARD's HFDB, `isrc` and `upc`.
