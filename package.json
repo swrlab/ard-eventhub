@@ -1,6 +1,6 @@
 {
 	"name": "ard-eventhub",
-	"version": "1.0.0-beta2",
+	"version": "1.0.0",
 	"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
 	"main": "./src/ingest/index.js",
 	"scripts": {
