@@ -42,7 +42,7 @@
 		"chai": "^4.3.4",
 		"chai-http": "^4.3.0",
 		"docsify-cli": "^4.4.3",
-		"dotenv": "^8.2.0",
+		"dotenv": "^8.5.1",
 		"eslint": "^7.23.0",
 		"eslint-plugin-chai-friendly": "^0.6.0",
 		"eslint-plugin-swr": "0.0.5",
