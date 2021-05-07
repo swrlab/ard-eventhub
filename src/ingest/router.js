@@ -44,8 +44,8 @@ router.use(
 const response = require('../utils/response')
 
 // register swagger endpoints
-router.get('/openapi/openapi.json', (req, res) => res.json(swaggerDocument));
-router.get('/openapi/openapi.yaml', (req, res) => res.sendFile('openapi.yaml', { root: '.' }));
+router.get('/openapi/openapi.json', (req, res) => res.json(swaggerDocument))
+router.get('/openapi/openapi.yaml', (req, res) => res.sendFile('openapi.yaml', { root: '.' }))
 router.use('/openapi', swaggerUi.serve, swaggerUi.setup({}, swaggerConfig))
 
 // load auth middleware
