@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Fixes for CVE-2021-27515 and CVE-2021-23362
 - Update project dependencies
 
 ## [1.0.0-beta2] - 2021-03-25

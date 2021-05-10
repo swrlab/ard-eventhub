@@ -1554,10 +1554,10 @@ date-and-time@^0.14.2:
   resolved "https://registry.yarnpkg.com/date-and-time/-/date-and-time-0.14.2.tgz#a4266c3dead460f6c231fe9674e585908dac354e"
   integrity sha512-EFTCh9zRSEpGPmJaexg7HTuzZHh6cnJj1ui7IGCFNXzd2QdpsNh05Db5TF3xzJm30YN+A8/6xHSuRcQqoc3kFA==
 
-dd-trace@^0.33.0:
-  version "0.33.0"
-  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-0.33.0.tgz#e968a1eff19cf28dee04631f4f52d7e1cc59016b"
-  integrity sha512-1ovGey49GeaQmDa5PgTwnU9EM2I98E+HWvD7fyMmiYA6uraOsvPl8nzRP64O/sPxkyrbCCtwSDs0B/yhHBwLpQ==
+dd-trace@^0.33.1:
+  version "0.33.1"
+  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-0.33.1.tgz#dc9d283c7c875495aa4f170af00c03edd978b01e"
+  integrity sha512-5PoDEfUYiYwNOwGS1nTeOfrYkwKHtAJHrXMk/Ds5KxliiLqmSGPK48dNCtrPANoLSuDmpxA1gVJ4K13QVn2SVg==
   dependencies:
     "@types/node" "^10.12.18"
     form-data "^3.0.0"
@@ -1777,10 +1777,10 @@ dot-prop@^5.2.0:
   dependencies:
     is-obj "^2.0.0"
 
-dotenv@^8.5.1:
-  version "8.5.1"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.5.1.tgz#e3a4c7862daba51b92bce0da5c349f11faa28663"
-  integrity sha512-qC1FbhCH7UH7B+BcRNUDhAk04d/n+tnGGB1ctwndZkVFeehYJOn39pRWWzmdzpFqImyX1KB8tO0DCHLf8yRaYQ==
+dotenv@^9.0.1:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-9.0.1.tgz#a889a28a3a515812dde1e7f8183ef5cdf3186b97"
+  integrity sha512-W8FNeNnnvJoYfgkFRKzp8kTgz0T2YY4TJ9xy1Ma0hSebPTK8iquRtpG12TUrSTX5zIN9D/wSLEEuI+Ad35tlyw==
 
 duplexer3@^0.1.4:
   version "0.1.4"
@@ -2841,10 +2841,10 @@ he@1.2.0:
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
-hosted-git-info@^2.1.4:
-  version "2.8.8"
-  resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.8.8.tgz#7539bd4bc1e0e0a895815a2e0262420b12858488"
-  integrity sha512-f/wzC2QaWBs7t9IYqB4T3sR1xviIViXJRJTWBlx2Gf3g0Xi5vI7Yy4koXQ1c9OYDGHN9sBy1DQ2AB8fqZBWhUg==
+hosted-git-info@^2.1.4, hosted-git-info@^2.8.9:
+  version "2.8.9"
+  resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.8.9.tgz#dffc0bf9a21c02209090f2aa69429e1414daf3f9"
+  integrity sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==
 
 http-cache-semantics@^4.0.0:
   version "4.1.0"
@@ -3323,10 +3323,10 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-license-compliance@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/license-compliance/-/license-compliance-1.2.0.tgz#d45a68ff49ed6d9a7cfb567bb2105f99b5560bd5"
-  integrity sha512-rEyvY4L8Wom6zt6R8HN1C59EEMBc9EBTpaWdtrcNNeWpxFCOc6fA/ETCRzuX3IKJ/J3e4AnUijKGZ9t2W9eZbw==
+license-compliance@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/license-compliance/-/license-compliance-1.2.1.tgz#38ebaac8f941c5f95c4347906aeb26dfe6496175"
+  integrity sha512-juwCQyf1UcSoWarCwOz/RnSnxe/6xckbUFXtmgcc4IxZ0EX01p/YJIhQW5EjPshCDKbOKg4xevQ4PhMdrsij9Q==
   dependencies:
     chalk "4.1.0"
     commander "7.2.0"
@@ -3335,7 +3335,7 @@ license-compliance@^1.2.0:
     joi "17.4.0"
     spdx-expression-parse "3.0.1"
     spdx-satisfies "5.0.0"
-    tslib "2.1.0"
+    tslib "2.2.0"
     xmlbuilder "15.1.1"
 
 limiter@^1.1.4:
@@ -5006,10 +5006,10 @@ tsconfig-paths@^3.9.0:
     minimist "^1.2.0"
     strip-bom "^3.0.0"
 
-tslib@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.1.0.tgz#da60860f1c2ecaa5703ab7d39bc05b6bf988b97a"
-  integrity sha512-hcVC3wYEziELGGmEEXue7D75zbwIIVUMWAVbHItGPx0ziyXxrOMQx4rQEVEV45Ut/1IotuEvwqPopzIOkDMf0A==
+tslib@2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.2.0.tgz#fb2c475977e35e241311ede2693cee1ec6698f5c"
+  integrity sha512-gS9GVHRU+RGn5KQM2rllAlR3dU6m7AcpJKdtH8gFvQiC4Otgk98XnmMU+nZenHt/+VhnBPWwgrJsyrdcw6i23w==
 
 tslib@^1.11.1, tslib@^1.8.1:
   version "1.14.1"
@@ -5132,10 +5132,10 @@ url-parse-lax@^3.0.0:
   dependencies:
     prepend-http "^2.0.0"
 
-url-parse@^1.4.3:
-  version "1.4.7"
-  resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.4.7.tgz#a8a83535e8c00a316e403a5db4ac1b9b853ae278"
-  integrity sha512-d3uaVyzDB9tQoSXFvuSUNFibTd9zxd2bkVrDRvF5TmvWWQwqE4lgYJ5m+x1DbecWkw+LK4RNl2CU1hHuOKPVlg==
+url-parse@^1.4.3, url-parse@^1.5.0:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.5.1.tgz#d5fa9890af8a5e1f274a2c98376510f6425f6e3b"
+  integrity sha512-HOfCOUJt7iSYzEx/UqgtwKRMC6EU91NFhsCHMv9oM03VJcVo2Qrp8T8kI9D7amFf1cu+/3CEhgb3rF9zL7k85Q==
   dependencies:
     querystringify "^2.1.1"
     requires-port "^1.0.0"
