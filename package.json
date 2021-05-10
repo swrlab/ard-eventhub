@@ -51,10 +51,6 @@
 		"nodemon": "^2.0.7",
 		"prettier": "^2.2.1"
 	},
-	"resolutions": {
-		"url-parse": "^1.5.0",
-		"hosted-git-info": "^2.8.9"
-	},
 	"engines": {
 		"node": ">=14.0.0"
 	},
