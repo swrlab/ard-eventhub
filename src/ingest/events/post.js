@@ -254,6 +254,25 @@ module.exports = async (req, res) => {
 		// replace services
 		message.services = newServices
 
+		// handle plugin integrations
+		const pluginMessages = []
+		for await (const plugin of message.plugins) {
+			const pluginMessage = {
+				action: `plugins.${plugin.type}.event`,
+				event: message,
+				plugin,
+			}
+
+			// try sending message
+			const messageId = await pubsub.publishMessage(config.pubSubTopicSelf, pluginMessage)
+
+			// add to output
+			pluginMessages.push({
+				type: plugin.type,
+				messageId,
+			})
+		}
+
 		// prepare output data
 		const data = {
 			statuses: {
@@ -263,6 +282,7 @@ module.exports = async (req, res) => {
 					(service) => !service.topic?.messageId && !service.blocked
 				).length,
 			},
+			plugins: pluginMessages,
 			event: message,
 		}
 

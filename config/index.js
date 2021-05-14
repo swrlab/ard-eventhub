@@ -26,6 +26,7 @@ const serviceName = 'ard-eventhub'
 const baseConfig = {
 	coreIdPrefixes,
 	pubSubPrefix: `de.ard.eventhub.${stage}.`,
+	pubSubTopicSelf: `de.ard.eventhub.${stage}.internal`,
 	stage,
 	userAgent: `${serviceName}/${version}`,
 	version,
