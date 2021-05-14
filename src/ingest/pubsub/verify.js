@@ -15,7 +15,7 @@ const logger = require('../../utils/logger')
 
 // set config
 // TODO migrate to ENV
-const serviceAccountEmail = 'somethin@something-else.iam.gserviceaccount.com'
+const serviceAccountEmail = process.env.SERVICE_ACCOUNT_EMAIL_INTERNAL
 
 module.exports = async (req, res, next) => {
 	try {

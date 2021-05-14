@@ -256,21 +256,23 @@ module.exports = async (req, res) => {
 
 		// handle plugin integrations
 		const pluginMessages = []
-		for await (const plugin of message.plugins) {
-			const pluginMessage = {
-				action: `plugins.${plugin.type}.event`,
-				event: message,
-				plugin,
+		if (message?.plugins?.length > 0) {
+			for await (const plugin of message.plugins) {
+				const pluginMessage = {
+					action: `plugins.${plugin.type}.event`,
+					event: message,
+					plugin,
+				}
+
+				// try sending message
+				const messageId = await pubsub.publishMessage(config.pubSubTopicSelf, pluginMessage)
+
+				// add to output
+				pluginMessages.push({
+					type: plugin.type,
+					messageId,
+				})
 			}
-
-			// try sending message
-			const messageId = await pubsub.publishMessage(config.pubSubTopicSelf, pluginMessage)
-
-			// add to output
-			pluginMessages.push({
-				type: plugin.type,
-				messageId,
-			})
 		}
 
 		// prepare output data
