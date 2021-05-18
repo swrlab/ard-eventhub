@@ -11,7 +11,7 @@
       "name": "European Union Public License 1.2",
       "url": "https://spdx.org/licenses/EUPL-1.2.html"
     },
-    "version": "1.0.1"
+    "version": "1.0.2"
   },
   "externalDocs": {
     "description": "ARD-Eventhub Documentation",
@@ -227,8 +227,7 @@
         },
         "responses": {
           "201": {
-            "description": "Event created",
-            "content": {}
+            "$ref": "#/components/responses/eventV1RadioTrack"
           },
           "400": {
             "description": "Bad Request (invalid input)",
@@ -290,8 +289,7 @@
         },
         "responses": {
           "201": {
-            "description": "Event created",
-            "content": {}
+            "$ref": "#/components/responses/eventV1RadioTrack"
           },
           "400": {
             "description": "Bad Request (invalid input)",
@@ -350,21 +348,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Subscription created",
+            "description": "Subscriptions found",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "description": "ID of the subscription to be referenced in API calls",
-                        "example": "abc-123-def"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/subscriptionsList"
                 }
               }
             }
@@ -429,14 +417,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "ID of the subscription to be referenced in future API calls",
-                      "example": "abc-123-def"
-                    }
-                  }
+                  "$ref": "#/components/schemas/subscriptionResponse"
                 }
               }
             }
@@ -472,7 +453,7 @@
             }
           },
           "404": {
-            "description": "Topic not found",
+            "description": "Topic for subscription not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -521,7 +502,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Subscription created",
+            "description": "Subscription found",
             "content": {
               "application/json": {
                 "schema": {
@@ -605,12 +586,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "valid": {
-                      "type": "boolean"
-                    }
-                  }
+                  "$ref": "#/components/schemas/subscriptionDeleted"
                 }
               }
             }
@@ -673,7 +649,13 @@
         "responses": {
           "200": {
             "description": "Topics found",
-            "content": {}
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/topicResponse"
+                }
+              }
+            }
           },
           "500": {
             "description": "Internal server error",
@@ -692,7 +674,7 @@
   "components": {
     "requestBodies": {
       "eventV1RadioTrack": {
-        "description": "New event to be distributed to subscribers.  \n  \nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.  \nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:  \n```json\n{\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"title\": \"Song name\",\n  \"services\": [ { ... } ],\n  \"playlistItemId\": \"swr3-5678\"\n}\n```\nRequired fields not specified in the Schema, will cause your request to fail.  \n  \nThe `id` is inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
+        "description": "New event to be distributed to subscribers.  \n  \nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.  \nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:  \n```json\n{\n  \"type\": \"music\",\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"title\": \"Song name\",\n  \"services\": [ { ... } ],\n  \"playlistItemId\": \"swr3-5678\"\n}\n```\nRequired fields not specified in the Schema, will cause your request to fail.  \n  \nThe `id` is inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
         "content": {
           "application/json": {
             "schema": {
@@ -701,6 +683,18 @@
           }
         },
         "required": true
+      }
+    },
+    "responses": {
+      "eventV1RadioTrack": {
+        "description": "Event created  \n  \n*Note:* The first request of an event for an externalId that is not  registered yet, will return the status `failed: 1`. This indicates  that a new topic for the externalId has been created, and the request  needs to be repeated:\n```json\n\"statuses\": {\n  \"published\": 0,\n  \"blocked\": 0,\n  \"failed\": 1\n}\n```\nIf the request returns the status `blocked: 1`, it indicates that you  are not allowed to publish events under the given publisherId.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/eventV1ResBody"
+            }
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -1138,6 +1132,35 @@
           }
         }
       },
+      "eventV1ResBody": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "object",
+            "properties": {
+              "published": {
+                "type": "integer",
+                "example": 1
+              },
+              "blocked": {
+                "type": "integer",
+                "example": 0
+              },
+              "failed": {
+                "type": "integer",
+                "example": 0
+              }
+            }
+          },
+          "event": {
+            "$ref": "#/components/schemas/eventV1PostBody"
+          },
+          "trace": {
+            "type": "string",
+            "example": null
+          }
+        }
+      },
       "subscriptionPost": {
         "required": [
           "type",
@@ -1159,7 +1182,8 @@
             "type": "string",
             "enum": [
               "PUSH"
-            ]
+            ],
+            "example": "PUSH"
           },
           "url": {
             "type": "string",
@@ -1178,6 +1202,16 @@
           }
         }
       },
+      "subscriptionsList": {
+        "type": "array",
+        "items": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/subscriptionResponse"
+            }
+          ]
+        }
+      },
       "subscriptionResponse": {
         "type": "object",
         "properties": {
@@ -1192,27 +1226,132 @@
             "type": "string",
             "enum": [
               "PUSH"
-            ]
+            ],
+            "example": "PUSH"
+          },
+          "name": {
+            "type": "string",
+            "description": "ID of the subscription to be referenced in API calls",
+            "example": "de.ard.eventhub.subscription.subscription-id"
+          },
+          "path": {
+            "type": "string",
+            "description": "Path of subscription in project",
+            "example": "projects/ard-eventhub/subscriptions/subscription-name"
+          },
+          "topic": {
+            "type": "object",
+            "description": "Object of the subscribed topic",
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "urn:ard:permanent-livestream:topic-id"
+              },
+              "name": {
+                "type": "string",
+                "example": "de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3Atopic-id"
+              },
+              "path": {
+                "type": "string",
+                "example": "projects/ard-eventhub/topics/topic-name"
+              }
+            }
+          },
+          "ackDeadlineSeconds": {
+            "type": "integer",
+            "example": 20
+          },
+          "retryPolicy": {
+            "type": "string",
+            "example": null
+          },
+          "serviceAccount": {
+            "type": "string",
+            "example": "name-of-service-account"
           },
           "url": {
             "type": "string",
             "description": "Publicly accessible URL that should receive the events",
             "example": "https://example.com/my/webhook/for/this/subscription"
           },
-          "email": {
+          "contact": {
             "type": "string",
             "description": "Email address to be contacted in case of problems with this subscription",
             "example": "my-emergency-and-notifications-contact@ard.de"
           },
-          "owner": {
+          "institutionId": {
             "type": "string",
-            "description": "Email address of this subscription's owner",
-            "example": "my-email@ard.de"
+            "description": "ID of the institution the current user belongs to",
+            "example": "urn:ard:institution:institution-id"
+          }
+        }
+      },
+      "subscriptionDeleted": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "example": true
           },
-          "topic": {
+          "trace": {
             "type": "string",
-            "description": "Name of the topic to subscribe to",
-            "example": "topic-name-to-subscribe-to"
+            "example": null
+          }
+        }
+      },
+      "topicResponse": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "PUBSUB"
+              ],
+              "example": "PUBSUB"
+            },
+            "id": {
+              "type": "string",
+              "example": "urn:ard:permanent-livestream:topic-id"
+            },
+            "name": {
+              "type": "string",
+              "example": "de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3Atopic-id"
+            },
+            "path": {
+              "type": "string",
+              "example": "projects/ard-eventhub/topics/topic-name"
+            },
+            "labels": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "1234567890"
+                },
+                "creator-slug": {
+                  "type": "string",
+                  "example": "ard-eventhub-swr"
+                },
+                "publisher-slug": {
+                  "type": "string",
+                  "example": "swr-rheinland-pfalz"
+                },
+                "stage": {
+                  "type": "string",
+                  "example": "prod"
+                },
+                "created": {
+                  "type": "string",
+                  "example": "2021-03-25"
+                },
+                "institution-slug": {
+                  "type": "string",
+                  "example": "sudwestrundfunk"
+                }
+              }
+            }
           }
         }
       }
