@@ -51,6 +51,7 @@ jobs:
         FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
         TEST_USER: ${{ secrets.TEST_USER }}
         TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
+        PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL: 'test@demo.iam.gserviceaccount.com'
       run: yarn ingest:test
 
   license:
