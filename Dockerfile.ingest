@@ -1,5 +1,5 @@
 # Load desired node pckg
-FROM node:14.16-alpine
+FROM node:14.17-alpine
 
 # Add python
 RUN apk add g++ make python
