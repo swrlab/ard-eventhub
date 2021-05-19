@@ -66,7 +66,7 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `slug`                        | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                  |
 | NPM     | `swagger-ui-express`          | [MIT](https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE)              |
 | NPM     | `uuid`                        | [MIT](https://github.com/uuidjs/uuid/blob/master/LICENSE.md)                              |
-| NPM     | `winston`                     | [MIT](hhttps://github.com/winstonjs/winston/blob/master/LICENSE)                          |
+| NPM     | `winston`                     | [MIT](https://github.com/winstonjs/winston/blob/master/LICENSE)                           |
 | NPM DEV | `@swrlab/eslint-plugin-swr`   | [ISC](https://github.com/swrlab/eslint-plugin-swr/)                                       |
 | NPM DEV | `@swrlab/swr-prettier-config` | [ISC](https://github.com/swrlab/prettier-config/blob/main/license.md)                     |
 | NPM DEV | `chai`                        | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                 |
@@ -74,8 +74,8 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM DEV | `docsify-cli`                 | [MIT](https://github.com/docsifyjs/docsify-cli/blob/master/LICENSE)                       |
 | NPM DEV | `dotenv`                      | [BSD-2-Clause](https://github.com/motdotla/dotenv/blob/master/LICENSE)                    |
 | NPM DEV | `eslint`                      | [MIT](https://github.com/eslint/eslint/blob/master/LICENSE)                               |
-| NPM DEV | `eslint-plugin-swr`           | [ISC](https://github.com/swrlab/eslint-plugin-swr/blob/main/package.json)                 |
 | NPM DEV | `eslint-plugin-chai-friendly` | [MIT](https://github.com/ihordiachenko/eslint-plugin-chai-friendly/blob/master/LICENSE)   |
+| NPM DEV | `eslint-plugin-swr`           | [ISC](https://github.com/swrlab/eslint-plugin-swr/blob/main/package.json)                 |
 | NPM DEV | `license-compliance`          | [MIT](https://github.com/tmorell/license-compliance/blob/master/LICENSE)                  |
 | NPM DEV | `mocha`                       | [MIT](https://github.com/mochajs/mocha/blob/master/LICENSE)                               |
 | NPM DEV | `nodemon`                     | [MIT](https://github.com/remy/nodemon/blob/master/LICENSE)                                |

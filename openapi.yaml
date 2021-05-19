@@ -10,7 +10,7 @@ info:
   license:
     name: European Union Public License 1.2
     url: 'https://spdx.org/licenses/EUPL-1.2.html'
-  version: 1.0.1
+  version: 1.0.2
 externalDocs:
   description: ARD-Eventhub Documentation
   url: 'https://swrlab.github.io/ard-eventhub/'
@@ -143,8 +143,7 @@ paths:
         $ref: '#/components/requestBodies/eventV1RadioTrack'
       responses:
         '201':
-          description: Event created
-          content: {}
+          $ref: '#/components/responses/eventV1RadioTrack'
         '400':
           description: Bad Request (invalid input)
           content:
@@ -181,8 +180,7 @@ paths:
         $ref: '#/components/requestBodies/eventV1RadioTrack'
       responses:
         '201':
-          description: Event created
-          content: {}
+          $ref: '#/components/responses/eventV1RadioTrack'
         '400':
           description: Bad Request (invalid input)
           content:
@@ -217,18 +215,11 @@ paths:
         - bearerAuth: []
       responses:
         '200':
-          description: Subscription created
+          description: Subscriptions found
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      description: ID of the subscription to be referenced in API calls
-                      example: abc-123-def
+                $ref: '#/components/schemas/subscriptionsList'
         '401':
           description: Missing authentication
           content:
@@ -267,14 +258,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    description: >-
-                      ID of the subscription to be referenced in future API
-                      calls
-                    example: abc-123-def
+                $ref: '#/components/schemas/subscriptionResponse'
         '400':
           description: Bad Request (invalid input)
           content:
@@ -294,7 +278,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorForbidden'
         '404':
-          description: Topic not found
+          description: Topic for subscription not found
           content:
             application/json:
               schema:
@@ -324,7 +308,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Subscription created
+          description: Subscription found
           content:
             application/json:
               schema:
@@ -377,10 +361,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  valid:
-                    type: boolean
+                $ref: '#/components/schemas/subscriptionDeleted'
         '401':
           description: Missing authentication
           content:
@@ -416,7 +397,10 @@ paths:
       responses:
         '200':
           description: Topics found
-          content: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/topicResponse'
         '500':
           description: Internal server error
           content:
@@ -427,38 +411,66 @@ components:
   requestBodies:
     eventV1RadioTrack:
       description: >
-          New event to be distributed to subscribers.  
-            
-          The Eventhub format validation expects only a subset of these
-          variables as minimum set. All other fields are technically optional,
-          but **highly encouraged** to be included, so a best-possible metadata
-          exchange is possible.  
+        New event to be distributed to subscribers.  
+          
+        The Eventhub format validation expects only a subset of these
+        variables as minimum set. All other fields are technically optional,
+        but **highly encouraged** to be included, so a best-possible metadata
+        exchange is possible.  
 
-          The subset is defined in the list of required fields of Schemas
-          `eventV1PostBody`, resulting in this body:  
+        The subset is defined in the list of required fields of Schemas
+        `eventV1PostBody`, resulting in this body:  
 
-          ```json
+        ```json
 
-          {
-            "start": "2020-01-19T06:00:00+01:00",
-            "title": "Song name",
-            "services": [ { ... } ],
-            "playlistItemId": "swr3-5678"
-          }
+        {
+          "type": "music",
+          "start": "2020-01-19T06:00:00+01:00",
+          "title": "Song name",
+          "services": [ { ... } ],
+          "playlistItemId": "swr3-5678"
+        }
 
-          ```
+        ```
 
-          Required fields not specified in the Schema, will cause your request to
-          fail.  
-            
-          The `id` is inserted by Eventhub as string-formatted number, but might
-          be a true string in the future, do not expect this string to remain
-          numbers only!
+        Required fields not specified in the Schema, will cause your request to
+        fail.  
+          
+        The `id` is inserted by Eventhub as string-formatted number, but might
+        be a true string in the future, do not expect this string to remain
+        numbers only!
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/eventV1PostBody'
       required: true
+  responses:
+    eventV1RadioTrack:
+      description: >
+        Event created  
+          
+        *Note:* The first request of an event for an externalId that is not 
+        registered yet, will return the status `failed: 1`. This indicates 
+        that a new topic for the externalId has been created, and the request 
+        needs to be repeated:
+        
+        ```json
+        
+        "statuses": {
+          "published": 0,
+          "blocked": 0,
+          "failed": 1
+        }
+        
+        ```
+        
+        If the request returns the status `blocked: 1`, it indicates that you 
+        are not allowed to publish events under the given publisherId.
+        
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/eventV1ResBody'
   securitySchemes:
     bearerAuth:
       type: http
@@ -805,6 +817,28 @@ components:
             be a true string in the future, do not expect this string to remain
             numbers only!
           example: '1234567890'
+    
+    eventV1ResBody:
+      type: object
+      properties:
+        statuses:
+          type: object
+          properties:
+            published:
+              type: integer
+              example: 1
+            blocked:
+              type: integer
+              example: 0
+            failed:
+              type: integer
+              example: 0
+        event:
+          $ref: '#/components/schemas/eventV1PostBody'
+        trace:
+          type: string
+          example: null
+    
     subscriptionPost:
       required:
         - type
@@ -823,6 +857,7 @@ components:
           type: string
           enum:
             - PUSH
+          example: PUSH
         url:
           type: string
           description: Publicly accessible URL that should receive the events
@@ -837,6 +872,13 @@ components:
           type: string
           description: Name of the topic to subscribe to
           example: topic-name-to-subscribe-to
+    
+    subscriptionsList:
+      type: array
+      items:
+        allOf:
+        - $ref: '#/components/schemas/subscriptionResponse'
+    
     subscriptionResponse:
       type: object
       properties:
@@ -849,21 +891,99 @@ components:
           type: string
           enum:
             - PUSH
+          example: PUSH
+        name:
+          type: string
+          description: ID of the subscription to be referenced in API calls
+          example: de.ard.eventhub.subscription.subscription-id
+        path:
+          type: string
+          description: Path of subscription in project
+          example: projects/ard-eventhub/subscriptions/subscription-name
+        topic:
+          type: object
+          description: Object of the subscribed topic
+          properties:
+            id:
+              type: string
+              example: urn:ard:permanent-livestream:topic-id
+            name:
+              type: string
+              example: de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3Atopic-id
+            path:
+              type: string
+              example: projects/ard-eventhub/topics/topic-name
+        ackDeadlineSeconds:
+          type: integer
+          example: 20
+        retryPolicy:
+          type: string
+          example: null
+        serviceAccount:
+          type: string
+          example: name-of-service-account
         url:
           type: string
           description: Publicly accessible URL that should receive the events
           example: 'https://example.com/my/webhook/for/this/subscription'
-        email:
+        contact:
           type: string
           description: >-
             Email address to be contacted in case of problems with this
             subscription
           example: my-emergency-and-notifications-contact@ard.de
-        owner:
+        institutionId:
           type: string
-          description: Email address of this subscription's owner
-          example: my-email@ard.de
-        topic:
+          description: ID of the institution the current user belongs to
+          example: urn:ard:institution:institution-id
+    
+    subscriptionDeleted:
+      type: object
+      properties:
+        valid:
+          type: boolean
+          example: true
+        trace:
           type: string
-          description: Name of the topic to subscribe to
-          example: topic-name-to-subscribe-to
+          example: null
+    
+    topicResponse:
+      type: array
+      items:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - PUBSUB
+            example: PUBSUB
+          id:
+            type: string
+            example: urn:ard:permanent-livestream:topic-id
+          name:
+            type: string
+            example: de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3Atopic-id
+          path:
+            type: string
+            example: projects/ard-eventhub/topics/topic-name
+          labels:
+            type: object
+            properties:
+              id: 
+                type: string
+                example: "1234567890"
+              creator-slug:
+                type: string
+                example: ard-eventhub-swr
+              publisher-slug:
+                type: string
+                example: swr-rheinland-pfalz
+              stage: 
+                type: string
+                example: prod
+              created: 
+                type: string
+                example: "2021-03-25"
+              institution-slug: 
+                type: string
+                example: sudwestrundfunk
