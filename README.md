@@ -48,38 +48,40 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 
 ## Third-Party Components
 
-| Type    | Name                          | License                                                                                   |
-| ------- | ----------------------------- | ----------------------------------------------------------------------------------------- |
-| Docker  | `node:14.15-alpine`           | [MIT](https://github.com/nodejs/node/blob/master/LICENSE)                                 |
-| NPM     | `@google-cloud/datastore`     | [Apache License 2.0](https://github.com/googleapis/nodejs-datastore/blob/master/LICENSE)  |
-| NPM     | `@google-cloud/pubsub`        | [Apache License 2.0](https://github.com/googleapis/nodejs-pubsub/blob/master/LICENSE)     |
-| NPM     | `body-parser`                 | [MIT](https://github.com/expressjs/body-parser/blob/master/LICENSE)                       |
-| NPM     | `compression`                 | [MIT](https://github.com/expressjs/compression/blob/master/LICENSE)                       |
-| NPM     | `dd-trace`                    | [Apache-2.0 OR BSD-3-Clause](https://github.com/DataDog/dd-trace-js/blob/master/LICENSE)  |
-| NPM     | `express`                     | [MIT](https://github.com/expressjs/express/blob/master/LICENSE)                           |
-| NPM     | `express-openapi-validator`   | [MIT](https://github.com/cdimascio/express-openapi-validator/blob/master/LICENSE)         |
-| NPM     | `firebase-admin`              | [Apache License 2.0](https://github.com/firebase/firebase-admin-node/blob/master/LICENSE) |
-| NPM     | `jsonwebtoken`                | [MIT](https://github.com/auth0/node-jsonwebtoken/blob/master/LICENSE)                     |
-| NPM     | `moment`                      | [MIT](https://github.com/moment/moment/blob/develop/LICENSE)                              |
-| NPM     | `node-crc`                    | [MIT](https://github.com/magiclen/node-crc/blob/master/LICENSE)                           |
-| NPM     | `node-fetch`                  | [MIT](https://github.com/node-fetch/node-fetch/blob/master/LICENSE.md)                    |
-| NPM     | `slug`                        | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                  |
-| NPM     | `swagger-ui-express`          | [MIT](https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE)              |
-| NPM     | `uuid`                        | [MIT](https://github.com/uuidjs/uuid/blob/master/LICENSE.md)                              |
-| NPM     | `winston`                     | [MIT](hhttps://github.com/winstonjs/winston/blob/master/LICENSE)                          |
-| NPM DEV | `@swrlab/eslint-plugin-swr`   | [ISC](https://github.com/swrlab/eslint-plugin-swr/)                                       |
-| NPM DEV | `@swrlab/swr-prettier-config` | [ISC](https://github.com/swrlab/prettier-config/blob/main/license.md)                     |
-| NPM DEV | `chai`                        | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                 |
-| NPM DEV | `chai-http`                   | [MIT](https://github.com/chaijs/chai-http/blob/master/package.json)                       |
-| NPM DEV | `docsify-cli`                 | [MIT](https://github.com/docsifyjs/docsify-cli/blob/master/LICENSE)                       |
-| NPM DEV | `dotenv`                      | [BSD-2-Clause](https://github.com/motdotla/dotenv/blob/master/LICENSE)                    |
-| NPM DEV | `eslint`                      | [MIT](https://github.com/eslint/eslint/blob/master/LICENSE)                               |
-| NPM DEV | `eslint-plugin-swr`           | [ISC](https://github.com/swrlab/eslint-plugin-swr/blob/main/package.json)                 |
-| NPM DEV | `eslint-plugin-chai-friendly` | [MIT](https://github.com/ihordiachenko/eslint-plugin-chai-friendly/blob/master/LICENSE)   |
-| NPM DEV | `license-compliance`          | [MIT](https://github.com/tmorell/license-compliance/blob/master/LICENSE)                  |
-| NPM DEV | `mocha`                       | [MIT](https://github.com/mochajs/mocha/blob/master/LICENSE)                               |
-| NPM DEV | `nodemon`                     | [MIT](https://github.com/remy/nodemon/blob/master/LICENSE)                                |
-| NPM DEV | `prettier`                    | [MIT](https://github.com/prettier/prettier/blob/main/LICENSE)                             |
+| Type    | Name                           | License                                                                                            |
+| ------- | ------------------------------ | -------------------------------------------------------------------------------------------------- |
+| Docker  | `node:14.17-alpine`            | [MIT](https://github.com/nodejs/node/blob/master/LICENSE)                                          |
+| NPM     | `@google-cloud/datastore`      | [Apache License 2.0](https://github.com/googleapis/nodejs-datastore/blob/master/LICENSE)           |
+| NPM     | `@google-cloud/pubsub`         | [Apache License 2.0](https://github.com/googleapis/nodejs-pubsub/blob/master/LICENSE)              |
+| NPM     | `@google-cloud/secret-manager` | [Apache License 2.0](https://github.com/googleapis/nodejs-secret-manager/blob/master/LICENSE)      |
+| NPM     | `body-parser`                  | [MIT](https://github.com/expressjs/body-parser/blob/master/LICENSE)                                |
+| NPM     | `compression`                  | [MIT](https://github.com/expressjs/compression/blob/master/LICENSE)                                |
+| NPM     | `dd-trace`                     | [Apache-2.0 OR BSD-3-Clause](https://github.com/DataDog/dd-trace-js/blob/master/LICENSE)           |
+| NPM     | `express`                      | [MIT](https://github.com/expressjs/express/blob/master/LICENSE)                                    |
+| NPM     | `express-openapi-validator`    | [MIT](https://github.com/cdimascio/express-openapi-validator/blob/master/LICENSE)                  |
+| NPM     | `firebase-admin`               | [Apache License 2.0](https://github.com/firebase/firebase-admin-node/blob/master/LICENSE)          |
+| NPM     | `google-auth-library`          | [Apache License 2.0](https://github.com/googleapis/google-auth-library-nodejs/blob/master/LICENSE) |
+| NPM     | `jsonwebtoken`                 | [MIT](https://github.com/auth0/node-jsonwebtoken/blob/master/LICENSE)                              |
+| NPM     | `moment`                       | [MIT](https://github.com/moment/moment/blob/develop/LICENSE)                                       |
+| NPM     | `node-crc`                     | [MIT](https://github.com/magiclen/node-crc/blob/master/LICENSE)                                    |
+| NPM     | `node-fetch`                   | [MIT](https://github.com/node-fetch/node-fetch/blob/master/LICENSE.md)                             |
+| NPM     | `slug`                         | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                           |
+| NPM     | `swagger-ui-express`           | [MIT](https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE)                       |
+| NPM     | `uuid`                         | [MIT](https://github.com/uuidjs/uuid/blob/master/LICENSE.md)                                       |
+| NPM     | `winston`                      | [MIT](hhttps://github.com/winstonjs/winston/blob/master/LICENSE)                                   |
+| NPM DEV | `@swrlab/eslint-plugin-swr`    | [ISC](https://github.com/swrlab/eslint-plugin-swr/)                                                |
+| NPM DEV | `@swrlab/swr-prettier-config`  | [ISC](https://github.com/swrlab/prettier-config/blob/main/license.md)                              |
+| NPM DEV | `chai`                         | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                          |
+| NPM DEV | `chai-http`                    | [MIT](https://github.com/chaijs/chai-http/blob/master/package.json)                                |
+| NPM DEV | `docsify-cli`                  | [MIT](https://github.com/docsifyjs/docsify-cli/blob/master/LICENSE)                                |
+| NPM DEV | `dotenv`                       | [BSD-2-Clause](https://github.com/motdotla/dotenv/blob/master/LICENSE)                             |
+| NPM DEV | `eslint`                       | [MIT](https://github.com/eslint/eslint/blob/master/LICENSE)                                        |
+| NPM DEV | `eslint-plugin-chai-friendly`  | [MIT](https://github.com/ihordiachenko/eslint-plugin-chai-friendly/blob/master/LICENSE)            |
+| NPM DEV | `eslint-plugin-swr`            | [ISC](https://github.com/swrlab/eslint-plugin-swr/blob/main/package.json)                          |
+| NPM DEV | `license-compliance`           | [MIT](https://github.com/tmorell/license-compliance/blob/master/LICENSE)                           |
+| NPM DEV | `mocha`                        | [MIT](https://github.com/mochajs/mocha/blob/master/LICENSE)                                        |
+| NPM DEV | `nodemon`                      | [MIT](https://github.com/remy/nodemon/blob/master/LICENSE)                                         |
+| NPM DEV | `prettier`                     | [MIT](https://github.com/prettier/prettier/blob/main/LICENSE)                                      |
 
 ## Authors
 
