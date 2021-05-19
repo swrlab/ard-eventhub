@@ -60,7 +60,7 @@ jobs:
         FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
         TEST_USER: ${{ secrets.TEST_USER }}
         TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
-        PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL: 'test@demo.iam.gserviceaccount.com'
+        PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL: ${{ secrets.PUBSUB_SERVICE_ACCOUNT_EMAIL }}
       run: yarn ingest:test
 
 
@@ -146,7 +146,7 @@ jobs:
           --allow-unauthenticated \
           --timeout $GCP_RUN_TIMEOUT \
           --memory $GCP_RUN_MEMORY \
-          --update-env-vars STAGE=dev,DD_TRACER_ENABLED=false \
+          --update-env-vars STAGE=dev,DD_TRACER_ENABLED=false,PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL=${{ secrets.PUBSUB_SERVICE_ACCOUNT_EMAIL }} \
           --service-account ${{ secrets.GCP_SERVICE_ACCOUNT_INGEST }}
 
   deploy-B-test-kubernetes:
