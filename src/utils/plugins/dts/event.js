@@ -24,6 +24,10 @@ const defaultHeaders = {
 	'User-Agent': config.userAgent,
 }
 
+const checkIfArrayHasContent = (thisArray) => {
+	return thisArray && Array.isArray(thisArray) && thisArray.length > 0
+}
+
 module.exports = async (job) => {
 	try {
 		// remap input
@@ -66,7 +70,7 @@ module.exports = async (job) => {
 		const integrationsList = await integrationsListAction.json()
 
 		// end processing if no integrations were found
-		if (!integrationsList || integrationsList.length === 0) {
+		if (!checkIfArrayHasContent(integrationsList)) {
 			logger.log({
 				level: 'error',
 				message: `failed loading DTS integrations (err 2)`,
@@ -85,6 +89,17 @@ module.exports = async (job) => {
 			)
 			.map((integration) => integration.content_id)
 
+		// catch non-existent mappings
+		if (!checkIfArrayHasContent(contentIds)) {
+			logger.log({
+				level: 'notice',
+				message: `no DTS mapping exists for coreIds (err 3)`,
+				source,
+				data: { messageId, job, coreIds },
+			})
+			return Promise.resolve()
+		}
+
 		// fetch all matching broadcasts
 		lookupConfig.url = pluginSecrets.endpoints.searchBroadcasts.replace(
 			'{contentQuery}',
@@ -97,7 +112,7 @@ module.exports = async (job) => {
 			const errorText = await broadcastsAction.text()
 			logger.log({
 				level: 'error',
-				message: `failed loading DTS broadcasts for coreIds (err 1)`,
+				message: `failed loading DTS broadcasts for coreIds (err 4)`,
 				source,
 				data: { messageId, job, coreIds, errorText },
 			})
@@ -108,10 +123,10 @@ module.exports = async (job) => {
 		const broadcasts = await broadcastsAction.json()
 
 		// end processing if no broadcasts were found
-		if (!broadcasts || !Array.isArray(broadcasts) || broadcasts.length === 0) {
+		if (!checkIfArrayHasContent(broadcasts)) {
 			logger.log({
 				level: 'notice',
-				message: `failed finding DTS broadcasts for coreIds (err 2)`,
+				message: `failed finding DTS broadcasts for coreIds (err 5)`,
 				source,
 				data: { messageId, job, coreIds, contentIds, broadcasts },
 			})
@@ -171,8 +186,15 @@ module.exports = async (job) => {
 			liveRadioEvent.imageURL =
 				media.url || media.templateUrl.replace('{width}', 512).replace('{height}', 512)
 
+		// DEV TEMP workaround
+		if (liveRadioEvent.imageURL.indexOf('http://rdz-dev:4001') !== -1)
+			liveRadioEvent.imageURL = liveRadioEvent.imageURL.replace(
+				'http://rdz-dev:4001',
+				'https://onair.swr.de'
+			)
+
 		// handle exclusions
-		if (plugin?.excludeFields?.length > 0) {
+		if (checkIfArrayHasContent(plugin.excludeFields)) {
 			for (const field of plugin.excludeFields) {
 				if (pluginSecrets.permittedExcludedFields[field]) {
 					liveRadioEvent[pluginSecrets.permittedExcludedFields[field]] = null
