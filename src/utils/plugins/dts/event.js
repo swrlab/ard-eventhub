@@ -35,7 +35,7 @@ module.exports = async (job) => {
 		// collect ARD Core ids
 		const coreIds = event.services.map((service) => service?.topic?.id)
 
-		// fetch all mapped ids externally
+		// fetch all externally mapped ids
 		const lookupConfig = {
 			url: pluginSecrets.endpoints.listIntegrationRecords.replace(
 				'{integrationName}',
@@ -49,11 +49,32 @@ module.exports = async (job) => {
 			},
 		}
 		const integrationsListAction = await fetch(lookupConfig.url, lookupConfig)
+
+		// end processing if no integrations were found
+		if (!integrationsListAction.ok) {
+			const errorText = await integrationsListAction.text()
+			logger.log({
+				level: 'error',
+				message: `failed loading DTS integrations (err 1)`,
+				source,
+				data: { messageId, job, coreIds, errorText },
+			})
+			return Promise.resolve()
+		}
+
+		// parse API result
 		const integrationsList = await integrationsListAction.json()
 
-		//
-		// DEV catch empty list here
-		//
+		// end processing if no integrations were found
+		if (!integrationsList || integrationsList.length === 0) {
+			logger.log({
+				level: 'error',
+				message: `failed loading DTS integrations (err 2)`,
+				source,
+				data: { messageId, job, coreIds },
+			})
+			return Promise.resolve()
+		}
 
 		// filter IDs matching these services
 		const contentIds = integrationsList
@@ -72,16 +93,19 @@ module.exports = async (job) => {
 		const broadcastsAction = await fetch(lookupConfig.url, lookupConfig)
 		const broadcasts = await broadcastsAction.json()
 
-		//
-		// DEV catch empty broadcasts here
-		//
+		// end processing if no broadcasts were found
+		if (!broadcasts || broadcasts.length === 0) {
+			logger.log({
+				level: 'notice',
+				message: `failed finding DTS broadcasts for coreIds`,
+				source,
+				data: { messageId, job, coreIds, contentIds, broadcasts },
+			})
+			return Promise.resolve()
+		}
 
 		// remap broadcast IDs
 		const linkedBroadcastIds = broadcasts.map((broadcast) => broadcast.broadcast_id)
-
-		//
-		// DEV catch empty broadcasts here
-		//
 
 		// remap Eventhub variables to external ones
 		const liveRadioEvent = {
@@ -162,6 +186,8 @@ module.exports = async (job) => {
 				liveRadioEvent,
 			},
 		})
+
+		return Promise.resolve()
 	} catch (error) {
 		logger.log({
 			level: 'error',
@@ -170,5 +196,7 @@ module.exports = async (job) => {
 			error,
 			data: { job },
 		})
+
+		return Promise.reject(error)
 	}
 }
