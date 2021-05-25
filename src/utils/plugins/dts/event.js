@@ -25,7 +25,7 @@ const defaultHeaders = {
 }
 
 const checkIfArrayHasContent = (thisArray) => {
-	return thisArray && Array.isArray(thisArray) && thisArray.length > 0
+	return Array.isArray(thisArray) && thisArray.length > 0
 }
 
 module.exports = async (job) => {
@@ -93,7 +93,7 @@ module.exports = async (job) => {
 		if (!checkIfArrayHasContent(contentIds)) {
 			logger.log({
 				level: 'notice',
-				message: `no DTS mapping exists for coreIds (err 3)`,
+				message: `DTS BID mapping missing for coreIds (err 3)`,
 				source,
 				data: { messageId, job, coreIds },
 			})
@@ -220,11 +220,12 @@ module.exports = async (job) => {
 		// log result
 		logger.log({
 			level: postAction.ok ? 'info' : 'error',
-			message: `event posted externally > ${postAction.status}`,
+			message: `DTS event posted externally > ${postAction.status}`,
 			source,
 			data: {
 				messageId,
 				job,
+				ids: { coreIds, contentIds, broadcasts },
 				status: postAction.status,
 				postText,
 				liveRadioEvent,
