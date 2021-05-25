@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
 
 		// get message from pubsub or tasks
 		let job = req.body?.message?.data ? Buffer.from(req.body.message.data, 'base64').toString() : req.body
-		job = !req.headers['x-skip-parsing'] ? job : JSON.parse(job)
+		job = req.headers['x-skip-parsing'] ? job : JSON.parse(job)
 
 		// insert data into job
 		job.messageId = messageId
@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
 				level: 'warning',
 				message: 'undetected PubSub message action',
 				source: 'c/pubsub',
-				data: { messageId, job },
+				data: { messageId, job, headers: req.headers },
 			})
 		}
 
@@ -46,7 +46,7 @@ module.exports = async (req, res) => {
 			message: 'error while processing PubSub message',
 			source: 'c/pubsub',
 			error,
-			data: { messageId, body: req.body },
+			data: { messageId, body: req.body, headers: req.headers },
 		})
 
 		return res.sendStatus(204)
