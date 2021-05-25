@@ -91,18 +91,40 @@ module.exports = async (job) => {
 			contentIds.join(',')
 		)
 		const broadcastsAction = await fetch(lookupConfig.url, lookupConfig)
+
+		// end processing if no integrations were found
+		if (!broadcastsAction.ok) {
+			const errorText = await broadcastsAction.text()
+			logger.log({
+				level: 'error',
+				message: `failed loading DTS broadcasts for coreIds (err 1)`,
+				source,
+				data: { messageId, job, coreIds, errorText },
+			})
+			return Promise.resolve()
+		}
+
+		// parse API result
 		const broadcasts = await broadcastsAction.json()
 
 		// end processing if no broadcasts were found
-		if (!broadcasts || broadcasts.length === 0) {
+		if (!broadcasts || !Array.isArray(broadcasts) || broadcasts.length === 0) {
 			logger.log({
 				level: 'notice',
-				message: `failed finding DTS broadcasts for coreIds`,
+				message: `failed finding DTS broadcasts for coreIds (err 2)`,
 				source,
 				data: { messageId, job, coreIds, contentIds, broadcasts },
 			})
 			return Promise.resolve()
 		}
+
+		// DEV debug data
+		logger.log({
+			level: 'info',
+			message: `DEBUG: ids`,
+			source,
+			data: { messageId, job, coreIds, integrationsList, contentIds, broadcasts },
+		})
 
 		// remap broadcast IDs
 		const linkedBroadcastIds = broadcasts.map((broadcast) => broadcast.broadcast_id)
