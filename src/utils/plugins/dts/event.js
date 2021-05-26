@@ -33,6 +33,17 @@ module.exports = async (job) => {
 		// remap input
 		const { event, messageId, plugin } = job
 
+		// only process now playing events
+		if (event.name !== 'de.ard.eventhub.v1.radio.track.playing') {
+			logger.log({
+				level: 'debug',
+				message: `DTS skipping event != playing > ${event.name}`,
+				source,
+				data: { messageId, job },
+			})
+			return Promise.resolve()
+		}
+
 		// fetch secrets config
 		const { json: pluginSecrets } = await secrets.get(`plugins-dts-${config.stage}`)
 
@@ -225,7 +236,7 @@ module.exports = async (job) => {
 			data: {
 				messageId,
 				job,
-				ids: { coreIds, contentIds, broadcasts },
+				ids: { coreIds, contentIds, linkedBroadcastIds },
 				status: postAction.status,
 				postText,
 				liveRadioEvent,
