@@ -642,10 +642,10 @@
   dependencies:
     "@types/express" "*"
 
-"@types/node@*", "@types/node@>=12.12.47", "@types/node@>=13.7.0":
-  version "15.0.2"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-15.0.2.tgz#51e9c0920d1b45936ea04341aa3e2e58d339fb67"
-  integrity sha512-p68+a+KoxpoB47015IeYZYRrdqMUcpbK8re/zpFB8Ld46LHC1lPEbp3EXgkEhAYEcPvjJF6ZO+869SQ0aH1dcA==
+"@types/node@*", "@types/node@>=12.12.47", "@types/node@>=13.7.0", "@types/node@^15.6.1":
+  version "15.6.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-15.6.1.tgz#32d43390d5c62c5b6ec486a9bc9c59544de39a08"
+  integrity sha512-7EIraBEyRHEe7CH+Fm1XvgqU6uwZN8Q7jppJGcqjROMT29qhAuuOxYB1uEY5UMYQKEmA5D+5tBnhdaPXSsLONA==
 
 "@types/node@^10.10.0", "@types/node@^10.12.18":
   version "10.17.59"
@@ -3598,11 +3598,12 @@ nested-error-stacks@^2.0.0:
   resolved "https://registry.yarnpkg.com/nested-error-stacks/-/nested-error-stacks-2.1.0.tgz#0fbdcf3e13fe4994781280524f8b96b0cdff9c61"
   integrity sha512-AO81vsIO1k1sM4Zrd6Hu7regmJN1NSiAja10gc4bX3F0wd+9rQmcuHQaHVQCYIEC8iFXnE+mavh23GOt7wBgug==
 
-node-crc@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/node-crc/-/node-crc-1.3.0.tgz#2ec7b75de98a92be6c12674e77a4a4300e09f0dc"
-  integrity sha512-XSs9gZhZKdiwpJDLSoRQsnn8N9q/KH4bc0ayO6+qnHbtb1YfIrdKfjbOQFCwup4q/D2sNxhbupvrZ3rWmzAk4A==
+node-crc@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/node-crc/-/node-crc-1.3.2.tgz#c2f6f4f6abf765529ec99eb7e1a6c3942fc2fe69"
+  integrity sha512-1ipluqUEawnH1SVUz3JvnHqHaKbjTW5Mz/4lnvSU4fEmvfw9NU4DcTtCU8j2atk9p4P1TzyDKjo7YxVIKGTGdg==
   dependencies:
+    "@types/node" "^15.6.1"
     bindings "^1.3.0"
 
 node-fetch@2.6.1, node-fetch@^2.3.0, node-fetch@^2.6.0, node-fetch@^2.6.1:
