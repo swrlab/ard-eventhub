@@ -7,8 +7,7 @@ on:
     - feature/*
     - dev/*
   pull_request:
-    branches:
-    - main
+    types: [ closed ]
 
 env:
   NODE_VERSION: 14.17
