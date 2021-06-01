@@ -114,22 +114,22 @@ jobs:
         echo "::warning docker::VERSION $VERSION"
 
     - name: 💬 Comment Branch and Version
-        uses: peter-evans/create-or-update-comment@v1
-        if: github.event.pull_request.merged == 'true'
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            Docker container is ready!
+      uses: peter-evans/create-or-update-comment@v1
+      if: github.event.pull_request.merged == 'true'
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          Docker container is ready!
 
-            BRANCH:
-            ```
-            ${{ steps.push.outputs.BRANCH }}
-            ```
-            
-            VERSION:
-            ```
-            ${{ steps.push.outputs.VERSION }}
-            ```
+          BRANCH:
+          ```
+          ${{ steps.push.outputs.BRANCH }}
+          ```
+          
+          VERSION:
+          ```
+          ${{ steps.push.outputs.VERSION }}
+          ```
 
     - name: 👋 Logout
       run: "docker logout"
