@@ -20,7 +20,7 @@ If you are a radio station that wants to start publishing events to ARD-Eventhub
 
 - Set up your account and understand the authentication process
 - Use the POST `/events/{eventName}` endpoint to add your events
-- Note: Even if GET `/topics` does not list your radio station(s) beforehand, the topic(s) will be created during your first published event (response will contain:
+- Note: Even if GET `/topics` does not list your radio station(s) beforehand, the topic(s) will be created during your first published event (response will contain):
 
 ```js
 {
@@ -84,6 +84,7 @@ In your system for every new event, you might follow a workflow like this:
 
 ```js
 {
+   "type": "music",
    "start": "2021-03-17T10:04:35+01:00",
    "length": 215.2,
    "title": "Save your tears",
@@ -119,7 +120,6 @@ In your system for every new event, you might follow a workflow like this:
          "attribution": ""
       }
    ],
-   "type": "music",
    "hfdbIds": [
       "swrhfdb1.KONF.12345"
    ]

@@ -13,6 +13,7 @@ Several environment variables need to be set in `.env` config in order to run th
 - REQUIRED `GCP_PROJECT_ID` - which GCP project ID to use for Pub/Sub and Datastore requests
 - REQUIRED `FIREBASE_API_KEY` - corresponding `API_KEY` which matches the `GCP_PROJECT_ID`
 - REQUIRED `GOOGLE_APPLICATION_CREDENTIALS` - where the Google Cloud Service Account Key can be found (usually a path to a .json file)
+- REQUIRED `PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL` - for verification of internal publisher service account
 - REQUIRED `STAGE` - can be one of the Stages below to switch several settings
 - OPTIONAL `PORT` - override server port setting, default is 8080
 - OPTIONAL `DEBUG` - set true to enable more detailed logging

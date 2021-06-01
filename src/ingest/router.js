@@ -29,7 +29,7 @@ router.use(
 		apiSpec: './openapi.yaml',
 		validateRequests: true,
 		validateResponses: false,
-		ignorePaths: (path) => path.startsWith('/openapi') || path === '/',
+		ignorePaths: (path) => path.startsWith('/openapi') || path === '/' || path === '/pubsub',
 		formats: [
 			{
 				name: 'iso8601-timestamp',
@@ -57,6 +57,9 @@ router.post('/auth/refresh', require('./auth/refresh/post'))
 router.post('/auth/reset', require('./auth/reset/post'))
 
 router.post('/events/:eventName', authVerify, require('./events/post'))
+
+router.put('/pubsub/', authVerify, require('./pubsub'))
+router.post('/pubsub/', require('./pubsub/verify'), require('./pubsub'))
 
 router.get('/subscriptions/', authVerify, require('./subscriptions/list'))
 router.post('/subscriptions/', authVerify, require('./subscriptions/post'))
