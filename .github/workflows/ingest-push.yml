@@ -121,7 +121,7 @@ jobs:
 
     - name: 💬 Comment Branch and Version
       uses: peter-evans/create-or-update-comment@v1
-      if: github.event.pull_request.merged == 'true'
+      if: github.event.pull_request.merged == true
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
