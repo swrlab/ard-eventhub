@@ -1,14 +1,14 @@
 
 name: ingest push
 
-
 on:
   push:
     branches:
     - feature/*
     - dev/*
+  pull_request:
+    branches:
     - main
-
 
 env:
   NODE_VERSION: 14.17
@@ -18,9 +18,14 @@ env:
   GCP_RUN_MEMORY: 256Mi
   GCP_RUN_TIMEOUT: 60
 
-
 jobs:
+  security:
+    name: Check permissions for action runs
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true || github.event_name == "push"
+
   test:
+    needs: security
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -62,7 +67,6 @@ jobs:
         TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
         PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL: ${{ secrets.PUBSUB_SERVICE_ACCOUNT_EMAIL }}
       run: yarn ingest:test
-
 
   docker:
     runs-on: ubuntu-latest
