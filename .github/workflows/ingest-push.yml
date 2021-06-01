@@ -37,7 +37,7 @@ jobs:
       id: yarn-cache-dir-path
       run: echo "::set-output name=dir::$(yarn cache dir)"
 
-    - uses: actions/cache@v2.1.5
+    - uses: actions/cache@v2.1.6
       with:
         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
         key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
@@ -112,6 +112,24 @@ jobs:
         # Print vars
         echo "::warning docker::BRANCH $BRANCH"
         echo "::warning docker::VERSION $VERSION"
+
+    - name: 💬 Comment Branch and Version
+        uses: peter-evans/create-or-update-comment@v1
+        if: github.event.pull_request.merged == 'true'
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Docker container is ready!
+
+            BRANCH:
+            ```
+            ${{ steps.push.outputs.BRANCH }}
+            ```
+            
+            VERSION:
+            ```
+            ${{ steps.push.outputs.VERSION }}
+            ```
 
     - name: 👋 Logout
       run: "docker logout"
