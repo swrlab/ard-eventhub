@@ -8,7 +8,6 @@
 // import express.router
 const express = require('express')
 const moment = require('moment')
-const bodyParser = require('body-parser')
 const OpenApiValidator = require('express-openapi-validator')
 
 // load swagger UI
@@ -21,7 +20,7 @@ const router = express.Router()
 router.use(express.urlencoded({ extended: true }))
 
 // enable body parsing for post requests
-router.use(bodyParser.json())
+router.use(express.json())
 
 // load openapi validator
 router.use(
