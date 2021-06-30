@@ -13,25 +13,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update project dependencies
 - Remove deprecated body-parser
 
-## [1.1.0] - 2021-05-19
+## [1.1.0] - 2021-06-01
 
 ### Added
 
 - Add first external plugin with dts-integration
 
-## [1.0.2] - 2021-05-11
+## [1.0.2] - 2021-05-19
 
 ### Changed
 
 - Minor fixes in Readme and Docs
 - Update the OpenAPI specification
 
-## [1.0.1] - 2021-05-05
+## [1.0.1] - 2021-05-10
 
 ### Changed
 
 - Fixes for CVE-2021-27515 and CVE-2021-23362
 - Update project dependencies
+
+## [1.0.0] - 2021-04-09
+
+### Changed
+
+- Fixes in unit tests
+- Fixes events checks and errors
+- Update project dependencies
+- Update OpenApi Docs
 
 ## [1.0.0-beta2] - 2021-03-25
 
@@ -58,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `event` in the POST body for new events is now called `name` and is no longer required
   - variable is inserted using the event name provided by the URL
 
-## [0.1.7] - 2021-03-18
+## [0.1.7] - 2021-03-23
 
 ### Changed
 
@@ -66,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Check `content-type` in unit tests
 - Update unit tests for new ESLint config
 
-## [0.1.6] - 2021-03-17
+## [0.1.6] - 2021-03-18
 
 ### Changed
 
@@ -81,7 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enforcing separation between dev/prod topics and subscriptions
 - New onboarding and naming docs
 
-## [0.1.4] - 2021-03-16
+## [0.1.4] - 2021-03-17
 
 ### Changed
 
