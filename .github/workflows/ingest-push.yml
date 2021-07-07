@@ -13,9 +13,6 @@ env:
   NODE_VERSION: 14.17
   IMAGE_NAME: de.swr.ard.eventhub/ingest
   REGISTRY_DOMAIN: eu.gcr.io
-  GCP_RUN_REGION: europe-west1
-  GCP_RUN_MEMORY: 256Mi
-  GCP_RUN_TIMEOUT: 60
 
 jobs:
   security:
@@ -140,38 +137,20 @@ jobs:
     - name: 👋 Logout
       run: "docker logout"
 
-  deploy-A-dev-cloud-run:
+  deploy-A-dev-kubernetes:
+    if: github.event.pull_request.merged == true
     environment: dev
     needs: docker
     runs-on: ubuntu-latest
     steps:
-    - name: 🔑 Setup Google Cloud Auth
-      uses: google-github-actions/setup-gcloud@master
-      with:
-        service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
-        export_default_credentials: true
-
-    - name: 🧪 Add gcloud beta
-      run: "gcloud components install beta"
-
-    - name: 🏠 Set Cloud Run environment
-      run: "gcloud config set run/platform managed"
-
-    - name: 🗺 Set Cloud Run region
-      run: "gcloud config set run/region $GCP_RUN_REGION"
-
-    - name: 🚀 Deploy dev revision
+    - name: 🚀 Trigger deployment to dev
       run: |
-        gcloud beta run deploy ard-eventhub-ingest-dev \
-          --image $REGISTRY_DOMAIN/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME:${{ needs.docker.outputs.VERSION }} \
-          --quiet \
-          --verbosity error \
-          --project ${{ secrets.GCP_PROJECT_ID }} \
-          --allow-unauthenticated \
-          --timeout $GCP_RUN_TIMEOUT \
-          --memory $GCP_RUN_MEMORY \
-          --update-env-vars STAGE=dev,DD_TRACER_ENABLED=false,PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL=${{ secrets.PUBSUB_SERVICE_ACCOUNT_EMAIL }} \
-          --service-account ${{ secrets.GCP_SERVICE_ACCOUNT_INGEST }}
+        curl --location --request POST '${{ secrets.ARD_DEPLOYMENT_HOST }}' \
+        -s -w "%{http_code}\n" \
+        --header 'Authorization: Basic ${{ secrets.ARD_DEPLOYMENT_TOKEN }}' \
+        --form 'UMGEBUNG="dev"' \
+        --form 'COMPONENT="eventhub-ingest"' \
+        --form 'VERSION="${{ needs.docker.outputs.VERSION }}"'
 
   deploy-B-test-kubernetes:
     if: github.event.pull_request.merged == true
@@ -182,6 +161,7 @@ jobs:
     - name: 🚀 Trigger deployment to test
       run: |
         curl --location --request POST '${{ secrets.ARD_DEPLOYMENT_HOST }}' \
+        -s -w "%{http_code}\n" \
         --header 'Authorization: Basic ${{ secrets.ARD_DEPLOYMENT_TOKEN }}' \
         --form 'UMGEBUNG="test"' \
         --form 'COMPONENT="eventhub-ingest"' \
@@ -196,6 +176,7 @@ jobs:
     - name: 🚀 Trigger deployment to beta
       run: |
         curl --location --request POST '${{ secrets.ARD_DEPLOYMENT_HOST }}' \
+        -s -w "%{http_code}\n" \
         --header 'Authorization: Basic ${{ secrets.ARD_DEPLOYMENT_TOKEN }}' \
         --form 'UMGEBUNG="beta"' \
         --form 'COMPONENT="eventhub-ingest"' \
