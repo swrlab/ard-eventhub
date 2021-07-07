@@ -321,16 +321,16 @@
     retry-request "^4.1.1"
     teeny-request "^7.0.0"
 
-"@google-cloud/datastore@^6.4.3":
-  version "6.4.3"
-  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-6.4.3.tgz#386bc8f0a2d7fdb851b8a27a1d50fa9c17c1cab9"
-  integrity sha512-CcW6b9+P6JyYOhohnTImUX1j9iCtFJFH/9ND2QuaTz4mSrVYoJj8a0HepMIOhLPmrkpX63I0saA6CiaE6EzaSg==
+"@google-cloud/datastore@^6.4.4":
+  version "6.4.4"
+  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-6.4.4.tgz#ab354d87072098184a08aa47fed778cf0d5f9d84"
+  integrity sha512-hC7Mqr40wdAmiHXRnDe3MScUQobaEu6GwUtFG1E1zUEt82BMVucSvata/sIkLJlDZg/TuIAbHqlnDa05VDfFsw==
   dependencies:
     "@google-cloud/promisify" "^2.0.0"
     arrify "^2.0.1"
     concat-stream "^2.0.0"
     extend "^3.0.2"
-    google-gax "^2.12.0"
+    google-gax "^2.17.0"
     is "^3.3.0"
     pumpify "^2.0.1"
     split-array-stream "^2.0.0"
@@ -979,7 +979,7 @@ bindings@^1.3.0:
   dependencies:
     file-uri-to-path "1.0.0"
 
-body-parser@1.19.0, body-parser@^1.19.0:
+body-parser@1.19.0:
   version "1.19.0"
   resolved "https://registry.yarnpkg.com/body-parser/-/body-parser-1.19.0.tgz#96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
   integrity sha512-dhEPs72UPbDnAQJ9ZKMNTP6ptJaionhP5cBb541nXPlW60Jepo9RV/a4fX4XWW9CuFNK22krhrj1+rgzifNCsw==
