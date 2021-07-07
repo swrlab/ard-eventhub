@@ -49,7 +49,7 @@
 		"eslint-plugin-chai-friendly": "^0.7.1",
 		"eslint-plugin-swr": "0.0.5",
 		"license-compliance": "^1.2.1",
-		"mocha": "^9.0.1",
+		"mocha": "^9.0.2",
 		"nodemon": "^2.0.9",
 		"prettier": "^2.3.2"
 	},
