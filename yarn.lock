@@ -979,7 +979,7 @@ bindings@^1.3.0:
   dependencies:
     file-uri-to-path "1.0.0"
 
-body-parser@1.19.0, body-parser@^1.19.0:
+body-parser@1.19.0:
   version "1.19.0"
   resolved "https://registry.yarnpkg.com/body-parser/-/body-parser-1.19.0.tgz#96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
   integrity sha512-dhEPs72UPbDnAQJ9ZKMNTP6ptJaionhP5cBb541nXPlW60Jepo9RV/a4fX4XWW9CuFNK22krhrj1+rgzifNCsw==
@@ -1501,10 +1501,10 @@ date-and-time@^1.0.0:
   resolved "https://registry.yarnpkg.com/date-and-time/-/date-and-time-1.0.1.tgz#4959b7faf1ec5873e59d926d4528b9223a808a57"
   integrity sha512-7u+uNfnjWkX+YFQfivvW24TjaJG6ahvTrfw1auq7KlC7osuGcZBIWGBvB9UcENjH6JnLVhMqlRripk1dSHjAUA==
 
-dd-trace@^0.35.0:
-  version "0.35.0"
-  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-0.35.0.tgz#008d027b6101edcab53857b9f5b8d4001ec0bcf2"
-  integrity sha512-6C+YHK/EUrFEAzM3EfGJDUbmyLTtJUKWUkPGE9FHc/CM4Wsudx54SUZ7uEhLHL5SFeR06+NKMsZldOspgYWAOg==
+dd-trace@^0.36.1:
+  version "0.36.1"
+  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-0.36.1.tgz#3bea966ec3c67b96a298f20cd56dca6b856da822"
+  integrity sha512-4iPy6dJxaA0Yv9rZQa7ZGaTwyPI/m1adeUUhAqAgZ+mrzyz8TNSEeqEPohzECzgxNfLDjioGryJy4TblYED9ig==
   dependencies:
     "@types/node" "^10.12.18"
     form-data "^3.0.0"
@@ -1524,6 +1524,7 @@ dd-trace@^0.35.0:
     path-to-regexp "^0.1.2"
     performance-now "^2.1.0"
     protobufjs "^6.9.0"
+    resolve "^1.20.0"
     semver "^5.5.0"
     shimmer "1.2.1"
     source-map "^0.7.3"
