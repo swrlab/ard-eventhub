@@ -49,6 +49,9 @@ server.use('/', require('./router'))
 server.use(compression())
 server.disable('x-powered-by')
 server.listen(process.env.PORT || 8080)
-console.log('/// service is running >', JSON.stringify(config))
+console.log(`/// service is running > ${JSON.stringify(config)}`)
+if (process.env.STAGE === 'dev') {
+	console.log(`/// open http://localhost:${process.env.PORT || 8080}/openapi/ for API-reference`)
+}
 
 module.exports = server
