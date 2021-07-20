@@ -35,7 +35,13 @@ Uses full production prefixes and configuration.
 To run this project locally in your development environment you'll need these prerequisites:
 
 1. Node in the respective version currently used by the Dockerfile and yarn
-2. Have a Google Cloud Project and generate a JSON key, place it in the `/keys` folder named `ingest.json`. The service account needs to have these roles (some are only required if you also run it on Cloud Run):
+2. Rustup/Cargo installed to build the `node-crc` dependency
+
+   ```sh
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   ```
+
+3. Have a Google Cloud Project and generate a JSON key, place it in the `/keys` folder named `ingest.json`. The service account needs to have these roles (some are only required if you also run it on Cloud Run):
    1. `roles/datastore.user`
    2. `roles/errorreporting.writer`
    3. `roles/iam.serviceAccountTokenCreator`
@@ -43,11 +49,11 @@ To run this project locally in your development environment you'll need these pr
    5. `roles/logging.logWriter`
    6. `roles/monitoring.metricWriter`
    7. `roles/pubsub.admin`
-3. Install dependencies (`yarn`)
-4. Run the project
+4. Install dependencies (`yarn`)
+5. Run the project
 
    ```sh
    yarn ingest:local
    ```
 
-5. Open http://localhost:8080/openapi/
+6. Open http://localhost:8080/openapi/
