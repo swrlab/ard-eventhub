@@ -30,7 +30,7 @@ jobs:
       matrix:
         STAGES: [dev]
     steps:
-    - uses: actions/setup-node@v2.3.0
+    - uses: actions/setup-node@v2.3.1
       with:
         node-version: ${{ env.NODE_VERSION }}
 
