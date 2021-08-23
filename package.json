@@ -21,7 +21,7 @@
 	"license": "EUPL-1.2",
 	"dependencies": {
 		"@google-cloud/datastore": "^6.4.7",
-		"@google-cloud/pubsub": "^2.16.1",
+		"@google-cloud/pubsub": "^2.16.6",
 		"@google-cloud/secret-manager": "^3.9.0",
 		"compression": "^1.7.4",
 		"dd-trace": "^1.1.0",
