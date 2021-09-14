@@ -3,6 +3,9 @@
 	"version": "1.1.4",
 	"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
 	"main": "./src/ingest/index.js",
+	"engines": {
+		"node": ">=14.0.0"
+	},
 	"scripts": {
 		"docs:serve": "docsify serve . --port 3000",
 		"coreId": "node ./src/coreId/index.js",
@@ -53,8 +56,10 @@
 		"nodemon": "^2.0.12",
 		"prettier": "^2.4.0"
 	},
-	"engines": {
-		"node": ">=14.0.0"
+	"resolutions": {
+		"ansi-regex": "^6.0.1",
+		"strip-ansi": "^7.0.1",
+		"wide-align": "https://github.com/jimmywarting/wide-align#esm"
 	},
 	"prettier": "@swrlab/swr-prettier-config"
 }
