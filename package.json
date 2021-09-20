@@ -51,7 +51,7 @@
 		"license-compliance": "^1.2.2",
 		"mocha": "^9.1.1",
 		"nodemon": "^2.0.12",
-		"prettier": "^2.4.0"
+		"prettier": "^2.4.1"
 	},
 	"engines": {
 		"node": ">=14.0.0"
