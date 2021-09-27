@@ -1538,10 +1538,10 @@ date-and-time@^1.0.0:
   resolved "https://registry.yarnpkg.com/date-and-time/-/date-and-time-1.0.1.tgz#4959b7faf1ec5873e59d926d4528b9223a808a57"
   integrity sha512-7u+uNfnjWkX+YFQfivvW24TjaJG6ahvTrfw1auq7KlC7osuGcZBIWGBvB9UcENjH6JnLVhMqlRripk1dSHjAUA==
 
-dd-trace@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-1.3.0.tgz#b01e9dabb6122cf8feaa1db8fc346547b7816864"
-  integrity sha512-hjqXYaoPpn1nbp0/+93WU0WYDrN3ZG6X+6g6g8LCcCyQUF+QZc+5bMy4AHIAHmcbVMf7M/YuJf3sZdRdGxapKg==
+dd-trace@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-1.4.0.tgz#0cd593809d4aa239bcd54027240e45932b86be45"
+  integrity sha512-XP+EEO9IOaXUsGaurCGBGCsUqbJgTetjlt/FY/6vf+XPwD4rS4yJZRI2AsGX/2wTK+5I7AMbZgIJscVoX9jYLA==
   dependencies:
     "@datadog/native-metrics" "^1.0.0"
     "@datadog/pprof" "^0.1.3"
@@ -1549,7 +1549,7 @@ dd-trace@^1.3.0:
     "@types/node" "^10.12.18"
     crypto-randomuuid "^1.0.0"
     form-data "^3.0.0"
-    import-in-the-middle "^1.1.0"
+    import-in-the-middle "^1.1.1"
     koalas "^1.0.2"
     limiter "^1.1.4"
     lodash.kebabcase "^4.1.1"
@@ -1563,7 +1563,6 @@ dd-trace@^1.3.0:
     path-to-regexp "^0.1.2"
     performance-now "^2.1.0"
     semver "^5.5.0"
-    shimmer "1.2.1"
     source-map "^0.7.3"
     source-map-resolve "^0.6.0"
 
@@ -2896,10 +2895,10 @@ import-fresh@^3.0.0, import-fresh@^3.2.1:
     parent-module "^1.0.0"
     resolve-from "^4.0.0"
 
-import-in-the-middle@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.1.0.tgz#b3a90b0357b68befa32bec98257e845073372043"
-  integrity sha512-RjhfSRGkGdzuxSO4Cfalh8wJ9OPkRn4I9BhGOgNVSr71rvws5R9Xv9tOxn9g40Q6xE0F3oXVgtW4IEg/21aq9w==
+import-in-the-middle@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.1.1.tgz#5b5dfeb4f98688b15bee87139469dbb1207a5dfc"
+  integrity sha512-Qs77TopqLK2qNVfslMpvVBDgWamttEG/Ss6C3r23d3sA+mU5aU94YT2qlF9jtvXO5wBzcy5z1LFjGVp5jecBgw==
   dependencies:
     module-details-from-path "^1.0.3"
 
@@ -3689,7 +3688,7 @@ minimist@^1.2.0, minimist@^1.2.5:
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
   integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
 
-mkdirp@^0.5.1, mkdirp@^0.5.4:
+mkdirp@^0.5.4:
   version "0.5.5"
   resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-0.5.5.tgz#d91cefd62d1436ca0f41620e251288d420099def"
   integrity sha512-NKmAlESf6jMGym1++R0Ra7wvhV+wFW63FaSOFPwRahvea0gMUcGUhVeAg/0BC0wiv9ih5NYPB1Wn1UEI1/L+xQ==
@@ -3757,21 +3756,7 @@ ms@2.1.3, ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
-multer@^1.4.2:
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/multer/-/multer-1.4.2.tgz#2f1f4d12dbaeeba74cb37e623f234bf4d3d2057a"
-  integrity sha512-xY8pX7V+ybyUpbYMxtjM9KAiD9ixtg5/JkeKUTD6xilfDv0vzzOFcCp4Ljb1UU3tSOM3VTZtKo63OmzOrGi3Cg==
-  dependencies:
-    append-field "^1.0.0"
-    busboy "^0.2.11"
-    concat-stream "^1.5.2"
-    mkdirp "^0.5.1"
-    object-assign "^4.1.1"
-    on-finished "^2.3.0"
-    type-is "^1.6.4"
-    xtend "^4.0.0"
-
-multer@^1.4.3:
+multer@^1.4.2, multer@^1.4.3:
   version "1.4.3"
   resolved "https://registry.yarnpkg.com/multer/-/multer-1.4.3.tgz#4db352d6992e028ac0eacf7be45c6efd0264297b"
   integrity sha512-np0YLKncuZoTzufbkM6wEKp68EhWJXcU6fq6QqrSwkckd2LlMgd1UqhUJLj6NS/5sZ8dE8LYDWslsltJznnXlg==
@@ -3823,7 +3808,12 @@ node-crc@^1.3.2:
     "@types/node" "^15.6.1"
     bindings "^1.3.0"
 
-node-fetch@2.6.1, node-fetch@^2.3.0, node-fetch@^2.6.0, node-fetch@^2.6.1:
+node-fetch@2.6.2:
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.2.tgz#986996818b73785e47b1965cc34eb093a1d464d0"
+  integrity sha512-aLoxToI6RfZ+0NOjmWAgn9+LEd30YCkJKFSyWacNZdEKTit/ZMcKjGkTRo8uWEsnIb/hfKecNPEbln02PdWbcA==
+
+node-fetch@^2.3.0, node-fetch@^2.6.0, node-fetch@^2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
   integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
@@ -4667,11 +4657,6 @@ shebang-regex@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/shebang-regex/-/shebang-regex-3.0.0.tgz#ae16f1644d873ecad843b0307b143362d4c42172"
   integrity sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==
-
-shimmer@1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/shimmer/-/shimmer-1.2.1.tgz#610859f7de327b587efebf501fb43117f9aff337"
-  integrity sha512-sQTKC1Re/rM6XyFM6fIAGHRPVGvyXfgzIDvzoq608vM+jeyVD0Tu1E6Np0Kc2zAIFWIj963V2800iF/9LPieQw==
 
 side-channel@^1.0.4:
   version "1.0.4"
