@@ -6,25 +6,25 @@
 */
 
 // load node utils
-const fetch = require('node-fetch')
 const jwt = require('jsonwebtoken')
 
-// load eventhub utils
-const config = require('../../../config')
+// load utils
+const logger = require('../logger')
+const undici = require('../undici')
+
+const source = 'firebase.signInWithEmailAndPassword'
 
 module.exports = async (email, password) => {
 	// set firebase sign in url
 	const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY}`
 
 	// query firebase
-	const request = await fetch(url, {
-		method: 'post',
-		timeout: 4 * 1000,
+	const { statusCode, json: response } = await undici(url, {
+		method: 'POST',
+		timeout: 4e3,
 		headers: {
 			Accept: 'application/json',
-			Connection: 'keep-alive',
 			'Content-Type': 'application/json',
-			'User-Agent': config.userAgent,
 		},
 		body: JSON.stringify({
 			email,
@@ -33,20 +33,16 @@ module.exports = async (email, password) => {
 		}),
 	})
 
-	// parse json response
-	const response = await request.json()
-
 	// handle errors
-	if (request.status !== 200) {
-		console.warn(
-			'utils/firebase/refreshToken',
-			'failed with status',
-			request.status,
-			'>',
-			JSON.stringify(response)
-		)
+	if (statusCode !== 200) {
+		logger.log({
+			source,
+			level: 'warning',
+			message: `failed with status > ${statusCode}`,
+			data: { statusCode, response },
+		})
 
-		return Promise.reject(response)
+		return Promise.reject(new Error(response))
 	}
 
 	// decode JWT token to receive user object

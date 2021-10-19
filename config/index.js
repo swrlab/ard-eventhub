@@ -58,4 +58,7 @@ if (!stage || !config[stage]) {
 	process.exit(1)
 }
 
+// update user agent env for undici-wrapper
+process.env.USER_AGENT = config.userAgent
+
 module.exports = config[stage]

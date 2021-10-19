@@ -9,6 +9,8 @@
 const logger = require('../../utils/logger')
 const plugins = require('../../utils/plugins')
 
+const source = 'pubsub'
+
 module.exports = async (req, res) => {
 	try {
 		// get metadata from pubsub body
@@ -32,7 +34,7 @@ module.exports = async (req, res) => {
 			logger.log({
 				level: 'warning',
 				message: 'undetected PubSub message action',
-				source: 'c/pubsub',
+				source,
 				data: { messageId, job, headers: req.headers },
 			})
 		}
@@ -44,7 +46,7 @@ module.exports = async (req, res) => {
 		logger.log({
 			level: 'error',
 			message: 'error while processing PubSub message',
-			source: 'c/pubsub',
+			source,
 			error,
 			data: { messageId, body: req.body, headers: req.headers },
 		})
