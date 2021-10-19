@@ -26,15 +26,12 @@ module.exports = async (req, res) => {
 				data: { email: req.body.email },
 			})
 
-			return response.badRequest(req, res, {
-				status: err.error && err.error.code ? err.error.code : 500,
-				data: err,
-			})
+			return response.badRequest(req, res, { status: error?.error?.code || 500, data: error })
 		}
 
 		// return ok
 		return response.ok(req, res, { valid: true })
-	} catch (err) {
+	} catch (error) {
 		logger.log({
 			level: 'error',
 			message: 'failed to reset password',
@@ -43,6 +40,6 @@ module.exports = async (req, res) => {
 			data: { body: req.body, headers: req.headers },
 		})
 
-		return response.internalServerError(req, res, err)
+		return response.internalServerError(req, res, error)
 	}
 }

@@ -22,11 +22,8 @@ module.exports = async (req, res) => {
 		// swap previously received refresh token for new id token
 		try {
 			login = await firebase.refreshToken(req.body.refreshToken)
-		} catch (err) {
-			return response.badRequest(req, res, {
-				status: err.error && err.error.code ? err.error.code : 500,
-				data: err,
-			})
+		} catch (error) {
+			return response.badRequest(req, res, { status: error?.error?.code || 500, data: error })
 		}
 
 		// return ok
