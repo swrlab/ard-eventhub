@@ -10,6 +10,8 @@ const logger = require('../../utils/logger')
 const pubsub = require('../../utils/pubsub')
 const response = require('../../utils/response')
 
+const source = 'ingest/subscriptions/list'
+
 module.exports = async (req, res) => {
 	try {
 		// load all subscriptions
@@ -26,7 +28,7 @@ module.exports = async (req, res) => {
 		logger.log({
 			level: 'error',
 			message: 'failed to list subscriptions',
-			source: 'ingest/subscriptions/list',
+			source,
 			error,
 			data: {},
 		})

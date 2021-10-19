@@ -49,6 +49,5 @@ server.use('/', require('./router'))
 server.use(compression())
 server.disable('x-powered-by')
 server.listen(process.env.PORT || 8080)
-console.log('/// service is running >', JSON.stringify(config))
 
 module.exports = server

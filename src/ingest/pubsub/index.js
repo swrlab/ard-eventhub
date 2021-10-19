@@ -9,7 +9,7 @@
 const logger = require('../../utils/logger')
 const plugins = require('../../utils/plugins')
 
-const source = 'pubsub'
+const source = 'ingest/pubsub'
 
 module.exports = async (req, res) => {
 	try {

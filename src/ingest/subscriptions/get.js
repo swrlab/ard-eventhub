@@ -10,6 +10,8 @@ const logger = require('../../utils/logger')
 const pubsub = require('../../utils/pubsub')
 const response = require('../../utils/response')
 
+const source = 'ingest/subscriptions/get'
+
 module.exports = async (req, res) => {
 	try {
 		// preset vars
@@ -45,7 +47,7 @@ module.exports = async (req, res) => {
 		logger.log({
 			level: 'error',
 			message: 'failed to get subscription',
-			source: 'ingest/subscriptions/get',
+			source,
 			error,
 			data: { params: req.params },
 		})

@@ -19,7 +19,7 @@ const config = require('../../../config')
 // TODO: check IDs in ARD Core-API instead of dump
 const coreApi = require('../../data/coreApi.json')
 
-const source = 'ingest/subscription/post'
+const source = 'ingest/subscriptions/post'
 
 module.exports = async (req, res) => {
 	try {
