@@ -50,7 +50,7 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 
 | Type    | Name                           | License                                                                                            |
 | ------- | ------------------------------ | -------------------------------------------------------------------------------------------------- |
-| Docker  | `node:14.17-alpine`            | [MIT](https://github.com/nodejs/node/blob/master/LICENSE)                                          |
+| Docker  | `node:16.11.1-alpine`          | [MIT](https://github.com/nodejs/node/blob/master/LICENSE)                                          |
 | NPM     | `@google-cloud/datastore`      | [Apache License 2.0](https://github.com/googleapis/nodejs-datastore/blob/master/LICENSE)           |
 | NPM     | `@google-cloud/pubsub`         | [Apache License 2.0](https://github.com/googleapis/nodejs-pubsub/blob/master/LICENSE)              |
 | NPM     | `@google-cloud/secret-manager` | [Apache License 2.0](https://github.com/googleapis/nodejs-secret-manager/blob/master/LICENSE)      |
@@ -63,9 +63,9 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `jsonwebtoken`                 | [MIT](https://github.com/auth0/node-jsonwebtoken/blob/master/LICENSE)                              |
 | NPM     | `moment`                       | [MIT](https://github.com/moment/moment/blob/develop/LICENSE)                                       |
 | NPM     | `node-crc`                     | [MIT](https://github.com/magiclen/node-crc/blob/master/LICENSE)                                    |
-| NPM     | `node-fetch`                   | [MIT](https://github.com/node-fetch/node-fetch/blob/master/LICENSE.md)                             |
 | NPM     | `slug`                         | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                           |
 | NPM     | `swagger-ui-express`           | [MIT](https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE)                       |
+| NPM     | `undici-wrapper`               | [MIT](https://github.com/frytg/undici-wrapper)                                                     |
 | NPM     | `uuid`                         | [MIT](https://github.com/uuidjs/uuid/blob/master/LICENSE.md)                                       |
 | NPM     | `winston`                      | [MIT](https://github.com/winstonjs/winston/blob/master/LICENSE)                                    |
 | NPM DEV | `@swrlab/eslint-plugin-swr`    | [ISC](https://github.com/swrlab/eslint-plugin-swr/)                                                |
