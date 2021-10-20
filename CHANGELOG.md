@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update project dependencies
 - Swap `node-fetch` for `undici-wrapper`
 - Update remaining `console` logs to `logger`
+- Update dotenv and config
 
 ## [1.1.5] - 2021-09-27
 
