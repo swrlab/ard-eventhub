@@ -48,6 +48,10 @@ server.use('/', require('./router'))
 // start express server
 server.use(compression())
 server.disable('x-powered-by')
-server.listen(process.env.PORT || 8080)
+server.listen(config.port)
+
+if (config.isDev) {
+	console.log(`${config.serviceName} (v${config.version}) is running at: ${config.serviceUrl}`)
+}
 
 module.exports = server
