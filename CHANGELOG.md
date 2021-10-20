@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Update Node to [v16.11.1](https://nodejs.org/en/blog/vulnerability/oct-2021-security-releases/)
 - Update project dependencies
+- Update to python3 in docker
 - Swap `node-fetch` for `undici-wrapper`
 - Update remaining `console` logs to `logger`
 - Update dotenv and config
