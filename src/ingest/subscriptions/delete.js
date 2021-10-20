@@ -11,6 +11,8 @@ const logger = require('../../utils/logger')
 const pubsub = require('../../utils/pubsub')
 const response = require('../../utils/response')
 
+const source = 'ingest/subscriptions/delete'
+
 module.exports = async (req, res) => {
 	try {
 		// preset vars
@@ -21,17 +23,14 @@ module.exports = async (req, res) => {
 		try {
 			subscription = await pubsub.getSubscription(subscriptionName)
 			subscription = subscription.full
-		} catch (err) {
-			console.error(
-				'ingest/subscription/delete',
-				'failed to find topic to be deleted',
-				JSON.stringify({
-					subscriptionName,
-					code: err.code,
-					details: err.details,
-					error: err.stack || err,
-				})
-			)
+		} catch (error) {
+			logger.log({
+				level: 'error',
+				message: 'failed to find topic to be deleted',
+				source,
+				error,
+				data: { subscriptionName },
+			})
 
 			if (err?.code === 5) {
 				// pubsub error code 5 seems to be 'Resource not found'
@@ -71,7 +70,7 @@ module.exports = async (req, res) => {
 		logger.log({
 			level: 'info',
 			message: 'removed subscription',
-			source: 'ingest/subscriptions/delete',
+			source,
 			data: { email: req.user.email, subscriptionName, subscriptionId, subscription },
 		})
 
@@ -83,7 +82,7 @@ module.exports = async (req, res) => {
 		logger.log({
 			level: 'error',
 			message: 'failed to delete subscription',
-			source: 'ingest/subscriptions/delete',
+			source,
 			error,
 			data: { params: req.params },
 		})

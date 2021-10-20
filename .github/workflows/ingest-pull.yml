@@ -6,7 +6,7 @@ on:
     types: [labeled]
 
 env:
-  NODE_VERSION: 14.17
+  NODE_VERSION: 16.11.1
   
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
         STAGES: [dev]
     steps:
     - name: Checkout repo 👀
-      uses: actions/checkout@v2.3.4
+      uses: actions/checkout@v2.3.5
 
     - uses: actions/setup-node@v2.4.1
       with:
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repo 👀
-      uses: actions/checkout@v2.3.4
+      uses: actions/checkout@v2.3.5
 
     - uses: actions/setup-node@v2.4.1
       with:

@@ -11,7 +11,7 @@ module.exports = function (req, res, data, status) {
 			...data,
 			trace: req.headers['x-cloud-trace-context'] || null,
 		})
-	} catch (err) {
+	} catch (error) {
 		return res.sendStatus(500)
 	}
 }

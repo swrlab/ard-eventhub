@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2021-10-19
+
+### Changed
+
+- Update Node to [v16.11.1](https://nodejs.org/en/blog/vulnerability/oct-2021-security-releases/)
+- Update project dependencies
+- Update to python3 in docker
+- Swap `node-fetch` for `undici-wrapper`
+- Update remaining `console` logs to `logger`
+- Update dotenv and config
+
 ## [1.1.5] - 2021-09-27
 
 ### Changed

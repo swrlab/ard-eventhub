@@ -15,6 +15,7 @@ const logger = require('../../utils/logger')
 
 // set config
 const serviceAccountEmail = process.env.PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL
+const source = 'ingest/pubsub/verify'
 
 module.exports = async (req, res, next) => {
 	try {
@@ -47,7 +48,7 @@ module.exports = async (req, res, next) => {
 		logger.log({
 			level: 'error',
 			message: 'failed to verify user',
-			source: 'ingest/auth/middleware/verify',
+			source,
 			error,
 			data: { ...req.headers, authorization: 'hidden' },
 		})

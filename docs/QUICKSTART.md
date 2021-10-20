@@ -202,7 +202,7 @@ module.exports = async (req, res) => {
          // user provided valid token but failed email verification
          return res.sendStatus(204)
       }
-   } catch (err) {
+   } catch (error) {
       // request failed or invalid token
       return res.sendStatus(204)
    }

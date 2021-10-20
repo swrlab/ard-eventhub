@@ -10,7 +10,10 @@ const moment = require('moment')
 
 // load eventhub utils
 const firebase = require('../../../utils/firebase')
+const logger = require('../../../utils/logger')
 const response = require('../../../utils/response')
+
+const source = 'ingest/auth/login'
 
 module.exports = async (req, res) => {
 	try {
@@ -19,11 +22,8 @@ module.exports = async (req, res) => {
 		// send email + password for verification, receive login and user object
 		try {
 			login = await firebase.signInWithEmailAndPassword(req.body.email, req.body.password)
-		} catch (err) {
-			return response.badRequest(req, res, {
-				status: err.error && err.error.code ? err.error.code : 500,
-				data: err,
-			})
+		} catch (error) {
+			return response.badRequest(req, res, { status: error?.error?.code || 500, data: error })
 		}
 
 		// return ok
@@ -36,15 +36,15 @@ module.exports = async (req, res) => {
 
 			user: login.user,
 		})
-	} catch (err) {
-		console.error(
-			'ingest/auth/login',
-			'failed to sign in w/ email+password',
-			JSON.stringify({
-				headers: req.headers,
-				error: err.stack || err,
-			})
-		)
-		return response.internalServerError(req, res, err)
+	} catch (error) {
+		logger.log({
+			level: 'error',
+			message: 'failed to sign in w/ email+password',
+			source,
+			error,
+			data: { headers: req.headers },
+		})
+
+		return response.internalServerError(req, res, error)
 	}
 }

@@ -28,7 +28,8 @@ router.use(
 		apiSpec: './openapi.yaml',
 		validateRequests: true,
 		validateResponses: false,
-		ignorePaths: (path) => path.startsWith('/openapi') || path === '/' || path === '/pubsub',
+		ignorePaths: (path) =>
+			path.startsWith('/openapi') || path === '/' || path === '/health' || path === '/pubsub',
 		formats: [
 			{
 				name: 'iso8601-timestamp',

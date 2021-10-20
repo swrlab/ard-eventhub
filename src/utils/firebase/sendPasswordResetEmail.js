@@ -5,25 +5,23 @@
 
 */
 
-// load node utils
-const fetch = require('node-fetch')
+// load utils
+const logger = require('../logger')
+const undici = require('../undici')
 
-// load eventhub utils
-const config = require('../../../config')
+const source = 'firebase.sendPasswordResetEmail'
 
 module.exports = async (email) => {
 	// set firebase sign in url
 	const url = `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${process.env.FIREBASE_API_KEY}`
 
 	// query firebase
-	const request = await fetch(url, {
-		method: 'post',
-		timeout: 4 * 1000,
+	const { statusCode, json: response } = await undici(url, {
+		method: 'POST',
+		timeout: 4e3,
 		headers: {
 			Accept: 'application/json',
-			Connection: 'keep-alive',
 			'Content-Type': 'application/json',
-			'User-Agent': config.userAgent,
 		},
 		body: JSON.stringify({
 			requestType: 'PASSWORD_RESET',
@@ -31,22 +29,18 @@ module.exports = async (email) => {
 		}),
 	})
 
-	// parse json response
-	const response = await request.json()
-
 	// handle errors
-	if (request.status !== 200) {
-		console.warn(
-			'utils/firebase/refreshToken',
-			'failed with status',
-			request.status,
-			'>',
-			JSON.stringify(response)
-		)
+	if (statusCode !== 200) {
+		logger.log({
+			source,
+			level: 'warning',
+			message: `failed with status > ${statusCode}`,
+			data: { statusCode, response },
+		})
 
-		return Promise.reject(response)
+		return Promise.reject(new Error(response))
 	}
 
-	// return data
+	// return ok
 	return Promise.resolve()
 }

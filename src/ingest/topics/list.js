@@ -9,6 +9,8 @@ const logger = require('../../utils/logger')
 const pubsub = require('../../utils/pubsub')
 const response = require('../../utils/response')
 
+const source = 'ingest/topics/list'
+
 module.exports = async (req, res) => {
 	try {
 		// load all topics
@@ -20,7 +22,7 @@ module.exports = async (req, res) => {
 		logger.log({
 			level: 'error',
 			message: 'failed to list topics',
-			source: 'ingest/topics/list',
+			source,
 			error,
 			data: {},
 		})

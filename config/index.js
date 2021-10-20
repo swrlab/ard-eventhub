@@ -22,18 +22,27 @@ if (!process.env.GCP_PROJECT_ID) {
 }
 
 // read env vars
-const stage = process.env.STAGE
+const stage = process.env.STAGE.toLowerCase()
+const port = process.env.PORT || 8080
+
+// set protocol, hostname and hostUrl
+const protocol = stage === 'dev' ? 'http' : 'https'
+const hostname = stage === 'dev' ? 'localhost' : `eventhub-ingest.ard.de`
+const serviceUrl = `${protocol}://${hostname}:${port}`
 
 // set config
-const serviceName = 'ard-eventhub'
+const serviceName = process.env.SERVICE_NAME
 const baseConfig = {
 	coreIdPrefixes,
 	pubSubPrefix: `de.ard.eventhub.${stage}.`,
 	pubSubTopicSelf: `de.ard.eventhub.${stage}.internal`,
 	stage,
+	port,
 	userAgent: `${serviceName}/${version}`,
 	version,
+	serviceUrl,
 	isDebug: process.env.DEBUG === 'true',
+	isDev: process.env.STAGE === 'dev',
 }
 
 // set config based on stages
@@ -57,5 +66,8 @@ if (!stage || !config[stage]) {
 	console.error('STAGE not found >', stage)
 	process.exit(1)
 }
+
+// update user agent env for undici-wrapper
+process.env.USER_AGENT = config.userAgent
 
 module.exports = config[stage]
