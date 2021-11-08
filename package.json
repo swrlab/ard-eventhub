@@ -23,7 +23,7 @@
 	"author": "SWR Audio Lab <lab@swr.de>",
 	"license": "EUPL-1.2",
 	"dependencies": {
-		"@google-cloud/datastore": "^6.6.0",
+		"@google-cloud/datastore": "^6.6.1",
 		"@google-cloud/pubsub": "^2.18.1",
 		"@google-cloud/secret-manager": "^3.10.1",
 		"compression": "^1.7.4",

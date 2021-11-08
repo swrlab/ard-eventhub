@@ -389,10 +389,10 @@
     retry-request "^4.2.2"
     teeny-request "^7.0.0"
 
-"@google-cloud/datastore@^6.6.0":
-  version "6.6.0"
-  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-6.6.0.tgz#251b9a9b84cc10e1f925d55f3c17755367b19cbd"
-  integrity sha512-nxKYb3be/wnqExpxiBXEQMDXHYFDdZDRmh1jtMdXcPHz/eoxERS3ctITBWDWTHlJcAeeG/ZIOVCFw1sWnne1IA==
+"@google-cloud/datastore@^6.6.1":
+  version "6.6.1"
+  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-6.6.1.tgz#a0de67ca2a2babde55be6c00e5b1dcf14748e625"
+  integrity sha512-M3ek6zv9mHNThteb8ONq7FlojZ/mD8wKcGYSfm2iG0kYSoOQ1nhRhRkyUYjGfzKR1Qjgupm7XSVmLpOh+A3zDw==
   dependencies:
     "@google-cloud/promisify" "^2.0.0"
     arrify "^2.0.1"
