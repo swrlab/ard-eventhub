@@ -651,6 +651,32 @@
 	},
 	{
 		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:3b385773df2a92ff",
+		"externalId": "99080",
+		"title": "MDR SCHLAGERWELT",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:c062096f17e3f07f",
+			"externalId": "MDR",
+			"title": "Mitteldeutscher Rundfunk",
+			"acronym": "MDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:0f0f6cb9915a8175",
+		"externalId": "99200",
+		"title": "MDR TWEENS",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:c062096f17e3f07f",
+			"externalId": "MDR",
+			"title": "Mitteldeutscher Rundfunk",
+			"acronym": "MDR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
 		"id": "urn:ard:publisher:e9fe36ad40377d10",
 		"externalId": "284400",
 		"title": "N-JOY",
