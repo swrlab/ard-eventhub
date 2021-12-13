@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] - 2021-12-13
+
+### Changed
+
+- Fix IDs of two MDR channels
+- Fix for `GHSA-qrmm-w75w-3wpx`
+- Update Node to `v16.13.1`
+- Update project dependencies
+
 ## [1.2.2] - 2021-11-30
 
 ### Changed
@@ -26,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Update Node to [v16.11.1](https://nodejs.org/en/blog/vulnerability/oct-2021-security-releases/)
 - Update project dependencies
-- Update to python3 in docker
+- Update to `python3` in docker
 - Swap `node-fetch` for `undici-wrapper`
 - Update remaining `console` logs to `logger`
 - Update dotenv and config
@@ -35,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Fix for SNYK-JS-ANSIREGEX-1583908
+- Fix for `SNYK-JS-ANSIREGEX-1583908`
 - Update project dependencies
 - Update github actions
 
