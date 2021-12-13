@@ -664,8 +664,8 @@
 	},
 	{
 		"_type": "PublisherResource",
-		"id": "urn:ard:publisher:f41038bf16b6e7be",
-		"externalId": "10403",
+		"id": "urn:ard:publisher:5b1512d4453838b7",
+		"externalId": "10402",
 		"title": "MDR TWEENS",
 		"institution": {
 			"_type": "InstitutionResource",
