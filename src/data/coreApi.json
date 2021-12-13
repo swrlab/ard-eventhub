@@ -651,8 +651,8 @@
 	},
 	{
 		"_type": "PublisherResource",
-		"id": "urn:ard:publisher:3b385773df2a92ff",
-		"externalId": "99080",
+		"id": "urn:ard:publisher:e8ea8d8218416f3f",
+		"externalId": "10401",
 		"title": "MDR SCHLAGERWELT",
 		"institution": {
 			"_type": "InstitutionResource",
@@ -664,8 +664,8 @@
 	},
 	{
 		"_type": "PublisherResource",
-		"id": "urn:ard:publisher:0f0f6cb9915a8175",
-		"externalId": "99200",
+		"id": "urn:ard:publisher:f41038bf16b6e7be",
+		"externalId": "10403",
 		"title": "MDR TWEENS",
 		"institution": {
 			"_type": "InstitutionResource",
