@@ -30,7 +30,7 @@
 		"dd-trace": "^1.5.1",
 		"express": "4.17.1",
 		"express-openapi-validator": "^4.13.4",
-		"firebase-admin": "^10.0.0",
+		"firebase-admin": "^10.0.1",
 		"google-auth-library": "^7.10.3",
 		"jsonwebtoken": "^8.5.1",
 		"moment": "^2.29.1",
