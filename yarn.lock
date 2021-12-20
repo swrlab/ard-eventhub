@@ -236,10 +236,10 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
-"@datadog/native-metrics@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@datadog/native-metrics/-/native-metrics-1.0.1.tgz#709bfe0ead7d6f0b852155f28ed2f9f2e22a080c"
-  integrity sha512-VyaALmSV+5vHamBJEVoQSaU67E1lwYZHrWk8EsinUMvk/P0AWdWv9m3vYPRuhH+bfSyic4UQZkyBbYQFnXP5eg==
+"@datadog/native-metrics@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@datadog/native-metrics/-/native-metrics-1.1.0.tgz#ef860a4cbea81b6e1559b280f5f1f3cd2cc22585"
+  integrity sha512-OSrhoo8U/JB/FltvAp54cgMHCBWEriF/D/ZboBH4Pn7UY/Zu8dkzB6eAWQFJIxQlHjYrAEuNgZPBkaHhS3e0KQ==
   dependencies:
     nan "^2.14.2"
     node-gyp-build "^3.9.0"
@@ -767,15 +767,10 @@
   dependencies:
     "@types/express" "*"
 
-"@types/node@*", "@types/node@>=12.12.47", "@types/node@>=13.7.0":
-  version "16.11.7"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.7.tgz#36820945061326978c42a01e56b61cd223dfdc42"
-  integrity sha512-QB5D2sqfSjCmTuWcBWyJ+/44bcjO7VbjSbOE0ucoVbAsSNQc4Lt6QkgkVXkTDwkL4z/beecZNDvVX15D4P8Jbw==
-
-"@types/node@^10.12.18":
-  version "10.17.60"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.60.tgz#35f3d6213daed95da7f0f73e75bcc6980e90597b"
-  integrity sha512-F0KIgDJfy2nA3zMLmWGKxcH2ZVEtCZXHHdOQs2gSaQ27+lNeEfGxzkIw90aXswATX7AZ33tahPbzy6KAfUreVw==
+"@types/node@*", "@types/node@>=12", "@types/node@>=12.12.47", "@types/node@>=13.7.0":
+  version "17.0.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.1.tgz#88d501e84b6185f6489ecee4ba9e8fcec7f29bb2"
+  integrity sha512-NXKvBVUzIbs6ylBwmOwHFkZS2EXCcjnqr8ZCRNaXBkHAf+3mn/rPcJxwrzuc6movh8fxQAsUUfYklJ/EG+hZqQ==
 
 "@types/node@^15.6.1":
   version "15.14.9"
@@ -1584,15 +1579,15 @@ date-and-time@^2.0.0:
   resolved "https://registry.yarnpkg.com/date-and-time/-/date-and-time-2.0.1.tgz#bc8b72704980e8a0979bb186118d30d02059ef04"
   integrity sha512-O7Xe5dLaqvY/aF/MFWArsAM1J4j7w1CSZlPCX9uHgmb+6SbkPd8Q4YOvfvH/cZGvFlJFfHOZKxQtmMUOoZhc/w==
 
-dd-trace@^1.5.1:
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-1.5.1.tgz#b8d146643b52885dde5393d90cc4d3966d781cf9"
-  integrity sha512-ot43V0Uwto4VLnB7mx3wi2r84eXnqrN2CmAsiJf3rzLmJxbK/d/E5jumaBVvcHujdbUl5rqts4olFZK0Vks2sw==
+dd-trace@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-1.6.0.tgz#8c6ff7f7f810b635757b343a5019055afc69371c"
+  integrity sha512-8ZrZSwJZAhT2RCBR7AKxWmM/9tAuDzZoN6Z+y8Yo0Ai51VhpZIbKqEkMvz77Tla5j+RUkvUB5VYRphxB+KhsNg==
   dependencies:
-    "@datadog/native-metrics" "^1.0.1"
+    "@datadog/native-metrics" "^1.1.0"
     "@datadog/pprof" "^0.3.0"
     "@datadog/sketches-js" "^1.0.4"
-    "@types/node" "^10.12.18"
+    "@types/node" ">=12"
     crypto-randomuuid "^1.0.0"
     form-data "^3.0.0"
     import-in-the-middle "^1.1.2"
