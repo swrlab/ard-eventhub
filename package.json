@@ -28,7 +28,7 @@
 		"@google-cloud/secret-manager": "^3.10.1",
 		"compression": "^1.7.4",
 		"dd-trace": "^1.5.1",
-		"express": "4.17.1",
+		"express": "4.17.2",
 		"express-openapi-validator": "^4.13.4",
 		"firebase-admin": "^10.0.0",
 		"google-auth-library": "^7.10.3",
