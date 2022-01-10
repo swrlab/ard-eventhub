@@ -39,7 +39,7 @@
 		"swagger-ui-express": "^4.2.0",
 		"uuid": "^8.3.2",
 		"undici-wrapper": "frytg/undici-wrapper",
-		"winston": "^3.3.3"
+		"winston": "^3.3.4"
 	},
 	"devDependencies": {
 		"@swrlab/eslint-plugin-swr": "^0.1.2",
