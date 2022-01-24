@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - chore: update dependencies
 - chore: update README
+- Rename NDR `Plus` to `Schlager`
 
 ## [1.2.3] - 2021-12-13
 
