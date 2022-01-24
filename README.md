@@ -3,6 +3,7 @@
 ARD system to distribute real-time (live) metadata for primarily radio broadcasts.
 
 - [ARD-Eventhub](#ard-eventhub)
+  - [Active Data Suppliers](#active-data-suppliers)
   - [Get Started and Documentation](#get-started-and-documentation)
   - [Get involved](#get-involved)
   - [Modules](#modules)
@@ -12,6 +13,17 @@ ARD system to distribute real-time (live) metadata for primarily radio broadcast
   - [Third-Party Components](#third-party-components)
   - [Authors](#authors)
 
+## Active Data Suppliers
+
+These ARD broadcasters are currently sending live metadata via ARD Eventhub:
+
+| Broadcaster | TEST | PROD |
+| ----------- | ---- | ---- |
+| mdr         | ✅   | ✅   |
+| NDR         | ✅   | ⌛️   |
+| SWR         | ✅   | ✅   |
+| WDR         | ✅   | ⌛️   |
+
 ## Get Started and Documentation
 
 Important places to go ahead:
@@ -20,6 +32,7 @@ Important places to go ahead:
 - Our [Quickstart](docs/QUICKSTART.md) documentation
 - The full docs on [swrlab.github.io/ard-eventhub](https://swrlab.github.io/ard-eventhub/)
 - OpenAPI specification on [eventhub-ingest.ard.de/openapi](https://eventhub-ingest.ard.de/openapi)
+- Internal documentation in [Confluence](https://confluence.ard.de/x/4AmgDw)
 
 ## Get involved
 
