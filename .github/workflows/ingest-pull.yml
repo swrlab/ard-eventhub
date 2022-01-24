@@ -6,7 +6,7 @@ on:
     types: [labeled]
 
 env:
-  NODE_VERSION: 16.11.1
+  NODE_VERSION: 16.13
   
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
     - name: Checkout repo 👀
       uses: actions/checkout@v2.4.0
 
-    - uses: actions/setup-node@v2.5.0
+    - uses: actions/setup-node@v2.5.1
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'yarn'
@@ -60,7 +60,7 @@ jobs:
     - name: Checkout repo 👀
       uses: actions/checkout@v2.4.0
 
-    - uses: actions/setup-node@v2.5.0
+    - uses: actions/setup-node@v2.5.1
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'yarn'
