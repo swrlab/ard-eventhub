@@ -385,7 +385,7 @@
     google-gax "^2.24.1"
     protobufjs "^6.8.6"
 
-"@google-cloud/paginator@^3.0.0":
+"@google-cloud/paginator@^3.0.0", "@google-cloud/paginator@^3.0.6":
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/@google-cloud/paginator/-/paginator-3.0.6.tgz#02a59dccd348d515069779a4f77a4a4fd15594da"
   integrity sha512-XCTm/GfQIlc1ZxpNtTSs/mnZxC2cePNhxU3X8EzHXKIJ2JFncmJj2Fcd2IP+gbmZaSZnY0juFxbUCkIeuu/2eQ==
@@ -408,23 +408,23 @@
   resolved "https://registry.yarnpkg.com/@google-cloud/promisify/-/promisify-2.0.4.tgz#9d8705ecb2baa41b6b2673f3a8e9b7b7e1abc52a"
   integrity sha512-j8yRSSqswWi1QqUGKVEKOG03Q7qOoZP6/h2zN2YO+F5h2+DHU0bSrHCK9Y7lo2DI9fBd8qGAw795sf+3Jva4yA==
 
-"@google-cloud/pubsub@^2.18.4":
-  version "2.18.4"
-  resolved "https://registry.yarnpkg.com/@google-cloud/pubsub/-/pubsub-2.18.4.tgz#41b56cd428d51c6a699b7515af86d9c22ea94a4a"
-  integrity sha512-mgKZ7XdXN7MEGK+MCmRKuoq3GBiuYIa9ytYuV1DIHbd+eYqqyPYZHvL8g/73eogkNYK5TxSydja7TCRDzfJaxA==
+"@google-cloud/pubsub@^2.18.5":
+  version "2.18.5"
+  resolved "https://registry.yarnpkg.com/@google-cloud/pubsub/-/pubsub-2.18.5.tgz#1ea040c629ecc8cf256453b14c7ee3d98dc8a270"
+  integrity sha512-5AQHB8ul3vtVPLYFJ6EuWVdd6gO44su+y0ZXTDnRlEK2goIJrho7JugGgj+6aBhDeIQyJUdIFaZsfQxnlyHNPQ==
   dependencies:
-    "@google-cloud/paginator" "^3.0.0"
+    "@google-cloud/paginator" "^3.0.6"
     "@google-cloud/precise-date" "^2.0.0"
     "@google-cloud/projectify" "^2.0.0"
     "@google-cloud/promisify" "^2.0.0"
     "@opentelemetry/api" "^1.0.0"
-    "@opentelemetry/semantic-conventions" "^0.24.0"
+    "@opentelemetry/semantic-conventions" "^1.0.0"
     "@types/duplexify" "^3.6.0"
     "@types/long" "^4.0.0"
     arrify "^2.0.0"
     extend "^3.0.2"
     google-auth-library "^7.0.0"
-    google-gax "2.28.1"
+    google-gax "2.29.4"
     is-stream-ended "^0.1.4"
     lodash.snakecase "^4.1.1"
     p-defer "^3.0.0"
@@ -463,14 +463,6 @@
     snakeize "^0.1.0"
     stream-events "^1.0.4"
     xdg-basedir "^4.0.0"
-
-"@grpc/grpc-js@~1.4.0":
-  version "1.4.6"
-  resolved "https://registry.yarnpkg.com/@grpc/grpc-js/-/grpc-js-1.4.6.tgz#8108d7ab7c0c21b38c538c1a48583edbbf2c2412"
-  integrity sha512-Byau4xiXfIixb1PnW30V/P9mkrZ05lknyNqiK+cVY9J5hj3gecxd/anwaUbAM8j834zg1x78NvAbwGnMfWEu7A==
-  dependencies:
-    "@grpc/proto-loader" "^0.6.4"
-    "@types/node" ">=12.12.47"
 
 "@grpc/grpc-js@~1.5.0":
   version "1.5.3"
@@ -536,10 +528,10 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.0.4.tgz#a167e46c10d05a07ab299fc518793b0cff8f6924"
   integrity sha512-BuJuXRSJNQ3QoKA6GWWDyuLpOUck+9hAXNMCnrloc1aWVoy6Xq6t9PUV08aBZ4Lutqq2LEHM486bpZqoViScog==
 
-"@opentelemetry/semantic-conventions@^0.24.0":
-  version "0.24.0"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-0.24.0.tgz#1028ef0e0923b24916158d80d2ddfd67ea8b6740"
-  integrity sha512-a/szuMQV0Quy0/M7kKdglcbRSoorleyyOwbTNNJ32O+RBN766wbQlMTvdimImTmwYWGr+NJOni1EcC242WlRcA==
+"@opentelemetry/semantic-conventions@^1.0.0":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.0.1.tgz#9349c3860a53468fa2108b5df09aa843f22dbf94"
+  integrity sha512-7XU1sfQ8uCVcXLxtAHA8r3qaLJ2oq7sKtEwzZhzuEXqYmjW+n+J4yM3kNo0HQo3Xp1eUe47UM6Wy6yuAvIyllg==
 
 "@panva/asn1.js@^1.0.0":
   version "1.0.0"
@@ -1208,15 +1200,16 @@ chai-http@^4.3.0:
     qs "^6.5.1"
     superagent "^3.7.0"
 
-chai@^4.3.4:
-  version "4.3.4"
-  resolved "https://registry.yarnpkg.com/chai/-/chai-4.3.4.tgz#b55e655b31e1eac7099be4c08c21964fce2e6c49"
-  integrity sha512-yS5H68VYOCtN1cjfwumDSuzn/9c+yza4f3reKXlE5rUg7SFcCEy90gJvydNgOYtblyf4Zi6jIWRnXOgErta0KA==
+chai@^4.3.6:
+  version "4.3.6"
+  resolved "https://registry.yarnpkg.com/chai/-/chai-4.3.6.tgz#ffe4ba2d9fa9d6680cc0b370adae709ec9011e9c"
+  integrity sha512-bbcp3YfHCUzMOvKqsztczerVgBKSsEijCySNlHHbX3VG1nskvqjz5Rfso1gGwD6w6oOV3eI60pKuMOV5MV7p3Q==
   dependencies:
     assertion-error "^1.1.0"
     check-error "^1.0.2"
     deep-eql "^3.0.1"
     get-func-name "^2.0.0"
+    loupe "^2.3.1"
     pathval "^1.1.1"
     type-detect "^4.0.5"
 
@@ -2178,10 +2171,10 @@ eslint@^7.7.0:
     text-table "^0.2.0"
     v8-compile-cache "^2.0.3"
 
-eslint@^8.4.1:
-  version "8.7.0"
-  resolved "https://registry.yarnpkg.com/eslint/-/eslint-8.7.0.tgz#22e036842ee5b7cf87b03fe237731675b4d3633c"
-  integrity sha512-ifHYzkBGrzS2iDU7KjhCAVMGCvF6M3Xfs8X8b37cgrUlDt6bWRTpRh6T/gtSXv1HJ/BUGgmjvNvOEGu85Iif7w==
+eslint@^8.8.0:
+  version "8.8.0"
+  resolved "https://registry.yarnpkg.com/eslint/-/eslint-8.8.0.tgz#9762b49abad0cb4952539ffdb0a046392e571a2d"
+  integrity sha512-H3KXAzQGBH1plhYS3okDix2ZthuYJlQQEGE5k0IKuEqUSiyu4AmxxlJ2MtTYeJ3xB4jDhcYCwGOg2TXYdnDXlQ==
   dependencies:
     "@eslint/eslintrc" "^1.0.5"
     "@humanwhocodes/config-array" "^0.9.2"
@@ -2706,26 +2699,7 @@ google-auth-library@^7.0.0, google-auth-library@^7.11.0, google-auth-library@^7.
     jws "^4.0.0"
     lru-cache "^6.0.0"
 
-google-gax@2.28.1:
-  version "2.28.1"
-  resolved "https://registry.yarnpkg.com/google-gax/-/google-gax-2.28.1.tgz#99bc234b5769d901d70959d40bd1651729eb4a34"
-  integrity sha512-2Xjd3FrjlVd6Cmw2B2Aicpc/q92SwTpIOvxPUlnRg9w+Do8nu7UR+eQrgoKlo2FIUcUuDTvppvcx8toND0pK9g==
-  dependencies:
-    "@grpc/grpc-js" "~1.4.0"
-    "@grpc/proto-loader" "^0.6.1"
-    "@types/long" "^4.0.0"
-    abort-controller "^3.0.0"
-    duplexify "^4.0.0"
-    fast-text-encoding "^1.0.3"
-    google-auth-library "^7.6.1"
-    is-stream-ended "^0.1.4"
-    node-fetch "^2.6.1"
-    object-hash "^2.1.1"
-    proto3-json-serializer "^0.1.5"
-    protobufjs "6.11.2"
-    retry-request "^4.0.0"
-
-google-gax@^2.24.1:
+google-gax@2.29.4, google-gax@^2.24.1:
   version "2.29.4"
   resolved "https://registry.yarnpkg.com/google-gax/-/google-gax-2.29.4.tgz#9126b9e6d58a88dd8217acef5109e5697ee1ec08"
   integrity sha512-3o6cByD2fE1yIc6i1gpKMQlJStqlvu8Sa/Ly/HCQ6GPHpltpVfkTT4KVj2YLVa7WTSDoGbsLBDmJ1KfN1uNiRw==
@@ -3611,6 +3585,13 @@ long@^4.0.0:
   resolved "https://registry.yarnpkg.com/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
   integrity sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==
 
+loupe@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/loupe/-/loupe-2.3.1.tgz#a2e1192c9f452e4e85089766da10ac8288383947"
+  integrity sha512-EN1D3jyVmaX4tnajVlfbREU4axL647hLec1h/PXAb8CPDMJiYitcWF2UeLVNttRqaIqQs4x+mRvXf+d+TlDrCA==
+  dependencies:
+    get-func-name "^2.0.0"
+
 lowercase-keys@^1.0.0, lowercase-keys@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/lowercase-keys/-/lowercase-keys-1.0.1.tgz#6f9e30b47084d971a7c820ff15a6c5167b74c26f"
@@ -4258,7 +4239,7 @@ progress@^2.0.0:
   resolved "https://registry.yarnpkg.com/progress/-/progress-2.0.3.tgz#7e8cf8d8f5b8f239c1bc68beb4eb78567d572ef8"
   integrity sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA==
 
-proto3-json-serializer@^0.1.5, proto3-json-serializer@^0.1.7:
+proto3-json-serializer@^0.1.7:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/proto3-json-serializer/-/proto3-json-serializer-0.1.8.tgz#f80f9afc1efe5ed9a9856bbbd17dc7cabd7ce9a3"
   integrity sha512-ACilkB6s1U1gWnl5jtICpnDai4VCxmI9GFxuEaYdxtDG2oVI3sVFIUsvUZcQbJgtPM6p+zqKbjTKQZp6Y4FpQw==
@@ -4561,6 +4542,11 @@ safe-stable-stringify@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/safe-stable-stringify/-/safe-stable-stringify-1.1.1.tgz#c8a220ab525cd94e60ebf47ddc404d610dc5d84a"
   integrity sha512-ERq4hUjKDbJfE4+XtZLFPCDi8Vb1JqaxAPTxWFLBx8XcAlf9Bda/ZJdVezs/NAfsMQScyIlUMx+Yeu7P7rx5jw==
+
+safe-stable-stringify@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/safe-stable-stringify/-/safe-stable-stringify-2.3.1.tgz#ab67cbe1fe7d40603ca641c5e765cb942d04fc73"
+  integrity sha512-kYBSfT+troD9cDA85VDnHZ1rpHC50O0g1e6WlGHVCz/g+JS+9WKLj+XwFYyR8UbrZN8ll9HUpDAAddY58MGisg==
 
 "safer-buffer@>= 2.1.2 < 3":
   version "2.1.2"
@@ -5327,10 +5313,10 @@ winston-transport@^4.4.2:
     readable-stream "^3.4.0"
     triple-beam "^1.2.0"
 
-winston@^3.4.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/winston/-/winston-3.4.0.tgz#7080f24b02a0684f8a37f9d5c6afb1ac23e95b84"
-  integrity sha512-FqilVj+5HKwCfIHQzMxrrd5tBIH10JTS3koFGbLVWBODjiIYq7zir08rFyBT4rrTYG/eaTqDcfSIbcjSM78YSw==
+winston@^3.5.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/winston/-/winston-3.5.0.tgz#b1ef4dbc6d1a7c1b462650070f171abc7ce9eac0"
+  integrity sha512-OQMbmLsIdVHvm2hSurrYZs+iZNIImXneYJ6pX7LseSMEq20HdTETXiNnNX3FDwN4LB/xDRZLF6JYOY+AI112Kw==
   dependencies:
     "@dabh/diagnostics" "^2.0.2"
     async "^3.2.3"
@@ -5338,6 +5324,7 @@ winston@^3.4.0:
     logform "^2.3.2"
     one-time "^1.0.0"
     readable-stream "^3.4.0"
+    safe-stable-stringify "^2.3.1"
     stack-trace "0.0.x"
     triple-beam "^1.3.0"
     winston-transport "^4.4.2"

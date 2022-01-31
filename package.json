@@ -25,7 +25,7 @@
 	"license": "EUPL-1.2",
 	"dependencies": {
 		"@google-cloud/datastore": "^6.6.2",
-		"@google-cloud/pubsub": "^2.18.4",
+		"@google-cloud/pubsub": "^2.18.5",
 		"@google-cloud/secret-manager": "^3.10.1",
 		"compression": "^1.7.4",
 		"dd-trace": "^1.6.0",
@@ -40,16 +40,16 @@
 		"swagger-ui-express": "^4.3.0",
 		"uuid": "^8.3.2",
 		"undici-wrapper": "frytg/undici-wrapper",
-		"winston": "^3.4.0"
+		"winston": "^3.5.0"
 	},
 	"devDependencies": {
 		"@swrlab/eslint-plugin-swr": "^0.1.2",
 		"@swrlab/swr-prettier-config": "^0.1.2",
-		"chai": "^4.3.4",
+		"chai": "^4.3.6",
 		"chai-http": "^4.3.0",
 		"docsify-cli": "^4.4.3",
 		"dotenv": "^14.2.0",
-		"eslint": "^8.4.1",
+		"eslint": "^8.8.0",
 		"eslint-plugin-chai-friendly": "^0.7.2",
 		"eslint-plugin-swr": "0.0.5",
 		"license-compliance": "^1.2.3",
