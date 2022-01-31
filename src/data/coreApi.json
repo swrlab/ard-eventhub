@@ -287,6 +287,19 @@
 	},
 	{
 		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:6122f59ba860777a",
+		"externalId": "106010",
+		"title": "Bremen NEXT",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:6a3d641e111b03e9",
+			"externalId": "RadioBremen",
+			"title": "RadioBremen",
+			"acronym": "RadioBremen"
+		}
+	},
+	{
+		"_type": "PublisherResource",
 		"id": "urn:ard:publisher:ca10c1327ae065d7",
 		"externalId": "284500",
 		"title": "Bremen Vier",
@@ -652,7 +665,7 @@
 	{
 		"_type": "PublisherResource",
 		"id": "urn:ard:publisher:e8ea8d8218416f3f",
-		"externalId": "10401",
+		"externalId": "104010",
 		"title": "MDR SCHLAGERWELT",
 		"institution": {
 			"_type": "InstitutionResource",
@@ -665,7 +678,7 @@
 	{
 		"_type": "PublisherResource",
 		"id": "urn:ard:publisher:5b1512d4453838b7",
-		"externalId": "10402",
+		"externalId": "104020",
 		"title": "MDR TWEENS",
 		"institution": {
 			"_type": "InstitutionResource",
