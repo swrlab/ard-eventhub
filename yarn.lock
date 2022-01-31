@@ -1547,10 +1547,10 @@ date-and-time@^2.0.0:
   resolved "https://registry.yarnpkg.com/date-and-time/-/date-and-time-2.1.0.tgz#007efa9624684457259f19348b442e45128a6f1c"
   integrity sha512-X/b2gM7e8zQ7siiE0DhRLeNMpuCkIqec5Jnx4GMk/HWB71a6e5Lz48mH9/GIS/hpLsBRFZfMF1gjXBkY0vq5oA==
 
-dd-trace@^1.6.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-1.6.0.tgz#8c6ff7f7f810b635757b343a5019055afc69371c"
-  integrity sha512-8ZrZSwJZAhT2RCBR7AKxWmM/9tAuDzZoN6Z+y8Yo0Ai51VhpZIbKqEkMvz77Tla5j+RUkvUB5VYRphxB+KhsNg==
+dd-trace@^1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-1.7.0.tgz#7df2a5bcc443310dd675ee3c64d4c7e82bc7d0f0"
+  integrity sha512-PYoYx0gE4tUUe4DuivAMoO5AAaEu+w2WSu498Q5Su3xDdndrXACM+qwKVRRBI0+lXbbcQ0/eY14qYZbF8rB7sg==
   dependencies:
     "@datadog/native-metrics" "^1.1.0"
     "@datadog/pprof" "^0.3.0"
@@ -1761,10 +1761,10 @@ dot-prop@^5.2.0:
   dependencies:
     is-obj "^2.0.0"
 
-dotenv@^14.2.0:
-  version "14.2.0"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-14.2.0.tgz#7e77fd5dd6cff5942c4496e1acf2d0f37a9e67aa"
-  integrity sha512-05POuPJyPpO6jqzTNweQFfAyMSD4qa4lvsMOWyTRTdpHKy6nnnN+IYWaXF+lHivhBH/ufDKlR4IWCAN3oPnHuw==
+dotenv@^14.3.2:
+  version "14.3.2"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-14.3.2.tgz#7c30b3a5f777c79a3429cb2db358eef6751e8369"
+  integrity sha512-vwEppIphpFdvaMCaHfCEv9IgwcxMljMw2TnAQBB4VWPvzXQLTb82jwmdOKzlEVUL3gNFT4l4TPKO+Bn+sqcrVQ==
 
 duplexer3@^0.1.4:
   version "0.1.4"
