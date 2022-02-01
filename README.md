@@ -17,12 +17,18 @@ ARD system to distribute real-time (live) metadata for primarily radio broadcast
 
 These ARD broadcasters are currently sending live metadata via ARD Eventhub:
 
-| Broadcaster | TEST | PROD |
-| ----------- | ---- | ---- |
-| mdr         | ✅   | ✅   |
-| NDR         | ✅   | ⌛️   |
-| SWR         | ✅   | ✅   |
-| WDR         | ✅   | ⌛️   |
+| Broadcaster      | TEST | PROD |
+| ---------------- | ---- | ---- |
+| BR               | -    | -    |
+| HR               | ✅   | ⌛️  |
+| MDR              | ✅   | ✅   |
+| NDR              | ✅   | ✅   |
+| Radio Bremen     | ✅   | ⌛️  |
+| RBB              | -    | -    |
+| SR               | -    | -    |
+| SWR              | ✅   | ✅   |
+| WDR              | ✅   | ⌛️  |
+| Deutschlandradio | -    | -    |
 
 ## Get Started and Documentation
 
