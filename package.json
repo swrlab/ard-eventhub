@@ -28,7 +28,7 @@
 		"@google-cloud/pubsub": "^2.18.5",
 		"@google-cloud/secret-manager": "^3.10.1",
 		"compression": "^1.7.4",
-		"dd-trace": "^1.7.0",
+		"dd-trace": "^2.0.1",
 		"express": "4.17.2",
 		"express-openapi-validator": "^4.13.5",
 		"firebase-admin": "^10.0.2",
