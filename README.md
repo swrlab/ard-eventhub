@@ -20,14 +20,14 @@ These ARD broadcasters are currently sending live metadata via ARD Eventhub:
 | Broadcaster      | TEST | PROD |
 | ---------------- | ---- | ---- |
 | BR               | -    | -    |
-| HR               | ✅   | ⌛️  |
-| MDR              | ✅   | ✅   |
-| NDR              | ✅   | ✅   |
-| Radio Bremen     | ✅   | ⌛️  |
+| HR               | ✅    | ⌛️    |
+| MDR              | ✅    | ✅    |
+| NDR              | ✅    | ✅    |
+| Radio Bremen     | ✅    | ✅    |
 | RBB              | -    | -    |
 | SR               | -    | -    |
-| SWR              | ✅   | ✅   |
-| WDR              | ✅   | ⌛️  |
+| SWR              | ✅    | ✅    |
+| WDR              | ✅    | ⌛️    |
 | Deutschlandradio | -    | -    |
 
 ## Get Started and Documentation
@@ -69,7 +69,7 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 
 | Type    | Name                           | License                                                                                            |
 | ------- | ------------------------------ | -------------------------------------------------------------------------------------------------- |
-| Docker  | `node:16.11.1-alpine`          | [MIT](https://github.com/nodejs/node/blob/master/LICENSE)                                          |
+| Docker  | `node:16.13.1-alpine`          | [MIT](https://github.com/nodejs/node/blob/master/LICENSE)                                          |
 | NPM     | `@google-cloud/datastore`      | [Apache License 2.0](https://github.com/googleapis/nodejs-datastore/blob/master/LICENSE)           |
 | NPM     | `@google-cloud/pubsub`         | [Apache License 2.0](https://github.com/googleapis/nodejs-pubsub/blob/master/LICENSE)              |
 | NPM     | `@google-cloud/secret-manager` | [Apache License 2.0](https://github.com/googleapis/nodejs-secret-manager/blob/master/LICENSE)      |
