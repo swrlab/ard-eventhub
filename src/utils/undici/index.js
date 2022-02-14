@@ -6,7 +6,7 @@
 */
 
 // load request handler
-const undici = require('undici-wrapper')
+const undici = require('@swrlab/utils/packages/undici')
 
 // add tracing
 const tracer = process.env.DD_TRACER_ENABLED === 'true' ? require('../tracer') : null

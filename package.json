@@ -27,6 +27,7 @@
 		"@google-cloud/datastore": "^6.6.2",
 		"@google-cloud/pubsub": "^2.18.5",
 		"@google-cloud/secret-manager": "^3.11.0",
+		"@swrlab/utils": "swrlab/node-utils#1.0.2-beta",
 		"compression": "^1.7.4",
 		"dd-trace": "^1.7.0",
 		"express": "4.17.2",
@@ -39,7 +40,6 @@
 		"slug": "^5.2.0",
 		"swagger-ui-express": "^4.3.0",
 		"uuid": "^8.3.2",
-		"undici-wrapper": "frytg/undici-wrapper",
 		"winston": "^3.6.0"
 	},
 	"devDependencies": {
