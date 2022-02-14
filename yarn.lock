@@ -429,10 +429,10 @@
     lodash.snakecase "^4.1.1"
     p-defer "^3.0.0"
 
-"@google-cloud/secret-manager@^3.10.1":
-  version "3.10.1"
-  resolved "https://registry.yarnpkg.com/@google-cloud/secret-manager/-/secret-manager-3.10.1.tgz#1a9ab37044bb0fe707528c6b277fd8033155a413"
-  integrity sha512-aYnEolmrfUVRSJuKMce772YOyGZIetq4eDfN3yaMJ5BFJ/RO/SJOM1ruD/drKKTM+G39mnsHUK9GzAaoT/43ow==
+"@google-cloud/secret-manager@^3.11.0":
+  version "3.11.0"
+  resolved "https://registry.yarnpkg.com/@google-cloud/secret-manager/-/secret-manager-3.11.0.tgz#99bddd9ccef6d12b5d14e27e21977fcbaa8f3916"
+  integrity sha512-xoovdR7WSTmwlmjbkJSYTrOd2FiW0JlG3ON2p20uknBCzeSZDdCgsrFgysIbQqbZpRuGvEj71d4d1WEDk6wcdw==
   dependencies:
     google-gax "^2.24.1"
 

@@ -26,7 +26,7 @@
 	"dependencies": {
 		"@google-cloud/datastore": "^6.6.2",
 		"@google-cloud/pubsub": "^2.18.5",
-		"@google-cloud/secret-manager": "^3.10.1",
+		"@google-cloud/secret-manager": "^3.11.0",
 		"compression": "^1.7.4",
 		"dd-trace": "^1.7.0",
 		"express": "4.17.2",
