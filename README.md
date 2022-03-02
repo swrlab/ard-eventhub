@@ -73,7 +73,7 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `@google-cloud/datastore`      | [Apache License 2.0](https://github.com/googleapis/nodejs-datastore/blob/master/LICENSE)           |
 | NPM     | `@google-cloud/pubsub`         | [Apache License 2.0](https://github.com/googleapis/nodejs-pubsub/blob/master/LICENSE)              |
 | NPM     | `@google-cloud/secret-manager` | [Apache License 2.0](https://github.com/googleapis/nodejs-secret-manager/blob/master/LICENSE)      |
-| NPM     | `@swrlab/utils`                | [Hippocratic 2.0](https://github.com/swrlab/node-utils/blob/main/LICENSE.md)                       |
+| NPM     | `@swrlab/utils`                | [MIT](https://github.com/swrlab/node-utils/blob/main/LICENSE.md)                                   |
 | NPM     | `compression`                  | [MIT](https://github.com/expressjs/compression/blob/master/LICENSE)                                |
 | NPM     | `dd-trace`                     | [Apache-2.0 OR BSD-3-Clause](https://github.com/DataDog/dd-trace-js/blob/master/LICENSE)           |
 | NPM     | `express`                      | [MIT](https://github.com/expressjs/express/blob/master/LICENSE)                                    |
