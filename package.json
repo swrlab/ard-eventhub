@@ -29,7 +29,7 @@
 		"@google-cloud/secret-manager": "^3.11.0",
 		"@swrlab/utils": "swrlab/node-utils#1.0.3-beta",
 		"compression": "^1.7.4",
-		"dd-trace": "^1.7.1",
+		"dd-trace": "^2.3.0",
 		"express": "4.17.3",
 		"express-openapi-validator": "^4.13.5",
 		"firebase-admin": "^10.0.2",
