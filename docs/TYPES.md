@@ -69,7 +69,7 @@ If a live element is starting. This can be an moderation by an anchor, interview
 
 ## `news`
 
-This indicates the beginning of the news in general or a new news item. Get as detailed as possible. The `contributors` field can be used to include details of the `author`. `media` may be used to supply additional elements.
+This indicates the beginning of the news in general or a new news item. Get as detailed as possible. The `contributors` field should be used to include details of the `author`. `media` may be used to supply additional elements. `show` references the correspoding broadcast series / grouping.
 
 ```json
 {
@@ -87,7 +87,10 @@ This indicates the beginning of the news in general or a new news item. Get as d
     }
   ],
   "playlistItemId": "BCS1:cd052498-da90-4308-85d3-046cb15c6840",
-  "externalId": "TBD",
+  "externalId": "crid://swr.de/av/406d20f0-d9b8-431f-9e36-e2fa2cf263a5",
+  "show": {
+    "externalId": "crid://swr.de/1234567",
+  },
   … 
 }
 ```
