@@ -51,3 +51,20 @@ To run this project locally in your development environment you'll need these pr
    ```
 
 5. Open http://localhost:8080/openapi/
+
+## Deployment
+
+The deployment process of Eventhub-Ingest is different for `Non-Prod` and `Prod`-Stages
+
+### Dev, Test, Stage
+
+Deployments for Stages `Dev`, `Test` and `Stage` can be done in Github-Actions after the run completed successful.
+
+### Prod
+
+Deployments for `Prod` need to be done by external ARD-Service. Therefore request the rollout by sending following E-Mail:
+
+- To: `Christian.Hufnagel@swr.de`
+- Cc: `Julius.Zimmermann@ard.de`
+- Subject: Prod-Deployment of Eventhub-Ingest
+- Text: I request to deploy the following version of the eventhub-ingest on prod: `<docker-version-tag>`
