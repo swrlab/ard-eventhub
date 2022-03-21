@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - add: new deploy-process for prod
 - chore: update peer-dependencies
+- security: fix `CVE-2022-24772`
 
 ## [1.2.8] - 2022-03-15
 
