@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.9] - 2022-03-17
 
 - add: new deploy-process for prod
+- chore: remove `eslint-plugin-swr`
 - chore: update peer-dependencies
 - security: fix `CVE-2022-24772`
 
