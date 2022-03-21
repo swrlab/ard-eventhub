@@ -55,7 +55,7 @@
 		"license-compliance": "^1.2.3",
 		"mocha": "^9.2.2",
 		"nodemon": "^2.0.15",
-		"prettier": "^2.5.1"
+		"prettier": "^2.6.0"
 	},
 	"resolutions": {
 		"ansi-regex": "^5.0.1",
