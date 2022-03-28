@@ -32,9 +32,9 @@
 		"dd-trace": "^1.7.1",
 		"dotenv": "^16.0.0",
 		"express": "4.17.3",
-		"express-openapi-validator": "^4.13.6",
+		"express-openapi-validator": "^4.13.7",
 		"firebase-admin": "^10.0.2",
-		"google-auth-library": "^7.14.0",
+		"google-auth-library": "^7.14.1",
 		"jsonwebtoken": "^8.5.1",
 		"moment": "^2.29.1",
 		"node-crc": "^2.0.11",
@@ -49,13 +49,13 @@
 		"chai": "^4.3.6",
 		"chai-http": "^4.3.0",
 		"docsify-cli": "^4.4.4",
-		"eslint": "^8.11.0",
+		"eslint": "^8.12.0",
 		"eslint-plugin-chai-friendly": "^0.7.2",
 		"license-compliance": "^1.2.3",
 		"mocha": "^9.2.2",
 		"nodemon": "^2.0.15",
-		"prettier": "^2.6.0",
-		"typescript": "^4.6.2"
+		"prettier": "^2.6.1",
+		"typescript": "^4.6.3"
 	},
 	"resolutions": {
 		"ansi-regex": "^5.0.1",
