@@ -5,11 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2022-03-21
+## [1.3.0] - 2022-03-28
 
+- chore: update Node to `v16.14.2`
 - chore: change name of `Dockerfile`
 - chore: update node-crc to `v2`
 - add: `rustup` to build process
+- fix: `setup-gcloud` default branch
+- security: fix `CVE-2021-44906`
 
 ## [1.2.9] - 2022-03-17
 
