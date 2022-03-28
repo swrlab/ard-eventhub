@@ -78,7 +78,7 @@ jobs:
       run: "gcloud auth configure-docker $REGISTRY_DOMAIN"
 
     - name: 🚧 Building docker image
-      run: "docker build ./ --file ./Dockerfile.ingest -t image"
+      run: "docker build ./ --file ./Dockerfile -t image"
 
     - name: 🏷 Tagging & Pushing docker
       id: push

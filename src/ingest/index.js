@@ -52,6 +52,7 @@ server.listen(config.port)
 
 if (config.isDev) {
 	console.log(`${config.serviceName} (v${config.version}) is running at: ${config.serviceUrl}`)
+	console.log(`  - OpenAPI documentation: ${config.serviceUrl}/openapi`)
 }
 
 module.exports = server
