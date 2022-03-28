@@ -90,6 +90,7 @@ This indicates the beginning of the news in general or a new news item. Get as d
   "externalId": "crid://swr.de/av/406d20f0-d9b8-431f-9e36-e2fa2cf263a5",
   "show": {
     "externalId": "crid://swr.de/1234567",
+    "alternateIds": ["https://normdb.ivz.cn.ard.de/sendereihe/427", "urn:ard:show:027708befb6bfe14", "brid://br.de/broadcastSeries/1235"]
   },
   … 
 }
