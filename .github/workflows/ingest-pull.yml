@@ -6,7 +6,7 @@ on:
     types: [labeled]
 
 env:
-  NODE_VERSION: 16.14
+  NODE_VERSION: 16.14.2
   
 
 jobs:
@@ -38,7 +38,7 @@ jobs:
       run: yarn
 
     - name: 🔑 Setup Google Cloud Auth
-      uses: google-github-actions/setup-gcloud@master
+      uses: google-github-actions/setup-gcloud@v0
       with:
         service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
         export_default_credentials: true
