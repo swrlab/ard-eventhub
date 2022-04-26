@@ -30,25 +30,25 @@ jobs:
       matrix:
         STAGES: [dev]
     steps:
-    - name: Checkout repo 👀
-      uses: actions/checkout@v3
+    - name: 👀 Checkout repo
+      uses: actions/checkout@v3.0.2
 
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v3.1.1
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'yarn'
         cache-dependency-path: '**/yarn.lock'
 
-    - name: Install Dependencies
+    - name: 📦 Install Dependencies
       run: yarn
 
     - name: 🔑 Setup Google Cloud Auth
-      uses: google-github-actions/setup-gcloud@v0
+      uses: google-github-actions/setup-gcloud@v0.6.0
       with:
         service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
         export_default_credentials: true
 
-    - name: Run Ingest Tests
+    - name: 🧪 Run Ingest Tests
       env:
         STAGE: ${{ matrix.STAGES }}
         GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -66,10 +66,10 @@ jobs:
       VERSION: ${{ steps.push.outputs.VERSION }}
     steps:
     - name: 👀 Checkout repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v3.0.2
       
     - name: 🔑 Setup Google Cloud Auth
-      uses: google-github-actions/setup-gcloud@v0
+      uses: google-github-actions/setup-gcloud@v0.6.0
       with:
         service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
         export_default_credentials: true
