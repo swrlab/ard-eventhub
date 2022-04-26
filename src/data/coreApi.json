@@ -976,6 +976,32 @@
 	},
 	{
 		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:4d296c441325a5f7",
+		"externalId": "109020",
+		"title": "UNSERDING",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:35b40a1e275391f3",
+			"externalId": "SR",
+			"title": "Saarländischer Rundfunk",
+			"acronym": "SR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:fed6f3124e5cf27f",
+		"externalId": "109010",
+		"title": "AntenneSaar",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:35b40a1e275391f3",
+			"externalId": "SR",
+			"title": "Saarländischer Rundfunk",
+			"acronym": "SR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
 		"id": "urn:ard:publisher:1ecd6a84c7217724",
 		"externalId": "284860",
 		"title": "SR Fernsehen",
