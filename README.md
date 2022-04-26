@@ -25,7 +25,7 @@ These ARD broadcasters are currently sending live metadata via ARD Eventhub:
 | NDR              | ✅    | ✅    |
 | Radio Bremen     | ✅    | ✅    |
 | RBB              | ⌛️    | -    |
-| SR               | -    | -    |
+| SR               | ⌛️    | -    |
 | SWR              | ✅    | ✅    |
 | WDR              | ✅    | ⌛️    |
 | Deutschlandradio | -    | -    |
