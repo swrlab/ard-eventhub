@@ -10,7 +10,10 @@ const { version } = require('../package.json')
 const coreIdPrefixes = require('./coreIdPrefixes.json')
 
 // check existence of several process vars
-if (!process.env.GCP_PROJECT_ID) {
+if (!process.env.SERVICE_NAME) {
+	console.error('process.env.SERVICE_NAME not found')
+	process.exit(1)
+} else if (!process.env.GCP_PROJECT_ID) {
 	console.error('process.env.GCP_PROJECT_ID not found')
 	process.exit(1)
 } else if (!process.env.FIREBASE_API_KEY) {
