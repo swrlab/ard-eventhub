@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.2] - 2022-05-02
 
 - fix: require service-name
-- update: mocha to `v10.0.0`
+- update:
+  - mocha to `v10.0.0`
+  - /create-or-update-comment to `v2.0.0`
 
 ## [1.3.1] - 2022-04-26
 
