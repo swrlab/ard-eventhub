@@ -50,6 +50,7 @@ jobs:
 
     - name: 🧪 Run Ingest Tests
       env:
+        SERVICE_NAME: ard-eventhub
         STAGE: ${{ matrix.STAGES }}
         GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
         FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
@@ -108,7 +109,7 @@ jobs:
         echo "::warning docker::VERSION $VERSION"
 
     - name: 💬 Comment Branch and Version
-      uses: peter-evans/create-or-update-comment@v1
+      uses: peter-evans/create-or-update-comment@v2
       if: github.event.pull_request.merged == true
       with:
         issue-number: ${{ github.event.pull_request.number }}
