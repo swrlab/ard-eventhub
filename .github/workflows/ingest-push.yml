@@ -10,7 +10,7 @@ on:
     types: [ closed ]
 
 env:
-  NODE_VERSION: 16.14.2
+  NODE_VERSION: 16.15
   IMAGE_NAME: de.swr.ard.eventhub/ingest
   REGISTRY_DOMAIN: eu.gcr.io
 
@@ -30,10 +30,11 @@ jobs:
       matrix:
         STAGES: [dev]
     steps:
-    - name: 👀 Checkout repo
+    - name: 👀 Checkout Code
       uses: actions/checkout@v3.0.2
 
-    - uses: actions/setup-node@v3.1.1
+    - name: ⛺️ Install Node.js
+      uses: actions/setup-node@v3.1.1
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'yarn'
@@ -66,7 +67,7 @@ jobs:
       BRANCH: ${{ steps.push.outputs.BRANCH }}
       VERSION: ${{ steps.push.outputs.VERSION }}
     steps:
-    - name: 👀 Checkout repo
+    - name: 👀 Checkout Code
       uses: actions/checkout@v3.0.2
       
     - name: 🔑 Setup Google Cloud Auth
