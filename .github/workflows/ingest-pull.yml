@@ -6,7 +6,7 @@ on:
     types: [labeled]
 
 env:
-  NODE_VERSION: 16.14.2
+  NODE_VERSION: 16.15
   
 
 jobs:
@@ -25,10 +25,11 @@ jobs:
       matrix:
         STAGES: [dev]
     steps:
-    - name: 👀 Checkout repo
+    - name: 👀 Checkout Code
       uses: actions/checkout@v3.0.2
 
-    - uses: actions/setup-node@v3.1.1
+    - name: ⛺️ Install Node.js
+      uses: actions/setup-node@v3.1.1
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'yarn'
@@ -58,10 +59,11 @@ jobs:
     needs: security
     runs-on: ubuntu-latest
     steps:
-    - name: 👀 Checkout repo
+    - name: 👀 Checkout Code
       uses: actions/checkout@v3.0.2
 
-    - uses: actions/setup-node@v3.1.1
+    - name: ⛺️ Install Node.js
+      uses: actions/setup-node@v3.1.1
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'yarn'
