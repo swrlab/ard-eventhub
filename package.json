@@ -27,7 +27,7 @@
 		"@google-cloud/datastore": "^6.6.2",
 		"@google-cloud/pubsub": "^2.19.3",
 		"@google-cloud/secret-manager": "^3.12.0",
-		"@swrlab/utils": "swrlab/node-utils#1.0.3-beta",
+		"@swrlab/utils": "swrlab/node-utils#v1.0.4-beta",
 		"compression": "^1.7.4",
 		"dd-trace": "^1.7.1",
 		"dotenv": "^16.0.0",
