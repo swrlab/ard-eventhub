@@ -6,7 +6,6 @@
 */
 
 const tracer = require('dd-trace').init({
-	enabled: process.env.DD_TRACER_ENABLED === 'true',
 	logInjection: true,
 })
 
