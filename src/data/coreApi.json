@@ -131,6 +131,19 @@
 	},
 	{
 		"_type": "PublisherResource",
+		"id": "urn:ard:publisher:ec4f1dfdebfd5886",
+		"externalId": "284070",
+		"title": "BR Heimat",
+		"institution": {
+			"_type": "InstitutionResource",
+			"id": "urn:ard:institution:7d64899d03610af2",
+			"externalId": "BR",
+			"title": "Bayerischer Rundfunk",
+			"acronym": "BR"
+		}
+	},
+	{
+		"_type": "PublisherResource",
 		"id": "urn:ard:publisher:5fb082abb6840f0e",
 		"externalId": "284040",
 		"title": "B5 aktuell",
