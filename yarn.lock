@@ -1585,10 +1585,10 @@ date-and-time@^2.0.0:
   resolved "https://registry.yarnpkg.com/date-and-time/-/date-and-time-2.3.1.tgz#006675ec4943a0a5f85810e3a3fd6aa96f6130c9"
   integrity sha512-OaIRmSJXifwEN21rMVVDs0Kz8uhJ3wWPYd86atkRiqN54liaMQYEbbrgjZQea75YXOBWL4ZFb3rG/waenw1TEg==
 
-dd-trace@^2.7.0:
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-2.7.0.tgz#2139c2f8a5bb7b042487a3f0e0d107dc03265454"
-  integrity sha512-P6y1RG58AjDWZwwl8e1J87xveF68emBOoyv2tCdbQEB4n9dW4bV/3gfy4yI8c4Gdqd/nhOYMkaqELmiWxySTNw==
+dd-trace@^2.7.1:
+  version "2.7.1"
+  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-2.7.1.tgz#cac9a7a02dd3b6554cefea7b0e4e9667c23aee18"
+  integrity sha512-s2QSqC9ascm9VjHzQKG6Tpe71ydYH/VjBmTeu7zPgFYDXvkAx7fv3kcMYIkmPvvABdm1znmAqKeOBF1uqlZO/w==
   dependencies:
     "@datadog/native-appsec" "^1.1.1"
     "@datadog/native-metrics" "^1.2.0"
