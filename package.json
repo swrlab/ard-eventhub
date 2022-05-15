@@ -37,7 +37,7 @@
 		"google-auth-library": "^8.0.2",
 		"jsonwebtoken": "^8.5.1",
 		"moment": "^2.29.3",
-		"node-crc": "^2.0.11",
+		"node-crc": "^2.0.13",
 		"slug": "^5.3.0",
 		"swagger-ui-express": "^4.3.0",
 		"uuid": "^8.3.2",
