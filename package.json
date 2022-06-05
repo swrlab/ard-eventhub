@@ -25,7 +25,7 @@
 	"license": "EUPL-1.2",
 	"dependencies": {
 		"@google-cloud/datastore": "^6.6.2",
-		"@google-cloud/pubsub": "^2.19.4",
+		"@google-cloud/pubsub": "^3.0.1",
 		"@google-cloud/secret-manager": "^3.12.0",
 		"@swrlab/utils": "swrlab/node-utils#1.0.4-beta",
 		"compression": "^1.7.4",
