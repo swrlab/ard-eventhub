@@ -168,11 +168,6 @@ module.exports = async (job) => {
 			media.url || media.templateUrl.replace('{width}', 512).replace('{height}', 512)
 	}
 
-	// DEV TEMP workaround
-	if (liveRadioEvent.imageURL.indexOf('http://rdz-dev:4001') !== -1) {
-		liveRadioEvent.imageURL = liveRadioEvent.imageURL.replace('http://rdz-dev:4001', 'https://onair.swr.de')
-	}
-
 	// handle exclusions
 	if (checkIfArrayHasContent(plugin.excludeFields)) {
 		for (const field of plugin.excludeFields) {
