@@ -427,12 +427,12 @@
     lodash.snakecase "^4.1.1"
     p-defer "^3.0.0"
 
-"@google-cloud/secret-manager@^3.12.0":
-  version "3.12.0"
-  resolved "https://registry.yarnpkg.com/@google-cloud/secret-manager/-/secret-manager-3.12.0.tgz#ff975190e45da3aaa762905f2b7c679c06a0f4a3"
-  integrity sha512-nFNm5lYgH2RRAn1x8vPKt1c+MBMJtBXqkYB5Jpi68PjN7Emjcu7/kl+0/+FamFLp3qJUU7RKRCwETFNNZAOkuw==
+"@google-cloud/secret-manager@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@google-cloud/secret-manager/-/secret-manager-4.0.0.tgz#18af870dfbad09115f6c0e11dc98c77d66a783e0"
+  integrity sha512-wHlMAldXuQ+D7P2A3HHn/2u6aAPH+S3h8G9sH+O6cQPKRgqt3clCN7k9jZy7lJsuS09LaXgi05CEupnbmtNDhw==
   dependencies:
-    google-gax "^2.30.0"
+    google-gax "^3.0.1"
 
 "@google-cloud/storage@5.19.4":
   version "5.19.4"
@@ -2712,7 +2712,7 @@ google-auth-library@^8.0.2:
     jws "^4.0.0"
     lru-cache "^6.0.0"
 
-google-gax@^2.24.1, google-gax@^2.30.0:
+google-gax@^2.24.1:
   version "2.30.5"
   resolved "https://registry.yarnpkg.com/google-gax/-/google-gax-2.30.5.tgz#e836f984f3228900a8336f608c83d75f9cb73eff"
   integrity sha512-Jey13YrAN2hfpozHzbtrwEfEHdStJh1GwaQ2+Akh1k0Tv/EuNVSuBtHZoKSBm5wBMvNsxTsEIZ/152NrYyZgxQ==
