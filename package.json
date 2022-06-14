@@ -26,14 +26,14 @@
 	"dependencies": {
 		"@google-cloud/datastore": "^6.6.2",
 		"@google-cloud/pubsub": "^3.0.1",
-		"@google-cloud/secret-manager": "^3.12.0",
+		"@google-cloud/secret-manager": "^4.0.0",
 		"@swrlab/utils": "swrlab/node-utils#1.0.4-beta",
 		"compression": "^1.7.4",
-		"dd-trace": "^2.8.0",
+		"dd-trace": "^2.9.1",
 		"dotenv": "^16.0.1",
 		"express": "4.18.1",
 		"express-openapi-validator": "^4.13.8",
-		"firebase-admin": "^10.2.0",
+		"firebase-admin": "^10.3.0",
 		"google-auth-library": "^8.0.2",
 		"jsonwebtoken": "^8.5.1",
 		"moment": "^2.29.3",
@@ -54,7 +54,7 @@
 		"license-compliance": "^1.2.3",
 		"mocha": "^10.0.0",
 		"nodemon": "^2.0.16",
-		"prettier": "^2.6.2",
+		"prettier": "^2.7.0",
 		"typescript": "^4.7.3"
 	},
 	"resolutions": {
