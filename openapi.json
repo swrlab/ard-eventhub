@@ -1197,8 +1197,8 @@
           },
           "topic": {
             "type": "string",
-            "description": "Name of the topic to subscribe to",
-            "example": "topic-name-to-subscribe-to"
+            "description": "ID of the topic to subscribe to",
+            "example": "topic-id-to-subscribe-to"
           }
         }
       },
