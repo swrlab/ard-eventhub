@@ -351,16 +351,16 @@
   dependencies:
     tslib "^2.1.0"
 
-"@google-cloud/datastore@^6.6.2":
-  version "6.6.2"
-  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-6.6.2.tgz#0240869f942350b194e8c2eea6588b83f20c412c"
-  integrity sha512-gQxSusM1gREtUogVqtl/KuoFrstYns8ZxY3guso2Mg2eJ+ygJwWdxXmG23T+aSbzkofh2OF3Mz0p3a+0F9KoPg==
+"@google-cloud/datastore@^7.0.0":
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-7.0.0.tgz#e026db7d12c773230abf9e6b391a6196ef3fb81b"
+  integrity sha512-CbvqzqWFtwHqH3EWMWHqKzKiM9dV+/Ga0e1oSr7rO2KA6QBHGvUEBbLxRWirHnt6Xz2drjzIVjVE1tuOENHPlQ==
   dependencies:
     "@google-cloud/promisify" "^2.0.0"
     arrify "^2.0.1"
     concat-stream "^2.0.0"
     extend "^3.0.2"
-    google-gax "^2.24.1"
+    google-gax "^3.0.1"
     is "^3.3.0"
     split-array-stream "^2.0.0"
     stream-events "^1.0.5"
