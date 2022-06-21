@@ -83,7 +83,6 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `google-auth-library`          | [Apache License 2.0](https://github.com/googleapis/google-auth-library-nodejs/blob/master/LICENSE) |
 | NPM     | `jsonwebtoken`                 | [MIT](https://github.com/auth0/node-jsonwebtoken/blob/master/LICENSE)                              |
 | NPM     | `moment`                       | [MIT](https://github.com/moment/moment/blob/develop/LICENSE)                                       |
-| NPM     | `node-crc`                     | [MIT](https://github.com/magiclen/node-crc/blob/master/LICENSE)                                    |
 | NPM     | `slug`                         | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                           |
 | NPM     | `swagger-ui-express`           | [MIT](https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE)                       |
 | NPM     | `uuid`                         | [MIT](https://github.com/uuidjs/uuid/blob/master/LICENSE.md)                                       |
