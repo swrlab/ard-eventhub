@@ -24,7 +24,7 @@
 	"author": "SWR Audio Lab <lab@swr.de>",
 	"license": "EUPL-1.2",
 	"dependencies": {
-		"@google-cloud/datastore": "^6.6.2",
+		"@google-cloud/datastore": "^7.0.0",
 		"@google-cloud/pubsub": "^3.0.1",
 		"@google-cloud/secret-manager": "^4.0.0",
 		"@swrlab/utils": "swrlab/node-utils#1.0.5-beta",
@@ -33,7 +33,7 @@
 		"dotenv": "^16.0.1",
 		"express": "4.18.1",
 		"express-openapi-validator": "^4.13.8",
-		"firebase-admin": "^10.3.0",
+		"firebase-admin": "^11.0.0",
 		"google-auth-library": "^8.0.2",
 		"jsonwebtoken": "^8.5.1",
 		"moment": "^2.29.3",
@@ -48,13 +48,13 @@
 		"chai": "^4.3.6",
 		"chai-http": "^4.3.0",
 		"docsify-cli": "^4.4.4",
-		"eslint": "^8.17.0",
+		"eslint": "^8.18.0",
 		"eslint-plugin-chai-friendly": "^0.7.2",
 		"license-compliance": "^1.2.3",
 		"mocha": "^10.0.0",
 		"nodemon": "^2.0.16",
-		"prettier": "^2.7.0",
-		"typescript": "^4.7.3"
+		"prettier": "^2.7.1",
+		"typescript": "^4.7.4"
 	},
 	"resolutions": {
 		"ansi-regex": "^5.0.1",
