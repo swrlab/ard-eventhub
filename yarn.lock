@@ -704,12 +704,12 @@
 
 "@swrlab/utils@swrlab/node-utils#1.0.6-beta":
   version "1.0.6-beta"
-  resolved "https://codeload.github.com/swrlab/node-utils/tar.gz/bc0d28b275c177c8b7f007391bded62aa2046cd6"
+  resolved "https://codeload.github.com/swrlab/node-utils/tar.gz/3bf01154453e0aa70ed7fa4a1be16813a379e543"
   dependencies:
     "@google-cloud/storage" "6.2.1"
     aws-sdk "2.1163.0"
     chai "^4.3.6"
-    node-crc rafaelmaeuer/node-crc
+    node-crc rafaelmaeuer/node-crc#v2.0.14
     undici-wrapper frytg/undici-wrapper#v0.0.5
     uuid "8.3.2"
 
@@ -3848,9 +3848,9 @@ nested-error-stacks@^2.0.0:
   resolved "https://registry.yarnpkg.com/nested-error-stacks/-/nested-error-stacks-2.1.1.tgz#26c8a3cee6cc05fbcf1e333cd2fc3e003326c0b5"
   integrity sha512-9iN1ka/9zmX1ZvLV9ewJYEk9h7RyRRtqdK0woXcqohu8EWIerfPUjYJPg0ULy0UqP7cslmdGc8xKDJcojlKiaw==
 
-node-crc@rafaelmaeuer/node-crc:
+node-crc@rafaelmaeuer/node-crc#v2.0.14:
   version "2.0.14"
-  resolved "https://codeload.github.com/rafaelmaeuer/node-crc/tar.gz/26059598abb66cef2b5cc8212a602fa44c679aa8"
+  resolved "https://codeload.github.com/rafaelmaeuer/node-crc/tar.gz/fb90c9e9eaa2117dad982f6b5572ea1843170ed1"
   dependencies:
     "@types/node" "^18.0.0"
 
@@ -4582,7 +4582,7 @@ safe-stable-stringify@^2.3.1:
 sax@1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.1.tgz#7b8e656190b228e81a66aea748480d828cd2d37a"
-  integrity sha1-e45lYZCyKOgaZq6nSEgNgozS03o=
+  integrity sha512-8I2a3LovHTOpm7NV5yOyO8IHqgVsfK4+UuySrXU8YXkSRX7k6hCV9b3HrkKCr3nMpgj+0bmocaJJWpvp1oc7ZA==
 
 sax@>=0.6.0:
   version "1.2.4"
@@ -5200,7 +5200,7 @@ url-parse-lax@^3.0.0:
 url@0.10.3:
   version "0.10.3"
   resolved "https://registry.yarnpkg.com/url/-/url-0.10.3.tgz#021e4d9c7705f21bbf37d03ceb58767402774c64"
-  integrity sha1-Ah5NnHcF8hu/N9A861h2dAJ3TGQ=
+  integrity sha512-hzSUW2q06EqL1gKM/a+obYHLIO6ct2hwPuviqTTOcfFVc61UbfJ2Q32+uGL/HCPxKqrdGB5QUwIe7UqlDgwsOQ==
   dependencies:
     punycode "1.3.2"
     querystring "0.2.0"
@@ -5407,7 +5407,7 @@ xmlbuilder@15.1.1:
 xmlbuilder@~9.0.1:
   version "9.0.7"
   resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-9.0.7.tgz#132ee63d2ec5565c557e20f4c22df9aca686b10d"
-  integrity sha1-Ey7mPS7FVlxVfiD0wi35rKaGsQ0=
+  integrity sha512-7YXTQc3P2l9+0rjaUbLwMKRhtmwg1M1eDf6nag7urC7pIPYLD9W/jmzQ4ptRSUbodw5S0jfoGTflLemQibSpeQ==
 
 xtend@^4.0.0:
   version "4.0.2"
