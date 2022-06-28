@@ -7,7 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.5] - 2022-06-21
 
-- security: fix `CVE-2022-24434` and `CVE-2022-32210`
+- security:
+  - fix `CVE-2022-24434`
+  - fix `CVE-2022-32210`
+  - fix `CVE-2022-33987`
 - update:
   - github-actions to use latest versions
   - @google-cloud/secret-manager to `v4.0.0`

@@ -58,6 +58,7 @@
 	},
 	"resolutions": {
 		"ansi-regex": "^5.0.1",
+		"got": "^11.8.5",
 		"strip-ansi": "^6.0.1"
 	},
 	"prettier": "@swrlab/swr-prettier-config"
