@@ -9,8 +9,8 @@
 */
 
 // load node utils
-const crc = require('node-crc')
+const ard = require('@swrlab/utils/packages/ard')
 
 module.exports = (input) => {
-	return crc.crc64(Buffer.from(input, 'utf-8')).toString('hex')
+	return ard.createHashedId(input)
 }

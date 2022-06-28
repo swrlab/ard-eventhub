@@ -10,7 +10,7 @@ info:
   license:
     name: European Union Public License 1.2
     url: 'https://spdx.org/licenses/EUPL-1.2.html'
-  version: 1.3.4
+  version: 1.3.5
 externalDocs:
   description: ARD-Eventhub Documentation
   url: 'https://swrlab.github.io/ard-eventhub/'
@@ -870,8 +870,8 @@ components:
           example: my-emergency-and-notifications-contact@ard.de
         topic:
           type: string
-          description: Name of the topic to subscribe to
-          example: topic-name-to-subscribe-to
+          description: ID of the topic to subscribe to
+          example: topic-id-to-subscribe-to
     
     subscriptionsList:
       type: array

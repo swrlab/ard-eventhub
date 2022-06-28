@@ -31,10 +31,10 @@ jobs:
         STAGES: [dev]
     steps:
     - name: 👀 Checkout Code
-      uses: actions/checkout@v3.0.2
+      uses: actions/checkout@v3
 
     - name: ⛺️ Install Node.js
-      uses: actions/setup-node@v3.2.0
+      uses: actions/setup-node@v3
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'yarn'
@@ -44,7 +44,7 @@ jobs:
       run: yarn
 
     - name: 🔑 Setup Google Cloud Auth
-      uses: google-github-actions/setup-gcloud@v0.6.0
+      uses: google-github-actions/setup-gcloud@v0
       with:
         service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
         export_default_credentials: true
@@ -69,10 +69,10 @@ jobs:
       VERSION: ${{ steps.push.outputs.VERSION }}
     steps:
     - name: 👀 Checkout Code
-      uses: actions/checkout@v3.0.2
+      uses: actions/checkout@v3
       
     - name: 🔑 Setup Google Cloud Auth
-      uses: google-github-actions/setup-gcloud@v0.6.0
+      uses: google-github-actions/setup-gcloud@v0
       with:
         service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
         export_default_credentials: true

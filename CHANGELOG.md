@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.5] - 2022-06-21
+
+- security:
+  - fix `CVE-2022-24434`
+  - fix `CVE-2022-32210`
+  - fix `CVE-2022-33987`
+- update:
+  - github-actions to use latest versions
+  - @google-cloud/secret-manager to `v4.0.0`
+  - @google-cloud/datastore to `v7.0.0`
+  - firebase-admin to `v11.0.0`
+- use node-crc from `@swrlab/utils`
+
 ## [1.3.4] - 2022-06-07
 
 - security: fix `CVE-2022-25878`
