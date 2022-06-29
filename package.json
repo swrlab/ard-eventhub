@@ -12,6 +12,8 @@
 		"ingest:test": "mocha test/ingest.test.js --timeout 15000 --exit -r dotenv/config",
 		"ingest:local": "nodemon -r dotenv/config ./src/ingest/index.js",
 		"ingest:cloud": "node -r dotenv/config ./src/ingest/index.js",
+		"docker:build": "docker build . -t swr/ard-eventhub",
+		"docker:run": "docker run -p 8080:8080 swr/ard-eventhub",
 		"license": "chmod +x license.sh && ./license.sh",
 		"reinstall": "rm -rf node_modules && rm yarn.lock && yarn",
 		"test": "mocha test/example.test.js"
