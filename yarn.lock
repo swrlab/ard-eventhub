@@ -661,14 +661,14 @@
   resolved "https://registry.yarnpkg.com/@swrlab/swr-prettier-config/-/swr-prettier-config-0.1.2.tgz#e7fd79f72ceeb05a8b631ecc12a2bcae6ae2386b"
   integrity sha512-MyUTKRzzvQPexXINH7ASW9dDPtE/OrFfz6UngwyNMpPjAfUu+zJKCzNpiEagUxLGU/8s76oRHqDz5jsN2vyaHw==
 
-"@swrlab/utils@swrlab/node-utils#1.0.6-beta":
-  version "1.0.6-beta"
-  resolved "https://codeload.github.com/swrlab/node-utils/tar.gz/3bf01154453e0aa70ed7fa4a1be16813a379e543"
+"@swrlab/utils@swrlab/node-utils#1.0.7-beta":
+  version "1.0.7-beta"
+  resolved "https://codeload.github.com/swrlab/node-utils/tar.gz/c0b6899f8b0591f71a0864c8e3ab46265384e75c"
   dependencies:
     "@google-cloud/storage" "6.2.1"
-    aws-sdk "2.1163.0"
+    aws-sdk "2.1164.0"
     chai "^4.3.6"
-    node-crc rafaelmaeuer/node-crc#v2.0.14
+    node-crc rafaelmaeuer/node-crc#v2.0.15
     undici-wrapper frytg/undici-wrapper#v0.0.5
     uuid "8.3.2"
 
@@ -1018,10 +1018,10 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==
 
-aws-sdk@2.1163.0:
-  version "2.1163.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1163.0.tgz#2c24b82987c6a842d9bec8a0d61a13cb36b26bba"
-  integrity sha512-vSCPTNduqxv5cGe3al/0V6dxPr+hpDRR7B9AADtVp+iHS+HdLCeNZbGhT66VfFjXVXXEfbAuF4ME9fYSc5/mOg==
+aws-sdk@2.1164.0:
+  version "2.1164.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1164.0.tgz#050ce644ed9993582bd02151bf3ac9d9ebc143f5"
+  integrity sha512-q/M9E68WabF22G8d8lFgo3NH+9RooYswSY9VG6zqN16C19RRm2sGThp8Sxtz/WUK98BAsxSnkLW1ksmy3BsP7Q==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -1724,6 +1724,11 @@ detect-libc@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-1.0.3.tgz#fa137c4bd698edf55cd5cd02ac559f91a4c4ba9b"
   integrity sha512-pGjwhsmsp4kL2RTz08wcOlGN83otlqHeD/Z5T8GXZB+/YcpQ/dgo+lbU8ZsGxV0HIvqqxo9l7mqYwyYMD9bKDg==
+
+detect-libc@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-2.0.1.tgz#e1897aa88fa6ad197862937fbc0441ef352ee0cd"
+  integrity sha512-463v3ZeIrcWtdgIg6vI6XUncguvr2TnGl4SzDXinkt9mSLpBJKXT3mW6xT3VQdDN11+WVs29pgvivTc4Lp8v+w==
 
 diagnostics_channel@^1.1.0:
   version "1.1.0"
@@ -3838,11 +3843,12 @@ nested-error-stacks@^2.0.0:
   resolved "https://registry.yarnpkg.com/nested-error-stacks/-/nested-error-stacks-2.1.1.tgz#26c8a3cee6cc05fbcf1e333cd2fc3e003326c0b5"
   integrity sha512-9iN1ka/9zmX1ZvLV9ewJYEk9h7RyRRtqdK0woXcqohu8EWIerfPUjYJPg0ULy0UqP7cslmdGc8xKDJcojlKiaw==
 
-node-crc@rafaelmaeuer/node-crc#v2.0.14:
-  version "2.0.14"
-  resolved "https://codeload.github.com/rafaelmaeuer/node-crc/tar.gz/fb90c9e9eaa2117dad982f6b5572ea1843170ed1"
+node-crc@rafaelmaeuer/node-crc#v2.0.15:
+  version "2.0.15"
+  resolved "https://codeload.github.com/rafaelmaeuer/node-crc/tar.gz/9d0d20f171efb60265bbc91246a2497856f5fd89"
   dependencies:
     "@types/node" "^18.0.0"
+    detect-libc "^2.0.1"
 
 node-fetch@^2.6.1, node-fetch@^2.6.6, node-fetch@^2.6.7:
   version "2.6.7"

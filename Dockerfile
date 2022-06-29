@@ -1,8 +1,5 @@
-# Load desired node pckg
+# Load desired node image
 FROM node:16.15-alpine
-
-# Add python
-RUN apk add g++ make python3
 
 # Create app directory
 WORKDIR /web/app

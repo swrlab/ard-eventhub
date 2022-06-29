@@ -12,6 +12,8 @@
 		"ingest:test": "mocha test/ingest.test.js --timeout 15000 --exit -r dotenv/config",
 		"ingest:local": "nodemon -r dotenv/config ./src/ingest/index.js",
 		"ingest:cloud": "node -r dotenv/config ./src/ingest/index.js",
+		"docker:build": "docker build . -t swr/ard-eventhub",
+		"docker:run": "docker run -p 8080:8080 swr/ard-eventhub",
 		"license": "chmod +x license.sh && ./license.sh",
 		"reinstall": "rm -rf node_modules && rm yarn.lock && yarn",
 		"test": "mocha test/example.test.js"
@@ -27,7 +29,7 @@
 		"@google-cloud/datastore": "^7.0.0",
 		"@google-cloud/pubsub": "^3.0.1",
 		"@google-cloud/secret-manager": "^4.0.0",
-		"@swrlab/utils": "swrlab/node-utils#1.0.6-beta",
+		"@swrlab/utils": "swrlab/node-utils#1.0.7-beta",
 		"compression": "^1.7.4",
 		"dd-trace": "^2.10.0",
 		"dotenv": "^16.0.1",
