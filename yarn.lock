@@ -661,9 +661,10 @@
   resolved "https://registry.yarnpkg.com/@swrlab/swr-prettier-config/-/swr-prettier-config-0.1.2.tgz#e7fd79f72ceeb05a8b631ecc12a2bcae6ae2386b"
   integrity sha512-MyUTKRzzvQPexXINH7ASW9dDPtE/OrFfz6UngwyNMpPjAfUu+zJKCzNpiEagUxLGU/8s76oRHqDz5jsN2vyaHw==
 
-"@swrlab/utils@swrlab/node-utils#1.0.7-beta":
-  version "1.0.7-beta"
-  resolved "https://codeload.github.com/swrlab/node-utils/tar.gz/c0b6899f8b0591f71a0864c8e3ab46265384e75c"
+"@swrlab/utils@swrlab/node-utils#v1.0.8-beta":
+  version "1.0.8-beta"
+  uid "921a862127aaffba72a9441d5874654e7f08a8b8"
+  resolved "https://codeload.github.com/swrlab/node-utils/tar.gz/921a862127aaffba72a9441d5874654e7f08a8b8"
   dependencies:
     "@google-cloud/storage" "6.2.1"
     aws-sdk "2.1164.0"
