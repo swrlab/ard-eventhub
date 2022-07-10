@@ -436,10 +436,10 @@
   dependencies:
     google-gax "^3.0.1"
 
-"@google-cloud/storage@6.2.1", "@google-cloud/storage@^6.1.0":
-  version "6.2.1"
-  resolved "https://registry.yarnpkg.com/@google-cloud/storage/-/storage-6.2.1.tgz#6f02e44d907e2fcb2b80aeea5cc6e5575dfeefcc"
-  integrity sha512-obLGOFCp25rpRn4CZvZqQkSHhY+dBrK7IjDdFpF5gOXVxE40ilr287uikiGPjflVFbgNwO2qhioJNqMzxoqHZg==
+"@google-cloud/storage@6.2.2", "@google-cloud/storage@^6.1.0":
+  version "6.2.2"
+  resolved "https://registry.yarnpkg.com/@google-cloud/storage/-/storage-6.2.2.tgz#1fd3ee85e5fea55a9696c98769d097b28ff4d775"
+  integrity sha512-KhAOxmGfmELKKn6cdvgGfAi/YBLi19hI1jX3QI7xQmbeajSFMgUKrIPbbyfMIxQPOEQ9vG0MQX1uganlA/HTRA==
   dependencies:
     "@google-cloud/paginator" "^3.0.7"
     "@google-cloud/projectify" "^3.0.0"
@@ -661,15 +661,16 @@
   resolved "https://registry.yarnpkg.com/@swrlab/swr-prettier-config/-/swr-prettier-config-0.1.2.tgz#e7fd79f72ceeb05a8b631ecc12a2bcae6ae2386b"
   integrity sha512-MyUTKRzzvQPexXINH7ASW9dDPtE/OrFfz6UngwyNMpPjAfUu+zJKCzNpiEagUxLGU/8s76oRHqDz5jsN2vyaHw==
 
-"@swrlab/utils@swrlab/node-utils#1.0.7-beta":
-  version "1.0.7-beta"
-  resolved "https://codeload.github.com/swrlab/node-utils/tar.gz/c0b6899f8b0591f71a0864c8e3ab46265384e75c"
+"@swrlab/utils@swrlab/node-utils#v1.0.9-beta":
+  version "1.0.9-beta"
+  uid e3766f2b0add5080611bafece9ecca62ef4a87f5
+  resolved "https://codeload.github.com/swrlab/node-utils/tar.gz/e3766f2b0add5080611bafece9ecca62ef4a87f5"
   dependencies:
-    "@google-cloud/storage" "6.2.1"
-    aws-sdk "2.1164.0"
+    "@google-cloud/storage" "6.2.2"
+    aws-sdk "2.1168.0"
     chai "^4.3.6"
     node-crc rafaelmaeuer/node-crc#v2.0.15
-    undici-wrapper frytg/undici-wrapper#v0.0.5
+    undici-wrapper frytg/undici-wrapper#v0.1.0
     uuid "8.3.2"
 
 "@szmarczak/http-timer@^4.0.5":
@@ -1018,10 +1019,10 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==
 
-aws-sdk@2.1164.0:
-  version "2.1164.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1164.0.tgz#050ce644ed9993582bd02151bf3ac9d9ebc143f5"
-  integrity sha512-q/M9E68WabF22G8d8lFgo3NH+9RooYswSY9VG6zqN16C19RRm2sGThp8Sxtz/WUK98BAsxSnkLW1ksmy3BsP7Q==
+aws-sdk@2.1168.0:
+  version "2.1168.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1168.0.tgz#7936459edee0c999065f1ecf2ef0bea89ea056c1"
+  integrity sha512-9+WYoYTHHjLqeWdSSLbNpmc/NgnZpX4LGiyYjXenh4WNRBXshXI0XioTK8BQgDscVzB978EJV8kG1nZGE3USzw==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -5111,17 +5112,18 @@ undefsafe@^2.0.5:
   resolved "https://registry.yarnpkg.com/undefsafe/-/undefsafe-2.0.5.tgz#38733b9327bdcd226db889fb723a6efd162e6e2c"
   integrity sha512-WxONCrssBM8TSPRqN5EmsjVrsv4A8X12J4ArBiiayv3DyyG3ZlIg6yysuuSYdZsVz3TKcTg2fd//Ujd4CHV1iA==
 
-undici-wrapper@frytg/undici-wrapper#v0.0.5:
-  version "0.0.5"
-  resolved "https://codeload.github.com/frytg/undici-wrapper/tar.gz/de97a240485b639fd00a2c324998d4c1ec77648d"
+undici-wrapper@frytg/undici-wrapper#v0.1.0:
+  version "0.1.0"
+  uid "506951ce6f0595d0a37aa5c72bd26e73cf0ac0bd"
+  resolved "https://codeload.github.com/frytg/undici-wrapper/tar.gz/506951ce6f0595d0a37aa5c72bd26e73cf0ac0bd"
   dependencies:
     abort-controller "^3.0.0"
-    undici "^5.5.1"
+    undici "^5.6.0"
 
-undici@^5.5.1:
-  version "5.5.1"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-5.5.1.tgz#baaf25844a99eaa0b22e1ef8d205bffe587c8f43"
-  integrity sha512-MEvryPLf18HvlCbLSzCW0U00IMftKGI5udnjrQbC5D4P0Hodwffhv+iGfWuJwg16Y/TK11ZFK8i+BPVW2z/eAw==
+undici@^5.6.0:
+  version "5.6.1"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-5.6.1.tgz#7e5c56d15032d06738358dea433f98130e2a0561"
+  integrity sha512-yYVqywdCbNb99f/w045wqmv++WExXDjY0FEvLSB7QUZZH6izxrVkF4dJn1aimcvN0+WAhv75Gg7v6VJoqmRtJQ==
 
 unique-string@^2.0.0:
   version "2.0.0"
