@@ -21,13 +21,13 @@ These ARD broadcasters are currently sending live metadata via ARD Eventhub:
 | ---------------- | ---- | ---- |
 | BR               | ✅    | ✅    |
 | HR               | ✅    | ✅    |
-| MDR              | ✅    | ✅    |
+| MDR              | -    | ✅    |
 | NDR              | ✅    | ✅    |
-| Radio Bremen     | ✅    | ✅    |
-| RBB              | ✅    | ✅    |
-| SR               | ⌛️    | -    |
+| Radio Bremen     | -    | ✅    |
+| RBB              | -    | ✅    |
+| SR               | -    | ✅    |
 | SWR              | ✅    | ✅    |
-| WDR              | ⌛️    | ⌛️    |
+| WDR              | ✅    | ✅    |
 | Deutschlandradio | -    | -    |
 
 ## Get Started and Documentation
