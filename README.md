@@ -69,7 +69,7 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 
 | Type    | Name                           | License                                                                                            |
 | ------- | ------------------------------ | -------------------------------------------------------------------------------------------------- |
-| Docker  | `node:16.15-alpine`            | [MIT](https://github.com/nodejs/node/blob/master/LICENSE)                                          |
+| Docker  | `node:18-alpine`               | [MIT](https://github.com/nodejs/node/blob/master/LICENSE)                                          |
 | NPM     | `@google-cloud/datastore`      | [Apache License 2.0](https://github.com/googleapis/nodejs-datastore/blob/master/LICENSE)           |
 | NPM     | `@google-cloud/pubsub`         | [Apache License 2.0](https://github.com/googleapis/nodejs-pubsub/blob/master/LICENSE)              |
 | NPM     | `@google-cloud/secret-manager` | [Apache License 2.0](https://github.com/googleapis/nodejs-secret-manager/blob/master/LICENSE)      |

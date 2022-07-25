@@ -10,7 +10,7 @@ on:
     types: [ closed ]
 
 env:
-  NODE_VERSION: 16.15
+  NODE_VERSION: 18
   IMAGE_NAME: de.swr.ard.eventhub/ingest
   REGISTRY_DOMAIN: eu.gcr.io
 
