@@ -14,7 +14,8 @@
 		"ingest:test": "mocha test/ingest.test.js --timeout 15000 --exit -r dotenv/config",
 		"ingest:lint": "eslint src",
 		"docker:build": "docker build . -t swr/ard-eventhub",
-		"docker:run": "docker run --env-file .env -p 8080:8080 swr/ard-eventhub",
+		"docker:clean": "docker rm ard-eventhub",
+		"docker:run": "docker run --env-file .env -p 8080:8080 --name ard-eventhub swr/ard-eventhub",
 		"license": "chmod +x license.sh && ./license.sh",
 		"test": "mocha test/example.test.js",
 		"reinstall": "rm -rf node_modules && rm yarn.lock && yarn"
