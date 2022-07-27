@@ -5,7 +5,7 @@
 
 */
 
-module.exports = function (req, res, err) {
+module.exports = (req, res, err) => {
 	try {
 		return res.status(err.status || 404).json({
 			...err.data,
