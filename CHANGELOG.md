@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.7] - 2022-07-25
 
-- chore: update Node to `v18`
-- fix: reorder core-dump (alphabetically institutions)
-- feat: update docker version tag from package.json
+- chore:
+  - update Node to `v18`
+  - update node-utils to `v1.0.0`
+- fix:
+  - resolve eslint errors
+  - reorder core-dump (alphabetically institutions)
+- feat:
+  - update docker version tag from `package.json`
+  - add eslint check to github-actions
 
 ## [1.3.6] - 2022-07-18
 
