@@ -5,9 +5,14 @@
 
 */
 
+const notFound = require('./notFound')
+const badRequest = require('./badRequest')
+const internalServerError = require('./internalServerError')
+const ok = require('./ok')
+
 module.exports = {
-	notFound: require('./notFound'),
-	badRequest: require('./badRequest'),
-	internalServerError: require('./internalServerError'),
-	ok: require('./ok'),
+	notFound,
+	badRequest,
+	internalServerError,
+	ok,
 }
