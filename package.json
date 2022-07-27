@@ -29,7 +29,7 @@
 		"@google-cloud/datastore": "^7.0.0",
 		"@google-cloud/pubsub": "^3.1.0",
 		"@google-cloud/secret-manager": "^4.0.0",
-		"@swrlab/utils": "swrlab/node-utils#1.0.9-beta",
+		"@swrlab/utils": "^1.0.0",
 		"compression": "^1.7.4",
 		"dd-trace": "^2.11.0",
 		"dotenv": "^16.0.1",
@@ -45,7 +45,7 @@
 		"winston": "^3.8.1"
 	},
 	"devDependencies": {
-		"@swrlab/eslint-plugin-swr": "^0.1.2",
+		"@swrlab/eslint-plugin-swr": "^0.2.0",
 		"@swrlab/swr-prettier-config": "^0.1.2",
 		"chai": "^4.3.6",
 		"chai-http": "^4.3.0",
