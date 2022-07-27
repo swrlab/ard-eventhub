@@ -49,6 +49,9 @@ jobs:
         service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
         export_default_credentials: true
 
+    - name: 📚 Lint Code
+      run: yarn ingest:lint
+
     - name: 🧪 Run Ingest Tests
       env:
         SERVICE_NAME: ard-eventhub

@@ -9,14 +9,15 @@
 	"scripts": {
 		"docs:serve": "docsify serve . --port 3000",
 		"coreId": "node ./src/coreId/index.js",
-		"ingest:test": "mocha test/ingest.test.js --timeout 15000 --exit -r dotenv/config",
 		"ingest:local": "nodemon -r dotenv/config ./src/ingest/index.js",
 		"ingest:cloud": "node -r dotenv/config ./src/ingest/index.js",
+		"ingest:test": "mocha test/ingest.test.js --timeout 15000 --exit -r dotenv/config",
+		"ingest:lint": "eslint src",
 		"docker:build": "docker build . -t swr/ard-eventhub",
 		"docker:run": "docker run --env-file .env -p 8080:8080 swr/ard-eventhub",
 		"license": "chmod +x license.sh && ./license.sh",
-		"reinstall": "rm -rf node_modules && rm yarn.lock && yarn",
-		"test": "mocha test/example.test.js"
+		"test": "mocha test/example.test.js",
+		"reinstall": "rm -rf node_modules && rm yarn.lock && yarn"
 	},
 	"keywords": [
 		"ard",
