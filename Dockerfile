@@ -1,5 +1,5 @@
 # Load desired node image
-FROM node:16.15-alpine
+FROM node:18-alpine
 
 # Create app directory
 WORKDIR /web/app

@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
 				data: { subscriptionName },
 			})
 
-			if (err?.code === 5) {
+			if (error.code === 5) {
 				// pubsub error code 5 seems to be 'Resource not found'
 				return response.notFound(req, res, {
 					status: 404,

@@ -5,8 +5,12 @@
 
 */
 
+const del = require('./delete')
+const load = require('./load')
+const save = require('./save')
+
 module.exports = {
-	delete: require('./delete'),
-	load: require('./load'),
-	save: require('./save'),
+	delete: del,
+	load,
+	save,
 }

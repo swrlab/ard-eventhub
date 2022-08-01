@@ -5,54 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.7] - 2022-07-25
+
+- chore: update Node to `v18`
+- chore: update node-utils to `v1.0.0`
+- fix: resolve eslint errors
+- fix: reorder core-dump (alphabetically institutions)
+- feat: update docker version tag from `package.json`
+- feat: add eslint check to github-actions
+
 ## [1.3.6] - 2022-07-18
 
 - chore: add publisherId to logs
 
 ## [1.3.5] - 2022-06-21
 
-- security:
-  - fix `CVE-2022-24434`
-  - fix `CVE-2022-32210`
-  - fix `CVE-2022-33987`
-- update:
-  - github-actions to use latest versions
-  - @google-cloud/secret-manager to `v4.0.0`
-  - @google-cloud/datastore to `v7.0.0`
-  - firebase-admin to `v11.0.0`
+- security: fix `CVE-2022-24434`
+- security: fix `CVE-2022-32210`
+- security: fix `CVE-2022-33987`
+- update: github-actions to use latest versions
+- update: @google-cloud/secret-manager to `v4.0.0`
+- update: @google-cloud/datastore to `v7.0.0`
+- update: firebase-admin to `v11.0.0`
 - use node-crc from `@swrlab/utils`
 
 ## [1.3.4] - 2022-06-07
 
 - security: fix `CVE-2022-25878`
-- update:
-  - actions/setup-node to `v3.2.0`
-  - @google-cloud/pubsub to `v3.0.1`
+- update: actions/setup-node to `v3.2.0`
+- update: @google-cloud/pubsub to `v3.0.1`
 
 ## [1.3.3] - 2022-05-10
 
 - add: BR channel `BR Heimat`
-- update:
-  - dd-trace to `v2.7.0`
-  - google-auth-library to `v8.0.2`
+- update: dd-trace to `v2.7.0`
+- update: google-auth-library to `v8.0.2`
 
 ## [1.3.2] - 2022-05-03
 
 - chore: update Node to `v16.15`
 - fix: require service-name
-- update:
-  - mocha to `v10.0.0`
-  - /create-or-update-comment to `v2.0.0`
+- update: mocha to `v10.0.0`
+- update: /create-or-update-comment to `v2.0.0`
 
 ## [1.3.1] - 2022-04-26
 
-- add: SR channels
-  - `UNSERDING` and `AntenneSaar`
+- add: SR channels `UNSERDING` and `AntenneSaar`
 - security: fix `CVE-2022-24785`
-- update: github actions
-  - /checkout to `v3.0.2`
-  - /setup-node to `v3.1.1`
-  - /setup-gcloud to `v0.6.0`
+- update: actions/checkout to `v3.0.2`
+- update: actions/setup-node to `v3.1.1`
+- update: actions/setup-gcloud to `v0.6.0`
 
 ## [1.3.0] - 2022-03-28
 

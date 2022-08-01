@@ -5,9 +5,14 @@
 
 */
 
+const refreshToken = require('./refreshToken')
+const sendPasswordResetEmail = require('./sendPasswordResetEmail')
+const signInWithEmailAndPassword = require('./signInWithEmailAndPassword')
+const verifyToken = require('./verifyToken')
+
 module.exports = {
-	refreshToken: require('./refreshToken'),
-	sendPasswordResetEmail: require('./sendPasswordResetEmail'),
-	signInWithEmailAndPassword: require('./signInWithEmailAndPassword'),
-	verifyToken: require('./verifyToken'),
+	refreshToken,
+	sendPasswordResetEmail,
+	signInWithEmailAndPassword,
+	verifyToken,
 }

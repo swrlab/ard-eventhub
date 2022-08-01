@@ -10,7 +10,7 @@ on:
     types: [ closed ]
 
 env:
-  NODE_VERSION: 16.15
+  NODE_VERSION: 18
   IMAGE_NAME: de.swr.ard.eventhub/ingest
   REGISTRY_DOMAIN: eu.gcr.io
 
@@ -49,6 +49,9 @@ jobs:
         service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
         export_default_credentials: true
 
+    - name: 📚 Lint Code
+      run: yarn ingest:lint
+
     - name: 🧪 Run Ingest Tests
       env:
         SERVICE_NAME: ard-eventhub
@@ -83,6 +86,10 @@ jobs:
     - name: 🚧 Building docker image
       run: "docker build ./ --file ./Dockerfile -t image"
 
+    - name: 🔖 Get Package Version
+      id: package-version
+      uses: martinbeentjes/npm-get-version-action@main
+
     - name: 🏷 Tagging & Pushing docker
       id: push
       run: |
@@ -93,7 +100,7 @@ jobs:
         [[ "${{ github.ref }}" == "refs/tags/"* ]] && BRANCH=$(echo $BRANCH | sed -e 's/^v//')
 
         # Add custom wrapper syntax
-        VERSION=g${{ github.run_number }}-d$(date +%j)-$BRANCH-${{ github.actor }}-$GITHUB_SHA
+        VERSION=${{ steps.package-version.outputs.current-version }}-g${{ github.run_number }}
 
         # Set registry
         IMAGE_URI=$REGISTRY_DOMAIN/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME:$VERSION

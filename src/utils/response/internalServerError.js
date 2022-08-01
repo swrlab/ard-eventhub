@@ -5,7 +5,7 @@
 
 */
 
-module.exports = function (req, res) {
+module.exports = (req, res) => {
 	try {
 		return res.status(500).json({
 			message: 'Internal Server Error',

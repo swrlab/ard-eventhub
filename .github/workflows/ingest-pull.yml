@@ -6,7 +6,7 @@ on:
     types: [labeled]
 
 env:
-  NODE_VERSION: 16.15
+  NODE_VERSION: 18
   
 
 jobs:
@@ -43,6 +43,9 @@ jobs:
       with:
         service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
         export_default_credentials: true
+
+    - name: 📚 Lint Code
+      run: yarn ingest:lint
 
     - name: 🧪 Run Ingest Tests
       env:
