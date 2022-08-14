@@ -510,10 +510,10 @@
     eslint-plugin-unicorn "^43.0.2"
     eslint-plugin-vue "^9.3.0"
 
-"@swrlab/swr-prettier-config@^0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@swrlab/swr-prettier-config/-/swr-prettier-config-0.1.2.tgz#e7fd79f72ceeb05a8b631ecc12a2bcae6ae2386b"
-  integrity sha512-MyUTKRzzvQPexXINH7ASW9dDPtE/OrFfz6UngwyNMpPjAfUu+zJKCzNpiEagUxLGU/8s76oRHqDz5jsN2vyaHw==
+"@swrlab/swr-prettier-config@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@swrlab/swr-prettier-config/-/swr-prettier-config-0.2.0.tgz#cc3918fca31f3760ba7dad5dd11a3e0440fa623a"
+  integrity sha512-tq4rM0wq/s30etZOanWrbcHaTbsAIPr/LuedHAvErAiaLdWOJcRIiQjfzfgt9H28UKzrPlSJLiSiufC+zorNDQ==
 
 "@swrlab/utils@^1.0.0":
   version "1.0.0"
