@@ -277,10 +277,10 @@
   dependencies:
     google-gax "^3.0.1"
 
-"@google-cloud/storage@^6.1.0":
-  version "6.2.1"
-  resolved "https://registry.yarnpkg.com/@google-cloud/storage/-/storage-6.2.1.tgz#6f02e44d907e2fcb2b80aeea5cc6e5575dfeefcc"
-  integrity sha512-obLGOFCp25rpRn4CZvZqQkSHhY+dBrK7IjDdFpF5gOXVxE40ilr287uikiGPjflVFbgNwO2qhioJNqMzxoqHZg==
+"@google-cloud/storage@^6.1.0", "@google-cloud/storage@^6.3.0":
+  version "6.4.0"
+  resolved "https://registry.yarnpkg.com/@google-cloud/storage/-/storage-6.4.0.tgz#36413d549859ea325b71328e61dff7a669bc1f2e"
+  integrity sha512-ogNKY8Mv8JmNvSlJv12E6lB2DtcG7pVEI8k9vmH879ja5qqK8WPw0ys5/FG2Dh5AOwxrbDKbnzMVChNQuXtGpg==
   dependencies:
     "@google-cloud/paginator" "^3.0.7"
     "@google-cloud/projectify" "^3.0.0"
@@ -299,33 +299,6 @@
     p-limit "^3.0.1"
     pumpify "^2.0.0"
     retry-request "^5.0.0"
-    stream-events "^1.0.4"
-    teeny-request "^8.0.0"
-    uuid "^8.0.0"
-
-"@google-cloud/storage@^6.2.3":
-  version "6.2.3"
-  resolved "https://registry.yarnpkg.com/@google-cloud/storage/-/storage-6.2.3.tgz#e3dae8708488cf2e0e4fbf0488083d9d279ee097"
-  integrity sha512-UJqn3Ln8wFBPLuwBaNu3PlhzQDL3EKKfP1+3mzLRQhcFqgpBSMPLDgAXxc6e9S0l0kqsi4GOuAA7fA+l/VAMjQ==
-  dependencies:
-    "@google-cloud/paginator" "^3.0.7"
-    "@google-cloud/projectify" "^3.0.0"
-    "@google-cloud/promisify" "^3.0.0"
-    abort-controller "^3.0.0"
-    arrify "^2.0.0"
-    async-retry "^1.3.3"
-    compressible "^2.0.12"
-    duplexify "^4.0.0"
-    ent "^2.2.0"
-    extend "^3.0.2"
-    gaxios "^5.0.0"
-    google-auth-library "^8.0.1"
-    mime "^3.0.0"
-    mime-types "^2.0.8"
-    p-limit "^3.0.1"
-    pumpify "^2.0.0"
-    retry-request "^5.0.0"
-    stream-events "^1.0.4"
     teeny-request "^8.0.0"
     uuid "^8.0.0"
 
@@ -515,17 +488,17 @@
   resolved "https://registry.yarnpkg.com/@swrlab/swr-prettier-config/-/swr-prettier-config-0.1.2.tgz#e7fd79f72ceeb05a8b631ecc12a2bcae6ae2386b"
   integrity sha512-MyUTKRzzvQPexXINH7ASW9dDPtE/OrFfz6UngwyNMpPjAfUu+zJKCzNpiEagUxLGU/8s76oRHqDz5jsN2vyaHw==
 
-"@swrlab/utils@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@swrlab/utils/-/utils-1.0.0.tgz#c004d007354c993a8d0ef3328ec82c1cd841b0dd"
-  integrity sha512-yVHOk8xbBtMbasXY8QIBQfk6x959zTCIBqXfQUHbEG24v6ud5jF4gpueD+LaZT8vbm3tEQ6F+5R6swnWYWvJig==
+"@swrlab/utils@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@swrlab/utils/-/utils-1.0.1.tgz#f80175a9496ead2fb1eba511d3492db739f011bd"
+  integrity sha512-RTwBq4QborqRCmFvbO2rW6JXWkbUPcA/LTaZ0YqIR0u8SLdIgIOzaKyTOAZd19mgfQiwCQjht8nwFMxbkni4Kg==
   dependencies:
-    "@google-cloud/storage" "^6.2.3"
+    "@google-cloud/storage" "^6.3.0"
     abort-controller "^3.0.0"
-    aws-sdk "^2.1182.0"
+    aws-sdk "^2.1190.0"
     chai "^4.3.6"
-    node-crc swrlab/node-crc#v2.0.15
-    undici "^5.8.0"
+    node-crc "github:swrlab/node-crc#v2.0.15"
+    undici "^5.8.2"
     uuid "8.3.2"
 
 "@szmarczak/http-timer@^4.0.5":
@@ -884,10 +857,10 @@ available-typed-arrays@^1.0.5:
   resolved "https://registry.yarnpkg.com/available-typed-arrays/-/available-typed-arrays-1.0.5.tgz#92f95616501069d07d10edb2fc37d3e1c65123b7"
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
 
-aws-sdk@^2.1182.0:
-  version "2.1182.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1182.0.tgz#7364e3e104f62b61018a00f19f2ffc989b1780ed"
-  integrity sha512-iemVvLTc2iy0rz3xTp8zc/kD27gIfDF/mk6bxY8/35xMulKCVANWUkAH8jWRKReHh5F/gX4bp33dnfG63ny1Ww==
+aws-sdk@^2.1190.0:
+  version "2.1194.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1194.0.tgz#6a820684fa3f58ea40caf90d302414a23df7c308"
+  integrity sha512-wbgib7r7sHPkZIhqSMduueKYqe+DrFyxsKnUKHj6hdNcRKqEeqzvKp4olWmFs/3z3qU8+g78kBXr9rujvko1ug==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -3706,8 +3679,9 @@ nested-error-stacks@^2.0.0:
   resolved "https://registry.yarnpkg.com/nested-error-stacks/-/nested-error-stacks-2.1.1.tgz#26c8a3cee6cc05fbcf1e333cd2fc3e003326c0b5"
   integrity sha512-9iN1ka/9zmX1ZvLV9ewJYEk9h7RyRRtqdK0woXcqohu8EWIerfPUjYJPg0ULy0UqP7cslmdGc8xKDJcojlKiaw==
 
-node-crc@swrlab/node-crc#v2.0.15:
+"node-crc@github:swrlab/node-crc#v2.0.15":
   version "2.0.15"
+  uid "9d0d20f171efb60265bbc91246a2497856f5fd89"
   resolved "https://codeload.github.com/swrlab/node-crc/tar.gz/9d0d20f171efb60265bbc91246a2497856f5fd89"
   dependencies:
     "@types/node" "^18.0.0"
@@ -4697,7 +4671,7 @@ statuses@~1.5.0:
   resolved "https://registry.yarnpkg.com/statuses/-/statuses-1.5.0.tgz#161c7dac177659fd9811f43771fa99381478628c"
   integrity sha512-OpZ3zP+jT1PI7I8nemJX4AKmAX070ZkYPVWV/AaKTJl+tXCTGyVdC1a4SL8RUQYEwk/f34ZX8UTykN68FwrqAA==
 
-stream-events@^1.0.4, stream-events@^1.0.5:
+stream-events@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/stream-events/-/stream-events-1.0.5.tgz#bbc898ec4df33a4902d892333d47da9bf1c406d5"
   integrity sha512-E1GUzBSgvct8Jsb3v2X15pjzN1tYebtbLaMg+eBOUOAxgbLoSbT2NS91ckc5lJD1KfLjId+jXJRgo0qnV5Nerg==
@@ -5017,10 +4991,10 @@ undefsafe@^2.0.5:
   resolved "https://registry.yarnpkg.com/undefsafe/-/undefsafe-2.0.5.tgz#38733b9327bdcd226db889fb723a6efd162e6e2c"
   integrity sha512-WxONCrssBM8TSPRqN5EmsjVrsv4A8X12J4ArBiiayv3DyyG3ZlIg6yysuuSYdZsVz3TKcTg2fd//Ujd4CHV1iA==
 
-undici@^5.8.0:
-  version "5.8.0"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-5.8.0.tgz#dec9a8ccd90e5a1d81d43c0eab6503146d649a4f"
-  integrity sha512-1F7Vtcez5w/LwH2G2tGnFIihuWUlc58YidwLiCv+jR2Z50x0tNXpRRw7eOIJ+GvqCqIkg9SB7NWAJ/T9TLfv8Q==
+undici@^5.8.2:
+  version "5.8.2"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-5.8.2.tgz#071fc8a6a5d24db0ad510ad442f607d9b09d5eec"
+  integrity sha512-3KLq3pXMS0Y4IELV045fTxqz04Nk9Ms7yfBBHum3yxsTR4XNn+ZCaUbf/mWitgYDAhsplQ0B1G4S5D345lMO3A==
 
 unique-string@^2.0.0:
   version "2.0.0"
