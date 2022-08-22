@@ -5,9 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.8] - 2022-08-22
+
+- chore: code-format and linting
+- chore: update node-dependencies
+- feat: license-compliance with js
+
 ## [1.3.7] - 2022-07-25
 
-- chore: update Node to `v18`
+- chore: update Node.js to `v18`
 - chore: update node-utils to `v1.0.0`
 - fix: resolve eslint errors
 - fix: reorder core-dump (alphabetically institutions)
@@ -20,9 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.5] - 2022-06-21
 
-- security: fix `CVE-2022-24434`
-- security: fix `CVE-2022-32210`
-- security: fix `CVE-2022-33987`
 - update: github-actions to use latest versions
 - update: @google-cloud/secret-manager to `v4.0.0`
 - update: @google-cloud/datastore to `v7.0.0`
@@ -31,7 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.4] - 2022-06-07
 
-- security: fix `CVE-2022-25878`
 - update: actions/setup-node to `v3.2.0`
 - update: @google-cloud/pubsub to `v3.0.1`
 
@@ -43,7 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.2] - 2022-05-03
 
-- chore: update Node to `v16.15`
+- chore: update Node.js to `v16.15`
 - fix: require service-name
 - update: mocha to `v10.0.0`
 - update: /create-or-update-comment to `v2.0.0`
@@ -51,26 +53,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.1] - 2022-04-26
 
 - add: SR channels `UNSERDING` and `AntenneSaar`
-- security: fix `CVE-2022-24785`
 - update: actions/checkout to `v3.0.2`
 - update: actions/setup-node to `v3.1.1`
 - update: actions/setup-gcloud to `v0.6.0`
 
 ## [1.3.0] - 2022-03-28
 
-- chore: update Node to `v16.14.2`
+- chore: update Node.js to `v16.14.2`
 - chore: change name of `Dockerfile`
 - chore: update node-crc to `v2`
 - add: `rustup` to build process
 - fix: `setup-gcloud` default branch
-- security: fix `CVE-2021-44906`
 
 ## [1.2.9] - 2022-03-17
 
 - add: new deploy-process for prod
 - chore: remove `eslint-plugin-swr`
 - chore: update peer-dependencies
-- security: fix `CVE-2022-24772`
 
 ## [1.2.8] - 2022-03-15
 
@@ -79,13 +78,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.7] - 2022-03-01
 
-- security: fix `CVE-2022-23647`
 - chore: update setup-node to `v3`
 - chore: update dependencies
 
 ## [1.2.6] - 2022-02-14
 
-- chore: update Node to `v16.14`
+- chore: update Node.js to `v16.14`
 - chore: update dependencies
 - replace `undici-wrapper` with `@swrlab/utils`
 
@@ -103,8 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.3] - 2021-12-13
 
 - Fix IDs of two MDR channels
-- Fix for `GHSA-qrmm-w75w-3wpx`
-- Update Node to `v16.13.1`
+- Update Node.js to `v16.13.1`
 - Update project dependencies
 
 ## [1.2.2] - 2021-11-30
@@ -120,7 +117,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.0] - 2021-10-19
 
-- Update Node to [v16.11.1](https://nodejs.org/en/blog/vulnerability/oct-2021-security-releases/)
+- Update Node.js to [v16.11.1](https://nodejs.org/en/blog/vulnerability/oct-2021-security-releases/)
 - Update project dependencies
 - Update to `python3` in docker
 - Swap `node-fetch` for `undici-wrapper`
@@ -129,7 +126,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.5] - 2021-09-27
 
-- Fix for `SNYK-JS-ANSIREGEX-1583908`
 - Update project dependencies
 - Update github actions
 
@@ -148,7 +144,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.1] - 2021-06-30
 
-- Fix for CVE-2021-32723
 - Update project dependencies
 - Remove deprecated body-parser
 
@@ -163,7 +158,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1] - 2021-05-10
 
-- Fixes for CVE-2021-27515 and CVE-2021-23362
 - Update project dependencies
 
 ## [1.0.0] - 2021-04-09

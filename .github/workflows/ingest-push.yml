@@ -1,13 +1,12 @@
-
 name: ingest push
 
 on:
   push:
     branches:
-    - feature/*
-    - dev/*
+      - feature/*
+      - dev/*
   pull_request:
-    types: [ closed ]
+    types: [closed]
 
 env:
   NODE_VERSION: 18
@@ -20,8 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     if: "github.event.pull_request.merged == true || github.event_name == 'push'"
     steps:
-    - run: |
-        echo "Security checks passed!"
+      - run: |
+          echo "Security checks passed!"
 
   test:
     needs: security
@@ -30,39 +29,39 @@ jobs:
       matrix:
         STAGES: [dev]
     steps:
-    - name: 👀 Checkout Code
-      uses: actions/checkout@v3
+      - name: 👀 Checkout Code
+        uses: actions/checkout@v3
 
-    - name: ⛺️ Install Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'yarn'
-        cache-dependency-path: '**/yarn.lock'
+      - name: ⛺️ Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "yarn"
+          cache-dependency-path: "**/yarn.lock"
 
-    - name: 📦 Install Dependencies
-      run: yarn
+      - name: 📦 Install Dependencies
+        run: yarn
 
-    - name: 🔑 Setup Google Cloud Auth
-      uses: google-github-actions/setup-gcloud@v0
-      with:
-        service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
-        export_default_credentials: true
+      - name: 🔑 Setup Google Cloud Auth
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
+          export_default_credentials: true
 
-    - name: 📚 Lint Code
-      run: yarn ingest:lint
+      - name: 📚 Lint Code
+        run: yarn ingest:lint
 
-    - name: 🧪 Run Ingest Tests
-      env:
-        SERVICE_NAME: ard-eventhub
-        STAGE: ${{ matrix.STAGES }}
-        DD_TRACE_ENABLED: false
-        GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-        FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
-        TEST_USER: ${{ secrets.TEST_USER }}
-        TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
-        PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL: ${{ secrets.PUBSUB_SERVICE_ACCOUNT_EMAIL }}
-      run: yarn ingest:test
+      - name: 🧪 Run Ingest Tests
+        env:
+          SERVICE_NAME: ard-eventhub
+          STAGE: ${{ matrix.STAGES }}
+          DD_TRACE_ENABLED: false
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
+          TEST_USER: ${{ secrets.TEST_USER }}
+          TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
+          PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL: ${{ secrets.PUBSUB_SERVICE_ACCOUNT_EMAIL }}
+        run: yarn ingest:test
 
   docker:
     runs-on: ubuntu-latest
@@ -71,72 +70,72 @@ jobs:
       BRANCH: ${{ steps.push.outputs.BRANCH }}
       VERSION: ${{ steps.push.outputs.VERSION }}
     steps:
-    - name: 👀 Checkout Code
-      uses: actions/checkout@v3
-      
-    - name: 🔑 Setup Google Cloud Auth
-      uses: google-github-actions/setup-gcloud@v0
-      with:
-        service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
-        export_default_credentials: true
-        
-    - name: 🔑 Login to Registry
-      run: "gcloud auth configure-docker $REGISTRY_DOMAIN"
+      - name: 👀 Checkout Code
+        uses: actions/checkout@v3
 
-    - name: 🚧 Building docker image
-      run: "docker build ./ --file ./Dockerfile -t image"
+      - name: 🔑 Setup Google Cloud Auth
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
+          export_default_credentials: true
 
-    - name: 🔖 Get Package Version
-      id: package-version
-      uses: martinbeentjes/npm-get-version-action@main
+      - name: 🔑 Login to Registry
+        run: "gcloud auth configure-docker $REGISTRY_DOMAIN"
 
-    - name: 🏷 Tagging & Pushing docker
-      id: push
-      run: |
-        # Strip git ref prefix from version
-        BRANCH=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+      - name: 🚧 Building docker image
+        run: "docker build ./ --file ./Dockerfile -t image"
 
-        # Strip "v" prefix from tag name
-        [[ "${{ github.ref }}" == "refs/tags/"* ]] && BRANCH=$(echo $BRANCH | sed -e 's/^v//')
+      - name: 🔖 Get Package Version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@main
 
-        # Add custom wrapper syntax
-        VERSION=${{ steps.package-version.outputs.current-version }}-g${{ github.run_number }}
+      - name: 🏷 Tagging & Pushing docker
+        id: push
+        run: |
+          # Strip git ref prefix from version
+          BRANCH=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
-        # Set registry
-        IMAGE_URI=$REGISTRY_DOMAIN/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME:$VERSION
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && BRANCH=$(echo $BRANCH | sed -e 's/^v//')
 
-        # Push image to registry
-        docker tag image $IMAGE_URI
-        docker push $IMAGE_URI
+          # Add custom wrapper syntax
+          VERSION=${{ steps.package-version.outputs.current-version }}-g${{ github.run_number }}
 
-        # Update vars
-        echo "::set-output name=BRANCH::$BRANCH"
-        echo "::set-output name=VERSION::$VERSION"
+          # Set registry
+          IMAGE_URI=$REGISTRY_DOMAIN/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME:$VERSION
 
-        # Print vars
-        echo "::warning docker::BRANCH $BRANCH"
-        echo "::warning docker::VERSION $VERSION"
+          # Push image to registry
+          docker tag image $IMAGE_URI
+          docker push $IMAGE_URI
 
-    - name: 💬 Comment Branch and Version
-      uses: peter-evans/create-or-update-comment@v2
-      if: github.event.pull_request.merged == true
-      with:
-        issue-number: ${{ github.event.pull_request.number }}
-        body: |
-          Docker container is ready!
+          # Update vars
+          echo "::set-output name=BRANCH::$BRANCH"
+          echo "::set-output name=VERSION::$VERSION"
 
-          BRANCH:
-          ```
-          ${{ steps.push.outputs.BRANCH }}
-          ```
-          
-          VERSION:
-          ```
-          ${{ steps.push.outputs.VERSION }}
-          ```
+          # Print vars
+          echo "::warning docker::BRANCH $BRANCH"
+          echo "::warning docker::VERSION $VERSION"
 
-    - name: 👋 Logout
-      run: "docker logout"
+      - name: 💬 Comment Branch and Version
+        uses: peter-evans/create-or-update-comment@v2
+        if: github.event.pull_request.merged == true
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Docker container is ready!
+
+            BRANCH:
+            ```
+            ${{ steps.push.outputs.BRANCH }}
+            ```
+
+            VERSION:
+            ```
+            ${{ steps.push.outputs.VERSION }}
+            ```
+
+      - name: 👋 Logout
+        run: "docker logout"
 
   deploy-A-dev-kubernetes:
     if: github.event.pull_request.merged == true
@@ -144,14 +143,14 @@ jobs:
     needs: docker
     runs-on: ubuntu-latest
     steps:
-    - name: 🚀 Trigger deployment to dev
-      run: |
-        curl --location --request POST '${{ secrets.ARD_DEPLOYMENT_HOST }}' \
-        -s -w "%{http_code}\n" \
-        --header 'Authorization: Basic ${{ secrets.ARD_DEPLOYMENT_TOKEN }}' \
-        --form 'UMGEBUNG="dev"' \
-        --form 'COMPONENT="eventhub-ingest"' \
-        --form 'VERSION="${{ needs.docker.outputs.VERSION }}"'
+      - name: 🚀 Trigger deployment to dev
+        run: |
+          curl --location --request POST '${{ secrets.ARD_DEPLOYMENT_HOST }}' \
+          -s -w "%{http_code}\n" \
+          --header 'Authorization: Basic ${{ secrets.ARD_DEPLOYMENT_TOKEN }}' \
+          --form 'UMGEBUNG="dev"' \
+          --form 'COMPONENT="eventhub-ingest"' \
+          --form 'VERSION="${{ needs.docker.outputs.VERSION }}"'
 
   deploy-B-test-kubernetes:
     if: github.event.pull_request.merged == true
@@ -159,14 +158,14 @@ jobs:
     needs: docker
     runs-on: ubuntu-latest
     steps:
-    - name: 🚀 Trigger deployment to test
-      run: |
-        curl --location --request POST '${{ secrets.ARD_DEPLOYMENT_HOST }}' \
-        -s -w "%{http_code}\n" \
-        --header 'Authorization: Basic ${{ secrets.ARD_DEPLOYMENT_TOKEN }}' \
-        --form 'UMGEBUNG="test"' \
-        --form 'COMPONENT="eventhub-ingest"' \
-        --form 'VERSION="${{ needs.docker.outputs.VERSION }}"'
+      - name: 🚀 Trigger deployment to test
+        run: |
+          curl --location --request POST '${{ secrets.ARD_DEPLOYMENT_HOST }}' \
+          -s -w "%{http_code}\n" \
+          --header 'Authorization: Basic ${{ secrets.ARD_DEPLOYMENT_TOKEN }}' \
+          --form 'UMGEBUNG="test"' \
+          --form 'COMPONENT="eventhub-ingest"' \
+          --form 'VERSION="${{ needs.docker.outputs.VERSION }}"'
 
   deploy-C-beta-kubernetes:
     if: github.event.pull_request.merged == true
@@ -174,11 +173,11 @@ jobs:
     needs: docker
     runs-on: ubuntu-latest
     steps:
-    - name: 🚀 Trigger deployment to beta
-      run: |
-        curl --location --request POST '${{ secrets.ARD_DEPLOYMENT_HOST }}' \
-        -s -w "%{http_code}\n" \
-        --header 'Authorization: Basic ${{ secrets.ARD_DEPLOYMENT_TOKEN }}' \
-        --form 'UMGEBUNG="beta"' \
-        --form 'COMPONENT="eventhub-ingest"' \
-        --form 'VERSION="${{ needs.docker.outputs.VERSION }}"'
+      - name: 🚀 Trigger deployment to beta
+        run: |
+          curl --location --request POST '${{ secrets.ARD_DEPLOYMENT_HOST }}' \
+          -s -w "%{http_code}\n" \
+          --header 'Authorization: Basic ${{ secrets.ARD_DEPLOYMENT_TOKEN }}' \
+          --form 'UMGEBUNG="beta"' \
+          --form 'COMPONENT="eventhub-ingest"' \
+          --form 'VERSION="${{ needs.docker.outputs.VERSION }}"'
