@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - chore: code-format and linting
 - chore: update node-dependencies
+- feat: license-compliance with js
 
 ## [1.3.7] - 2022-07-25
 

@@ -17,7 +17,7 @@
 		"docker:run": "docker run --env-file .env -p 8080:8080 --name ard-eventhub swr/ard-eventhub",
 		"docker:scan": "docker scan node:18-alpine --file=Dockerfile",
 		"docker:clean": "docker rm ard-eventhub",
-		"license": "chmod +x license.sh && ./license.sh",
+		"license": "yarn run license-compliance",
 		"test": "mocha test/example.test.js",
 		"reinstall": "rm -rf node_modules && rm yarn.lock && yarn"
 	},
