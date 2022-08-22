@@ -88,7 +88,7 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `uuid`                         | [MIT](https://github.com/uuidjs/uuid/blob/master/LICENSE.md)                                       |
 | NPM     | `winston`                      | [MIT](https://github.com/winstonjs/winston/blob/master/LICENSE)                                    |
 | NPM DEV | `@swrlab/eslint-plugin-swr`    | [ISC](https://github.com/swrlab/eslint-plugin-swr/blob/main/package.json)                          |
-| NPM DEV | `@swrlab/swr-prettier-config`  | [ISC](https://github.com/swrlab/prettier-config/blob/main/license.md)                              |
+| NPM DEV | `@swrlab/swr-prettier-config`  | [MIT](https://github.com/swrlab/swr-prettier-config/blob/main/LICENSE.txt)                         |
 | NPM DEV | `chai`                         | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                          |
 | NPM DEV | `chai-http`                    | [MIT](https://github.com/chaijs/chai-http/blob/master/package.json)                                |
 | NPM DEV | `docsify-cli`                  | [MIT](https://github.com/docsifyjs/docsify-cli/blob/master/LICENSE)                                |
