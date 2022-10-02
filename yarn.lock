@@ -3076,10 +3076,10 @@ jmespath@0.16.0:
   resolved "https://registry.yarnpkg.com/jmespath/-/jmespath-0.16.0.tgz#b15b0a85dfd4d930d43e69ed605943c802785076"
   integrity sha512-9FzQjJ7MATs1tSpnco1K6ayiYE3figslrXA72G2HQ/n76RzvYlofyi5QM+iX4YRs/pu3yzxlVQSST23+dMDknw==
 
-joi@17.6.0:
-  version "17.6.0"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-17.6.0.tgz#0bb54f2f006c09a96e75ce687957bd04290054b2"
-  integrity sha512-OX5dG6DTbcr/kbMFj0KGYxuew69HPcAE3K/sZpEV2nP6e/j/C0HV+HNiBPCASxdx5T7DMoa0s8UeHWMnb6n2zw==
+joi@17.6.1:
+  version "17.6.1"
+  resolved "https://registry.yarnpkg.com/joi/-/joi-17.6.1.tgz#e77422f277091711599634ac39a409e599d7bdaa"
+  integrity sha512-Hl7/iBklIX345OCM1TiFSCZRVaAOLDGlWCp0Df2vWYgBgjkezaR7Kvm3joBciBHQjZj5sxXs859r6eqsRSlG8w==
   dependencies:
     "@hapi/hoek" "^9.0.0"
     "@hapi/topo" "^5.0.0"
@@ -3254,16 +3254,16 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-license-compliance@^1.2.4:
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/license-compliance/-/license-compliance-1.2.4.tgz#a5259bc949d94f918b07422079a313f81fc9af65"
-  integrity sha512-GQyGXE54ygmcG1hz17TYWRGRwKG6vU/YknJc9sL8HuY8I+Tk0FhO8OfLCfXC+ZlgepX4sn7wBl66LlhuhNViYw==
+license-compliance@^1.2.5:
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/license-compliance/-/license-compliance-1.2.5.tgz#95a9228dc93a29ffb4d213ba2237828fbcc00162"
+  integrity sha512-vvtnMsWRQmd1RSBroKZwXSIMQ5cGScyBZg/WxMlFLtWHIfhjZ3Unmcgz6klw4TZV94Jire9VTcGEEOAFsRIsZQ==
   dependencies:
     chalk "4.1.2"
     commander "9.4.0"
     cosmiconfig "7.0.1"
     debug "4.3.4"
-    joi "17.6.0"
+    joi "17.6.1"
     spdx-expression-parse "3.0.1"
     spdx-satisfies "5.0.1"
     tslib "2.4.0"
