@@ -236,10 +236,10 @@
   resolved "https://registry.yarnpkg.com/@google-cloud/promisify/-/promisify-3.0.1.tgz#8d724fb280f47d1ff99953aee0c1669b25238c2e"
   integrity sha512-z1CjRjtQyBOYL+5Qr9DdYIfrdLBe746jRTYfaYU6MeXkqp7UfYs/jX16lFFVzZ7PGEJvqZNqYUEtb1mvDww4pA==
 
-"@google-cloud/pubsub@^3.2.0":
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/@google-cloud/pubsub/-/pubsub-3.2.0.tgz#03e421240b660957b867921640c34ee142463c20"
-  integrity sha512-QYRbrR7Jk/UnxeU4mYW29/i6WZ8vhzwYH83z55Ki9UFbK0uKL8B0D0o7JMOpk6KRJnmZira48m1dxagv3Av74A==
+"@google-cloud/pubsub@^3.2.1":
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/@google-cloud/pubsub/-/pubsub-3.2.1.tgz#0f3a77e553ff905cb5f4c22e017334b4db5e1501"
+  integrity sha512-TcGPqNkCYNwM3LTWBYjdryv1WQX2a4H52gaL9IAMZCp1i28r90syWjZoFhcUObowb3v3StTCL6a9YlPef4LY3g==
   dependencies:
     "@google-cloud/paginator" "^4.0.0"
     "@google-cloud/precise-date" "^3.0.0"
@@ -252,7 +252,7 @@
     arrify "^2.0.0"
     extend "^3.0.2"
     google-auth-library "^8.0.2"
-    google-gax "^3.3.0"
+    google-gax "^3.5.2"
     heap-js "^2.2.0"
     is-stream-ended "^0.1.4"
     lodash.snakecase "^4.1.1"
@@ -2557,7 +2557,7 @@ google-gax@^2.24.1:
     protobufjs "6.11.3"
     retry-request "^4.0.0"
 
-google-gax@^3.0.1, google-gax@^3.3.0:
+google-gax@^3.0.1, google-gax@^3.3.0, google-gax@^3.5.2:
   version "3.5.2"
   resolved "https://registry.yarnpkg.com/google-gax/-/google-gax-3.5.2.tgz#7c3ad61dbf366a55527b803caead276668b160d8"
   integrity sha512-AyP53w0gHcWlzxm+jSgqCR3Xu4Ld7EpSjhtNBnNhzwwWaIUyphH9kBGNIEH+i4UGkTUXOY29K/Re8EiAvkBRGw==
