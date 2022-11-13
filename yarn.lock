@@ -258,12 +258,12 @@
     lodash.snakecase "^4.1.1"
     p-defer "^3.0.0"
 
-"@google-cloud/secret-manager@^4.1.3":
-  version "4.1.3"
-  resolved "https://registry.yarnpkg.com/@google-cloud/secret-manager/-/secret-manager-4.1.3.tgz#3b3227ea0a7f9940031ed760c44b8708d08c31d7"
-  integrity sha512-uw007zc/UdALanNoK52ZCxhuSUgSbX5Dc8qB0yrvn/8Jm+tuCsOaJbG73dej0wN4KfT7lcddQ6oASrRinxtLxw==
+"@google-cloud/secret-manager@^4.1.4":
+  version "4.1.4"
+  resolved "https://registry.yarnpkg.com/@google-cloud/secret-manager/-/secret-manager-4.1.4.tgz#d19c36137e62dba4f103b338035f2e6abcc75407"
+  integrity sha512-IMt6ks2kXrqYOHnfdtY0cBK1ETRWc+ylEzzVYgzUPBt3glaVn6Kvhz3jCd4S3CIJMMnZG5KrgsBTyff6d96AtA==
   dependencies:
-    google-gax "^3.3.0"
+    google-gax "^3.5.2"
 
 "@google-cloud/storage@^6.1.0", "@google-cloud/storage@^6.3.0":
   version "6.5.2"
@@ -2557,7 +2557,7 @@ google-gax@^2.24.1:
     protobufjs "6.11.3"
     retry-request "^4.0.0"
 
-google-gax@^3.0.1, google-gax@^3.3.0:
+google-gax@^3.0.1, google-gax@^3.3.0, google-gax@^3.5.2:
   version "3.5.2"
   resolved "https://registry.yarnpkg.com/google-gax/-/google-gax-3.5.2.tgz#7c3ad61dbf366a55527b803caead276668b160d8"
   integrity sha512-AyP53w0gHcWlzxm+jSgqCR3Xu4Ld7EpSjhtNBnNhzwwWaIUyphH9kBGNIEH+i4UGkTUXOY29K/Re8EiAvkBRGw==
