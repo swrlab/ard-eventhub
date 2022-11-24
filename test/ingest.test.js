@@ -30,6 +30,7 @@ function testResponse(res, status) {
 	expect(res).to.have.status(status)
 }
 
+// check rejection of invalid token
 function testAuth(res) {
 	expect(res).to.have.status(403)
 }
