@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2022-11-24
+
+- chore: update express-openapi-validator to `v5`
+- chore: update google-github-actions to `v1`
+- chore: refactor env check and add google-auth
+- chore: add env var checks to mocha-tests
+- chore: migrate GitHub Actions from `::set-output` to new format
+- chore: migrate to new `google-github-actions/auth` authentication
+- fix: decouple logger init from config loading
+
 ## [1.3.9] - 2022-10-04
 
 - chore: update dd-trace to `v3`

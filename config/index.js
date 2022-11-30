@@ -9,24 +9,28 @@
 const { version } = require('../package.json')
 const coreIdPrefixes = require('./coreIdPrefixes.json')
 
-// check existence of several process vars
-if (!process.env.SERVICE_NAME) {
-	console.error('process.env.SERVICE_NAME not found')
-	process.exit(1)
-} else if (!process.env.GCP_PROJECT_ID) {
-	console.error('process.env.GCP_PROJECT_ID not found')
-	process.exit(1)
-} else if (!process.env.FIREBASE_API_KEY) {
-	console.error('process.env.FIREBASE_API_KEY not found')
-	process.exit(1)
-} else if (!process.env.PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL) {
-	console.error('process.env.PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL not found')
-	process.exit(1)
-}
+// load winston logger
+const logger = require('../src/utils/logger')
 
 // read env vars
 const stage = process.env.STAGE.toLowerCase()
 const port = process.env.PORT || 8080
+
+const exitWithError = (message) => {
+	logger.log({
+		level: 'error',
+		message,
+		source: 'config',
+	})
+	process.exit(1)
+}
+
+// check env vars
+if (!process.env.SERVICE_NAME) exitWithError('SERVICE_NAME not found')
+if (!process.env.GCP_PROJECT_ID) exitWithError('GCP_PROJECT_ID not found')
+if (!process.env.FIREBASE_API_KEY) exitWithError('FIREBASE_API_KEY not found')
+if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) exitWithError('GOOGLE_APPLICATION_CREDENTIALS not found')
+if (!process.env.PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL) exitWithError('PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL not found')
 
 // set protocol, hostname and hostUrl
 const protocol = stage === 'dev' ? 'http' : 'https'

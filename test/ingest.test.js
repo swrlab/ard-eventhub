@@ -15,7 +15,9 @@
 const chai = require('chai')
 const moment = require('moment')
 const chaiHttp = require('chai-http')
+
 const server = require('../src/ingest/index')
+const logger = require('../src/utils/logger')
 
 // Init chai functions
 const { expect } = chai
@@ -24,12 +26,31 @@ const should = chai.should()
 // Use chaiHttp
 chai.use(chaiHttp)
 
+const exitWithError = (message) => {
+	logger.log({
+		level: 'error',
+		message,
+		source: 'config',
+	})
+	process.exit(1)
+}
+
+// check required env vars
+if (!process.env.TEST_USER) exitWithError('TEST_USER not found')
+if (!process.env.TEST_USER_PW) exitWithError('TEST_USER_PW not found')
+
+// set test-user env vars
+const testUser = process.env.TEST_USER
+const testUserPass = process.env.TEST_USER_PW
+const testUserReset = process.env.TEST_USER_RESET
+
 // define general tests
 function testResponse(res, status) {
 	expect(res).to.be.json
 	expect(res).to.have.status(status)
 }
 
+// check rejection of invalid token
 function testAuth(res) {
 	expect(res).to.have.status(403)
 }
@@ -55,8 +76,8 @@ function testAuthKeys(body) {
 describe(`POST ${loginPath}`, () => {
 	it('swap login credentials for an id-token', (done) => {
 		const loginRequest = {
-			email: process.env.TEST_USER,
-			password: process.env.TEST_USER_PW,
+			email: testUser,
+			password: testUserPass,
 		}
 
 		chai.request(server)
@@ -97,11 +118,11 @@ describe(`POST ${refreshPath}`, () => {
 // 🚨 firebase limit is 150 requests per day 🚨
 const resetPath = '/auth/reset'
 
-if (process.env.TEST_USER_RESET === true) {
+if (testUserReset === true) {
 	describe(`POST ${resetPath}`, () => {
 		it('request password reset email', (done) => {
 			const resetRequest = {
-				email: process.env.TEST_USER,
+				email: testUser,
 			}
 
 			chai.request(server)

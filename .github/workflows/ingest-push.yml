@@ -36,17 +36,20 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "yarn"
-          cache-dependency-path: "**/yarn.lock"
+          cache: 'yarn'
+          cache-dependency-path: '**/yarn.lock'
 
       - name: 📦 Install Dependencies
         run: yarn
 
       - name: 🔑 Setup Google Cloud Auth
-        uses: google-github-actions/setup-gcloud@v0
+        uses: google-github-actions/auth@v1
         with:
-          service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
-          export_default_credentials: true
+          credentials_json: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
+          create_credentials_file: true
+
+      - name: 🏗 Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
 
       - name: 📚 Lint Code
         run: yarn ingest:lint
@@ -67,23 +70,24 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     outputs:
-      BRANCH: ${{ steps.push.outputs.BRANCH }}
       VERSION: ${{ steps.push.outputs.VERSION }}
     steps:
       - name: 👀 Checkout Code
         uses: actions/checkout@v3
 
       - name: 🔑 Setup Google Cloud Auth
-        uses: google-github-actions/setup-gcloud@v0
+        uses: google-github-actions/auth@v1
         with:
-          service_account_key: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
-          export_default_credentials: true
+          credentials_json: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
+
+      - name: 🏗 Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
 
       - name: 🔑 Login to Registry
-        run: "gcloud auth configure-docker $REGISTRY_DOMAIN"
+        run: 'gcloud auth configure-docker $REGISTRY_DOMAIN'
 
       - name: 🚧 Building docker image
-        run: "docker build ./ --file ./Dockerfile -t image"
+        run: 'docker build ./ --file ./Dockerfile -t image'
 
       - name: 🔖 Get Package Version
         id: package-version
@@ -109,14 +113,15 @@ jobs:
           docker push $IMAGE_URI
 
           # Update vars
-          echo "::set-output name=BRANCH::$BRANCH"
-          echo "::set-output name=VERSION::$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
           # Print vars
-          echo "::warning docker::BRANCH $BRANCH"
-          echo "::warning docker::VERSION $VERSION"
+          echo "## Docker Version Tag" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "$VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
-      - name: 💬 Comment Branch and Version
+      - name: 💬 Comment Version
         uses: peter-evans/create-or-update-comment@v2
         if: github.event.pull_request.merged == true
         with:
@@ -124,18 +129,13 @@ jobs:
           body: |
             Docker container is ready!
 
-            BRANCH:
-            ```
-            ${{ steps.push.outputs.BRANCH }}
-            ```
-
             VERSION:
             ```
             ${{ steps.push.outputs.VERSION }}
             ```
 
       - name: 👋 Logout
-        run: "docker logout"
+        run: 'docker logout'
 
   deploy-A-dev-kubernetes:
     if: github.event.pull_request.merged == true
