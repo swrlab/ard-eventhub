@@ -70,7 +70,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     outputs:
-      BRANCH: ${{ steps.push.outputs.BRANCH }}
       VERSION: ${{ steps.push.outputs.VERSION }}
     steps:
       - name: 👀 Checkout Code
@@ -114,25 +113,21 @@ jobs:
           docker push $IMAGE_URI
 
           # Update vars
-          echo "::set-output name=BRANCH::$BRANCH"
-          echo "::set-output name=VERSION::$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
           # Print vars
-          echo "::warning docker::BRANCH $BRANCH"
-          echo "::warning docker::VERSION $VERSION"
+          echo "## Docker Version Tag" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "$VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
-      - name: 💬 Comment Branch and Version
+      - name: 💬 Comment Version
         uses: peter-evans/create-or-update-comment@v2
         if: github.event.pull_request.merged == true
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             Docker container is ready!
-
-            BRANCH:
-            ```
-            ${{ steps.push.outputs.BRANCH }}
-            ```
 
             VERSION:
             ```
