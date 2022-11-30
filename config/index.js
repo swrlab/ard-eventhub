@@ -21,7 +21,6 @@ const exitWithError = (message) => {
 		level: 'error',
 		message,
 		source: 'config',
-		data: { env: process.env },
 	})
 	process.exit(1)
 }
