@@ -40,7 +40,7 @@ jobs:
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
-          export_default_credentials: true
+          create_credentials_file: true
 
       - name: 📚 Lint Code
         run: yarn ingest:lint
