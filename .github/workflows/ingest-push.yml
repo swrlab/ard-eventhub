@@ -48,9 +48,6 @@ jobs:
           credentials_json: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
           create_credentials_file: true
 
-      - name: 🏗 Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-
       - name: 📚 Lint Code
         run: yarn ingest:lint
 
