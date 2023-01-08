@@ -59,10 +59,10 @@
   dependencies:
     node-gyp-build "^3.9.0"
 
-"@datadog/native-iast-rewriter@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@datadog/native-iast-rewriter/-/native-iast-rewriter-1.0.0.tgz#02bf338055cdcd3c5b3e8d528afe6d967985cf11"
-  integrity sha512-DGN4cQd30mUaAB349gKeoDTt7acviBERnNYlyk8G+PlobuomTSEohJri5Jo4X+/5oRJPJngGX2VBq7YwMHiing==
+"@datadog/native-iast-rewriter@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@datadog/native-iast-rewriter/-/native-iast-rewriter-1.0.1.tgz#92262a2995642e93d844d4a62a3a82b53167ce32"
+  integrity sha512-UBN8Ce4OSiBhMQWY8COD4Zn/TkqIuUyYQgA9tasda73njVqcZ3FZqFhPNow1j5r5Ka3a/PCrGdUs9U5uuod0YA==
   dependencies:
     node-gyp-build "^4.5.0"
 
@@ -1452,13 +1452,13 @@ cssesc@^3.0.0:
   resolved "https://registry.yarnpkg.com/cssesc/-/cssesc-3.0.0.tgz#37741919903b868565e1c09ea747445cd18983ee"
   integrity sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==
 
-dd-trace@^3.9.3:
-  version "3.9.3"
-  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-3.9.3.tgz#99c44a30a172fb7f91f75e18ff7f7001df54854b"
-  integrity sha512-30F9AoYozo9v3I6ycmDJl22XLbLapo2SmirAJh6ULjQ8q/Gb9yP1vf57bnFlTWjtdFgxxeBxVY/ksnTRzZcsew==
+dd-trace@^3.10.0:
+  version "3.10.0"
+  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-3.10.0.tgz#3b182a4c962627db09c2d87586794157e98dc4c7"
+  integrity sha512-m5xVH4E1meD3W4wLgyIzYFGb7suw6XpDn+h6oDjMIarzgU4yUdz3D5uny0PU3psyE8DUI2nSwCZVF1fulzxPkw==
   dependencies:
     "@datadog/native-appsec" "2.0.0"
-    "@datadog/native-iast-rewriter" "1.0.0"
+    "@datadog/native-iast-rewriter" "1.0.1"
     "@datadog/native-iast-taint-tracking" "1.0.0"
     "@datadog/native-metrics" "^1.5.0"
     "@datadog/pprof" "^1.1.1"
@@ -4451,14 +4451,7 @@ semver@^6.0.0, semver@^6.2.0, semver@^6.3.0:
   resolved "https://registry.yarnpkg.com/semver/-/semver-6.3.0.tgz#ee0a64c8af5e8ceea67687b133761e1becbd1d3d"
   integrity sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==
 
-semver@^7.1.2, semver@^7.3.5, semver@^7.3.6, semver@^7.3.7:
-  version "7.3.7"
-  resolved "https://registry.yarnpkg.com/semver/-/semver-7.3.7.tgz#12c5b649afdbf9049707796e22a4028814ce523f"
-  integrity sha512-QlYTucUYOews+WeEujDoEGziz4K6c47V/Bd+LjSSYcA94p+DmINdf7ncaUinThfvZyu13lN9OY1XDxt8C0Tw0g==
-  dependencies:
-    lru-cache "^6.0.0"
-
-semver@^7.3.8:
+semver@^7.1.2, semver@^7.3.5, semver@^7.3.6, semver@^7.3.7, semver@^7.3.8:
   version "7.3.8"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.3.8.tgz#07a78feafb3f7b32347d725e33de7e2a2df67798"
   integrity sha512-NB1ctGL5rlHrPJtFDVIVzTyQylMLu9N9VICA6HSFJo8MCGVTMW6gfpicwKmmK/dAjTOrqu5l63JJOpDSrAis3A==
