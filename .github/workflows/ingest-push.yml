@@ -54,7 +54,7 @@ jobs:
       - name: 🧪 Run Ingest Tests
         env:
           DD_TRACE_ENABLED: false
-          DTS_KEYS: ${{ secrets.DTS_KEYS }}
+          DTS_KEYS: ${{ secrets.TEST_DTS_KEYS }}
           FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL: ${{ secrets.PUBSUB_SERVICE_ACCOUNT_EMAIL }}
