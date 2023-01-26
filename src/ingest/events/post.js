@@ -262,6 +262,7 @@ module.exports = async (req, res) => {
 					action: `plugins.${plugin.type}.event`,
 					event: message,
 					plugin,
+					institutionId: user.institutionId,
 				}
 
 				// try sending message
