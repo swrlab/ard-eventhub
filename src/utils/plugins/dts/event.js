@@ -5,6 +5,9 @@
 
 */
 
+// load node utils
+const { isIncluded, notEmptyArray } = require('@swrlab/utils/packages/strings')
+
 // load utils
 const logger = require('../../logger')
 const undici = require('../../undici')
@@ -20,10 +23,6 @@ const { credentials, endpoints, integrationName, permittedExcludedFields } = dts
 const source = 'utils/plugins/dts/event'
 
 const defaultHeaders = { Accept: 'application/json', 'Content-Type': 'application/json' }
-
-const checkIfArrayHasContent = (thisArray) => {
-	return Array.isArray(thisArray) && thisArray.length > 0
-}
 
 module.exports = async (job) => {
 	// remap input
@@ -44,7 +43,11 @@ module.exports = async (job) => {
 	const coreIds = event.services.map((service) => service.topic.id)
 
 	// set up dashboard API fetching
-	const lookupConfig = { timeout: 7e3, headers: { ...defaultHeaders, Authorization: credentials.dashboardToken } }
+	const lookupConfig = {
+		timeout: 7e3,
+		reject: false,
+		headers: { ...defaultHeaders, Authorization: credentials.dashboardToken },
+	}
 
 	// fetch all externally mapped ids
 	const integrationsEndpointUrl = endpoints.listIntegrationRecords.replace('{integrationName}', integrationName)
@@ -62,7 +65,7 @@ module.exports = async (job) => {
 	}
 
 	// end processing if no integrations were found
-	if (!checkIfArrayHasContent(integrationsList.json)) {
+	if (!notEmptyArray(integrationsList.json)) {
 		logger.log({
 			level: 'error',
 			message: `failed loading DTS integrations`,
@@ -82,7 +85,7 @@ module.exports = async (job) => {
 		.map((integration) => integration.content_id)
 
 	// catch non-existent mappings
-	if (!checkIfArrayHasContent(contentIds)) {
+	if (!notEmptyArray(contentIds)) {
 		logger.log({
 			level: 'notice',
 			message: `DTS BID mapping missing for coreIds`,
@@ -108,7 +111,7 @@ module.exports = async (job) => {
 	}
 
 	// end processing if no broadcasts were found
-	if (!checkIfArrayHasContent(broadcasts.json)) {
+	if (!notEmptyArray(broadcasts.json)) {
 		logger.log({
 			level: 'notice',
 			message: `failed finding DTS broadcasts for coreIds`,
@@ -168,7 +171,7 @@ module.exports = async (job) => {
 	}
 
 	// handle exclusions
-	if (checkIfArrayHasContent(plugin.excludeFields)) {
+	if (notEmptyArray(plugin.excludeFields)) {
 		for (const field of plugin.excludeFields) {
 			if (permittedExcludedFields[field]) {
 				liveRadioEvent[permittedExcludedFields[field]] = null
@@ -196,20 +199,33 @@ module.exports = async (job) => {
 		method: 'POST',
 		body: JSON.stringify([liveRadioEvent]),
 		timeout: 7e3,
+		reject: false,
 		headers: { ...defaultHeaders, Authorization: liveradioToken },
 	}
 	const posted = await undici(liveradioUrl, postConfig)
 
+	// check response for keywords
+	let isDtsResponseOkay = true
+	if (posted.json?.data?.length > 0) {
+		for (const item of posted.json.data) {
+			if (isIncluded(item, 'not authorized')) isDtsResponseOkay = false
+		}
+	}
+
 	// log result
 	logger.log({
-		level: posted.ok ? 'info' : 'error',
+		level: !isDtsResponseOkay || !posted.ok ? 'error' : 'info',
 		message: `DTS event done > status ${posted.statusCode} > contentIds ${contentIds.join(',')}`,
 		source,
 		data: {
 			messageId,
+			posted: {
+				statusCode: posted.statusCode,
+				response: posted.json || posted.string,
+				liveRadioEvent,
+			},
 			input: job,
 			ids: { coreIds, contentIds, linkedBroadcastIds },
-			posted: { statusCode: posted.statusCode, response: posted.string, liveRadioEvent },
 		},
 	})
 

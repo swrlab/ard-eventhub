@@ -102,7 +102,9 @@ module.exports = async (req, res) => {
 				const urnPrefix = config.coreIdPrefixes[service.type]
 
 				// create hash based on prefix and id
-				service.topic = { id: `${urnPrefix}${core.createHashedId(service.externalId)}` }
+				service.topic = {
+					id: `${urnPrefix}${core.createHashedId(service.externalId)}`,
+				}
 
 				// convert publisher if needed
 				const urnRegex = /(?=urn:ard:publisher:[a-z0-9]{16})/g

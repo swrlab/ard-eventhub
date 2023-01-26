@@ -58,7 +58,7 @@ jobs:
           FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL: ${{ secrets.PUBSUB_SERVICE_ACCOUNT_EMAIL }}
-          SERVICE_NAME: ard-eventhub
+          SERVICE_NAME: ard-eventhub-ingest
           STAGE: ${{ matrix.STAGES }}
           TEST_USER: ${{ secrets.TEST_USER }}
           TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
