@@ -32,12 +32,12 @@ jobs:
       - name: 👀 Checkout Code
         uses: actions/checkout@v3
 
-      - name: ⛺️ Install Node.js
+      - name: 🏗 Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-          cache-dependency-path: '**/yarn.lock'
+          cache: "yarn"
+          cache-dependency-path: "**/yarn.lock"
 
       - name: 📦 Install Dependencies
         run: yarn
@@ -79,10 +79,10 @@ jobs:
           credentials_json: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
 
       - name: 🔑 Login to Registry
-        run: 'gcloud auth configure-docker $REGISTRY_DOMAIN'
+        run: "gcloud auth configure-docker $REGISTRY_DOMAIN"
 
       - name: 🚧 Building docker image
-        run: 'docker build ./ --file ./Dockerfile -t image'
+        run: "docker build ./ --file ./Dockerfile -t image"
 
       - name: 🔖 Get Package Version
         id: package-version
@@ -130,7 +130,7 @@ jobs:
             ```
 
       - name: 👋 Logout
-        run: 'docker logout'
+        run: "docker logout"
 
   deploy-A-dev-kubernetes:
     if: github.event.pull_request.merged == true
