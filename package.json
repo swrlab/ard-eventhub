@@ -37,7 +37,7 @@
 		"dd-trace": "^3.9.3",
 		"dotenv": "^16.0.3",
 		"express": "4.18.2",
-		"express-openapi-validator": "^5.0.0",
+		"express-openapi-validator": "^5.0.2",
 		"firebase-admin": "^11.4.1",
 		"google-auth-library": "^8.7.0",
 		"jsonwebtoken": "^9.0.0",

@@ -2064,10 +2064,10 @@ events@1.1.1:
   resolved "https://registry.yarnpkg.com/events/-/events-1.1.1.tgz#9ebdb7635ad099c70dcc4c2a1f5004288e8bd924"
   integrity sha512-kEcvvCBByWXGnZy6JUlgAp2gBIUjfCAV6P6TgT1/aaQKcmuAEC4OZTV1I4EWQLz2gxZw76atuVyvHhTxvi0Flw==
 
-express-openapi-validator@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/express-openapi-validator/-/express-openapi-validator-5.0.0.tgz#f4c309a6e9e756a9e067b617d760a33e8cc2f202"
-  integrity sha512-2h0qhuwS/0vi7B68pXtTDZrXTe1kyZxG5/rvukWYcQlXL5yXMQ3H7cHnoWNY4gzCJzVsj7ciDA1S2kRiEzFsOA==
+express-openapi-validator@^5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/express-openapi-validator/-/express-openapi-validator-5.0.2.tgz#3f68cd4bc4844f33c89c708e2f349e117c0ef884"
+  integrity sha512-3EmKfTzI7tAVgdQMNCTb/HTiyCTKON3aqpoj5e4bl3rjIENsiA/TjVjpquBkoPI75MSNKFrEyEqTodkI4IE+zQ==
   dependencies:
     "@types/multer" "^1.4.7"
     ajv "^8.6.2"
