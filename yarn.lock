@@ -185,16 +185,16 @@
   dependencies:
     tslib "^2.1.0"
 
-"@google-cloud/datastore@^7.0.0":
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-7.0.0.tgz#e026db7d12c773230abf9e6b391a6196ef3fb81b"
-  integrity sha512-CbvqzqWFtwHqH3EWMWHqKzKiM9dV+/Ga0e1oSr7rO2KA6QBHGvUEBbLxRWirHnt6Xz2drjzIVjVE1tuOENHPlQ==
+"@google-cloud/datastore@^7.2.0":
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-7.2.0.tgz#6f106c12c5dd57a7d99b55d24d9990744fc198a3"
+  integrity sha512-5mAbGtB+uSt0v8VokCLQSRGIT/owOytBr0dVqUUmQlgMLZV351UFJbXR+1Je5D5aoqouKEqw4FgQxj9Ktxqxyw==
   dependencies:
-    "@google-cloud/promisify" "^2.0.0"
+    "@google-cloud/promisify" "^3.0.0"
     arrify "^2.0.1"
     concat-stream "^2.0.0"
     extend "^3.0.2"
-    google-gax "^3.0.1"
+    google-gax "^3.5.2"
     is "^3.3.0"
     split-array-stream "^2.0.0"
     stream-events "^1.0.5"
@@ -2501,7 +2501,7 @@ google-auth-library@^8.7.0:
     jws "^4.0.0"
     lru-cache "^6.0.0"
 
-google-gax@^3.0.1, google-gax@^3.5.1, google-gax@^3.5.2:
+google-gax@^3.5.1, google-gax@^3.5.2:
   version "3.5.2"
   resolved "https://registry.yarnpkg.com/google-gax/-/google-gax-3.5.2.tgz#7c3ad61dbf366a55527b803caead276668b160d8"
   integrity sha512-AyP53w0gHcWlzxm+jSgqCR3Xu4Ld7EpSjhtNBnNhzwwWaIUyphH9kBGNIEH+i4UGkTUXOY29K/Re8EiAvkBRGw==
