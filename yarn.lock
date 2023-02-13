@@ -185,10 +185,10 @@
   dependencies:
     tslib "^2.1.0"
 
-"@google-cloud/datastore@^7.1.0":
-  version "7.1.0"
-  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-7.1.0.tgz#8c5772dab387da5ef5faf65f3a2e8ac77f6cbcfe"
-  integrity sha512-xtpXm6FlTOrQFLDnhUROjHhNmr0Y9bN+d31x2Y3Py9Qpm1edMfdv5sQRj2iK7/36fVi/y5SDyarmVp7IlV0nBw==
+"@google-cloud/datastore@^7.2.0":
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-7.2.0.tgz#6f106c12c5dd57a7d99b55d24d9990744fc198a3"
+  integrity sha512-5mAbGtB+uSt0v8VokCLQSRGIT/owOytBr0dVqUUmQlgMLZV351UFJbXR+1Je5D5aoqouKEqw4FgQxj9Ktxqxyw==
   dependencies:
     "@google-cloud/promisify" "^3.0.0"
     arrify "^2.0.1"
@@ -274,7 +274,7 @@
   dependencies:
     google-gax "^3.5.2"
 
-"@google-cloud/storage@^6.5.2", "@google-cloud/storage@^6.8.0":
+"@google-cloud/storage@^6.5.2", "@google-cloud/storage@^6.9.2":
   version "6.9.2"
   resolved "https://registry.yarnpkg.com/@google-cloud/storage/-/storage-6.9.2.tgz#f620c22aa817d3459035adeb23b89342ece60dc3"
   integrity sha512-TIQ6G+QzHb/hR/7AIH4OU+z8fXqCLM7JiqO+nGxw61os4YxCWPD2ajW+pzz7VY5k2VtqzhoMFA6rjIfw39wJmQ==
@@ -485,17 +485,17 @@
   resolved "https://registry.yarnpkg.com/@swrlab/swr-prettier-config/-/swr-prettier-config-0.2.0.tgz#cc3918fca31f3760ba7dad5dd11a3e0440fa623a"
   integrity sha512-tq4rM0wq/s30etZOanWrbcHaTbsAIPr/LuedHAvErAiaLdWOJcRIiQjfzfgt9H28UKzrPlSJLiSiufC+zorNDQ==
 
-"@swrlab/utils@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@swrlab/utils/-/utils-1.1.0.tgz#3b5f56a1b4a4be16ba4a188ece2083533e90ac34"
-  integrity sha512-7g1C42JuK54OQiG5xgOZVk8c7kuZCm2TeTcZww9DmkJb86cI+oPrIA/DuY9AcnOFoibtIH6oI3Cng/GXjv7fHw==
+"@swrlab/utils@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@swrlab/utils/-/utils-1.1.1.tgz#ad8758ad1419342fd83977a72ce02096d38bc874"
+  integrity sha512-h8E44WK0ADQey8XtalZPrAhAMBP0Em6DkmnIzDsDOHLIREZjqbQTsdjhJy3RqVheqCO22nFqX9mURiVFGWMH3w==
   dependencies:
-    "@google-cloud/storage" "^6.8.0"
+    "@google-cloud/storage" "^6.9.2"
     abort-controller "^3.0.0"
-    aws-sdk "^2.1277.0"
+    aws-sdk "^2.1313.0"
     chai "^4.3.7"
     node-crc swrlab/node-crc#v2.1.0
-    undici "^5.14.0"
+    undici "^5.19.1"
     uuid "9.0.0"
 
 "@szmarczak/http-timer@^4.0.5":
@@ -910,10 +910,10 @@ available-typed-arrays@^1.0.5:
   resolved "https://registry.yarnpkg.com/available-typed-arrays/-/available-typed-arrays-1.0.5.tgz#92f95616501069d07d10edb2fc37d3e1c65123b7"
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
 
-aws-sdk@^2.1277.0:
-  version "2.1310.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1310.0.tgz#7ec1aa9c4bd96f957ecc6d3d2510f3e9dd9975f9"
-  integrity sha512-D0m9uFUa1UVXWTe4GSyNJP4+6DXwboE2FEG/URkLoo4r9Q8LHxwNFCGkBhaoEwssREyRe2LOYS1Nag/6WyvC6Q==
+aws-sdk@^2.1313.0:
+  version "2.1313.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1313.0.tgz#e6dad914670fb3f4d5cd95c58413fca5ea5c6c86"
+  integrity sha512-8GMdtV2Uch3HL2c6+P3lNZFTcg/fqq9L3EWYRLb6ljCZvWKTssjdkjSJFDyTReNgeiKV224YRPYQbKpOEz4flQ==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -1986,10 +1986,10 @@ eslint-visitor-keys@^3.3.0:
   resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-3.3.0.tgz#f6480fa6b1f30efe2d1968aa8ac745b862469826"
   integrity sha512-mQ+suqKJVyeuwGYHAdjMFqjCyfl8+Ldnxuyp3ldiMBFKkvytrXUZWaiPCEav8qDHKty44bD+qV1IP4T+w+xXRA==
 
-eslint@^8.33.0:
-  version "8.33.0"
-  resolved "https://registry.yarnpkg.com/eslint/-/eslint-8.33.0.tgz#02f110f32998cb598c6461f24f4d306e41ca33d7"
-  integrity sha512-WjOpFQgKK8VrCnAtl8We0SUOy/oVZ5NHykyMiagV1M9r8IFpIJX7DduK6n1mpfhlG7T1NLWm2SuD8QB7KFySaA==
+eslint@^8.34.0:
+  version "8.34.0"
+  resolved "https://registry.yarnpkg.com/eslint/-/eslint-8.34.0.tgz#fe0ab0ef478104c1f9ebc5537e303d25a8fb22d6"
+  integrity sha512-1Z8iFsucw+7kSqXNZVslXS8Ioa4u2KM7GPwuKtkTFAqZ/cHMcEaR+1+Br0wLlot49cNxIiZk5wp8EAbPcYZxTg==
   dependencies:
     "@eslint/eslintrc" "^1.4.1"
     "@humanwhocodes/config-array" "^0.11.8"
@@ -2089,10 +2089,10 @@ events@1.1.1:
   resolved "https://registry.yarnpkg.com/events/-/events-1.1.1.tgz#9ebdb7635ad099c70dcc4c2a1f5004288e8bd924"
   integrity sha512-kEcvvCBByWXGnZy6JUlgAp2gBIUjfCAV6P6TgT1/aaQKcmuAEC4OZTV1I4EWQLz2gxZw76atuVyvHhTxvi0Flw==
 
-express-openapi-validator@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/express-openapi-validator/-/express-openapi-validator-5.0.1.tgz#52c4ef098f883cb49bd15550c72fe3d5cb72e691"
-  integrity sha512-i4BlQsfgO3+MGsjvIP7zPJjqFXjRQG31YL8HsGvgoPHyDKFZW3QHGtlJSRwuelX1RqCwZ+BdqCZ9RfKCi5kgJw==
+express-openapi-validator@^5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/express-openapi-validator/-/express-openapi-validator-5.0.2.tgz#3f68cd4bc4844f33c89c708e2f349e117c0ef884"
+  integrity sha512-3EmKfTzI7tAVgdQMNCTb/HTiyCTKON3aqpoj5e4bl3rjIENsiA/TjVjpquBkoPI75MSNKFrEyEqTodkI4IE+zQ==
   dependencies:
     "@types/multer" "^1.4.7"
     ajv "^8.6.2"
@@ -5054,10 +5054,10 @@ underscore@~1.13.2:
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.13.6.tgz#04786a1f589dc6c09f761fc5f45b89e935136441"
   integrity sha512-+A5Sja4HP1M08MaXya7p5LvjuM7K6q/2EaC0+iovj/wOcMsTzMvDFbasi/oSapiwOlt252IqsKqPjCl7huKS0A==
 
-undici@^5.14.0:
-  version "5.18.0"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-5.18.0.tgz#e88a77a74d991a30701e9a6751e4193a26fabda9"
-  integrity sha512-1iVwbhonhFytNdg0P4PqyIAXbdlVZVebtPDvuM36m66mRw4OGrCm2MYynJv/UENFLdP13J1nPVQzVE2zTs1OeA==
+undici@^5.19.1:
+  version "5.19.1"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-5.19.1.tgz#92b1fd3ab2c089b5a6bd3e579dcda8f1934ebf6d"
+  integrity sha512-YiZ61LPIgY73E7syxCDxxa3LV2yl3sN8spnIuTct60boiiRaE1J8mNWHO8Im2Zi/sFrPusjLlmRPrsyraSqX6A==
   dependencies:
     busboy "^1.6.0"
 
