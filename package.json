@@ -31,7 +31,7 @@
 	"dependencies": {
 		"@google-cloud/datastore": "^7.0.0",
 		"@google-cloud/pubsub": "^3.2.1",
-		"@google-cloud/secret-manager": "^4.2.0",
+		"@google-cloud/secret-manager": "^4.2.1",
 		"@swrlab/utils": "^1.1.0",
 		"compression": "^1.7.4",
 		"dd-trace": "^3.9.3",
