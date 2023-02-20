@@ -185,10 +185,10 @@
   dependencies:
     tslib "^2.1.0"
 
-"@google-cloud/datastore@^7.2.0":
-  version "7.2.0"
-  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-7.2.0.tgz#6f106c12c5dd57a7d99b55d24d9990744fc198a3"
-  integrity sha512-5mAbGtB+uSt0v8VokCLQSRGIT/owOytBr0dVqUUmQlgMLZV351UFJbXR+1Je5D5aoqouKEqw4FgQxj9Ktxqxyw==
+"@google-cloud/datastore@^7.3.1":
+  version "7.3.1"
+  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-7.3.1.tgz#494a639a54fab419650b8a6596a296c75b31b45c"
+  integrity sha512-104ZsFQeUMzoj9Z/T9ULd/7V65kPqxB4WMcNfMQuKnWznHSX4lwVvqJ8+VWpj21gl/SPWEerinp5Qfv5y6axMA==
   dependencies:
     "@google-cloud/promisify" "^3.0.0"
     arrify "^2.0.1"
@@ -267,17 +267,40 @@
     lodash.snakecase "^4.1.1"
     p-defer "^3.0.0"
 
-"@google-cloud/secret-manager@^4.2.0":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@google-cloud/secret-manager/-/secret-manager-4.2.0.tgz#bf0596a1f8657baf01e5d8887048d7bc0d4caf82"
-  integrity sha512-yHmop9Eq/6xjfHJ6+d3QWSbQI+jyInf23KuoV6r/h5slvK8F/XMTA37WZ2bvMvDtLUNKaKBKSrAt6XEMgSp9pQ==
+"@google-cloud/secret-manager@^4.2.1":
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/@google-cloud/secret-manager/-/secret-manager-4.2.1.tgz#c2f04af967e4c70612077816bd4d3af5f85c6edf"
+  integrity sha512-PU7unr+L0Zx2ZErUzyfZ6VxgNQ2t1YfxSWZ1ELaObpRvoeLzsxQaeXH5dsNt0p5XEFu/tTyjDUfyF/64RxbFyQ==
   dependencies:
     google-gax "^3.5.2"
 
-"@google-cloud/storage@^6.5.2", "@google-cloud/storage@^6.9.2":
+"@google-cloud/storage@^6.5.2":
   version "6.9.2"
   resolved "https://registry.yarnpkg.com/@google-cloud/storage/-/storage-6.9.2.tgz#f620c22aa817d3459035adeb23b89342ece60dc3"
   integrity sha512-TIQ6G+QzHb/hR/7AIH4OU+z8fXqCLM7JiqO+nGxw61os4YxCWPD2ajW+pzz7VY5k2VtqzhoMFA6rjIfw39wJmQ==
+  dependencies:
+    "@google-cloud/paginator" "^3.0.7"
+    "@google-cloud/projectify" "^3.0.0"
+    "@google-cloud/promisify" "^3.0.0"
+    abort-controller "^3.0.0"
+    async-retry "^1.3.3"
+    compressible "^2.0.12"
+    duplexify "^4.0.0"
+    ent "^2.2.0"
+    extend "^3.0.2"
+    gaxios "^5.0.0"
+    google-auth-library "^8.0.1"
+    mime "^3.0.0"
+    mime-types "^2.0.8"
+    p-limit "^3.0.1"
+    retry-request "^5.0.0"
+    teeny-request "^8.0.0"
+    uuid "^8.0.0"
+
+"@google-cloud/storage@^6.9.3":
+  version "6.9.3"
+  resolved "https://registry.yarnpkg.com/@google-cloud/storage/-/storage-6.9.3.tgz#43fa4c9e30785313f68d01e6fde9bdba6d10a695"
+  integrity sha512-ucbHoDvjXlcR/DrJNQlCFnQSaO7pXHTPGs3Gt2TQtPQ+b7Y6DR0ztIt/CEeH+O03I41g9e+T2N1SOOVq5UyaKQ==
   dependencies:
     "@google-cloud/paginator" "^3.0.7"
     "@google-cloud/projectify" "^3.0.0"
@@ -485,17 +508,18 @@
   resolved "https://registry.yarnpkg.com/@swrlab/swr-prettier-config/-/swr-prettier-config-0.2.0.tgz#cc3918fca31f3760ba7dad5dd11a3e0440fa623a"
   integrity sha512-tq4rM0wq/s30etZOanWrbcHaTbsAIPr/LuedHAvErAiaLdWOJcRIiQjfzfgt9H28UKzrPlSJLiSiufC+zorNDQ==
 
-"@swrlab/utils@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@swrlab/utils/-/utils-1.1.1.tgz#ad8758ad1419342fd83977a72ce02096d38bc874"
-  integrity sha512-h8E44WK0ADQey8XtalZPrAhAMBP0Em6DkmnIzDsDOHLIREZjqbQTsdjhJy3RqVheqCO22nFqX9mURiVFGWMH3w==
+"@swrlab/utils@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@swrlab/utils/-/utils-1.1.2.tgz#13ee583f61d97ca7eef2fee8d2ed59f6327ce3ce"
+  integrity sha512-uWPk8gHxNDY4Ir8GbleK3vM0Oa3iNmTq4gXmACqRl1KpwABYiZKMS2L8XhtPYQR8gUFo6CSp+U0tYSTxLKBRxg==
   dependencies:
-    "@google-cloud/storage" "^6.9.2"
+    "@google-cloud/storage" "^6.9.3"
     abort-controller "^3.0.0"
-    aws-sdk "^2.1313.0"
+    aws-sdk "^2.1318.0"
     chai "^4.3.7"
+    luxon "^3.2.1"
     node-crc swrlab/node-crc#v2.1.0
-    undici "^5.19.1"
+    undici "^5.20.0"
     uuid "9.0.0"
 
 "@szmarczak/http-timer@^4.0.5":
@@ -910,10 +934,10 @@ available-typed-arrays@^1.0.5:
   resolved "https://registry.yarnpkg.com/available-typed-arrays/-/available-typed-arrays-1.0.5.tgz#92f95616501069d07d10edb2fc37d3e1c65123b7"
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
 
-aws-sdk@^2.1313.0:
-  version "2.1313.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1313.0.tgz#e6dad914670fb3f4d5cd95c58413fca5ea5c6c86"
-  integrity sha512-8GMdtV2Uch3HL2c6+P3lNZFTcg/fqq9L3EWYRLb6ljCZvWKTssjdkjSJFDyTReNgeiKV224YRPYQbKpOEz4flQ==
+aws-sdk@^2.1318.0:
+  version "2.1318.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1318.0.tgz#a633c82a51d0572805f744b51ca04a3babf6c909"
+  integrity sha512-xRCKqx4XWXUIpjDCVHmdOSINEVCIC5+yhmgUGR9A6VfxfPs59HbxKyd5LB+CmXhVbwVUM4SRWG5O+agQj+w7Eg==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -1462,10 +1486,10 @@ cssesc@^3.0.0:
   resolved "https://registry.yarnpkg.com/cssesc/-/cssesc-3.0.0.tgz#37741919903b868565e1c09ea747445cd18983ee"
   integrity sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==
 
-dd-trace@^3.13.2:
-  version "3.13.2"
-  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-3.13.2.tgz#95b1ec480ab9ac406e1da7591a8c6f678d3799fd"
-  integrity sha512-POO9nEcAufe5pgp2xV1X3PfWip6wh+6TpEcRSlSgZJCIIMvWVCkcIVL/J2a6KAZq6V3Yjbkl8Ktfe+MOzQf5kw==
+dd-trace@^3.14.1:
+  version "3.14.1"
+  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-3.14.1.tgz#db1de48abc52202edba5dd5c2c8580141d2c3e7c"
+  integrity sha512-s77EQ+LtrguMg1fs0TaO/JgCZfVS/OSBShDYfRSNm5bQdlfQL0YUSizPNpWTLB6cc9AHNA2sSGtOcQsY2xTFfA==
   dependencies:
     "@datadog/native-appsec" "2.0.0"
     "@datadog/native-iast-rewriter" "1.1.2"
@@ -3487,6 +3511,11 @@ lru-memoizer@^2.1.4:
     lodash.clonedeep "^4.5.0"
     lru-cache "~4.0.0"
 
+luxon@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-3.2.1.tgz#14f1af209188ad61212578ea7e3d518d18cee45f"
+  integrity sha512-QrwPArQCNLAKGO/C+ZIilgIuDnEnKx5QYODdDtbFaxzsbZcc/a7WFq7MhsVYgRlwawLtvOUESTlfJ+hc/USqPg==
+
 make-dir@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/make-dir/-/make-dir-3.1.0.tgz#415e967046b3a7f1d185277d84aa58203726a13f"
@@ -4847,10 +4876,10 @@ swagger-ui-dist@>=4.11.0:
   resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-4.15.5.tgz#cda226a79db2a9192579cc1f37ec839398a62638"
   integrity sha512-V3eIa28lwB6gg7/wfNvAbjwJYmDXy1Jo1POjyTzlB6wPcHiGlRxq39TSjYGVjQrUSAzpv+a7nzp7mDxgNy57xA==
 
-swagger-ui-express@^4.6.0:
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/swagger-ui-express/-/swagger-ui-express-4.6.0.tgz#fc297d80c614c80f5d7def3dab50b56428cfe1c9"
-  integrity sha512-ZxpQFp1JR2RF8Ar++CyJzEDdvufa08ujNUJgMVTMWPi86CuQeVdBtvaeO/ysrz6dJAYXf9kbVNhWD7JWocwqsA==
+swagger-ui-express@^4.6.1:
+  version "4.6.1"
+  resolved "https://registry.yarnpkg.com/swagger-ui-express/-/swagger-ui-express-4.6.1.tgz#7283d34b17f3a9c113764505fa85a7a38bc040a1"
+  integrity sha512-Pss7YNFKNdq66XKNjRe4IRXKKYNx/LvOSml9TdrZ8/78UpxUHIp9JoXpXWA5Z4L+SCmX63DZ9IPlQ8nnRuncvA==
   dependencies:
     swagger-ui-dist ">=4.11.0"
 
@@ -5054,10 +5083,10 @@ underscore@~1.13.2:
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.13.6.tgz#04786a1f589dc6c09f761fc5f45b89e935136441"
   integrity sha512-+A5Sja4HP1M08MaXya7p5LvjuM7K6q/2EaC0+iovj/wOcMsTzMvDFbasi/oSapiwOlt252IqsKqPjCl7huKS0A==
 
-undici@^5.19.1:
-  version "5.19.1"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-5.19.1.tgz#92b1fd3ab2c089b5a6bd3e579dcda8f1934ebf6d"
-  integrity sha512-YiZ61LPIgY73E7syxCDxxa3LV2yl3sN8spnIuTct60boiiRaE1J8mNWHO8Im2Zi/sFrPusjLlmRPrsyraSqX6A==
+undici@^5.20.0:
+  version "5.20.0"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-5.20.0.tgz#6327462f5ce1d3646bcdac99da7317f455bcc263"
+  integrity sha512-J3j60dYzuo6Eevbawwp1sdg16k5Tf768bxYK4TUJRH7cBM4kFCbf3mOnM/0E3vQYXvpxITbbWmBafaDbxLDz3g==
   dependencies:
     busboy "^1.6.0"
 
