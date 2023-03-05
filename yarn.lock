@@ -768,10 +768,10 @@ ajv@^6.10.0, ajv@^6.12.4:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-ajv@^8.0.0, ajv@^8.6.2:
-  version "8.11.2"
-  resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.11.2.tgz#aecb20b50607acf2569b6382167b65a96008bb78"
-  integrity sha512-E4bfmKAhGiSTvMfL1Myyycaub+cUEU2/IvpylXkUu7CHBkBj1f/ikdzbD7YQ6FKUbixDxeYvB/xY4fvyroDlQg==
+ajv@^8.0.0, ajv@^8.11.2:
+  version "8.12.0"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.12.0.tgz#d1a0527323e22f53562c567c00991577dfbe19d1"
+  integrity sha512-sRu1kpcO9yLtYxBKvqfTeh9KzZEwO3STyX1HT+4CaDzC6HpTGYhIhPIzj9XuKU7KYDwnaeh5hcOwjy1QuJzBPA==
   dependencies:
     fast-deep-equal "^3.1.1"
     json-schema-traverse "^1.0.0"
@@ -1382,10 +1382,10 @@ content-disposition@0.5.4:
   dependencies:
     safe-buffer "5.2.1"
 
-content-type@^1.0.4, content-type@~1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/content-type/-/content-type-1.0.4.tgz#e138cc75e040c727b1966fe5e5f8c9aee256fe3b"
-  integrity sha512-hIP3EEPs8tB9AT1L+NUqtwOAps4mk2Zob89MWXMHjHWg9milF/j4osnnQLXBCBFBk/tvIG/tUc9mOUJiPBhPXA==
+content-type@^1.0.5, content-type@~1.0.4:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/content-type/-/content-type-1.0.5.tgz#8b773162656d1d1086784c8f23a54ce6d73d7918"
+  integrity sha512-nTjqfcBFEipKdXCv4YDQWCfmcLZKm81ldF0pAopTvyrFGVbcR6P/VAAd5G7N+0tTr8QqiU0tFadD6FK4NtJwOA==
 
 cookie-signature@1.0.6:
   version "1.0.6"
@@ -2064,16 +2064,16 @@ events@1.1.1:
   resolved "https://registry.yarnpkg.com/events/-/events-1.1.1.tgz#9ebdb7635ad099c70dcc4c2a1f5004288e8bd924"
   integrity sha512-kEcvvCBByWXGnZy6JUlgAp2gBIUjfCAV6P6TgT1/aaQKcmuAEC4OZTV1I4EWQLz2gxZw76atuVyvHhTxvi0Flw==
 
-express-openapi-validator@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/express-openapi-validator/-/express-openapi-validator-5.0.0.tgz#f4c309a6e9e756a9e067b617d760a33e8cc2f202"
-  integrity sha512-2h0qhuwS/0vi7B68pXtTDZrXTe1kyZxG5/rvukWYcQlXL5yXMQ3H7cHnoWNY4gzCJzVsj7ciDA1S2kRiEzFsOA==
+express-openapi-validator@^5.0.3:
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/express-openapi-validator/-/express-openapi-validator-5.0.3.tgz#dde8b31236736d2695c08b9bcd58728d88628765"
+  integrity sha512-ZCNMSlkjdgVzmZKsAs/dgDb3F69S7Q0JeT9EuKWd2VJOKgsWmlcA7P6dwouH6SHcLYn14XvyHEktmW3APmKboQ==
   dependencies:
     "@types/multer" "^1.4.7"
-    ajv "^8.6.2"
+    ajv "^8.11.2"
     ajv-draft-04 "^1.0.0"
     ajv-formats "^2.1.1"
-    content-type "^1.0.4"
+    content-type "^1.0.5"
     json-schema-ref-parser "^9.0.9"
     lodash.clonedeep "^4.5.0"
     lodash.get "^4.4.2"
