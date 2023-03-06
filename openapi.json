@@ -899,6 +899,51 @@
           }
         }
       },
+      "reference": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+              "type": {
+                  "type": "string",
+                  "enum": [
+                    "Episode",
+                    "Section",
+                    "Publication",
+                    "Broadcast",
+                    "Show",
+                    "Season",
+                    "Article"
+                  ]
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^urn:ard:[a-z0-9-]+:[a-z0-9-]+$",
+                "example": "urn:ard:show:49267f7d67be180d"
+              },
+              "externalId": {
+                  "type": "string",
+                  "example": "crid://swr.de/123450",
+                  "pattern": "^(c|b)rid://.+$"
+              },
+              "title": {
+                "type": "string"
+              },
+              "url": {
+                  "type": "string",
+                  "format": "uri"
+              },
+              "alternateIds": {
+                  "type": "array",
+                  "items": {
+                      "type": "string",
+                      "example": "https://normdb.ivz.cn.ard.de/sendereihe/427"
+                  }
+              }
+          },
+          "required": [
+              "type"
+          ]
+      },
       "eventV1PostBody": {
         "additionalProperties": false,
         "required": [
@@ -1024,6 +1069,37 @@
               "allOf": [
                 {
                   "$ref": "#/components/schemas/services"
+                }
+              ]
+            }
+          },
+          "references": {
+            "type": "string",
+            "description": "related external entities",
+            "nullable": true,
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/reference",
+                  "required": [
+                    "type",
+                    "externalId"
+                  ]
+                },
+                {
+                  "$ref": "#/components/schemas/reference",
+                  "required": [
+                    "type",
+                    "id"
+                  ]
+                },
+                {
+                  "$ref": "#/components/schemas/reference",
+                  "required": [
+                    "type",
+                    "title",
+                    "url"
+                  ]
                 }
               ]
             }
