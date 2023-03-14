@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.5.0] - 2023-01-26
 
+- fix: stop logging requests on dev
+- feat: add `IS_LOCAL` env for local-specific logs and actions
 - feat: enable multiple user accounts for DTS plugin
 - refactor: move DTS keys from GCP Secrets to env
 

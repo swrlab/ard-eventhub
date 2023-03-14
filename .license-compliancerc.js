@@ -1,6 +1,6 @@
 //
 // ard-eventhub
-// by SWR audio lab
+// by SWR Audio Lab
 //
 
 // This helper runs the license-compliance toolkit using

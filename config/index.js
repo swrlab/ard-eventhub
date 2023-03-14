@@ -58,6 +58,7 @@ const config = {
 	// set service flags
 	isDebug: process.env.DEBUG === 'true',
 	isDev: process.env.STAGE === 'dev',
+	isLocal: process.env.IS_LOCAL === 'true',
 }
 
 // update user agent env for undici-wrapper
