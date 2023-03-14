@@ -20,12 +20,78 @@ const response = require('../../utils/response')
 const config = require('../../../config')
 
 const source = 'ingest/events/post'
+const urnPublisherRegex = /(?=urn:ard:publisher:[a-z0-9]{16})/g
+
+const processServices = async (service, req) => {
+	// fetch prefix from configured list
+	const urnPrefix = config.coreIdPrefixes[service.type]
+	const topicId = `${urnPrefix}${createHashedId(service.externalId)}`
+
+	// create hash based on prefix and id
+	service.topic = {
+		id: topicId,
+
+		// create pub/sub-compliant name
+		name: pubsub.buildId(service.topic.id),
+	}
+
+	// convert publisher if not in new urn format
+	if (!service.publisherId.match(urnPublisherRegex)) {
+		// fetch prefix
+		const urnPublisherPrefix = config.coreIdPrefixes.Publisher
+
+		// add trailing 0 if number is only 5 digits
+		if (service.publisherId.length === 5) service.publisherId = `${service.publisherId}0`
+
+		// create hash using given publisherId
+		service.publisherId = `${urnPublisherPrefix}${createHashedId(service.publisherId)}`
+	}
+
+	// fetch publisher
+	const publisher = await core.getPublisher(service.publisherId)
+
+	// block access if publisher not found
+	if (!publisher) {
+		// set blocked flag to be filtered out
+		service.blocked = `Publisher not found > ${service.publisherId}`
+
+		// log access attempt
+		logger.log({
+			level: 'warning',
+			message: service.blocked,
+			source,
+			data: { service, user: req.user },
+		})
+
+		// stop processing
+		return service
+	}
+
+	// check allowed institutions for current user
+	if (req.user.institutionId !== publisher?.institution?.id) {
+		// set blocked flag to be filtered out
+		service.blocked = 'User unauthorized for service'
+
+		// log access attempt
+		logger.log({
+			level: 'warning',
+			message: service.blocked,
+			source,
+			data: { service, user: req.user, publisher: publisher?.institution },
+		})
+
+		// stop processing
+		return service
+	}
+
+	// final data
+	return service
+}
 
 module.exports = async (req, res) => {
 	try {
 		// fetch inputs
 		const { eventName } = req.params
-		const { user } = req
 
 		// check eventName
 		if (req.body?.event && req.body.event !== eventName) {
@@ -37,96 +103,20 @@ module.exports = async (req, res) => {
 			return response.errors.expiredStartTime(req, res)
 		}
 
+		// DEV check for duplicates
+
 		// insert name, creator and timestamp into object
 		const message = {
 			name: eventName,
-			creator: user.email,
+			creator: req.user.email,
 			created: moment().toISOString(),
 
 			// use entire POST body to include potentially new fields
 			...req.body,
 		}
 
-		// use collector to check duplicates for externalId in services
-		const externalIdCollector = []
-
 		// compile core hashes for every service
-		message.services = await Promise.all(
-			message.services.map(async (service) => {
-				// check for duplicates
-				if (externalIdCollector.includes(service.externalId)) service.blocked = true
-				externalIdCollector.push(service.externalId)
-
-				// fetch prefix from configured list
-				const urnPrefix = config.coreIdPrefixes[service.type]
-
-				// create hash based on prefix and id
-				service.topic = {
-					id: `${urnPrefix}${createHashedId(service.externalId)}`,
-				}
-
-				// convert publisher if needed
-				const urnRegex = /(?=urn:ard:publisher:[a-z0-9]{16})/g
-				if (!service.publisherId.match(urnRegex)) {
-					// fetch prefix
-					const urnPublisherPrefix = config.coreIdPrefixes.Publisher
-
-					// add trailing 0 if number is only 5 digits
-					if (service.publisherId.length === 5)
-						service.publisherId = `${service.publisherId}0`
-
-					// create hash using given publisherId
-					service.publisherId = `${urnPublisherPrefix}${createHashedId(
-						service.publisherId
-					)}`
-				}
-
-				// fetch publisher
-				const publisher = await core.getPublisher(service.publisherId)
-
-				// block access if publisher not found
-				if (!service.blocked && !publisher) {
-					// set blocked flag to be filtered out
-					service.blocked = true
-
-					// log access attempt
-					logger.log({
-						level: 'warning',
-						message: `Publisher not found > ${service.publisherId}`,
-						source,
-						data: {
-							email: req.user.email,
-							service,
-						},
-					})
-				}
-
-				// check allowed institutions for current user
-				if (!service.blocked && user.institutionId !== publisher?.institution?.id) {
-					// set blocked flag to be filtered out
-					service.blocked = true
-
-					// log access attempt
-					logger.log({
-						level: 'warning',
-						message: 'User unauthorized for service',
-						source,
-						data: {
-							email: req.user.email,
-							service,
-							user: user.institution,
-							publisher: publisher?.institution,
-						},
-					})
-				}
-
-				// create pub/sub-compliant name
-				if (!service.blocked) service.topic.name = pubsub.buildId(service.topic.id)
-
-				// final data
-				return service
-			})
-		)
+		message.services = await Promise.all(message.services.map((service) => processServices(service, req)))
 
 		// save message to datastore
 		const savedMessage = await datastore.save(message, 'events')
@@ -153,14 +143,14 @@ module.exports = async (req, res) => {
 					// try creating new topic
 					const newTopic = {
 						created: moment().toISOString(),
-						creator: user.email,
+						creator: req.user.email,
 
 						coreId: service.topic.id,
 						externalId: service.externalId,
 						name: service.topic.name,
 
 						institution: {
-							id: user.institutionId,
+							id: req.user.institutionId,
 							title: publisher.institution.title,
 						},
 
@@ -179,7 +169,7 @@ module.exports = async (req, res) => {
 
 					// handle feedback
 					if (result?.name?.indexOf(service.topic.name) !== -1) {
-						// Update api result that topic was created
+						// update api result that topic was created
 						service.topic.status = 'TOPIC_CREATED'
 
 						logger.log({
@@ -189,7 +179,7 @@ module.exports = async (req, res) => {
 							data: { service, result },
 						})
 					} else {
-						// Update api result that topic was not created
+						// update api result that topic was not created
 						service.topic.status = 'TOPIC_NOT_CREATED'
 
 						logger.log({
@@ -224,7 +214,7 @@ module.exports = async (req, res) => {
 					action: `plugins.${plugin.type}.event`,
 					event: message,
 					plugin,
-					institutionId: user.institutionId,
+					institutionId: req.user.institutionId,
 				}
 
 				// try sending message
