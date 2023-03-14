@@ -1,12 +1,13 @@
 /*
 
 	ard-eventhub
-	by SWR audio lab
+	by SWR Audio Lab
 
 */
 
 // load node utils
 const moment = require('moment')
+const { createHashedId } = require('@swrlab/utils/packages/ard')
 
 // load eventhub utils
 const core = require('../../utils/core')
@@ -22,70 +23,28 @@ const source = 'ingest/events/post'
 
 module.exports = async (req, res) => {
 	try {
-		// use entire POST body to include potentially new fields
-		let message = req.body
+		// fetch inputs
 		const { eventName } = req.params
 		const { user } = req
 
 		// check eventName
-		if (message?.event && message.event !== eventName) {
-			// log access attempt
-			logger.log({
-				level: 'warning',
-				message: 'User attempted event with mismatching names',
-				source,
-				data: {
-					email: req.user.email,
-					body: req.body,
-					params: eventName,
-				},
-			})
-
-			// return 400
-			return response.badRequest(req, res, {
-				message: 'request.body.event should match URL parameter',
-				errors: [
-					{
-						path: '.body.event',
-						message: 'should match URL parameter',
-						errorCode: 'required.openapi.validation',
-					},
-				],
-			})
+		if (req.body?.event && req.body.event !== eventName) {
+			return response.errors.mismatchingEventName(req, res, eventName)
 		}
 
 		// check offset for start event
-		if (moment(message.start).add(2, 'm').isBefore()) {
-			// log access attempt
-			logger.log({
-				level: 'notice',
-				message: `User attempted event with expired start time ${message.start}`,
-				source,
-				data: {
-					email: req.user.email,
-					message,
-				},
-			})
-
-			// return 400
-			return response.badRequest(req, res, {
-				message: 'request.body.start should be recent',
-				errors: [
-					{
-						path: '.body.start',
-						message: 'should not be expired event',
-						errorCode: 'required.openapi.validation',
-					},
-				],
-			})
+		if (moment(req.body.start).add(2, 'm').isBefore()) {
+			return response.errors.expiredStartTime(req, res)
 		}
 
 		// insert name, creator and timestamp into object
-		message = {
+		const message = {
 			name: eventName,
 			creator: user.email,
 			created: moment().toISOString(),
-			...message,
+
+			// use entire POST body to include potentially new fields
+			...req.body,
 		}
 
 		// use collector to check duplicates for externalId in services
@@ -103,7 +62,7 @@ module.exports = async (req, res) => {
 
 				// create hash based on prefix and id
 				service.topic = {
-					id: `${urnPrefix}${core.createHashedId(service.externalId)}`,
+					id: `${urnPrefix}${createHashedId(service.externalId)}`,
 				}
 
 				// convert publisher if needed
@@ -117,7 +76,7 @@ module.exports = async (req, res) => {
 						service.publisherId = `${service.publisherId}0`
 
 					// create hash using given publisherId
-					service.publisherId = `${urnPublisherPrefix}${core.createHashedId(
+					service.publisherId = `${urnPublisherPrefix}${createHashedId(
 						service.publisherId
 					)}`
 				}
@@ -170,8 +129,8 @@ module.exports = async (req, res) => {
 		)
 
 		// save message to datastore
-		message = await datastore.save(message, 'events')
-		message.id = message.id.toString()
+		const savedMessage = await datastore.save(message, 'events')
+		message.id = savedMessage.id.toString()
 		delete message.creator
 
 		// collect unknown topics from returning errors
@@ -204,6 +163,7 @@ module.exports = async (req, res) => {
 							id: user.institutionId,
 							title: publisher.institution.title,
 						},
+
 						publisher: {
 							id: service.publisherId,
 							title: publisher.title,

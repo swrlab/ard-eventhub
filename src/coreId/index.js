@@ -8,7 +8,7 @@
 */
 
 // load utils
-const createHashedId = require('../utils/core/createHashedId')
+const { createHashedId } = require('@swrlab/utils/packages/ard')
 
 // parse input
 const input = process.argv[2]
