@@ -15,7 +15,7 @@ module.exports = (req, res) => {
 	// log access attempt
 	logger.log({
 		level: 'notice',
-		message: `User attempted event with expired start time ${req.body.start}`,
+		message: `User attempted event with expired start time > ${req.body.start}`,
 		source,
 		data: {
 			email: req.user.email,

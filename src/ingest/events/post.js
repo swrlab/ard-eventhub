@@ -123,7 +123,7 @@ module.exports = async (req, res) => {
 		logger.log({
 			level: 'notice',
 			message: `event processed > ${eventName} > ${message.services.length}x services (${message.services[0]?.publisherId})`,
-			source: `${source}/${eventName}`,
+			source,
 			data,
 		})
 
