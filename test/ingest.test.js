@@ -202,6 +202,18 @@ describe(`POST ${eventPath}`, () => {
 				done()
 			})
 	})
+
+	it('publish a new event with invalid time', (done) => {
+		event.start = `${DateTime.now().toISO()}00`
+		chai.request(server)
+			.post(eventPath)
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send(event)
+			.end((err, res) => {
+				testResponse(res, 400)
+				done()
+			})
+	})
 })
 
 /*

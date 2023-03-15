@@ -1,7 +1,7 @@
 /*
 
 	ard-eventhub
-	by SWR audio lab
+	by SWR Audio Lab
 
 */
 
@@ -27,11 +27,10 @@ module.exports = async (req, res) => {
 		}
 
 		// return ok
+		const expiresIn = parseInt(login.login.expires_in)
 		return response.ok(req, res, {
-			expiresIn: parseInt(login.login.expires_in),
-			expires: DateTime.now()
-				.plus({ seconds: parseInt(login.login.expires_in) })
-				.toISO(),
+			expiresIn,
+			expires: DateTime.now().plus({ seconds: expiresIn }).toISO(),
 
 			token: login.login.id_token,
 			refreshToken: login.login.refresh_token,

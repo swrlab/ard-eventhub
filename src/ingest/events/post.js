@@ -25,15 +25,13 @@ module.exports = async (req, res) => {
 		// fetch inputs
 		const { eventName } = req.params
 
-		// check eventName
+		// check eventName consistency
 		if (req.body?.event && req.body.event !== eventName) {
-			console.warn('xxxxx mismatch')
 			return response.errors.mismatchingEventName(req, res)
 		}
 
 		// check offset for start event
 		if (DateTime.fromISO(req.body.start).plus({ minutes: 2 }) < DateTime.now()) {
-			console.warn('xxxxx expired')
 			return response.errors.expiredStartTime(req, res)
 		}
 
@@ -43,13 +41,13 @@ module.exports = async (req, res) => {
 		const message = {
 			name: eventName,
 			creator: req.user.email,
-			created: DateTime.now().toUTC().toISO(),
+			created: DateTime.now().toISO(),
 
 			// use entire POST body to include potentially new fields
 			...req.body,
 		}
 
-		// compile core hashes for every service
+		// compile core hashes and pubsub names for every service
 		message.services = await Promise.all(message.services.map((service) => processServices(service, req)))
 
 		// save message to datastore
@@ -124,8 +122,8 @@ module.exports = async (req, res) => {
 		// log success
 		logger.log({
 			level: 'notice',
-			message: `event processed > ${eventName} (${message.services[0]?.publisherId})`,
-			source,
+			message: `event processed > ${eventName} > ${message.services.length}x services (${message.services[0]?.publisherId})`,
+			source: `${source}/${eventName}`,
 			data,
 		})
 

@@ -1,7 +1,7 @@
 /*
 
 	ard-eventhub
-	by SWR audio lab
+	by SWR Audio Lab
 
 */
 
@@ -38,7 +38,7 @@ const convertGlobals = format((event) => {
 
 // set format converters
 let formatConfig = format.combine(convertError(), convertGlobals(), format.json())
-if (process.env.DEBUG === 'true') {
+if (process.env.IS_LOCAL === 'true') {
 	formatConfig = format.combine(
 		convertError(),
 		convertGlobals(),

@@ -1,7 +1,7 @@
 /*
 
 	ard-eventhub
-	by SWR audio lab
+	by SWR Audio Lab
 
 */
 
@@ -14,18 +14,8 @@ const config = require('../../../config')
 const source = 'pubsub.publishMessage'
 
 module.exports = async (topic, message) => {
-	logger.log({
-		level: 'info',
-		message: `sending message > ${topic}`,
-		source,
-		data: { topic },
-	})
-
 	// initialize output
 	let output
-
-	// prepare buffer object
-	const messageBuffer = Buffer.from(JSON.stringify(message))
 
 	// add runtime information as attributes
 	const customAttributes = {
@@ -33,10 +23,17 @@ module.exports = async (topic, message) => {
 		version: config.version,
 	}
 
+	logger.log({
+		level: 'info',
+		message: `sending message > ${topic}`,
+		source,
+		data: { topic },
+	})
+
 	// send message for each topic
 	try {
 		// attempt to send message
-		output = await pubSubClient.topic(topic).publish(messageBuffer, customAttributes)
+		output = await pubSubClient.topic(topic).publishJSON(message, customAttributes)
 	} catch (error) {
 		if (error?.code === 5) {
 			output = 'TOPIC_NOT_FOUND'

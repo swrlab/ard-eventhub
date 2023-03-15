@@ -1,7 +1,7 @@
 /*
 
 	ard-eventhub
-	by SWR audio lab
+	by SWR Audio Lab
 
 */
 
@@ -56,7 +56,6 @@ const config = {
 	userAgent: `${serviceName}/${version}`,
 
 	// set service flags
-	isDebug: process.env.DEBUG === 'true',
 	isDev: process.env.STAGE === 'dev',
 	isLocal: process.env.IS_LOCAL === 'true',
 }

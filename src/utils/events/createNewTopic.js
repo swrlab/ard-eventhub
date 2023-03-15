@@ -22,7 +22,7 @@ module.exports = async (service, req) => {
 
 	// try creating new topic
 	const newTopic = {
-		created: DateTime.now().toUTC().toISO(),
+		created: DateTime.now().toISO(),
 		creator: req.user.email,
 
 		coreId: service.topic.id,

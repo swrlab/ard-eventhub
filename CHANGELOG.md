@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.5.0] - 2023-03-14
 
 - fix: stop logging requests on dev
+- fix: spelling of `SWR Audio Lab`
 - feat: add `IS_LOCAL` env for local-specific logs and actions
 - feat: enable multiple user accounts for DTS plugin
 - feat: add test for invalid timestamps

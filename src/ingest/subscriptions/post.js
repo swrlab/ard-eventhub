@@ -1,7 +1,7 @@
 /*
 
 	ard-eventhub
-	by SWR audio lab
+	by SWR Audio Lab
 
 */
 
@@ -69,7 +69,7 @@ module.exports = async (req, res) => {
 
 			creator: req.user.email,
 			institutionId: req.user.institutionId,
-			created: DateTime.now().toUTC().toISO(),
+			created: DateTime.now().toISO(),
 		}
 
 		// save to datastore
