@@ -58,7 +58,7 @@ function testFailedAuth(res) {
 }
 
 /*
-    AUTH - Authentication services for Eventhub
+	AUTH - Authentication services for Eventhub
 */
 
 const loginPath = '/auth/login'
@@ -140,7 +140,7 @@ if (testUserReset === true) {
 }
 
 /*
-    EVENTS - Manage events
+	EVENTS - Manage events
 */
 
 function testEventKeys(body) {
@@ -217,7 +217,7 @@ describe(`POST ${eventPath}`, () => {
 })
 
 /*
-    TOPICS - Access to topics details
+	TOPICS - Access to topics details
 */
 
 const topicPath = '/topics'
@@ -257,7 +257,7 @@ describe(`GET ${topicPath}`, () => {
 })
 
 /*
-    SUBSCRIPTIONS - Access to subscription management
+	SUBSCRIPTIONS - Access to subscription management
 */
 
 const subscriptPath = '/subscriptions'

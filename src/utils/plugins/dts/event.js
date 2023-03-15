@@ -37,6 +37,19 @@ const filterIntegrations = (li, coreIds) =>
 	li.filter((i) => i.external_system === integrationName && coreIds.includes(i.external_id))
 const getContentIds = (li) => li.map((integration) => integration.content_id)
 
+const getUserForInstitution = (institutionId) => {
+	// get user or reject if not found
+	const liveradioUser = credentials.liveradio.find((user) => user.coreId === institutionId)
+	if (!liveradioUser) return { token: null, username: null }
+
+	// encode token
+	const liveradioLogin = `${liveradioUser?.username}:${liveradioUser?.password}`
+	return {
+		token: `Basic ${Buffer.from(liveradioLogin, 'utf8').toString('base64')}`,
+		username: liveradioUser.username,
+	}
+}
+
 module.exports = async (job) => {
 	// remap input
 	const { event, plugin, institutionId } = job
@@ -158,10 +171,8 @@ module.exports = async (job) => {
 	}
 
 	// set event host and auth
-	const liveradioUser = credentials.liveradio.find((user) => user.coreId === institutionId)
-	const liveradioLogin = `${liveradioUser?.username}:${liveradioUser?.password}`
-	const liveradioToken = `Basic ${Buffer.from(liveradioLogin, 'utf8').toString('base64')}`
-	if (!LIVERADIO_URL || !liveradioUser || !liveradioLogin) {
+	const { token: liveradioToken, username } = getUserForInstitution(institutionId)
+	if (!LIVERADIO_URL || !liveradioToken) {
 		logger.log({
 			level: 'error',
 			message: `failed loading DTS user for liveradio API`,
@@ -172,14 +183,14 @@ module.exports = async (job) => {
 	}
 
 	// post event
-	const postConfig = {
+	const liveradioConfig = {
 		method: 'POST',
 		body: JSON.stringify([liveRadioEvent]),
 		timeout: 7e3,
 		reject: false,
 		headers: { ...DEFAULT_HEADERS, Authorization: liveradioToken },
 	}
-	const posted = await undici(LIVERADIO_URL, postConfig)
+	const posted = await undici(LIVERADIO_URL, liveradioConfig)
 
 	// check response for keywords
 	let isDtsResponseOkay = true
@@ -187,21 +198,26 @@ module.exports = async (job) => {
 	if (isIncluded(posted.string, 'not authorized')) isDtsResponseOkay = false
 
 	// log result
+	const message = [
+		`DTS event done (${event.services[0]?.publisherId})`,
+		`status ${posted.statusCode}`,
+		`${linkedBroadcastIds?.length}x BIDs`,
+		`${contentIds?.length}x contentIds ${JSON.stringify(contentIds)}`,
+		`${coreIds.length}x Core IDs`,
+	]
 	logger.log({
 		level: isDtsResponseOkay && posted.ok ? 'info' : 'error',
-		message: `DTS event done (${event.services[0]?.publisherId}) > status ${posted.statusCode} > ${
-			linkedBroadcastIds?.length
-		}x BIDs > ${contentIds?.length}x contentIds ${JSON.stringify(contentIds)}`,
+		message: message.join(' > '),
 		source,
 		data: {
-			posted: {
-				username: liveradioUser.username,
+			input: job,
+			ids: { coreIds, contentIds, linkedBroadcastIds },
+			dts: {
+				username,
 				statusCode: posted.statusCode,
 				response: posted.json || posted.string,
 				liveRadioEvent,
 			},
-			input: job,
-			ids: { coreIds, contentIds, linkedBroadcastIds },
 		},
 	})
 
