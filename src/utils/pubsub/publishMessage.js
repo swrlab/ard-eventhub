@@ -23,13 +23,6 @@ module.exports = async (topic, message) => {
 		version: config.version,
 	}
 
-	logger.log({
-		level: 'info',
-		message: `sending message > ${topic}`,
-		source,
-		data: { topic },
-	})
-
 	// send message for each topic
 	try {
 		// attempt to send message

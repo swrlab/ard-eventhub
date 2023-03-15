@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - refactor: move DTS keys from GCP Secrets to env
 - refactor: move some event functions to utils
 - refactor: replace `moment` with `luxon`
+- refactor: remove info logging for sent pubsub events
 
 ## [1.4.1] - 2022-12-23
 
