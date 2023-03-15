@@ -35,8 +35,6 @@ module.exports = async (req, res) => {
 			return response.errors.expiredStartTime(req, res)
 		}
 
-		// DEV check for duplicates
-
 		// insert name, creator and timestamp into object
 		const message = {
 			name: eventName,
@@ -121,7 +119,7 @@ module.exports = async (req, res) => {
 
 		// log success
 		logger.log({
-			level: 'notice',
+			level: 'info',
 			message: `event processed > ${eventName} > ${message.services.length}x services (${message.services[0]?.publisherId})`,
 			source,
 			data,

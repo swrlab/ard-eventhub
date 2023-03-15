@@ -43,13 +43,15 @@ To run this project locally in your development environment you'll need these pr
 1. Node in the respective version currently used by the Dockerfile and yarn
 2. Rustup toolchain `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs/ | sh`
 3. Have a Google Cloud Project and generate a JSON key, place it in the `/keys` folder named `ingest.json`. The service account needs to have these roles (some are only required if you also run it on Cloud Run):
-   - `roles/datastore.user`
-   - `roles/errorreporting.writer`
-   - `roles/iam.serviceAccountTokenCreator`
-   - `roles/iam.serviceAccountUser`
-   - `roles/logging.logWriter`
-   - `roles/monitoring.metricWriter`
-   - `roles/pubsub.admin`
+
+- `roles/datastore.user`
+- `roles/errorreporting.writer`
+- `roles/iam.serviceAccountTokenCreator`
+- `roles/iam.serviceAccountUser`
+- `roles/logging.logWriter`
+- `roles/monitoring.metricWriter`
+- `roles/pubsub.admin`
+
 4. Install dependencies (`yarn`)
 5. Run the project
 

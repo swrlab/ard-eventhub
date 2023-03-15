@@ -12,13 +12,11 @@ const { isIncluded, notEmptyArray } = require('@swrlab/utils/packages/strings')
 const logger = require('../../logger')
 const undici = require('../../undici')
 
+// load keys
+const { credentials, endpoints, integrationName, permittedExcludedFields } = require('../../../../config/dtsKeys')
+
 // load config
 const config = require('../../../../config')
-
-// load keys
-const dtsKeys = require('../../../../config/dtsKeys')
-
-const { credentials, endpoints, integrationName, permittedExcludedFields } = dtsKeys
 
 const source = 'utils/plugins/dts/event'
 
@@ -58,14 +56,14 @@ module.exports = async (job) => {
 	if (event.name !== 'de.ard.eventhub.v1.radio.track.playing') {
 		logger.log({
 			level: 'debug',
-			message: `DTS skipping event != playing > ${event.name}`,
+			message: `DTS skipping event (not playing) > ${event.name}`,
 			source,
 			data: { job },
 		})
 		return Promise.resolve()
 	}
 
-	// collect ARD Core IDs
+	// collect ARD Core ids
 	const coreIds = getCoreIds(event.services)
 
 	// fetch all externally mapped ids
@@ -82,7 +80,7 @@ module.exports = async (job) => {
 		return Promise.resolve()
 	}
 
-	// filter integrations matching these ARD Core IDs
+	// filter integrations matching these ARD Core ids
 	const matchingIntegrations = filterIntegrations(integrationsList.json, coreIds)
 	const contentIds = getContentIds(matchingIntegrations)
 
@@ -112,7 +110,7 @@ module.exports = async (job) => {
 		return Promise.resolve()
 	}
 
-	// remap broadcast IDs
+	// remap broadcast ids
 	const linkedBroadcastIds = broadcasts.json.map((broadcast) => broadcast.broadcast_id)
 
 	// remap playing type
@@ -193,9 +191,10 @@ module.exports = async (job) => {
 	const posted = await undici(LIVERADIO_URL, liveradioConfig)
 
 	// check response for keywords
-	let isDtsResponseOkay = true
-	if (isIncluded(posted.string, 'dropped bids')) isDtsResponseOkay = false
-	if (isIncluded(posted.string, 'not authorized')) isDtsResponseOkay = false
+	let isDtsResponseOk = true
+	if (isIncluded(posted.string, 'error')) isDtsResponseOk = false
+	if (isIncluded(posted.string, 'dropped bids')) isDtsResponseOk = false
+	if (isIncluded(posted.string, 'not authorized')) isDtsResponseOk = false
 
 	// log result
 	const message = [
@@ -206,7 +205,7 @@ module.exports = async (job) => {
 		`${coreIds.length}x Core IDs`,
 	]
 	logger.log({
-		level: isDtsResponseOkay && posted.ok ? 'info' : 'error',
+		level: isDtsResponseOk && posted.ok ? 'info' : 'error',
 		message: message.join(' > '),
 		source,
 		data: {
