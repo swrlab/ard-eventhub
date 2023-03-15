@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat: enable multiple user accounts for DTS plugin
 - refactor: move DTS keys from GCP Secrets to env
 - refactor: move some event functions to utils
+- refactor: replace `moment` with `luxon`
 
 ## [1.4.1] - 2022-12-23
 

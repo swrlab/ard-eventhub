@@ -7,7 +7,7 @@
 
 // load node utils
 const slug = require('slug')
-const moment = require('moment')
+const { DateTime } = require('luxon')
 
 // load pubsub for internal queues
 const publisherClient = require('./_publisherClient')
@@ -18,7 +18,7 @@ module.exports = async (newTopic) => {
 	const topic = {
 		name: `projects/${process.env.GCP_PROJECT_ID}/topics/${newTopic.name}`,
 		labels: {
-			created: moment().format('YYYY-MM-DD'),
+			created: DateTime.now().toFormat('yyyy-LL-dd'),
 			'creator-slug': slug(newTopic.creator),
 
 			id: newTopic.id,

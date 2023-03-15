@@ -13,8 +13,8 @@
 
 // Require dependencies
 const chai = require('chai')
-const moment = require('moment')
 const chaiHttp = require('chai-http')
+const { DateTime } = require('luxon')
 
 const server = require('../src/ingest/index')
 const logger = require('../src/utils/logger')
@@ -152,7 +152,7 @@ const eventPath = `/events/${eventName}`
 const event = {
 	event: eventName,
 	type: 'music',
-	start: moment().toISOString(),
+	start: DateTime.now().toISO(),
 	title: 'Unit Test Song',
 	services: [
 		{

@@ -7,7 +7,7 @@
 
 // import express.router
 const express = require('express')
-const moment = require('moment')
+const { DateTime } = require('luxon')
 const OpenApiValidator = require('express-openapi-validator')
 
 // load swagger UI
@@ -34,7 +34,7 @@ router.use(
 			{
 				name: 'iso8601-timestamp',
 				type: 'string',
-				validate: (value) => moment(value, moment.ISO_8601).isValid(),
+				validate: (value) => DateTime.fromISO(value).isValid(),
 			},
 		],
 	})

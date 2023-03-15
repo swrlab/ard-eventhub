@@ -6,7 +6,7 @@
 */
 
 // load node utils
-const moment = require('moment')
+const { DateTime } = require('luxon')
 
 // load eventhub utils
 const firebase = require('../../../utils/firebase')
@@ -29,7 +29,9 @@ module.exports = async (req, res) => {
 		// return ok
 		return response.ok(req, res, {
 			expiresIn: parseInt(login.login.expires_in),
-			expires: moment().add(parseInt(login.login.expires_in), 's').toISOString(),
+			expires: DateTime.now()
+				.plus({ seconds: parseInt(login.login.expires_in) })
+				.toISO(),
 
 			token: login.login.id_token,
 			refreshToken: login.login.refresh_token,
