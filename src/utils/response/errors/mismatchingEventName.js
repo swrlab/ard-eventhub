@@ -11,7 +11,7 @@ const badRequest = require('../badRequest')
 
 const source = 'utils.response.errors.mismatchingEventName'
 
-module.exports = (req, res, eventName) => {
+module.exports = (req, res) => {
 	// log access attempt
 	logger.log({
 		level: 'warning',
@@ -20,7 +20,7 @@ module.exports = (req, res, eventName) => {
 		data: {
 			email: req.user.email,
 			body: req.body,
-			params: eventName,
+			params: req.params,
 		},
 	})
 

@@ -1,7 +1,7 @@
 /*
 
 	ard-eventhub
-	by SWR audio lab
+	by SWR Audio Lab
 
 */
 
@@ -9,6 +9,8 @@
 const datastore = require('../../../utils/datastore')
 const firebase = require('../../../utils/firebase')
 const logger = require('../../../utils/logger')
+
+const source = 'ingest/auth/middleware/verify'
 
 module.exports = async (req, res, next) => {
 	try {
@@ -18,6 +20,12 @@ module.exports = async (req, res, next) => {
 
 		// check existence of x-auth... header
 		if (!authorization || !regexp.test(authorization)) {
+			logger.log({
+				level: 'notice',
+				message: 'user token missing',
+				source,
+				data: { ...req.headers, authorization: 'hidden' },
+			})
 			return res.sendStatus(401)
 		}
 
@@ -33,7 +41,7 @@ module.exports = async (req, res, next) => {
 			logger.log({
 				level: 'notice',
 				message: 'user token invalid',
-				source: 'ingest/auth/middleware/verify',
+				source,
 				data: { ...req.headers, authorization: 'hidden' },
 			})
 			return res.sendStatus(403)
@@ -44,6 +52,12 @@ module.exports = async (req, res, next) => {
 
 		// check if profile exists and valid
 		if (!userDb || userDb.active !== true) {
+			logger.log({
+				level: 'notice',
+				message: 'user not found or not active',
+				source,
+				data: { ...req.headers, authorization: 'hidden' },
+			})
 			return res.sendStatus(403)
 		}
 
@@ -56,7 +70,7 @@ module.exports = async (req, res, next) => {
 		logger.log({
 			level: 'error',
 			message: 'failed to verify user',
-			source: 'ingest/auth/middleware/verify',
+			source,
 			error,
 			data: { ...req.headers, authorization: 'hidden' },
 		})

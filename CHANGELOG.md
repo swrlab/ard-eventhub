@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fix: stop logging requests on dev
 - feat: add `IS_LOCAL` env for local-specific logs and actions
 - feat: enable multiple user accounts for DTS plugin
+- feat: add test for invalid timestamps
 - refactor: move DTS keys from GCP Secrets to env
 - refactor: move some event functions to utils
 - refactor: replace `moment` with `luxon`

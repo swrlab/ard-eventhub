@@ -27,11 +27,13 @@ module.exports = async (req, res) => {
 
 		// check eventName
 		if (req.body?.event && req.body.event !== eventName) {
-			return response.errors.mismatchingEventName(req, res, eventName)
+			console.warn('xxxxx mismatch')
+			return response.errors.mismatchingEventName(req, res)
 		}
 
 		// check offset for start event
-		if (DateTime.now() > DateTime.fromISO(req.body.start).plus({ minutes: 2 })) {
+		if (DateTime.fromISO(req.body.start).plus({ minutes: 2 }) < DateTime.now()) {
+			console.warn('xxxxx expired')
 			return response.errors.expiredStartTime(req, res)
 		}
 

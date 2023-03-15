@@ -34,7 +34,7 @@ router.use(
 			{
 				name: 'iso8601-timestamp',
 				type: 'string',
-				validate: (value) => DateTime.fromISO(value).isValid(),
+				validate: (value) => DateTime.fromISO(value).isValid,
 			},
 		],
 	})

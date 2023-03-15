@@ -1,9 +1,9 @@
 /*
 
 	ard-eventhub
-	by SWR audio lab
+	by SWR Audio Lab
 
-    unit tests for the ingest service
+	unit tests for the ingest service
 
 */
 
@@ -46,12 +46,14 @@ const testUserReset = process.env.TEST_USER_RESET
 
 // define general tests
 function testResponse(res, status) {
+	console.log(`comparing response with statusCode ${res.statusCode} (should be ${status})`)
 	expect(res).to.be.json
 	expect(res).to.have.status(status)
 }
 
 // check rejection of invalid token
-function testAuth(res) {
+function testFailedAuth(res) {
+	console.log(`comparing failed auth response with statusCode ${res.statusCode} (should be 403)`)
 	expect(res).to.have.status(403)
 }
 
@@ -109,7 +111,8 @@ describe(`POST ${refreshPath}`, () => {
 				testResponse(res, 200)
 				testAuthKeys(res.body)
 				done()
-				// Store new token for further tests
+
+				// store new token for further tests
 				accessToken = res.body.token
 			})
 	})
@@ -165,13 +168,13 @@ const event = {
 }
 
 describe(`POST ${eventPath}`, () => {
-	it('test auth for POST /event', (done) => {
+	it('test invalid auth for POST /event', (done) => {
 		chai.request(server)
 			.post(eventPath)
 			.set('Authorization', `Bearer invalid${accessToken}`)
 			.send(event)
 			.end((err, res) => {
-				testAuth(res)
+				testFailedAuth(res)
 				done()
 			})
 	})
@@ -184,6 +187,18 @@ describe(`POST ${eventPath}`, () => {
 			.end((err, res) => {
 				testResponse(res, 201)
 				testEventKeys(res.body)
+				done()
+			})
+	})
+
+	it('publish a new event with expired time', (done) => {
+		event.start = DateTime.now().minus({ minutes: 3 }).toISO()
+		chai.request(server)
+			.post(eventPath)
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send(event)
+			.end((err, res) => {
+				testResponse(res, 400)
 				done()
 			})
 	})
@@ -210,7 +225,7 @@ describe(`GET ${topicPath}`, () => {
 			.get(topicPath)
 			.set('Authorization', `Bearer invalid${accessToken}`)
 			.end((err, res) => {
-				testAuth(res)
+				testFailedAuth(res)
 				done()
 			})
 	})
@@ -273,7 +288,7 @@ describe(`POST ${subscriptPath}`, () => {
 			.set('Authorization', `Bearer invalid${accessToken}`)
 			.send(subscription)
 			.end((err, res) => {
-				testAuth(res)
+				testFailedAuth(res)
 				done()
 			})
 	})
@@ -299,7 +314,7 @@ describe(`GET ${subscriptPath}`, () => {
 			.get(subscriptPath)
 			.set('Authorization', `Bearer invalid${accessToken}`)
 			.end((err, res) => {
-				testAuth(res)
+				testFailedAuth(res)
 				done()
 			})
 	})
@@ -323,7 +338,7 @@ describe(`GET ${subscriptPath}/{name}`, () => {
 			.get(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer invalid${accessToken}`)
 			.end((err, res) => {
-				testAuth(res)
+				testFailedAuth(res)
 				done()
 			})
 	})
@@ -346,7 +361,7 @@ describe(`DELETE ${subscriptPath}/{name}`, () => {
 			.delete(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer invalid${accessToken}`)
 			.end((err, res) => {
-				testAuth(res)
+				testFailedAuth(res)
 				done()
 			})
 	})
