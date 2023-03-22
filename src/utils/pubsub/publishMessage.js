@@ -13,12 +13,13 @@ const config = require('../../../config')
 // set local config
 const source = 'pubsub.publishMessage'
 
-module.exports = async (topic, message) => {
+module.exports = async (topic, message, attributes) => {
 	// initialize output
 	let output
 
 	// add runtime information as attributes
 	const customAttributes = {
+		...attributes,
 		stage: config.stage,
 		version: config.version,
 	}

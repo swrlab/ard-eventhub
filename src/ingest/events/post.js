@@ -45,6 +45,11 @@ module.exports = async (req, res) => {
 			...req.body,
 		}
 
+		// create custom attributes for pubsub metadata
+		const attributes = {
+			event: eventName,
+		}
+
 		// compile core hashes and pubsub names for every service
 		message.services = await Promise.all(message.services.map((service) => processServices(service, req)))
 
@@ -58,7 +63,7 @@ module.exports = async (req, res) => {
 			// ignoring blocked services
 			if (!service.blocked && service.topic?.name) {
 				// try sending message
-				const messageId = await pubsub.publishMessage(service.topic.name, message)
+				const messageId = await pubsub.publishMessage(service.topic.name, message, attributes)
 
 				// handle errors
 				if (messageId === 'TOPIC_ERROR') {
@@ -94,7 +99,11 @@ module.exports = async (req, res) => {
 				}
 
 				// try sending message
-				const messageId = await pubsub.publishMessage(config.pubSubTopicSelf, pluginMessage)
+				const messageId = await pubsub.publishMessage(
+					config.pubSubTopicSelf,
+					pluginMessage,
+					attributes
+				)
 
 				// add to output
 				pluginMessages.push({
