@@ -6,6 +6,7 @@
 */
 
 // import express.router
+const { isIncluded } = require('@swrlab/utils/packages/strings')
 const express = require('express')
 const { DateTime } = require('luxon')
 const OpenApiValidator = require('express-openapi-validator')
@@ -30,13 +31,12 @@ router.use(
 		validateResponses: false,
 		ignorePaths: (path) =>
 			path.startsWith('/openapi') || path === '/' || path === '/health' || path === '/pubsub',
-		formats: [
-			{
-				name: 'iso8601-timestamp',
+		formats: {
+			'iso8601-timestamp': {
 				type: 'string',
-				validate: (value) => DateTime.fromISO(value).isValid,
+				validate: (value) => isIncluded(value, 'T') && DateTime.fromISO(value).isValid,
 			},
-		],
+		},
 	})
 )
 

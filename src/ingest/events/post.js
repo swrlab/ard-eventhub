@@ -42,7 +42,10 @@ module.exports = async (req, res) => {
 			created: DateTime.now().toISO(),
 
 			// use entire POST body to include potentially new fields
-			...req.body,
+			...structuredClone(req.body),
+
+			// reformat start time
+			start: DateTime.fromISO(req.body.start).toLocal().toISO(),
 		}
 
 		// create custom attributes for pubsub metadata
@@ -131,7 +134,7 @@ module.exports = async (req, res) => {
 			level: 'info',
 			message: `event processed > ${eventName} > ${message.services.length}x services (${message.services[0]?.publisherId})`,
 			source,
-			data,
+			data: { ...data, body: req.body },
 		})
 
 		// return ok
