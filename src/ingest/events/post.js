@@ -19,6 +19,7 @@ const response = require('../../utils/response')
 const config = require('../../../config')
 
 const source = 'ingest/events/post'
+const DEFAULT_ZONE = 'Europe/Berlin'
 
 module.exports = async (req, res) => {
 	try {
@@ -45,7 +46,7 @@ module.exports = async (req, res) => {
 			...structuredClone(req.body),
 
 			// reformat start time
-			start: DateTime.fromISO(req.body.start).toLocal().toISO(),
+			start: DateTime.fromISO(req.body.start, { zone: DEFAULT_ZONE }).toLocal().toISO(),
 		}
 
 		// create custom attributes for pubsub metadata

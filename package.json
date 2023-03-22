@@ -58,8 +58,8 @@
 		"license-compliance": "^1.2.5",
 		"mocha": "^10.2.0",
 		"nodemon": "^2.0.21",
-		"prettier": "^2.8.4",
-		"typescript": "^4.9.5"
+		"prettier": "^2.8.6",
+		"typescript": "^5.0.2"
 	},
 	"resolutions": {
 		"ansi-regex": "^5.0.1",
