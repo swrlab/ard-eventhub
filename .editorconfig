@@ -1,0 +1,42 @@
+# docs: https://editorconfig.org
+# please make sure to keep this file in sync between repositories
+# to main file should be edited in `swr-prettier-config` and copied where needed
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = tab
+indent_size = 8
+print_width = 111
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.md]
+trim_trailing_whitespace = false
+indent_style = space
+indent_size = 2
+
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# LiquidSoap config files
+[*.liq]
+indent_style = space
+indent_size = 2
+
+# Terraform config files
+[*.tf]
+indent_style = space
+indent_size = 2
+
+# Linting toml config files
+[*.toml]
+indent_style = space
+indent_size = 2
+
+# Auto-generated CSV Files
+[*.csv]
+insert_final_newline = false

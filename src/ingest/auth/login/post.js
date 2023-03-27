@@ -1,12 +1,12 @@
 /*
 
 	ard-eventhub
-	by SWR audio lab
+	by SWR Audio Lab
 
 */
 
 // load node utils
-const moment = require('moment')
+const { DateTime } = require('luxon')
 
 // load eventhub utils
 const firebase = require('../../../utils/firebase')
@@ -27,9 +27,10 @@ module.exports = async (req, res) => {
 		}
 
 		// return ok
+		const expiresIn = parseInt(login.login.expiresIn)
 		return response.ok(req, res, {
-			expiresIn: parseInt(login.login.expiresIn),
-			expires: moment().add(parseInt(login.login.expiresIn), 's').toISOString(),
+			expiresIn,
+			expires: DateTime.now().plus({ seconds: expiresIn }).toISO(),
 
 			token: login.login.idToken,
 			refreshToken: login.login.refreshToken,

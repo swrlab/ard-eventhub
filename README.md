@@ -19,15 +19,15 @@ These ARD broadcasters are currently sending live metadata via ARD Eventhub:
 
 | Broadcaster      | TEST | PROD |
 | ---------------- | ---- | ---- |
-| BR               | ✅    | ✅    |
-| HR               | ✅    | ✅    |
-| MDR              | -    | ✅    |
-| NDR              | ✅    | ✅    |
-| Radio Bremen     | -    | ✅    |
-| RBB              | -    | ✅    |
-| SR               | -    | ✅    |
-| SWR              | ✅    | ✅    |
-| WDR              | ✅    | ✅    |
+| BR               | ✅   | ✅   |
+| HR               | ✅   | ✅   |
+| MDR              | -    | ✅   |
+| NDR              | ✅   | ✅   |
+| Radio Bremen     | -    | ✅   |
+| RBB              | -    | ✅   |
+| SR               | -    | ✅   |
+| SWR              | ✅   | ✅   |
+| WDR              | ✅   | ✅   |
 | Deutschlandradio | -    | -    |
 
 ## Get Started and Documentation
@@ -82,7 +82,7 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `firebase-admin`               | [Apache License 2.0](https://github.com/firebase/firebase-admin-node/blob/master/LICENSE)          |
 | NPM     | `google-auth-library`          | [Apache License 2.0](https://github.com/googleapis/google-auth-library-nodejs/blob/master/LICENSE) |
 | NPM     | `jsonwebtoken`                 | [MIT](https://github.com/auth0/node-jsonwebtoken/blob/master/LICENSE)                              |
-| NPM     | `moment`                       | [MIT](https://github.com/moment/moment/blob/develop/LICENSE)                                       |
+| NPM     | `luxon`                        | [MIT](https://github.com/moment/luxon/blob/master/LICENSE.md)                                      |
 | NPM     | `slug`                         | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                           |
 | NPM     | `swagger-ui-express`           | [MIT](https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE)                       |
 | NPM     | `uuid`                         | [MIT](https://github.com/uuidjs/uuid/blob/master/LICENSE.md)                                       |

@@ -1,15 +1,18 @@
 /*
 
 	ard-eventhub
-	by SWR audio lab
+	by SWR Audio Lab
 
 */
 
 // load node utils
+const os = require('os')
 const { createLogger, config, format, transports } = require('winston')
 
 // get version
 const { version } = require('../../../package.json')
+
+const hostName = os.hostname()
 
 // set error formatter
 const convertError = format((event) => {
@@ -25,7 +28,8 @@ const convertError = format((event) => {
 
 // set converter for globals
 const convertGlobals = format((event) => {
-	event.serviceName = 'eventhub-ingest'
+	event.host = process.env.K_REVISION || hostName
+	event.serviceName = process.env.SERVICE_NAME
 	event.stage = process.env.STAGE
 	event.version = version
 	event.nodeVersion = process.version
@@ -34,7 +38,7 @@ const convertGlobals = format((event) => {
 
 // set format converters
 let formatConfig = format.combine(convertError(), convertGlobals(), format.json())
-if (process.env.DEBUG === 'true') {
+if (process.env.IS_LOCAL === 'true') {
 	formatConfig = format.combine(
 		convertError(),
 		convertGlobals(),

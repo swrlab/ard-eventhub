@@ -1,12 +1,12 @@
 /*
 
 	ard-eventhub
-	by SWR audio lab
+	by SWR Audio Lab
 
 */
 
 // load node utils
-const moment = require('moment')
+const { DateTime } = require('luxon')
 const slug = require('slug')
 
 // load utils
@@ -36,7 +36,7 @@ module.exports = async (subscription) => {
 			id: subscription.id,
 			stage: config.stage,
 			'creator-slug': slug(subscription.creator),
-			created: moment().format('YYYY-MM-DD'),
+			created: DateTime.now().toFormat('yyyy-LL-dd'),
 		},
 		ackDeadlineSeconds: 20,
 		expirationPolicy: {},

@@ -5,14 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2023-03-14
+
+- fix: stop logging requests on dev
+- fix: spelling of `SWR Audio Lab`
+- fix: handle invalid format definition
+- feat: add `IS_LOCAL` env for local-specific logs and actions
+- feat: enable multiple user accounts for DTS plugin
+- feat: add test for invalid timestamps
+- feat: add custom attributes to pubsub messages
+- refactor: move DTS keys from GCP Secrets to env
+- refactor: move some event functions to utils
+- refactor: replace `moment` with `luxon`
+- refactor: remove info logging for sent pubsub events
+
 ## [1.4.1] - 2022-12-23
 
 - chore: update `jsonwebtoken` to mitigate CVE-2022-23529
 
 ## [1.4.0] - 2022-11-24
 
-- chore: update express-openapi-validator to `v5`
-- chore: update google-github-actions to `v1`
+- chore: update `express-openapi-validator` to `v5`
+- chore: update `google-github-actions` to `v1`
 - chore: refactor env check and add google-auth
 - chore: add env var checks to mocha-tests
 - chore: migrate GitHub Actions from `::set-output` to new format
@@ -35,10 +49,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - chore: update Node.js to `v18`
 - chore: update node-utils to `v1.0.0`
-- fix: resolve eslint errors
+- fix: resolve ESLint errors
 - fix: reorder core-dump (alphabetically institutions)
 - feat: update docker version tag from `package.json`
-- feat: add eslint check to github-actions
+- feat: add ESLint check to GitHub Actions
 
 ## [1.3.6] - 2022-07-18
 
@@ -46,7 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.5] - 2022-06-21
 
-- update: github-actions to use latest versions
+- update: GitHub Actions to use latest versions
 - update: @google-cloud/secret-manager to `v4.0.0`
 - update: @google-cloud/datastore to `v7.0.0`
 - update: firebase-admin to `v11.0.0`
@@ -128,12 +142,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add two missing MDR channels
 - Update project dependencies
-- Update github actions
+- Update GitHub Actions
 
 ## [1.2.1] - 2021-11-16
 
 - Update project dependencies
-- Update github actions
+- Update GitHub Actions
 
 ## [1.2.0] - 2021-10-19
 
@@ -147,7 +161,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.5] - 2021-09-27
 
 - Update project dependencies
-- Update github actions
+- Update GitHub Actions
 
 ## [1.1.4] - 2021-09-13
 

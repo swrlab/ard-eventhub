@@ -1,10 +1,16 @@
-# ARD-Eventhub
+# ARD-Eventhub Ingest
 
-## Ingest
+The Ingest service is used to accept incoming events, distribute them via Pub/Sub and provide methods for users to manage their own subscriptions (self-service).
 
-The Ingest service is used to accept incoming events, distribute them via Pub/Sub and provide methods for users to manage their own subscriptions (self-service).  
+- [ARD-Eventhub Ingest](#ard-eventhub-ingest)
+  - [Environments](#environments)
+  - [Stages](#stages)
+    - [DEV](#dev)
+    - [PROD](#prod)
+  - [Setup](#setup)
+  - [Deployment](#deployment)
 
-### Environments
+## Environments
 
 Designated host is Kubernetes but the Docker container will also be used in other environments such as Google Cloud Run for testing purposes.
 
@@ -18,15 +24,15 @@ Several environment variables need to be set in `.env` config in order to run th
 - OPTIONAL `PORT` - override server port setting, default is 8080
 - OPTIONAL `DEBUG` - set true to enable more detailed logging
 
-### Stages
+## Stages
 
 Some staging information is auto-detected (whether to run tracing or not), some is configured by the `STAGE` variable.
 
-#### DEV
+### DEV
 
 Main difference is the prefix used for Pub/Sub topics, which includes `DEV-`.
 
-#### PROD
+### PROD
 
 Uses full production prefixes and configuration.
 
@@ -37,35 +43,26 @@ To run this project locally in your development environment you'll need these pr
 1. Node in the respective version currently used by the Dockerfile and yarn
 2. Rustup toolchain `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs/ | sh`
 3. Have a Google Cloud Project and generate a JSON key, place it in the `/keys` folder named `ingest.json`. The service account needs to have these roles (some are only required if you also run it on Cloud Run):
-   1. `roles/datastore.user`
-   2. `roles/errorreporting.writer`
-   3. `roles/iam.serviceAccountTokenCreator`
-   4. `roles/iam.serviceAccountUser`
-   5. `roles/logging.logWriter`
-   6. `roles/monitoring.metricWriter`
-   7. `roles/pubsub.admin`
+
+- `roles/datastore.user`
+- `roles/errorreporting.writer`
+- `roles/iam.serviceAccountTokenCreator`
+- `roles/iam.serviceAccountUser`
+- `roles/logging.logWriter`
+- `roles/monitoring.metricWriter`
+- `roles/pubsub.admin`
+
 4. Install dependencies (`yarn`)
 5. Run the project
 
-   ```sh
-   yarn ingest:local
-   ```
+```sh
+yarn ingest:local
+```
 
-6. Open http://localhost:8080/openapi/
+6. Open [localhost:8080/openapi](http://localhost:8080/openapi/)
 
 ## Deployment
 
 The deployment process of Eventhub-Ingest is different for `Non-Prod` and `Prod`-Stages
 
-### Dev, Test, Stage
-
-Deployments for Stages `Dev`, `Test` and `Stage` can be done in Github-Actions after the run completed successful.
-
-### Prod
-
-Deployments for `Prod` need to be done by external ARD-Service. Therefore request the rollout by sending following E-Mail:
-
-- To: `Christian.Hufnagel@swr.de`
-- Cc: `Julius.Zimmermann@ard.de`
-- Subject: Prod-Deployment of Eventhub-Ingest
-- Text: I request to deploy the following version of the eventhub-ingest on prod: `<docker-version-tag>`
+Deployments for all stages will be done in Github-Actions after the run completed successful.

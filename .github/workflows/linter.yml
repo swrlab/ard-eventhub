@@ -1,0 +1,19 @@
+name: Linter
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches-ignore:
+      - dependabot/**
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  lint:
+    uses: swrlab/node-utils/.github/workflows/linter.yml@main
+    with:
+      install-all: false
+      log-level: "NOTICE"
+      validate-all-codebase: false

@@ -1,13 +1,14 @@
 /*
 
 	ard-eventhub
-	by SWR audio lab
+	by SWR Audio Lab
 
 */
 
 // import express.router
+const { isIncluded } = require('@swrlab/utils/packages/strings')
 const express = require('express')
-const moment = require('moment')
+const { DateTime } = require('luxon')
 const OpenApiValidator = require('express-openapi-validator')
 
 // load swagger UI
@@ -30,13 +31,12 @@ router.use(
 		validateResponses: false,
 		ignorePaths: (path) =>
 			path.startsWith('/openapi') || path === '/' || path === '/health' || path === '/pubsub',
-		formats: [
-			{
-				name: 'iso8601-timestamp',
+		formats: {
+			'iso8601-timestamp': {
 				type: 'string',
-				validate: (value) => moment(value, moment.ISO_8601).isValid(),
+				validate: (value) => isIncluded(value, 'T') && DateTime.fromISO(value).isValid,
 			},
-		],
+		},
 	})
 )
 

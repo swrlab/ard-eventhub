@@ -32,12 +32,12 @@ jobs:
       - name: 👀 Checkout Code
         uses: actions/checkout@v3
 
-      - name: ⛺️ Install Node.js
+      - name: 🏗 Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-          cache-dependency-path: '**/yarn.lock'
+          cache: "yarn"
+          cache-dependency-path: "**/yarn.lock"
 
       - name: 📦 Install Dependencies
         run: yarn
@@ -53,14 +53,15 @@ jobs:
 
       - name: 🧪 Run Ingest Tests
         env:
-          SERVICE_NAME: ard-eventhub
-          STAGE: ${{ matrix.STAGES }}
           DD_TRACE_ENABLED: false
-          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          DTS_KEYS: ${{ secrets.TEST_DTS_KEYS }}
           FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL: ${{ secrets.PUBSUB_SERVICE_ACCOUNT_EMAIL }}
+          SERVICE_NAME: ard-eventhub-ingest
+          STAGE: ${{ matrix.STAGES }}
           TEST_USER: ${{ secrets.TEST_USER }}
           TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
-          PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL: ${{ secrets.PUBSUB_SERVICE_ACCOUNT_EMAIL }}
         run: yarn ingest:test
 
   docker:
@@ -77,14 +78,11 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
 
-      - name: 🏗 Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-
       - name: 🔑 Login to Registry
-        run: 'gcloud auth configure-docker $REGISTRY_DOMAIN'
+        run: "gcloud auth configure-docker $REGISTRY_DOMAIN"
 
       - name: 🚧 Building docker image
-        run: 'docker build ./ --file ./Dockerfile -t image'
+        run: "docker build ./ --file ./Dockerfile -t image"
 
       - name: 🔖 Get Package Version
         id: package-version
@@ -132,7 +130,7 @@ jobs:
             ```
 
       - name: 👋 Logout
-        run: 'docker logout'
+        run: "docker logout"
 
   deploy-A-dev-kubernetes:
     if: github.event.pull_request.merged == true

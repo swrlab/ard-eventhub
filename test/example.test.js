@@ -1,9 +1,9 @@
 /*
 
 	ard-eventhub
-	by SWR audio lab
+	by SWR Audio Lab
 
-    simple tests with mocha and chai
+	simple tests with mocha and chai
 
 */
 

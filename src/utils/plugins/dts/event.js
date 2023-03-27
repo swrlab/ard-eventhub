@@ -1,138 +1,129 @@
-/* eslint-disable no-nested-ternary */
 /*
 
 	ard-eventhub
-	by SWR audio lab
+	by SWR Audio Lab
 
 */
 
+// load node utils
+const { isIncluded, notEmptyArray } = require('@swrlab/utils/packages/strings')
+
 // load utils
 const logger = require('../../logger')
-const secrets = require('../../secrets')
 const undici = require('../../undici')
+
+// load keys
+const { credentials, endpoints, integrationName, permittedExcludedFields } = require('../../../../config/dtsKeys')
 
 // load config
 const config = require('../../../../config')
 
 const source = 'utils/plugins/dts/event'
 
-const defaultHeaders = { Accept: 'application/json' }
+const DEFAULT_HEADERS = { Accept: 'application/json', 'Content-Type': 'application/json' }
+const LIVERADIO_URL = endpoints.liveRadioEvent[config.stage]
+const RECORDS_INTEGRATION_URL = endpoints.listIntegrationRecords.replace('{integrationName}', integrationName)
+const DASHBOARD_REQUEST_CONFIG = {
+	timeout: 7e3,
+	reject: false,
+	headers: { ...DEFAULT_HEADERS, Authorization: credentials.dashboardToken },
+}
 
-const checkIfArrayHasContent = (thisArray) => {
-	return Array.isArray(thisArray) && thisArray.length > 0
+// provide remapping helpers
+const getCoreIds = (services) => services.map((service) => service.topic.id)
+const filterIntegrations = (li, coreIds) =>
+	li.filter((i) => i.external_system === integrationName && coreIds.includes(i.external_id))
+const getContentIds = (li) => li.map((integration) => integration.content_id)
+
+const getUserForInstitution = (institutionId) => {
+	// get user or reject if not found
+	const liveradioUser = credentials.liveradio.find((user) => user.coreId === institutionId)
+	if (!liveradioUser) return { token: null, username: null }
+
+	// encode token
+	const liveradioLogin = `${liveradioUser?.username}:${liveradioUser?.password}`
+	return {
+		token: `Basic ${Buffer.from(liveradioLogin, 'utf8').toString('base64')}`,
+		username: liveradioUser.username,
+	}
 }
 
 module.exports = async (job) => {
 	// remap input
-	const { event, messageId, plugin } = job
+	const { event, plugin, institutionId } = job
 
 	// only process now playing events
 	if (event.name !== 'de.ard.eventhub.v1.radio.track.playing') {
 		logger.log({
 			level: 'debug',
-			message: `DTS skipping event != playing > ${event.name}`,
+			message: `DTS skipping event (not playing) > ${event.name}`,
 			source,
-			data: { messageId, job },
+			data: { job },
 		})
 		return Promise.resolve()
 	}
-
-	// fetch secrets config
-	const { json: pluginSecrets } = await secrets.get(`plugins-dts-${config.stage}`)
-	const { credentials, endpoints, integrationName, permittedExcludedFields } = pluginSecrets
 
 	// collect ARD Core ids
-	const coreIds = event.services.map((service) => service?.topic?.id)
+	const coreIds = getCoreIds(event.services)
 
 	// fetch all externally mapped ids
-	const lookupConfig = {
-		url: endpoints.listIntegrationRecords.replace('{integrationName}', integrationName),
-		method: 'GET',
-		timeout: 7e3,
-		headers: {
-			...defaultHeaders,
-			Authorization: credentials.dashboard,
-		},
-	}
-	const integrationsList = await undici(lookupConfig.url, lookupConfig)
+	const integrationsList = await undici(RECORDS_INTEGRATION_URL, DASHBOARD_REQUEST_CONFIG)
 
 	// end processing if no integrations were found
-	if (!integrationsList.ok) {
+	if (!integrationsList.ok || !notEmptyArray(integrationsList.json)) {
 		logger.log({
 			level: 'error',
-			message: `failed loading DTS integrations (err 1)`,
+			message: `failed loading DTS integrations`,
 			source,
-			data: { messageId, job, coreIds, response: integrationsList.string },
+			data: { job, ids: { coreIds }, string: integrationsList.string, json: integrationsList.json },
 		})
 		return Promise.resolve()
 	}
 
-	// end processing if no integrations were found
-	if (!checkIfArrayHasContent(integrationsList.json)) {
-		logger.log({
-			level: 'error',
-			message: `failed loading DTS integrations (err 2)`,
-			source,
-			data: { messageId, job, coreIds },
-		})
-		return Promise.resolve()
-	}
-
-	// filter IDs matching these services
-	const contentIds = integrationsList.json
-		.filter(
-			(integration) =>
-				integration.external_system === integrationName &&
-				coreIds.includes(integration.external_id)
-		)
-		.map((integration) => integration.content_id)
+	// filter integrations matching these ARD Core ids
+	const matchingIntegrations = filterIntegrations(integrationsList.json, coreIds)
+	const contentIds = getContentIds(matchingIntegrations)
 
 	// catch non-existent mappings
-	if (!checkIfArrayHasContent(contentIds)) {
+	if (!notEmptyArray(contentIds)) {
 		logger.log({
 			level: 'notice',
-			message: `DTS BID mapping missing for coreIds (err 3)`,
+			message: `DTS BID mapping missing for coreIds`,
 			source,
-			data: { messageId, job, coreIds },
+			data: { job, ids: { coreIds } },
 		})
 		return Promise.resolve()
 	}
 
 	// fetch all matching broadcasts
-	lookupConfig.url = endpoints.searchBroadcasts.replace('{contentQuery}', contentIds.join(','))
-	const broadcasts = await undici(lookupConfig.url, lookupConfig)
-
-	// end processing if no integrations were found
-	if (!broadcasts.ok) {
-		logger.log({
-			level: 'error',
-			message: `failed loading DTS broadcasts for coreIds (err 4)`,
-			source,
-			data: { messageId, job, coreIds, response: broadcasts.string },
-		})
-		return Promise.resolve()
-	}
+	const searchBroadcastsUrl = endpoints.searchBroadcasts.replace('{contentQuery}', contentIds.join(','))
+	const broadcasts = await undici(searchBroadcastsUrl, DASHBOARD_REQUEST_CONFIG)
 
 	// end processing if no broadcasts were found
-	if (!checkIfArrayHasContent(broadcasts.json)) {
+	if (!broadcasts.ok || !notEmptyArray(broadcasts.json)) {
 		logger.log({
-			level: 'notice',
-			message: `failed finding DTS broadcasts for coreIds (err 5)`,
+			level: 'error',
+			message: `failed loading DTS broadcasts for coreIds`,
 			source,
-			data: { messageId, job, coreIds, contentIds, response: broadcasts.json },
+			data: { job, ids: { coreIds, contentIds }, string: broadcasts.string, json: broadcasts.json },
 		})
 		return Promise.resolve()
 	}
 
-	// remap broadcast IDs
+	// remap broadcast ids
 	const linkedBroadcastIds = broadcasts.json.map((broadcast) => broadcast.broadcast_id)
+
+	// remap playing type
+	let type = 'other'
+	if (event.type === 'music') type = event.type
+	if (event.type === 'advertisement') type = 'ad'
 
 	// remap Eventhub variables to external ones
 	const liveRadioEvent = {
 		broadcastId: null,
 		linkedBroadcastIds,
 
-		type: event.type === 'music' ? event.type : event.type === 'advertisement' ? 'ad' : 'other',
+		type,
 		status: 'playing',
 
 		client: config.serviceName,
@@ -169,7 +160,7 @@ module.exports = async (job) => {
 	}
 
 	// handle exclusions
-	if (checkIfArrayHasContent(plugin.excludeFields)) {
+	if (notEmptyArray(plugin.excludeFields)) {
 		for (const field of plugin.excludeFields) {
 			if (permittedExcludedFields[field]) {
 				liveRadioEvent[permittedExcludedFields[field]] = null
@@ -177,30 +168,55 @@ module.exports = async (job) => {
 		}
 	}
 
+	// set event host and auth
+	const { token: liveradioToken, username } = getUserForInstitution(institutionId)
+	if (!LIVERADIO_URL || !liveradioToken) {
+		logger.log({
+			level: 'error',
+			message: `failed loading DTS user for liveradio API`,
+			source,
+			data: { job, ids: { coreIds } },
+		})
+		return Promise.resolve()
+	}
+
 	// post event
-	const postConfig = {
-		url: endpoints.liveRadioEvent[config.stage],
+	const liveradioConfig = {
 		method: 'POST',
 		body: JSON.stringify([liveRadioEvent]),
 		timeout: 7e3,
-		headers: {
-			...defaultHeaders,
-			Authorization: credentials.liveradio,
-			'Content-Type': 'application/json',
-		},
+		reject: false,
+		headers: { ...DEFAULT_HEADERS, Authorization: liveradioToken },
 	}
-	const posted = await undici(postConfig.url, postConfig)
+	const posted = await undici(LIVERADIO_URL, liveradioConfig)
+
+	// check response for keywords
+	let isDtsResponseOk = true
+	if (isIncluded(posted.string, 'error')) isDtsResponseOk = false
+	if (isIncluded(posted.string, 'dropped bids')) isDtsResponseOk = false
+	if (isIncluded(posted.string, 'not authorized')) isDtsResponseOk = false
 
 	// log result
+	const message = [
+		`DTS event done (${event.services[0]?.publisherId})`,
+		`status ${posted.statusCode}`,
+		`${linkedBroadcastIds?.length}x BIDs`,
+		`${contentIds?.length}x contentIds ${JSON.stringify(contentIds)}`,
+		`${coreIds.length}x Core IDs`,
+	]
 	logger.log({
-		level: posted.ok ? 'info' : 'error',
-		message: `DTS event done > status ${posted.statusCode} > contentIds ${contentIds.join(',')}`,
+		level: isDtsResponseOk && posted.ok ? 'info' : 'error',
+		message: message.join(' > '),
 		source,
 		data: {
-			messageId,
 			input: job,
 			ids: { coreIds, contentIds, linkedBroadcastIds },
-			posted: { statusCode: posted.statusCode, response: posted.string, liveRadioEvent },
+			dts: {
+				username,
+				statusCode: posted.statusCode,
+				response: posted.json || posted.string,
+				liveRadioEvent,
+			},
 		},
 	})
 

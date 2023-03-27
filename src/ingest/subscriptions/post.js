@@ -1,12 +1,12 @@
 /*
 
 	ard-eventhub
-	by SWR audio lab
+	by SWR Audio Lab
 
 */
 
 // load node utils
-const moment = require('moment')
+const { DateTime } = require('luxon')
 const { v4: uuidv4 } = require('uuid')
 
 // load eventhub utils
@@ -69,7 +69,7 @@ module.exports = async (req, res) => {
 
 			creator: req.user.email,
 			institutionId: req.user.institutionId,
-			created: moment().toISOString(),
+			created: DateTime.now().toISO(),
 		}
 
 		// save to datastore

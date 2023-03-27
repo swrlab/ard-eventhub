@@ -7,7 +7,7 @@ yarn-error.log*
 .DS_STORE
 
 # keys
-keys/*.json
+keys/
 .env
 
 # Dependency directories

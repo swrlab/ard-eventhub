@@ -10,7 +10,7 @@ info:
   license:
     name: European Union Public License 1.2
     url: "https://spdx.org/licenses/EUPL-1.2.html"
-  version: 1.4.1
+  version: 1.5.0
 externalDocs:
   description: ARD-Eventhub Documentation
   url: "https://swrlab.github.io/ard-eventhub/"
@@ -411,15 +411,15 @@ components:
   requestBodies:
     eventV1RadioTrack:
       description: >
-        New event to be distributed to subscribers.  
-          
+        New event to be distributed to subscribers.
+
         The Eventhub format validation expects only a subset of these
         variables as minimum set. All other fields are technically optional,
         but **highly encouraged** to be included, so a best-possible metadata
-        exchange is possible.  
+        exchange is possible.
 
         The subset is defined in the list of required fields of Schemas
-        `eventV1PostBody`, resulting in this body:  
+        `eventV1PostBody`, resulting in this body:
 
         ```json
 
@@ -434,8 +434,8 @@ components:
         ```
 
         Required fields not specified in the Schema, will cause your request to
-        fail.  
-          
+        fail.
+
         The `id` is inserted by Eventhub as string-formatted number, but might
         be a true string in the future, do not expect this string to remain
         numbers only!
@@ -447,11 +447,11 @@ components:
   responses:
     eventV1RadioTrack:
       description: >
-        Event created  
-          
-        *Note:* The first request of an event for an externalId that is not 
-        registered yet, will return the status `failed: 1`. This indicates 
-        that a new topic for the externalId has been created, and the request 
+        Event created
+
+        *Note:* The first request of an event for an externalId that is not
+        registered yet, will return the status `failed: 1`. This indicates
+        that a new topic for the externalId has been created, and the request
         needs to be repeated:
 
         ```json
@@ -464,7 +464,7 @@ components:
 
         ```
 
-        If the request returns the status `blocked: 1`, it indicates that you 
+        If the request returns the status `blocked: 1`, it indicates that you
         are not allowed to publish events under the given publisherId.
 
       content:

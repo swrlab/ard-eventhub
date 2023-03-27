@@ -1,0 +1,35 @@
+# see config https://github.com/DavidAnson/markdownlint#optionsconfig
+# see example file https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.yaml
+# see rules https://github.com/markdownlint/markdownlint/blob/master/docs/RULES.md
+# recommended VS Code plugin: https://marketplace.visualstudio.com/items?itemName=DavidAnson.vscode-markdownlint
+
+# Default state for all rules
+default: true
+
+# Unordered list style
+MD004: true
+
+MD007:
+  # Unordered list indentation
+  indent: 2
+
+# MD013/line-length - Line length
+MD013:
+  # Number of characters
+  line_length: 808
+
+MD026:
+  # List of not allowed
+  punctuation: '.,;:!。，；:'
+
+# Ordered list item prefix
+MD029: false
+
+# Allow inline HTML
+MD033: false
+
+# Emphasis used instead of a heading
+MD036: false
+
+# Error on blank lines
+blank_lines: false
