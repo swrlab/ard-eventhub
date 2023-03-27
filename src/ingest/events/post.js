@@ -25,6 +25,7 @@ module.exports = async (req, res) => {
 	try {
 		// fetch inputs
 		const { eventName } = req.params
+		const start = DateTime.fromISO(req.body.start, { zone: DEFAULT_ZONE })
 
 		// check eventName consistency
 		if (req.body?.event && req.body.event !== eventName) {
@@ -32,7 +33,7 @@ module.exports = async (req, res) => {
 		}
 
 		// check offset for start event
-		if (DateTime.fromISO(req.body.start).plus({ minutes: 2 }) < DateTime.now()) {
+		if (start.plus({ minutes: 2 }) < DateTime.now()) {
 			return response.errors.expiredStartTime(req, res)
 		}
 
@@ -40,13 +41,13 @@ module.exports = async (req, res) => {
 		const message = {
 			name: eventName,
 			creator: req.user.email,
-			created: DateTime.now().toISO(),
+			created: DateTime.now().toLocal().toISO(),
 
 			// use entire POST body to include potentially new fields
 			...structuredClone(req.body),
 
 			// reformat start time
-			start: DateTime.fromISO(req.body.start, { zone: DEFAULT_ZONE }).toLocal().toISO(),
+			start: start.toLocal().toISO(),
 		}
 
 		// create custom attributes for pubsub metadata
