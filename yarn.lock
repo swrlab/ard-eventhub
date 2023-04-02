@@ -80,10 +80,10 @@
   dependencies:
     node-gyp-build "^3.9.0"
 
-"@datadog/pprof@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@datadog/pprof/-/pprof-2.0.0.tgz#d6a13587ffc83779e16e271f90e363f69d5c44f6"
-  integrity sha512-Qsy/IjB1QbPH77FGMgMUEw3PE/oA1wgXhc+Q3cnv88OOs/Q1olEvnEeu59eS2DXUBfDFVK82W2aiMrDnJT2ytA==
+"@datadog/pprof@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@datadog/pprof/-/pprof-2.1.0.tgz#acc8a7a2a74442cfd725abc620a5f8505dbe1807"
+  integrity sha512-nHZ16CuwKfscNF2PKAEPMqdn5AsxHmvurwiFmPd65VoDXKWLX2Ourj/izgL/HJ4Q5LZS/yiV4lsM4d7Xwmw0zQ==
   dependencies:
     delay "^5.0.0"
     node-gyp-build "^3.9.0"
@@ -1487,16 +1487,16 @@ cssesc@^3.0.0:
   resolved "https://registry.yarnpkg.com/cssesc/-/cssesc-3.0.0.tgz#37741919903b868565e1c09ea747445cd18983ee"
   integrity sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==
 
-dd-trace@3.15.0:
-  version "3.15.0"
-  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-3.15.0.tgz#1f19017ada852d54964140ecff1759ac0b0b0ba4"
-  integrity sha512-/aytNWL4rnwp4bxF0RQLr46DjpACdsKhjfPi2qFxStNKxO6X76+TZZeKoe85mVkDfUo7lMBNNbbQl5P+VHkgow==
+dd-trace@3.16.0:
+  version "3.16.0"
+  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-3.16.0.tgz#baa76f9cfe047f16a995ace3d515d21d81944ed6"
+  integrity sha512-ogRsTotTF/dMzGVrULzEPShCf9MP6aHxNS5LQS0igvx7I/gJof0MTCXNGDhLY8X3KYRczolTkYTcJ3S4siiyGg==
   dependencies:
     "@datadog/native-appsec" "2.0.0"
     "@datadog/native-iast-rewriter" "2.0.1"
     "@datadog/native-iast-taint-tracking" "1.1.1"
     "@datadog/native-metrics" "^1.5.0"
-    "@datadog/pprof" "^2.0.0"
+    "@datadog/pprof" "^2.1.0"
     "@datadog/sketches-js" "^2.1.0"
     crypto-randomuuid "^1.0.0"
     diagnostics_channel "^1.1.0"
