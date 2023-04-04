@@ -29,12 +29,12 @@
 	"author": "SWR Audio Lab <lab@swr.de>",
 	"license": "EUPL-1.2",
 	"dependencies": {
-		"@google-cloud/datastore": "^7.4.0",
+		"@google-cloud/datastore": "^7.5.0",
 		"@google-cloud/pubsub": "^3.4.1",
 		"@google-cloud/secret-manager": "^4.2.1",
 		"@swrlab/utils": "1.1.2",
 		"compression": "1.7.4",
-		"dd-trace": "3.15.0",
+		"dd-trace": "3.16.0",
 		"dotenv": "16.0.3",
 		"express": "4.18.2",
 		"express-openapi-validator": "5.0.3",
@@ -53,13 +53,13 @@
 		"chai": "^4.3.7",
 		"chai-http": "^4.3.0",
 		"docsify-cli": "^4.4.4",
-		"eslint": "^8.36.0",
+		"eslint": "^8.37.0",
 		"eslint-plugin-chai-friendly": "^0.7.2",
 		"license-compliance": "^1.2.5",
 		"mocha": "^10.2.0",
 		"nodemon": "^2.0.22",
 		"prettier": "^2.8.7",
-		"typescript": "^5.0.2"
+		"typescript": "^5.0.3"
 	},
 	"resolutions": {
 		"ansi-regex": "^5.0.1",
