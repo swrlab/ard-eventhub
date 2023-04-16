@@ -201,10 +201,10 @@
   dependencies:
     tslib "^2.1.0"
 
-"@google-cloud/datastore@^7.4.0":
-  version "7.4.0"
-  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-7.4.0.tgz#1db8f1e62e833b2768ea5f9a162e4186987f7686"
-  integrity sha512-A/NGLFeQROJu6UpGDZ49MY9PZik1+6UVH+YAnGvXUWlVcYVD49EGNGbCftDRSAa/TpYBCm9aSKQ5Vj3NCZlO1A==
+"@google-cloud/datastore@^7.5.1":
+  version "7.5.1"
+  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-7.5.1.tgz#89e862f17fe980dd2f1ee65399d89a59b0ec21bb"
+  integrity sha512-wIGg4X00ty/Dz9Fgl8EVm1lmpF2rH643yhE2/Whw8frfTRKQL+wT8LpGxasSGbvDb/NMedNUG1O9tohQNNHMvQ==
   dependencies:
     "@google-cloud/promisify" "^3.0.0"
     arrify "^2.0.1"

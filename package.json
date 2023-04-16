@@ -29,7 +29,7 @@
 	"author": "SWR Audio Lab <lab@swr.de>",
 	"license": "EUPL-1.2",
 	"dependencies": {
-		"@google-cloud/datastore": "^7.4.0",
+		"@google-cloud/datastore": "^7.5.1",
 		"@google-cloud/pubsub": "^3.4.1",
 		"@google-cloud/secret-manager": "^4.2.1",
 		"@swrlab/utils": "1.1.2",
