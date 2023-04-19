@@ -96,9 +96,9 @@ This indicates the beginning of the news in general or a new news item. Get as d
     },
     {
       "type": "Article",
-      "title": "Kommerzielle US-Raumfahrt – Die neue Weltraumökonomie",
+      "title": "Kommerzielle US-Raumfahrt - Die neue Weltraumökonomie",
       "url": "https://www.deutschlandfunkkultur.de/kommerzielle-us-raumfahrt-die-neue-weltraumoekonomie-100.html"
-    },
+    }
   ]
   … 
 }

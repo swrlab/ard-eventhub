@@ -624,6 +624,9 @@ components:
     reference:
       type: object
       additionalProperties: false
+      required:
+        - type
+        - externalId
       properties:
         type:
           type: string
@@ -653,8 +656,6 @@ components:
           items:
             type: string
             example: https://normdb.ivz.cn.ard.de/sendereihe/427
-      required:
-        - type
 
     eventV1PostBody:
       additionalProperties: false
@@ -765,24 +766,13 @@ components:
             allOf:
               - $ref: "#/components/schemas/services"
         references:
-          type: string
+          type: array
           description: related external entities
           nullable: true
           items:
-            oneOf:
+            minItems: 0
+            allOf:
               - $ref: "#/components/schemas/reference"
-                required:
-                  - type
-                  - externalId
-              - $ref: "#/components/schemas/reference"
-                required:
-                  - type
-                  - id
-              - $ref: "#/components/schemas/reference"
-                required:
-                  - type
-                  - title
-                  - url
         playlistItemId:
           type: string
           description: >-

@@ -1,1365 +1,1419 @@
 {
-	"openapi": "3.0.3",
-	"info": {
-		"title": "ARD-Eventhub",
-		"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
-		"termsOfService": "https://www.ard.de",
-		"contact": {
-			"email": "lab@swr.de"
-		},
-		"license": {
-			"name": "European Union Public License 1.2",
-			"url": "https://spdx.org/licenses/EUPL-1.2.html"
-		},
-		"version": "1.5.1"
-	},
-	"externalDocs": {
-		"description": "ARD-Eventhub Documentation",
-		"url": "https://swrlab.github.io/ard-eventhub/"
-	},
-	"servers": [
-		{
-			"url": "/",
-			"description": "Local (domain-relative) environment"
-		}
-	],
-	"tags": [
-		{
-			"name": "auth",
-			"description": "Authentication services for Eventhub"
-		},
-		{
-			"name": "events",
-			"description": "Manage events"
-		},
-		{
-			"name": "subscriptions",
-			"description": "Access to subscription management"
-		},
-		{
-			"name": "topics",
-			"description": "Access to topics details"
-		}
-	],
-	"paths": {
-		"/auth/login": {
-			"post": {
-				"tags": ["auth"],
-				"summary": "Swap login credentials for a token",
-				"operationId": "authLoginPost",
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"additionalProperties": false,
-								"type": "object",
-								"properties": {
-									"email": {
-										"type": "string",
-										"example": "my-email@example.com"
-									},
-									"password": {
-										"type": "string",
-										"example": "my-password"
-									}
-								}
-							}
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"description": "Authentication successful",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/authResponse"
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request (invalid input)",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorBadRequest"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorInternalServerError"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/auth/refresh": {
-			"post": {
-				"tags": ["auth"],
-				"summary": "Swap refresh token for new id token",
-				"operationId": "authRefreshPost",
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"additionalProperties": false,
-								"type": "object",
-								"properties": {
-									"refreshToken": {
-										"type": "string",
-										"example": "abcXYZ..."
-									}
-								}
-							}
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"description": "Authentication successful",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/authResponse"
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request (invalid input)",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorBadRequest"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorInternalServerError"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/auth/reset": {
-			"post": {
-				"tags": ["auth"],
-				"summary": "Request password reset email",
-				"operationId": "authResetPost",
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"type": "object",
-								"properties": {
-									"email": {
-										"type": "string",
-										"example": "my-email@example.com"
-									}
-								}
-							}
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"description": "Request successful",
-						"content": {}
-					},
-					"400": {
-						"description": "Bad Request (invalid input)",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorBadRequest"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorInternalServerError"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/events/de.ard.eventhub.v1.radio.track.next": {
-			"post": {
-				"tags": ["events"],
-				"summary": "Distribute a next track",
-				"operationId": "eventPostV1RadioTrackNext",
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"requestBody": {
-					"$ref": "#/components/requestBodies/eventV1RadioTrack"
-				},
-				"responses": {
-					"201": {
-						"$ref": "#/components/responses/eventV1RadioTrack"
-					},
-					"400": {
-						"description": "Bad Request (invalid input)",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorBadRequest"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Missing authentication",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorUnauthorized"
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Invalid authorization",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorForbidden"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorInternalServerError"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/events/de.ard.eventhub.v1.radio.track.playing": {
-			"post": {
-				"tags": ["events"],
-				"summary": "Distribute a now-playing track",
-				"operationId": "eventPostV1RadioTrackPlaying",
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"requestBody": {
-					"$ref": "#/components/requestBodies/eventV1RadioTrack"
-				},
-				"responses": {
-					"201": {
-						"$ref": "#/components/responses/eventV1RadioTrack"
-					},
-					"400": {
-						"description": "Bad Request (invalid input)",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorBadRequest"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Missing authentication",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorUnauthorized"
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Invalid authorization",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorForbidden"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorInternalServerError"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/subscriptions": {
-			"get": {
-				"tags": ["subscriptions"],
-				"summary": "List all subscriptions for this user",
-				"operationId": "subscriptionList",
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Subscriptions found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/subscriptionsList"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Missing authentication",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorUnauthorized"
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Invalid authorization",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorForbidden"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorInternalServerError"
-								}
-							}
-						}
-					}
-				}
-			},
-			"post": {
-				"tags": ["subscriptions"],
-				"summary": "Add a new subscription",
-				"operationId": "subscriptionPost",
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"requestBody": {
-					"description": "New event to be distributed to subscribers.",
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/subscriptionPost"
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"201": {
-						"description": "Subscription created",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/subscriptionResponse"
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request (invalid input)",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorBadRequest"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Missing authentication",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorUnauthorized"
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Invalid authorization",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorForbidden"
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Topic for subscription not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorNotFound"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorInternalServerError"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/subscriptions/{name}": {
-			"get": {
-				"tags": ["subscriptions"],
-				"summary": "Get details about a single subscription from this user",
-				"operationId": "subscriptionsGet",
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"name": "name",
-						"in": "path",
-						"description": "`name` of the desired subscription",
-						"required": true,
-						"style": "simple",
-						"explode": false,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Subscription found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/subscriptionResponse"
-									}
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Missing authentication",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorUnauthorized"
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Invalid authorization",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorForbidden"
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Subscription not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorNotFound"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorInternalServerError"
-								}
-							}
-						}
-					}
-				}
-			},
-			"delete": {
-				"tags": ["subscriptions"],
-				"summary": "Remove a single subscription by this user",
-				"operationId": "subscriptionsDelete",
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"parameters": [
-					{
-						"name": "name",
-						"in": "path",
-						"description": "`name` of the desired subscription",
-						"required": true,
-						"style": "simple",
-						"explode": false,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Subscription deleted",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/subscriptionDeleted"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Missing authentication",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorUnauthorized"
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Invalid authorization",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorForbidden"
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Subscription not found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorNotFound"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorInternalServerError"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/topics": {
-			"get": {
-				"tags": ["topics"],
-				"summary": "List all available topics",
-				"operationId": "topicsGet",
-				"security": [
-					{
-						"bearerAuth": []
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Topics found",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/topicResponse"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal server error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/errorInternalServerError"
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	},
-	"components": {
-		"requestBodies": {
-			"eventV1RadioTrack": {
-				"description": "New event to be distributed to subscribers.  \n  \nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.  \nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:  \n```json\n{\n  \"type\": \"music\",\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"title\": \"Song name\",\n  \"services\": [ { ... } ],\n  \"playlistItemId\": \"swr3-5678\"\n}\n```\nRequired fields not specified in the Schema, will cause your request to fail.  \n  \nThe `id` is inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "#/components/schemas/eventV1PostBody"
-						}
-					}
-				},
-				"required": true
-			}
-		},
-		"responses": {
-			"eventV1RadioTrack": {
-				"description": "Event created  \n  \n*Note:* The first request of an event for an externalId that is not  registered yet, will return the status `failed: 1`. This indicates  that a new topic for the externalId has been created, and the request  needs to be repeated:\n```json\n\"statuses\": {\n  \"published\": 0,\n  \"blocked\": 0,\n  \"failed\": 1\n}\n```\nIf the request returns the status `blocked: 1`, it indicates that you  are not allowed to publish events under the given publisherId.\n",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "#/components/schemas/eventV1ResBody"
-						}
-					}
-				}
-			}
-		},
-		"securitySchemes": {
-			"bearerAuth": {
-				"type": "http",
-				"scheme": "bearer",
-				"bearerFormat": "JWT"
-			}
-		},
-		"schemas": {
-			"authResponse": {
-				"type": "object",
-				"properties": {
-					"expiresIn": {
-						"type": "number",
-						"description": "TTL for the token in seconds",
-						"example": 3600
-					},
-					"expires": {
-						"type": "string",
-						"description": "ISO8601 compliant timestamp for the token expiry",
-						"format": "iso8601-timestamp",
-						"example": "2020-01-19T06:00:00+01:00"
-					},
-					"token": {
-						"type": "string",
-						"description": "ready to use token for API queries",
-						"example": "ey..."
-					},
-					"refreshToken": {
-						"type": "string",
-						"description": "refresh token to be used with `/auth/refresh`/ endpoint",
-						"example": "A0..."
-					},
-					"user": {
-						"type": "object",
-						"description": "Firebase-type user object obtained by decoding the JWT token"
-					},
-					"trace": {
-						"type": "string",
-						"example": null
-					}
-				}
-			},
-			"errorBadRequest": {
-				"type": "object",
-				"properties": {
-					"message": {
-						"type": "string",
-						"example": "request.body should have required property 'XYZ'"
-					},
-					"errors": {
-						"type": "array",
-						"minItems": 1,
-						"items": {
-							"type": "object",
-							"properties": {
-								"path": {
-									"type": "string",
-									"example": ".body.XYZ"
-								},
-								"message": {
-									"type": "string",
-									"example": "should have required property 'XYZ'"
-								},
-								"errorCode": {
-									"type": "string",
-									"example": "required.openapi.validation"
-								}
-							}
-						}
-					},
-					"trace": {
-						"type": "string",
-						"example": null
-					}
-				}
-			},
-			"errorUnauthorized": {
-				"type": "object",
-				"properties": {
-					"message": {
-						"type": "string",
-						"example": "request.headers should have required property 'Authorization'"
-					},
-					"errors": {
-						"type": "array",
-						"minItems": 1,
-						"items": {
-							"type": "object",
-							"properties": {
-								"path": {
-									"type": "string",
-									"example": ".headers.authorization"
-								},
-								"message": {
-									"type": "string",
-									"example": "should have required property 'authorization'"
-								},
-								"errorCode": {
-									"type": "string",
-									"example": "required.user"
-								}
-							}
-						}
-					},
-					"trace": {
-						"type": "string",
-						"example": null
-					}
-				}
-			},
-			"errorNotFound": {
-				"type": "object",
-				"properties": {
-					"message": {
-						"type": "string",
-						"example": "object 'object.name' not found"
-					},
-					"trace": {
-						"type": "string",
-						"example": null
-					}
-				}
-			},
-			"errorForbidden": {
-				"type": "object",
-				"properties": {
-					"message": {
-						"type": "string",
-						"example": "user is missing required permission"
-					},
-					"errors": {
-						"type": "array",
-						"minItems": 1,
-						"items": {
-							"type": "object",
-							"properties": {
-								"path": {
-									"type": "string",
-									"example": ".headers.authorization"
-								},
-								"message": {
-									"type": "string",
-									"example": "should have required permission"
-								},
-								"errorCode": {
-									"type": "string",
-									"example": "required.user.permission"
-								}
-							}
-						}
-					},
-					"trace": {
-						"type": "string",
-						"example": null
-					}
-				}
-			},
-			"errorInternalServerError": {
-				"type": "object",
-				"properties": {
-					"message": {
-						"type": "string",
-						"example": "Internal Server Error"
-					},
-					"trace": {
-						"type": "string",
-						"example": null
-					}
-				}
-			},
-			"services": {
-				"type": "object",
-				"required": ["type", "externalId", "publisherId"],
-				"properties": {
-					"type": {
-						"type": "string",
-						"example": "PermanentLivestream",
-						"enum": ["EventLivestream", "PermanentLivestream"]
-					},
-					"externalId": {
-						"type": "string",
-						"example": "crid://swr.de/123450"
-					},
-					"publisherId": {
-						"type": "string",
-						"description": "External ID or globally unique identifier (Core ID) for the associated publisher.\nWhen no Core ID is provided, the External ID will be converted by Eventhub.\n",
-						"example": "248000"
-					},
-					"id": {
-						"type": "string",
-						"description": "Globally unique identifier, created by Eventhub",
-						"example": "urn:ard:permanent-livestream:49267f7d67be180d"
-					}
-				}
-			},
-			"reference": {
-				"type": "object",
-				"additionalProperties": false,
-				"properties": {
-					"type": {
-						"type": "string",
-						"enum": [
-							"Episode",
-							"Section",
-							"Publication",
-							"Broadcast",
-							"Show",
-							"Season",
-							"Article"
-						]
-					},
-					"id": {
-						"type": "string",
-						"pattern": "^urn:ard:[a-z0-9-]+:[a-z0-9-]+$",
-						"example": "urn:ard:show:49267f7d67be180d"
-					},
-					"externalId": {
-						"type": "string",
-						"example": "crid://swr.de/123450",
-						"pattern": "^(c|b)rid://.+$"
-					},
-					"title": {
-						"type": "string"
-					},
-					"url": {
-						"type": "string",
-						"format": "uri"
-					},
-					"alternateIds": {
-						"type": "array",
-						"items": {
-							"type": "string",
-							"example": "https://normdb.ivz.cn.ard.de/sendereihe/427"
-						}
-					}
-				},
-				"required": ["type"]
-			},
-			"eventV1PostBody": {
-				"additionalProperties": false,
-				"required": ["type", "start", "title", "services", "playlistItemId"],
-				"type": "object",
-				"description": "**Please also note the details in the `POST /events/v1` endpoint above!**\n",
-				"properties": {
-					"event": {
-						"type": "string",
-						"description": "If set, it needs to match the URL event parameter",
-						"example": "de.ard.eventhub.v1.radio.track.playing",
-						"enum": [
-							"de.ard.eventhub.v1.radio.track.playing",
-							"de.ard.eventhub.v1.radio.track.next"
-						]
-					},
-					"type": {
-						"type": "string",
-						"description": "The type of the element that triggered this event. See additional file in docs for details.",
-						"example": "music",
-						"enum": [
-							"audio",
-							"commercial",
-							"jingle",
-							"live",
-							"music",
-							"news",
-							"traffic",
-							"weather"
-						]
-					},
-					"start": {
-						"type": "string",
-						"description": "ISO8601 compliant timestamp",
-						"format": "iso8601-timestamp",
-						"example": "2020-01-19T06:00:00+01:00"
-					},
-					"length": {
-						"type": "number",
-						"format": "float",
-						"description": "Scheduled length of the element in seconds",
-						"example": 240,
-						"nullable": true
-					},
-					"title": {
-						"type": "string",
-						"description": "Representative title for external use",
-						"example": "Song name"
-					},
-					"artist": {
-						"type": "string",
-						"description": "Pre-formatted artist information",
-						"example": "Sam Feldt feat. Someone Else",
-						"nullable": true
-					},
-					"contributors": {
-						"type": "array",
-						"description": "Full details about involved artists if available",
-						"nullable": true,
-						"items": {
-							"type": "object",
-							"required": ["name", "role"],
-							"properties": {
-								"name": {
-									"type": "string",
-									"example": "Sam Feldt"
-								},
-								"role": {
-									"type": "string",
-									"example": "artist",
-									"enum": [
-										"artist",
-										"author",
-										"composer",
-										"performer"
-									]
-								},
-								"normDb": {
-									"type": "object",
-									"description": "Reference to an entity in ARD's Norm-DB catalog",
-									"nullable": true,
-									"properties": {
-										"type": {
-											"type": "string",
-											"example": "Person"
-										},
-										"id": {
-											"type": "string",
-											"example": "1641010"
-										}
-									}
-								},
-								"isni": {
-									"type": "string",
-									"description": "ISNI ID if available",
-									"nullable": true,
-									"externalDocs": {
-										"description": "International Standard Name Identifier",
-										"url": "https://kb.ddex.net/display/HBK/Communication+of+Identifiers+in+DDEX+Messages"
-									}
-								},
-								"url": {
-									"type": "string",
-									"description": "Can link to external reference",
-									"nullable": true
-								}
-							}
-						}
-					},
-					"services": {
-						"type": "array",
-						"description": "The playing stations unique Service-IDs. Do not include the Service-Type suffix.",
-						"items": {
-							"minItems": 1,
-							"allOf": [
-								{
-									"$ref": "#/components/schemas/services"
-								}
-							]
-						}
-					},
-					"references": {
-						"type": "string",
-						"description": "related external entities",
-						"nullable": true,
-						"items": {
-							"oneOf": [
-								{
-									"$ref": "#/components/schemas/reference",
-									"required": ["type", "externalId"]
-								},
-								{
-									"$ref": "#/components/schemas/reference",
-									"required": ["type", "id"]
-								},
-								{
-									"$ref": "#/components/schemas/reference",
-									"required": ["type", "title", "url"]
-								}
-							]
-						}
-					},
-					"playlistItemId": {
-						"type": "string",
-						"description": "Unique identifier (within a publisher) to connect next and playing items if needed",
-						"example": "swr3-5678"
-					},
-					"hfdbIds": {
-						"type": "array",
-						"description": "Can reference all available tracks in ARD HFDB instances. Should ideally at least include the common ZSK instance.",
-						"nullable": true,
-						"items": {
-							"type": "string"
-						},
-						"example": ["swrhfdb1.KONF.12345", "zskhfdb1.KONF.12345"]
-					},
-					"externalId": {
-						"type": "string",
-						"description": "Can reference the original ID in the publisher's system",
-						"example": "M012345.001",
-						"nullable": true
-					},
-					"isrc": {
-						"type": "string",
-						"description": "Appropriate ISRC code if track is a music element",
-						"example": "DE012345678",
-						"nullable": true
-					},
-					"upc": {
-						"type": "string",
-						"description": "Corresponding reference to an album where such ISRC was published",
-						"nullable": true
-					},
-					"mpn": {
-						"type": "string",
-						"description": "If available the reference to the original delivery from MPN",
-						"nullable": true
-					},
-					"media": {
-						"type": "array",
-						"description": "Can contain an array of media files like cover, artist, etc.",
-						"nullable": true,
-						"items": {
-							"required": ["type", "url", "description"],
-							"type": "object",
-							"properties": {
-								"type": {
-									"type": "string",
-									"enum": [
-										"cover",
-										"artist",
-										"anchor",
-										"audio",
-										"video"
-									],
-									"example": "cover"
-								},
-								"url": {
-									"type": "string",
-									"example": "https://example.com/cover.jpg"
-								},
-								"templateUrl": {
-									"type": "string",
-									"example": "https://example.com/cover.jpg?width={width}",
-									"nullable": true
-								},
-								"description": {
-									"type": "string",
-									"example": "Cover Demo Artist"
-								},
-								"attribution": {
-									"type": "string",
-									"example": "Photographer XYZ",
-									"nullable": true
-								}
-							}
-						}
-					},
-					"plugins": {
-						"type": "array",
-						"description": "Highly optional field for future third-party metadata distribution or other connected services",
-						"nullable": true,
-						"items": {
-							"type": "object",
-							"properties": {
-								"type": {
-									"type": "string",
-									"example": "postToThirdPartyPlatformXYZ"
-								}
-							}
-						}
-					},
-					"id": {
-						"type": "string",
-						"description": "ID gets inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!",
-						"example": "1234567890"
-					}
-				}
-			},
-			"eventV1ResBody": {
-				"type": "object",
-				"properties": {
-					"statuses": {
-						"type": "object",
-						"properties": {
-							"published": {
-								"type": "integer",
-								"example": 1
-							},
-							"blocked": {
-								"type": "integer",
-								"example": 0
-							},
-							"failed": {
-								"type": "integer",
-								"example": 0
-							}
-						}
-					},
-					"event": {
-						"$ref": "#/components/schemas/eventV1PostBody"
-					},
-					"trace": {
-						"type": "string",
-						"example": null
-					}
-				}
-			},
-			"subscriptionPost": {
-				"required": ["type", "method", "url", "contact", "topic"],
-				"type": "object",
-				"properties": {
-					"type": {
-						"type": "string",
-						"enum": ["PUBSUB"],
-						"example": "PUBSUB"
-					},
-					"method": {
-						"type": "string",
-						"enum": ["PUSH"],
-						"example": "PUSH"
-					},
-					"url": {
-						"type": "string",
-						"description": "Publicly accessible URL that should receive the events",
-						"example": "https://example.com/my/webhook/for/this/subscription"
-					},
-					"contact": {
-						"type": "string",
-						"description": "Email address to be contacted in case of problems with this subscription",
-						"example": "my-emergency-and-notifications-contact@ard.de"
-					},
-					"topic": {
-						"type": "string",
-						"description": "ID of the topic to subscribe to",
-						"example": "topic-id-to-subscribe-to"
-					}
-				}
-			},
-			"subscriptionsList": {
-				"type": "array",
-				"items": {
-					"allOf": [
-						{
-							"$ref": "#/components/schemas/subscriptionResponse"
-						}
-					]
-				}
-			},
-			"subscriptionResponse": {
-				"type": "object",
-				"properties": {
-					"type": {
-						"type": "string",
-						"enum": ["PUBSUB"],
-						"example": "PUBSUB"
-					},
-					"method": {
-						"type": "string",
-						"enum": ["PUSH"],
-						"example": "PUSH"
-					},
-					"name": {
-						"type": "string",
-						"description": "ID of the subscription to be referenced in API calls",
-						"example": "de.ard.eventhub.subscription.subscription-id"
-					},
-					"path": {
-						"type": "string",
-						"description": "Path of subscription in project",
-						"example": "projects/ard-eventhub/subscriptions/subscription-name"
-					},
-					"topic": {
-						"type": "object",
-						"description": "Object of the subscribed topic",
-						"properties": {
-							"id": {
-								"type": "string",
-								"example": "urn:ard:permanent-livestream:topic-id"
-							},
-							"name": {
-								"type": "string",
-								"example": "de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3Atopic-id"
-							},
-							"path": {
-								"type": "string",
-								"example": "projects/ard-eventhub/topics/topic-name"
-							}
-						}
-					},
-					"ackDeadlineSeconds": {
-						"type": "integer",
-						"example": 20
-					},
-					"retryPolicy": {
-						"type": "string",
-						"example": null
-					},
-					"serviceAccount": {
-						"type": "string",
-						"example": "name-of-service-account"
-					},
-					"url": {
-						"type": "string",
-						"description": "Publicly accessible URL that should receive the events",
-						"example": "https://example.com/my/webhook/for/this/subscription"
-					},
-					"contact": {
-						"type": "string",
-						"description": "Email address to be contacted in case of problems with this subscription",
-						"example": "my-emergency-and-notifications-contact@ard.de"
-					},
-					"institutionId": {
-						"type": "string",
-						"description": "ID of the institution the current user belongs to",
-						"example": "urn:ard:institution:institution-id"
-					}
-				}
-			},
-			"subscriptionDeleted": {
-				"type": "object",
-				"properties": {
-					"valid": {
-						"type": "boolean",
-						"example": true
-					},
-					"trace": {
-						"type": "string",
-						"example": null
-					}
-				}
-			},
-			"topicResponse": {
-				"type": "array",
-				"items": {
-					"type": "object",
-					"properties": {
-						"type": {
-							"type": "string",
-							"enum": ["PUBSUB"],
-							"example": "PUBSUB"
-						},
-						"id": {
-							"type": "string",
-							"example": "urn:ard:permanent-livestream:topic-id"
-						},
-						"name": {
-							"type": "string",
-							"example": "de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3Atopic-id"
-						},
-						"path": {
-							"type": "string",
-							"example": "projects/ard-eventhub/topics/topic-name"
-						},
-						"labels": {
-							"type": "object",
-							"properties": {
-								"id": {
-									"type": "string",
-									"example": "1234567890"
-								},
-								"creator-slug": {
-									"type": "string",
-									"example": "ard-eventhub-swr"
-								},
-								"publisher-slug": {
-									"type": "string",
-									"example": "swr-rheinland-pfalz"
-								},
-								"stage": {
-									"type": "string",
-									"example": "prod"
-								},
-								"created": {
-									"type": "string",
-									"example": "2021-03-25"
-								},
-								"institution-slug": {
-									"type": "string",
-									"example": "sudwestrundfunk"
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ARD-Eventhub",
+    "description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
+    "termsOfService": "https://www.ard.de",
+    "contact": {
+      "email": "lab@swr.de"
+    },
+    "license": {
+      "name": "European Union Public License 1.2",
+      "url": "https://spdx.org/licenses/EUPL-1.2.html"
+    },
+    "version": "1.5.1"
+  },
+  "externalDocs": {
+    "description": "ARD-Eventhub Documentation",
+    "url": "https://swrlab.github.io/ard-eventhub/"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Local (domain-relative) environment"
+    }
+  ],
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Authentication services for Eventhub"
+    },
+    {
+      "name": "events",
+      "description": "Manage events"
+    },
+    {
+      "name": "subscriptions",
+      "description": "Access to subscription management"
+    },
+    {
+      "name": "topics",
+      "description": "Access to topics details"
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Swap login credentials for a token",
+        "operationId": "authLoginPost",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "my-email@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "my-password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/authResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (invalid input)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorBadRequest"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Swap refresh token for new id token",
+        "operationId": "authRefreshPost",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "example": "abcXYZ..."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/authResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (invalid input)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorBadRequest"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/reset": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Request password reset email",
+        "operationId": "authResetPost",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "my-email@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request successful",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad Request (invalid input)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorBadRequest"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events/de.ard.eventhub.v1.radio.track.next": {
+      "post": {
+        "tags": [
+          "events"
+        ],
+        "summary": "Distribute a next track",
+        "operationId": "eventPostV1RadioTrackNext",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/eventV1RadioTrack"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/eventV1RadioTrack"
+          },
+          "400": {
+            "description": "Bad Request (invalid input)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorBadRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUnauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invalid authorization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorForbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events/de.ard.eventhub.v1.radio.track.playing": {
+      "post": {
+        "tags": [
+          "events"
+        ],
+        "summary": "Distribute a now-playing track",
+        "operationId": "eventPostV1RadioTrackPlaying",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/eventV1RadioTrack"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/eventV1RadioTrack"
+          },
+          "400": {
+            "description": "Bad Request (invalid input)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorBadRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUnauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invalid authorization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorForbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions": {
+      "get": {
+        "tags": [
+          "subscriptions"
+        ],
+        "summary": "List all subscriptions for this user",
+        "operationId": "subscriptionList",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscriptions found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/subscriptionsList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUnauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invalid authorization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorForbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "subscriptions"
+        ],
+        "summary": "Add a new subscription",
+        "operationId": "subscriptionPost",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "New event to be distributed to subscribers.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/subscriptionPost"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Subscription created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/subscriptionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (invalid input)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorBadRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUnauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invalid authorization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorForbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Topic for subscription not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorNotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{name}": {
+      "get": {
+        "tags": [
+          "subscriptions"
+        ],
+        "summary": "Get details about a single subscription from this user",
+        "operationId": "subscriptionsGet",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "`name` of the desired subscription",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/subscriptionResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUnauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invalid authorization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorForbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Subscription not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorNotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "subscriptions"
+        ],
+        "summary": "Remove a single subscription by this user",
+        "operationId": "subscriptionsDelete",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "`name` of the desired subscription",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/subscriptionDeleted"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUnauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invalid authorization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorForbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Subscription not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorNotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/topics": {
+      "get": {
+        "tags": [
+          "topics"
+        ],
+        "summary": "List all available topics",
+        "operationId": "topicsGet",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Topics found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/topicResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorInternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "requestBodies": {
+      "eventV1RadioTrack": {
+        "description": "New event to be distributed to subscribers.\nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.\nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:\n```json\n{\n  \"type\": \"music\",\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"title\": \"Song name\",\n  \"services\": [ { ... } ],\n  \"playlistItemId\": \"swr3-5678\"\n}\n```\nRequired fields not specified in the Schema, will cause your request to fail.\nThe `id` is inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/eventV1PostBody"
+            }
+          }
+        },
+        "required": true
+      }
+    },
+    "responses": {
+      "eventV1RadioTrack": {
+        "description": "Event created\n*Note:* The first request of an event for an externalId that is not registered yet, will return the status `failed: 1`. This indicates that a new topic for the externalId has been created, and the request needs to be repeated:\n```json\n\"statuses\": {\n  \"published\": 0,\n  \"blocked\": 0,\n  \"failed\": 1\n}\n```\nIf the request returns the status `blocked: 1`, it indicates that you are not allowed to publish events under the given publisherId.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/eventV1ResBody"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "authResponse": {
+        "type": "object",
+        "properties": {
+          "expiresIn": {
+            "type": "number",
+            "description": "TTL for the token in seconds",
+            "example": 3600
+          },
+          "expires": {
+            "type": "string",
+            "description": "ISO8601 compliant timestamp for the token expiry",
+            "format": "iso8601-timestamp",
+            "example": "2020-01-19T06:00:00+01:00"
+          },
+          "token": {
+            "type": "string",
+            "description": "ready to use token for API queries",
+            "example": "ey..."
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "refresh token to be used with `/auth/refresh`/ endpoint",
+            "example": "A0..."
+          },
+          "user": {
+            "type": "object",
+            "description": "Firebase-type user object obtained by decoding the JWT token"
+          },
+          "trace": {
+            "type": "string",
+            "example": null
+          }
+        }
+      },
+      "errorBadRequest": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "request.body should have required property 'XYZ'"
+          },
+          "errors": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "example": ".body.XYZ"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "should have required property 'XYZ'"
+                },
+                "errorCode": {
+                  "type": "string",
+                  "example": "required.openapi.validation"
+                }
+              }
+            }
+          },
+          "trace": {
+            "type": "string",
+            "example": null
+          }
+        }
+      },
+      "errorUnauthorized": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "request.headers should have required property 'Authorization'"
+          },
+          "errors": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "example": ".headers.authorization"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "should have required property 'authorization'"
+                },
+                "errorCode": {
+                  "type": "string",
+                  "example": "required.user"
+                }
+              }
+            }
+          },
+          "trace": {
+            "type": "string",
+            "example": null
+          }
+        }
+      },
+      "errorNotFound": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "object 'object.name' not found"
+          },
+          "trace": {
+            "type": "string",
+            "example": null
+          }
+        }
+      },
+      "errorForbidden": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "user is missing required permission"
+          },
+          "errors": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "example": ".headers.authorization"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "should have required permission"
+                },
+                "errorCode": {
+                  "type": "string",
+                  "example": "required.user.permission"
+                }
+              }
+            }
+          },
+          "trace": {
+            "type": "string",
+            "example": null
+          }
+        }
+      },
+      "errorInternalServerError": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Internal Server Error"
+          },
+          "trace": {
+            "type": "string",
+            "example": null
+          }
+        }
+      },
+      "services": {
+        "type": "object",
+        "required": [
+          "type",
+          "externalId",
+          "publisherId"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "PermanentLivestream",
+            "enum": [
+              "EventLivestream",
+              "PermanentLivestream"
+            ]
+          },
+          "externalId": {
+            "type": "string",
+            "example": "crid://swr.de/123450"
+          },
+          "publisherId": {
+            "type": "string",
+            "description": "External ID or globally unique identifier (Core ID) for the associated publisher.\nWhen no Core ID is provided, the External ID will be converted by Eventhub.\n",
+            "example": "248000"
+          },
+          "id": {
+            "type": "string",
+            "description": "Globally unique identifier, created by Eventhub",
+            "example": "urn:ard:permanent-livestream:49267f7d67be180d"
+          }
+        }
+      },
+      "reference": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "externalId"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Episode",
+              "Section",
+              "Publication",
+              "Broadcast",
+              "Show",
+              "Season",
+              "Article"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^urn:ard:[a-z0-9-]+:[a-z0-9-]+$",
+            "example": "urn:ard:show:49267f7d67be180d"
+          },
+          "externalId": {
+            "type": "string",
+            "example": "crid://swr.de/123450",
+            "pattern": "^(c|b)rid://.+$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "alternateIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "https://normdb.ivz.cn.ard.de/sendereihe/427"
+            }
+          }
+        }
+      },
+      "eventV1PostBody": {
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "start",
+          "title",
+          "services",
+          "playlistItemId"
+        ],
+        "type": "object",
+        "description": "**Please also note the details in the `POST /events/v1` endpoint above!**\n",
+        "properties": {
+          "event": {
+            "type": "string",
+            "description": "If set, it needs to match the URL event parameter",
+            "example": "de.ard.eventhub.v1.radio.track.playing",
+            "enum": [
+              "de.ard.eventhub.v1.radio.track.playing",
+              "de.ard.eventhub.v1.radio.track.next"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the element that triggered this event. See additional file in docs for details.",
+            "example": "music",
+            "enum": [
+              "audio",
+              "commercial",
+              "jingle",
+              "live",
+              "music",
+              "news",
+              "traffic",
+              "weather"
+            ]
+          },
+          "start": {
+            "type": "string",
+            "description": "ISO8601 compliant timestamp",
+            "format": "iso8601-timestamp",
+            "example": "2020-01-19T06:00:00+01:00"
+          },
+          "length": {
+            "type": "number",
+            "format": "float",
+            "description": "Scheduled length of the element in seconds",
+            "example": 240,
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "description": "Representative title for external use",
+            "example": "Song name"
+          },
+          "artist": {
+            "type": "string",
+            "description": "Pre-formatted artist information",
+            "example": "Sam Feldt feat. Someone Else",
+            "nullable": true
+          },
+          "contributors": {
+            "type": "array",
+            "description": "Full details about involved artists if available",
+            "nullable": true,
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "role"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Sam Feldt"
+                },
+                "role": {
+                  "type": "string",
+                  "example": "artist",
+                  "enum": [
+                    "artist",
+                    "author",
+                    "composer",
+                    "performer"
+                  ]
+                },
+                "normDb": {
+                  "type": "object",
+                  "description": "Reference to an entity in ARD's Norm-DB catalog",
+                  "nullable": true,
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "Person"
+                    },
+                    "id": {
+                      "type": "string",
+                      "example": "1641010"
+                    }
+                  }
+                },
+                "isni": {
+                  "type": "string",
+                  "description": "ISNI ID if available",
+                  "nullable": true,
+                  "externalDocs": {
+                    "description": "International Standard Name Identifier",
+                    "url": "https://kb.ddex.net/display/HBK/Communication+of+Identifiers+in+DDEX+Messages"
+                  }
+                },
+                "url": {
+                  "type": "string",
+                  "description": "Can link to external reference",
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "services": {
+            "type": "array",
+            "description": "The playing stations unique Service-IDs. Do not include the Service-Type suffix.",
+            "items": {
+              "minItems": 1,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/services"
+                }
+              ]
+            }
+          },
+          "references": {
+            "type": "array",
+            "description": "related external entities",
+            "nullable": true,
+            "items": {
+              "minItems": 0,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/reference"
+                }
+              ]
+            }
+          },
+          "playlistItemId": {
+            "type": "string",
+            "description": "Unique identifier (within a publisher) to connect next and playing items if needed",
+            "example": "swr3-5678"
+          },
+          "hfdbIds": {
+            "type": "array",
+            "description": "Can reference all available tracks in ARD HFDB instances. Should ideally at least include the common ZSK instance.",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "swrhfdb1.KONF.12345",
+              "zskhfdb1.KONF.12345"
+            ]
+          },
+          "externalId": {
+            "type": "string",
+            "description": "Can reference the original ID in the publisher's system",
+            "example": "M012345.001",
+            "nullable": true
+          },
+          "isrc": {
+            "type": "string",
+            "description": "Appropriate ISRC code if track is a music element",
+            "example": "DE012345678",
+            "nullable": true
+          },
+          "upc": {
+            "type": "string",
+            "description": "Corresponding reference to an album where such ISRC was published",
+            "nullable": true
+          },
+          "mpn": {
+            "type": "string",
+            "description": "If available the reference to the original delivery from MPN",
+            "nullable": true
+          },
+          "media": {
+            "type": "array",
+            "description": "Can contain an array of media files like cover, artist, etc.",
+            "nullable": true,
+            "items": {
+              "required": [
+                "type",
+                "url",
+                "description"
+              ],
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "cover",
+                    "artist",
+                    "anchor",
+                    "audio",
+                    "video"
+                  ],
+                  "example": "cover"
+                },
+                "url": {
+                  "type": "string",
+                  "example": "https://example.com/cover.jpg"
+                },
+                "templateUrl": {
+                  "type": "string",
+                  "example": "https://example.com/cover.jpg?width={width}",
+                  "nullable": true
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Cover Demo Artist"
+                },
+                "attribution": {
+                  "type": "string",
+                  "example": "Photographer XYZ",
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "plugins": {
+            "type": "array",
+            "description": "Highly optional field for future third-party metadata distribution or other connected services",
+            "nullable": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "postToThirdPartyPlatformXYZ"
+                }
+              }
+            }
+          },
+          "id": {
+            "type": "string",
+            "description": "ID gets inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!",
+            "example": "1234567890"
+          }
+        }
+      },
+      "eventV1ResBody": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "object",
+            "properties": {
+              "published": {
+                "type": "integer",
+                "example": 1
+              },
+              "blocked": {
+                "type": "integer",
+                "example": 0
+              },
+              "failed": {
+                "type": "integer",
+                "example": 0
+              }
+            }
+          },
+          "event": {
+            "$ref": "#/components/schemas/eventV1PostBody"
+          },
+          "trace": {
+            "type": "string",
+            "example": null
+          }
+        }
+      },
+      "subscriptionPost": {
+        "required": [
+          "type",
+          "method",
+          "url",
+          "contact",
+          "topic"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "PUBSUB"
+            ],
+            "example": "PUBSUB"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "PUSH"
+            ],
+            "example": "PUSH"
+          },
+          "url": {
+            "type": "string",
+            "description": "Publicly accessible URL that should receive the events",
+            "example": "https://example.com/my/webhook/for/this/subscription"
+          },
+          "contact": {
+            "type": "string",
+            "description": "Email address to be contacted in case of problems with this subscription",
+            "example": "my-emergency-and-notifications-contact@ard.de"
+          },
+          "topic": {
+            "type": "string",
+            "description": "ID of the topic to subscribe to",
+            "example": "topic-id-to-subscribe-to"
+          }
+        }
+      },
+      "subscriptionsList": {
+        "type": "array",
+        "items": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/subscriptionResponse"
+            }
+          ]
+        }
+      },
+      "subscriptionResponse": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "PUBSUB"
+            ],
+            "example": "PUBSUB"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "PUSH"
+            ],
+            "example": "PUSH"
+          },
+          "name": {
+            "type": "string",
+            "description": "ID of the subscription to be referenced in API calls",
+            "example": "de.ard.eventhub.subscription.subscription-id"
+          },
+          "path": {
+            "type": "string",
+            "description": "Path of subscription in project",
+            "example": "projects/ard-eventhub/subscriptions/subscription-name"
+          },
+          "topic": {
+            "type": "object",
+            "description": "Object of the subscribed topic",
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "urn:ard:permanent-livestream:topic-id"
+              },
+              "name": {
+                "type": "string",
+                "example": "de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3Atopic-id"
+              },
+              "path": {
+                "type": "string",
+                "example": "projects/ard-eventhub/topics/topic-name"
+              }
+            }
+          },
+          "ackDeadlineSeconds": {
+            "type": "integer",
+            "example": 20
+          },
+          "retryPolicy": {
+            "type": "string",
+            "example": null
+          },
+          "serviceAccount": {
+            "type": "string",
+            "example": "name-of-service-account"
+          },
+          "url": {
+            "type": "string",
+            "description": "Publicly accessible URL that should receive the events",
+            "example": "https://example.com/my/webhook/for/this/subscription"
+          },
+          "contact": {
+            "type": "string",
+            "description": "Email address to be contacted in case of problems with this subscription",
+            "example": "my-emergency-and-notifications-contact@ard.de"
+          },
+          "institutionId": {
+            "type": "string",
+            "description": "ID of the institution the current user belongs to",
+            "example": "urn:ard:institution:institution-id"
+          }
+        }
+      },
+      "subscriptionDeleted": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "example": true
+          },
+          "trace": {
+            "type": "string",
+            "example": null
+          }
+        }
+      },
+      "topicResponse": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "PUBSUB"
+              ],
+              "example": "PUBSUB"
+            },
+            "id": {
+              "type": "string",
+              "example": "urn:ard:permanent-livestream:topic-id"
+            },
+            "name": {
+              "type": "string",
+              "example": "de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3Atopic-id"
+            },
+            "path": {
+              "type": "string",
+              "example": "projects/ard-eventhub/topics/topic-name"
+            },
+            "labels": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "1234567890"
+                },
+                "creator-slug": {
+                  "type": "string",
+                  "example": "ard-eventhub-swr"
+                },
+                "publisher-slug": {
+                  "type": "string",
+                  "example": "swr-rheinland-pfalz"
+                },
+                "stage": {
+                  "type": "string",
+                  "example": "prod"
+                },
+                "created": {
+                  "type": "string",
+                  "example": "2021-03-25"
+                },
+                "institution-slug": {
+                  "type": "string",
+                  "example": "sudwestrundfunk"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }

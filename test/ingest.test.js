@@ -164,7 +164,24 @@ const event = {
 			publisherId: '282310',
 		},
 	],
-	playlistItemId: 'unit-test-playlist',
+	playlistItemId: 'unit-test-id-in-playlist-567',
+	references: [
+		{
+			type: 'Show',
+			externalId: 'crid://swr.de/my-show/1234567',
+			alternateIds: [
+				'https://normdb.ivz.cn.ard.de/sendereihe/427',
+				'urn:ard:show:027708befb6bfe14',
+				'brid://br.de/broadcastSeries/1235',
+			],
+		},
+		{
+			type: 'Article',
+			externalId: 'crid://dlf.de/article/1234567',
+			title: 'Kommerzielle US-Raumfahrt - Die neue Weltraumökonomie',
+			url: 'https://www.deutschlandfunkkultur.de/kommerzielle-us-raumfahrt-die-neue-weltraumoekonomie-100.html',
+		},
+	],
 }
 
 describe(`POST ${eventPath}`, () => {
@@ -205,6 +222,18 @@ describe(`POST ${eventPath}`, () => {
 
 	it('publish a new event with invalid time', (done) => {
 		event.start = `${DateTime.now().toISO()}00`
+		chai.request(server)
+			.post(eventPath)
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send(event)
+			.end((err, res) => {
+				testResponse(res, 400)
+				done()
+			})
+	})
+
+	it('publish a new event with invalid externalId in references', (done) => {
+		event.references[1].externalId = null
 		chai.request(server)
 			.post(eventPath)
 			.set('Authorization', `Bearer ${accessToken}`)
