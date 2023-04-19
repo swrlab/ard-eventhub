@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.5.1] - 2023-04-04
 
-- feat: add reference to broadcast series and shows
+- feat: add `references` to external broadcast series and shows
 
 ## [1.5.0] - 2023-03-14
 
