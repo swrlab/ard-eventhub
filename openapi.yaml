@@ -10,7 +10,7 @@ info:
   license:
     name: European Union Public License 1.2
     url: "https://spdx.org/licenses/EUPL-1.2.html"
-  version: 1.5.0
+  version: 1.5.1
 externalDocs:
   description: ARD-Eventhub Documentation
   url: "https://swrlab.github.io/ard-eventhub/"
@@ -621,6 +621,42 @@ components:
           description: Globally unique identifier, created by Eventhub
           example: "urn:ard:permanent-livestream:49267f7d67be180d"
 
+    reference:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - externalId
+      properties:
+        type:
+          type: string
+          enum:
+            - Episode
+            - Section
+            - Publication
+            - Broadcast
+            - Show
+            - Season
+            - Article
+        id:
+          type: string
+          pattern: ^urn:ard:[a-z0-9-]+:[a-z0-9-]+$
+          example: urn:ard:show:49267f7d67be180d
+        externalId:
+          type: string
+          example: crid://swr.de/123450
+          pattern: ^(c|b)rid://.+$
+        title:
+          type: string
+        url:
+          type: string
+          format: uri
+        alternateIds:
+          type: array
+          items:
+            type: string
+            example: https://normdb.ivz.cn.ard.de/sendereihe/427
+
     eventV1PostBody:
       additionalProperties: false
       required:
@@ -729,6 +765,14 @@ components:
             minItems: 1
             allOf:
               - $ref: "#/components/schemas/services"
+        references:
+          type: array
+          description: related external entities
+          nullable: true
+          items:
+            minItems: 0
+            allOf:
+              - $ref: "#/components/schemas/reference"
         playlistItemId:
           type: string
           description: >-

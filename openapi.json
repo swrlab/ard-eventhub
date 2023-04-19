@@ -11,7 +11,7 @@
 			"name": "European Union Public License 1.2",
 			"url": "https://spdx.org/licenses/EUPL-1.2.html"
 		},
-		"version": "1.5.0"
+		"version": "1.5.1"
 	},
 	"externalDocs": {
 		"description": "ARD-Eventhub Documentation",
@@ -654,7 +654,7 @@
 	"components": {
 		"requestBodies": {
 			"eventV1RadioTrack": {
-				"description": "New event to be distributed to subscribers.  \n  \nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.  \nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:  \n```json\n{\n  \"type\": \"music\",\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"title\": \"Song name\",\n  \"services\": [ { ... } ],\n  \"playlistItemId\": \"swr3-5678\"\n}\n```\nRequired fields not specified in the Schema, will cause your request to fail.  \n  \nThe `id` is inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
+				"description": "New event to be distributed to subscribers.\nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.\nThe subset is defined in the list of required fields of Schemas `eventV1PostBody`, resulting in this body:\n```json\n{\n  \"type\": \"music\",\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"title\": \"Song name\",\n  \"services\": [ { ... } ],\n  \"playlistItemId\": \"swr3-5678\"\n}\n```\nRequired fields not specified in the Schema, will cause your request to fail.\nThe `id` is inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!\n",
 				"content": {
 					"application/json": {
 						"schema": {
@@ -667,7 +667,7 @@
 		},
 		"responses": {
 			"eventV1RadioTrack": {
-				"description": "Event created  \n  \n*Note:* The first request of an event for an externalId that is not  registered yet, will return the status `failed: 1`. This indicates  that a new topic for the externalId has been created, and the request  needs to be repeated:\n```json\n\"statuses\": {\n  \"published\": 0,\n  \"blocked\": 0,\n  \"failed\": 1\n}\n```\nIf the request returns the status `blocked: 1`, it indicates that you  are not allowed to publish events under the given publisherId.\n",
+				"description": "Event created\n*Note:* The first request of an event for an externalId that is not registered yet, will return the status `failed: 1`. This indicates that a new topic for the externalId has been created, and the request needs to be repeated:\n```json\n\"statuses\": {\n  \"published\": 0,\n  \"blocked\": 0,\n  \"failed\": 1\n}\n```\nIf the request returns the status `blocked: 1`, it indicates that you are not allowed to publish events under the given publisherId.\n",
 				"content": {
 					"application/json": {
 						"schema": {
@@ -872,6 +872,49 @@
 					}
 				}
 			},
+			"reference": {
+				"type": "object",
+				"additionalProperties": false,
+				"required": ["type", "externalId"],
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"Episode",
+							"Section",
+							"Publication",
+							"Broadcast",
+							"Show",
+							"Season",
+							"Article"
+						]
+					},
+					"id": {
+						"type": "string",
+						"pattern": "^urn:ard:[a-z0-9-]+:[a-z0-9-]+$",
+						"example": "urn:ard:show:49267f7d67be180d"
+					},
+					"externalId": {
+						"type": "string",
+						"example": "crid://swr.de/123450",
+						"pattern": "^(c|b)rid://.+$"
+					},
+					"title": {
+						"type": "string"
+					},
+					"url": {
+						"type": "string",
+						"format": "uri"
+					},
+					"alternateIds": {
+						"type": "array",
+						"items": {
+							"type": "string",
+							"example": "https://normdb.ivz.cn.ard.de/sendereihe/427"
+						}
+					}
+				}
+			},
 			"eventV1PostBody": {
 				"additionalProperties": false,
 				"required": ["type", "start", "title", "services", "playlistItemId"],
@@ -988,6 +1031,19 @@
 							"allOf": [
 								{
 									"$ref": "#/components/schemas/services"
+								}
+							]
+						}
+					},
+					"references": {
+						"type": "array",
+						"description": "related external entities",
+						"nullable": true,
+						"items": {
+							"minItems": 0,
+							"allOf": [
+								{
+									"$ref": "#/components/schemas/reference"
 								}
 							]
 						}
