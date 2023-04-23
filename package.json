@@ -58,7 +58,7 @@
 		"license-compliance": "^1.2.5",
 		"mocha": "^10.2.0",
 		"nodemon": "^2.0.22",
-		"prettier": "^2.8.7",
+		"prettier": "^2.8.8",
 		"typescript": "^5.0.4"
 	},
 	"resolutions": {
