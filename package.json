@@ -51,7 +51,7 @@
 		"@swrlab/eslint-plugin-swr": "^0.2.0",
 		"@swrlab/swr-prettier-config": "^0.2.0",
 		"chai": "^4.3.7",
-		"chai-http": "^4.3.0",
+		"chai-http": "^4.4.0",
 		"docsify-cli": "^4.4.4",
 		"eslint": "^8.38.0",
 		"eslint-plugin-chai-friendly": "^0.7.2",
