@@ -55,7 +55,7 @@
 		"docsify-cli": "^4.4.4",
 		"eslint": "^8.38.0",
 		"eslint-plugin-chai-friendly": "^0.7.2",
-		"license-compliance": "^1.2.5",
+		"license-compliance": "^2.0.0",
 		"mocha": "^10.2.0",
 		"nodemon": "^2.0.22",
 		"prettier": "^2.8.7",
