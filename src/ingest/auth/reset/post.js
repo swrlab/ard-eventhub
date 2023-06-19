@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
 				data: { email: req.body.email },
 			})
 
-			return response.badRequest(req, res, { status: error?.error?.code || 500, data: error })
+			return response.badRequest(req, res, { status: 500 })
 		}
 
 		// return ok
