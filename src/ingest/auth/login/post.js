@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
 		try {
 			login = await firebase.signInWithEmailAndPassword(req.body.email, req.body.password)
 		} catch (error) {
-			return response.badRequest(req, res, { status: error?.error?.code || 500, data: error })
+			return response.badRequest(req, res, { status: 500 })
 		}
 
 		// return ok

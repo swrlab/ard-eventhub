@@ -76,7 +76,7 @@ router.get(['/', '/health'], (req, res) => {
 
 // set openapi error handler
 router.use((err, req, res, next) => {
-	return response.badRequest(req, res, err)
+	return response.badRequest(req, res, { status: 400 })
 })
 
 // export router object to server

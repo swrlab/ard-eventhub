@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
 		try {
 			login = await firebase.refreshToken(req.body.refreshToken)
 		} catch (error) {
-			return response.badRequest(req, res, { status: error?.error?.code || 500, data: error })
+			return response.badRequest(req, res, { status: 500 })
 		}
 
 		// return ok
