@@ -15,7 +15,7 @@
 		"ingest:lint": "eslint src",
 		"docker:build": "docker build . -t swr/ard-eventhub",
 		"docker:run": "docker run --env-file .env -p 8080:8080 --name ard-eventhub swr/ard-eventhub",
-		"docker:scan": "docker scan node:18-alpine --file=Dockerfile",
+		"docker:scan": "yarn docker:build && docker scout quickview",
 		"docker:clean": "docker rm ard-eventhub",
 		"license": "yarn run license-compliance",
 		"test": "mocha test/example.test.js",
