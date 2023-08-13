@@ -40,7 +40,7 @@
 		"express-openapi-validator": "5.0.4",
 		"firebase-admin": "11.9.0",
 		"google-auth-library": "8.8.0",
-		"jsonwebtoken": "9.0.0",
+		"jsonwebtoken": "9.0.1",
 		"luxon": "3.3.0",
 		"slug": "8.2.2",
 		"swagger-ui-express": "4.6.3",
