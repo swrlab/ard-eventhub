@@ -43,7 +43,7 @@
 		"jsonwebtoken": "9.0.0",
 		"luxon": "3.3.0",
 		"slug": "8.2.2",
-		"swagger-ui-express": "4.6.3",
+		"swagger-ui-express": "5.0.0",
 		"uuid": "9.0.0",
 		"winston": "3.9.0"
 	},
