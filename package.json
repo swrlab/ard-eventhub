@@ -42,7 +42,7 @@
 		"google-auth-library": "8.8.0",
 		"jsonwebtoken": "9.0.0",
 		"luxon": "3.3.0",
-		"slug": "8.2.2",
+		"slug": "8.2.3",
 		"swagger-ui-express": "4.6.3",
 		"uuid": "9.0.0",
 		"winston": "3.9.0"
