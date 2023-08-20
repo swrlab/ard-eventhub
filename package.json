@@ -48,7 +48,7 @@
 		"winston": "3.9.0"
 	},
 	"devDependencies": {
-		"@swrlab/eslint-plugin-swr": "^0.2.0",
+		"@swrlab/eslint-plugin-swr": "^0.3.0",
 		"@swrlab/swr-prettier-config": "^0.2.0",
 		"chai": "^4.3.7",
 		"chai-http": "^4.4.0",
