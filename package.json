@@ -50,7 +50,7 @@
 	"devDependencies": {
 		"@swrlab/eslint-plugin-swr": "^0.2.0",
 		"@swrlab/swr-prettier-config": "^0.2.0",
-		"chai": "^4.3.7",
+		"chai": "^4.3.8",
 		"chai-http": "^4.4.0",
 		"docsify-cli": "^4.4.4",
 		"eslint": "^8.43.0",
