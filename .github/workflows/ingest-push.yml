@@ -30,7 +30,7 @@ jobs:
         STAGES: [dev]
     steps:
       - name: 👀 Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🏗 Install Node.js
         uses: actions/setup-node@v3
@@ -71,7 +71,7 @@ jobs:
       VERSION: ${{ steps.push.outputs.VERSION }}
     steps:
       - name: 👀 Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🔑 Setup Google Cloud Auth
         uses: google-github-actions/auth@v1
