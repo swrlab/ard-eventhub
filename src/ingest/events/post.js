@@ -23,12 +23,14 @@ const DEFAULT_ZONE = 'Europe/Berlin'
 
 // feature flags
 const IS_DTS_OPT_OUT_ENABLED = false
+const IS_COMMON_TOPIC_ENABLED = true
 
 module.exports = async (req, res) => {
 	try {
 		// fetch inputs
 		const { eventName } = req.params
 		const start = DateTime.fromISO(req.body.start, { zone: DEFAULT_ZONE })
+		const pluginMessages = []
 
 		// check eventName consistency
 		if (req.body?.event && req.body.event !== eventName) {
@@ -96,6 +98,23 @@ module.exports = async (req, res) => {
 		// replace services
 		message.services = newServices
 
+		// send event to common topic
+		if (IS_COMMON_TOPIC_ENABLED) {
+			// try sending message
+			const topicName = pubsub.buildId(eventName.replace('de.ard.eventhub.', ''))
+			const messageId = await pubsub.publishMessage(topicName, message, attributes)
+
+			// add to output
+			pluginMessages.push({
+				type: 'common',
+				messageId,
+				topic: {
+					id: eventName,
+					name: topicName,
+				},
+			})
+		}
+
 		// add opt-out plugins
 		const isDtsPluginSet = message.plugins?.find((plugin) => plugin.type === 'dts')
 		if (!isDtsPluginSet && IS_DTS_OPT_OUT_ENABLED) {
@@ -107,7 +126,6 @@ module.exports = async (req, res) => {
 		}
 
 		// handle plugin integrations
-		const pluginMessages = []
 		if (message.plugins?.length > 0) {
 			for await (const plugin of message.plugins) {
 				if (!plugin.isDeactivated) {

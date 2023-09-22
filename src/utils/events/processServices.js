@@ -17,8 +17,8 @@ const pubsub = require('../pubsub')
 const { coreIdPrefixes } = require('../../../config')
 
 const source = 'utils.events.processServices'
-const urnPublisherRegex = /(?=urn:ard:publisher:[a-z0-9]{16})/g
-const urnPublisherPrefix = coreIdPrefixes.Publisher
+const URN_PUBLISHER_PREFIX = coreIdPrefixes.Publisher
+const URN_PUBLISHER_REGEX = /(?=urn:ard:publisher:[a-z0-9]{16})/g
 
 module.exports = async (service, req) => {
 	// fetch prefix from configured list
@@ -35,12 +35,12 @@ module.exports = async (service, req) => {
 	}
 
 	// convert publisher if not in new ARD urn format
-	if (!service.publisherId.match(urnPublisherRegex)) {
+	if (!service.publisherId.match(URN_PUBLISHER_REGEX)) {
 		// add trailing 0 if number is only 5 digits
 		if (service.publisherId.length === 5) service.publisherId = `${service.publisherId}0`
 
 		// create hash using given publisherId
-		service.publisherId = `${urnPublisherPrefix}${createHashedId(service.publisherId)}`
+		service.publisherId = `${URN_PUBLISHER_PREFIX}${createHashedId(service.publisherId)}`
 	}
 
 	// fetch publisher

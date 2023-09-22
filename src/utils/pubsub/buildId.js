@@ -12,8 +12,8 @@
 const convertId = require('./convertId')
 
 // load config
-const config = require('../../../config')
+const { pubSubPrefix } = require('../../../config')
 
 module.exports = (input) => {
-	return `${config.pubSubPrefix}${convertId.encode(input)}`
+	return `${pubSubPrefix}${convertId.encode(input)}`
 }
