@@ -17,7 +17,7 @@ jobs:
   security:
     name: Check permissions for action runs
     runs-on: ubuntu-latest
-    if: "github.event.pull_request.merged == true || github.event_name == 'push'"
+    if: github.event.pull_request.merged == true || github.event_name == 'push'
     steps:
       - run: |
           echo "Security checks passed!"
@@ -30,14 +30,14 @@ jobs:
         STAGES: [dev]
     steps:
       - name: 👀 Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🏗 Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "yarn"
-          cache-dependency-path: "**/yarn.lock"
+          cache: 'yarn'
+          cache-dependency-path: '**/yarn.lock'
 
       - name: 📦 Install Dependencies
         run: yarn
@@ -71,7 +71,7 @@ jobs:
       VERSION: ${{ steps.push.outputs.VERSION }}
     steps:
       - name: 👀 Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🔑 Setup Google Cloud Auth
         uses: google-github-actions/auth@v1
@@ -79,10 +79,10 @@ jobs:
           credentials_json: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
 
       - name: 🔑 Login to Registry
-        run: "gcloud auth configure-docker $REGISTRY_DOMAIN"
+        run: 'gcloud auth configure-docker $REGISTRY_DOMAIN'
 
       - name: 🚧 Building docker image
-        run: "docker build ./ --file ./Dockerfile -t image"
+        run: 'docker build ./ --file ./Dockerfile -t image'
 
       - name: 🔖 Get Package Version
         id: package-version
@@ -130,7 +130,7 @@ jobs:
             ```
 
       - name: 👋 Logout
-        run: "docker logout"
+        run: 'docker logout'
 
   deploy-A-dev-kubernetes:
     if: github.event.pull_request.merged == true
