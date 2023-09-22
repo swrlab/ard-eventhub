@@ -21,6 +21,9 @@ const config = require('../../../config')
 const source = 'ingest/events/post'
 const DEFAULT_ZONE = 'Europe/Berlin'
 
+// feature flags
+const IS_DTS_OPT_OUT_ENABLED = false
+
 module.exports = async (req, res) => {
 	try {
 		// fetch inputs
@@ -42,6 +45,7 @@ module.exports = async (req, res) => {
 			name: eventName,
 			creator: req.user.email,
 			created: DateTime.now().toLocal().toISO(),
+			plugins: [],
 
 			// use entire POST body to include potentially new fields
 			...structuredClone(req.body),
@@ -92,29 +96,41 @@ module.exports = async (req, res) => {
 		// replace services
 		message.services = newServices
 
+		// add opt-out plugins
+		const isDtsPluginSet = message.plugins?.find((plugin) => plugin.type === 'dts')
+		if (!isDtsPluginSet && IS_DTS_OPT_OUT_ENABLED) {
+			message.plugins.push({
+				type: 'dts',
+				isDeactivated: false,
+				note: 'automatically enabled by opt-out',
+			})
+		}
+
 		// handle plugin integrations
 		const pluginMessages = []
-		if (message?.plugins?.length > 0) {
+		if (message.plugins?.length > 0) {
 			for await (const plugin of message.plugins) {
-				const pluginMessage = {
-					action: `plugins.${plugin.type}.event`,
-					event: message,
-					plugin,
-					institutionId: req.user.institutionId,
+				if (!plugin.isDeactivated) {
+					const pluginMessage = {
+						action: `plugins.${plugin.type}.event`,
+						event: message,
+						plugin,
+						institutionId: req.user.institutionId,
+					}
+
+					// try sending message
+					const messageId = await pubsub.publishMessage(
+						config.pubSubTopicSelf,
+						pluginMessage,
+						attributes
+					)
+
+					// add to output
+					pluginMessages.push({
+						type: plugin.type,
+						messageId,
+					})
 				}
-
-				// try sending message
-				const messageId = await pubsub.publishMessage(
-					config.pubSubTopicSelf,
-					pluginMessage,
-					attributes
-				)
-
-				// add to output
-				pluginMessages.push({
-					type: plugin.type,
-					messageId,
-				})
 			}
 		}
 
@@ -136,7 +152,7 @@ module.exports = async (req, res) => {
 			level: 'info',
 			message: `event processed > ${eventName} > ${message.services.length}x services (${message.services[0]?.publisherId})`,
 			source,
-			data: { ...data, body: req.body },
+			data: { ...data, body: req.body, isDtsPluginSet },
 		})
 
 		// return ok
