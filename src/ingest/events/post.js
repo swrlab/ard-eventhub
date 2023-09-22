@@ -100,19 +100,31 @@ module.exports = async (req, res) => {
 
 		// send event to common topic
 		if (IS_COMMON_TOPIC_ENABLED) {
-			// try sending message
+			// prepare common post
 			const topicName = pubsub.buildId(eventName.replace('de.ard.eventhub.', ''))
-			const messageId = await pubsub.publishMessage(topicName, message, attributes)
-
-			// add to output
-			pluginMessages.push({
+			const commonEvent = {
 				type: 'common',
-				messageId,
 				topic: {
 					id: eventName,
 					name: topicName,
 				},
-			})
+			}
+
+			// try sending message
+			commonEvent.messageId = await pubsub.publishMessage(topicName, message, attributes)
+
+			// handle errors
+			if (commonEvent.messageId === 'TOPIC_ERROR' || commonEvent.messageId === 'TOPIC_NOT_FOUND') {
+				logger.log({
+					level: 'warning',
+					message: `failed common plugin > ${eventName} > ${message.services[0]?.publisherId}`,
+					source,
+					data: { message, body: req.body, commonEvent },
+				})
+			}
+
+			// add to output
+			pluginMessages.push(commonEvent)
 		}
 
 		// add opt-out plugins
