@@ -21,11 +21,16 @@ const config = require('../../../config')
 const source = 'ingest/events/post'
 const DEFAULT_ZONE = 'Europe/Berlin'
 
+// feature flags
+const IS_DTS_OPT_OUT_ENABLED = false
+const IS_COMMON_TOPIC_ENABLED = true
+
 module.exports = async (req, res) => {
 	try {
 		// fetch inputs
 		const { eventName } = req.params
 		const start = DateTime.fromISO(req.body.start, { zone: DEFAULT_ZONE })
+		const pluginMessages = []
 
 		// check eventName consistency
 		if (req.body?.event && req.body.event !== eventName) {
@@ -42,6 +47,7 @@ module.exports = async (req, res) => {
 			name: eventName,
 			creator: req.user.email,
 			created: DateTime.now().toLocal().toISO(),
+			plugins: [],
 
 			// use entire POST body to include potentially new fields
 			...structuredClone(req.body),
@@ -92,29 +98,69 @@ module.exports = async (req, res) => {
 		// replace services
 		message.services = newServices
 
-		// handle plugin integrations
-		const pluginMessages = []
-		if (message?.plugins?.length > 0) {
-			for await (const plugin of message.plugins) {
-				const pluginMessage = {
-					action: `plugins.${plugin.type}.event`,
-					event: message,
-					plugin,
-					institutionId: req.user.institutionId,
-				}
+		// send event to common topic
+		if (IS_COMMON_TOPIC_ENABLED) {
+			// prepare common post
+			const topicName = pubsub.buildId(eventName.replace('de.ard.eventhub.', ''))
+			const commonEvent = {
+				type: 'common',
+				topic: {
+					id: eventName,
+					name: topicName,
+				},
+			}
 
-				// try sending message
-				const messageId = await pubsub.publishMessage(
-					config.pubSubTopicSelf,
-					pluginMessage,
-					attributes
-				)
+			// try sending message
+			commonEvent.messageId = await pubsub.publishMessage(topicName, message, attributes)
 
-				// add to output
-				pluginMessages.push({
-					type: plugin.type,
-					messageId,
+			// handle errors
+			if (commonEvent.messageId === 'TOPIC_ERROR' || commonEvent.messageId === 'TOPIC_NOT_FOUND') {
+				logger.log({
+					level: 'warning',
+					message: `failed common plugin > ${eventName} > ${message.services[0]?.publisherId}`,
+					source,
+					data: { message, body: req.body, commonEvent },
 				})
+			}
+
+			// add to output
+			pluginMessages.push(commonEvent)
+		}
+
+		// add opt-out plugins
+		const isDtsPluginSet = message.plugins?.find((plugin) => plugin.type === 'dts')
+		if (!isDtsPluginSet && IS_DTS_OPT_OUT_ENABLED) {
+			message.plugins.push({
+				type: 'dts',
+				isDeactivated: false,
+				note: 'automatically enabled by opt-out',
+			})
+		}
+
+		// handle plugin integrations
+		if (message.plugins?.length > 0) {
+			for await (const plugin of message.plugins) {
+				if (!plugin.isDeactivated) {
+					const pluginMessage = {
+						action: `plugins.${plugin.type}.event`,
+						event: message,
+						plugin,
+						institutionId: req.user.institutionId,
+					}
+
+					// try sending message
+					const messageId = await pubsub.publishMessage(
+						config.pubSubTopicSelf,
+						pluginMessage,
+						attributes
+					)
+
+					// add to output
+					pluginMessages.push({
+						type: plugin.type,
+						messageId,
+					})
+				}
 			}
 		}
 
@@ -136,7 +182,7 @@ module.exports = async (req, res) => {
 			level: 'info',
 			message: `event processed > ${eventName} > ${message.services.length}x services (${message.services[0]?.publisherId})`,
 			source,
-			data: { ...data, body: req.body },
+			data: { ...data, body: req.body, isDtsPluginSet },
 		})
 
 		// return ok

@@ -88,30 +88,12 @@ module.exports = async (job) => {
 	if (!notEmptyArray(contentIds)) {
 		logger.log({
 			level: 'notice',
-			message: `DTS BID mapping missing for coreIds`,
+			message: `DTS contentIds mapping missing for coreIds`,
 			source,
 			data: { job, ids: { coreIds } },
 		})
 		return Promise.resolve()
 	}
-
-	// fetch all matching broadcasts
-	const searchBroadcastsUrl = endpoints.searchBroadcasts.replace('{contentQuery}', contentIds.join(','))
-	const broadcasts = await undici(searchBroadcastsUrl, DASHBOARD_REQUEST_CONFIG)
-
-	// end processing if no broadcasts were found
-	if (!broadcasts.ok || !notEmptyArray(broadcasts.json)) {
-		logger.log({
-			level: 'error',
-			message: `failed loading DTS broadcasts for coreIds`,
-			source,
-			data: { job, ids: { coreIds, contentIds }, string: broadcasts.string, json: broadcasts.json },
-		})
-		return Promise.resolve()
-	}
-
-	// remap broadcast ids
-	const linkedBroadcastIds = broadcasts.json.map((broadcast) => broadcast.broadcast_id)
 
 	// remap playing type
 	let type = 'other'
@@ -121,7 +103,7 @@ module.exports = async (job) => {
 	// remap Eventhub variables to external ones
 	const liveRadioEvent = {
 		broadcastId: null,
-		linkedBroadcastIds,
+		contentId: null,
 
 		type,
 		status: 'playing',
@@ -180,10 +162,15 @@ module.exports = async (job) => {
 		return Promise.resolve()
 	}
 
+	// insert contentIds into events
+	const liveRadioEvents = contentIds.map((contentId) => {
+		return { ...liveRadioEvent, contentId }
+	})
+
 	// post event
 	const liveradioConfig = {
 		method: 'POST',
-		body: JSON.stringify([liveRadioEvent]),
+		body: JSON.stringify(liveRadioEvents),
 		timeout: 7e3,
 		reject: false,
 		headers: { ...DEFAULT_HEADERS, Authorization: liveradioToken },
@@ -200,7 +187,6 @@ module.exports = async (job) => {
 	const message = [
 		`DTS event done (${event.services[0]?.publisherId})`,
 		`status ${posted.statusCode}`,
-		`${linkedBroadcastIds?.length}x BIDs`,
 		`${contentIds?.length}x contentIds ${JSON.stringify(contentIds)}`,
 		`${coreIds.length}x Core IDs`,
 	]
@@ -210,7 +196,7 @@ module.exports = async (job) => {
 		source,
 		data: {
 			input: job,
-			ids: { coreIds, contentIds, linkedBroadcastIds },
+			ids: { coreIds, contentIds },
 			dts: {
 				username,
 				statusCode: posted.statusCode,
