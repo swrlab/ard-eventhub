@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.6.0] - 2023-09-22
 
-- feat: make dts plugin opt-out
+- feat: prepare feature flat to toggle `dts` plugin to be opt-out
 - feat: add common pubsub topic
 - refactor: migrate DTS APIs
 
