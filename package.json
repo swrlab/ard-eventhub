@@ -45,7 +45,7 @@
 		"slug": "8.2.3",
 		"swagger-ui-express": "5.0.0",
 		"uuid": "9.0.1",
-		"winston": "3.10.0"
+		"winston": "3.11.0"
 	},
 	"devDependencies": {
 		"@swrlab/eslint-plugin-swr": "^0.3.0",
