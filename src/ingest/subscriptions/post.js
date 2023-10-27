@@ -7,7 +7,7 @@
 
 // load node utils
 const { DateTime } = require('luxon')
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('crypto')
 
 // load eventhub utils
 const datastore = require('../../utils/datastore')
@@ -60,7 +60,7 @@ module.exports = async (req, res) => {
 
 		// map inputs
 		let subscription = {
-			name: `${prefix}${uuidv4()}`,
+			name: `${prefix}${randomUUID()}`,
 			type: req.body.type,
 			method: req.body.method,
 			url: req.body.url,

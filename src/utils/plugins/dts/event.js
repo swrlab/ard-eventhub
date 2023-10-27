@@ -13,7 +13,7 @@ const logger = require('../../logger')
 const undici = require('../../undici')
 
 // load keys
-const { credentials, endpoints, integrationName, permittedExcludedFields } = require('../../../../config/dtsKeys')
+const { credentials, endpoints, permittedExcludedFields } = require('../../../../config/dtsKeys')
 
 // load config
 const config = require('../../../../config')
@@ -22,18 +22,9 @@ const source = 'utils/plugins/dts/event'
 
 const DEFAULT_HEADERS = { Accept: 'application/json', 'Content-Type': 'application/json' }
 const LIVERADIO_URL = endpoints.liveRadioEvent[config.stage]
-const RECORDS_INTEGRATION_URL = endpoints.listIntegrationRecords.replace('{integrationName}', integrationName)
-const DASHBOARD_REQUEST_CONFIG = {
-	timeout: 7e3,
-	reject: false,
-	headers: { ...DEFAULT_HEADERS, Authorization: credentials.dashboardToken },
-}
 
 // provide remapping helpers
 const getCoreIds = (services) => services.map((service) => service.topic.id)
-const filterIntegrations = (li, coreIds) =>
-	li.filter((i) => i.external_system === integrationName && coreIds.includes(i.external_id))
-const getContentIds = (li) => li.map((integration) => integration.content_id)
 
 const getUserForInstitution = (institutionId) => {
 	// get user or reject if not found
@@ -65,35 +56,6 @@ module.exports = async (job) => {
 
 	// collect ARD Core ids
 	const coreIds = getCoreIds(event.services)
-
-	// fetch all externally mapped ids
-	const integrationsList = await undici(RECORDS_INTEGRATION_URL, DASHBOARD_REQUEST_CONFIG)
-
-	// end processing if no integrations were found
-	if (!integrationsList.ok || !notEmptyArray(integrationsList.json)) {
-		logger.log({
-			level: 'error',
-			message: `failed loading DTS integrations`,
-			source,
-			data: { job, ids: { coreIds }, string: integrationsList.string, json: integrationsList.json },
-		})
-		return Promise.resolve()
-	}
-
-	// filter integrations matching these ARD Core ids
-	const matchingIntegrations = filterIntegrations(integrationsList.json, coreIds)
-	const contentIds = getContentIds(matchingIntegrations)
-
-	// catch non-existent mappings
-	if (!notEmptyArray(contentIds)) {
-		logger.log({
-			level: 'notice',
-			message: `DTS contentIds mapping missing for coreIds`,
-			source,
-			data: { job, ids: { coreIds } },
-		})
-		return Promise.resolve()
-	}
 
 	// remap playing type
 	let type = 'other'
@@ -162,9 +124,9 @@ module.exports = async (job) => {
 		return Promise.resolve()
 	}
 
-	// insert contentIds into events
-	const liveRadioEvents = contentIds.map((contentId) => {
-		return { ...liveRadioEvent, contentId }
+	// insert coreId into events
+	const liveRadioEvents = coreIds.map((coreId) => {
+		return { ...liveRadioEvent, contentId: coreId }
 	})
 
 	// post event
@@ -187,7 +149,6 @@ module.exports = async (job) => {
 	const message = [
 		`DTS event done (${event.services[0]?.publisherId})`,
 		`status ${posted.statusCode}`,
-		`${contentIds?.length}x contentIds ${JSON.stringify(contentIds)}`,
 		`${coreIds.length}x Core IDs`,
 	]
 	logger.log({
@@ -196,7 +157,7 @@ module.exports = async (job) => {
 		source,
 		data: {
 			input: job,
-			ids: { coreIds, contentIds },
+			coreIds,
 			dts: {
 				username,
 				statusCode: posted.statusCode,
