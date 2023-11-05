@@ -34,7 +34,7 @@
 		"@google-cloud/secret-manager": "5.0.1",
 		"@swrlab/utils": "1.1.3",
 		"compression": "1.7.4",
-		"dd-trace": "4.15.0",
+		"dd-trace": "4.18.0",
 		"dotenv": "16.3.1",
 		"express": "4.18.2",
 		"express-openapi-validator": "5.0.6",
