@@ -272,17 +272,17 @@
   resolved "https://registry.yarnpkg.com/@google-cloud/promisify/-/promisify-4.0.0.tgz#a906e533ebdd0f754dca2509933334ce58b8c8b1"
   integrity sha512-Orxzlfb9c67A15cq2JQEyVc7wEsmFBmHjZWZYQMUyJ1qivXyMwdyNOs9odi79hze+2zqdTtu1E19IM/FtqZ10g==
 
-"@google-cloud/pubsub@4.0.6":
-  version "4.0.6"
-  resolved "https://registry.yarnpkg.com/@google-cloud/pubsub/-/pubsub-4.0.6.tgz#769ceab51885891a2484791f549b6542da50b6b6"
-  integrity sha512-F67FvIAjARqdB9OF5Vy8sOQxfQyzTlTsjuNnJPvpCqv/4LlWwsfnW4FcCLa+Wlb92vaLI3ikHxLrqYz6WWg2cA==
+"@google-cloud/pubsub@4.0.7":
+  version "4.0.7"
+  resolved "https://registry.yarnpkg.com/@google-cloud/pubsub/-/pubsub-4.0.7.tgz#63e820cd527c638be47630fe8c44fa47163c8eb9"
+  integrity sha512-LE+Wa1IW89MtW/t2Dvdwr5wvBono0xURoPx1T8kAOT6gG6XL2PR8LlcMT+V0WEkx98UkhQiKVf4w2dIRJmyl3w==
   dependencies:
     "@google-cloud/paginator" "^5.0.0"
     "@google-cloud/precise-date" "^4.0.0"
     "@google-cloud/projectify" "^4.0.0"
     "@google-cloud/promisify" "^4.0.0"
     "@opentelemetry/api" "^1.6.0"
-    "@opentelemetry/semantic-conventions" "~1.17.0"
+    "@opentelemetry/semantic-conventions" "~1.18.0"
     "@types/duplexify" "^3.6.0"
     "@types/long" "^4.0.0"
     arrify "^2.0.0"
@@ -427,10 +427,15 @@
   dependencies:
     "@opentelemetry/semantic-conventions" "1.17.0"
 
-"@opentelemetry/semantic-conventions@1.17.0", "@opentelemetry/semantic-conventions@~1.17.0":
+"@opentelemetry/semantic-conventions@1.17.0":
   version "1.17.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.17.0.tgz#af10baa9f05ce1e64a14065fc138b5739bfb65f6"
   integrity sha512-+fguCd2d8d2qruk0H0DsCEy2CTK3t0Tugg7MhZ/UQMvmewbZLNnJ6heSYyzIZWG5IPfAXzoj4f4F/qpM7l4VBA==
+
+"@opentelemetry/semantic-conventions@~1.18.0":
+  version "1.18.1"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.18.1.tgz#8e47caf57a84b1dcc1722b2025693348cdf443b4"
+  integrity sha512-+NLGHr6VZwcgE/2lw8zDIufOCGnzsA5CbQIMleXZTrgkBd0TanCX+MiDYJ1TOS4KL/Tqk0nFRxawnaYr6pkZkA==
 
 "@pkgr/utils@^2.3.1":
   version "2.4.2"
@@ -4184,8 +4189,9 @@ node-addon-api@^6.1.0:
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-6.1.0.tgz#ac8470034e58e67d0c6f1204a18ae6995d9c0d76"
   integrity sha512-+eawOlIgy680F0kBzPUNFhMZGtJ1YmqM6l4+Crf4IkImjYrO/mqPwRMh352g23uIaQKFItcQ64I7KMaJxHgAVA==
 
-"node-crc@github:swrlab/node-crc#v2.1.0":
+node-crc@swrlab/node-crc#v2.1.0:
   version "2.1.0"
+  uid "25f12cdce8b7463a0829593a09224d53c08341aa"
   resolved "https://codeload.github.com/swrlab/node-crc/tar.gz/25f12cdce8b7463a0829593a09224d53c08341aa"
   dependencies:
     "@types/node" "^18.11.17"
