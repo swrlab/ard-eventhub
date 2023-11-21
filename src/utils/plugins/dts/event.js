@@ -126,7 +126,7 @@ module.exports = async (job) => {
 
 	// insert coreId into events
 	const liveRadioEvents = coreIds.map((coreId) => {
-		return { ...liveRadioEvent, contentId: coreId }
+		return { ...liveRadioEvent, publisherSourceId: coreId }
 	})
 
 	// post event
