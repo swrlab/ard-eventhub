@@ -76,7 +76,6 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `@swrlab/utils`                | [MIT](https://github.com/swrlab/node-utils/blob/main/LICENSE.md)                                   |
 | NPM     | `compression`                  | [MIT](https://github.com/expressjs/compression/blob/master/LICENSE)                                |
 | NPM     | `dd-trace`                     | [Apache-2.0 OR BSD-3-Clause](https://github.com/DataDog/dd-trace-js/blob/master/LICENSE)           |
-| NPM     | `dotenv`                       | [BSD-2-Clause](https://github.com/motdotla/dotenv/blob/master/LICENSE)                             |
 | NPM     | `express`                      | [MIT](https://github.com/expressjs/express/blob/master/LICENSE)                                    |
 | NPM     | `express-openapi-validator`    | [MIT](https://github.com/cdimascio/express-openapi-validator/blob/master/LICENSE)                  |
 | NPM     | `firebase-admin`               | [Apache License 2.0](https://github.com/firebase/firebase-admin-node/blob/master/LICENSE)          |
@@ -85,13 +84,13 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `luxon`                        | [MIT](https://github.com/moment/luxon/blob/master/LICENSE.md)                                      |
 | NPM     | `slug`                         | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                           |
 | NPM     | `swagger-ui-express`           | [MIT](https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE)                       |
-| NPM     | `uuid`                         | [MIT](https://github.com/uuidjs/uuid/blob/master/LICENSE.md)                                       |
 | NPM     | `winston`                      | [MIT](https://github.com/winstonjs/winston/blob/master/LICENSE)                                    |
 | NPM DEV | `@swrlab/eslint-plugin-swr`    | [ISC](https://github.com/swrlab/eslint-plugin-swr/blob/main/package.json)                          |
 | NPM DEV | `@swrlab/swr-prettier-config`  | [MIT](https://github.com/swrlab/swr-prettier-config/blob/main/LICENSE.txt)                         |
 | NPM DEV | `chai`                         | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                          |
 | NPM DEV | `chai-http`                    | [MIT](https://github.com/chaijs/chai-http/blob/master/package.json)                                |
 | NPM DEV | `docsify-cli`                  | [MIT](https://github.com/docsifyjs/docsify-cli/blob/master/LICENSE)                                |
+| NPM DEV | `dotenv`                       | [BSD-2-Clause](https://github.com/motdotla/dotenv/blob/master/LICENSE)                             |
 | NPM DEV | `eslint`                       | [MIT](https://github.com/eslint/eslint/blob/master/LICENSE)                                        |
 | NPM DEV | `eslint-plugin-chai-friendly`  | [MIT](https://github.com/ihordiachenko/eslint-plugin-chai-friendly/blob/master/LICENSE)            |
 | NPM DEV | `license-compliance`           | [MIT](https://github.com/tmorell/license-compliance/blob/master/LICENSE)                           |

@@ -25,3 +25,6 @@ lib-cov
 
 # Yarn Integrity file
 .yarn-integrity
+
+# IntelliJ Idea
+.idea/
