@@ -2370,10 +2370,10 @@ execa@^7.1.1:
     signal-exit "^3.0.7"
     strip-final-newline "^3.0.0"
 
-express-openapi-validator@5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/express-openapi-validator/-/express-openapi-validator-5.1.0.tgz#909f9b3b71979b6d4c09369fc6a01e01364c4789"
-  integrity sha512-vSC+/a3wizKhTVJ3wH82lD4jQpq+hKkAvPaKSbDY24fKxEF7On1q7pC0tFGAFSX8/i9vuODuox24ujqVn5nr0w==
+express-openapi-validator@5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/express-openapi-validator/-/express-openapi-validator-5.1.1.tgz#617eea05374a890f6c9d6f8afec46cfd21fe7af4"
+  integrity sha512-zSRTscxNIV6XX26nIUjCOUUml1sQ9OUdruzX6jSc7pI8cWJUagQd/RDDcfkV1XZvqlcqMSQu960h9xJ9nW29Kg==
   dependencies:
     "@apidevtools/json-schema-ref-parser" "^9.1.2"
     "@types/multer" "^1.4.7"
