@@ -58,7 +58,7 @@
 		"mocha": "^10.2.0",
 		"nodemon": "^3.0.1",
 		"prettier": "^3.1.0",
-		"typescript": "^5.2.2"
+		"typescript": "^5.3.2"
 	},
 	"resolutions": {
 		"ansi-regex": "^5.0.1",
