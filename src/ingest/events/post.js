@@ -22,8 +22,8 @@ const source = 'ingest/events/post'
 const DEFAULT_ZONE = 'Europe/Berlin'
 
 // feature flags
-const IS_DTS_OPT_OUT_ENABLED = false
 const IS_COMMON_TOPIC_ENABLED = true
+const DTS_INSTITUTION_ALLOW_LIST = ['urn:ard:institution:a3004ff924ece1a2', 'urn:ard:institution:95a02eb6cc4f3d59']
 
 module.exports = async (req, res) => {
 	try {
@@ -129,7 +129,7 @@ module.exports = async (req, res) => {
 
 		// add opt-out plugins
 		const isDtsPluginSet = message.plugins?.find((plugin) => plugin.type === 'dts')
-		if (!isDtsPluginSet && IS_DTS_OPT_OUT_ENABLED) {
+		if (!isDtsPluginSet && DTS_INSTITUTION_ALLOW_LIST.includes(req.user.institutionId)) {
 			message.plugins.push({
 				type: 'dts',
 				isDeactivated: false,
