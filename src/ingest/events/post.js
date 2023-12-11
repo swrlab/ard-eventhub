@@ -23,6 +23,7 @@ const DEFAULT_ZONE = 'Europe/Berlin'
 
 // feature flags
 const IS_COMMON_TOPIC_ENABLED = true
+// allow DTS for SWR (a3004ff924ece1a2) and BR (95a02eb6cc4f3d59)
 const DTS_INSTITUTION_ALLOW_LIST = ['urn:ard:institution:a3004ff924ece1a2', 'urn:ard:institution:95a02eb6cc4f3d59']
 
 module.exports = async (req, res) => {
