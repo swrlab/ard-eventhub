@@ -130,7 +130,8 @@ module.exports = async (req, res) => {
 
 		// add opt-out plugins
 		const isDtsPluginSet = message.plugins?.find((plugin) => plugin.type === 'dts')
-		if (!isDtsPluginSet && DTS_INSTITUTION_ALLOW_LIST.includes(req.user.institutionId)) {
+		const isMusic = req.body.type === 'music'
+		if (!isDtsPluginSet && isMusic && DTS_INSTITUTION_ALLOW_LIST.includes(req.user.institutionId)) {
 			message.plugins.push({
 				type: 'dts',
 				isDeactivated: false,
