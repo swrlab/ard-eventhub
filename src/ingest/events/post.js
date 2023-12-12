@@ -131,7 +131,10 @@ module.exports = async (req, res) => {
 		// add opt-out plugins
 		const isDtsPluginSet = message.plugins?.find((plugin) => plugin.type === 'dts')
 		const isMusic = req.body.type === 'music'
-		if (!isDtsPluginSet && isMusic && DTS_INSTITUTION_ALLOW_LIST.includes(req.user.institutionId)) {
+		const isInDtsAllowList = DTS_INSTITUTION_ALLOW_LIST.includes(req.user.institutionId)
+		const institutionId = req.user.institutionId || 'unknown'
+
+		if (!isDtsPluginSet && isMusic && isInDtsAllowList) {
 			message.plugins.push({
 				type: 'dts',
 				isDeactivated: false,
@@ -182,7 +185,7 @@ module.exports = async (req, res) => {
 		// log success
 		logger.log({
 			level: 'info',
-			message: `event processed > ${eventName} > ${message.services.length}x services (${message.services[0]?.publisherId})`,
+			message: `event processed > ${eventName} > institution ${institutionId} > isInDtsAllowList ${isInDtsAllowList} > ${message.services.length}x services (${message.services[0]?.publisherId})`,
 			source,
 			data: { ...data, body: req.body, isDtsPluginSet },
 		})
