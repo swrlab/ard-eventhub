@@ -23,8 +23,8 @@ const DEFAULT_ZONE = 'Europe/Berlin'
 
 // feature flags
 const IS_COMMON_TOPIC_ENABLED = true
-// allow DTS for SWR (a3004ff924ece1a2) and BR (95a02eb6cc4f3d59)
-const DTS_INSTITUTION_ALLOW_LIST = ['urn:ard:institution:a3004ff924ece1a2', 'urn:ard:institution:95a02eb6cc4f3d59']
+// allow DTS for SWR (baa7e9a52223a090) and BR (7d64899d03610af2)
+const DTS_INSTITUTION_ALLOW_LIST = ['urn:ard:institution:baa7e9a52223a090', 'urn:ard:institution:7d64899d03610af2']
 
 module.exports = async (req, res) => {
 	try {
@@ -131,7 +131,9 @@ module.exports = async (req, res) => {
 		// add opt-out plugins
 		const isDtsPluginSet = message.plugins?.find((plugin) => plugin.type === 'dts')
 		const isMusic = req.body.type === 'music'
-		if (!isDtsPluginSet && isMusic && DTS_INSTITUTION_ALLOW_LIST.includes(req.user.institutionId)) {
+		const isInDtsAllowList = DTS_INSTITUTION_ALLOW_LIST.includes(req.user.institutionId)
+
+		if (!isDtsPluginSet && isMusic && isInDtsAllowList) {
 			message.plugins.push({
 				type: 'dts',
 				isDeactivated: false,
