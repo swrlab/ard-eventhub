@@ -212,10 +212,10 @@
   dependencies:
     tslib "^2.1.0"
 
-"@google-cloud/datastore@8.2.2":
-  version "8.2.2"
-  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-8.2.2.tgz#17d740bd757359764b1faccb8beba32f326f6112"
-  integrity sha512-XnxJrR438nJ3h/t+lZnPub7wI+yHZj6Y12xQcoO9GN3E9BRTVY33AkpGIjUpGLxWQVeRGblMU1x80Nbll3DLng==
+"@google-cloud/datastore@8.3.0":
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/@google-cloud/datastore/-/datastore-8.3.0.tgz#179afffb38c603769c89f64af2933279ebe9cf1d"
+  integrity sha512-zd535qNbj0LJOEsEY5ovjj5uKqrkYxHnzWsHfuAJJLXIYV9Cfdynvnn7mPpDk0XbWWM6hfbe4IoL4aSUTVhYjg==
   dependencies:
     "@google-cloud/promisify" "^4.0.0"
     arrify "^2.0.1"
