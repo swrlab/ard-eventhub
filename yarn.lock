@@ -58,17 +58,17 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
-"@datadog/native-appsec@4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@datadog/native-appsec/-/native-appsec-4.0.0.tgz#ee08138b987dec557eac3650a43a972dac85b6a6"
-  integrity sha512-myTguXJ3VQHS2E1ylNsSF1avNpDmq5t+K4Q47wdzeakGc3sDIDDyEbvuFTujl9c9wBIkup94O1mZj5DR37ajzA==
+"@datadog/native-appsec@6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@datadog/native-appsec/-/native-appsec-6.0.0.tgz#da753f8566ec5180ad9e83014cb44984b4bc878e"
+  integrity sha512-e7vH5usFoqov7FraPcA99fe80t2/qm4Cmno1T3iBhYlhyO6HD01ArDsCZ/sUvNIUR1ujxtbr8Z9WRGJ0qQ/FDA==
   dependencies:
     node-gyp-build "^3.9.0"
 
-"@datadog/native-iast-rewriter@2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@datadog/native-iast-rewriter/-/native-iast-rewriter-2.2.1.tgz#3c74c5a8caa0b876e091e9c5a95256add0d73e1c"
-  integrity sha512-DyZlE8gNa5AoOFNKGRJU4RYF/Y/tJzv4bIAMuVBbEnMA0xhiIYqpYQG8T3OKkALl3VSEeBMjYwuOR2fCrJ6gzA==
+"@datadog/native-iast-rewriter@2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@datadog/native-iast-rewriter/-/native-iast-rewriter-2.2.2.tgz#3f7feaf6be1af4c83ad063065b8ed509bbaf11cb"
+  integrity sha512-13ZBhJpjZ/tiV6rYfyAf/ITye9cyd3x12M/2NKhD4Ivev4N4uKBREAjpArOtzKtPXZ5b6oXwVV4ofT1SHoYyzA==
   dependencies:
     lru-cache "^7.14.0"
     node-gyp-build "^4.5.0"
@@ -88,10 +88,10 @@
     node-addon-api "^6.1.0"
     node-gyp-build "^3.9.0"
 
-"@datadog/pprof@4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@datadog/pprof/-/pprof-4.0.1.tgz#f8629ecb62646d90ed49b6252dd0583d8d5001d3"
-  integrity sha512-TavqyiyQZOaUM9eQB07r8+K/T1CqKyOdsUGxpN79+BF+eOQBpTj/Cte6KdlhcUSKL3h5hSjC+vlgA7uW2qtVhA==
+"@datadog/pprof@4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@datadog/pprof/-/pprof-4.1.0.tgz#db86a720f1dfecbcab8838bc1f148eb0a402af55"
+  integrity sha512-g7EWI185nwSuFwlmnAGDPxbPsqe+ipOoDB2oP841WMNRaJBPRdg5J90c+6ucmyltuC9VpTrmzzqcachkOTzZEQ==
   dependencies:
     delay "^5.0.0"
     node-gyp-build "<4.0"
@@ -1663,16 +1663,16 @@ dc-polyfill@^0.1.2:
   resolved "https://registry.yarnpkg.com/dc-polyfill/-/dc-polyfill-0.1.3.tgz#fe9eefc86813439dd46d6f9ad9582ec079c39720"
   integrity sha512-Wyk5n/5KUj3GfVKV2jtDbtChC/Ff9fjKsBcg4ZtYW1yQe3DXNHcGURvmoxhqQdfOQ9TwyMjnfyv1lyYcOkFkFA==
 
-dd-trace@4.19.0:
-  version "4.19.0"
-  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-4.19.0.tgz#c67549b5b0cfbe37dcddaa39298b9dadfc0191fa"
-  integrity sha512-fmWqrAlQk1xnKzgPEM8RpQPTalxCa+F8Q/6JQQ1M3AczYrvwmJ45ljw2mB1F4iXeDEj0ycYFH3BRtdywspBLLQ==
+dd-trace@4.22.0:
+  version "4.22.0"
+  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-4.22.0.tgz#aa3c5402edd4c30acf2c2cc78f4476c68c86bf8d"
+  integrity sha512-29mFmPNEA5obdKQSSK3fcke0fhpwpETB5+R6UWRoBn6BqirBWGbkQeU7xW1vZMHzgTV5d4MkQFmjTPK8SlsgHg==
   dependencies:
-    "@datadog/native-appsec" "4.0.0"
-    "@datadog/native-iast-rewriter" "2.2.1"
+    "@datadog/native-appsec" "6.0.0"
+    "@datadog/native-iast-rewriter" "2.2.2"
     "@datadog/native-iast-taint-tracking" "1.6.4"
     "@datadog/native-metrics" "^2.0.0"
-    "@datadog/pprof" "4.0.1"
+    "@datadog/pprof" "4.1.0"
     "@datadog/sketches-js" "^2.1.0"
     "@opentelemetry/api" "^1.0.0"
     "@opentelemetry/core" "^1.14.0"
@@ -1698,9 +1698,10 @@ dd-trace@4.19.0:
     opentracing ">=0.12.1"
     path-to-regexp "^0.1.2"
     pprof-format "^2.0.7"
-    protobufjs "^7.2.4"
+    protobufjs "^7.2.5"
     retry "^0.13.1"
     semver "^7.5.4"
+    tlhunter-sorted-set "^0.1.0"
 
 debug@2.6.9:
   version "2.6.9"
@@ -5575,6 +5576,11 @@ titleize@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/titleize/-/titleize-3.0.0.tgz#71c12eb7fdd2558aa8a44b0be83b8a76694acd53"
   integrity sha512-KxVu8EYHDPBdUYdKZdKtU2aj2XfEx9AfjXxE/Aj0vT06w2icA09Vus1rh6eSu1y01akYg6BjIK/hxyLJINoMLQ==
+
+tlhunter-sorted-set@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/tlhunter-sorted-set/-/tlhunter-sorted-set-0.1.0.tgz#1c3eae28c0fa4dff97e9501d2e3c204b86406f4b"
+  integrity sha512-eGYW4bjf1DtrHzUYxYfAcSytpOkA44zsr7G2n3PV7yOUR23vmkGe3LL4R+1jL9OsXtbsFOwe8XtbCrabeaEFnw==
 
 tmp@^0.2.1:
   version "0.2.1"
