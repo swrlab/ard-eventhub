@@ -10,8 +10,8 @@ on:
 
 env:
   NODE_VERSION: 18
-  IMAGE_NAME: de.swr.ard.eventhub/ingest
-  REGISTRY_DOMAIN: eu.gcr.io
+  IMAGE_NAME: ard-eventhub-europe-west3/ingest
+  REGISTRY_DOMAIN: europe-west3-docker.pkg.dev
 
 jobs:
   security:
@@ -117,7 +117,7 @@ jobs:
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - name: 💬 Comment Version
-        uses: peter-evans/create-or-update-comment@v2
+        uses: peter-evans/create-or-update-comment@v4
         if: github.event.pull_request.merged == true
         with:
           issue-number: ${{ github.event.pull_request.number }}
