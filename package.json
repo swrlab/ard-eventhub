@@ -41,7 +41,7 @@
 		"google-auth-library": "9.6.3",
 		"jsonwebtoken": "9.0.2",
 		"luxon": "3.4.4",
-		"slug": "8.2.3",
+		"slug": "9.0.0",
 		"swagger-ui-express": "5.0.0",
 		"winston": "3.11.0"
 	},
