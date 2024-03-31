@@ -43,7 +43,7 @@
 		"luxon": "3.4.4",
 		"slug": "8.2.3",
 		"swagger-ui-express": "5.0.0",
-		"winston": "3.11.0"
+		"winston": "3.13.0"
 	},
 	"devDependencies": {
 		"@swrlab/eslint-plugin-swr": "^0.3.0",
