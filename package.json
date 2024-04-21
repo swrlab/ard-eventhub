@@ -38,7 +38,7 @@
 		"express": "4.18.2",
 		"express-openapi-validator": "5.1.6",
 		"firebase-admin": "12.0.0",
-		"google-auth-library": "9.6.3",
+		"google-auth-library": "9.8.0",
 		"jsonwebtoken": "9.0.2",
 		"luxon": "3.4.4",
 		"slug": "8.2.3",
