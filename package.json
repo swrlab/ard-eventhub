@@ -42,7 +42,7 @@
 		"jsonwebtoken": "9.0.2",
 		"luxon": "3.4.4",
 		"slug": "9.0.0",
-		"swagger-ui-express": "5.0.0",
+		"swagger-ui-express": "5.0.1",
 		"winston": "3.13.0"
 	},
 	"devDependencies": {
