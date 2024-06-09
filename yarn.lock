@@ -1600,10 +1600,10 @@ dc-polyfill@^0.1.4:
   resolved "https://registry.yarnpkg.com/dc-polyfill/-/dc-polyfill-0.1.4.tgz#4118cec81a8fab9a5729c41c285c715ffa42495a"
   integrity sha512-8iwEduR2jR9wWYggeaYtYZWRiUe3XZPyAQtMTL1otv8X3kfR8xUIVb4l5awHEeyDrH6Je7N324lKzMKlMMN6Yw==
 
-dd-trace@5.10.0:
-  version "5.10.0"
-  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-5.10.0.tgz#719673ff14e552767beda01ce12879616e62ba0a"
-  integrity sha512-+JyAf8DKGlCGPxhVhIHcG2+oD5h9/oGFbNj35Jlsl+EEMD/hqOWihgzZ2UzWNCVmOtVGQip3bdRGE4uqkRY+/g==
+dd-trace@5.11.0:
+  version "5.11.0"
+  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-5.11.0.tgz#302c39b89c0462b6fad3689cc72d1ab99f12db5d"
+  integrity sha512-LF4wT/SNWvPmiiuMJgrCeNZ0qaBWROuirDIzD6CmeqR7iYUkY+kDGh+pRCvjqwEetadIzNYGqtjQD2DmVZP41w==
   dependencies:
     "@datadog/native-appsec" "7.1.1"
     "@datadog/native-iast-rewriter" "2.3.0"
@@ -4451,10 +4451,10 @@ prettier-linter-helpers@^1.0.0:
   dependencies:
     fast-diff "^1.1.2"
 
-prettier@^3.2.5:
-  version "3.2.5"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.2.5.tgz#e52bc3090586e824964a8813b09aba6233b28368"
-  integrity sha512-3/GWa9aOC0YeD7LUfvOG2NiDyhOWRvt1k+rcKhOuYnMY24iiCphgneUfJDyFXd6rZCAnuLBv6UeAULtrhT/F4A==
+prettier@^3.3.1:
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.3.1.tgz#e68935518dd90bb7ec4821ba970e68f8de16e1ac"
+  integrity sha512-7CAwy5dRsxs8PHXT3twixW9/OEll8MLE0VRPCJyl7CkS6VHGPSlsVaWTiASPTyGyYRyApxlaWTzwUxVNrhcwDg==
 
 prismjs@^1.27.0:
   version "1.29.0"
