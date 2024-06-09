@@ -1600,10 +1600,10 @@ dc-polyfill@^0.1.4:
   resolved "https://registry.yarnpkg.com/dc-polyfill/-/dc-polyfill-0.1.4.tgz#4118cec81a8fab9a5729c41c285c715ffa42495a"
   integrity sha512-8iwEduR2jR9wWYggeaYtYZWRiUe3XZPyAQtMTL1otv8X3kfR8xUIVb4l5awHEeyDrH6Je7N324lKzMKlMMN6Yw==
 
-dd-trace@5.10.0:
-  version "5.10.0"
-  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-5.10.0.tgz#719673ff14e552767beda01ce12879616e62ba0a"
-  integrity sha512-+JyAf8DKGlCGPxhVhIHcG2+oD5h9/oGFbNj35Jlsl+EEMD/hqOWihgzZ2UzWNCVmOtVGQip3bdRGE4uqkRY+/g==
+dd-trace@5.11.0:
+  version "5.11.0"
+  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-5.11.0.tgz#302c39b89c0462b6fad3689cc72d1ab99f12db5d"
+  integrity sha512-LF4wT/SNWvPmiiuMJgrCeNZ0qaBWROuirDIzD6CmeqR7iYUkY+kDGh+pRCvjqwEetadIzNYGqtjQD2DmVZP41w==
   dependencies:
     "@datadog/native-appsec" "7.1.1"
     "@datadog/native-iast-rewriter" "2.3.0"
@@ -2049,10 +2049,10 @@ eslint-module-utils@^2.8.0:
   dependencies:
     debug "^3.2.7"
 
-eslint-plugin-chai-friendly@^0.7.4:
-  version "0.7.4"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-chai-friendly/-/eslint-plugin-chai-friendly-0.7.4.tgz#eaf222b848673ef8a00b8e507f7c6fd83d036bf2"
-  integrity sha512-PGPjJ8diYgX1mjLxGJqRop2rrGwZRKImoEOwUOgoIhg0p80MkTaqvmFLe5TF7/iagZHggasvIfQlUyHIhK/PYg==
+eslint-plugin-chai-friendly@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-chai-friendly/-/eslint-plugin-chai-friendly-1.0.0.tgz#84631f0a415914f15fbaee2ccbf77dc6f3d2cc8a"
+  integrity sha512-M7pDQ/H5IiMz1LsfNi7Js4LvKx7cx0VMJHT/u1d35GOXxkQdJ2vAeaLC5q6GW126KVOnUMJ8WvBMWWLxtfdcog==
 
 eslint-plugin-import@^2.28.0:
   version "2.29.0"
