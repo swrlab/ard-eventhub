@@ -1600,10 +1600,10 @@ dc-polyfill@^0.1.4:
   resolved "https://registry.yarnpkg.com/dc-polyfill/-/dc-polyfill-0.1.4.tgz#4118cec81a8fab9a5729c41c285c715ffa42495a"
   integrity sha512-8iwEduR2jR9wWYggeaYtYZWRiUe3XZPyAQtMTL1otv8X3kfR8xUIVb4l5awHEeyDrH6Je7N324lKzMKlMMN6Yw==
 
-dd-trace@5.10.0:
-  version "5.10.0"
-  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-5.10.0.tgz#719673ff14e552767beda01ce12879616e62ba0a"
-  integrity sha512-+JyAf8DKGlCGPxhVhIHcG2+oD5h9/oGFbNj35Jlsl+EEMD/hqOWihgzZ2UzWNCVmOtVGQip3bdRGE4uqkRY+/g==
+dd-trace@5.11.0:
+  version "5.11.0"
+  resolved "https://registry.yarnpkg.com/dd-trace/-/dd-trace-5.11.0.tgz#302c39b89c0462b6fad3689cc72d1ab99f12db5d"
+  integrity sha512-LF4wT/SNWvPmiiuMJgrCeNZ0qaBWROuirDIzD6CmeqR7iYUkY+kDGh+pRCvjqwEetadIzNYGqtjQD2DmVZP41w==
   dependencies:
     "@datadog/native-appsec" "7.1.1"
     "@datadog/native-iast-rewriter" "2.3.0"
@@ -2593,17 +2593,7 @@ functions-have-names@^1.2.3:
   resolved "https://registry.yarnpkg.com/functions-have-names/-/functions-have-names-1.2.3.tgz#0404fe4ee2ba2f607f0e0ec3c80bae994133b834"
   integrity sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==
 
-gaxios@^6.0.0:
-  version "6.1.1"
-  resolved "https://registry.yarnpkg.com/gaxios/-/gaxios-6.1.1.tgz#549629f86a13e756b900f9ff7c94624670102938"
-  integrity sha512-bw8smrX+XlAoo9o1JAksBwX+hi/RG15J+NTSxmNPIclKC3ZVK6C2afwY8OSdRvOK0+ZLecUJYtj2MmjOt3Dm0w==
-  dependencies:
-    extend "^3.0.2"
-    https-proxy-agent "^7.0.1"
-    is-stream "^2.0.0"
-    node-fetch "^2.6.9"
-
-gaxios@^6.0.2, gaxios@^6.1.1:
+gaxios@^6.0.0, gaxios@^6.0.2, gaxios@^6.1.1:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/gaxios/-/gaxios-6.2.0.tgz#4698976664ef63e47dbf3f61ec9320885fcc1ba1"
   integrity sha512-H6+bHeoEAU5D6XNc6mPKeN5dLZqEDs9Gpk6I+SZBEzK5So58JVrHPmevNi35fRl1J9Y5TaeLW0kYx3pCJ1U2mQ==
@@ -2612,14 +2602,6 @@ gaxios@^6.0.2, gaxios@^6.1.1:
     https-proxy-agent "^7.0.1"
     is-stream "^2.0.0"
     node-fetch "^2.6.9"
-
-gcp-metadata@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/gcp-metadata/-/gcp-metadata-6.0.0.tgz#2ae12008bef8caa8726cba31fd0a641ebad5fb56"
-  integrity sha512-Ozxyi23/1Ar51wjUT2RDklK+3HxqDr8TLBNK8rBBFQ7T85iIGnXnVusauj06QyqCXRFZig8LZC+TUddWbndlpQ==
-  dependencies:
-    gaxios "^6.0.0"
-    json-bigint "^1.0.0"
 
 gcp-metadata@^6.1.0:
   version "6.1.0"
@@ -2732,34 +2714,10 @@ globalthis@^1.0.3:
   dependencies:
     define-properties "^1.1.3"
 
-google-auth-library@9.8.0:
-  version "9.8.0"
-  resolved "https://registry.yarnpkg.com/google-auth-library/-/google-auth-library-9.8.0.tgz#43ae0f72dd72f49fd6a4a46d8eeffe2236691b20"
-  integrity sha512-TJJXFzMlVGRlIH27gYZ6XXyPf5Y3OItsKFfefsDAafNNywYRTkei83nEO29IrYj8GtdHWU78YnW+YZdaZaXIJA==
-  dependencies:
-    base64-js "^1.3.0"
-    ecdsa-sig-formatter "^1.0.11"
-    gaxios "^6.1.1"
-    gcp-metadata "^6.1.0"
-    gtoken "^7.0.0"
-    jws "^4.0.0"
-
-google-auth-library@^9.0.0:
-  version "9.2.0"
-  resolved "https://registry.yarnpkg.com/google-auth-library/-/google-auth-library-9.2.0.tgz#16c14a775b3a9a1be53b7428ddbd9d2c3599836b"
-  integrity sha512-1oV3p0JhNEhVbj26eF3FAJcv9MXXQt4S0wcvKZaDbl4oHq5V3UJoSbsGZGQNcjoCdhW4kDSwOs11wLlHog3fgQ==
-  dependencies:
-    base64-js "^1.3.0"
-    ecdsa-sig-formatter "^1.0.11"
-    gaxios "^6.0.0"
-    gcp-metadata "^6.0.0"
-    gtoken "^7.0.0"
-    jws "^4.0.0"
-
-google-auth-library@^9.3.0:
-  version "9.6.3"
-  resolved "https://registry.yarnpkg.com/google-auth-library/-/google-auth-library-9.6.3.tgz#add8935bc5b842a8e80f84fef2b5ed9febb41d48"
-  integrity sha512-4CacM29MLC2eT9Cey5GDVK4Q8t+MMp8+OEdOaqD9MG6b0dOyLORaaeJMPQ7EESVgm/+z5EKYyFLxgzBJlJgyHQ==
+google-auth-library@9.11.0, google-auth-library@^9.0.0, google-auth-library@^9.3.0:
+  version "9.11.0"
+  resolved "https://registry.yarnpkg.com/google-auth-library/-/google-auth-library-9.11.0.tgz#bd6da364bcde4e0cc4ed70a0e0df5112b6a671dd"
+  integrity sha512-epX3ww/mNnhl6tL45EQ/oixsY8JLEgUFoT4A5E/5iAR4esld9Kqv6IJGk7EmGuOgDvaarwF95hU2+v7Irql9lw==
   dependencies:
     base64-js "^1.3.0"
     ecdsa-sig-formatter "^1.0.11"
