@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
 			// return 400 error
 			return response.badRequest(req, res, {
 				status: 400,
-				message: `Mismatch of user and subscription institution`,
+				message: 'Mismatch of user and subscription institution',
 				errors: `Subscription of this institution is not visible for user of institution '${userInstitution}'`,
 			})
 		}

@@ -54,7 +54,7 @@ module.exports = async (req, res) => {
 			// return 400 error
 			return response.badRequest(req, res, {
 				status: 400,
-				message: `Mismatch of user and subscription institution`,
+				message: 'Mismatch of user and subscription institution',
 				errors: `Subscription of this institution cannot be deleted by user of institution '${userInstitution}'`,
 			})
 		}
@@ -63,7 +63,7 @@ module.exports = async (req, res) => {
 		await pubsub.deleteSubscription(subscriptionName)
 
 		// also delete from datastore
-		const subscriptionId = parseInt(subscription.labels.id)
+		const subscriptionId = Number.parseInt(subscription.labels.id)
 		await datastore.delete('subscriptions', subscriptionId)
 
 		// log progress

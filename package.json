@@ -12,7 +12,7 @@
 		"ingest:local": "nodemon -r dotenv/config ./src/ingest/index.js",
 		"ingest:cloud": "node ./src/ingest/index.js",
 		"ingest:test": "mocha --recursive './src/**/*.test.js' --timeout 15000 --exit -r dotenv/config",
-		"ingest:lint": "eslint src",
+		"ingest:lint": "biome lint src",
 		"docker:build": "docker build . -t swr/ard-eventhub",
 		"docker:run": "docker run --env-file .env -p 8080:8080 --name ard-eventhub swr/ard-eventhub",
 		"docker:scan": "bun docker:build && docker scout quickview",

@@ -7,7 +7,7 @@
 
 // load node utils
 const { DateTime } = require('luxon')
-const { randomUUID } = require('crypto')
+const { randomUUID } = require('node:crypto')
 
 // load eventhub utils
 const datastore = require('../../utils/datastore')

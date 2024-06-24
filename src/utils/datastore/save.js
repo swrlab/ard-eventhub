@@ -27,7 +27,7 @@ module.exports = async (data, kind, id) => {
 
 	// insert key
 	if (key.id) {
-		thisData.id = parseInt(key.id)
+		thisData.id = Number.parseInt(key.id)
 	} else if (key.name) {
 		thisData.id = key.name
 	}

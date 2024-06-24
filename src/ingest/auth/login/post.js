@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
 		}
 
 		// return ok
-		const expiresIn = parseInt(login.login.expiresIn)
+		const expiresIn = Number.parseInt(login.login.expiresIn)
 		return response.ok(req, res, {
 			expiresIn,
 			expires: DateTime.now().plus({ seconds: expiresIn }).toISO(),

@@ -1,7 +1,7 @@
 /*
 
-	ard-eventhub
-	by SWR Audio Lab
+    ard-eventhub
+    by SWR Audio Lab
 
 */
 
@@ -34,7 +34,7 @@ server.use((req, res, next) => {
 		}
 		logger.log({
 			level: 'debug',
-			message: `middleware logging`,
+			message: 'middleware logging',
 			source: 'DEV',
 			data: { logHeaders, path: req.path },
 		})
