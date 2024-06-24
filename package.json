@@ -1,6 +1,6 @@
 {
 	"name": "ard-eventhub",
-	"version": "1.7.3",
+	"version": "1.8.0",
 	"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
 	"main": "./src/ingest/index.js",
 	"engines": {
@@ -11,15 +11,14 @@
 		"coreId": "node ./src/coreId/index.js",
 		"ingest:local": "nodemon -r dotenv/config ./src/ingest/index.js",
 		"ingest:cloud": "node ./src/ingest/index.js",
-		"ingest:test": "mocha test/ingest.test.js --timeout 15000 --exit -r dotenv/config",
+		"ingest:test": "mocha --recursive './src/**/*.test.js' --timeout 15000 --exit -r dotenv/config",
 		"ingest:lint": "eslint src",
 		"docker:build": "docker build . -t swr/ard-eventhub",
 		"docker:run": "docker run --env-file .env -p 8080:8080 --name ard-eventhub swr/ard-eventhub",
-		"docker:scan": "yarn docker:build && docker scout quickview",
+		"docker:scan": "bun docker:build && docker scout quickview",
 		"docker:clean": "docker rm ard-eventhub",
-		"license": "yarn run license-compliance",
-		"test": "mocha test/example.test.js",
-		"reinstall": "rm -rf node_modules && rm yarn.lock && yarn"
+		"license": "bunx license-compliance",
+		"reinstall": "rm -rf node_modules && rm bun.lockb && bun install"
 	},
 	"keywords": ["ard", "metadata", "pubsub"],
 	"author": "SWR Audio Lab <lab@swr.de>",
@@ -42,19 +41,16 @@
 		"winston": "3.13.0"
 	},
 	"devDependencies": {
-		"@swrlab/eslint-plugin-swr": "^0.3.0",
+		"@biomejs/biome": "^1.8.2",
 		"@swrlab/swr-prettier-config": "^0.3.0",
 		"chai": "^4.4.1",
 		"chai-http": "^4.4.0",
 		"docsify-cli": "^4.4.4",
 		"dotenv": "16.4.5",
-		"eslint": "^8.57.0",
-		"eslint-plugin-chai-friendly": "^0.7.4",
 		"license-compliance": "^3.0.1",
 		"mocha": "^10.4.0",
 		"nodemon": "^3.1.4",
-		"prettier": "^3.3.2",
-		"typescript": "^5.5.2"
+		"prettier": "^3.3.2"
 	},
 	"resolutions": {
 		"ansi-regex": "^5.0.1",

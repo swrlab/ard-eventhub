@@ -111,3 +111,5 @@ This project was realized by
 - [Daniel Freytag](https://github.com/frytg)
 - [Rafael Mäuer](https://github.com/rafaelmaeuer)
 - [Christian Hufnagel](https://github.com/chhufnagel)
+
+at [SWR Audio Lab](https://www.swr.de/audiolab)

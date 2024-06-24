@@ -7,17 +7,13 @@
 
 */
 
-// Add eslint exceptions
-/* eslint-disable object-shorthand */
-/* global describe it before */
-
 // Require dependencies
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 const { DateTime } = require('luxon')
 
-const server = require('../src/ingest/index')
-const logger = require('../src/utils/logger')
+const server = require('./index')
+const logger = require('../utils/logger')
 
 // Init chai functions
 const { expect } = chai
@@ -62,7 +58,8 @@ function testFailedAuth(res) {
 */
 
 const loginPath = '/auth/login'
-let accessToken, refreshToken
+let accessToken = null
+let refreshToken = null
 
 function testAuthKeys(body) {
 	body.should.be.a('object')
