@@ -49,8 +49,10 @@ function testResponse(res, status) {
 
 // check rejection of invalid token
 function testFailedAuth(res) {
-	console.log(`comparing failed auth response with statusCode ${res.statusCode} (should be 403)`)
-	expect(res).to.have.status(403)
+	testResponse(res, 403)
+}
+function testMissingAuth(res) {
+	testResponse(res, 401)
 }
 
 /*
@@ -182,6 +184,16 @@ const event = {
 }
 
 describe(`POST ${eventPath}`, () => {
+	it('test invalid auth for POST /event', (done) => {
+		chai.request(server)
+			.post(eventPath)
+			.send(event)
+			.end((err, res) => {
+				testMissingAuth(res)
+				done()
+			})
+	})
+
 	it('test invalid auth for POST /event', (done) => {
 		chai.request(server)
 			.post(eventPath)

@@ -74,9 +74,21 @@ router.get(['/', '/health'], (req, res) => {
 	res.sendStatus(200)
 })
 
+// set which error message to return (other may contain private information)
+const allowedErrors = ['Authorization header required', 'GET method not allowed']
+
 // set openapi error handler
 router.use((err, req, res, next) => {
-	return response.badRequest(req, res, { status: 400 })
+	// set error message
+	let useOriginalError = false
+	if (allowedErrors.includes(err.message)) useOriginalError = true
+	if (err.message.includes('must have required property') !== -1) useOriginalError = true
+
+	return response.badRequest(req, res, {
+		message: useOriginalError ? err.message : 'Bad request',
+		errors: useOriginalError ? err.errors : [],
+		status: err.status === 401 ? 401 : 400,
+	})
 })
 
 // export router object to server
