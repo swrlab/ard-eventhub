@@ -46,23 +46,19 @@ It is recommended to use the Eventhub `test` system first, to make sure everythi
 
 Security Note: Every user account can only publish to `publisherId`s from their own institution. If you are receiving an error, the Id could be misspelled, or the user account was wrongly configured by an admin.
 
+### Handling Events with External Data
+
+Let's say you are using Eventhub to receive events from a station that belongs to another broadcaster (i.e. nightly broadcasts) for your own station. For this case, it is expected to also re-publish these events to Eventhub.
+
+This is important because your subscribers expect to receive all events from your station, including the ones that are re-broadcasted from other stations. They might not know that you are re-broadcasting the signal from another station and are simply using a subscription to your station to receive all events.
+
+For ARD Audiothek, this is also important. Otherwise, your station might have incomplete live metadata when re-broadcasting other stations.
+
+For this case, it is important to make sure your internal filtering works correctly when receiving events from other stations and only publish them when the station is actually on air. Otherwise, it could create a loop.
+
 ### Importance of External IDs
 
-For the Eventhub to work it needs to be able to uniquely identify a service. This is defined as the so-called `externalId` in ARD's new Core API. You might currently know this as _CRID_, which you are using in the TVA documents.
-
-⚠️ Please make sure to use the **exact** `externalId` that you will be using to deliver the metadata of your livestreams to ARD Core (_PermanentLivestream_). When in doubt please reach out to your metadata contacts or to SWR Audio Lab.
-
-> **External ID Requirements and Recommendations**
-> The external ID may be provided through the field `externalId` during an entity creation request.
->
-> If you do not already deliver content via TVA you are free in your choice of external ID. However, your choice **must** meet the following criteria:
->
-> (a) The external ID of a single entity does not change over time
-> (b) The external ID is referring to the local entity you want to import
-> (c) The external ID is unique in your own local context
-> (d) The external ID is unique in the whole ARD context
-
-[Source: developer.ard.de](https://developer.ard.de/core-api-v2-delivering-content#ExternalIDRequirementsRecommendations)
+This has moved to [EXTERNAL_IDS.md](EXTERNAL_IDS.md).
 
 ### Workflow Example
 

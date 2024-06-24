@@ -1,6 +1,7 @@
 - [ARD Eventhub Overview](/ 'ARD Eventhub')
 - [Quickstart](/docs/QUICKSTART.md)
   - [Authentication](/docs/AUTHENTICATION.md)
+  - [External IDs](/docs/EXTERNAL_IDS.md)
   - [Events](/docs/EVENTS.md)
   - [Plugins](/docs/PLUGINS.md)
   - [Types](/docs/TYPES.md)
