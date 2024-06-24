@@ -1,4 +1,4 @@
-# ARD-Eventhub / Users
+# ARD Eventhub / Users
 
 To authenticate and work with Eventhub API you will need a valid user. For now these user logins are kept separate from the ARD Core API, but are using a similar login method. This page covers the process of administrating users.
 

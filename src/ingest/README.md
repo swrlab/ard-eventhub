@@ -1,4 +1,4 @@
-# ARD-Eventhub Ingest
+# ARD Eventhub Ingest
 
 The Ingest service is used to accept incoming events, distribute them via Pub/Sub and provide methods for users to manage their own subscriptions (self-service).
 
@@ -32,7 +32,7 @@ Uses full production prefixes and configuration.
 
 To run this project locally in your development environment you'll need these prerequisites:
 
-1. Node in the respective version currently used by the Dockerfile and yarn
+1. Node in the respective version currently used by the Dockerfile
 2. Rustup toolchain `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs/ | sh`
 3. Have a Google Cloud Project and generate a JSON key, place it in the `/keys` folder named `ingest.json`. The service account needs to have these roles (some are only required if you also run it on Cloud Run):
 
@@ -44,8 +44,8 @@ To run this project locally in your development environment you'll need these pr
 - `roles/monitoring.metricWriter`
 - `roles/pubsub.admin`
 
-4. Install dependencies (`yarn`)
-5. Run the project
+4. Install dependencies (`bun install`)
+5. Run the project (`bun $command`)
 
 ```sh
 bun ingest:local

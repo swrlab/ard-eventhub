@@ -1,4 +1,4 @@
-# ARD-Eventhub
+# ARD Eventhub
 
 ARD system to distribute real-time (live) metadata for primarily radio broadcasts.
 

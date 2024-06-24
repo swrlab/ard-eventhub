@@ -1,4 +1,4 @@
-# ARD-Eventhub / Naming Conventions
+# ARD Eventhub / Naming Conventions
 
 Several parts of this service require naming conventions that are followed throughout all parts.
 

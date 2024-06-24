@@ -1,4 +1,4 @@
-# ARD-Eventhub / Stages
+# ARD Eventhub / Stages
 
 The Eventhub differentiates between stages given to the service via env `STAGE` and different runtime environments or deployments, such as beta, test, or similar.
 

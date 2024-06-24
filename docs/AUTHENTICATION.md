@@ -1,4 +1,4 @@
-# ARD-Eventhub / Authentication
+# ARD Eventhub / Authentication
 
 To authenticate and work with Eventhub API you will need a valid user. For now these user logins are kept separate from the ARD Core API, but are using a similar login method. This page covers the authentication process.
 
@@ -6,7 +6,7 @@ To authenticate and work with Eventhub API you will need a valid user. For now t
 
 The app uses an authentication workflow, that is kept very similar to the new ARD Core API, so once it goes live there, it can be easily migrated (variations may apply). You can find their documentation for ARD in the [developer portal](https://developer.ard.de/core-api-v2-roles-and-access-control).
 
-This page explicitly covers the login methods for the ARD-Eventhub API. Compared to the ARD Core API the token exchange for ARD-Eventhub is handled in this service directly, not externally so it does not need to expose the `API_KEY` to clients.
+This page explicitly covers the login methods for the ARD Eventhub API. Compared to the ARD Core API the token exchange for ARD Eventhub is handled in this service directly, not externally so it does not need to expose the `API_KEY` to clients.
 
 ## Exchange Credentials for Tokens
 

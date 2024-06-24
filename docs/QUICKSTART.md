@@ -1,6 +1,6 @@
-# ARD-Eventhub / Quickstart
+# ARD Eventhub / Quickstart
 
-This guide will help you get started with ARD-Eventhub.
+This guide will help you get started with ARD Eventhub.
 
 No matter if you are a Publisher or Subscriber, you will need a user account to interact with the API. Request one through your contacts at SWR Audio Lab or ARD Online. Admins can reference the Users docs for account registrations.
 
@@ -8,7 +8,7 @@ Once this has been set up, check the Authentication docs to learn more about the
 
 ## Publishers
 
-If you are a radio station that wants to start publishing events to ARD-Eventhub, follow these easy steps:
+If you are a radio station that wants to start publishing events to ARD Eventhub, follow these easy steps:
 
 - Set up your account and understand the authentication process
 - Use the POST `/events/{eventName}` endpoint to add your events

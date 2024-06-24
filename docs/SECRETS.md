@@ -1,4 +1,4 @@
-# ARD-Eventhub / Secrets
+# ARD Eventhub / Secrets
 
 This repository obviously needs a number of secrets and configuration files that are kept in various places. This page documents what goes where.
 Since this project is designed to be kept public to allow a collaborative development process, the full configuration around secrets and their deployment process is not described to the fullest extend here. There are other places, which include more about the internal maintenance structure.

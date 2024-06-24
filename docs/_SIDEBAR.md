@@ -1,4 +1,4 @@
-- [ARD-Eventhub Overview](/ 'ARD-Eventhub')
+- [ARD Eventhub Overview](/ 'ARD Eventhub')
 - [Quickstart](/docs/QUICKSTART.md)
   - [Authentication](/docs/AUTHENTICATION.md)
   - [Events](/docs/EVENTS.md)

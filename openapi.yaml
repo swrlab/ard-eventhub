@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: ARD-Eventhub
+  title: ARD Eventhub
   description: >-
     ARD system to distribute real-time (live) metadata for primarily radio
     broadcasts.
@@ -12,7 +12,7 @@ info:
     url: 'https://spdx.org/licenses/EUPL-1.2.html'
   version: 1.8.0
 externalDocs:
-  description: ARD-Eventhub Documentation
+  description: ARD Eventhub Documentation
   url: 'https://swrlab.github.io/ard-eventhub/'
 servers:
   - url: /
