@@ -2,6 +2,7 @@
 - [Quickstart](/docs/QUICKSTART.md)
   - [Authentication](/docs/AUTHENTICATION.md)
   - [Events](/docs/EVENTS.md)
+  - [Plugins](/docs/PLUGINS.md)
   - [Types](/docs/TYPES.md)
 - [OpenAPI](/docs/OPENAPI.md)
   - [OpenAPI Swagger UI](https://eventhub-ingest.ard.de/openapi)

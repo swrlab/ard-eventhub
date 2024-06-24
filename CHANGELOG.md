@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - chore: upgrade to Node.js 20
 - chore: swap yarn for bun (package manager only)
 - chore: remove table of contents from docs
+- chore: add docs about plugins
+- chore: add docs about pubsub defaults
 
 ## [1.7.3] - 2024-04-23
 
