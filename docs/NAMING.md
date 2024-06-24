@@ -1,11 +1,6 @@
 # ARD-Eventhub / Naming Conventions
 
-Several parts of this service require naming conventions that are followed throughout all parts.  
-
-- [ARD-Eventhub / Naming Conventions](#ard-eventhub--naming-conventions)
-  - [Google Cloud Pub/Sub](#google-cloud-pubsub)
-  - [Pub/Sub Topics](#pubsub-topics)
-  - [Pub/Sub Subscriptions](#pubsub-subscriptions)
+Several parts of this service require naming conventions that are followed throughout all parts.
 
 ## Google Cloud Pub/Sub
 

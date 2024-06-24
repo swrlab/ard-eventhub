@@ -2,14 +2,6 @@
 
 The Ingest service is used to accept incoming events, distribute them via Pub/Sub and provide methods for users to manage their own subscriptions (self-service).
 
-- [ARD-Eventhub Ingest](#ard-eventhub-ingest)
-  - [Environments](#environments)
-  - [Stages](#stages)
-    - [DEV](#dev)
-    - [PROD](#prod)
-  - [Setup](#setup)
-  - [Deployment](#deployment)
-
 ## Environments
 
 Designated host is Kubernetes but the Docker container will also be used in other environments such as Google Cloud Run for testing purposes.
@@ -56,7 +48,7 @@ To run this project locally in your development environment you'll need these pr
 5. Run the project
 
 ```sh
-yarn ingest:local
+bun ingest:local
 ```
 
 6. Open [localhost:8080/openapi](http://localhost:8080/openapi/)

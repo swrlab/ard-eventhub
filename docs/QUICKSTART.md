@@ -6,14 +6,6 @@ No matter if you are a Publisher or Subscriber, you will need a user account to 
 
 Once this has been set up, check the Authentication docs to learn more about the login and token exchange process.
 
-- [ARD-Eventhub / Quickstart](#ard-eventhub--quickstart)
-  - [Publishers](#publishers)
-    - [Importance of External IDs](#importance-of-external-ids)
-    - [Workflow Example](#workflow-example)
-  - [Subscribers](#subscribers)
-    - [Security](#security)
-    - [Receiver Example](#receiver-example)
-
 ## Publishers
 
 If you are a radio station that wants to start publishing events to ARD-Eventhub, follow these easy steps:
@@ -56,19 +48,19 @@ Security Note: Every user account can only publish to `publisherId`s from their 
 
 ### Importance of External IDs
 
-For the Eventhub to work it needs to be able to uniquely identify a service. This is defined as the so-called `externalId` in ARD's new Core API. You might currently know this as _CRID_, which you are using in the TVA documents.  
+For the Eventhub to work it needs to be able to uniquely identify a service. This is defined as the so-called `externalId` in ARD's new Core API. You might currently know this as _CRID_, which you are using in the TVA documents.
 
 ⚠️ Please make sure to use the **exact** `externalId` that you will be using to deliver the metadata of your livestreams to ARD Core (_PermanentLivestream_). When in doubt please reach out to your metadata contacts or to SWR Audio Lab.
 
-> **External ID Requirements and Recommendations**  
-> The external ID may be provided through the field `externalId` during an entity creation request.  
+> **External ID Requirements and Recommendations**
+> The external ID may be provided through the field `externalId` during an entity creation request.
 >
-> If you do not already deliver content via TVA you are free in your choice of external ID. However, your choice **must** meet the following criteria:  
+> If you do not already deliver content via TVA you are free in your choice of external ID. However, your choice **must** meet the following criteria:
 >
-> (a) The external ID of a single entity does not change over time  
-> (b) The external ID is referring to the local entity you want to import  
-> (c) The external ID is unique in your own local context  
-> (d) The external ID is unique in the whole ARD context  
+> (a) The external ID of a single entity does not change over time
+> (b) The external ID is referring to the local entity you want to import
+> (c) The external ID is unique in your own local context
+> (d) The external ID is unique in the whole ARD context
 
 [Source: developer.ard.de](https://developer.ard.de/core-api-v2-delivering-content#ExternalIDRequirementsRecommendations)
 
@@ -144,12 +136,12 @@ Start receiving events with these steps:
 - Check the Google Cloud page ["Receiving messages using Push"](https://cloud.google.com/pubsub/docs/push#receiving_messages) to learn more about the format that you will be receiving those events in
 - Use GET `/subcriptions` to verify your new or existing subscriptions
 
-Security Note: When a user is registered, it is linked to a specific institution (_Landesrundfunkanstalt_ or _GSEA_). Users can manage all subscriptions within this institution, so be careful not to delete your colleagues' (production) entries.  
+Security Note: When a user is registered, it is linked to a specific institution (_Landesrundfunkanstalt_ or _GSEA_). Users can manage all subscriptions within this institution, so be careful not to delete your colleagues' (production) entries.
 With this method you will still have access to all subscriptions, even if a person leaves your institution or their account is deactivated.
 
 ### Security
 
-Generally it is recommended to keep your endpoints hidden from public indexes. To be absolutely sure that an event is actually being received from Eventhub, you can make use of the provided JWT token and service account.  
+Generally it is recommended to keep your endpoints hidden from public indexes. To be absolutely sure that an event is actually being received from Eventhub, you can make use of the provided JWT token and service account.
 For every subscription that you create, the response will (amongst other metadata) also include a field about the used service account:
 
 ```js
@@ -164,7 +156,7 @@ Please note that for now the service account usually contains the same response.
 
 ### Receiver Example
 
-In a simplified way, your receiver might look something like this (example for NodeJS with Express). The Google Cloud section ["Authentication and authorization by the push endpoint"](https://cloud.google.com/pubsub/docs/push#authentication_and_authorization_by_the_push_endpoint) also holds more information about this process.  
+In a simplified way, your receiver might look something like this (example for NodeJS with Express). The Google Cloud section ["Authentication and authorization by the push endpoint"](https://cloud.google.com/pubsub/docs/push#authentication_and_authorization_by_the_push_endpoint) also holds more information about this process.
 
 ```js
 // load node packages

@@ -2,17 +2,6 @@
 
 ARD system to distribute real-time (live) metadata for primarily radio broadcasts.
 
-- [ARD-Eventhub](#ard-eventhub)
-  - [Active Data Suppliers](#active-data-suppliers)
-  - [Get Started and Documentation](#get-started-and-documentation)
-  - [Get involved](#get-involved)
-  - [Modules](#modules)
-    - [Ingest](#ingest)
-  - [Changelog](#changelog)
-  - [License](#license)
-  - [Third-Party Components](#third-party-components)
-  - [Authors](#authors)
-
 ## Active Data Suppliers
 
 These ARD broadcasters are currently sending live metadata via ARD Eventhub:
@@ -54,13 +43,29 @@ This project will include two modules: Ingest and API. The first development ste
 
 The Ingest service is responsible for receiving and publishing events and managing subscriptions. You'll find the core code in [`./src/ingest/`](./src/ingest/).
 
+## Local Setup
+
+This project uses `bun` as package manager and runtime environment. Please note that this only applies to the package manager and CLI commands. JavaScript still uses the 'traditional' `node` runtime. Check the [Bun documentation](https://bun.sh/docs/installation) for installation instructions.
+
+To install dependencies run:
+
+```sh
+bun install
+```
+
+To check for minor updates:
+
+```sh
+bun update
+```
+
 ## Changelog
 
 See [CHANGELOG](CHANGELOG.md) for latest changes.
 
 ## License
 
-This project is licensed under **European Union Public License 1.2** ([`EUPL-1.2`](https://spdx.org/licenses/EUPL-1.2.html)), which can be found in [LICENSE](LICENSE.txt). Detailed information and translations to all 23 official languages of the European Union are available at [joinup.ec.europa.eu](https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12). The usage of this license does not imply any relationship to or endorsement by the European Union, the joinup initiative or other participating parties.  
+This project is licensed under **European Union Public License 1.2** ([`EUPL-1.2`](https://spdx.org/licenses/EUPL-1.2.html)), which can be found in [LICENSE](LICENSE.txt). Detailed information and translations to all 23 official languages of the European Union are available at [joinup.ec.europa.eu](https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12). The usage of this license does not imply any relationship to or endorsement by the European Union, the joinup initiative or other participating parties.
 A [compatibility matrix](https://joinup.ec.europa.eu/collection/eupl/matrix-eupl-compatible-open-source-licences) is also available and describes the relationships between EUPL-1.2 in upstream and downstream projects.
 
 This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`](https://www.npmjs.com/package/spdx-exceptions) package, which uses the `CC-BY-3.0` license, without adding any legal or technical restrictions guaranteed by their license.

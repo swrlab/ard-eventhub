@@ -2,11 +2,6 @@
 
 The Eventhub differentiates between stages given to the service via env `STAGE` and different runtime environments or deployments, such as beta, test, or similar.
 
-- [ARD-Eventhub / Stages](#ard-eventhub--stages)
-  - [Ingest](#ingest)
-    - [Ingest Service Stages](#ingest-service-stages)
-    - [Ingest Deployment Stages](#ingest-deployment-stages)
-
 ## Ingest
 
 ### Ingest Service Stages
