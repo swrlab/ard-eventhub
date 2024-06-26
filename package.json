@@ -38,6 +38,7 @@
 		"luxon": "3.4.4",
 		"slug": "9.1.0",
 		"swagger-ui-express": "5.0.1",
+		"ulid": "^2.3.0",
 		"winston": "3.13.0"
 	},
 	"devDependencies": {

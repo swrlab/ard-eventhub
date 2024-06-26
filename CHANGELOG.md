@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.8.0] - 2024-06-26
 
 - chore: upgrade to Node.js 20
+- feat: switch subscription names from UUIDv4 to ULID
 - chore: swap yarn for bun (package manager only)
 - chore: remove table of contents from docs
 - chore: add docs about plugins
