@@ -4,14 +4,15 @@
 	"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
 	"main": "./src/ingest/index.js",
 	"engines": {
-		"node": ">=20.0.0"
+		"node": ">=22.0.0",
+		"npm": ">=10.0.0"
 	},
 	"scripts": {
 		"docs:serve": "docsify serve . --port 3000",
 		"coreId": "node ./src/coreId/index.js",
-		"ingest:local": "nodemon -r dotenv/config ./src/ingest/index.js",
+		"ingest:local": "node --trace-deprecation --env-file .env ./node_modules/nodemon/bin/nodemon ./src/ingest/index.js",
 		"ingest:cloud": "node ./src/ingest/index.js",
-		"ingest:test": "mocha --recursive './src/**/*.test.js' --timeout 15000 --exit -r dotenv/config",
+		"ingest:test": "node --env-file .env ./node_modules/mocha/bin/mocha --recursive './src/**/*.test.js' --timeout 15000 --exit",
 		"ingest:lint": "biome lint src",
 		"docker:build": "docker build . -t swr/ard-eventhub",
 		"docker:run": "docker run --env-file .env -p 8080:8080 --name ard-eventhub swr/ard-eventhub",
@@ -47,7 +48,6 @@
 		"chai": "^4.4.1",
 		"chai-http": "^4.4.0",
 		"docsify-cli": "^4.4.4",
-		"dotenv": "16.4.5",
 		"license-compliance": "^3.0.1",
 		"mocha": "^10.5.1",
 		"nodemon": "^3.1.4",

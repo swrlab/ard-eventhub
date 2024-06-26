@@ -74,7 +74,7 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 
 | Type    | Name                           | License                                                                                            |
 | ------- | ------------------------------ | -------------------------------------------------------------------------------------------------- |
-| Docker  | `node:20-alpine`               | [MIT](https://github.com/nodejs/node/tree/main?tab=readme-ov-file#license)                         |
+| Docker  | `node:22-alpine`               | [MIT](https://github.com/nodejs/node/tree/main?tab=readme-ov-file#license)                         |
 | NPM     | `@google-cloud/datastore`      | [Apache License 2.0](https://github.com/googleapis/nodejs-datastore/blob/master/LICENSE)           |
 | NPM     | `@google-cloud/pubsub`         | [Apache License 2.0](https://github.com/googleapis/nodejs-pubsub/blob/master/LICENSE)              |
 | NPM     | `@google-cloud/secret-manager` | [Apache License 2.0](https://github.com/googleapis/nodejs-secret-manager/blob/master/LICENSE)      |
@@ -96,7 +96,6 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM DEV | `chai`                         | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                          |
 | NPM DEV | `chai-http`                    | [MIT](https://github.com/chaijs/chai-http/blob/master/package.json)                                |
 | NPM DEV | `docsify-cli`                  | [MIT](https://github.com/docsifyjs/docsify-cli/blob/master/LICENSE)                                |
-| NPM DEV | `dotenv`                       | [BSD-2-Clause](https://github.com/motdotla/dotenv/blob/master/LICENSE)                             |
 | NPM DEV | `license-compliance`           | [MIT](https://github.com/tmorell/license-compliance/blob/master/LICENSE)                           |
 | NPM DEV | `mocha`                        | [MIT](https://github.com/mochajs/mocha/blob/master/LICENSE)                                        |
 | NPM DEV | `nodemon`                      | [MIT](https://github.com/remy/nodemon/blob/master/LICENSE)                                         |
