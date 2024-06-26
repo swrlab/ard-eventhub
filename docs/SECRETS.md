@@ -1,18 +1,12 @@
-# ARD-Eventhub / Secrets
+# ARD Eventhub / Secrets
 
-This repository obviously needs a number of secrets and configuration files that are kept in various places. This page documents what goes where.  
-Since this project is designed to be kept public to allow a collaborative development process, the full configuration around secrets and their deployment process is not described to the fullest extend here. There are other places, which include more about the internal maintenance structure.  
-
-- [ARD-Eventhub / Secrets](#ard-eventhub--secrets)
-  - [Code](#code)
-  - [Github](#github)
-  - [Google Cloud](#google-cloud)
-    - [Docker Image](#docker-image)
+This repository obviously needs a number of secrets and configuration files that are kept in various places. This page documents what goes where.
+Since this project is designed to be kept public to allow a collaborative development process, the full configuration around secrets and their deployment process is not described to the fullest extend here. There are other places, which include more about the internal maintenance structure.
 
 ## Code
 
-Different modules might need varying sets of variables. Check the README of each provided module to see more about those.  
-Usually it only requires few API keys to external services. Access to Google Cloud services is given by a [service account](https://cloud.google.com/iam/docs/service-accounts) (SA), with only the minimum set of permissions needed. This SA is added using an environment variable.  
+Different modules might need varying sets of variables. Check the README of each provided module to see more about those.
+Usually it only requires few API keys to external services. Access to Google Cloud services is given by a [service account](https://cloud.google.com/iam/docs/service-accounts) (SA), with only the minimum set of permissions needed. This SA is added using an environment variable.
 
 ## Github
 
@@ -37,9 +31,9 @@ Secrets in Github are write-only by default for users. Admins can change them in
 
 ## Google Cloud
 
-When this project is deployed to Google Cloud for example, it also needs environment variables and keys. Those are usually provided by the runtime and its deployment configuration. The location of all Kubernetes deployments files is explicitly not mentioned here, but if have access to said environment, you should know where to start searching.  
+When this project is deployed to Google Cloud for example, it also needs environment variables and keys. Those are usually provided by the runtime and its deployment configuration. The location of all Kubernetes deployments files is explicitly not mentioned here, but if have access to said environment, you should know where to start searching.
 
 ### Docker Image
 
-Kubernetes needs to pull the image from some specified registry. Usually there's one central place for these images. For eventhub we are not using this place to avoid adding their key to this repository. Instead we are storing containers in our eventhub project and are giving access to their SA.  
-To do this, open the console, navigate to the eventhub project, go to storage, select the artifact bucket. In the info panel, add their SA email address with the permission "_Storage Object Viewer_".  
+Kubernetes needs to pull the image from some specified registry. Usually there's one central place for these images. For eventhub we are not using this place to avoid adding their key to this repository. Instead we are storing containers in our eventhub project and are giving access to their SA.
+To do this, open the console, navigate to the eventhub project, go to storage, select the artifact bucket. In the info panel, add their SA email address with the permission "_Storage Object Viewer_".

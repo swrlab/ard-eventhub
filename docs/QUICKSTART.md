@@ -1,22 +1,14 @@
-# ARD-Eventhub / Quickstart
+# ARD Eventhub / Quickstart
 
-This guide will help you get started with ARD-Eventhub.
+This guide will help you get started with ARD Eventhub.
 
 No matter if you are a Publisher or Subscriber, you will need a user account to interact with the API. Request one through your contacts at SWR Audio Lab or ARD Online. Admins can reference the Users docs for account registrations.
 
 Once this has been set up, check the Authentication docs to learn more about the login and token exchange process.
 
-- [ARD-Eventhub / Quickstart](#ard-eventhub--quickstart)
-  - [Publishers](#publishers)
-    - [Importance of External IDs](#importance-of-external-ids)
-    - [Workflow Example](#workflow-example)
-  - [Subscribers](#subscribers)
-    - [Security](#security)
-    - [Receiver Example](#receiver-example)
-
 ## Publishers
 
-If you are a radio station that wants to start publishing events to ARD-Eventhub, follow these easy steps:
+If you are a radio station that wants to start publishing events to ARD Eventhub, follow these easy steps:
 
 - Set up your account and understand the authentication process
 - Use the POST `/events/{eventName}` endpoint to add your events
@@ -54,23 +46,19 @@ It is recommended to use the Eventhub `test` system first, to make sure everythi
 
 Security Note: Every user account can only publish to `publisherId`s from their own institution. If you are receiving an error, the Id could be misspelled, or the user account was wrongly configured by an admin.
 
+### Handling Events with External Data
+
+Let's say you are using Eventhub to receive events from a station that belongs to another broadcaster (i.e. nightly broadcasts) for your own station. For this case, it is expected to also re-publish these events to Eventhub.
+
+This is important because your subscribers expect to receive all events from your station, including the ones that are re-broadcasted from other stations. They might not know that you are re-broadcasting the signal from another station and are simply using a subscription to your station to receive all events.
+
+For ARD Audiothek, this is also important. Otherwise, your station might have incomplete live metadata when re-broadcasting other stations.
+
+For this case, it is important to make sure your internal filtering works correctly when receiving events from other stations and only publish them when the station is actually on air. Otherwise, it could create a loop.
+
 ### Importance of External IDs
 
-For the Eventhub to work it needs to be able to uniquely identify a service. This is defined as the so-called `externalId` in ARD's new Core API. You might currently know this as _CRID_, which you are using in the TVA documents.  
-
-⚠️ Please make sure to use the **exact** `externalId` that you will be using to deliver the metadata of your livestreams to ARD Core (_PermanentLivestream_). When in doubt please reach out to your metadata contacts or to SWR Audio Lab.
-
-> **External ID Requirements and Recommendations**  
-> The external ID may be provided through the field `externalId` during an entity creation request.  
->
-> If you do not already deliver content via TVA you are free in your choice of external ID. However, your choice **must** meet the following criteria:  
->
-> (a) The external ID of a single entity does not change over time  
-> (b) The external ID is referring to the local entity you want to import  
-> (c) The external ID is unique in your own local context  
-> (d) The external ID is unique in the whole ARD context  
-
-[Source: developer.ard.de](https://developer.ard.de/core-api-v2-delivering-content#ExternalIDRequirementsRecommendations)
+This has moved to [EXTERNAL_IDS.md](EXTERNAL_IDS.md).
 
 ### Workflow Example
 
@@ -135,6 +123,8 @@ Please be aware that the type of events published to this service may be extende
 
 In case of nightly re-broadcasts you should create a permanent subscription and keep this one running 24/7. The filter based on the program schedule should be done on your side. Pub/Sub should not be used to create and delete subscriptions once the re-broadcast starts and ends.
 
+Make sure that your endpoint is reachable from the internet and that you have a valid SSL certificate installed. If the endpoint is periodically unreachable, the subscription will collect past events and will retry delivering them to you. Reference [`src/utils/pubsub/createSubscription.js`](../src/utils/pubsub/createSubscription.js) and [cloud.google.com/pubsub/docs/push](https://cloud.google.com/pubsub/docs/push#push_backoff) for more details about the default subscription config and retry behavior.
+
 Start receiving events with these steps:
 
 - Set up your account and understand the authentication process
@@ -144,12 +134,12 @@ Start receiving events with these steps:
 - Check the Google Cloud page ["Receiving messages using Push"](https://cloud.google.com/pubsub/docs/push#receiving_messages) to learn more about the format that you will be receiving those events in
 - Use GET `/subcriptions` to verify your new or existing subscriptions
 
-Security Note: When a user is registered, it is linked to a specific institution (_Landesrundfunkanstalt_ or _GSEA_). Users can manage all subscriptions within this institution, so be careful not to delete your colleagues' (production) entries.  
+Security Note: When a user is registered, it is linked to a specific institution (_Landesrundfunkanstalt_ or _GSEA_). Users can manage all subscriptions within this institution, so be careful not to delete your colleagues' (production) entries.
 With this method you will still have access to all subscriptions, even if a person leaves your institution or their account is deactivated.
 
 ### Security
 
-Generally it is recommended to keep your endpoints hidden from public indexes. To be absolutely sure that an event is actually being received from Eventhub, you can make use of the provided JWT token and service account.  
+Generally it is recommended to keep your endpoints hidden from public indexes. To be absolutely sure that an event is actually being received from Eventhub, you can make use of the provided JWT token and service account.
 For every subscription that you create, the response will (amongst other metadata) also include a field about the used service account:
 
 ```js
@@ -164,7 +154,7 @@ Please note that for now the service account usually contains the same response.
 
 ### Receiver Example
 
-In a simplified way, your receiver might look something like this (example for NodeJS with Express). The Google Cloud section ["Authentication and authorization by the push endpoint"](https://cloud.google.com/pubsub/docs/push#authentication_and_authorization_by_the_push_endpoint) also holds more information about this process.  
+In a simplified way, your receiver might look something like this (example for NodeJS with Express). The Google Cloud section ["Authentication and authorization by the push endpoint"](https://cloud.google.com/pubsub/docs/push#authentication_and_authorization_by_the_push_endpoint) also holds more information about this process.
 
 ```js
 // load node packages

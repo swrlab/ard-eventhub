@@ -1,19 +1,19 @@
 openapi: 3.0.3
 info:
-  title: ARD-Eventhub
+  title: ARD Eventhub
   description: >-
     ARD system to distribute real-time (live) metadata for primarily radio
     broadcasts.
-  termsOfService: "https://www.ard.de"
+  termsOfService: 'https://www.ard.de'
   contact:
     email: lab@swr.de
   license:
     name: European Union Public License 1.2
-    url: "https://spdx.org/licenses/EUPL-1.2.html"
-  version: 1.6.0
+    url: 'https://spdx.org/licenses/EUPL-1.2.html'
+  version: 1.8.0
 externalDocs:
-  description: ARD-Eventhub Documentation
-  url: "https://swrlab.github.io/ard-eventhub/"
+  description: ARD Eventhub Documentation
+  url: 'https://swrlab.github.io/ard-eventhub/'
 servers:
   - url: /
     description: Local (domain-relative) environment
@@ -47,24 +47,24 @@ paths:
                   type: string
                   example: my-password
       responses:
-        "200":
+        '200':
           description: Authentication successful
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/authResponse"
-        "400":
+                $ref: '#/components/schemas/authResponse'
+        '400':
           description: Bad Request (invalid input)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorBadRequest"
-        "500":
+                $ref: '#/components/schemas/errorBadRequest'
+        '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorInternalServerError"
+                $ref: '#/components/schemas/errorInternalServerError'
   /auth/refresh:
     post:
       tags:
@@ -82,24 +82,24 @@ paths:
                   type: string
                   example: abcXYZ...
       responses:
-        "200":
+        '200':
           description: Authentication successful
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/authResponse"
-        "400":
+                $ref: '#/components/schemas/authResponse'
+        '400':
           description: Bad Request (invalid input)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorBadRequest"
-        "500":
+                $ref: '#/components/schemas/errorBadRequest'
+        '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorInternalServerError"
+                $ref: '#/components/schemas/errorInternalServerError'
   /auth/reset:
     post:
       tags:
@@ -116,22 +116,22 @@ paths:
                   type: string
                   example: my-email@example.com
       responses:
-        "200":
+        '200':
           description: Request successful
           content: {}
-        "400":
+        '400':
           description: Bad Request (invalid input)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorBadRequest"
-        "500":
+                $ref: '#/components/schemas/errorBadRequest'
+        '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorInternalServerError"
-  "/events/de.ard.eventhub.v1.radio.track.next":
+                $ref: '#/components/schemas/errorInternalServerError'
+  '/events/de.ard.eventhub.v1.radio.track.next':
     post:
       tags:
         - events
@@ -140,35 +140,35 @@ paths:
       security:
         - bearerAuth: []
       requestBody:
-        $ref: "#/components/requestBodies/eventV1RadioTrack"
+        $ref: '#/components/requestBodies/eventV1RadioTrack'
       responses:
-        "201":
-          $ref: "#/components/responses/eventV1RadioTrack"
-        "400":
+        '201':
+          $ref: '#/components/responses/eventV1RadioTrack'
+        '400':
           description: Bad Request (invalid input)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorBadRequest"
-        "401":
+                $ref: '#/components/schemas/errorBadRequest'
+        '401':
           description: Missing authentication
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorUnauthorized"
-        "403":
+                $ref: '#/components/schemas/errorUnauthorized'
+        '403':
           description: Invalid authorization
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorForbidden"
-        "500":
+                $ref: '#/components/schemas/errorForbidden'
+        '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorInternalServerError"
-  "/events/de.ard.eventhub.v1.radio.track.playing":
+                $ref: '#/components/schemas/errorInternalServerError'
+  '/events/de.ard.eventhub.v1.radio.track.playing':
     post:
       tags:
         - events
@@ -177,34 +177,34 @@ paths:
       security:
         - bearerAuth: []
       requestBody:
-        $ref: "#/components/requestBodies/eventV1RadioTrack"
+        $ref: '#/components/requestBodies/eventV1RadioTrack'
       responses:
-        "201":
-          $ref: "#/components/responses/eventV1RadioTrack"
-        "400":
+        '201':
+          $ref: '#/components/responses/eventV1RadioTrack'
+        '400':
           description: Bad Request (invalid input)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorBadRequest"
-        "401":
+                $ref: '#/components/schemas/errorBadRequest'
+        '401':
           description: Missing authentication
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorUnauthorized"
-        "403":
+                $ref: '#/components/schemas/errorUnauthorized'
+        '403':
           description: Invalid authorization
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorForbidden"
-        "500":
+                $ref: '#/components/schemas/errorForbidden'
+        '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorInternalServerError"
+                $ref: '#/components/schemas/errorInternalServerError'
   /subscriptions:
     get:
       tags:
@@ -214,30 +214,30 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        "200":
+        '200':
           description: Subscriptions found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/subscriptionsList"
-        "401":
+                $ref: '#/components/schemas/subscriptionsList'
+        '401':
           description: Missing authentication
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorUnauthorized"
-        "403":
+                $ref: '#/components/schemas/errorUnauthorized'
+        '403':
           description: Invalid authorization
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorForbidden"
-        "500":
+                $ref: '#/components/schemas/errorForbidden'
+        '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorInternalServerError"
+                $ref: '#/components/schemas/errorInternalServerError'
     post:
       tags:
         - subscriptions
@@ -250,46 +250,46 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/subscriptionPost"
+              $ref: '#/components/schemas/subscriptionPost'
         required: true
       responses:
-        "201":
+        '201':
           description: Subscription created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/subscriptionResponse"
-        "400":
+                $ref: '#/components/schemas/subscriptionResponse'
+        '400':
           description: Bad Request (invalid input)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorBadRequest"
-        "401":
+                $ref: '#/components/schemas/errorBadRequest'
+        '401':
           description: Missing authentication
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorUnauthorized"
-        "403":
+                $ref: '#/components/schemas/errorUnauthorized'
+        '403':
           description: Invalid authorization
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorForbidden"
-        "404":
+                $ref: '#/components/schemas/errorForbidden'
+        '404':
           description: Topic for subscription not found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorNotFound"
-        "500":
+                $ref: '#/components/schemas/errorNotFound'
+        '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorInternalServerError"
-  "/subscriptions/{name}":
+                $ref: '#/components/schemas/errorInternalServerError'
+  '/subscriptions/{name}':
     get:
       tags:
         - subscriptions
@@ -300,45 +300,45 @@ paths:
       parameters:
         - name: name
           in: path
-          description: "`name` of the desired subscription"
+          description: '`name` of the desired subscription'
           required: true
           style: simple
           explode: false
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Subscription found
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/subscriptionResponse"
-        "401":
+                  $ref: '#/components/schemas/subscriptionResponse'
+        '401':
           description: Missing authentication
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorUnauthorized"
-        "403":
+                $ref: '#/components/schemas/errorUnauthorized'
+        '403':
           description: Invalid authorization
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorForbidden"
-        "404":
+                $ref: '#/components/schemas/errorForbidden'
+        '404':
           description: Subscription not found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorNotFound"
-        "500":
+                $ref: '#/components/schemas/errorNotFound'
+        '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorInternalServerError"
+                $ref: '#/components/schemas/errorInternalServerError'
     delete:
       tags:
         - subscriptions
@@ -349,43 +349,43 @@ paths:
       parameters:
         - name: name
           in: path
-          description: "`name` of the desired subscription"
+          description: '`name` of the desired subscription'
           required: true
           style: simple
           explode: false
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Subscription deleted
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/subscriptionDeleted"
-        "401":
+                $ref: '#/components/schemas/subscriptionDeleted'
+        '401':
           description: Missing authentication
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorUnauthorized"
-        "403":
+                $ref: '#/components/schemas/errorUnauthorized'
+        '403':
           description: Invalid authorization
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorForbidden"
-        "404":
+                $ref: '#/components/schemas/errorForbidden'
+        '404':
           description: Subscription not found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorNotFound"
-        "500":
+                $ref: '#/components/schemas/errorNotFound'
+        '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorInternalServerError"
+                $ref: '#/components/schemas/errorInternalServerError'
   /topics:
     get:
       tags:
@@ -395,18 +395,18 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        "200":
+        '200':
           description: Topics found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/topicResponse"
-        "500":
+                $ref: '#/components/schemas/topicResponse'
+        '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorInternalServerError"
+                $ref: '#/components/schemas/errorInternalServerError'
 components:
   requestBodies:
     eventV1RadioTrack:
@@ -442,7 +442,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/eventV1PostBody"
+            $ref: '#/components/schemas/eventV1PostBody'
       required: true
   responses:
     eventV1RadioTrack:
@@ -470,7 +470,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/eventV1ResBody"
+            $ref: '#/components/schemas/eventV1ResBody'
   securitySchemes:
     bearerAuth:
       type: http
@@ -488,7 +488,7 @@ components:
           type: string
           description: ISO8601 compliant timestamp for the token expiry
           format: iso8601-timestamp
-          example: "2020-01-19T06:00:00+01:00"
+          example: '2020-01-19T06:00:00+01:00'
         token:
           type: string
           description: ready to use token for API queries
@@ -603,23 +603,23 @@ components:
       properties:
         type:
           type: string
-          example: "PermanentLivestream"
+          example: 'PermanentLivestream'
           enum:
-            - "EventLivestream"
-            - "PermanentLivestream"
+            - 'EventLivestream'
+            - 'PermanentLivestream'
         externalId:
           type: string
-          example: "crid://swr.de/123450"
+          example: 'crid://swr.de/123450'
         publisherId:
           type: string
           description: |
             External ID or globally unique identifier (Core ID) for the associated publisher.
             When no Core ID is provided, the External ID will be converted by Eventhub.
-          example: "248000"
+          example: '248000'
         id:
           type: string
           description: Globally unique identifier, created by Eventhub
-          example: "urn:ard:permanent-livestream:49267f7d67be180d"
+          example: 'urn:ard:permanent-livestream:49267f7d67be180d'
 
     reference:
       type: object
@@ -696,7 +696,7 @@ components:
           type: string
           description: ISO8601 compliant timestamp
           format: iso8601-timestamp
-          example: "2020-01-19T06:00:00+01:00"
+          example: '2020-01-19T06:00:00+01:00'
         length:
           type: number
           format: float
@@ -743,7 +743,7 @@ components:
                     example: Person
                   id:
                     type: string
-                    example: "1641010"
+                    example: '1641010'
               isni:
                 type: string
                 description: ISNI ID if available
@@ -764,7 +764,7 @@ components:
           items:
             minItems: 1
             allOf:
-              - $ref: "#/components/schemas/services"
+              - $ref: '#/components/schemas/services'
         references:
           type: array
           description: related external entities
@@ -772,7 +772,7 @@ components:
           items:
             minItems: 0
             allOf:
-              - $ref: "#/components/schemas/reference"
+              - $ref: '#/components/schemas/reference'
         playlistItemId:
           type: string
           description: >-
@@ -830,10 +830,10 @@ components:
                 example: cover
               url:
                 type: string
-                example: "https://example.com/cover.jpg"
+                example: 'https://example.com/cover.jpg'
               templateUrl:
                 type: string
-                example: "https://example.com/cover.jpg?width={width}"
+                example: 'https://example.com/cover.jpg?width={width}'
                 nullable: true
               description:
                 type: string
@@ -860,7 +860,7 @@ components:
             ID gets inserted by Eventhub as string-formatted number, but might
             be a true string in the future, do not expect this string to remain
             numbers only!
-          example: "1234567890"
+          example: '1234567890'
 
     eventV1ResBody:
       type: object
@@ -878,7 +878,7 @@ components:
               type: integer
               example: 0
         event:
-          $ref: "#/components/schemas/eventV1PostBody"
+          $ref: '#/components/schemas/eventV1PostBody'
         trace:
           type: string
           example: null
@@ -905,7 +905,7 @@ components:
         url:
           type: string
           description: Publicly accessible URL that should receive the events
-          example: "https://example.com/my/webhook/for/this/subscription"
+          example: 'https://example.com/my/webhook/for/this/subscription'
         contact:
           type: string
           description: >-
@@ -921,7 +921,7 @@ components:
       type: array
       items:
         allOf:
-          - $ref: "#/components/schemas/subscriptionResponse"
+          - $ref: '#/components/schemas/subscriptionResponse'
 
     subscriptionResponse:
       type: object
@@ -969,7 +969,7 @@ components:
         url:
           type: string
           description: Publicly accessible URL that should receive the events
-          example: "https://example.com/my/webhook/for/this/subscription"
+          example: 'https://example.com/my/webhook/for/this/subscription'
         contact:
           type: string
           description: >-
@@ -1015,7 +1015,7 @@ components:
             properties:
               id:
                 type: string
-                example: "1234567890"
+                example: '1234567890'
               creator-slug:
                 type: string
                 example: ard-eventhub-swr
@@ -1027,7 +1027,7 @@ components:
                 example: prod
               created:
                 type: string
-                example: "2021-03-25"
+                example: '2021-03-25'
               institution-slug:
                 type: string
                 example: sudwestrundfunk

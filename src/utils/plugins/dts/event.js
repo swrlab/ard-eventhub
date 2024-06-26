@@ -78,7 +78,7 @@ module.exports = async (job) => {
 		title: event.title,
 		isrc: event.isrc,
 		email: plugin?.email,
-		duration: parseInt(event.length),
+		duration: Number.parseInt(event.length),
 
 		delay: plugin?.delay || 0,
 		album: plugin?.album || null,
@@ -117,7 +117,7 @@ module.exports = async (job) => {
 	if (!LIVERADIO_URL || !liveradioToken) {
 		logger.log({
 			level: 'error',
-			message: `failed loading DTS user for liveradio API`,
+			message: 'failed loading DTS user for liveradio API',
 			source,
 			data: { job, ids: { coreIds } },
 		})

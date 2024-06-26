@@ -11,6 +11,7 @@ const firebase = require('../../../utils/firebase')
 const logger = require('../../../utils/logger')
 
 const source = 'ingest/auth/middleware/verify'
+const ERROR_JSON = { message: 'Forbidden', errors: [], status: 403 }
 
 module.exports = async (req, res, next) => {
 	try {
@@ -44,7 +45,7 @@ module.exports = async (req, res, next) => {
 				source,
 				data: { ...req.headers, authorization: 'hidden' },
 			})
-			return res.sendStatus(403)
+			return res.status(403).json(ERROR_JSON)
 		}
 
 		// lookup user in DB
@@ -58,7 +59,7 @@ module.exports = async (req, res, next) => {
 				source,
 				data: { ...req.headers, authorization: 'hidden' },
 			})
-			return res.sendStatus(403)
+			return res.status(403).json(ERROR_JSON)
 		}
 
 		// add user details to request profile

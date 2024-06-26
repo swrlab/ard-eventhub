@@ -1,16 +1,6 @@
-# ARD-Eventhub / Types
+# ARD Eventhub / Types
 
 Each triggered `track` can and must be of a certain type, to be properly displayed by receiving subscribers.
-
-- [ARD-Eventhub / Types](#ard-eventhub--types)
-  - [`music`](#music)
-  - [`live`](#live)
-  - [`news`](#news)
-  - [`weather`](#weather)
-  - [`traffic`](#traffic)
-  - [`audio`](#audio)
-  - [`commercial`](#commercial)
-  - [`jingle`](#jingle)
 
 ## `music`
 
@@ -48,7 +38,7 @@ A song or commercially produced piece of music. It is highly recommended and exp
       "attribution": "Photographer XYZ"
     }
   ],
-  … 
+  …
 }
 ```
 
@@ -63,7 +53,7 @@ If a live element is starting. This can be an moderation by an anchor, interview
   "start": "2020-01-19T06:20:00+01:00",
   "length": 240,
   "title": "Moderation",
-  … 
+  …
 }
 ```
 
@@ -100,7 +90,7 @@ This indicates the beginning of the news in general or a new news item. Get as d
       "url": "https://www.deutschlandfunkkultur.de/kommerzielle-us-raumfahrt-die-neue-weltraumoekonomie-100.html"
     }
   ]
-  … 
+  …
 }
 ```
 
@@ -115,7 +105,7 @@ Similar to `news` it marks the beginning of a weather segment.
   "start": "2020-01-19T06:03:00+01:00",
   "length": 30,
   "title": "Wetter",
-  … 
+  …
 }
 ```
 
@@ -130,7 +120,7 @@ Similar to `news` and `weather` it can mark the beginning of a traffic announcem
   "start": "2020-01-19T06:03:30+01:00",
   "length": 10,
   "title": "Verkehr",
-  … 
+  …
 }
 ```
 

@@ -1,17 +1,6 @@
-# ARD-Eventhub
+# ARD Eventhub
 
 ARD system to distribute real-time (live) metadata for primarily radio broadcasts.
-
-- [ARD-Eventhub](#ard-eventhub)
-  - [Active Data Suppliers](#active-data-suppliers)
-  - [Get Started and Documentation](#get-started-and-documentation)
-  - [Get involved](#get-involved)
-  - [Modules](#modules)
-    - [Ingest](#ingest)
-  - [Changelog](#changelog)
-  - [License](#license)
-  - [Third-Party Components](#third-party-components)
-  - [Authors](#authors)
 
 ## Active Data Suppliers
 
@@ -54,13 +43,29 @@ This project will include two modules: Ingest and API. The first development ste
 
 The Ingest service is responsible for receiving and publishing events and managing subscriptions. You'll find the core code in [`./src/ingest/`](./src/ingest/).
 
+## Local Setup
+
+This project uses `bun` as package manager and runtime environment. Please note that this only applies to the package manager and CLI commands. JavaScript still uses the 'traditional' `node` runtime. Check the [Bun documentation](https://bun.sh/docs/installation) for installation instructions.
+
+To install dependencies run:
+
+```sh
+bun install
+```
+
+To check for minor updates:
+
+```sh
+bun update
+```
+
 ## Changelog
 
 See [CHANGELOG](CHANGELOG.md) for latest changes.
 
 ## License
 
-This project is licensed under **European Union Public License 1.2** ([`EUPL-1.2`](https://spdx.org/licenses/EUPL-1.2.html)), which can be found in [LICENSE](LICENSE.txt). Detailed information and translations to all 23 official languages of the European Union are available at [joinup.ec.europa.eu](https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12). The usage of this license does not imply any relationship to or endorsement by the European Union, the joinup initiative or other participating parties.  
+This project is licensed under **European Union Public License 1.2** ([`EUPL-1.2`](https://spdx.org/licenses/EUPL-1.2.html)), which can be found in [LICENSE](LICENSE.txt). Detailed information and translations to all 23 official languages of the European Union are available at [joinup.ec.europa.eu](https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12). The usage of this license does not imply any relationship to or endorsement by the European Union, the joinup initiative or other participating parties.
 A [compatibility matrix](https://joinup.ec.europa.eu/collection/eupl/matrix-eupl-compatible-open-source-licences) is also available and describes the relationships between EUPL-1.2 in upstream and downstream projects.
 
 This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`](https://www.npmjs.com/package/spdx-exceptions) package, which uses the `CC-BY-3.0` license, without adding any legal or technical restrictions guaranteed by their license.
@@ -69,7 +74,7 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 
 | Type    | Name                           | License                                                                                            |
 | ------- | ------------------------------ | -------------------------------------------------------------------------------------------------- |
-| Docker  | `node:18-alpine`               | [MIT](https://github.com/nodejs/node/blob/master/LICENSE)                                          |
+| Docker  | `node:22-alpine`               | [MIT](https://github.com/nodejs/node/tree/main?tab=readme-ov-file#license)                         |
 | NPM     | `@google-cloud/datastore`      | [Apache License 2.0](https://github.com/googleapis/nodejs-datastore/blob/master/LICENSE)           |
 | NPM     | `@google-cloud/pubsub`         | [Apache License 2.0](https://github.com/googleapis/nodejs-pubsub/blob/master/LICENSE)              |
 | NPM     | `@google-cloud/secret-manager` | [Apache License 2.0](https://github.com/googleapis/nodejs-secret-manager/blob/master/LICENSE)      |
@@ -84,20 +89,17 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `luxon`                        | [MIT](https://github.com/moment/luxon/blob/master/LICENSE.md)                                      |
 | NPM     | `slug`                         | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                           |
 | NPM     | `swagger-ui-express`           | [MIT](https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE)                       |
+| NPM     | `ulid`                         | [MIT](https://github.com/ulid/javascript/blob/master/LICENSE)                                      |
 | NPM     | `winston`                      | [MIT](https://github.com/winstonjs/winston/blob/master/LICENSE)                                    |
-| NPM DEV | `@swrlab/eslint-plugin-swr`    | [ISC](https://github.com/swrlab/eslint-plugin-swr/blob/main/package.json)                          |
+| NPM DEV | `@biomejs/biome`               | [MIT](https://github.com/biomejs/biome/blob/main/LICENSE-MIT)                                      |
 | NPM DEV | `@swrlab/swr-prettier-config`  | [MIT](https://github.com/swrlab/swr-prettier-config/blob/main/LICENSE.txt)                         |
 | NPM DEV | `chai`                         | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                          |
 | NPM DEV | `chai-http`                    | [MIT](https://github.com/chaijs/chai-http/blob/master/package.json)                                |
 | NPM DEV | `docsify-cli`                  | [MIT](https://github.com/docsifyjs/docsify-cli/blob/master/LICENSE)                                |
-| NPM DEV | `dotenv`                       | [BSD-2-Clause](https://github.com/motdotla/dotenv/blob/master/LICENSE)                             |
-| NPM DEV | `eslint`                       | [MIT](https://github.com/eslint/eslint/blob/master/LICENSE)                                        |
-| NPM DEV | `eslint-plugin-chai-friendly`  | [MIT](https://github.com/ihordiachenko/eslint-plugin-chai-friendly/blob/master/LICENSE)            |
 | NPM DEV | `license-compliance`           | [MIT](https://github.com/tmorell/license-compliance/blob/master/LICENSE)                           |
 | NPM DEV | `mocha`                        | [MIT](https://github.com/mochajs/mocha/blob/master/LICENSE)                                        |
 | NPM DEV | `nodemon`                      | [MIT](https://github.com/remy/nodemon/blob/master/LICENSE)                                         |
 | NPM DEV | `prettier`                     | [MIT](https://github.com/prettier/prettier/blob/main/LICENSE)                                      |
-| NPM DEV | `typescript`                   | [Apache License 2.0](https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt)                |
 
 ## Authors
 
@@ -106,3 +108,5 @@ This project was realized by
 - [Daniel Freytag](https://github.com/frytg)
 - [Rafael Mäuer](https://github.com/rafaelmaeuer)
 - [Christian Hufnagel](https://github.com/chhufnagel)
+
+at [SWR Audio Lab](https://www.swr.de/audiolab)

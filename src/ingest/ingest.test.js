@@ -7,17 +7,13 @@
 
 */
 
-// Add eslint exceptions
-/* eslint-disable object-shorthand */
-/* global describe it before */
-
 // Require dependencies
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 const { DateTime } = require('luxon')
 
-const server = require('../src/ingest/index')
-const logger = require('../src/utils/logger')
+const server = require('./index')
+const logger = require('../utils/logger')
 
 // Init chai functions
 const { expect } = chai
@@ -53,8 +49,10 @@ function testResponse(res, status) {
 
 // check rejection of invalid token
 function testFailedAuth(res) {
-	console.log(`comparing failed auth response with statusCode ${res.statusCode} (should be 403)`)
-	expect(res).to.have.status(403)
+	testResponse(res, 403)
+}
+function testMissingAuth(res) {
+	testResponse(res, 401)
 }
 
 /*
@@ -62,7 +60,8 @@ function testFailedAuth(res) {
 */
 
 const loginPath = '/auth/login'
-let accessToken, refreshToken
+let accessToken = null
+let refreshToken = null
 
 function testAuthKeys(body) {
 	body.should.be.a('object')
@@ -185,6 +184,16 @@ const event = {
 }
 
 describe(`POST ${eventPath}`, () => {
+	it('test invalid auth for POST /event', (done) => {
+		chai.request(server)
+			.post(eventPath)
+			.send(event)
+			.end((err, res) => {
+				testMissingAuth(res)
+				done()
+			})
+	})
+
 	it('test invalid auth for POST /event', (done) => {
 		chai.request(server)
 			.post(eventPath)

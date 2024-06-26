@@ -1,0 +1,8 @@
+# disable analytics
+# https://bun.sh/docs/runtime/bunfig#telemetry
+telemetry = false
+
+# exclude commands from logs
+# https://bun.sh/docs/runtime/bunfig#run-silent-suppress-reporting-the-command-being-run
+[run]
+silent = true

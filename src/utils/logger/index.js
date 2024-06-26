@@ -6,7 +6,7 @@
 */
 
 // load node utils
-const os = require('os')
+const os = require('node:os')
 const { createLogger, config, format, transports } = require('winston')
 
 // get version

@@ -5,7 +5,7 @@ on:
     types: [labeled]
 
 env:
-  NODE_VERSION: 18
+  NODE_VERSION: 22
 
 jobs:
   security:
@@ -30,11 +30,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-          cache-dependency-path: '**/yarn.lock'
+
+      - name: 🛠 Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
 
       - name: 📦 Install Dependencies
-        run: yarn
+        run: bun install
 
       - name: 🔑 Setup Google Cloud Auth
         uses: google-github-actions/auth@v2
@@ -43,7 +46,7 @@ jobs:
           create_credentials_file: true
 
       - name: 📚 Lint Code
-        run: yarn ingest:lint
+        run: bun ingest:lint
 
       - name: 🧪 Run Ingest Tests
         env:
@@ -56,7 +59,7 @@ jobs:
           STAGE: ${{ matrix.STAGES }}
           TEST_USER: ${{ secrets.TEST_USER }}
           TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
-        run: yarn ingest:test
+        run: bun ingest:test
 
   license:
     needs: security
@@ -69,11 +72,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-          cache-dependency-path: '**/yarn.lock'
+
+      - name: 🛠 Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
 
       - name: 📦 Install Dependencies
-        run: yarn
+        run: bun install
 
       - name: 📚 Run License Check
-        run: yarn license
+        run: bun license

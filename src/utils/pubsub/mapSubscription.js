@@ -21,7 +21,7 @@ module.exports = async (subscription) => {
 
 	// preset vars
 	const lookup = subscription.metadata?.labels?.id
-		? await datastore.load('subscriptions', parseInt(subscription.metadata.labels.id))
+		? await datastore.load('subscriptions', Number.parseInt(subscription.metadata.labels.id))
 		: null
 
 	// remap values

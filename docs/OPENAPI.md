@@ -1,6 +1,6 @@
-# ARD-Eventhub / OpenAPI
+# ARD Eventhub / OpenAPI
 
-The ARD-Eventhub APIs are documented with [OpenAPI](https://swagger.io/specification/) specification (a standard, language-agnostic interface to RESTful APIs). With [Swagger-UI](https://swagger.io/tools/swagger-ui/) a testable interface is provided at `{service-endpoint}/openapi/`.
+The ARD Eventhub APIs are documented with [OpenAPI](https://swagger.io/specification/) specification (a standard, language-agnostic interface to RESTful APIs). With [Swagger-UI](https://swagger.io/tools/swagger-ui/) a testable interface is provided at `{service-endpoint}/openapi/`.
 
 All changes in the API should be documented in [openapi.yaml](https://eventhub-ingest.ard.de/openapi/openapi.yaml) which must be converted to a JSON format afterwards.
 

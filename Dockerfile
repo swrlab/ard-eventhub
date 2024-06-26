@@ -1,5 +1,5 @@
-# Load desired node image
-FROM node:18-alpine
+# select bun
+FROM oven/bun:1 as bun
 
 # Create app directory
 WORKDIR /web/app
@@ -7,13 +7,20 @@ WORKDIR /web/app
 # Copy app source
 COPY . .
 
-# Install node dependencies with clean slate
-# Also download tokens
-RUN rm -rf node_modules && \
-	yarn
+# Install dependencies
+RUN bun install
+
+# Load desired node image
+FROM node:22-alpine
+
+# Create app directory
+WORKDIR /web/app
+
+# Copy compiled app source
+COPY --from=bun /web/app /web/app
 
 # Expose port
 EXPOSE 80
 
 # Run app
-CMD [ "yarn", "ingest:cloud" ]
+CMD [ "npm", "run", "ingest:cloud" ]
