@@ -4,7 +4,7 @@
 	"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
 	"main": "./src/ingest/index.js",
 	"engines": {
-		"node": ">=22.0.0",
+		"node": ">=20.0.0",
 		"npm": ">=10.0.0"
 	},
 	"scripts": {
