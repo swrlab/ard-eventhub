@@ -74,7 +74,7 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 
 | Type    | Name                           | License                                                                                            |
 | ------- | ------------------------------ | -------------------------------------------------------------------------------------------------- |
-| Docker  | `node:18-alpine`               | [MIT](https://github.com/nodejs/node/blob/master/LICENSE)                                          |
+| Docker  | `node:20-alpine`               | [MIT](https://github.com/nodejs/node/tree/main?tab=readme-ov-file#license)                         |
 | NPM     | `@google-cloud/datastore`      | [Apache License 2.0](https://github.com/googleapis/nodejs-datastore/blob/master/LICENSE)           |
 | NPM     | `@google-cloud/pubsub`         | [Apache License 2.0](https://github.com/googleapis/nodejs-pubsub/blob/master/LICENSE)              |
 | NPM     | `@google-cloud/secret-manager` | [Apache License 2.0](https://github.com/googleapis/nodejs-secret-manager/blob/master/LICENSE)      |
@@ -91,19 +91,16 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `swagger-ui-express`           | [MIT](https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE)                       |
 | NPM     | `ulid`                         | [MIT](https://github.com/ulid/javascript/blob/master/LICENSE)                                      |
 | NPM     | `winston`                      | [MIT](https://github.com/winstonjs/winston/blob/master/LICENSE)                                    |
-| NPM DEV | `@swrlab/eslint-plugin-swr`    | [ISC](https://github.com/swrlab/eslint-plugin-swr/blob/main/package.json)                          |
+| NPM DEV | `@biomejs/biome`               | [MIT](https://github.com/biomejs/biome/blob/main/LICENSE-MIT)                                      |
 | NPM DEV | `@swrlab/swr-prettier-config`  | [MIT](https://github.com/swrlab/swr-prettier-config/blob/main/LICENSE.txt)                         |
 | NPM DEV | `chai`                         | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                          |
 | NPM DEV | `chai-http`                    | [MIT](https://github.com/chaijs/chai-http/blob/master/package.json)                                |
 | NPM DEV | `docsify-cli`                  | [MIT](https://github.com/docsifyjs/docsify-cli/blob/master/LICENSE)                                |
 | NPM DEV | `dotenv`                       | [BSD-2-Clause](https://github.com/motdotla/dotenv/blob/master/LICENSE)                             |
-| NPM DEV | `eslint`                       | [MIT](https://github.com/eslint/eslint/blob/master/LICENSE)                                        |
-| NPM DEV | `eslint-plugin-chai-friendly`  | [MIT](https://github.com/ihordiachenko/eslint-plugin-chai-friendly/blob/master/LICENSE)            |
 | NPM DEV | `license-compliance`           | [MIT](https://github.com/tmorell/license-compliance/blob/master/LICENSE)                           |
 | NPM DEV | `mocha`                        | [MIT](https://github.com/mochajs/mocha/blob/master/LICENSE)                                        |
 | NPM DEV | `nodemon`                      | [MIT](https://github.com/remy/nodemon/blob/master/LICENSE)                                         |
 | NPM DEV | `prettier`                     | [MIT](https://github.com/prettier/prettier/blob/main/LICENSE)                                      |
-| NPM DEV | `typescript`                   | [Apache License 2.0](https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt)                |
 
 ## Authors
 

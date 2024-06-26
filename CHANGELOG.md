@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - chore: upgrade to Node.js 20
 - feat: switch subscription names from UUIDv4 to ULID
 - chore: swap yarn for bun (package manager only)
+- chore: swap eslint for biome (experimental)
 - chore: remove table of contents from docs
 - chore: add docs about plugins
 - chore: add docs about pubsub defaults
