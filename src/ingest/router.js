@@ -30,11 +30,15 @@ router.use(
 		validateRequests: true,
 		validateResponses: false,
 		ignorePaths: (path) =>
-			path.startsWith('/openapi') || path === '/' || path === '/health' || path === '/pubsub',
+			path.startsWith('/openapi') ||
+			path === '/' ||
+			path === '/health' ||
+			path === '/pubsub',
 		formats: {
 			'iso8601-timestamp': {
 				type: 'string',
-				validate: (value) => isIncluded(value, 'T') && DateTime.fromISO(value).isValid,
+				validate: (value) =>
+					isIncluded(value, 'T') && DateTime.fromISO(value).isValid,
 			},
 		},
 	})
@@ -44,8 +48,10 @@ router.use(
 const response = require('../utils/response')
 
 // register swagger endpoints
-router.get('/openapi/openapi.json', (req, res) => res.json(swaggerDocument))
-router.get('/openapi/openapi.yaml', (req, res) => res.sendFile('openapi.yaml', { root: '.' }))
+router.get('/openapi/openapi.json', (_req, res) => res.json(swaggerDocument))
+router.get('/openapi/openapi.yaml', (_req, res) =>
+	res.sendFile('openapi.yaml', { root: '.' })
+)
 router.use('/openapi', swaggerUi.serve, swaggerUi.setup({}, swaggerConfig))
 
 // load auth middleware
@@ -63,26 +69,38 @@ router.post('/pubsub/', require('./pubsub/verify'), require('./pubsub'))
 
 router.get('/subscriptions/', authVerify, require('./subscriptions/list'))
 router.post('/subscriptions/', authVerify, require('./subscriptions/post'))
-router.get('/subscriptions/:subscriptionName', authVerify, require('./subscriptions/get'))
-router.delete('/subscriptions/:subscriptionName', authVerify, require('./subscriptions/delete'))
+router.get(
+	'/subscriptions/:subscriptionName',
+	authVerify,
+	require('./subscriptions/get')
+)
+router.delete(
+	'/subscriptions/:subscriptionName',
+	authVerify,
+	require('./subscriptions/delete')
+)
 
 router.get('/topics/', authVerify, require('./topics/list'))
 router.get('/topics/:topicName', authVerify, require('./topics/list'))
 
 // send health-check ok
-router.get(['/', '/health'], (req, res) => {
+router.get(['/', '/health'], (_req, res) => {
 	res.sendStatus(200)
 })
 
 // set which error message to return (other may contain private information)
-const allowedErrors = ['Authorization header required', 'GET method not allowed']
+const allowedErrors = [
+	'Authorization header required',
+	'GET method not allowed',
+]
 
 // set openapi error handler
-router.use((err, req, res, next) => {
+router.use((err, req, res, _next) => {
 	// set error message
 	let useOriginalError = false
 	if (allowedErrors.includes(err.message)) useOriginalError = true
-	if (err.message.includes('must have required property') !== -1) useOriginalError = true
+	if (err.message.includes('must have required property') !== -1)
+		useOriginalError = true
 
 	return response.badRequest(req, res, {
 		message: useOriginalError ? err.message : 'Bad request',
