@@ -15,5 +15,6 @@ jobs:
     uses: swrlab/node-utils/.github/workflows/linter.yml@main
     with:
       install-all: false
-      log-level: "NOTICE"
+      log-level: 'NOTICE'
       validate-all-codebase: false
+      javascript-es-config-file: /.eslintrc.json

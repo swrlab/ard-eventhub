@@ -19,9 +19,10 @@ This plugin makes it possible to send data to their system. It is currently set 
 }
 ```
 
-There are also a couple of additional properties that can be set:
+There are also a couple of properties that can be set:
 
-- `delay` (int, default: `0`) - if there is an offset to wait until this data is shown
+- `isDeactivated` (boolean, default `false`) - if `true`, the data will not be sent to the external system
+- `delay` (int, default `0`) - if there is an offset to wait until this data is shown
 - `album` (string, default `null`) - album title, if available
 - `composer` (string, default `null`) - composer, if available
 - `program` (string, default `null`) - program title, if available
