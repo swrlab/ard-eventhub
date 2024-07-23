@@ -733,6 +733,14 @@ components:
                   - author
                   - composer
                   - performer
+                  - conductor
+                  - choir
+                  - leader
+                  - ensemble
+                  - orchestra
+                  - soloist
+                  - producer
+                  - engineer
               normDb:
                 type: object
                 description: Reference to an entity in ARD's Norm-DB catalog
