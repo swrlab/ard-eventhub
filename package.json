@@ -19,6 +19,7 @@
 		"docker:run": "docker run --env-file .env -p 8080:8080 --name ard-eventhub swr/ard-eventhub",
 		"docker:scan": "bun docker:build && docker scout quickview",
 		"docker:clean": "docker rm ard-eventhub",
+		"openapi:format": "bunx biome format openapi.json --write && bunx prettier openapi.yaml -w",
 		"license": "bunx license-compliance",
 		"reinstall": "rm -rf node_modules && rm bun.lockb && bun install"
 	},
@@ -45,7 +46,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.2",
-		"@swrlab/swr-prettier-config": "^0.3.0",
+		"@swrlab/style-guide": "swrlab/style-guide",
 		"chai": "^4.4.1",
 		"chai-http": "^4.4.0",
 		"docsify-cli": "^4.4.4",
@@ -60,5 +61,5 @@
 		"strip-ansi": "^6.0.1",
 		"update-notifier": "^5.1.0"
 	},
-	"prettier": "@swrlab/swr-prettier-config"
+	"prettier": "@swrlab/style-guide/prettier"
 }
