@@ -11,7 +11,7 @@
 			"name": "European Union Public License 1.2",
 			"url": "https://spdx.org/licenses/EUPL-1.2.html"
 		},
-		"version": "1.8.0"
+		"version": "1.8.1"
 	},
 	"externalDocs": {
 		"description": "ARD Eventhub Documentation",
@@ -984,7 +984,20 @@
 								"role": {
 									"type": "string",
 									"example": "artist",
-									"enum": ["artist", "author", "composer", "performer"]
+									"enum": [
+										"artist",
+										"author",
+										"composer",
+										"performer",
+										"conductor",
+										"choir",
+										"leader",
+										"ensemble",
+										"orchestra",
+										"soloist",
+										"producer",
+										"engineer"
+									]
 								},
 								"normDb": {
 									"type": "object",
