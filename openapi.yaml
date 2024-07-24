@@ -4,16 +4,16 @@ info:
   description: >-
     ARD system to distribute real-time (live) metadata for primarily radio
     broadcasts.
-  termsOfService: 'https://www.ard.de'
+  termsOfService: https://www.ard.de
   contact:
     email: lab@swr.de
   license:
     name: European Union Public License 1.2
-    url: 'https://spdx.org/licenses/EUPL-1.2.html'
+    url: https://spdx.org/licenses/EUPL-1.2.html
   version: 1.8.0
 externalDocs:
   description: ARD Eventhub Documentation
-  url: 'https://swrlab.github.io/ard-eventhub/'
+  url: https://swrlab.github.io/ard-eventhub/
 servers:
   - url: /
     description: Local (domain-relative) environment
@@ -131,7 +131,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorInternalServerError'
-  '/events/de.ard.eventhub.v1.radio.track.next':
+  /events/de.ard.eventhub.v1.radio.track.next:
     post:
       tags:
         - events
@@ -168,7 +168,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorInternalServerError'
-  '/events/de.ard.eventhub.v1.radio.track.playing':
+  /events/de.ard.eventhub.v1.radio.track.playing:
     post:
       tags:
         - events
@@ -289,7 +289,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorInternalServerError'
-  '/subscriptions/{name}':
+  /subscriptions/{name}:
     get:
       tags:
         - subscriptions
@@ -413,10 +413,10 @@ components:
       description: >
         New event to be distributed to subscribers.
 
-        The Eventhub format validation expects only a subset of these
-        variables as minimum set. All other fields are technically optional,
-        but **highly encouraged** to be included, so a best-possible metadata
-        exchange is possible.
+        The Eventhub format validation expects only a subset of these variables
+        as minimum set. All other fields are technically optional, but **highly
+        encouraged** to be included, so a best-possible metadata exchange is
+        possible.
 
         The subset is defined in the list of required fields of Schemas
         `eventV1PostBody`, resulting in this body:
@@ -450,9 +450,9 @@ components:
         Event created
 
         *Note:* The first request of an event for an externalId that is not
-        registered yet, will return the status `failed: 1`. This indicates
-        that a new topic for the externalId has been created, and the request
-        needs to be repeated:
+        registered yet, will return the status `failed: 1`. This indicates that
+        a new topic for the externalId has been created, and the request needs
+        to be repeated:
 
         ```json
 
@@ -466,7 +466,6 @@ components:
 
         If the request returns the status `blocked: 1`, it indicates that you
         are not allowed to publish events under the given publisherId.
-
       content:
         application/json:
           schema:
@@ -593,7 +592,6 @@ components:
         trace:
           type: string
           example: null
-
     services:
       type: object
       required:
@@ -603,24 +601,26 @@ components:
       properties:
         type:
           type: string
-          example: 'PermanentLivestream'
+          example: PermanentLivestream
           enum:
-            - 'EventLivestream'
-            - 'PermanentLivestream'
+            - EventLivestream
+            - PermanentLivestream
         externalId:
           type: string
-          example: 'crid://swr.de/123450'
+          example: crid://swr.de/123450
         publisherId:
           type: string
-          description: |
-            External ID or globally unique identifier (Core ID) for the associated publisher.
-            When no Core ID is provided, the External ID will be converted by Eventhub.
+          description: >
+            External ID or globally unique identifier (Core ID) for the
+            associated publisher.
+
+            When no Core ID is provided, the External ID will be converted by
+            Eventhub.
           example: '248000'
         id:
           type: string
           description: Globally unique identifier, created by Eventhub
-          example: 'urn:ard:permanent-livestream:49267f7d67be180d'
-
+          example: urn:ard:permanent-livestream:49267f7d67be180d
     reference:
       type: object
       additionalProperties: false
@@ -656,7 +656,6 @@ components:
           items:
             type: string
             example: https://normdb.ivz.cn.ard.de/sendereihe/427
-
     eventV1PostBody:
       additionalProperties: false
       required:
@@ -830,10 +829,10 @@ components:
                 example: cover
               url:
                 type: string
-                example: 'https://example.com/cover.jpg'
+                example: https://example.com/cover.jpg
               templateUrl:
                 type: string
-                example: 'https://example.com/cover.jpg?width={width}'
+                example: https://example.com/cover.jpg?width={width}
                 nullable: true
               description:
                 type: string
@@ -861,7 +860,6 @@ components:
             be a true string in the future, do not expect this string to remain
             numbers only!
           example: '1234567890'
-
     eventV1ResBody:
       type: object
       properties:
@@ -882,7 +880,6 @@ components:
         trace:
           type: string
           example: null
-
     subscriptionPost:
       required:
         - type
@@ -905,7 +902,7 @@ components:
         url:
           type: string
           description: Publicly accessible URL that should receive the events
-          example: 'https://example.com/my/webhook/for/this/subscription'
+          example: https://example.com/my/webhook/for/this/subscription
         contact:
           type: string
           description: >-
@@ -916,13 +913,11 @@ components:
           type: string
           description: ID of the topic to subscribe to
           example: topic-id-to-subscribe-to
-
     subscriptionsList:
       type: array
       items:
         allOf:
           - $ref: '#/components/schemas/subscriptionResponse'
-
     subscriptionResponse:
       type: object
       properties:
@@ -969,7 +964,7 @@ components:
         url:
           type: string
           description: Publicly accessible URL that should receive the events
-          example: 'https://example.com/my/webhook/for/this/subscription'
+          example: https://example.com/my/webhook/for/this/subscription
         contact:
           type: string
           description: >-
@@ -980,7 +975,6 @@ components:
           type: string
           description: ID of the institution the current user belongs to
           example: urn:ard:institution:institution-id
-
     subscriptionDeleted:
       type: object
       properties:
@@ -990,7 +984,6 @@ components:
         trace:
           type: string
           example: null
-
     topicResponse:
       type: array
       items:
