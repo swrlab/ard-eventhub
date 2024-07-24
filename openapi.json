@@ -984,12 +984,7 @@
 								"role": {
 									"type": "string",
 									"example": "artist",
-									"enum": [
-										"artist",
-										"author",
-										"composer",
-										"performer"
-									]
+									"enum": ["artist", "author", "composer", "performer"]
 								},
 								"normDb": {
 									"type": "object",
@@ -1094,13 +1089,7 @@
 							"properties": {
 								"type": {
 									"type": "string",
-									"enum": [
-										"cover",
-										"artist",
-										"anchor",
-										"audio",
-										"video"
-									],
+									"enum": ["cover", "artist", "anchor", "audio", "video"],
 									"example": "cover"
 								},
 								"url": {
