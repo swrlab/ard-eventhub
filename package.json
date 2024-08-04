@@ -38,7 +38,7 @@
 		"firebase-admin": "12.2.0",
 		"google-auth-library": "9.11.0",
 		"jsonwebtoken": "9.0.2",
-		"luxon": "3.4.4",
+		"luxon": "3.5.0",
 		"slug": "9.1.0",
 		"swagger-ui-express": "5.0.1",
 		"ulid": "^2.3.0",
