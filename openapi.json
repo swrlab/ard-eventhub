@@ -984,7 +984,20 @@
 								"role": {
 									"type": "string",
 									"example": "artist",
-									"enum": ["artist", "author", "composer", "performer"]
+									"enum": [
+										"artist",
+										"author",
+										"composer",
+										"performer",
+										"conductor",
+										"choir",
+										"leader",
+										"ensemble",
+										"orchestra",
+										"soloist",
+										"producer",
+										"engineer"
+									]
 								},
 								"normDb": {
 									"type": "object",

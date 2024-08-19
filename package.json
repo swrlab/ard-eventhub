@@ -18,7 +18,8 @@
 		"docker:build": "docker build . -t swr/ard-eventhub",
 		"docker:run": "docker run --env-file .env -p 8080:8080 --name ard-eventhub swr/ard-eventhub",
 		"docker:scan": "bun docker:build && docker scout quickview",
-		"docker:clean": "docker rm ard-eventhub && docker image remove swr/ard-eventhub",
+		"docker:clean": "docker rm ard-eventhub",
+		"openapi:format": "bunx biome format openapi.json --write && bunx prettier openapi.yaml -w",
 		"license": "bunx license-compliance",
 		"reinstall": "rm -rf node_modules && rm bun.lockb && bun install"
 	},
@@ -31,26 +32,26 @@
 		"@google-cloud/secret-manager": "^5.6.0",
 		"@swrlab/utils": "^2.0.0-beta",
 		"compression": "^1.7.4",
-		"dd-trace": "^5.18.0",
+		"dd-trace": "^5.21.0",
 		"express": "^4.19.2",
-		"express-openapi-validator": "^5.2.0",
-		"firebase-admin": "^12.2.0",
-		"google-auth-library": "^9.11.0",
+		"express-openapi-validator": "^5.3.1",
+		"firebase-admin": "^12.3.1",
+		"google-auth-library": "^9.13.0",
 		"jsonwebtoken": "^9.0.2",
-		"luxon": "^3.4.4",
+		"luxon": "^3.5.0",
 		"slug": "^9.1.0",
 		"swagger-ui-express": "^5.0.1",
 		"ulid": "^2.3.0",
-		"winston": "^3.13.1"
+		"winston": "^3.14.2"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3",
-		"@swrlab/swr-prettier-config": "^0.3.0",
-		"chai": "^4.4.1",
+		"@swrlab/style-guide": "swrlab/style-guide",
+		"chai": "^4.5.0",
 		"chai-http": "^4.4.0",
 		"docsify-cli": "^4.4.4",
 		"license-compliance": "^3.0.1",
-		"mocha": "^10.6.0",
+		"mocha": "^10.7.3",
 		"nodemon": "^3.1.4",
 		"prettier": "^3.3.3"
 	},
@@ -60,5 +61,5 @@
 		"strip-ansi": "^6.0.1",
 		"update-notifier": "^5.1.0"
 	},
-	"prettier": "@swrlab/swr-prettier-config"
+	"prettier": "@swrlab/style-guide/prettier"
 }
