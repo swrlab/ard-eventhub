@@ -17,6 +17,7 @@ const response = require('../../utils/response')
 
 // load config
 const config = require('../../../config')
+const eventDuplicationConfig = require('../../../config/event-duplication.json')
 
 const source = 'ingest/events/post'
 const DEFAULT_ZONE = 'Europe/Berlin'
@@ -56,12 +57,32 @@ module.exports = async (req, res) => {
 		}
 
 		// create custom attributes for pubsub metadata
-		const attributes = {
-			event: eventName,
+		const attributes = { event: eventName }
+
+		// add workaround for stations in migration phase
+		for (const service of message.services) {
+			// check if externalID is in duplication config
+			if (eventDuplicationConfig[service.externalId]) {
+				// clone service and add new externalId
+				const newService = structuredClone(service)
+				newService.externalId = eventDuplicationConfig[service.externalId]
+
+				// add to services
+				message.services.push(newService)
+
+				logger.log({
+					level: 'info',
+					message: `duplicated event > ${eventName} > ${service.externalId}`,
+					source,
+					data: { body: req.body, service, newService },
+				})
+			}
 		}
 
 		// compile core hashes and pubsub names for every service
-		message.services = await Promise.all(message.services.map((service) => processServices(service, req)))
+		message.services = await Promise.all(
+			message.services.map((service) => processServices(service, req))
+		)
 
 		// save message to datastore
 		const savedMessage = await datastore.save(message, 'events')
@@ -73,7 +94,11 @@ module.exports = async (req, res) => {
 			// ignoring blocked services
 			if (!service.blocked && service.topic?.name) {
 				// try sending message
-				const messageId = await pubsub.publishMessage(service.topic.name, message, attributes)
+				const messageId = await pubsub.publishMessage(
+					service.topic.name,
+					message,
+					attributes
+				)
 
 				// handle errors
 				if (messageId === 'TOPIC_ERROR') {
@@ -100,7 +125,9 @@ module.exports = async (req, res) => {
 		// send event to common topic
 		if (IS_COMMON_TOPIC_ENABLED) {
 			// prepare common post
-			const topicName = pubsub.buildId(eventName.replace('de.ard.eventhub.', ''))
+			const topicName = pubsub.buildId(
+				eventName.replace('de.ard.eventhub.', '')
+			)
 			const commonEvent = {
 				type: 'common',
 				topic: {
@@ -110,10 +137,17 @@ module.exports = async (req, res) => {
 			}
 
 			// try sending message
-			commonEvent.messageId = await pubsub.publishMessage(topicName, message, attributes)
+			commonEvent.messageId = await pubsub.publishMessage(
+				topicName,
+				message,
+				attributes
+			)
 
 			// handle errors
-			if (commonEvent.messageId === 'TOPIC_ERROR' || commonEvent.messageId === 'TOPIC_NOT_FOUND') {
+			if (
+				commonEvent.messageId === 'TOPIC_ERROR' ||
+				commonEvent.messageId === 'TOPIC_NOT_FOUND'
+			) {
 				logger.log({
 					level: 'warning',
 					message: `failed common plugin > ${eventName} > ${message.services[0]?.publisherId}`,
@@ -127,7 +161,9 @@ module.exports = async (req, res) => {
 		}
 
 		// add opt-out plugins
-		const isDtsPluginSet = message.plugins?.find((plugin) => plugin.type === 'dts')
+		const isDtsPluginSet = message.plugins?.find(
+			(plugin) => plugin.type === 'dts'
+		)
 		const isMusic = req.body.type === 'music'
 
 		if (!isDtsPluginSet && isMusic) {
@@ -168,7 +204,9 @@ module.exports = async (req, res) => {
 		// prepare output data
 		const data = {
 			statuses: {
-				published: message.services.filter((service) => service.topic?.messageId).length,
+				published: message.services.filter(
+					(service) => service.topic?.messageId
+				).length,
 				blocked: message.services.filter((service) => service.blocked).length,
 				failed: message.services.filter(
 					(service) => !service.topic?.messageId && !service.blocked
