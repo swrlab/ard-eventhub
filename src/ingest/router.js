@@ -7,7 +7,7 @@ const OpenApiValidator = require('express-openapi-validator')
 // load swagger UI
 const swaggerUi = require('swagger-ui-express')
 const swaggerDocument = require('../../openapi.json')
-const swaggerConfig = require('../../config/swaggerUI')
+const swaggerConfig = require('../../config/swagger-ui')
 
 // set up router
 const router = express.Router()

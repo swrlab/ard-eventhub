@@ -7,7 +7,7 @@
 
 // import version from package.json
 const { version } = require('../package.json')
-const coreIdPrefixes = require('./coreIdPrefixes.json')
+const coreIdPrefixes = require('./core-id-prefixes.json')
 
 // load winston logger
 const logger = require('../src/utils/logger')
