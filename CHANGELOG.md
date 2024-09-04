@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.1] - 2024-09-04
 
 - chore: apply linter suggestions
+- feat: add more event duplication IDs
 
 ## [1.9.0] - 2024-08-19
 
