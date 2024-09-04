@@ -8,6 +8,7 @@
 */
 
 // Require dependencies
+const { describe, it, before } = require('mocha')
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 const { DateTime } = require('luxon')
@@ -17,7 +18,7 @@ const logger = require('../utils/logger')
 
 // Init chai functions
 const { expect } = chai
-const should = chai.should()
+chai.should()
 
 // Use chaiHttp
 chai.use(chaiHttp)
@@ -81,10 +82,11 @@ describe(`POST ${loginPath}`, () => {
 			password: testUserPass,
 		}
 
-		chai.request(server)
+		chai
+			.request(server)
 			.post(loginPath)
 			.send(loginRequest)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testResponse(res, 200)
 				testAuthKeys(res.body)
 				done()
@@ -103,10 +105,11 @@ describe(`POST ${refreshPath}`, () => {
 			refreshToken: refreshToken,
 		}
 
-		chai.request(server)
+		chai
+			.request(server)
 			.post(refreshPath)
 			.send(refreshRequest)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testResponse(res, 200)
 				testAuthKeys(res.body)
 				done()
@@ -127,10 +130,11 @@ if (testUserReset === true) {
 				email: testUser,
 			}
 
-			chai.request(server)
+			chai
+				.request(server)
 				.post(resetPath)
 				.send(resetRequest)
-				.end((err, res) => {
+				.end((_err, res) => {
 					testResponse(res, 200)
 					done()
 				})
@@ -185,32 +189,35 @@ const event = {
 
 describe(`POST ${eventPath}`, () => {
 	it('test invalid auth for POST /event', (done) => {
-		chai.request(server)
+		chai
+			.request(server)
 			.post(eventPath)
 			.send(event)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testMissingAuth(res)
 				done()
 			})
 	})
 
 	it('test invalid auth for POST /event', (done) => {
-		chai.request(server)
+		chai
+			.request(server)
 			.post(eventPath)
 			.set('Authorization', `Bearer invalid${accessToken}`)
 			.send(event)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testFailedAuth(res)
 				done()
 			})
 	})
 
 	it('publish a new event', (done) => {
-		chai.request(server)
+		chai
+			.request(server)
 			.post(eventPath)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send(event)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testResponse(res, 201)
 				testEventKeys(res.body)
 				done()
@@ -219,11 +226,12 @@ describe(`POST ${eventPath}`, () => {
 
 	it('publish a new event with expired time', (done) => {
 		event.start = DateTime.now().minus({ minutes: 3 }).toISO()
-		chai.request(server)
+		chai
+			.request(server)
 			.post(eventPath)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send(event)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testResponse(res, 400)
 				done()
 			})
@@ -231,11 +239,12 @@ describe(`POST ${eventPath}`, () => {
 
 	it('publish a new event with invalid time', (done) => {
 		event.start = `${DateTime.now().toISO()}00`
-		chai.request(server)
+		chai
+			.request(server)
 			.post(eventPath)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send(event)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testResponse(res, 400)
 				done()
 			})
@@ -243,11 +252,12 @@ describe(`POST ${eventPath}`, () => {
 
 	it('publish a new event with invalid externalId in references', (done) => {
 		event.references[1].externalId = null
-		chai.request(server)
+		chai
+			.request(server)
 			.post(eventPath)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send(event)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testResponse(res, 400)
 				done()
 			})
@@ -271,20 +281,22 @@ function testTopicKeys(body) {
 
 describe(`GET ${topicPath}`, () => {
 	it(`test auth for GET ${topicPath}`, (done) => {
-		chai.request(server)
+		chai
+			.request(server)
 			.get(topicPath)
 			.set('Authorization', `Bearer invalid${accessToken}`)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testFailedAuth(res)
 				done()
 			})
 	})
 
 	it('list all available topics', (done) => {
-		chai.request(server)
+		chai
+			.request(server)
 			.get(topicPath)
 			.set('Authorization', `Bearer ${accessToken}`)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testResponse(res, 200)
 				res.body.should.be.a('array')
 				res.body.every((i) => testTopicKeys(i))
@@ -333,22 +345,24 @@ describe(`POST ${subscriptPath}`, () => {
 	})
 
 	it(`test auth for POST ${subscriptPath}`, (done) => {
-		chai.request(server)
+		chai
+			.request(server)
 			.post(subscriptPath)
 			.set('Authorization', `Bearer invalid${accessToken}`)
 			.send(subscription)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testFailedAuth(res)
 				done()
 			})
 	})
 
 	it('add a new subscription to this user', (done) => {
-		chai.request(server)
+		chai
+			.request(server)
 			.post(subscriptPath)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send(subscription)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testResponse(res, 201)
 				testSubscriptionKeys(res.body)
 				// Store subscription name for further tests
@@ -360,20 +374,22 @@ describe(`POST ${subscriptPath}`, () => {
 
 describe(`GET ${subscriptPath}`, () => {
 	it(`test auth for GET ${subscriptPath}`, (done) => {
-		chai.request(server)
+		chai
+			.request(server)
 			.get(subscriptPath)
 			.set('Authorization', `Bearer invalid${accessToken}`)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testFailedAuth(res)
 				done()
 			})
 	})
 
 	it('list all subscriptions for this user', (done) => {
-		chai.request(server)
+		chai
+			.request(server)
 			.get(subscriptPath)
 			.set('Authorization', `Bearer ${accessToken}`)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testResponse(res, 200)
 				res.body.should.be.a('array')
 				res.body.every((i) => testSubscriptionKeys(i))
@@ -384,20 +400,22 @@ describe(`GET ${subscriptPath}`, () => {
 
 describe(`GET ${subscriptPath}/{name}`, () => {
 	it(`test auth for GET ${subscriptPath}/{name}`, (done) => {
-		chai.request(server)
+		chai
+			.request(server)
 			.get(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer invalid${accessToken}`)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testFailedAuth(res)
 				done()
 			})
 	})
 
 	it('get details about single subscription from this user', (done) => {
-		chai.request(server)
+		chai
+			.request(server)
 			.get(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer ${accessToken}`)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testResponse(res, 200)
 				testSubscriptionKeys(res.body)
 				done()
@@ -407,20 +425,22 @@ describe(`GET ${subscriptPath}/{name}`, () => {
 
 describe(`DELETE ${subscriptPath}/{name}`, () => {
 	it(`test auth for DELETE ${subscriptPath}/{name}`, (done) => {
-		chai.request(server)
+		chai
+			.request(server)
 			.delete(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer invalid${accessToken}`)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testFailedAuth(res)
 				done()
 			})
 	})
 
 	it('remove a single subscription by this user', (done) => {
-		chai.request(server)
+		chai
+			.request(server)
 			.delete(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer ${accessToken}`)
-			.end((err, res) => {
+			.end((_err, res) => {
 				testResponse(res, 200)
 				res.body.should.be.a('object')
 				res.body.should.have.property('valid').eql(true)

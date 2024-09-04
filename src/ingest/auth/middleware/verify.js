@@ -29,7 +29,6 @@ module.exports = async (req, res, next) => {
 			})
 			return res.sendStatus(401)
 		}
-
 		// extract token
 		;[authorization] = authorization.match(regexp)
 
@@ -43,6 +42,7 @@ module.exports = async (req, res, next) => {
 				level: 'notice',
 				message: 'user token invalid',
 				source,
+				error,
 				data: { ...req.headers, authorization: 'hidden' },
 			})
 			return res.status(403).json(ERROR_JSON)

@@ -8,7 +8,7 @@ WORKDIR /web/app
 COPY . .
 
 # Install dependencies
-RUN bun install
+RUN bun install --frozen-lockfile --production
 
 # Load desired node image
 FROM node:22-alpine
