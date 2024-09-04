@@ -14,7 +14,7 @@
 		"ingest:cloud": "node ./src/ingest/index.js",
 		"ingest:test:local": "node --env-file .env ./node_modules/mocha/bin/mocha --recursive './src/**/*.test.js' --timeout 15000 --exit",
 		"ingest:test": "mocha --recursive './src/**/*.test.js' --timeout 15000 --exit",
-		"ingest:lint": "biome lint src",
+		"lint": "biome lint",
 		"docker:build": "docker build . -t swr/ard-eventhub",
 		"docker:run": "docker run --env-file .env -p 8080:8080 --name ard-eventhub swr/ard-eventhub",
 		"docker:scan": "bun docker:build && docker scout quickview",
