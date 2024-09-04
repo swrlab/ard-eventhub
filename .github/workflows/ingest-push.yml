@@ -9,7 +9,7 @@ on:
     types: [closed]
 
 env:
-  NODE_VERSION: 22
+  NODE_VERSION: 22.8
   IMAGE_NAME: ard-eventhub-europe-west3/ingest
   REGISTRY_DOMAIN: europe-west3-docker.pkg.dev
 

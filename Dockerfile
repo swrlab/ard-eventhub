@@ -11,7 +11,7 @@ COPY . .
 RUN bun install --frozen-lockfile --production
 
 # Load desired node image
-FROM node:22-alpine
+FROM node:22.8-alpine
 
 # Create app directory
 WORKDIR /web/app
