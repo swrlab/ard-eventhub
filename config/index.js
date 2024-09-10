@@ -7,7 +7,7 @@
 
 // import version from package.json
 const { version } = require('../package.json')
-const coreIdPrefixes = require('./coreIdPrefixes.json')
+const coreIdPrefixes = require('./core-id-prefixes.json')
 
 // load winston logger
 const logger = require('../src/utils/logger')
@@ -32,7 +32,7 @@ if (!process.env.SERVICE_NAME) exitWithError('SERVICE_NAME not found')
 // set static envs
 const stage = process.env.STAGE.toLowerCase()
 const protocol = stage === 'dev' ? 'http' : 'https'
-const hostname = stage === 'dev' ? 'localhost' : `eventhub-ingest.ard.de`
+const hostname = stage === 'dev' ? 'localhost' : 'eventhub-ingest.ard.de'
 const port = process.env.PORT || 8080
 const serviceName = process.env.SERVICE_NAME
 

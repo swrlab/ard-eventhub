@@ -18,9 +18,7 @@ module.exports = async (req, res) => {
 		let subscriptions = await pubsub.getSubscriptions()
 
 		// verify if user is allowed to list subscriptions (same institution)
-		subscriptions = subscriptions.filter(
-			(subscription) => subscription?.institutionId === req.user.institutionId
-		)
+		subscriptions = subscriptions.filter((subscription) => subscription?.institutionId === req.user.institutionId)
 
 		// return data
 		return res.status(200).json(subscriptions)

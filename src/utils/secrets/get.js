@@ -20,7 +20,7 @@ module.exports = async (name) => {
 	let json = null
 	try {
 		json = JSON.parse(payload)
-	} catch (error) {
+	} catch (_error) {
 		// do nothing
 	}
 

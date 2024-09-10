@@ -32,7 +32,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: 🛠 Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
@@ -46,7 +46,7 @@ jobs:
           create_credentials_file: true
 
       - name: 📚 Lint Code
-        run: bun ingest:lint
+        run: bun lint
 
       - name: 🧪 Run Ingest Tests
         env:
@@ -74,7 +74,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: 🛠 Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 

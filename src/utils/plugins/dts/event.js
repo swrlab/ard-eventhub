@@ -13,7 +13,7 @@ const logger = require('../../logger')
 const undici = require('../../undici')
 
 // load keys
-const { credentials, endpoints, permittedExcludedFields } = require('../../../../config/dtsKeys')
+const { credentials, endpoints, permittedExcludedFields } = require('../../../../config/dts-keys')
 
 // load config
 const config = require('../../../../config')
@@ -88,8 +88,7 @@ module.exports = async (job) => {
 		webURL: plugin?.webUrl || null,
 		enableShare: !!plugin?.webUrl,
 
-		enableThumbs:
-			plugin?.enableThumbs === true || plugin?.enableThumbs === false ? plugin.enableThumbs : true,
+		enableThumbs: plugin?.enableThumbs === true || plugin?.enableThumbs === false ? plugin.enableThumbs : true,
 		year: null,
 		fccId: null,
 		imageURL: null,
@@ -99,8 +98,7 @@ module.exports = async (job) => {
 	const mediaType = plugin?.preferArtistMedia ? 'artist' : 'cover'
 	const media = event.media?.find((thisMedia) => thisMedia.type === mediaType)
 	if (media) {
-		liveRadioEvent.imageURL =
-			media.url || media.templateUrl.replace('{width}', 512).replace('{height}', 512)
+		liveRadioEvent.imageURL = media.url || media.templateUrl.replace('{width}', 512).replace('{height}', 512)
 	}
 
 	// handle exclusions

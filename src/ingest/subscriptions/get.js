@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
 		try {
 			subscription = await pubsub.getSubscription(subscriptionName)
 			subscription = subscription.limited
-		} catch (error) {
+		} catch (_error) {
 			return response.notFound(req, res, {
 				status: 404,
 				message: `Subscription '${subscriptionName}' not found`,

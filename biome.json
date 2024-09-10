@@ -5,7 +5,8 @@
 	},
 	"formatter": {
 		"indentStyle": "tab",
-		"formatWithErrors": true
+		"formatWithErrors": true,
+		"lineWidth": 120
 	},
 	"javascript": {
 		"formatter": {

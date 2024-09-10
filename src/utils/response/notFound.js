@@ -13,7 +13,7 @@ module.exports = (req, res, err) => {
 			errors: err.errors,
 			trace: req.headers['x-cloud-trace-context'] || null,
 		})
-	} catch (error) {
+	} catch (_error) {
 		return res.sendStatus(500)
 	}
 }

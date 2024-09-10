@@ -9,7 +9,7 @@ charset = utf-8
 end_of_line = lf
 indent_style = tab
 indent_size = 8
-print_width = 111
+print_width = 120
 trim_trailing_whitespace = true
 insert_final_newline = true
 
