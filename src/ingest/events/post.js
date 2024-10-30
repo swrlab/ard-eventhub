@@ -7,9 +7,9 @@
 
 // load node utils
 const { DateTime } = require('luxon')
+const ULID = require('ulid')
 
 // load eventhub utils
-const datastore = require('../../utils/datastore')
 const { createNewTopic, processServices } = require('../../utils/events')
 const logger = require('../../utils/logger')
 const pubsub = require('../../utils/pubsub')
@@ -84,9 +84,8 @@ module.exports = async (req, res) => {
 			message.services.map((service) => processServices(service, req))
 		)
 
-		// save message to datastore
-		const savedMessage = await datastore.save(message, 'events')
-		message.id = savedMessage.id.toString()
+		// generate unique Id from the institution id and a random ULID
+		message.id = `${req.user.institutionId}-${ULID.ulid()}`
 
 		// collect unknown topics from returning errors
 		const newServices = []
