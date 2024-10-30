@@ -48,7 +48,7 @@
 		"@biomejs/biome": "^1.8.3",
 		"@swrlab/style-guide": "^1.0.2",
 		"chai": "^4.5.0",
-		"chai-http": "^4.4.0",
+		"chai-http": "^5.1.1",
 		"docsify-cli": "^4.4.4",
 		"license-compliance": "^3.0.1",
 		"mocha": "^10.7.3",
