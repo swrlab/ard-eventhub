@@ -44,7 +44,9 @@
 	"paths": {
 		"/auth/login": {
 			"post": {
-				"tags": ["auth"],
+				"tags": [
+					"auth"
+				],
 				"summary": "Swap login credentials for a token",
 				"operationId": "authLoginPost",
 				"requestBody": {
@@ -103,7 +105,9 @@
 		},
 		"/auth/refresh": {
 			"post": {
-				"tags": ["auth"],
+				"tags": [
+					"auth"
+				],
 				"summary": "Swap refresh token for new id token",
 				"operationId": "authRefreshPost",
 				"requestBody": {
@@ -158,7 +162,9 @@
 		},
 		"/auth/reset": {
 			"post": {
-				"tags": ["auth"],
+				"tags": [
+					"auth"
+				],
 				"summary": "Request password reset email",
 				"operationId": "authResetPost",
 				"requestBody": {
@@ -206,7 +212,9 @@
 		},
 		"/events/de.ard.eventhub.v1.radio.track.next": {
 			"post": {
-				"tags": ["events"],
+				"tags": [
+					"events"
+				],
 				"summary": "Distribute a next track",
 				"operationId": "eventPostV1RadioTrackNext",
 				"security": [
@@ -264,9 +272,73 @@
 				}
 			}
 		},
+		"/events/de.ard.eventhub.v1.radio.text": {
+			"post": {
+				"tags": [
+					"events"
+				],
+				"summary": "Set a live encoder text for a track",
+				"operationId": "eventPostV1RadioText",
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"requestBody": {
+					"$ref": "#/components/requestBodies/eventPostV1RadioText"
+				},
+				"responses": {
+					"201": {
+						"$ref": "#/components/responses/eventPostV1RadioText"
+					},
+					"400": {
+						"description": "Bad Request (invalid input)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/errorBadRequest"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing authentication",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/errorUnauthorized"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Invalid authorization",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/errorForbidden"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal server error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/errorInternalServerError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/events/de.ard.eventhub.v1.radio.track.playing": {
 			"post": {
-				"tags": ["events"],
+				"tags": [
+					"events"
+				],
 				"summary": "Distribute a now-playing track",
 				"operationId": "eventPostV1RadioTrackPlaying",
 				"security": [
@@ -326,7 +398,9 @@
 		},
 		"/subscriptions": {
 			"get": {
-				"tags": ["subscriptions"],
+				"tags": [
+					"subscriptions"
+				],
 				"summary": "List all subscriptions for this user",
 				"operationId": "subscriptionList",
 				"security": [
@@ -378,7 +452,9 @@
 				}
 			},
 			"post": {
-				"tags": ["subscriptions"],
+				"tags": [
+					"subscriptions"
+				],
 				"summary": "Add a new subscription",
 				"operationId": "subscriptionPost",
 				"security": [
@@ -463,7 +539,9 @@
 		},
 		"/subscriptions/{name}": {
 			"get": {
-				"tags": ["subscriptions"],
+				"tags": [
+					"subscriptions"
+				],
 				"summary": "Get details about a single subscription from this user",
 				"operationId": "subscriptionsGet",
 				"security": [
@@ -541,7 +619,9 @@
 				}
 			},
 			"delete": {
-				"tags": ["subscriptions"],
+				"tags": [
+					"subscriptions"
+				],
 				"summary": "Remove a single subscription by this user",
 				"operationId": "subscriptionsDelete",
 				"security": [
@@ -618,7 +698,9 @@
 		},
 		"/topics": {
 			"get": {
-				"tags": ["topics"],
+				"tags": [
+					"topics"
+				],
 				"summary": "List all available topics",
 				"operationId": "topicsGet",
 				"security": [
@@ -663,6 +745,17 @@
 					}
 				},
 				"required": true
+			},
+			"eventPostV1RadioText": {
+				"description": "New event to be distributed to subscribers.\nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.\nThe subset is defined in the list of required fields of Schemas `eventV1PostRadioTextBody`, resulting in this body:\n```json\n{\n  \"event\": \"music\",\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"validUntil\": \"2026-01-19T06:00:00+01:00\",\n  \"text\": \"Catchy one Liner\",\n  \"services\": [ { ... } ]\n }\n```\nRequired fields not specified in the Schema, will cause your request to fail.\n",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/eventV1PostRadioTextBody"
+						}
+					}
+				},
+				"required": true
 			}
 		},
 		"responses": {
@@ -672,6 +765,16 @@
 					"application/json": {
 						"schema": {
 							"$ref": "#/components/schemas/eventV1ResBody"
+						}
+					}
+				}
+			},
+			"eventPostV1RadioText": {
+				"description": "Event created\n*Note:* The first request of an event for an externalId that is not registered yet, will return the status `failed: 1`. This indicates that a new topic for the externalId has been created, and the request needs to be repeated:\n```json\n\"statuses\": {\n  \"published\": 0,\n  \"blocked\": 0,\n  \"failed\": 1\n}\n```\nIf the request returns the status `blocked: 1`, it indicates that you are not allowed to publish events under the given publisherId.\n",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/eventV1PostRadioTextResBody"
 						}
 					}
 				}
@@ -849,12 +952,19 @@
 			},
 			"services": {
 				"type": "object",
-				"required": ["type", "externalId", "publisherId"],
+				"required": [
+					"type",
+					"externalId",
+					"publisherId"
+				],
 				"properties": {
 					"type": {
 						"type": "string",
 						"example": "PermanentLivestream",
-						"enum": ["EventLivestream", "PermanentLivestream"]
+						"enum": [
+							"EventLivestream",
+							"PermanentLivestream"
+						]
 					},
 					"externalId": {
 						"type": "string",
@@ -875,11 +985,22 @@
 			"reference": {
 				"type": "object",
 				"additionalProperties": false,
-				"required": ["type", "externalId"],
+				"required": [
+					"type",
+					"externalId"
+				],
 				"properties": {
 					"type": {
 						"type": "string",
-						"enum": ["Episode", "Section", "Publication", "Broadcast", "Show", "Season", "Article"]
+						"enum": [
+							"Episode",
+							"Section",
+							"Publication",
+							"Broadcast",
+							"Show",
+							"Season",
+							"Article"
+						]
 					},
 					"id": {
 						"type": "string",
@@ -909,7 +1030,13 @@
 			},
 			"eventV1PostBody": {
 				"additionalProperties": false,
-				"required": ["type", "start", "title", "services", "playlistItemId"],
+				"required": [
+					"type",
+					"start",
+					"title",
+					"services",
+					"playlistItemId"
+				],
 				"type": "object",
 				"description": "**Please also note the details in the `POST /events/v1` endpoint above!**\n",
 				"properties": {
@@ -917,13 +1044,25 @@
 						"type": "string",
 						"description": "If set, it needs to match the URL event parameter",
 						"example": "de.ard.eventhub.v1.radio.track.playing",
-						"enum": ["de.ard.eventhub.v1.radio.track.playing", "de.ard.eventhub.v1.radio.track.next"]
+						"enum": [
+							"de.ard.eventhub.v1.radio.track.playing",
+							"de.ard.eventhub.v1.radio.track.next"
+						]
 					},
 					"type": {
 						"type": "string",
 						"description": "The type of the element that triggered this event. See additional file in docs for details.",
 						"example": "music",
-						"enum": ["audio", "commercial", "jingle", "live", "music", "news", "traffic", "weather"]
+						"enum": [
+							"audio",
+							"commercial",
+							"jingle",
+							"live",
+							"music",
+							"news",
+							"traffic",
+							"weather"
+						]
 					},
 					"start": {
 						"type": "string",
@@ -955,7 +1094,10 @@
 						"nullable": true,
 						"items": {
 							"type": "object",
-							"required": ["name", "role"],
+							"required": [
+								"name",
+								"role"
+							],
 							"properties": {
 								"name": {
 									"type": "string",
@@ -1048,7 +1190,10 @@
 						"items": {
 							"type": "string"
 						},
-						"example": ["swrhfdb1.KONF.12345", "zskhfdb1.KONF.12345"]
+						"example": [
+							"swrhfdb1.KONF.12345",
+							"zskhfdb1.KONF.12345"
+						]
 					},
 					"externalId": {
 						"type": "string",
@@ -1077,12 +1222,22 @@
 						"description": "Can contain an array of media files like cover, artist, etc.",
 						"nullable": true,
 						"items": {
-							"required": ["type", "url", "description"],
+							"required": [
+								"type",
+								"url",
+								"description"
+							],
 							"type": "object",
 							"properties": {
 								"type": {
 									"type": "string",
-									"enum": ["cover", "artist", "anchor", "audio", "video"],
+									"enum": [
+										"cover",
+										"artist",
+										"anchor",
+										"audio",
+										"video"
+									],
 									"example": "cover"
 								},
 								"url": {
@@ -1127,6 +1282,56 @@
 					}
 				}
 			},
+			"eventV1PostRadioTextBody": {
+				"additionalProperties": false,
+				"required": [
+					"start",
+					"validUntil",
+					"services",
+					"text"
+				],
+				"type": "object",
+				"description": "**Please also note the details in the `POST /events/v1` endpoint above!**\n",
+				"properties": {
+					"event": {
+						"type": "string",
+						"description": "If set, it needs to match the URL event parameter",
+						"example": "de.ard.eventhub.v1.radio.text",
+						"enum": [
+							"de.ard.eventhub.v1.radio.text"
+						]
+					},
+					"start": {
+						"type": "string",
+						"description": "ISO8601 compliant timestamp",
+						"format": "iso8601-timestamp",
+						"example": "2020-01-19T06:00:00+01:00"
+					},
+					"validUntil": {
+						"type": "string",
+						"description": "ISO8601 compliant timestamp how long this text can be displayed (fallback to title - artist)",
+						"format": "iso8601-timestamp",
+						"example": "2020-01-19T06:00:00+01:00"
+					},
+					"text": {
+						"type": "string",
+						"description": "one line of Radiotext for live encoder (limited in length)",
+						"example": "Catchy one Liner"
+					},
+					"services": {
+						"type": "array",
+						"description": "The playing stations unique Service-IDs. Do not include the Service-Type suffix.",
+						"items": {
+							"minItems": 1,
+							"allOf": [
+								{
+									"$ref": "#/components/schemas/services"
+								}
+							]
+						}
+					}
+				}
+			},
 			"eventV1ResBody": {
 				"type": "object",
 				"properties": {
@@ -1156,18 +1361,57 @@
 					}
 				}
 			},
+			"eventV1PostRadioTextResBody": {
+				"type": "object",
+				"properties": {
+					"statuses": {
+						"type": "object",
+						"properties": {
+							"published": {
+								"type": "integer",
+								"example": 1
+							},
+							"blocked": {
+								"type": "integer",
+								"example": 0
+							},
+							"failed": {
+								"type": "integer",
+								"example": 0
+							}
+						}
+					},
+					"event": {
+						"$ref": "#/components/schemas/eventV1PostRadioTextBody"
+					},
+					"trace": {
+						"type": "string",
+						"example": null
+					}
+				}
+			},
 			"subscriptionPost": {
-				"required": ["type", "method", "url", "contact", "topic"],
+				"required": [
+					"type",
+					"method",
+					"url",
+					"contact",
+					"topic"
+				],
 				"type": "object",
 				"properties": {
 					"type": {
 						"type": "string",
-						"enum": ["PUBSUB"],
+						"enum": [
+							"PUBSUB"
+						],
 						"example": "PUBSUB"
 					},
 					"method": {
 						"type": "string",
-						"enum": ["PUSH"],
+						"enum": [
+							"PUSH"
+						],
 						"example": "PUSH"
 					},
 					"url": {
@@ -1202,12 +1446,16 @@
 				"properties": {
 					"type": {
 						"type": "string",
-						"enum": ["PUBSUB"],
+						"enum": [
+							"PUBSUB"
+						],
 						"example": "PUBSUB"
 					},
 					"method": {
 						"type": "string",
-						"enum": ["PUSH"],
+						"enum": [
+							"PUSH"
+						],
 						"example": "PUSH"
 					},
 					"name": {
@@ -1287,7 +1535,9 @@
 					"properties": {
 						"type": {
 							"type": "string",
-							"enum": ["PUBSUB"],
+							"enum": [
+								"PUBSUB"
+							],
 							"example": "PUBSUB"
 						},
 						"id": {
