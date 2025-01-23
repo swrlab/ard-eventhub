@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.3] - 2025-01-23
 
 - fix: update publisher `radio3`
+- chore: migrate to Bun text lockfile
 
 ## [1.9.2] - 2024-10-28
 
