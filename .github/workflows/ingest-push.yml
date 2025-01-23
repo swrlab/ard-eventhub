@@ -16,7 +16,7 @@ env:
 jobs:
   security:
     name: Check permissions for action runs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event.pull_request.merged == true || github.event_name == 'push'
     steps:
       - run: |
@@ -24,7 +24,7 @@ jobs:
 
   test:
     needs: security
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: 👀 Checkout Code
         uses: actions/checkout@v4
@@ -65,7 +65,7 @@ jobs:
         run: npm run ingest:test
 
   docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: test
     outputs:
       VERSION: ${{ steps.push.outputs.VERSION }}
@@ -136,7 +136,7 @@ jobs:
     if: github.event.pull_request.merged == true
     environment: dev
     needs: docker
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: 🚀 Trigger deployment to dev
         run: |
@@ -151,7 +151,7 @@ jobs:
     if: github.event.pull_request.merged == true
     environment: test
     needs: docker
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: 🚀 Trigger deployment to test
         run: |
@@ -166,7 +166,7 @@ jobs:
     if: github.event.pull_request.merged == true
     environment: beta
     needs: docker
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: 🚀 Trigger deployment to beta
         run: |
