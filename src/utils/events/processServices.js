@@ -26,7 +26,7 @@ module.exports = async (service, req) => {
 
 	// add a different suffix for radio text topics to not confuse subscribers with new event
 	if (req.body.event === 'de.ard.eventhub.v1.radio.text') {
-		urnPrefix = `RadioText:${urnPrefix}`
+		urnPrefix = `radio-text:${urnPrefix}`
 	}
 
 	const topicId = `${urnPrefix}${createHashedId(service.externalId)}`

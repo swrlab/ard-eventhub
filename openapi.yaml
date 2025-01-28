@@ -10,7 +10,7 @@ info:
   license:
     name: European Union Public License 1.2
     url: 'https://spdx.org/licenses/EUPL-1.2.html'
-  version: 1.9.2
+  version: 1.10.0
 externalDocs:
   description: ARD Eventhub Documentation
   url: https://swrlab.github.io/ard-eventhub/
@@ -488,7 +488,7 @@ components:
         The subset is defined in the list of required fields of Schemas `eventV1PostRadioTextBody`, resulting in this body:
         ```json
         {
-          "event": "music",
+          "event": "de.ard.eventhub.v1.radio.text",
           "start": "2020-01-19T06:00:00+01:00",
           "validUntil": "2026-01-19T06:00:00+01:00",
           "text": "Catchy one Liner",
@@ -967,7 +967,7 @@ components:
           type: string
           description: ISO8601 compliant timestamp how long this text can be displayed (fallback to title - artist)
           format: iso8601-timestamp
-          example: '2020-01-19T06:00:00+01:00'
+          example: '2026-01-19T06:00:00+01:00'
         text:
           type: string
           description: one line of Radiotext for live encoder (limited in length)

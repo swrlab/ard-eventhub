@@ -11,7 +11,7 @@
 			"name": "European Union Public License 1.2",
 			"url": "https://spdx.org/licenses/EUPL-1.2.html"
 		},
-		"version": "1.9.2"
+		"version": "1.10.0"
 	},
 	"externalDocs": {
 		"description": "ARD Eventhub Documentation",
@@ -747,7 +747,7 @@
 				"required": true
 			},
 			"eventPostV1RadioText": {
-				"description": "New event to be distributed to subscribers.\nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.\nThe subset is defined in the list of required fields of Schemas `eventV1PostRadioTextBody`, resulting in this body:\n```json\n{\n  \"event\": \"music\",\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"validUntil\": \"2026-01-19T06:00:00+01:00\",\n  \"text\": \"Catchy one Liner\",\n  \"services\": [ { ... } ]\n }\n```\nRequired fields not specified in the Schema, will cause your request to fail.\n",
+				"description": "New event to be distributed to subscribers.\nThe Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.\nThe subset is defined in the list of required fields of Schemas `eventV1PostRadioTextBody`, resulting in this body:\n```json\n{\n  \"event\": \"de.ard.eventhub.v1.radio.text\",\n  \"start\": \"2020-01-19T06:00:00+01:00\",\n  \"validUntil\": \"2026-01-19T06:00:00+01:00\",\n  \"text\": \"Catchy one Liner\",\n  \"services\": [ { ... } ]\n }\n```\nRequired fields not specified in the Schema, will cause your request to fail.\n",
 				"content": {
 					"application/json": {
 						"schema": {
@@ -1311,7 +1311,7 @@
 						"type": "string",
 						"description": "ISO8601 compliant timestamp how long this text can be displayed (fallback to title - artist)",
 						"format": "iso8601-timestamp",
-						"example": "2020-01-19T06:00:00+01:00"
+						"example": "2026-01-19T06:00:00+01:00"
 					},
 					"text": {
 						"type": "string",
