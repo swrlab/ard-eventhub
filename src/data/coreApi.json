@@ -1054,9 +1054,9 @@
 	},
 	{
 		"_type": "PublisherResource",
-		"id": "urn:ard:publisher:79ef5e642799325f",
-		"externalId": "284530",
-		"title": "rbbKultur",
+		"id": "urn:ard:publisher:9548accdf5dcc097",
+		"externalId": "28453",
+		"title": "radio3",
 		"institution": {
 			"_type": "InstitutionResource",
 			"id": "urn:ard:institution:8e518f3cb1c8b7bb",
