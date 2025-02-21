@@ -11,7 +11,7 @@
 			"name": "European Union Public License 1.2",
 			"url": "https://spdx.org/licenses/EUPL-1.2.html"
 		},
-		"version": "1.10.0"
+		"version": "1.10.1"
 	},
 	"externalDocs": {
 		"description": "ARD Eventhub Documentation",
@@ -44,9 +44,7 @@
 	"paths": {
 		"/auth/login": {
 			"post": {
-				"tags": [
-					"auth"
-				],
+				"tags": ["auth"],
 				"summary": "Swap login credentials for a token",
 				"operationId": "authLoginPost",
 				"requestBody": {
@@ -105,9 +103,7 @@
 		},
 		"/auth/refresh": {
 			"post": {
-				"tags": [
-					"auth"
-				],
+				"tags": ["auth"],
 				"summary": "Swap refresh token for new id token",
 				"operationId": "authRefreshPost",
 				"requestBody": {
@@ -162,9 +158,7 @@
 		},
 		"/auth/reset": {
 			"post": {
-				"tags": [
-					"auth"
-				],
+				"tags": ["auth"],
 				"summary": "Request password reset email",
 				"operationId": "authResetPost",
 				"requestBody": {
@@ -212,9 +206,7 @@
 		},
 		"/events/de.ard.eventhub.v1.radio.track.next": {
 			"post": {
-				"tags": [
-					"events"
-				],
+				"tags": ["events"],
 				"summary": "Distribute a next track",
 				"operationId": "eventPostV1RadioTrackNext",
 				"security": [
@@ -274,9 +266,7 @@
 		},
 		"/events/de.ard.eventhub.v1.radio.text": {
 			"post": {
-				"tags": [
-					"events"
-				],
+				"tags": ["events"],
 				"summary": "Set a live encoder text for a track",
 				"operationId": "eventPostV1RadioText",
 				"security": [
@@ -336,9 +326,7 @@
 		},
 		"/events/de.ard.eventhub.v1.radio.track.playing": {
 			"post": {
-				"tags": [
-					"events"
-				],
+				"tags": ["events"],
 				"summary": "Distribute a now-playing track",
 				"operationId": "eventPostV1RadioTrackPlaying",
 				"security": [
@@ -398,9 +386,7 @@
 		},
 		"/subscriptions": {
 			"get": {
-				"tags": [
-					"subscriptions"
-				],
+				"tags": ["subscriptions"],
 				"summary": "List all subscriptions for this user",
 				"operationId": "subscriptionList",
 				"security": [
@@ -452,9 +438,7 @@
 				}
 			},
 			"post": {
-				"tags": [
-					"subscriptions"
-				],
+				"tags": ["subscriptions"],
 				"summary": "Add a new subscription",
 				"operationId": "subscriptionPost",
 				"security": [
@@ -539,9 +523,7 @@
 		},
 		"/subscriptions/{name}": {
 			"get": {
-				"tags": [
-					"subscriptions"
-				],
+				"tags": ["subscriptions"],
 				"summary": "Get details about a single subscription from this user",
 				"operationId": "subscriptionsGet",
 				"security": [
@@ -619,9 +601,7 @@
 				}
 			},
 			"delete": {
-				"tags": [
-					"subscriptions"
-				],
+				"tags": ["subscriptions"],
 				"summary": "Remove a single subscription by this user",
 				"operationId": "subscriptionsDelete",
 				"security": [
@@ -698,9 +678,7 @@
 		},
 		"/topics": {
 			"get": {
-				"tags": [
-					"topics"
-				],
+				"tags": ["topics"],
 				"summary": "List all available topics",
 				"operationId": "topicsGet",
 				"security": [
@@ -952,19 +930,12 @@
 			},
 			"services": {
 				"type": "object",
-				"required": [
-					"type",
-					"externalId",
-					"publisherId"
-				],
+				"required": ["type", "externalId", "publisherId"],
 				"properties": {
 					"type": {
 						"type": "string",
 						"example": "PermanentLivestream",
-						"enum": [
-							"EventLivestream",
-							"PermanentLivestream"
-						]
+						"enum": ["EventLivestream", "PermanentLivestream"]
 					},
 					"externalId": {
 						"type": "string",
@@ -985,10 +956,7 @@
 			"reference": {
 				"type": "object",
 				"additionalProperties": false,
-				"required": [
-					"type",
-					"externalId"
-				],
+				"required": ["type", "externalId"],
 				"properties": {
 					"type": {
 						"type": "string",
@@ -1030,13 +998,7 @@
 			},
 			"eventV1PostBody": {
 				"additionalProperties": false,
-				"required": [
-					"type",
-					"start",
-					"title",
-					"services",
-					"playlistItemId"
-				],
+				"required": ["type", "start", "title", "services", "playlistItemId"],
 				"type": "object",
 				"description": "**Please also note the details in the `POST /events/v1` endpoint above!**\n",
 				"properties": {
@@ -1094,10 +1056,7 @@
 						"nullable": true,
 						"items": {
 							"type": "object",
-							"required": [
-								"name",
-								"role"
-							],
+							"required": ["name", "role"],
 							"properties": {
 								"name": {
 									"type": "string",
@@ -1190,10 +1149,7 @@
 						"items": {
 							"type": "string"
 						},
-						"example": [
-							"swrhfdb1.KONF.12345",
-							"zskhfdb1.KONF.12345"
-						]
+						"example": ["swrhfdb1.KONF.12345", "zskhfdb1.KONF.12345"]
 					},
 					"externalId": {
 						"type": "string",
@@ -1222,22 +1178,12 @@
 						"description": "Can contain an array of media files like cover, artist, etc.",
 						"nullable": true,
 						"items": {
-							"required": [
-								"type",
-								"url",
-								"description"
-							],
+							"required": ["type", "url", "description"],
 							"type": "object",
 							"properties": {
 								"type": {
 									"type": "string",
-									"enum": [
-										"cover",
-										"artist",
-										"anchor",
-										"audio",
-										"video"
-									],
+									"enum": ["cover", "artist", "anchor", "audio", "video"],
 									"example": "cover"
 								},
 								"url": {
@@ -1284,12 +1230,7 @@
 			},
 			"eventV1PostRadioTextBody": {
 				"additionalProperties": false,
-				"required": [
-					"start",
-					"validUntil",
-					"services",
-					"text"
-				],
+				"required": ["start", "validUntil", "services", "text"],
 				"type": "object",
 				"description": "**Please also note the details in the `POST /events/v1` endpoint above!**\n",
 				"properties": {
@@ -1297,9 +1238,7 @@
 						"type": "string",
 						"description": "If set, it needs to match the URL event parameter",
 						"example": "de.ard.eventhub.v1.radio.text",
-						"enum": [
-							"de.ard.eventhub.v1.radio.text"
-						]
+						"enum": ["de.ard.eventhub.v1.radio.text"]
 					},
 					"start": {
 						"type": "string",
@@ -1391,27 +1330,17 @@
 				}
 			},
 			"subscriptionPost": {
-				"required": [
-					"type",
-					"method",
-					"url",
-					"contact",
-					"topic"
-				],
+				"required": ["type", "method", "url", "contact", "topic"],
 				"type": "object",
 				"properties": {
 					"type": {
 						"type": "string",
-						"enum": [
-							"PUBSUB"
-						],
+						"enum": ["PUBSUB"],
 						"example": "PUBSUB"
 					},
 					"method": {
 						"type": "string",
-						"enum": [
-							"PUSH"
-						],
+						"enum": ["PUSH"],
 						"example": "PUSH"
 					},
 					"url": {
@@ -1446,16 +1375,12 @@
 				"properties": {
 					"type": {
 						"type": "string",
-						"enum": [
-							"PUBSUB"
-						],
+						"enum": ["PUBSUB"],
 						"example": "PUBSUB"
 					},
 					"method": {
 						"type": "string",
-						"enum": [
-							"PUSH"
-						],
+						"enum": ["PUSH"],
 						"example": "PUSH"
 					},
 					"name": {
@@ -1535,9 +1460,7 @@
 					"properties": {
 						"type": {
 							"type": "string",
-							"enum": [
-								"PUBSUB"
-							],
+							"enum": ["PUBSUB"],
 							"example": "PUBSUB"
 						},
 						"id": {
