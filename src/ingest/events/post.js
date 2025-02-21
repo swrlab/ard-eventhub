@@ -17,7 +17,6 @@ const response = require('../../utils/response')
 
 // load config
 const config = require('../../../config')
-const eventDuplicationConfig = require('../../../config/event-duplication.json')
 
 const source = 'ingest/events/post'
 const DEFAULT_ZONE = 'Europe/Berlin'
@@ -58,26 +57,6 @@ module.exports = async (req, res) => {
 
 		// create custom attributes for pubsub metadata
 		const attributes = { event: eventName }
-
-		// add workaround for stations in migration phase
-		for (const service of message.services) {
-			// check if externalID is in duplication config
-			if (eventDuplicationConfig[service.externalId]) {
-				// clone service and add new externalId
-				const newService = structuredClone(service)
-				newService.externalId = eventDuplicationConfig[service.externalId]
-
-				// add to services
-				message.services.push(newService)
-
-				logger.log({
-					level: 'info',
-					message: `duplicated event > ${eventName} > ${service.externalId}`,
-					source,
-					data: { body: req.body, service, newService },
-				})
-			}
-		}
 
 		// compile core hashes and pubsub names for every service
 		message.services = await Promise.all(
