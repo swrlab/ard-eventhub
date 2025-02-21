@@ -5,9 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.3] - 2024-12-18
+## [1.10.1] - 2025-02-21
 
 - chore: remove event duplication for service migrations
+
+## [1.10.0] - 2025-01-07
+
+- refactor: change new radio text event description and sophora tag
+- feat: add new radio text event
+
+## [1.9.3] - 2025-01-23
+
+- fix: update publisher `radio3`
+- chore: migrate to Bun text lockfile
 
 ## [1.9.2] - 2024-10-28
 

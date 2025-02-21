@@ -22,7 +22,13 @@ const URN_PUBLISHER_REGEX = /(?=urn:ard:publisher:[a-z0-9]{16})/g
 
 module.exports = async (service, req) => {
 	// fetch prefix from configured list
-	const urnPrefix = coreIdPrefixes[service.type]
+	let urnPrefix = coreIdPrefixes[service.type]
+
+	// add a different suffix for radio text topics to not confuse subscribers with new event
+	if (req.body.event === 'de.ard.eventhub.v1.radio.text') {
+		urnPrefix = `radio-text:${urnPrefix}`
+	}
+
 	const topicId = `${urnPrefix}${createHashedId(service.externalId)}`
 
 	// create hash based on prefix and id
@@ -75,7 +81,11 @@ module.exports = async (service, req) => {
 			level: 'warning',
 			message: `User unauthorized for service > ${service.externalId} (${service.publisherId})`,
 			source,
-			data: { service, user: req.user, publisher: publisher?.institution },
+			data: {
+				service,
+				user: req.user,
+				publisher: publisher?.institution,
+			},
 		})
 
 		// stop processing

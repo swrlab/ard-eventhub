@@ -10,7 +10,7 @@ env:
 jobs:
   security:
     name: Check permissions for pull request runs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: contains(github.event.pull_request.labels.*.name, 'safe to test')
     steps:
       - run: |
@@ -18,7 +18,7 @@ jobs:
 
   test:
     needs: security
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         STAGES: [dev]
@@ -63,7 +63,7 @@ jobs:
 
   license:
     needs: security
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: 👀 Checkout Code
         uses: actions/checkout@v4

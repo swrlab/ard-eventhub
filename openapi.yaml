@@ -10,7 +10,7 @@ info:
   license:
     name: European Union Public License 1.2
     url: 'https://spdx.org/licenses/EUPL-1.2.html'
-  version: 1.9.2
+  version: 1.10.0
 externalDocs:
   description: ARD Eventhub Documentation
   url: https://swrlab.github.io/ard-eventhub/
@@ -144,6 +144,43 @@ paths:
       responses:
         '201':
           $ref: '#/components/responses/eventV1RadioTrack'
+        '400':
+          description: Bad Request (invalid input)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorBadRequest'
+        '401':
+          description: Missing authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorUnauthorized'
+        '403':
+          description: Invalid authorization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorForbidden'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorInternalServerError'
+  /events/de.ard.eventhub.v1.radio.text:
+    post:
+      tags:
+        - events
+      summary: Set a live encoder text for a track
+      operationId: eventPostV1RadioText
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/eventPostV1RadioText'
+      responses:
+        '201':
+          $ref: '#/components/responses/eventPostV1RadioText'
         '400':
           description: Bad Request (invalid input)
           content:
@@ -444,6 +481,26 @@ components:
           schema:
             $ref: '#/components/schemas/eventV1PostBody'
       required: true
+    eventPostV1RadioText:
+      description: |
+        New event to be distributed to subscribers.
+        The Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.
+        The subset is defined in the list of required fields of Schemas `eventV1PostRadioTextBody`, resulting in this body:
+        ```json
+        {
+          "event": "de.ard.eventhub.v1.radio.text",
+          "start": "2020-01-19T06:00:00+01:00",
+          "validUntil": "2026-01-19T06:00:00+01:00",
+          "text": "Catchy one Liner",
+          "services": [ { ... } ]
+         }
+        ```
+        Required fields not specified in the Schema, will cause your request to fail.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/eventV1PostRadioTextBody'
+      required: true
   responses:
     eventV1RadioTrack:
       description: >
@@ -470,6 +527,22 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/eventV1ResBody'
+    eventPostV1RadioText:
+      description: |
+        Event created
+        *Note:* The first request of an event for an externalId that is not registered yet, will return the status `failed: 1`. This indicates that a new topic for the externalId has been created, and the request needs to be repeated:
+        ```json
+        "statuses": {
+          "published": 0,
+          "blocked": 0,
+          "failed": 1
+        }
+        ```
+        If the request returns the status `blocked: 1`, it indicates that you are not allowed to publish events under the given publisherId.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/eventV1PostRadioTextResBody'
   securitySchemes:
     bearerAuth:
       type: http
@@ -868,6 +941,44 @@ components:
             be a true string in the future, do not expect this string to remain
             numbers only!
           example: '1234567890'
+    eventV1PostRadioTextBody:
+      additionalProperties: false
+      required:
+        - start
+        - validUntil
+        - services
+        - text
+      type: object
+      description: |
+        **Please also note the details in the `POST /events/v1` endpoint above!**
+      properties:
+        event:
+          type: string
+          description: If set, it needs to match the URL event parameter
+          example: de.ard.eventhub.v1.radio.text
+          enum:
+            - de.ard.eventhub.v1.radio.text
+        start:
+          type: string
+          description: ISO8601 compliant timestamp
+          format: iso8601-timestamp
+          example: '2020-01-19T06:00:00+01:00'
+        validUntil:
+          type: string
+          description: ISO8601 compliant timestamp how long this text can be displayed (fallback to title - artist)
+          format: iso8601-timestamp
+          example: '2026-01-19T06:00:00+01:00'
+        text:
+          type: string
+          description: one line of Radiotext for live encoder (limited in length)
+          example: Catchy one Liner
+        services:
+          type: array
+          description: The playing stations unique Service-IDs. Do not include the Service-Type suffix.
+          items:
+            minItems: 1
+            allOf:
+              - $ref: '#/components/schemas/services'
     eventV1ResBody:
       type: object
       properties:
@@ -885,6 +996,26 @@ components:
               example: 0
         event:
           $ref: '#/components/schemas/eventV1PostBody'
+        trace:
+          type: string
+          example: null
+    eventV1PostRadioTextResBody:
+      type: object
+      properties:
+        statuses:
+          type: object
+          properties:
+            published:
+              type: integer
+              example: 1
+            blocked:
+              type: integer
+              example: 0
+            failed:
+              type: integer
+              example: 0
+        event:
+          $ref: '#/components/schemas/eventV1PostRadioTextBody'
         trace:
           type: string
           example: null

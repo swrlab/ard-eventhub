@@ -264,6 +264,87 @@ describe(`POST ${eventPath}`, () => {
 	})
 })
 
+const eventRadioTextName = 'de.ard.eventhub.v1.radio.text'
+const eventRadioTextPath = `/events/${eventRadioTextName}`
+
+const eventRadioText = {
+	event: eventRadioTextName,
+	start: DateTime.now().toISO(),
+	validUntil: DateTime.now().toISO(),
+	text: 'Unit Test Song',
+	services: [
+		{
+			type: 'PermanentLivestream',
+			externalId: 'crid://swr.de/282310/unit',
+			publisherId: '282310',
+		},
+	],
+}
+
+describe(`POST ${eventRadioTextPath}`, () => {
+	it('test invalid auth for POST /event', (done) => {
+		chai
+			.request(server)
+			.post(eventRadioTextPath)
+			.send(eventRadioText)
+			.end((_err, res) => {
+				testMissingAuth(res)
+				done()
+			})
+	})
+
+	it('test invalid auth for POST /event', (done) => {
+		chai
+			.request(server)
+			.post(eventRadioTextPath)
+			.set('Authorization', `Bearer invalid${accessToken}`)
+			.send(eventRadioText)
+			.end((_err, res) => {
+				testFailedAuth(res)
+				done()
+			})
+	})
+
+	it('publish a new event', (done) => {
+		chai
+			.request(server)
+			.post(eventRadioTextPath)
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send(eventRadioText)
+			.end((_err, res) => {
+				testResponse(res, 201)
+				testEventKeys(res.body)
+				done()
+			})
+	})
+
+	it('publish a new event with expired time', (done) => {
+		eventRadioText.start = DateTime.now().minus({ minutes: 3 }).toISO()
+		chai
+			.request(server)
+			.post(eventRadioTextPath)
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send(eventRadioText)
+			.end((_err, res) => {
+				testResponse(res, 400)
+				done()
+			})
+	})
+
+	it('publish a new event with invalid time', (done) => {
+		eventRadioText.start = `${DateTime.now().toISO()}00`
+		chai
+			.request(server)
+			.post(eventRadioTextPath)
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send(eventRadioText)
+			.end((_err, res) => {
+				testResponse(res, 400)
+				done()
+			})
+	})
+})
+
 /*
 	TOPICS - Access to topics details
 */

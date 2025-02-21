@@ -101,7 +101,8 @@ module.exports = async (req, res) => {
 		message.services = newServices
 
 		// send event to common topic
-		if (IS_COMMON_TOPIC_ENABLED) {
+		// if it is not a radio text event
+		if (IS_COMMON_TOPIC_ENABLED && req.body.event !== 'de.ard.eventhub.v1.radio.text') {
 			// prepare common post
 			const topicName = pubsub.buildId(
 				eventName.replace('de.ard.eventhub.', '')
