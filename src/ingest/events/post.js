@@ -7,7 +7,6 @@
 
 // load node utils
 const { DateTime } = require('luxon')
-const { ulid } = require('@std/ulid')
 
 // load eventhub utils
 const { createNewTopic, processServices } = require('../../utils/events')
@@ -25,6 +24,7 @@ const DEFAULT_ZONE = 'Europe/Berlin'
 const IS_COMMON_TOPIC_ENABLED = true
 
 module.exports = async (req, res) => {
+	const { ulid } = await import('@std/ulid')
 	try {
 		// fetch inputs
 		const { eventName } = req.params

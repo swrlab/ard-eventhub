@@ -7,7 +7,6 @@
 
 // load node utils
 const { DateTime } = require('luxon')
-const { ulid } = require('@std/ulid')
 
 // load eventhub utils
 const datastore = require('../../utils/datastore')
@@ -23,6 +22,7 @@ const source = 'ingest/subscriptions/post'
 
 module.exports = async (req, res) => {
 	try {
+		const { ulid } = await import('@std/ulid')
 		// generate subscription name
 		const prefix = `${config.pubSubPrefix}subscription.`
 
