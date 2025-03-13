@@ -16,19 +16,21 @@ const pubsub = require('../../utils/pubsub')
 const response = require('../../utils/response')
 const config = require('../../../config')
 
-// TODO: check IDs in ARD Core-API instead of dump
-const coreApi = require('../../data/coreApi.json')
+// load api feed
+const feed = require('../../data')
 
 const source = 'ingest/subscriptions/post'
 
 module.exports = async (req, res) => {
+	const coreApi = require('../../data/ard-core-livestreams.json')
+
 	try {
 		// generate subscription name
 		const prefix = `${config.pubSubPrefix}subscription.`
 
 		// check existence of user institution
-		const institutionExists = coreApi.some((entry) => {
-			return req.user.institutionId === entry.institution.id
+		const institutionExists = coreApi.items.some((entry) => {
+			return req.user.institutionId === entry.publisher.institution.id
 		})
 
 		// check if user has institution set

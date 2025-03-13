@@ -62,6 +62,7 @@ jobs:
           STAGE: dev
           TEST_USER: ${{ secrets.TEST_USER }}
           TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
+          ARD_FEED_URL: ${{ secrets.ARD_FEED_URL }}
         run: npm run ingest:test
 
   docker:
