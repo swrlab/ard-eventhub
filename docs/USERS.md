@@ -4,7 +4,7 @@ To authenticate and work with Eventhub API you will need a valid user. For now t
 
 ## Authentication
 
-Please see the [Authentication document](AUTHENTICATION.md) to learn more about this process.
+Please see the [Authentication document](/docs/AUTHENTICATION.md) to learn more about this process.
 
 ## Registering new users
 

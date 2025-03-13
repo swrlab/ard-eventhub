@@ -9,10 +9,11 @@
 	<body>
 		<div id="app"></div>
 		<script>
+			const isLocalhost = globalThis.location.hostname === 'localhost';
 			window.$docsify = {
 				name: 'ARD Eventhub',
 				repo: 'https://github.com/swrlab/ard-eventhub',
-				basePath: '/ard-eventhub/',
+				basePath: isLocalhost ? '' : '/ard-eventhub/',
 				loadSidebar: 'docs/_SIDEBAR.md',
 				subMaxLevel: 3,
 				themeColor: 'rgb(0, 52, 128)',
