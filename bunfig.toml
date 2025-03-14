@@ -6,3 +6,6 @@ telemetry = false
 # https://bun.sh/docs/runtime/bunfig#run-silent-suppress-reporting-the-command-being-run
 [run]
 silent = true
+
+[install.scopes]
+jsr = "https://npm.jsr.io"

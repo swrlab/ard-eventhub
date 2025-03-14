@@ -7,7 +7,6 @@
 
 // load node utils
 const { DateTime } = require('luxon')
-const ULID = require('ulid')
 
 // load eventhub utils
 const { createNewTopic, processServices } = require('../../utils/events')
@@ -25,6 +24,7 @@ const DEFAULT_ZONE = 'Europe/Berlin'
 const IS_COMMON_TOPIC_ENABLED = true
 
 module.exports = async (req, res) => {
+	const { ulid } = await import('@std/ulid')
 	try {
 		// fetch inputs
 		const { eventName } = req.params
@@ -64,7 +64,7 @@ module.exports = async (req, res) => {
 		)
 
 		// generate unique Id from the institution id and a random ULID
-		message.id = `${req.user.institutionId}-${ULID.ulid()}`
+		message.id = `${req.user.institutionId}-${ulid()}`
 
 		// collect unknown topics from returning errors
 		const newServices = []
