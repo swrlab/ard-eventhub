@@ -22,6 +22,10 @@ const feed = require('../../data')
 const source = 'ingest/subscriptions/post'
 
 module.exports = async (req, res) => {
+	// check if env was set
+	if (!process.env.ARD_FEED_URL)
+		console.log('Feed-URL was not set')
+
 	const coreApi = require('../../data/ard-core-livestreams.json')
 
 	try {
