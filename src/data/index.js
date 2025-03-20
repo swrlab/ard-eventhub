@@ -2,6 +2,7 @@
 const undici = require('../utils/undici')
 
 const ARD_FEED_URL = process.env.ARD_FEED_URL
+const MIN_FEED_PAGE_ITEMS = 251
 const MIN_FEED_ITEMS = 190
 const MAX_FEED_ITEMS = 251
 const STATIONS = [
@@ -22,25 +23,29 @@ const exitWithError = (message) => {
 	process.exit(1)
 }
 
-const download = async () => {
+const getARDFeed = async () => {
 	// download ard feed
-	const response = await undici.fetch(ARD_FEED_URL)
-	const feed = await response.json()
+	const { statusCode, json: feed, ok } = await undici(ARD_FEED_URL,{
+		method: 'GET',
+		timeout: 4e3
+	})
 
 	// check api
-	if (!response.ok || response.status !== 200)
+	if (!ok || statusCode !== 200)
 		return exitWithError(
-			`API is not available (${response.status})`
+			`API is not available (${statusCode})`
 		)
 
+	const feedItemCount = feed.items.length
+
 	// check integrity
-	if (!feed || !feed.items || !feed.items.length)
+	if (!feed || !feed.items || !feedItemCount)
 		return exitWithError('Feed is empty')
 
 	// check if feed has enough items
-	if (feed.pageItemCount < MIN_FEED_ITEMS) {
+	if (feed.pageItemCount < MIN_FEED_PAGE_ITEMS) {
 		console.log(
-			`ARD Feed contains an unexpected amount of stations: ${feed.pageItemCount}`
+			`pageItemCount is too small for the ARD Feed with its expected amount of stations: ${feed.pageItemCount}`
 		)
 
 		return exitWithError(
@@ -48,14 +53,25 @@ const download = async () => {
 		)
 	}
 
-	// check if feed has too many items
-	if (feed.pageItemCount >= MAX_FEED_ITEMS) {
+	// check if feed has enough items
+	if (feedItemCount < MIN_FEED_ITEMS) {
 		console.log(
-			`ARD Feed contains an unexpected amount of stations: ${feed.pageItemCount}`
+			`ARD Feed contains an unexpected amount of stations: ${feedItemCount}`
 		)
 
 		return exitWithError(
-			`pageItemCount is too high > ${feed.pageItemCount}`
+			`pageItemCount is too small > ${feedItemCount}`
+		)
+	}
+
+	// check if feed has too many items
+	if (feedItemCount >= MAX_FEED_ITEMS) {
+		console.log(
+			`ARD Feed contains an unexpected amount of stations: ${feedItemCount}`
+		)
+
+		return exitWithError(
+			`pageItemCount is too high > ${feedItemCount}`
 		)
 	}
 
@@ -64,8 +80,8 @@ const download = async () => {
 		return exitWithError('Pagination is not supported')
 
 	// check if any expected Station is missing
-	for (const station in STATIONS) {
-		const isStationInFeed = feed.items.any(
+	for (const station of STATIONS) {
+		const isStationInFeed = feed.items.some(
 			(entry) => entry.publisher.title === station
 		)
 
@@ -76,13 +92,8 @@ const download = async () => {
 		}
 	}
 
-	// save to local storage
-	await Bun.write(
-		`${__dirname}/../data/ard-core-livestreams.json`,
-		JSON.stringify(feed, null, '\t')
-	)
 	console.log('ARD feed downloaded successfully')
-	return null
+	return feed
 }
 
-download()
+module.exports = getARDFeed
