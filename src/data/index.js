@@ -22,7 +22,7 @@ const exitWithError = (message) => {
 	process.exit(1)
 }
 
-const download = async () => {
+const getARDFeed = async () => {
 	// download ard feed
 	const response = await undici.fetch(ARD_FEED_URL)
 	const feed = await response.json()
@@ -76,13 +76,8 @@ const download = async () => {
 		}
 	}
 
-	// save to local storage
-	await Bun.write(
-		`${__dirname}/../data/ard-core-livestreams.json`,
-		JSON.stringify(feed, null, '\t')
-	)
 	console.log('ARD feed downloaded successfully')
-	return null
+	return feed
 }
 
-download()
+module.exports = getARDFeed

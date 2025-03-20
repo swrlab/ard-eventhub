@@ -4,12 +4,12 @@
 	by SWR Audio Lab
 
 */
-const feed = require('../../data')
+const getArdFeed = require('../../data')
 
 module.exports = async (publisherId) => {
-	const coreApi = require('../../data/ard-core-livestreams.json')
 
-	const publisher = coreApi.items.find((entry) => {
+	const ardFeed = await getArdFeed()
+	const publisher = ardFeed.items.find((entry) => {
 		return publisherId === entry.publisher.id ? entry.publisher : null
 	})
 

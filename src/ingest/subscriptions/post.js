@@ -17,23 +17,18 @@ const response = require('../../utils/response')
 const config = require('../../../config')
 
 // load api feed
-const feed = require('../../data')
+const getArdFeed = require('../../data')
 
 const source = 'ingest/subscriptions/post'
 
 module.exports = async (req, res) => {
-	// check if env was set
-	if (!process.env.ARD_FEED_URL)
-		console.log('Feed-URL was not set')
-
-	const coreApi = require('../../data/ard-core-livestreams.json')
-
 	try {
 		// generate subscription name
 		const prefix = `${config.pubSubPrefix}subscription.`
 
 		// check existence of user institution
-		const institutionExists = coreApi.items.some((entry) => {
+		const ardFeed = await getArdFeed()
+		const institutionExists = ardFeed.items.some((entry) => {
 			return req.user.institutionId === entry.publisher.institution.id
 		})
 
