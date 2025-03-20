@@ -4,13 +4,13 @@
 	by SWR Audio Lab
 
 */
-
-// TODO: check IDs in ARD Core-API instead of dump
-const coreApi = require('../../data/coreApi.json')
+const getArdFeed = require('../../data')
 
 module.exports = async (publisherId) => {
-	const publisher = coreApi.find((entry) => {
-		return publisherId === entry.id ? entry : null
+
+	const ardFeed = await getArdFeed()
+	const publisher = ardFeed.items.find((entry) => {
+		return publisherId === entry.publisher.id ? entry.publisher : null
 	})
 
 	return Promise.resolve(publisher)

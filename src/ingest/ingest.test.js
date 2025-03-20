@@ -282,6 +282,7 @@ const eventRadioText = {
 }
 
 describe(`POST ${eventRadioTextPath}`, () => {
+
 	it('test invalid auth for POST /event', (done) => {
 		chai
 			.request(server)
