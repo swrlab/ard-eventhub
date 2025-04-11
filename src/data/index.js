@@ -1,6 +1,6 @@
 // load utils
 const undici = require('../utils/undici')
-const fs = require('fs');
+const fs = require('node:fs');
 
 const ARD_FEED_URL = process.env.ARD_FEED_URL
 const MIN_FEED_PAGE_ITEMS = 251

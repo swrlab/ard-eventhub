@@ -4,7 +4,8 @@
 	by SWR Audio Lab
 
 */
-const feed = require('../../data')
+// load api feed (needed to get the file initialized)
+const _feed = require('../../data')
 
 module.exports = async (publisherId) => {
 

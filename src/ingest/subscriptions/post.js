@@ -16,8 +16,8 @@ const pubsub = require('../../utils/pubsub')
 const response = require('../../utils/response')
 const config = require('../../../config')
 
-// load api feed
-const feed = require('../../data')
+// load api feed (needed to get the file initialized)
+const _feed = require('../../data')
 
 const source = 'ingest/subscriptions/post'
 
