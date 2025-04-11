@@ -17,7 +17,7 @@ const response = require('../../utils/response')
 const config = require('../../../config')
 
 // load api feed
-const getArdFeed = require('../../data')
+const feed = require('../../data')
 
 const source = 'ingest/subscriptions/post'
 
@@ -27,7 +27,8 @@ module.exports = async (req, res) => {
 		const prefix = `${config.pubSubPrefix}subscription.`
 
 		// check existence of user institution
-		const ardFeed = await getArdFeed()
+		const ardFeed = require('../../data/ard-core-livestreams.json')
+
 		const institutionExists = ardFeed.items.some((entry) => {
 			return req.user.institutionId === entry.publisher.institution.id
 		})

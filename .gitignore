@@ -23,3 +23,6 @@ lib-cov
 
 # IntelliJ Idea
 .idea/
+
+# livestreams that get downloaded
+/src/data/ard-core-livestreams.json

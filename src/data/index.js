@@ -1,5 +1,6 @@
 // load utils
 const undici = require('../utils/undici')
+const fs = require('fs');
 
 const ARD_FEED_URL = process.env.ARD_FEED_URL
 const MIN_FEED_PAGE_ITEMS = 251
@@ -92,8 +93,17 @@ const getARDFeed = async () => {
 		}
 	}
 
+	// save to local storage
+	fs.writeFileSync(
+		`${__dirname}/../data/ard-core-livestreams.json`,
+		JSON.stringify(feed, null, '\t')
+	)
 	console.log('ARD feed downloaded successfully')
+
 	return feed
 }
+
+// get initial feed
+getARDFeed()
 
 module.exports = getARDFeed
