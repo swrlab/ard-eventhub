@@ -1,6 +1,7 @@
 // load utils
 const undici = require('../utils/undici')
-const fs = require('node:fs');
+const fs = require('node:fs')
+const logger = require('../utils/logger')
 
 const ARD_FEED_URL = process.env.ARD_FEED_URL
 const MIN_FEED_PAGE_ITEMS = 251
@@ -20,22 +21,31 @@ const STATIONS = [
 ]
 
 const exitWithError = (message) => {
-	console.error(message)
+	logger.log({
+		level: 'error',
+		message: message,
+		source: 'Livestream Data',
+		error: Error(message),
+		data: {},
+	})
+
 	process.exit(1)
 }
 
 const getARDFeed = async () => {
 	// download ard feed
-	const { statusCode, json: feed, ok } = await undici(ARD_FEED_URL,{
+	const {
+		statusCode,
+		json: feed,
+		ok,
+	} = await undici(ARD_FEED_URL, {
 		method: 'GET',
-		timeout: 4e3
+		timeout: 4e3,
 	})
 
 	// check api
 	if (!ok || statusCode !== 200)
-		return exitWithError(
-			`API is not available (${statusCode})`
-		)
+		return exitWithError(`API is not available (${statusCode})`)
 
 	const feedItemCount = feed.items.length
 
@@ -45,9 +55,13 @@ const getARDFeed = async () => {
 
 	// check if feed has enough items
 	if (feed.pageItemCount < MIN_FEED_PAGE_ITEMS) {
-		console.log(
-			`pageItemCount is too small for the ARD Feed with its expected amount of stations: ${feed.pageItemCount}`
-		)
+		logger.log({
+			level: 'error',
+			message: `pageItemCount is too small for the ARD Feed with its expected amount of stations: ${feed.pageItemCount}`,
+			source: 'Livestream Data',
+			error: Error(message),
+			data: {},
+		})
 
 		return exitWithError(
 			`pageItemCount is too small > ${feed.pageItemCount}`
@@ -56,9 +70,13 @@ const getARDFeed = async () => {
 
 	// check if feed has enough items
 	if (feedItemCount < MIN_FEED_ITEMS) {
-		console.log(
-			`ARD Feed contains an unexpected amount of stations: ${feedItemCount}`
-		)
+		logger.log({
+			level: 'error',
+			message: `ARD Feed contains an unexpected amount of stations: ${feedItemCount}`,
+			source: 'Livestream Data',
+			error: Error(message),
+			data: {},
+		})
 
 		return exitWithError(
 			`pageItemCount is too small > ${feedItemCount}`
@@ -67,9 +85,13 @@ const getARDFeed = async () => {
 
 	// check if feed has too many items
 	if (feedItemCount >= MAX_FEED_ITEMS) {
-		console.log(
-			`ARD Feed contains an unexpected amount of stations: ${feedItemCount}`
-		)
+		logger.log({
+			level: 'error',
+			message: `ARD Feed contains an unexpected amount of stations: ${feedItemCount}`,
+			source: 'Livestream Data',
+			error: Error(message),
+			data: {},
+		})
 
 		return exitWithError(
 			`pageItemCount is too high > ${feedItemCount}`
@@ -98,7 +120,12 @@ const getARDFeed = async () => {
 		`${__dirname}/../data/ard-core-livestreams.json`,
 		JSON.stringify(feed, null, '\t')
 	)
-	console.log('ARD feed downloaded successfully')
+	logger.log({
+		level: 'info',
+		message: 'ARD feed downloaded successfully',
+		source: 'Livestream Data',
+		data: {},
+	})
 
 	return feed
 }
