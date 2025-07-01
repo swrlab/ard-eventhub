@@ -5,10 +5,10 @@ updates:
     open-pull-requests-limit: 20
     schedule:
       interval: "weekly"
-      day: "sunday"
+      day: "monday"
   - package-ecosystem: npm
     directory: "/"
     open-pull-requests-limit: 20
     schedule:
       interval: "weekly"
-      day: "sunday"
+      day: "monday"
