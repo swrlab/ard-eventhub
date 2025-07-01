@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.0.6/schema.json",
 	"files": {
 		"maxSize": 90485760
 	},
@@ -21,18 +21,23 @@
 		"rules": {
 			"recommended": true,
 			"correctness": {
-				"all": true,
 				"noNodejsModules": "off"
 			},
-			"performance": {
-				"all": true
-			},
-			"security": {
-				"all": true
+			"performance": {},
+			"security": {},
+			"style": {
+				"noParameterAssign": "error",
+				"useAsConstAssertion": "error",
+				"useDefaultParameterLast": "error",
+				"useEnumInitializers": "error",
+				"useSelfClosingElements": "error",
+				"useSingleVarDeclarator": "error",
+				"noUnusedTemplateLiteral": "error",
+				"useNumberNamespace": "error",
+				"noInferrableTypes": "error",
+				"noUselessElse": "error"
 			}
 		}
 	},
-	"organizeImports": {
-		"enabled": true
-	}
+	"assist": { "actions": { "source": { "organizeImports": "on" } } }
 }
