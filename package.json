@@ -40,7 +40,7 @@
 		"google-auth-library": "^10.1.0",
 		"jsonwebtoken": "^9.0.2",
 		"luxon": "^3.6.1",
-		"slug": "^9.1.0",
+		"slug": "^11.0.0",
 		"swagger-ui-express": "^5.0.1",
 		"winston": "^3.17.0"
 	},
