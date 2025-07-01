@@ -57,14 +57,15 @@ If a live element is starting. This can be an moderation by an anchor, interview
 }
 ```
 
-## `news`
+## `audio`
 
-This indicates the beginning of the news in general or a new news item. Get as detailed as possible. The `contributors` field should be used to include details of the `author`. `media` may be used to supply additional elements. `show` references the correspoding broadcast series / grouping.
+This type was initially the least descriptive and is now used for items (de: _Beiträge_) – pre-recorded elements that don't fit any of the other categories. Get as detailed as possible. 
+The `contributors` field should be used to include details of the `author`. `media` may be used to supply additional elements. `show` references the correspoding broadcast series / grouping.
 
 ```json
 {
   "event": "de.ard.eventhub.v1.radio.track.playing",
-  "type": "news",
+  "type": "audio",
   "start": "2021-03-17T11:10:31+01:00",
   "length": 1415,
   "title": "Kommerzielle-Raumfahrt - eine Zukunftsvision?",
@@ -94,6 +95,29 @@ This indicates the beginning of the news in general or a new news item. Get as d
 }
 ```
 
+## `news`
+
+This indicates the beginning of the news in general (de: _Nachrichten_).
+
+```json
+{
+  "event": "de.ard.eventhub.v1.radio.track.playing",
+  "type": "news",
+  "start": "2020-01-19T06:00:00+01:00",
+  "length": 250,
+  "title": "Nachrichten",
+  "playlistItemId": "BCS1:cd052498-da90-4308-85d3-046cb15c6832",
+  "references": [
+    {
+      "type": "Overview",
+      "title": "BR Nachrichten",
+      "url": "https://www.br.de/nachrichten/meldungen"
+    }
+  ]
+  …
+}
+```
+
 ## `weather`
 
 Similar to `news` it marks the beginning of a weather segment.
@@ -111,7 +135,7 @@ Similar to `news` it marks the beginning of a weather segment.
 
 ## `traffic`
 
-Similar to `news` and `weather` it can mark the beginning of a traffic announcement.
+Similar to `news` and `weather` it can mark the beginning of traffic announcements.
 
 ```json
 {
@@ -123,10 +147,6 @@ Similar to `news` and `weather` it can mark the beginning of a traffic announcem
   …
 }
 ```
-
-## `audio`
-
-This type is the least descriptive and should only be used for pre-recorded elements that don't fit any of the other categories.
 
 ## `commercial`
 
