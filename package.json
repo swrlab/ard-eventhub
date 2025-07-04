@@ -20,17 +20,21 @@
 		"docker:scan": "bun docker:build && docker scout quickview",
 		"docker:clean": "docker rm ard-eventhub",
 		"openapi:format": "bunx biome format openapi.json --write && bunx prettier openapi.yaml -w",
-		"license": "bunx license-compliance",
+		"license": "bunx license-compliance -f json -r detailed",
 		"reinstall": "rm -rf node_modules && rm bun.lockb && bun install"
 	},
-	"keywords": ["ard", "metadata", "pubsub"],
+	"keywords": [
+		"ard",
+		"metadata",
+		"pubsub"
+	],
 	"author": "SWR Audio Lab <lab@swr.de>",
 	"license": "EUPL-1.2",
 	"dependencies": {
 		"@google-cloud/datastore": "^10.0.1",
 		"@google-cloud/pubsub": "^5.1.0",
 		"@google-cloud/secret-manager": "^6.0.1",
-		"@std/ulid": "npm:@jsr/std__ulid",
+		"@std/ulid": "npm:@jsr/std__ulid@1.0.0",
 		"@swrlab/utils": "^2.1.0",
 		"compression": "^1.8.0",
 		"dd-trace": "^5.57.1",

@@ -102,7 +102,7 @@ module.exports = {
 		'0BSD',
 		'CC0-1.0',
 	],
-	exclude: ['doctrine', 'hdr-histogram-js', 'spdx-exceptions'],
+	exclude: ['@std/ulid', 'doctrine', 'hdr-histogram-js', 'spdx-exceptions'],
 	direct: true,
 	format: 'text',
 	report: 'summary',
