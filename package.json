@@ -51,7 +51,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.0.6",
 		"@swrlab/style-guide": "^1.0.3",
-		"chai": "^4.5.0",
+		"chai": "^6.0.1",
 		"chai-http": "^4.4.0",
 		"docsify-cli": "^4.4.4",
 		"license-compliance": "^3.0.1",
