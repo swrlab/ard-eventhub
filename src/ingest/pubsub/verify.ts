@@ -20,7 +20,11 @@ import logger from '../../utils/logger'
 const serviceAccountEmail = process.env.PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL
 const source = 'ingest/pubsub/verify'
 
-export default async (req: UserTicketRequest, res: Response, next: NextFunction) => {
+export default async (
+	req: UserTicketRequest,
+	res: Response,
+	next: NextFunction
+) => {
 	try {
 		// read token from header
 		const bearer = req.header('Authorization')
@@ -32,7 +36,9 @@ export default async (req: UserTicketRequest, res: Response, next: NextFunction)
 		}
 
 		// parse token
-		const [idToken] = bearer.match(/Bearer (.*)/)!
+		const [idToken] = bearer.match(/Bearer (.*)/) || []
+
+		if (idToken == null) throw Error('No ID token could be found.')
 
 		// verify token, throws error if invalid
 		req.user = await authClient.verifyIdToken({
