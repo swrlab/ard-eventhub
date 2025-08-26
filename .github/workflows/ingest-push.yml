@@ -63,7 +63,7 @@ jobs:
           TEST_USER: ${{ secrets.TEST_USER }}
           TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
           ARD_FEED_URL: ${{ secrets.ARD_FEED_URL }}
-        run: npm run ingest:test
+        run: bun run ingest:test
 
   docker:
     runs-on: ubuntu-24.04

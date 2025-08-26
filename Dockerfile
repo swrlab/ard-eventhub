@@ -23,4 +23,4 @@ COPY --from=bun /web/app /web/app
 EXPOSE 80
 
 # Run app
-CMD [ "npm", "run", "ingest:cloud" ]
+CMD [ "bun", "run", "ingest:cloud" ]
