@@ -20,6 +20,10 @@ import router from './router.ts'
 
 import config from '../../config'
 
+// get initial feed
+import getARDFeed from '../data'
+getARDFeed()
+
 // set up express server
 const server = express()
 

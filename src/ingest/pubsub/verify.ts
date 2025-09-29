@@ -36,7 +36,7 @@ export default async (
 		}
 
 		// parse token
-		const [idToken] = bearer.match(/Bearer (.*)/) || []
+		const [_ignore, idToken] = bearer.match(/Bearer (.*)/) || []
 
 		if (idToken == null) throw Error('No ID token could be found.')
 

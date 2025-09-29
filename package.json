@@ -11,7 +11,7 @@
 	"scripts": {
 		"docs:serve": "docsify serve . --port 3000",
 		"coreId": "bun run ./src/coreId/index.ts",
-		"ingest:local": "bun run --env-file=.env --env-file=./node_modules/nodemon/bin/nodemon --env-file=./src/ingest/index.ts",
+		"ingest:local": "bun run --env-file=.env --env-file=./node_modules/nodemon/bin/nodemon ./src/ingest/index.ts",
 		"ingest:cloud": "bun run ./src/ingest/index.ts",
 		"ingest:test:local": "jest",
 		"ingest:test": "jest --ci --forceExit",
@@ -63,13 +63,13 @@
 		"@types/luxon": "^3.6.2",
 		"@types/slug": "^5.0.9",
 		"@types/swagger-ui-express": "^4.1.8",
-		"ts-node": "^10.9.2",
 		"chai": "^4.5.0",
 		"chai-http": "^4.4.0",
 		"docsify-cli": "^4.4.4",
 		"license-compliance": "^3.0.1",
 		"nodemon": "^3.1.10",
-		"prettier": "^3.6.2"
+		"prettier": "^3.6.2",
+		"ts-node": "^10.9.2"
 	},
 	"resolutions": {
 		"ansi-regex": "^5.0.1",

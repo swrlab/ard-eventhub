@@ -133,7 +133,4 @@ const getARDFeed = async () => {
 	return feed
 }
 
-// get initial feed
-getARDFeed()
-
 export default getARDFeed
