@@ -118,7 +118,7 @@ jobs:
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - name: 💬 Comment Version
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         if: github.event.pull_request.merged == true
         with:
           issue-number: ${{ github.event.pull_request.number }}
