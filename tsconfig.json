@@ -1,0 +1,50 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"lib": [
+			"dom",
+			"dom.iterable",
+			"esnext"
+		],
+		"module": "ESNext",
+		"allowJs": true,
+		"skipLibCheck": true,
+		"noEmit": true,
+		"esModuleInterop": true,
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"jsx": "preserve",
+		"jsxImportSource": "vue",
+		"incremental": true,
+		"strict": true,
+		"allowImportingTsExtensions": true,
+		"allowSyntheticDefaultImports": true,
+
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+
+		"types": [
+			"node",
+			"mocha",
+			"express"
+		],
+
+		"paths": {
+			"@/*": [
+				"./*"
+			]
+		}
+	},
+	"include": [
+		"**/*.ts",
+		"**/*.tsx",
+		".env"
+	],
+	"ts-node": {
+		"esm": true
+	},
+	"exclude": [
+		"node_modules"
+	]
+}
