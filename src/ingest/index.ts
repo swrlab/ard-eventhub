@@ -22,7 +22,7 @@ import config from '../../config'
 
 // get initial feed
 import getARDFeed from '../data'
-getARDFeed()
+await getARDFeed()
 
 // set up express server
 const server = express()
