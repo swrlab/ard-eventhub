@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2025-10-16
+- refactor: use bun with typescript instead of javascript and node
+- refactor: use bun instead of npm to test
+- fix: retrieve the feed at the application start
+- chore: rename application version
+
 ## [1.10.2] - 2025-03-13
 
 - feat: use ard feed api for livestreams, publishers and institutions instead of a local file
