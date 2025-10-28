@@ -1,5 +1,5 @@
 # select bun
-FROM oven/bun:1 as bun
+FROM oven/bun:1-alpine as base
 
 # Create app directory
 WORKDIR /web/app
@@ -9,15 +9,6 @@ COPY . .
 
 # Install dependencies
 RUN bun install --frozen-lockfile --production
-
-# Load desired node image
-FROM node:22.8-alpine
-
-# Create app directory
-WORKDIR /web/app
-
-# Copy compiled app source
-COPY --from=bun /web/app /web/app
 
 # Expose port
 EXPOSE 80
