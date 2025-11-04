@@ -5,9 +5,7 @@ import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { fetch } from 'undici'
 
-getMsOffset(getMs())
-
-import type { ArdFeed, ArdLivestream } from '@/types.ard'
+import type { ArdFeed, ArdLivestream } from '@/types.ard.ts'
 
 const ARD_FEED_URL = getRequiredEnv('ARD_FEED_URL')
 const DOWNLOAD_TO_FILE = false
@@ -117,7 +115,7 @@ export const getARDFeed = async () => {
 	} catch (error) {
 		logger.log({
 			level: 'error',
-			message: `Failed to download ARD feed: ${error}`,
+			message: 'Failed to download ARD feed',
 			source,
 			error,
 		})

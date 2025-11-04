@@ -57,9 +57,7 @@ jobs:
           TEST_USER: ${{ secrets.TEST_USER }}
           TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
           ARD_FEED_URL: ${{ secrets.ARD_FEED_URL }}
-        run: |
-          bun run feed
-          bun run test
+        run: bun run test
 
   docker:
     runs-on: ubuntu-24.04
@@ -85,11 +83,6 @@ jobs:
 
       - name: 🔑 Login to Registry
         run: 'gcloud auth configure-docker $REGISTRY_DOMAIN'
-
-      - name: 🔄 Download ARD Feed
-        env:
-          ARD_FEED_URL: ${{ secrets.ARD_FEED_URL }}
-        run: bun run feed
 
       - name: 🚧 Building docker image
         run: 'docker build ./ --file ./Dockerfile -t image'
