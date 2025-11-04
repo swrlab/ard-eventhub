@@ -10,7 +10,7 @@ import { createHashedId } from '@swrlab/utils/packages/ard'
 
 import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 import config from '../../../config'
-import core from '../core'
+import { getPublisher } from '../core/getPublisher.ts'
 import pubsub from '../pubsub'
 
 const source = 'utils.events.processServices'
@@ -48,7 +48,7 @@ export default async (service: any, req: UserTokenRequest) => {
 	}
 
 	// fetch publisher
-	const publisher = await core.getPublisher(service.publisherId)
+	const publisher = getPublisher(service.publisherId)
 
 	// block access if publisher not found
 	if (!publisher) {

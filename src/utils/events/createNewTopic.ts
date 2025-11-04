@@ -9,7 +9,7 @@ import logger from '@frytg/logger'
 import { DateTime } from 'luxon'
 import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 
-import core from '../core'
+import { getPublisher } from '../core/getPublisher.ts'
 import datastore from '../datastore'
 import pubsub from '../pubsub'
 
@@ -17,7 +17,7 @@ const source = 'utils.events.createNewTopic'
 
 export default async (service: any, req: UserTokenRequest) => {
 	// fetch publisher
-	const publisher = await core.getPublisher(service.publisherId)
+	const publisher = getPublisher(service.publisherId)
 
 	// try creating new topic
 	const newTopic = {

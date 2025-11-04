@@ -7,7 +7,6 @@
 
 */
 
-// load utils
 // @ts-expect-error
 import { createHashedId } from '@swrlab/utils/packages/ard'
 
