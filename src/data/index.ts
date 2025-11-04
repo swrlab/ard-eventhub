@@ -8,9 +8,9 @@ import { fetch } from 'undici'
 getMsOffset(getMs())
 
 import type { ArdFeed, ArdLivestream } from '@/types.ard'
-import config from '../../config'
 
 const ARD_FEED_URL = getRequiredEnv('ARD_FEED_URL')
+const DOWNLOAD_TO_FILE = false
 const MIN_FEED_PAGE_ITEMS = 251
 const MIN_FEED_ITEMS = 190
 const MAX_FEED_ITEMS = 251
@@ -100,7 +100,7 @@ export const getARDFeed = async () => {
 		}
 
 		// save to local storage
-		if (config.isLocal) {
+		if (DOWNLOAD_TO_FILE) {
 			fs.writeFileSync(`${__dirname}/../data/ard-core-livestreams.json`, JSON.stringify(feed, null, '\t'))
 		}
 
