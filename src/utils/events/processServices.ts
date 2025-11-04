@@ -5,18 +5,13 @@
 
 */
 
-// load node utils
-import UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
-
 import { createHashedId } from '@swrlab/utils/packages/ard'
 
-// load eventhub utils
+import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
+import config from '../../../config'
 import core from '../core'
 import logger from '../logger'
 import pubsub from '../pubsub'
-
-// load config
-import  config  from '../../../config'
 
 const source = 'utils.events.processServices'
 const URN_PUBLISHER_PREFIX = config.coreIdPrefixes.Publisher
@@ -45,6 +40,9 @@ export default async (service: any, req: UserTokenRequest) => {
 
 	// convert publisher if not in new ARD urn format
 	if (!service.publisherId.match(URN_PUBLISHER_REGEX)) {
+		// DEV TEMP debug log
+		service.publisherIdOrig = service.publisherId
+
 		// add trailing 0 if number is only 5 digits
 		if (service.publisherId.length === 5) {
 			service.publisherId = `${service.publisherId}0`
@@ -75,7 +73,7 @@ export default async (service: any, req: UserTokenRequest) => {
 	}
 
 	// check allowed institutions for current user
-	if (req.user.institutionId !== publisher?.publisher.institution.id) {
+	if (!req.user || req.user.institutionId !== publisher?.publisher.institution.id) {
 		// set blocked flag to be filtered out
 		service.blocked = 'User unauthorized for service'
 
