@@ -10,9 +10,6 @@ COPY . .
 # Install dependencies
 RUN bun install --frozen-lockfile --production
 
-# Download initial ARD feed
-RUN bun run feed
-
 # Expose port
 EXPOSE 80
 
