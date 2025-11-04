@@ -30,6 +30,7 @@
 	"author": "SWR Audio Lab <lab@swr.de>",
 	"license": "EUPL-1.2",
 	"dependencies": {
+		"@frytg/dates": "npm:@jsr/frytg__dates",
 		"@frytg/logger": "npm:@jsr/frytg__logger",
 		"@google-cloud/datastore": "^10.0.1",
 		"@google-cloud/pubsub": "^5.2.0",

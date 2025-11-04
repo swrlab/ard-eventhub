@@ -4,6 +4,7 @@
     "": {
       "name": "ard-eventhub",
       "dependencies": {
+        "@frytg/dates": "npm:@jsr/frytg__dates",
         "@frytg/logger": "npm:@jsr/frytg__logger",
         "@google-cloud/datastore": "^10.0.1",
         "@google-cloud/pubsub": "^5.2.0",
@@ -374,6 +375,8 @@
 
     "@firebase/util": ["@firebase/util@1.10.0", "", { "dependencies": { "tslib": "^2.1.0" } }, "sha512-xKtx4A668icQqoANRxyDLBLz51TAbDP9KRfpbKGxiCAW346d0BeJe5vN6/hKxxmWwnZ0mautyv39JxviwwQMOQ=="],
 
+    "@frytg/dates": ["@jsr/frytg__dates@0.3.0", "https://npm.jsr.io/~/11/@jsr/frytg__dates/0.3.0.tgz", { "dependencies": { "@jsr/std__fmt": "^1.0.3", "@types/luxon": "^3.4.2", "luxon": "^3.6.1" } }, "sha512-tzSrzAZ4MmnEm+x7g0yUm7Z5v0QkncESh1z5SOOFwCOzyHm3ryXhWUn3oBMfOAwpGBkZv8LOpNr3W0XYLrwq3A=="],
+
     "@frytg/logger": ["@jsr/frytg__logger@0.0.3", "https://npm.jsr.io/~/11/@jsr/frytg__logger/0.0.3.tgz", { "dependencies": { "winston": "^3.17.0" } }, "sha512-YHuFNLeDO23Pw0cHgbqzlcKyL0T2n4cxwYNY7zTolg8N9rd5bx4SddSoVGNe7SNP6FRKqm7qJNu2wxoDOV3pdw=="],
 
     "@google-cloud/datastore": ["@google-cloud/datastore@10.0.1", "", { "dependencies": { "@google-cloud/promisify": "^5.0.0", "arrify": "^2.0.0", "async-mutex": "^0.5.0", "concat-stream": "^2.0.0", "extend": "^3.0.2", "google-gax": "^5.0.2-rc.1", "is": "^3.3.0", "protobufjs": "7.0.0", "split-array-stream": "^2.0.0", "stream-events": "^1.0.5" } }, "sha512-O6DiCk3jwm9RCuJBx5y34ykR4SbPGDBIbIQSMYkWC2BoCuAf8QZ/4+i59EPx4FUUmANbNC9eu9kjU1NN2lfWSQ=="],
@@ -473,6 +476,8 @@
     "@jsep-plugin/assignment": ["@jsep-plugin/assignment@1.3.0", "", { "peerDependencies": { "jsep": "^0.4.0||^1.0.0" } }, "sha512-VVgV+CXrhbMI3aSusQyclHkenWSAm95WaiKrMxRFam3JSUiIaQjoMIw2sEs/OX4XifnqeQUN4DYbJjlA8EfktQ=="],
 
     "@jsep-plugin/regex": ["@jsep-plugin/regex@1.0.4", "", { "peerDependencies": { "jsep": "^0.4.0||^1.0.0" } }, "sha512-q7qL4Mgjs1vByCaTnDFcBnV9HS7GVPJX5vyVoCgZHNSC9rjwIlmbXG5sUuorR5ndfHAIlJ8pVStxvjXHbNvtUg=="],
+
+    "@jsr/std__fmt": ["@jsr/std__fmt@1.0.8", "https://npm.jsr.io/~/11/@jsr/std__fmt/1.0.8.tgz", {}, "sha512-miZHzj9OgjuajrcMKzpqNVwFb9O71UHZzV/FHVq0E0Uwmv/1JqXgmXAoBNPrn+MP0fHT3mMgaZ6XvQO7dam67Q=="],
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@0.2.12", "", { "dependencies": { "@emnapi/core": "^1.4.3", "@emnapi/runtime": "^1.4.3", "@tybys/wasm-util": "^0.10.0" } }, "sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ=="],
 
