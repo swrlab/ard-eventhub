@@ -7,11 +7,11 @@
 
 */
 
-import { beforeAll, describe, expect, it } from '@jest/globals'
+import { beforeAll, describe, expect, it } from 'bun:test'
+import logger from '@frytg/logger'
 import { DateTime } from 'luxon'
 import request, { type Response } from 'supertest'
 
-import logger from '../utils/logger'
 import { default as server } from './index'
 
 const exitWithError = (message: string) => {
@@ -107,55 +107,35 @@ async function _login() {
 //})
 
 describe(`POST ${loginPath}`, () => {
-	it('swap login credentials for an id-token', (done) => {
+	it('swap login credentials for an id-token', async () => {
 		const loginRequest = {
 			email: testUser,
 			password: testUserPass,
 		}
 
-		request(server)
-			.post(loginPath)
-			.send(loginRequest)
-			.end((_err, res) => {
-				try {
-					testResponse(res, 200)
-					testAuthKeys(res.body)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-				// Store tokens for further tests
-				accessToken = res.body.token
-				refreshToken = res.body.refreshToken
-			})
+		const res = await request(server).post(loginPath).send(loginRequest)
+		testResponse(res, 200)
+		testAuthKeys(res.body)
+		// Store tokens for further tests
+		accessToken = res.body.token
+		refreshToken = res.body.refreshToken
 	})
 })
 
 const refreshPath = '/auth/refresh'
 
 describe(`POST ${refreshPath}`, () => {
-	it('swap refresh-token for new id-token', (done) => {
+	it('swap refresh-token for new id-token', async () => {
 		const refreshRequest = {
 			refreshToken: refreshToken,
 		}
 
-		request(server)
-			.post(refreshPath)
-			.send(refreshRequest)
-			.end((_err, res) => {
-				try {
-					testResponse(res, 200)
-					testAuthKeys(res.body)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
+		const res = await request(server).post(refreshPath).send(refreshRequest)
+		testResponse(res, 200)
+		testAuthKeys(res.body)
 
-				// store new token for further tests
-				accessToken = res.body.token
-			})
+		// store new token for further tests
+		accessToken = res.body.token
 	})
 })
 
@@ -164,22 +144,13 @@ const resetPath = '/auth/reset'
 
 if (testUserReset === 'true') {
 	describe(`POST ${resetPath}`, () => {
-		it('request password reset email', (done) => {
+		it('request password reset email', async () => {
 			const resetRequest = {
 				email: testUser,
 			}
 
-			request(server)
-				.post(resetPath)
-				.send(resetRequest)
-				.end((_err, res) => {
-					try {
-						testResponse(res, 200)
-					} catch (e: any) {
-						done(e)
-					}
-					done()
-				})
+			const res = await request(server).post(resetPath).send(resetRequest)
+			testResponse(res, 200)
 		})
 	})
 }
@@ -232,103 +203,38 @@ const event = {
 }
 
 describe(`POST ${eventPath}`, () => {
-	it('test invalid auth for POST /event', (done) => {
-		request(server)
-			.post(eventPath)
-			.send(event)
-			.end((_err, res) => {
-				try {
-					testMissingAuth(res)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+	it('test invalid auth for POST /event', async () => {
+		const res = await request(server).post(eventPath).send(event)
+		testMissingAuth(res)
 	})
 
-	it('test invalid auth for POST /event', (done) => {
-		request(server)
-			.post(eventPath)
-			.set('Authorization', `Bearer invalid${accessToken}`)
-			.send(event)
-			.end((_err, res) => {
-				try {
-					testFailedAuth(res)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+	it('test invalid auth for POST /event', async () => {
+		const res = await request(server).post(eventPath).set('Authorization', `Bearer invalid${accessToken}`).send(event)
+		testFailedAuth(res)
 	})
 
-	it('publish a new event', (done) => {
-		request(server)
-			.post(eventPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send(event)
-			.end((_err, res) => {
-				try {
-					testResponse(res, 201)
-					testEventKeys(res.body)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+	it('publish a new event', async () => {
+		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
+		testResponse(res, 201)
+		testEventKeys(res.body)
 	})
 
-	it('publish a new event with expired time', (done) => {
+	it('publish a new event with expired time', async () => {
 		event.start = DateTime.now().minus({ minutes: 3 }).toISO()
-		request(server)
-			.post(eventPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send(event)
-			.end((_err, res) => {
-				try {
-					testResponse(res, 400)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
+		testResponse(res, 400)
 	})
 
-	it('publish a new event with invalid time', (done) => {
+	it('publish a new event with invalid time', async () => {
 		event.start = `${DateTime.now().toISO()}00`
-		request(server)
-			.post(eventPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send(event)
-			.end((_err, res) => {
-				try {
-					testResponse(res, 400)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
+		testResponse(res, 400)
 	})
 
-	it('publish a new event with invalid externalId in references', (done) => {
+	it('publish a new event with invalid externalId in references', async () => {
 		event.references[1].externalId = null
-		request(server)
-			.post(eventPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send(event)
-			.end((_err, res) => {
-				try {
-					testResponse(res, 400)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
+		testResponse(res, 400)
 	})
 })
 
@@ -350,86 +256,44 @@ const eventRadioText = {
 }
 
 describe(`POST ${eventRadioTextPath}`, () => {
-	it('test invalid auth for POST /event', (done) => {
-		request(server)
-			.post(eventRadioTextPath)
-			.send(eventRadioText)
-			.end((_err, res) => {
-				try {
-					testMissingAuth(res)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+	it('test invalid auth for POST /event', async () => {
+		const res = await request(server).post(eventRadioTextPath).send(eventRadioText)
+		testMissingAuth(res)
 	})
 
-	it('test invalid auth for POST /event', (done) => {
-		request(server)
+	it('test invalid auth for POST /event', async () => {
+		const res = await request(server)
 			.post(eventRadioTextPath)
 			.set('Authorization', `Bearer invalid${accessToken}`)
 			.send(eventRadioText)
-			.end((_err, res) => {
-				try {
-					testFailedAuth(res)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+		testFailedAuth(res)
 	})
 
-	it('publish a new event', (done) => {
-		request(server)
+	it('publish a new event', async () => {
+		const res = await request(server)
 			.post(eventRadioTextPath)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send(eventRadioText)
-			.end((_err, res) => {
-				try {
-					testResponse(res, 201)
-					testEventKeys(res.body)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+		testResponse(res, 201)
+		testEventKeys(res.body)
 	})
 
-	it('publish a new event with expired time', (done) => {
+	it('publish a new event with expired time', async () => {
 		eventRadioText.start = DateTime.now().minus({ minutes: 3 }).toISO()
-		request(server)
+		const res = await request(server)
 			.post(eventRadioTextPath)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send(eventRadioText)
-			.end((_err, res) => {
-				try {
-					testResponse(res, 400)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+		testResponse(res, 400)
 	})
 
-	it('publish a new event with invalid time', (done) => {
+	it('publish a new event with invalid time', async () => {
 		eventRadioText.start = `${DateTime.now().toISO()}00`
-		request(server)
+		const res = await request(server)
 			.post(eventRadioTextPath)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send(eventRadioText)
-			.end((_err, res) => {
-				try {
-					testResponse(res, 400)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+		testResponse(res, 400)
 	})
 })
 
@@ -455,39 +319,19 @@ function testTopicKeys(body: any) {
 }
 
 describe(`GET ${topicPath}`, () => {
-	it(`test auth for GET ${topicPath}`, (done) => {
-		request(server)
-			.get(topicPath)
-			.set('Authorization', `Bearer invalid${accessToken}`)
-			.end((_err, res) => {
-				try {
-					testFailedAuth(res)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+	it(`test auth for GET ${topicPath}`, async () => {
+		const res = await request(server).get(topicPath).set('Authorization', `Bearer invalid${accessToken}`)
+		testFailedAuth(res)
 	})
 
-	it('list all available topics', (done) => {
-		request(server)
-			.get(topicPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.end((_err, res) => {
-				try {
-					testResponse(res, 200)
-					console.log(res.body)
-					const isArray = Array.isArray(res.body)
-					expect(isArray).toBeTruthy()
-					res.body.every((i: any) => testTopicKeys(i))
-					topicName = res.body[0].id
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+	it('list all available topics', async () => {
+		const res = await request(server).get(topicPath).set('Authorization', `Bearer ${accessToken}`)
+		testResponse(res, 200)
+		console.log(res.body)
+		const isArray = Array.isArray(res.body)
+		expect(isArray).toBeTruthy()
+		res.body.every((i: any) => testTopicKeys(i))
+		topicName = res.body[0].id
 	})
 })
 
@@ -538,7 +382,7 @@ function testSubscriptionKeys(body: any) {
 describe(`POST ${subscriptPath}`, () => {
 	let subscription: any
 
-	beforeAll((done) => {
+	beforeAll(() => {
 		subscription = {
 			type: 'PUBSUB',
 			method: 'PUSH',
@@ -546,141 +390,72 @@ describe(`POST ${subscriptPath}`, () => {
 			contact: 'eventhub-unit-test@ard.de',
 			topic: topicName,
 		}
-		done()
 	})
 
-	it(`test auth for POST ${subscriptPath}`, (done) => {
-		request(server)
+	it(`test auth for POST ${subscriptPath}`, async () => {
+		const res = await request(server)
 			.post(subscriptPath)
 			.set('Authorization', `Bearer invalid${accessToken}`)
 			.send(subscription)
-			.end((_err, res) => {
-				try {
-					testFailedAuth(res)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+		testFailedAuth(res)
 	})
 
-	it('add a new subscription to this user', (done) => {
-		request(server)
+	it('add a new subscription to this user', async () => {
+		const res = await request(server)
 			.post(subscriptPath)
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send(subscription)
-			.end((_err, res) => {
-				try {
-					testResponse(res, 201)
-					testSubscriptionKeys(res.body)
-					// Store subscription name for further tests
-					subscriptionName = res.body.name
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+		testResponse(res, 201)
+		testSubscriptionKeys(res.body)
+		// Store subscription name for further tests
+		subscriptionName = res.body.name
 	})
 })
 
 describe(`GET ${subscriptPath}`, () => {
-	it(`test auth for GET ${subscriptPath}`, (done) => {
-		request(server)
-			.get(subscriptPath)
-			.set('Authorization', `Bearer invalid${accessToken}`)
-			.end((_err, res) => {
-				try {
-					testFailedAuth(res)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+	it(`test auth for GET ${subscriptPath}`, async () => {
+		const res = await request(server).get(subscriptPath).set('Authorization', `Bearer invalid${accessToken}`)
+		testFailedAuth(res)
 	})
 
-	it('list all subscriptions for this user', (done) => {
-		request(server)
-			.get(subscriptPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.end((_err, res) => {
-				try {
-					testResponse(res, 200)
-					res.body.every((i: any) => testSubscriptionKeys(i))
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+	it('list all subscriptions for this user', async () => {
+		const res = await request(server).get(subscriptPath).set('Authorization', `Bearer ${accessToken}`)
+		testResponse(res, 200)
+		res.body.every((i: any) => testSubscriptionKeys(i))
 	})
 })
 
 describe(`GET ${subscriptPath}/{name}`, () => {
-	it(`test auth for GET ${subscriptPath}/{name}`, (done) => {
-		request(server)
+	it(`test auth for GET ${subscriptPath}/{name}`, async () => {
+		const res = await request(server)
 			.get(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer invalid${accessToken}`)
-			.end((_err, res) => {
-				try {
-					testFailedAuth(res)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+		testFailedAuth(res)
 	})
 
-	it('get details about single subscription from this user', (done) => {
-		request(server)
+	it('get details about single subscription from this user', async () => {
+		const res = await request(server)
 			.get(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer ${accessToken}`)
-			.end((_err, res) => {
-				try {
-					testResponse(res, 200)
-					testSubscriptionKeys(res.body)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+		testResponse(res, 200)
+		testSubscriptionKeys(res.body)
 	})
 })
 
 describe(`DELETE ${subscriptPath}/{name}`, () => {
-	it(`test auth for DELETE ${subscriptPath}/{name}`, (done) => {
-		request(server)
+	it(`test auth for DELETE ${subscriptPath}/{name}`, async () => {
+		const res = await request(server)
 			.delete(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer invalid${accessToken}`)
-			.end((_err, res) => {
-				try {
-					testFailedAuth(res)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+		testFailedAuth(res)
 	})
 
-	it('remove a single subscription by this user', (done) => {
-		request(server)
+	it('remove a single subscription by this user', async () => {
+		const res = await request(server)
 			.delete(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer ${accessToken}`)
-			.end((_err, res) => {
-				try {
-					testResponse(res, 200)
-					expect(res.body).toHaveProperty('valid')
-					expect(res.body.valid).toBe(true)
-					done()
-				} catch (e: any) {
-					console.error(e)
-					done(e)
-				}
-			})
+		testResponse(res, 200)
+		expect(res.body).toHaveProperty('valid')
+		expect(res.body.valid).toBe(true)
 	})
 })

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fix: prevent multiple downloads of the ard feed
 - fix: proper publisher lookup
 - refact: replace logger import
+- refact: migrate tests from jest to `bun:test`
 
 ## [2.0.2] - 2025-10-28
 

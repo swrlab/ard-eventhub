@@ -4,7 +4,7 @@ _default:
 
 # run the ingest tests locally
 test:
-	bun run ingest:test:local
+	bun run test
 
 # generate a coreId for a given text
 coreId text:
