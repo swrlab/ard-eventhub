@@ -7,9 +7,6 @@ WORKDIR /web/app
 # Copy app source
 COPY . .
 
-# Install dependencies
-RUN bun install --frozen-lockfile --production
-
 # Expose port
 EXPOSE 80
 
