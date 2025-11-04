@@ -1,13 +1,16 @@
 import fs from 'node:fs'
 import { exitWithError } from '@frytg/check-required-env/exit'
+import { getRequiredEnv } from '@frytg/check-required-env/get'
 import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
+import { fetch } from 'undici'
 
 getMsOffset(getMs())
 
-import undici from '../utils/undici'
+import type { ArdFeed, ArdLivestream } from '@/types.ard'
+import config from '../../config'
 
-const ARD_FEED_URL = process.env.ARD_FEED_URL
+const ARD_FEED_URL = getRequiredEnv('ARD_FEED_URL')
 const MIN_FEED_PAGE_ITEMS = 251
 const MIN_FEED_ITEMS = 190
 const MAX_FEED_ITEMS = 251
@@ -29,22 +32,22 @@ const source = 'data'
 /**
  * The ARD feed is downloaded and cached in this variable. This is used to avoid multiple downloads of the feed.
  */
-export let ardFeed: any = null
+export let ardFeed: ArdFeed | null = null
 
 export const getARDFeed = async () => {
 	try {
 		// download ard feed
-		const { statusCode, json: feed, ok } = await undici(ARD_FEED_URL, { method: 'GET', timeout: 6e3 })
+		const res = await fetch(ARD_FEED_URL, { signal: AbortSignal.timeout(10e3) })
 
 		// check api
-		if (!ok || statusCode !== 200) return exitWithError(`API is not available (${statusCode})`)
+		if (!res.ok || res.status !== 200) return exitWithError(`API is not available (${res.status})`)
 
+		// parse reponse
+		const feed: ArdFeed = (await res.json()) as ArdFeed
 		if (!feed?.items || !Array.isArray(feed.items)) return exitWithError('Feed is not an array')
 
-		// get feed item count
+		// check integrity of feed length
 		const feedItemCount = feed.items.length
-
-		// check integrity
 		if (!feedItemCount) return exitWithError('Feed is empty')
 
 		// check if feed has enough items
@@ -89,7 +92,7 @@ export const getARDFeed = async () => {
 
 		// check if any expected Station is missing
 		for (const station of STATIONS) {
-			const isStationInFeed = feed.items.some((entry: any) => entry.publisher.title === station)
+			const isStationInFeed = feed.items.some((entry: ArdLivestream) => entry.publisher.title === station)
 
 			if (!isStationInFeed) {
 				return exitWithError(`🚨 ${station} not found in ARD feed!`)
@@ -97,7 +100,10 @@ export const getARDFeed = async () => {
 		}
 
 		// save to local storage
-		fs.writeFileSync(`${__dirname}/../data/ard-core-livestreams.json`, JSON.stringify(feed, null, '\t'))
+		if (config.isLocal) {
+			fs.writeFileSync(`${__dirname}/../data/ard-core-livestreams.json`, JSON.stringify(feed, null, '\t'))
+		}
+
 		logger.log({
 			level: 'info',
 			message: `ARD feed downloaded successfully > ${getMsOffset(START_TIME)}ms`,

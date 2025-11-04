@@ -28,6 +28,7 @@
         "ts-jest": "^29.4.5",
         "typescript": "^5.9.3",
         "ulid": "^3.0.1",
+        "undici": "^7.16.0",
       },
       "devDependencies": {
         "@biomejs/biome": "^2.3.3",
@@ -2148,7 +2149,7 @@
 
     "unbox-primitive": ["unbox-primitive@1.1.0", "", { "dependencies": { "call-bound": "^1.0.3", "has-bigints": "^1.0.2", "has-symbols": "^1.1.0", "which-boxed-primitive": "^1.1.1" } }, "sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw=="],
 
-    "undici": ["undici@7.13.0", "", {}, "sha512-l+zSMssRqrzDcb3fjMkjjLGmuiiK2pMIcV++mJaAc9vhjSGpvM7h43QgP+OAMb1GImHmbPyG2tBXeuyG5iY4gA=="],
+    "undici": ["undici@7.16.0", "", {}, "sha512-QEg3HPMll0o3t2ourKwOeUAZ159Kn9mx5pnzHRQO8+Wixmh88YdZRiIwat0iNzNNXn0yoEtXJqFpyW7eM8BV7g=="],
 
     "undici-types": ["undici-types@7.10.0", "", {}, "sha512-t5Fy/nfn+14LuOc2KNYg75vZqClpAiqscVvMygNnlsHBFpSXdJaYtXMcdNLpl/Qvc3P2cB3s6lOV51nqsFq4ag=="],
 
@@ -2369,6 +2370,8 @@
     "@stylistic/eslint-plugin-js/eslint-visitor-keys": ["eslint-visitor-keys@4.2.1", "", {}, "sha512-Uhdk5sfqcee/9H/rCOJikYz67o0a2Tw2hGRPOG2Y1R2dg7brRe1uG0yaNQDHu+TO/uQPF/5eCapvYSmHUjt7JQ=="],
 
     "@swrlab/utils/luxon": ["luxon@3.7.1", "", {}, "sha512-RkRWjA926cTvz5rAb1BqyWkKbbjzCGchDUIKMCUvNi17j6f6j8uHGDV82Aqcqtzd+icoYpELmG3ksgGiFNNcNg=="],
+
+    "@swrlab/utils/undici": ["undici@7.13.0", "", {}, "sha512-l+zSMssRqrzDcb3fjMkjjLGmuiiK2pMIcV++mJaAc9vhjSGpvM7h43QgP+OAMb1GImHmbPyG2tBXeuyG5iY4gA=="],
 
     "@types/dd-trace/dd-trace": ["dd-trace@5.62.0", "", { "dependencies": { "@datadog/libdatadog": "0.7.0", "@datadog/native-appsec": "10.0.1", "@datadog/native-iast-taint-tracking": "4.0.0", "@datadog/native-metrics": "3.1.1", "@datadog/pprof": "5.9.0", "@datadog/sketches-js": "2.1.1", "@datadog/wasm-js-rewriter": "4.0.1", "@isaacs/ttlcache": "^1.4.1", "@opentelemetry/api": "1.8.0", "@opentelemetry/core": "^1.14.0", "crypto-randomuuid": "^1.0.0", "dc-polyfill": "^0.1.10", "ignore": "^7.0.5", "import-in-the-middle": "^1.14.2", "istanbul-lib-coverage": "^3.2.2", "jest-docblock": "^29.7.0", "jsonpath-plus": "^10.3.0", "koalas": "^1.0.2", "limiter": "^1.1.5", "lodash.sortby": "^4.7.0", "lru-cache": "^10.4.3", "module-details-from-path": "^1.0.4", "mutexify": "^1.4.0", "opentracing": ">=0.14.7", "path-to-regexp": "^0.1.12", "pprof-format": "^2.1.0", "protobufjs": "^7.5.3", "retry": "^0.13.1", "rfdc": "^1.4.1", "semifies": "^1.0.0", "shell-quote": "^1.8.2", "source-map": "^0.7.4", "tlhunter-sorted-set": "^0.1.0", "ttl-set": "^1.0.0" } }, "sha512-mCy1Z2mHVxgiMJRBctrK5/7Ygjk/vB1dvG++bad2Jf/avpAjm4qI8cfiULHzjS9MuP/Bf9n/6eEtA7MVFs8viA=="],
 
