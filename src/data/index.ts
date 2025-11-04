@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import { exitWithError } from '@frytg/check-required-env/exit'
 import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
 
@@ -24,15 +25,6 @@ const STATIONS = [
 ]
 const START_TIME = getMs()
 const source = 'data'
-
-const exitWithError = (message: string) => {
-	logger.log({
-		level: 'error',
-		message: message,
-		source,
-	})
-	process.exit(1)
-}
 
 /**
  * The ARD feed is downloaded and cached in this variable. This is used to avoid multiple downloads of the feed.
@@ -117,6 +109,12 @@ export const getARDFeed = async () => {
 
 		return feed
 	} catch (error) {
-		return exitWithError(`Failed to download ARD feed: ${error}`)
+		logger.log({
+			level: 'error',
+			message: `Failed to download ARD feed: ${error}`,
+			source,
+			error,
+		})
+		return exitWithError('Failed to download ARD feed')
 	}
 }

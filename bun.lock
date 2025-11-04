@@ -4,6 +4,7 @@
     "": {
       "name": "ard-eventhub",
       "dependencies": {
+        "@frytg/check-required-env": "npm:@jsr/frytg__check-required-env",
         "@frytg/dates": "npm:@jsr/frytg__dates",
         "@frytg/logger": "npm:@jsr/frytg__logger",
         "@google-cloud/datastore": "^10.0.1",
@@ -375,6 +376,8 @@
 
     "@firebase/util": ["@firebase/util@1.10.0", "", { "dependencies": { "tslib": "^2.1.0" } }, "sha512-xKtx4A668icQqoANRxyDLBLz51TAbDP9KRfpbKGxiCAW346d0BeJe5vN6/hKxxmWwnZ0mautyv39JxviwwQMOQ=="],
 
+    "@frytg/check-required-env": ["@jsr/frytg__check-required-env@0.2.0", "https://npm.jsr.io/~/11/@jsr/frytg__check-required-env/0.2.0.tgz", { "dependencies": { "@jsr/frytg__logger": "0.0.2" } }, "sha512-RX3WPkM41u5e21MQ7axcAHreRuVTWlLY9+wsMLdIdIBr7ccsAwyK86K/HQXHj7DDiIRhyHCFaudyxEH5vHuVzA=="],
+
     "@frytg/dates": ["@jsr/frytg__dates@0.3.0", "https://npm.jsr.io/~/11/@jsr/frytg__dates/0.3.0.tgz", { "dependencies": { "@jsr/std__fmt": "^1.0.3", "@types/luxon": "^3.4.2", "luxon": "^3.6.1" } }, "sha512-tzSrzAZ4MmnEm+x7g0yUm7Z5v0QkncESh1z5SOOFwCOzyHm3ryXhWUn3oBMfOAwpGBkZv8LOpNr3W0XYLrwq3A=="],
 
     "@frytg/logger": ["@jsr/frytg__logger@0.0.3", "https://npm.jsr.io/~/11/@jsr/frytg__logger/0.0.3.tgz", { "dependencies": { "winston": "^3.17.0" } }, "sha512-YHuFNLeDO23Pw0cHgbqzlcKyL0T2n4cxwYNY7zTolg8N9rd5bx4SddSoVGNe7SNP6FRKqm7qJNu2wxoDOV3pdw=="],
@@ -476,6 +479,8 @@
     "@jsep-plugin/assignment": ["@jsep-plugin/assignment@1.3.0", "", { "peerDependencies": { "jsep": "^0.4.0||^1.0.0" } }, "sha512-VVgV+CXrhbMI3aSusQyclHkenWSAm95WaiKrMxRFam3JSUiIaQjoMIw2sEs/OX4XifnqeQUN4DYbJjlA8EfktQ=="],
 
     "@jsep-plugin/regex": ["@jsep-plugin/regex@1.0.4", "", { "peerDependencies": { "jsep": "^0.4.0||^1.0.0" } }, "sha512-q7qL4Mgjs1vByCaTnDFcBnV9HS7GVPJX5vyVoCgZHNSC9rjwIlmbXG5sUuorR5ndfHAIlJ8pVStxvjXHbNvtUg=="],
+
+    "@jsr/frytg__logger": ["@jsr/frytg__logger@0.0.2", "https://npm.jsr.io/~/11/@jsr/frytg__logger/0.0.2.tgz", { "dependencies": { "winston": "^3.17.0" } }, "sha512-pV+AKXdAW5ljR71TYOqemsSpEHyTqyF3p5Mqqk6ujf4KDVP5KXEMgyhfkJ0yYDJA4L43OKCfa4BAyjwenkHGpA=="],
 
     "@jsr/std__fmt": ["@jsr/std__fmt@1.0.8", "https://npm.jsr.io/~/11/@jsr/std__fmt/1.0.8.tgz", {}, "sha512-miZHzj9OgjuajrcMKzpqNVwFb9O71UHZzV/FHVq0E0Uwmv/1JqXgmXAoBNPrn+MP0fHT3mMgaZ6XvQO7dam67Q=="],
 
