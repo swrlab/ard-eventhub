@@ -5,8 +5,8 @@
 
 */
 
-// load utils
-import logger from '../logger'
+import logger from '@frytg/logger'
+
 import undici from '../undici'
 
 const source = 'firebase.sendPasswordResetEmail'

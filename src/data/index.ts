@@ -1,5 +1,6 @@
 import fs from 'node:fs'
-import logger from '../utils/logger'
+import logger from '@frytg/logger'
+
 import undici from '../utils/undici'
 
 const ARD_FEED_URL = process.env.ARD_FEED_URL

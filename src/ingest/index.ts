@@ -5,12 +5,12 @@
 
 */
 
+import logger from '@frytg/logger'
 import compression from 'compression'
 import express from 'express'
 import config from '../../config'
 
 import { getARDFeed } from '../data/index.ts'
-import logger from '../utils/logger/index.ts'
 import router from './router.ts'
 
 await getARDFeed()

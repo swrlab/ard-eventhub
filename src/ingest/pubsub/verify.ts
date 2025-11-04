@@ -5,15 +5,13 @@
 
 */
 
+import logger from '@frytg/logger'
 import type { NextFunction, Response } from 'express'
 import { OAuth2Client } from 'google-auth-library'
 
 import type UserTicketRequest from './userTicketRequest.ts'
 
 const authClient = new OAuth2Client()
-
-// load utils
-import logger from '../../utils/logger'
 
 // set config
 const serviceAccountEmail = process.env.PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL

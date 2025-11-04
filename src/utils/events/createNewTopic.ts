@@ -5,15 +5,13 @@
 
 */
 
-// load node utils
+import logger from '@frytg/logger'
 import { DateTime } from 'luxon'
+import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 
-// load eventhub utils
 import core from '../core'
 import datastore from '../datastore'
-import logger from '../logger'
 import pubsub from '../pubsub'
-import UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 
 const source = 'utils.events.createNewTopic'
 

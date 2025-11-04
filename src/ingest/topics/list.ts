@@ -4,8 +4,9 @@
 	by SWR Audio Lab
 
 */
+import logger from '@frytg/logger'
 import type { Request, Response } from 'express'
-import logger from '../../utils/logger'
+
 import pubsub from '../../utils/pubsub'
 import response from '../../utils/response'
 

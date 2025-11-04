@@ -5,13 +5,13 @@
 
 */
 
+import logger from '@frytg/logger'
 import type { Response } from 'express'
 import { DateTime } from 'luxon'
 import { ulid } from 'ulid'
 
 import config from '../../../config'
 import { createNewTopic, processServices } from '../../utils/events'
-import logger from '../../utils/logger'
 import pubsub from '../../utils/pubsub'
 import response from '../../utils/response'
 import type UserTokenRequest from '../auth/middleware/userTokenRequest.ts'

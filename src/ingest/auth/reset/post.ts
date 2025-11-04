@@ -5,10 +5,10 @@
 
 */
 
+import logger from '@frytg/logger'
 import type { Request, Response } from 'express'
 
 import firebase from '../../../utils/firebase'
-import logger from '../../../utils/logger'
 import response from '../../../utils/response'
 
 const source = 'ingest/auth/reset'

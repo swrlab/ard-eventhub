@@ -5,18 +5,12 @@
 
 */
 
-// load node utils
+import logger from '@frytg/logger'
 import { isIncluded, notEmptyArray } from '@swrlab/utils/packages/strings'
 
-// load utils
-import logger from '../../logger'
-import undici from '../../undici'
-
-// load keys
-import dts from '../../../../config/dts-keys'
-
-// load config
 import config from '../../../../config'
+import dts from '../../../../config/dts-keys'
+import undici from '../../undici'
 
 const source = 'utils/plugins/dts/event'
 
@@ -27,14 +21,11 @@ const DEFAULT_HEADERS = {
 const LIVERADIO_URL = dts.endpoints.liveRadioEvent[config.stage as keyof typeof dts.endpoints.liveRadioEvent]
 
 // provide remapping helpers
-const getCoreIds = (services: any) =>
-	services.map((service: any) => service.topic.id)
+const getCoreIds = (services: any) => services.map((service: any) => service.topic.id)
 
 const getUserForInstitution = (institutionId: string) => {
 	// get user or reject if not found
-	const liveradioUser = dts.credentials.liveradio.find(
-		(user: any) => user.coreId === institutionId
-	)
+	const liveradioUser = dts.credentials.liveradio.find((user: any) => user.coreId === institutionId)
 	if (!liveradioUser) return { token: null, username: null }
 
 	// encode token
@@ -84,21 +75,18 @@ export default async (job: any) => {
 		title: event.title as any | null,
 		isrc: event.isrc as any | null,
 		email: plugin?.email as any | null,
-		duration: Number.parseInt(event.length) as number | null,
+		duration: Number.parseInt(event.length, 10) as number | null,
 
-		delay: plugin?.delay || 0 as any | null,
-		album: plugin?.album || null as any | null,
-		composer: plugin?.composer || null as any | null,
-		program: plugin?.program || null as any | null,
-		subject: plugin?.subject || null as any | null,
-		webURL: plugin?.webUrl || null as any | null,
+		delay: plugin?.delay || (0 as any | null),
+		album: plugin?.album || (null as any | null),
+		composer: plugin?.composer || (null as any | null),
+		program: plugin?.program || (null as any | null),
+		subject: plugin?.subject || (null as any | null),
+		webURL: plugin?.webUrl || (null as any | null),
 		enableShare: !!plugin?.webUrl as any | null,
 
 		enableThumbs:
-			plugin?.enableThumbs === true ||
-			plugin?.enableThumbs === false
-				? plugin.enableThumbs
-				: true as boolean | null,
+			plugin?.enableThumbs === true || plugin?.enableThumbs === false ? plugin.enableThumbs : (true as boolean | null),
 		year: null as any | null,
 		fccId: null as any | null,
 		imageURL: null as string | null,
@@ -106,15 +94,9 @@ export default async (job: any) => {
 
 	// set thumbnail
 	const mediaType = plugin?.preferArtistMedia ? 'artist' : 'cover'
-	const media = event.media?.find(
-		(thisMedia) => thisMedia.type === mediaType
-	)
+	const media = event.media?.find((thisMedia) => thisMedia.type === mediaType)
 	if (media) {
-		liveRadioEvent.imageURL =
-			media.url ||
-			media.templateUrl
-				.replace('{width}', 512)
-				.replace('{height}', 512)
+		liveRadioEvent.imageURL = media.url || media.templateUrl.replace('{width}', 512).replace('{height}', 512)
 	}
 
 	// handle exclusions
@@ -128,8 +110,7 @@ export default async (job: any) => {
 	}
 
 	// set event host and auth
-	const { token: liveradioToken, username } =
-		getUserForInstitution(institutionId)
+	const { token: liveradioToken, username } = getUserForInstitution(institutionId)
 	if (!LIVERADIO_URL || !liveradioToken) {
 		logger.log({
 			level: 'error',

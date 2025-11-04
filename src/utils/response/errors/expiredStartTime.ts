@@ -5,11 +5,11 @@
 
 */
 
-// load eventhub utils
-import logger from '../../logger'
+import logger from '@frytg/logger'
+import type { Response } from 'express'
+
+import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 import badRequest from '../badRequest.ts'
-import UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
-import { Response } from 'express'
 
 const source = 'utils.response.errors.expiredStartTime'
 

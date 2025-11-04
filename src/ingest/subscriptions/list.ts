@@ -5,10 +5,10 @@
 
 */
 
+import logger from '@frytg/logger'
 import type { Response } from 'express'
 
 import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
-import logger from '../../utils/logger'
 import pubsub from '../../utils/pubsub'
 import response from '../../utils/response'
 

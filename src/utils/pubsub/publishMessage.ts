@@ -5,15 +5,15 @@
 
 */
 
-// load pubsub for internal queues
-import logger from '../logger'
-import pubSubClient from './_client'
+import logger from '@frytg/logger'
+
 import config from '../../../config'
+import pubSubClient from './_client'
 
 // set local config
 const source = 'pubsub.publishMessage'
 
-export default async (topic:string, message:any, attributes:any) => {
+export default async (topic: string, message: any, attributes: any) => {
 	// initialize output
 	let output: string
 
@@ -27,10 +27,7 @@ export default async (topic:string, message:any, attributes:any) => {
 	// send message for each topic
 	try {
 		// attempt to send message
-		output = await pubSubClient
-			.topic(topic)
-			.publishJSON(message, customAttributes)
-
+		output = await pubSubClient.topic(topic).publishJSON(message, customAttributes)
 	} catch (error: any) {
 		if (error.code === 5) {
 			output = 'TOPIC_NOT_FOUND'

@@ -12,8 +12,7 @@
 		"docs:serve": "docsify serve . --port 3000",
 		"coreId": "bun run ./src/coreId/index.ts",
 		"ingest": "bun run ./src/ingest/index.ts",
-		"ingest:test:local": "jest",
-		"ingest:test": "jest --ci --forceExit",
+		"ingest:test": "bun test src/ingest/ingest.test.ts",
 		"lint": "biome lint",
 		"docker:build": "docker build . -t swr/ard-eventhub",
 		"docker:run": "docker run --env-file .env -p 8080:8080 --name ard-eventhub swr/ard-eventhub",
@@ -31,6 +30,7 @@
 	"author": "SWR Audio Lab <lab@swr.de>",
 	"license": "EUPL-1.2",
 	"dependencies": {
+		"@frytg/logger": "npm:@jsr/frytg__logger",
 		"@google-cloud/datastore": "^10.0.1",
 		"@google-cloud/pubsub": "^5.2.0",
 		"@google-cloud/secret-manager": "^6.1.1",
@@ -51,8 +51,7 @@
 		"swagger-ui-express": "^5.0.1",
 		"ts-jest": "^29.4.5",
 		"typescript": "^5.9.3",
-		"ulid": "^3.0.1",
-		"winston": "^3.18.3"
+		"ulid": "^3.0.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.3",

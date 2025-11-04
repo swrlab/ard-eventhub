@@ -5,11 +5,11 @@
 
 */
 
+import logger from '@frytg/logger'
 import type { NextFunction, Response } from 'express'
 
 import datastore from '../../../utils/datastore'
 import firebase from '../../../utils/firebase'
-import logger from '../../../utils/logger'
 import type UserTokenRequest from './userTokenRequest.ts'
 
 const source = 'ingest/auth/middleware/verify'
