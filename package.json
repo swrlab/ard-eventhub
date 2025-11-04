@@ -1,6 +1,6 @@
 {
 	"name": "ard-eventhub",
-	"version": "2.0.2",
+	"version": "2.1.0",
 	"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
 	"main": "./src/ingest/index.ts",
 	"engines": {
@@ -11,8 +11,7 @@
 	"scripts": {
 		"docs:serve": "docsify serve . --port 3000",
 		"coreId": "bun run ./src/coreId/index.ts",
-		"ingest:local": "bun run --env-file=.env --env-file=./node_modules/nodemon/bin/nodemon ./src/ingest/index.ts",
-		"ingest:cloud": "bun run ./src/ingest/index.ts",
+		"ingest": "bun run ./src/ingest/index.ts",
 		"ingest:test:local": "jest",
 		"ingest:test": "jest --ci --forceExit",
 		"lint": "biome lint",

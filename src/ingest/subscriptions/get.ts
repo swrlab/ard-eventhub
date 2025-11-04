@@ -5,13 +5,12 @@
 
 */
 
-// load eventhub utils
+import type { Response } from 'express'
+import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
+
 import logger from '../../utils/logger'
 import pubsub from '../../utils/pubsub'
 import response from '../../utils/response'
-
-import { Response } from 'express'
-import UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 
 const source = 'ingest/subscriptions/get'
 
@@ -19,17 +18,17 @@ export default async (req: UserTokenRequest, res: Response) => {
 	try {
 		// preset vars
 		const { subscriptionName } = req.params
-		let limitedSubscription : {
-			type: string;
-			method: string;
-			name: any;
-			path: string | null | undefined;
-			topic: { id: string; name: any; path: any };
-			ackDeadlineSeconds: any;
-			retryPolicy: any;
-			serviceAccount: any;
-			url: any;
-			contact: any;
+		let limitedSubscription: {
+			type: string
+			method: string
+			name: any
+			path: string | null | undefined
+			topic: { id: string; name: any; path: any }
+			ackDeadlineSeconds: any
+			retryPolicy: any
+			serviceAccount: any
+			url: any
+			contact: any
 			institutionId: any
 		}
 

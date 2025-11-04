@@ -7,13 +7,12 @@
 
 */
 
-// Require dependencies
-import { DateTime } from 'luxon'
-import request, { Response } from 'supertest'
-
-import { default as server } from './index'
-import logger from '../utils/logger'
 import { beforeAll, describe, expect, it } from '@jest/globals'
+import { DateTime } from 'luxon'
+import request, { type Response } from 'supertest'
+
+import logger from '../utils/logger'
+import { default as server } from './index'
 
 const exitWithError = (message: string) => {
 	logger.log({
@@ -35,9 +34,7 @@ const testUserReset = process.env.TEST_USER_RESET
 
 // define general tests
 function testResponse(res: Response, status: number) {
-	console.log(
-		`comparing response with statusCode ${res.statusCode} (should be ${status})`
-	)
+	console.log(`comparing response with statusCode ${res.statusCode} (should be ${status})`)
 
 	expect(isJson(res)).toBe(true)
 	expect(res.status).toBe(status)
@@ -47,7 +44,7 @@ function isJson(item: any) {
 	let value = typeof item !== 'string' ? JSON.stringify(item) : item
 	try {
 		value = JSON.parse(value)
-	} catch (e) {
+	} catch (_e) {
 		return false
 	}
 
@@ -90,15 +87,13 @@ function testAuthKeys(body: any) {
 	//expect(body.user.email_verified).toBeInstanceOf(Boolean)
 }
 
-async function login() {
+async function _login() {
 	const loginRequest = {
 		email: testUser,
 		password: testUserPass,
 	}
 
-	const response = await request(server)
-		.post(loginPath)
-		.send(loginRequest)
+	const response = await request(server).post(loginPath).send(loginRequest)
 
 	return response
 }
@@ -220,9 +215,7 @@ const event = {
 	references: [
 		{
 			type: 'Show',
-			externalId: 'crid://swr.de/my-show/1234567' as
-				| string
-				| null,
+			externalId: 'crid://swr.de/my-show/1234567' as string | null,
 			alternateIds: [
 				'https://normdb.ivz.cn.ard.de/sendereihe/427',
 				'urn:ard:show:027708befb6bfe14',
@@ -231,9 +224,7 @@ const event = {
 		},
 		{
 			type: 'Article',
-			externalId: 'crid://dlf.de/article/1234567' as
-				| string
-				| null,
+			externalId: 'crid://dlf.de/article/1234567' as string | null,
 			title: 'Kommerzielle US-Raumfahrt - Die neue Weltraumökonomie',
 			url: 'https://www.deutschlandfunkkultur.de/kommerzielle-us-raumfahrt-die-neue-weltraumoekonomie-100.html',
 		},
@@ -408,9 +399,7 @@ describe(`POST ${eventRadioTextPath}`, () => {
 	})
 
 	it('publish a new event with expired time', (done) => {
-		eventRadioText.start = DateTime.now()
-			.minus({ minutes: 3 })
-			.toISO()
+		eventRadioText.start = DateTime.now().minus({ minutes: 3 }).toISO()
 		request(server)
 			.post(eventRadioTextPath)
 			.set('Authorization', `Bearer ${accessToken}`)
@@ -491,9 +480,7 @@ describe(`GET ${topicPath}`, () => {
 					console.log(res.body)
 					const isArray = Array.isArray(res.body)
 					expect(isArray).toBeTruthy()
-					res.body.every((i: any) =>
-						testTopicKeys(i)
-					)
+					res.body.every((i: any) => testTopicKeys(i))
 					topicName = res.body[0].id
 					done()
 				} catch (e: any) {
@@ -621,9 +608,7 @@ describe(`GET ${subscriptPath}`, () => {
 			.end((_err, res) => {
 				try {
 					testResponse(res, 200)
-					res.body.every((i: any) =>
-						testSubscriptionKeys(i)
-					)
+					res.body.every((i: any) => testSubscriptionKeys(i))
 					done()
 				} catch (e: any) {
 					console.error(e)

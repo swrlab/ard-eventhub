@@ -4,7 +4,7 @@
 	by SWR Audio Lab
 
 */
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 import logger from '../../utils/logger'
 import pubsub from '../../utils/pubsub'
 import response from '../../utils/response'

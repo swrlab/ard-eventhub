@@ -5,13 +5,13 @@
 
 */
 
-// load eventhub utils
+import type { Response } from 'express'
+import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
+
 import datastore from '../../utils/datastore'
 import logger from '../../utils/logger'
 import pubsub from '../../utils/pubsub'
 import response from '../../utils/response'
-import { Response } from 'express'
-import UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 
 const source = 'ingest/subscriptions/delete'
 
@@ -40,8 +40,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		// load single subscription to get owner
 		try {
-			const subscription =
-				await pubsub.getSubscription(subscriptionName)
+			const subscription = await pubsub.getSubscription(subscriptionName)
 			fullSubscription = subscription.full
 		} catch (error: any) {
 			logger.log({
@@ -83,7 +82,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		await pubsub.deleteSubscription(subscriptionName)
 
 		// also delete from datastore
-		const subscriptionId = Number.parseInt(fullSubscription.labels.id)
+		const subscriptionId = Number.parseInt(fullSubscription.labels.id, 10)
 		await datastore.delete('subscriptions', subscriptionId.toString())
 
 		// log progress

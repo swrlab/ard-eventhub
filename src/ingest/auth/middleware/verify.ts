@@ -5,12 +5,12 @@
 
 */
 
-// load utils
+import type { NextFunction, Response } from 'express'
+
 import datastore from '../../../utils/datastore'
 import firebase from '../../../utils/firebase'
 import logger from '../../../utils/logger'
-import { NextFunction, Response } from 'express'
-import UserTokenRequest from './userTokenRequest.ts'
+import type UserTokenRequest from './userTokenRequest.ts'
 
 const source = 'ingest/auth/middleware/verify'
 const ERROR_JSON = { message: 'Forbidden', errors: [], status: 403 }
@@ -32,7 +32,7 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 			return res.sendStatus(401)
 		}
 		// extract token
-		[authorization] = authorization.match(regexp)!
+		;[authorization] = authorization.match(regexp)!
 
 		// validate JWT token with firebase
 		try {

@@ -5,9 +5,8 @@
 
 */
 
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 
-// load eventhub utils
 import firebase from '../../../utils/firebase'
 import logger from '../../../utils/logger'
 import response from '../../../utils/response'

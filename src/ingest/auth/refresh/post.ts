@@ -5,15 +5,13 @@
 
 */
 
-// load node utils
+import type { Request, Response } from 'express'
+import type { JwtPayload } from 'jsonwebtoken'
 import { DateTime } from 'luxon'
 
-// load eventhub utils
 import firebase from '../../../utils/firebase'
 import logger from '../../../utils/logger'
 import response from '../../../utils/response'
-import { Request, Response } from 'express'
-import { JwtPayload } from 'jsonwebtoken'
 
 const source = 'ingest/auth/refresh'
 
@@ -26,20 +24,16 @@ export default async (req: Request, res: Response) => {
 
 		// swap previously received refresh token for new id token
 		try {
-			login = await firebase.refreshToken(
-				req.body.refreshToken
-			)
+			login = await firebase.refreshToken(req.body.refreshToken)
 		} catch (_error) {
 			return response.badRequest(req, res, { status: 500 })
 		}
 
 		// return ok
-		const expiresIn = Number.parseInt(login.login.expires_in)
+		const expiresIn = Number.parseInt(login.login.expires_in, 10)
 		return response.ok(req, res, {
 			expiresIn,
-			expires: DateTime.now()
-				.plus({ seconds: expiresIn })
-				.toISO(),
+			expires: DateTime.now().plus({ seconds: expiresIn }).toISO(),
 
 			token: login.login.id_token,
 			refreshToken: login.login.refresh_token,

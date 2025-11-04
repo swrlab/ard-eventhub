@@ -5,18 +5,12 @@
 
 */
 // load api feed (needed to get the file initialized)
-import _feed from '../../data'
+import { ardFeed } from '../../data/index.ts'
 
 export default async (publisherId: string) => {
-	const ardFeed = import('../../data/ard-core-livestreams.json')
+	const publisher = ardFeed?.items?.find((entry: any) => {
+		return publisherId === entry.publisher.id ? entry.publisher : null
+	})
 
-	const publisher = await ardFeed.then((feed) =>
-		feed.items.find((entry: any) => {
-			return publisherId === entry.publisher.id
-				? entry.publisher
-				: null
-		})
-	)
-
-	return Promise.resolve(publisher)
+	return publisher
 }

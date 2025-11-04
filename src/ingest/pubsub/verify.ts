@@ -5,11 +5,10 @@
 
 */
 
-// load node packages
+import type { NextFunction, Response } from 'express'
 import { OAuth2Client } from 'google-auth-library'
 
-import { NextFunction, Response } from 'express'
-import UserTicketRequest from './userTicketRequest.ts'
+import type UserTicketRequest from './userTicketRequest.ts'
 
 const authClient = new OAuth2Client()
 
@@ -20,11 +19,7 @@ import logger from '../../utils/logger'
 const serviceAccountEmail = process.env.PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL
 const source = 'ingest/pubsub/verify'
 
-export default async (
-	req: UserTicketRequest,
-	res: Response,
-	next: NextFunction
-) => {
+export default async (req: UserTicketRequest, res: Response, next: NextFunction) => {
 	try {
 		// read token from header
 		const bearer = req.header('Authorization')

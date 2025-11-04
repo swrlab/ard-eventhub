@@ -12,7 +12,7 @@ coreId text:
 
 # start the ingest service in development mode
 dev:
-	bun run ingest:local
+	bun run ingest
 
 # serve the documentation
 docs:

@@ -1,7 +1,6 @@
-// load utils
-import undici from '../utils/undici'
 import fs from 'node:fs'
 import logger from '../utils/logger'
+import undici from '../utils/undici'
 
 const ARD_FEED_URL = process.env.ARD_FEED_URL
 const MIN_FEED_PAGE_ITEMS = 251
@@ -19,38 +18,33 @@ const STATIONS = [
 	'hr3',
 	'hr4',
 ]
+const source = 'data'
 
 const exitWithError = (message: string) => {
 	logger.log({
 		level: 'error',
 		message: message,
-		source: 'Livestream Data',
-		error: Error(message),
-		data: {},
+		source,
 	})
 	process.exit(1)
 }
 
-const getARDFeed = async () => {
+/**
+ * The ARD feed is downloaded and cached in this variable. This is used to avoid multiple downloads of the feed.
+ */
+export let ardFeed: any = null
+
+export const getARDFeed = async () => {
 	// download ard feed
-	const {
-		statusCode,
-		json: feed,
-		ok,
-	} = await undici(ARD_FEED_URL, {
-		method: 'GET',
-		timeout: 4e3,
-	})
+	const { statusCode, json: feed, ok } = await undici(ARD_FEED_URL, { method: 'GET', timeout: 6e3 })
 
 	// check api
-	if (!ok || statusCode !== 200)
-		return exitWithError(`API is not available (${statusCode})`)
+	if (!ok || statusCode !== 200) return exitWithError(`API is not available (${statusCode})`)
 
 	const feedItemCount = feed.items.length
 
 	// check integrity
-	if (!feed || !feed.items || !feedItemCount)
-		return exitWithError('Feed is empty')
+	if (!feed || !feed.items || !feedItemCount) return exitWithError('Feed is empty')
 
 	// check if feed has enough items
 	if (feed.pageItemCount < MIN_FEED_PAGE_ITEMS) {
@@ -59,14 +53,10 @@ const getARDFeed = async () => {
 		logger.log({
 			level: 'error',
 			message: message,
-			source: 'Livestream Data',
-			error: Error(message),
-			data: {},
+			source,
 		})
 
-		return exitWithError(
-			`pageItemCount is too small > ${feed.pageItemCount}`
-		)
+		return exitWithError(`pageItemCount is too small > ${feed.pageItemCount}`)
 	}
 
 	// check if feed has enough items
@@ -75,14 +65,10 @@ const getARDFeed = async () => {
 		logger.log({
 			level: 'error',
 			message: message,
-			source: 'Livestream Data',
-			error: Error(message),
-			data: {},
+			source,
 		})
 
-		return exitWithError(
-			`pageItemCount is too small > ${feedItemCount}`
-		)
+		return exitWithError(`pageItemCount is too small > ${feedItemCount}`)
 	}
 
 	// check if feed has too many items
@@ -91,46 +77,34 @@ const getARDFeed = async () => {
 		logger.log({
 			level: 'error',
 			message: message,
-			source: 'Livestream Data',
-			error: Error(message),
-			data: {},
+			source,
 		})
 
-		return exitWithError(
-			`pageItemCount is too high > ${feedItemCount}`
-		)
+		return exitWithError(`pageItemCount is too high > ${feedItemCount}`)
 	}
 
 	// check for pagination
-	if (feed.totalPageCount > 1)
-		return exitWithError('Pagination is not supported')
+	if (feed.totalPageCount > 1) return exitWithError('Pagination is not supported')
 
 	// check if any expected Station is missing
 	for (const station of STATIONS) {
-		const isStationInFeed = feed.items.some(
-			(entry: any) => entry.publisher.title === station
-		)
+		const isStationInFeed = feed.items.some((entry: any) => entry.publisher.title === station)
 
 		if (!isStationInFeed) {
-			return exitWithError(
-				`🚨 ${station} not found in ARD feed!`
-			)
+			return exitWithError(`🚨 ${station} not found in ARD feed!`)
 		}
 	}
 
 	// save to local storage
-	fs.writeFileSync(
-		`${__dirname}/../data/ard-core-livestreams.json`,
-		JSON.stringify(feed, null, '\t')
-	)
+	fs.writeFileSync(`${__dirname}/../data/ard-core-livestreams.json`, JSON.stringify(feed, null, '\t'))
 	logger.log({
 		level: 'info',
 		message: 'ARD feed downloaded successfully',
-		source: 'Livestream Data',
-		data: {},
+		source,
 	})
+
+	// save to global variable
+	ardFeed = feed
 
 	return feed
 }
-
-export default getARDFeed

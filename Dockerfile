@@ -1,5 +1,5 @@
 # select bun
-FROM oven/bun:1-alpine as base
+FROM oven/bun:1-alpine
 
 # Create app directory
 WORKDIR /web/app
@@ -14,4 +14,4 @@ RUN bun install --frozen-lockfile --production
 EXPOSE 80
 
 # Run app
-CMD [ "bun", "run", "ingest:cloud" ]
+CMD [ "bun", "run", "ingest" ]

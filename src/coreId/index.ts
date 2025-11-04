@@ -8,7 +8,7 @@
 */
 
 // load utils
-// @ts-ignore
+// @ts-expect-error
 import { createHashedId } from '@swrlab/utils/packages/ard'
 
 // parse input

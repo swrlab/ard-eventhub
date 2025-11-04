@@ -5,13 +5,12 @@
 
 */
 
-// load eventhub utils
+import type { Response } from 'express'
+
+import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 import logger from '../../utils/logger'
 import pubsub from '../../utils/pubsub'
 import response from '../../utils/response'
-
-import { Response } from 'express'
-import UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 
 const source = 'ingest/subscriptions/list'
 
@@ -21,11 +20,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		let subscriptions = await pubsub.getSubscriptions()
 
 		// verify if user is allowed to list subscriptions (same institution)
-		subscriptions = subscriptions.filter(
-			(subscription: any) =>
-				subscription?.institutionId ===
-				req.user.institutionId
-		)
+		subscriptions = subscriptions.filter((subscription: any) => subscription?.institutionId === req.user.institutionId)
 
 		// return data
 		return res.status(200).json(subscriptions)

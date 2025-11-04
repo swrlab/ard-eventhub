@@ -5,24 +5,15 @@
 
 */
 
-// enable tracing
-import _utils from '../utils/tracer'
-
-// load node utils
 import compression from 'compression'
 import express from 'express'
-
-// load utils
-import logger from '../utils/logger/index.ts'
-
-// load config
-import router from './router.ts'
-
 import config from '../../config'
 
-// get initial feed
-import getARDFeed from '../data'
-getARDFeed()
+import { getARDFeed } from '../data/index.ts'
+import logger from '../utils/logger/index.ts'
+import router from './router.ts'
+
+await getARDFeed()
 
 // set up express server
 const server = express()

@@ -5,9 +5,8 @@
 
 */
 
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 
-// load utils
 import logger from '../../utils/logger'
 import plugins from '../../utils/plugins'
 

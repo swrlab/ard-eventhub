@@ -5,19 +5,17 @@
 
 */
 
-// load node utils
+import type { Response } from 'express'
 import { DateTime } from 'luxon'
 import { ulid } from 'ulid'
 
-// load eventhub utils
+import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
+import config from '../../../config'
+import { ardFeed } from '../../data/index.ts'
 import datastore from '../../utils/datastore'
 import logger from '../../utils/logger'
 import pubsub from '../../utils/pubsub'
 import response from '../../utils/response'
-import config from '../../../config'
-
-import { Response } from 'express'
-import UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 
 // load api feed (needed to get the file initialized)
 
@@ -26,22 +24,15 @@ const source = 'ingest/subscriptions/post'
 export default async (req: UserTokenRequest, res: Response) => {
 	try {
 		// fetch user from request
-		const user = req.user!!
+		const user = req.user!
 
 		// generate subscription name
 		const prefix = `${config.pubSubPrefix}subscription.`
 
 		// check existence of user institution
-		const ardFeed = import('../../data/ard-core-livestreams.json')
-
-		const institutionExists = await ardFeed.then((feed) =>
-			feed.items.some((entry: any) => {
-				return (
-					user.institutionId ===
-					entry.publisher.institution.id
-				)
-			})
-		)
+		const institutionExists = ardFeed?.items?.some((entry: any) => {
+			return user.institutionId === entry.publisher.institution.id
+		})
 
 		// check if user has institution set
 		if (!institutionExists) {
@@ -86,11 +77,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		}
 
 		// save to datastore
-		subscription = await datastore.save(
-			subscription,
-			'subscriptions',
-			null
-		)
+		subscription = await datastore.save(subscription, 'subscriptions', null)
 
 		// check existence of topic
 		try {
@@ -116,8 +103,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		}
 
 		// request creation of subscription
-		const createdSubscription =
-			await pubsub.createSubscription(subscription)
+		const createdSubscription = await pubsub.createSubscription(subscription)
 
 		// return data
 		return res.status(201).json(createdSubscription)
