@@ -68,7 +68,7 @@ export default async (service: any, req: UserTokenRequest) => {
 	}
 
 	// check allowed institutions for current user
-	if (!req.user || req.user.institutionId !== publisher?.publisher.institution.id) {
+	if (!req.user || req.user.institutionId !== publisher?.institution.id) {
 		// set blocked flag to be filtered out
 		service.blocked = 'User unauthorized for service'
 
@@ -80,7 +80,7 @@ export default async (service: any, req: UserTokenRequest) => {
 			data: {
 				service,
 				user: req.user,
-				publisher: publisher?.publisher.institution,
+				institution: publisher?.institution,
 				originalPublisherId,
 			},
 		})
