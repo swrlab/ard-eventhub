@@ -21,6 +21,7 @@ const DEFAULT_ZONE = 'Europe/Berlin'
 
 // feature flags
 const IS_COMMON_TOPIC_ENABLED = true
+const MAX_OFFSET_IN_MINUTES = 15
 
 export default async (req: UserTokenRequest, res: Response) => {
 	try {
@@ -37,7 +38,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		}
 
 		// check offset for start event
-		if (start.plus({ minutes: 2 }) < DateTime.now()) {
+		if (start.plus({ minutes: MAX_OFFSET_IN_MINUTES }) < DateTime.now()) {
 			return response.errors.expiredStartTime(req, res)
 		}
 

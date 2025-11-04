@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fix: proper publisher lookup
 - refact: replace logger import
 - refact: migrate tests from jest to `bun:test`
+- chore: allow higher expired offset for events
 
 ## [2.0.2] - 2025-10-28
 
