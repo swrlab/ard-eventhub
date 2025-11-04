@@ -220,7 +220,7 @@ describe(`POST ${eventPath}`, () => {
 	})
 
 	it('publish a new event with expired time', async () => {
-		event.start = DateTime.now().minus({ minutes: 3 }).toISO()
+		event.start = DateTime.now().minus({ minutes: 20 }).toISO()
 		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
 		testResponse(res, 400)
 	})
@@ -279,7 +279,7 @@ describe(`POST ${eventRadioTextPath}`, () => {
 	})
 
 	it('publish a new event with expired time', async () => {
-		eventRadioText.start = DateTime.now().minus({ minutes: 3 }).toISO()
+		eventRadioText.start = DateTime.now().minus({ minutes: 20 }).toISO()
 		const res = await request(server)
 			.post(eventRadioTextPath)
 			.set('Authorization', `Bearer ${accessToken}`)
