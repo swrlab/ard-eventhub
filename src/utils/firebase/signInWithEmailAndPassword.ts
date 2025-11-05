@@ -12,7 +12,7 @@ import undici from '../undici'
 
 const source = 'firebase.signInWithEmailAndPassword'
 
-export default async (email: any, password: any) => {
+export default async (email: string, password: string) => {
 	// set firebase sign in url
 	const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY}`
 

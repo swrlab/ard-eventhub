@@ -9,15 +9,49 @@ import logger from '@frytg/logger'
 import { DateTime } from 'luxon'
 import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 
+import type { EventhubService } from '@/types.eventhub.ts'
 import { getPublisherById } from '../ard-core.ts'
 import datastore from '../datastore'
 import pubsub from '../pubsub'
 
 const source = 'utils.events.createNewTopic'
 
-export default async (service: any, req: UserTokenRequest) => {
+export default async (service: EventhubService, req: UserTokenRequest) => {
+	// check if user is present
+	if (!req.user?.email) {
+		logger.log({
+			level: 'notice',
+			message: 'user not found',
+			source,
+			data: { ...req.headers, authorization: 'hidden' },
+		})
+		throw new Error('User not found')
+	}
+
+	// check if topic is present
+	if (!service.topic) {
+		logger.log({
+			level: 'notice',
+			message: 'topic not found',
+			source,
+			data: { service },
+		})
+		throw new Error('Topic not found')
+	}
+
 	// fetch publisher
 	const publisher = getPublisherById(service.publisherId)
+
+	// check if publisher is present
+	if (!publisher) {
+		logger.log({
+			level: 'notice',
+			message: 'publisher not found',
+			source,
+			data: { service },
+		})
+		throw new Error('Publisher not found')
+	}
 
 	// try creating new topic
 	const newTopic = {

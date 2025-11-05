@@ -84,7 +84,7 @@ router.get(['/', '/health'], (_req: Request, res: Response) => {
 const allowedErrors = ['Authorization header required', 'GET method not allowed']
 
 // set openapi error handler
-router.use((err: any, req: Request, res: Response, _next: any) => {
+router.use((err: any, req: Request, res: Response) => {
 	// set error message
 	let useOriginalError = false
 	if (allowedErrors.includes(err.message)) useOriginalError = true

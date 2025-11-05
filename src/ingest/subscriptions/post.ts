@@ -12,7 +12,7 @@ import { ulid } from 'ulid'
 
 import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 import type { ArdLivestream } from '@/types.ard.ts'
-import type { EventhubSubscription } from '@/types.eventhub.ts'
+import type { EventhubSubscriptionDatastore } from '@/types.eventhub.ts'
 import config from '../../../config'
 import { ardFeed } from '../../data/index.ts'
 import datastore from '../../utils/datastore'
@@ -73,7 +73,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		}
 
 		// map inputs
-		let subscription: EventhubSubscription = {
+		let subscription: EventhubSubscriptionDatastore = {
 			id: undefined,
 			name: `${prefix}${ulid()}`,
 			type: req.body.type,

@@ -7,7 +7,7 @@
 
 import type { Request, Response } from 'express'
 
-export default (req: Request, res: Response, data: any, status?: number) => {
+export default (req: Request, res: Response, data: object, status?: number) => {
 	try {
 		return res.status(status || 200).json({
 			...data,
