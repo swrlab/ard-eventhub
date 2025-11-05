@@ -32,7 +32,17 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 			return res.sendStatus(401)
 		}
 		// extract token
-		;[authorization] = authorization.match(regexp)!
+		;[authorization] = authorization.match(regexp) || []
+
+		if (!authorization) {
+			logger.log({
+				level: 'notice',
+				message: 'user token missing',
+				source,
+				data: { ...req.headers, authorization: 'hidden' },
+			})
+			return res.sendStatus(401)
+		}
 
 		// validate JWT token with firebase
 		try {
@@ -52,8 +62,18 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 			return res.status(403).json(ERROR_JSON)
 		}
 
+		if (!req.user.email) {
+			logger.log({
+				level: 'notice',
+				message: 'user email missing',
+				source,
+				data: { ...req.headers, authorization: 'hidden' },
+			})
+			return res.status(403).json(ERROR_JSON)
+		}
+
 		// lookup user in DB
-		const userDb = await datastore.load('users', req.user.email!)
+		const userDb = await datastore.load('users', req.user.email)
 
 		// check if profile exists and valid
 		if (!userDb || userDb.active !== true) {

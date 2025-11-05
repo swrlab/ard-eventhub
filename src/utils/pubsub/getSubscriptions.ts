@@ -5,12 +5,9 @@
 
 */
 
-// load other utils
+import config from '../../../config'
 import pubSubClient from './_client'
 import mapSubscription from './mapSubscription.ts'
-
-// load config
-import config from '../../../config'
 
 export default async () => {
 	// fetch subscriptions list

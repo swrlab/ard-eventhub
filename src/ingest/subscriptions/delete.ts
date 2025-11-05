@@ -7,11 +7,13 @@
 
 import logger from '@frytg/logger'
 import type { Response } from 'express'
-import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 
-import datastore from '../../utils/datastore'
-import pubsub from '../../utils/pubsub'
-import response from '../../utils/response'
+import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
+import type { EventhubSubscriptionWithLabels } from '@/types.eventhub.ts'
+import datastore from '../../utils/datastore/index.ts'
+import deleteSubscription from '../../utils/pubsub/deleteSubscription.ts'
+import getSubscription from '../../utils/pubsub/getSubscription.ts'
+import response from '../../utils/response/index.ts'
 
 const source = 'ingest/subscriptions/delete'
 
@@ -19,30 +21,23 @@ export default async (req: UserTokenRequest, res: Response) => {
 	try {
 		// preset vars
 		const { subscriptionName } = req.params
-		let fullSubscription: {
-			labels: any
-			type: string
-			method: string
-			name: string | undefined
-			path: string | null | undefined
-			topic: {
-				id: string
-				name: any
-				path: any
-			}
-			ackDeadlineSeconds: any
-			retryPolicy: any
-			serviceAccount: any
-			url: any
-			contact: any
-			institutionId: any
+
+		// check if subscription name is present
+		if (!subscriptionName) {
+			return response.badRequest(req, res, { status: 400, message: 'Subscription name is required' })
+		}
+
+		// check if user is present
+		if (!req.user) {
+			return response.badRequest(req, res, { status: 401, message: 'User not found' })
 		}
 
 		// load single subscription to get owner
+		let fullSubscription: EventhubSubscriptionWithLabels
 		try {
-			const subscription = await pubsub.getSubscription(subscriptionName)
+			const subscription = await getSubscription(subscriptionName)
 			fullSubscription = subscription.full
-		} catch (error: any) {
+		} catch (error) {
 			logger.log({
 				level: 'error',
 				message: 'failed to find topic to be deleted',
@@ -79,7 +74,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		}
 
 		// request actual deletion
-		await pubsub.deleteSubscription(subscriptionName)
+		await deleteSubscription(subscriptionName)
 
 		// also delete from datastore
 		const subscriptionId = Number.parseInt(fullSubscription.labels.id, 10)
@@ -90,18 +85,11 @@ export default async (req: UserTokenRequest, res: Response) => {
 			level: 'info',
 			message: 'removed subscription',
 			source,
-			data: {
-				email: req.user.email,
-				subscriptionName,
-				subscriptionId,
-				fullSubscription,
-			},
+			data: { email: req.user.email, subscriptionName, subscriptionId, fullSubscription },
 		})
 
 		// return data
-		return response.ok(req, res, {
-			valid: true,
-		})
+		return response.ok(req, res, { valid: true })
 	} catch (error) {
 		logger.log({
 			level: 'error',
@@ -111,6 +99,6 @@ export default async (req: UserTokenRequest, res: Response) => {
 			data: { params: req.params },
 		})
 
-		return response.internalServerError(req, res, error)
+		return response.internalServerError(req, res, error as Error)
 	}
 }

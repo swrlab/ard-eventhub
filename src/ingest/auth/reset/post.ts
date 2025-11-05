@@ -41,6 +41,6 @@ export default async (req: Request, res: Response) => {
 			data: { body: req.body, headers: req.headers },
 		})
 
-		return response.internalServerError(req, res, error)
+		return response.internalServerError(req, res, error as Error)
 	}
 }

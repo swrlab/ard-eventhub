@@ -5,11 +5,8 @@
 
 */
 
-// load pubsub for internal queues
-import pubSubClient from './_client'
-
-// load config
-import config from '../../../config'
+import config from '../../../config/index.ts'
+import pubSubClient from './_client.ts'
 
 export default async (topicName: string) => {
 	// fetch topic list

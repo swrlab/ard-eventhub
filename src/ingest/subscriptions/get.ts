@@ -9,8 +9,9 @@ import logger from '@frytg/logger'
 import type { Response } from 'express'
 import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 
-import pubsub from '../../utils/pubsub'
-import response from '../../utils/response'
+import type { EventhubSubscriptionLimited } from '@/types.eventhub.ts'
+import getSubscription from '../../utils/pubsub/getSubscription.ts'
+import response from '../../utils/response/index.ts'
 
 const source = 'ingest/subscriptions/get'
 
@@ -18,23 +19,21 @@ export default async (req: UserTokenRequest, res: Response) => {
 	try {
 		// preset vars
 		const { subscriptionName } = req.params
-		let limitedSubscription: {
-			type: string
-			method: string
-			name: any
-			path: string | null | undefined
-			topic: { id: string; name: any; path: any }
-			ackDeadlineSeconds: any
-			retryPolicy: any
-			serviceAccount: any
-			url: any
-			contact: any
-			institutionId: any
+
+		// check if subscription name is present
+		if (!subscriptionName) {
+			return response.badRequest(req, res, { status: 400, message: 'Subscription name is required' })
+		}
+
+		// check if user is present
+		if (!req.user) {
+			return response.badRequest(req, res, { status: 401, message: 'User not found' })
 		}
 
 		// load single subscription
+		let limitedSubscription: EventhubSubscriptionLimited
 		try {
-			const subscription = await pubsub.getSubscription(subscriptionName)
+			const subscription = await getSubscription(subscriptionName)
 			limitedSubscription = subscription.limited
 		} catch (_error) {
 			return response.notFound(req, res, {
@@ -66,6 +65,6 @@ export default async (req: UserTokenRequest, res: Response) => {
 			data: { params: req.params },
 		})
 
-		return response.internalServerError(req, res, error)
+		return response.internalServerError(req, res, error as Error)
 	}
 }

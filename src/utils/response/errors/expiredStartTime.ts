@@ -20,7 +20,7 @@ export default (req: UserTokenRequest, res: Response) => {
 		message: `User attempted event with expired start time > ${req.body.start}`,
 		source,
 		data: {
-			email: req.user.email,
+			email: req.user?.email,
 			body: req.body,
 		},
 	})

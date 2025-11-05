@@ -20,7 +20,7 @@ export default (req: UserTokenRequest, res: Response) => {
 		message: 'User attempted event with mismatching names',
 		source,
 		data: {
-			email: req.user.email,
+			email: req.user?.email,
 			body: req.body,
 			params: req.params,
 		},

@@ -5,7 +5,7 @@
 
 */
 
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 
 export default (req: Request, res: Response, err: any) => {
 	try {
