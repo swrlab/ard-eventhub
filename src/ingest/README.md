@@ -45,10 +45,10 @@ To run this project locally in your development environment you'll need these pr
 - `roles/pubsub.admin`
 
 4. Install dependencies (`bun install`)
-5. Run the project (`bun $command`)
+5. Run the project (`bun run $command`)
 
 ```sh
-bun ingest:local
+bun run ingest
 ```
 
 6. Open [localhost:8080/openapi](http://localhost:8080/openapi/)

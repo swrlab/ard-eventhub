@@ -5,24 +5,20 @@
 
 */
 
-// load node utils
-import UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
-
+import logger from '@frytg/logger'
 import { createHashedId } from '@swrlab/utils/packages/ard'
 
-// load eventhub utils
-import core from '../core'
-import logger from '../logger'
+import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
+import type { EventhubService } from '@/types.eventhub.ts'
+import config from '../../../config'
+import { getPublisherById } from '../ard-core.ts'
 import pubsub from '../pubsub'
-
-// load config
-import  config  from '../../../config'
 
 const source = 'utils.events.processServices'
 const URN_PUBLISHER_PREFIX = config.coreIdPrefixes.Publisher
 const URN_PUBLISHER_REGEX = /(?=urn:ard:publisher:[a-z0-9]{16})/g
 
-export default async (service: any, req: UserTokenRequest) => {
+export default async (service: EventhubService, req: UserTokenRequest) => {
 	// fetch prefix from configured list
 	const type = service.type as keyof typeof config.coreIdPrefixes
 	let urnPrefix = config.coreIdPrefixes[type]
@@ -33,6 +29,9 @@ export default async (service: any, req: UserTokenRequest) => {
 	}
 
 	const topicId = `${urnPrefix}${createHashedId(service.externalId)}`
+
+	// save original publisher id for logging
+	const originalPublisherId = service.publisherId
 
 	// create hash based on prefix and id
 	service.topic = {
@@ -45,17 +44,12 @@ export default async (service: any, req: UserTokenRequest) => {
 
 	// convert publisher if not in new ARD urn format
 	if (!service.publisherId.match(URN_PUBLISHER_REGEX)) {
-		// add trailing 0 if number is only 5 digits
-		if (service.publisherId.length === 5) {
-			service.publisherId = `${service.publisherId}0`
-		}
-
 		// create hash using given publisherId
 		service.publisherId = `${URN_PUBLISHER_PREFIX}${createHashedId(service.publisherId)}`
 	}
 
 	// fetch publisher
-	const publisher = await core.getPublisher(service.publisherId)
+	const publisher = getPublisherById(service.publisherId)
 
 	// block access if publisher not found
 	if (!publisher) {
@@ -67,7 +61,7 @@ export default async (service: any, req: UserTokenRequest) => {
 			level: 'warning',
 			message: `Publisher not found (${service.publisherId})`,
 			source,
-			data: { service, user: req.user },
+			data: { service, user: req.user, originalPublisherId },
 		})
 
 		// stop processing
@@ -75,7 +69,7 @@ export default async (service: any, req: UserTokenRequest) => {
 	}
 
 	// check allowed institutions for current user
-	if (req.user.institutionId !== publisher?.publisher.institution.id) {
+	if (!req.user || req.user.institutionId !== publisher?.institution.id) {
 		// set blocked flag to be filtered out
 		service.blocked = 'User unauthorized for service'
 
@@ -87,7 +81,8 @@ export default async (service: any, req: UserTokenRequest) => {
 			data: {
 				service,
 				user: req.user,
-				publisher: publisher?.publisher.institution,
+				institution: publisher?.institution,
+				originalPublisherId,
 			},
 		})
 

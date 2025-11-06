@@ -5,38 +5,33 @@
 
 */
 
-// load node utils
+import logger from '@frytg/logger'
+import type { google } from '@google-cloud/pubsub/build/protos/protos'
 import { DateTime } from 'luxon'
 import slug from 'slug'
 
-// load utils
-import logger from '../logger'
+import type { EventhubSubscriptionDatastore } from '@/types.eventhub.ts'
+import config from '../../../config'
 import pubSubSubscriberClient from './_subscriberClient'
 import mapSubscription from './mapSubscription.ts'
 
-// load config
-import config from '../../../config'
-import { google } from '@google-cloud/pubsub/build/protos/protos'
-import ISubscription = google.pubsub.v1.ISubscription
-
 const source = 'utils/pubsub/createSubscription'
 
-export default async (subscription: any) => {
+export default async (subscription: EventhubSubscriptionDatastore) => {
 	// map inputs for pubsub
-	const options: ISubscription = {
+	const options: google.pubsub.v1.ISubscription = {
 		name: `projects/${process.env.GCP_PROJECT_ID}/subscriptions/${subscription.name}`,
 		topic: `projects/${process.env.GCP_PROJECT_ID}/topics/${subscription.topic}`,
 		pushConfig: {
 			pushEndpoint: subscription.url,
 			oidcToken: {
-				serviceAccountEmail:
-					'publisher@ard-eventhub.iam.gserviceaccount.com',
+				serviceAccountEmail: 'publisher@ard-eventhub.iam.gserviceaccount.com',
 				audience: '',
 			},
 		},
 		labels: {
-			id: subscription.id,
-			stage: config.stage!!,
+			id: subscription.id ?? '',
+			stage: config.stage ?? '',
 			'creator-slug': slug(subscription.creator),
 			created: DateTime.now().toFormat('yyyy-LL-dd'),
 		},
@@ -51,8 +46,7 @@ export default async (subscription: any) => {
 	})
 
 	// submit subscription
-	const [createdSubscription] =
-		await pubSubSubscriberClient.createSubscription(options)
+	const [createdSubscription] = await pubSubSubscriberClient.createSubscription(options)
 	logger.log({
 		level: 'info',
 		message: 'created subscription',
@@ -62,7 +56,7 @@ export default async (subscription: any) => {
 
 	// map and filter values
 	const mappedCreatedSubscription = { metadata: null, ...createdSubscription }
-	const { limited: mappedSubscription } =	await mapSubscription(mappedCreatedSubscription)
+	const { limited: mappedSubscription } = await mapSubscription(mappedCreatedSubscription)
 	logger.log({
 		level: 'info',
 		message: 'mapped subscription',

@@ -5,30 +5,38 @@
 
 */
 
-import { Response } from 'express'
-import UserTokenRequest from '../auth/middleware/userTokenRequest.ts'
-
-// load node utils
+import logger from '@frytg/logger'
+import type { Response } from 'express'
 import { DateTime } from 'luxon'
 import { ulid } from 'ulid'
 
-// load eventhub utils
-import { createNewTopic, processServices } from '../../utils/events'
-import logger from '../../utils/logger'
-import pubsub from '../../utils/pubsub'
-import response from '../../utils/response'
-
-// load config
-import config from '../../../config'
+import type { EventhubV1RadioPostBody } from '@/types.eventhub.ts'
+import config from '../../../config/index.ts'
+import { createNewTopic, processServices } from '../../utils/events/index.ts'
+import pubsub from '../../utils/pubsub/index.ts'
+import publishPubSubMessage from '../../utils/pubsub/publishMessage.ts'
+import response from '../../utils/response/index.ts'
+import type UserTokenRequest from '../auth/middleware/userTokenRequest.ts'
 
 const source = 'ingest/events/post'
 const DEFAULT_ZONE = 'Europe/Berlin'
 
 // feature flags
 const IS_COMMON_TOPIC_ENABLED = true
+const MAX_OFFSET_IN_MINUTES = 15
 
 export default async (req: UserTokenRequest, res: Response) => {
 	try {
+		if (!req.user) {
+			logger.log({
+				level: 'notice',
+				message: 'user not found',
+				source,
+				data: { ...req.headers, authorization: 'hidden' },
+			})
+			return response.internalServerError(req, res, new Error('User not found'))
+		}
+
 		// fetch inputs
 		const { eventName } = req.params
 		const start = DateTime.fromISO(req.body.start, {
@@ -36,18 +44,26 @@ export default async (req: UserTokenRequest, res: Response) => {
 		})
 		const pluginMessages = []
 
+		// check if event name is present
+		if (!eventName) {
+			return response.badRequest(req, res, {
+				status: 400,
+				message: 'Event name not found',
+			})
+		}
+
 		// check eventName consistency
 		if (req.body?.event && req.body.event !== eventName) {
 			return response.errors.mismatchingEventName(req, res)
 		}
 
 		// check offset for start event
-		if (start.plus({ minutes: 2 }) < DateTime.now()) {
+		if (start.plus({ minutes: MAX_OFFSET_IN_MINUTES }) < DateTime.now()) {
 			return response.errors.expiredStartTime(req, res)
 		}
 
 		// insert name, creator and timestamp into object
-		const message = {
+		const message: EventhubV1RadioPostBody = {
 			name: eventName,
 			creator: req.user.email,
 			created: DateTime.now().toLocal().toISO(),
@@ -64,11 +80,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		const attributes = { event: eventName }
 
 		// compile core hashes and pubsub names for every service
-		message.services = await Promise.all(
-			message.services.map((service: any) =>
-				processServices(service, req)
-			)
-		)
+		message.services = await Promise.all(message.services.map((service) => processServices(service, req)))
 
 		// generate unique Id from the institution id and a random ULID
 		message.id = `${req.user.institutionId}-${ulid()}`
@@ -79,11 +91,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 			// ignoring blocked services
 			if (!service.blocked && service.topic?.name) {
 				// try sending message
-				const messageId = await pubsub.publishMessage(
-					service.topic.name,
-					message,
-					attributes
-				)
+				const messageId = await publishPubSubMessage(service.topic.name, message, attributes)
 
 				// handle errors
 				if (messageId === 'TOPIC_ERROR') {
@@ -92,10 +100,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 					service.topic.messageId = null
 				} else if (messageId === 'TOPIC_NOT_FOUND') {
 					// first message, create a new topic
-					service.topic = await createNewTopic(
-						service,
-						req
-					)
+					service.topic = await createNewTopic(service, req)
 				} else {
 					// insert messageId
 					service.topic.status = 'MESSAGE_SENT'
@@ -112,14 +117,9 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		// send event to common topic
 		// if it is not a radio text event
-		if (
-			IS_COMMON_TOPIC_ENABLED &&
-			req.body.event !== 'de.ard.eventhub.v1.radio.text'
-		) {
+		if (IS_COMMON_TOPIC_ENABLED && req.body.event !== 'de.ard.eventhub.v1.radio.text') {
 			// prepare common post
-			const topicName = pubsub.buildId(
-				eventName.replace('de.ard.eventhub.', '')
-			)
+			const topicName = pubsub.buildId(eventName.replace('de.ard.eventhub.', ''))
 			const commonEvent = {
 				messageId: null as null | string,
 				type: 'common',
@@ -130,17 +130,10 @@ export default async (req: UserTokenRequest, res: Response) => {
 			}
 
 			// try sending message
-			commonEvent.messageId = await pubsub.publishMessage(
-				topicName,
-				message,
-				attributes
-			)
+			commonEvent.messageId = await publishPubSubMessage(topicName, message, attributes)
 
 			// handle errors
-			if (
-				commonEvent.messageId === 'TOPIC_ERROR' ||
-				commonEvent.messageId === 'TOPIC_NOT_FOUND'
-			) {
+			if (commonEvent.messageId === 'TOPIC_ERROR' || commonEvent.messageId === 'TOPIC_NOT_FOUND') {
 				logger.log({
 					level: 'warning',
 					message: `failed common plugin > ${eventName} > ${message.services[0]?.publisherId}`,
@@ -158,9 +151,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		}
 
 		// add opt-out plugins
-		const isDtsPluginSet = message.plugins?.find(
-			(plugin: any) => plugin.type === 'dts'
-		)
+		const isDtsPluginSet = message.plugins?.find((plugin) => plugin.type === 'dts')
 		const isMusic = req.body.type === 'music'
 
 		if (!isDtsPluginSet && isMusic) {
@@ -179,17 +170,11 @@ export default async (req: UserTokenRequest, res: Response) => {
 						action: `plugins.${plugin.type}.event`,
 						event: message,
 						plugin,
-						institutionId:
-							req.user.institutionId,
+						institutionId: req.user.institutionId,
 					}
 
 					// try sending message
-					const messageId =
-						await pubsub.publishMessage(
-							config.pubSubTopicSelf,
-							pluginMessage,
-							attributes
-						)
+					const messageId = await publishPubSubMessage(config.pubSubTopicSelf, pluginMessage, attributes)
 
 					// add to output
 					pluginMessages.push({
@@ -203,18 +188,9 @@ export default async (req: UserTokenRequest, res: Response) => {
 		// prepare output data
 		const data = {
 			statuses: {
-				published: message.services.filter(
-					(service: any) =>
-						service.topic?.messageId
-				).length,
-				blocked: message.services.filter(
-					(service: any) => service.blocked
-				).length,
-				failed: message.services.filter(
-					(service: any) =>
-						!service.topic?.messageId &&
-						!service.blocked
-				).length,
+				published: message.services.filter((service) => service.topic?.messageId).length,
+				blocked: message.services.filter((service) => service.blocked).length,
+				failed: message.services.filter((service) => !service.topic?.messageId && !service.blocked).length,
 			},
 			plugins: pluginMessages,
 			event: message,
@@ -239,6 +215,6 @@ export default async (req: UserTokenRequest, res: Response) => {
 			data: { body: req.body, headers: req.headers },
 		})
 
-		return response.internalServerError(req, res, error)
+		return response.internalServerError(req, res, error as Error)
 	}
 }

@@ -5,22 +5,22 @@
 
 */
 
-// load eventhub utils
-import UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
-import { Response } from 'express'
-import logger from '../../logger'
+import logger from '@frytg/logger'
+import type { Response } from 'express'
+
+import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 import badRequest from '../badRequest.ts'
 
 const source = 'utils.response.errors.mismatchingEventName'
 
-export default (req:UserTokenRequest, res:Response) => {
+export default (req: UserTokenRequest, res: Response) => {
 	// log access attempt
 	logger.log({
 		level: 'warning',
 		message: 'User attempted event with mismatching names',
 		source,
 		data: {
-			email: req.user.email,
+			email: req.user?.email,
 			body: req.body,
 			params: req.params,
 		},

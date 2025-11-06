@@ -6,13 +6,8 @@
 */
 
 // load request handler
-// @ts-ignore
+// @ts-expect-error
 import undici from '@swrlab/utils/packages/undici'
 
-// add tracing
-import { tracer } from '../tracer'
-
-const enabledTracer = process.env.DD_TRACER_ENABLED === 'true' ? tracer : null
-
 // export handler
-export default undici(enabledTracer)
+export default undici()

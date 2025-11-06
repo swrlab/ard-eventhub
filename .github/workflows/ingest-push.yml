@@ -9,7 +9,6 @@ on:
     types: [closed]
 
 env:
-  NODE_VERSION: 22.8
   IMAGE_NAME: ard-eventhub-europe-west3/ingest
   REGISTRY_DOMAIN: europe-west3-docker.pkg.dev
 
@@ -29,11 +28,6 @@ jobs:
       - name: 👀 Checkout Code
         uses: actions/checkout@v4
 
-      - name: 🏗 Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
       - name: 🛠 Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -43,7 +37,7 @@ jobs:
         run: bun install
 
       - name: 🔑 Setup Google Cloud Auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           credentials_json: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
           create_credentials_file: true
@@ -63,7 +57,7 @@ jobs:
           TEST_USER: ${{ secrets.TEST_USER }}
           TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
           ARD_FEED_URL: ${{ secrets.ARD_FEED_URL }}
-        run: bun run ingest:test
+        run: bun run test
 
   docker:
     runs-on: ubuntu-24.04
@@ -74,8 +68,16 @@ jobs:
       - name: 👀 Checkout Code
         uses: actions/checkout@v4
 
+      - name: 🛠 Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: 📦 Install Dependencies
+        run: bun install --frozen-lockfile --production
+
       - name: 🔑 Setup Google Cloud Auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           credentials_json: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
 

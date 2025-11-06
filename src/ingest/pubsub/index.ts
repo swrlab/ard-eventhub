@@ -5,10 +5,9 @@
 
 */
 
-import { Request, Response } from 'express'
+import logger from '@frytg/logger'
+import type { Request, Response } from 'express'
 
-// load utils
-import logger from '../../utils/logger'
 import plugins from '../../utils/plugins'
 
 const source = 'ingest/pubsub'

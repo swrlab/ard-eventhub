@@ -18,5 +18,5 @@ In addition to the [ingest-env](../src/ingest/README.md#Environments), following
 Follow the [ingest-setup](../src/ingest/README.md) first, then run tests with
 
 ```sh
-bun ingest:test
+bun run test
 ```

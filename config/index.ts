@@ -5,12 +5,11 @@
 
 */
 
+import logger from '@frytg/logger'
+
 // import version from package.json
 import { version } from '../package.json'
 import coreIdPrefixes from './core-id-prefixes.json'
-
-// load winston logger
-import logger from '../src/utils/logger'
 
 const exitWithError = (message: string) => {
 	logger.log({

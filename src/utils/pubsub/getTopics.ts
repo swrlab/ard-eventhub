@@ -5,12 +5,9 @@
 
 */
 
-// load pubsub for internal queues
-import pubSubClient from './_client'
-import convertId from './convertId'
-
-// load config
-import config from '../../../config'
+import config from '../../../config/index.ts'
+import pubSubClient from './_client.ts'
+import convertId from './convertId.ts'
 
 export default async () => {
 	// fetch topic list
@@ -23,9 +20,11 @@ export default async () => {
 	const mappedTopics = topics.map((topic) => {
 		const name = topic.name.split('/').pop()
 
+		if (!name) throw new Error('Topic name is required')
+
 		return {
 			type: 'PUBSUB',
-			id: convertId.decode(name!!).replace(config.pubSubPrefix, ''),
+			id: convertId.decode(name).replace(config.pubSubPrefix, ''),
 			name,
 			path: topic.name,
 			labels: topic.metadata?.labels,

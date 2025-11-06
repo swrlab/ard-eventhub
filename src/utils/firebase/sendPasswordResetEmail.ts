@@ -5,13 +5,13 @@
 
 */
 
-// load utils
-import logger from '../logger'
+import logger from '@frytg/logger'
+
 import undici from '../undici'
 
 const source = 'firebase.sendPasswordResetEmail'
 
-export default async (email: any) => {
+export default async (email: string) => {
 	// set firebase sign in url
 	const url = `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${process.env.FIREBASE_API_KEY}`
 

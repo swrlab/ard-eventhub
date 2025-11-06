@@ -4,8 +4,10 @@
 	by SWR Audio Lab
 
 */
-import { Request, Response } from 'express'
-import logger from '../../utils/logger'
+
+import logger from '@frytg/logger'
+import type { Request, Response } from 'express'
+
 import pubsub from '../../utils/pubsub'
 import response from '../../utils/response'
 
@@ -24,9 +26,8 @@ export default async (req: Request, res: Response) => {
 			message: 'failed to list topics',
 			source,
 			error,
-			data: {},
 		})
 
-		return response.internalServerError(req, res, error)
+		return response.internalServerError(req, res, error as Error)
 	}
 }

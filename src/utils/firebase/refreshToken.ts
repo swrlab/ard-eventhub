@@ -5,16 +5,14 @@
 
 */
 
-// load node utils
+import logger from '@frytg/logger'
 import jwt from 'jsonwebtoken'
 
-// load utils
-import logger from '../logger'
 import undici from '../undici'
 
 const source = 'firebase.refreshToken'
 
-export default async (refreshToken:any) => {
+export default async (refreshToken: string) => {
 	// set firebase sign in url
 	const url = `https://securetoken.googleapis.com/v1/token?key=${process.env.FIREBASE_API_KEY}`
 

@@ -5,43 +5,45 @@
 
 */
 
-// load node utils
+import logger from '@frytg/logger'
+import type { Response } from 'express'
 import { DateTime } from 'luxon'
 import { ulid } from 'ulid'
 
-// load eventhub utils
+import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
+import type { ArdLivestream } from '@/types.ard.ts'
+import type { EventhubSubscriptionDatastore } from '@/types.eventhub.ts'
+import config from '../../../config'
+import { ardFeed } from '../../data/index.ts'
 import datastore from '../../utils/datastore'
-import logger from '../../utils/logger'
 import pubsub from '../../utils/pubsub'
 import response from '../../utils/response'
-import config from '../../../config'
-
-import { Response } from 'express'
-import UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
-
-// load api feed (needed to get the file initialized)
 
 const source = 'ingest/subscriptions/post'
 
 export default async (req: UserTokenRequest, res: Response) => {
 	try {
 		// fetch user from request
-		const user = req.user!!
+		const user = req.user
+
+		// check if user is present
+		if (!user?.email) {
+			logger.log({
+				level: 'notice',
+				message: 'user not found',
+				source,
+				data: { ...req.headers, authorization: 'hidden' },
+			})
+			return response.internalServerError(req, res, new Error('User not found'))
+		}
 
 		// generate subscription name
 		const prefix = `${config.pubSubPrefix}subscription.`
 
 		// check existence of user institution
-		const ardFeed = import('../../data/ard-core-livestreams.json')
-
-		const institutionExists = await ardFeed.then((feed) =>
-			feed.items.some((entry: any) => {
-				return (
-					user.institutionId ===
-					entry.publisher.institution.id
-				)
-			})
-		)
+		const institutionExists = ardFeed?.items?.some((entry: ArdLivestream) => {
+			return user.institutionId === entry.publisher.institution.id
+		})
 
 		// check if user has institution set
 		if (!institutionExists) {
@@ -71,8 +73,8 @@ export default async (req: UserTokenRequest, res: Response) => {
 		}
 
 		// map inputs
-		let subscription = {
-			id: undefined as undefined | string,
+		let subscription: EventhubSubscriptionDatastore = {
+			id: undefined,
 			name: `${prefix}${ulid()}`,
 			type: req.body.type,
 			method: req.body.method,
@@ -84,13 +86,6 @@ export default async (req: UserTokenRequest, res: Response) => {
 			institutionId: user.institutionId,
 			created: DateTime.now().toISO(),
 		}
-
-		// save to datastore
-		subscription = await datastore.save(
-			subscription,
-			'subscriptions',
-			null
-		)
 
 		// check existence of topic
 		try {
@@ -105,9 +100,6 @@ export default async (req: UserTokenRequest, res: Response) => {
 				data: { subscription },
 			})
 
-			// delete datastore object
-			await datastore.delete('subscriptions', subscription.id!)
-
 			// return 404 error
 			return response.notFound(req, res, {
 				status: 404,
@@ -115,9 +107,22 @@ export default async (req: UserTokenRequest, res: Response) => {
 			})
 		}
 
+		// save to datastore
+		subscription = await datastore.save(subscription, 'subscriptions', null)
+
+		// check if subscription was saved
+		if (!subscription.id) {
+			logger.log({
+				level: 'error',
+				message: 'failed to save subscription to datastore',
+				source,
+				data: { subscription },
+			})
+			return response.internalServerError(req, res, new Error('Failed to save subscription'))
+		}
+
 		// request creation of subscription
-		const createdSubscription =
-			await pubsub.createSubscription(subscription)
+		const createdSubscription = await pubsub.createSubscription(subscription)
 
 		// return data
 		return res.status(201).json(createdSubscription)
@@ -130,6 +135,6 @@ export default async (req: UserTokenRequest, res: Response) => {
 			data: { body: req.body },
 		})
 
-		return response.internalServerError(req, res, error)
+		return response.internalServerError(req, res, error as Error)
 	}
 }

@@ -5,9 +5,9 @@
 
 */
 
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 
-export default (req: Request, res: Response, data: any, status?: any) => {
+export default (req: Request, res: Response, data: object, status?: number) => {
 	try {
 		return res.status(status || 200).json({
 			...data,

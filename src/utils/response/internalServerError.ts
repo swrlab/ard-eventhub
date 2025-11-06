@@ -4,12 +4,12 @@
 	by SWR Audio Lab
 
 */
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 
-export default (req: Request, res: Response, error?:any) => {
+export default (req: Request, res: Response, error?: Error) => {
 	try {
 		return res.status(500).json({
-			message: error.message || 'Internal Server Error',
+			message: error?.message || 'Internal Server Error',
 			trace: req.headers['x-cloud-trace-context'] || null,
 		})
 	} catch (_error) {

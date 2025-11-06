@@ -5,11 +5,10 @@
 
 */
 
-import { Request, Response } from 'express'
+import logger from '@frytg/logger'
+import type { Request, Response } from 'express'
 
-// load eventhub utils
 import firebase from '../../../utils/firebase'
-import logger from '../../../utils/logger'
 import response from '../../../utils/response'
 
 const source = 'ingest/auth/reset'
@@ -42,6 +41,6 @@ export default async (req: Request, res: Response) => {
 			data: { body: req.body, headers: req.headers },
 		})
 
-		return response.internalServerError(req, res, error)
+		return response.internalServerError(req, res, error as Error)
 	}
 }

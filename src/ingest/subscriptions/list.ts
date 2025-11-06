@@ -5,27 +5,33 @@
 
 */
 
-// load eventhub utils
-import logger from '../../utils/logger'
-import pubsub from '../../utils/pubsub'
-import response from '../../utils/response'
+import logger from '@frytg/logger'
+import type { Response } from 'express'
 
-import { Response } from 'express'
-import UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
+import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
+import getSubscriptions from '../../utils/pubsub/getSubscriptions.ts'
+import response from '../../utils/response/index.ts'
 
 const source = 'ingest/subscriptions/list'
 
 export default async (req: UserTokenRequest, res: Response) => {
 	try {
+		// check if user is present
+		if (!req.user) {
+			logger.log({
+				level: 'notice',
+				message: 'user not found',
+				source,
+				data: { ...req.headers, authorization: 'hidden' },
+			})
+			return response.internalServerError(req, res, new Error('User not found'))
+		}
+
 		// load all subscriptions
-		let subscriptions = await pubsub.getSubscriptions()
+		let subscriptions = await getSubscriptions()
 
 		// verify if user is allowed to list subscriptions (same institution)
-		subscriptions = subscriptions.filter(
-			(subscription: any) =>
-				subscription?.institutionId ===
-				req.user.institutionId
-		)
+		subscriptions = subscriptions.filter((subscription) => subscription?.institutionId === req.user?.institutionId)
 
 		// return data
 		return res.status(200).json(subscriptions)
@@ -35,9 +41,8 @@ export default async (req: UserTokenRequest, res: Response) => {
 			message: 'failed to list subscriptions',
 			source,
 			error,
-			data: {},
 		})
 
-		return response.internalServerError(req, res, error)
+		return response.internalServerError(req, res, error as Error)
 	}
 }
