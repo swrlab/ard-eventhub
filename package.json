@@ -49,7 +49,7 @@
 		"google-auth-library": "^10.5.0",
 		"jsonwebtoken": "^9.0.2",
 		"luxon": "^3.7.2",
-		"slug": "^9.1.0",
+		"slug": "^11.0.1",
 		"supertest": "^7.1.4",
 		"swagger-ui-express": "^5.0.1",
 		"ts-jest": "^29.4.5",
