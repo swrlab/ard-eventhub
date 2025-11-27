@@ -11,7 +11,7 @@
 			"name": "European Union Public License 1.2",
 			"url": "https://spdx.org/licenses/EUPL-1.2.html"
 		},
-		"version": "1.10.1"
+		"version": "2.1.1"
 	},
 	"externalDocs": {
 		"description": "ARD Eventhub Documentation",
@@ -960,15 +960,7 @@
 				"properties": {
 					"type": {
 						"type": "string",
-						"enum": [
-							"Episode",
-							"Section",
-							"Publication",
-							"Broadcast",
-							"Show",
-							"Season",
-							"Article"
-						]
+						"enum": ["Episode", "Section", "Publication", "Broadcast", "Show", "Season", "Article"]
 					},
 					"id": {
 						"type": "string",
@@ -1006,25 +998,13 @@
 						"type": "string",
 						"description": "If set, it needs to match the URL event parameter",
 						"example": "de.ard.eventhub.v1.radio.track.playing",
-						"enum": [
-							"de.ard.eventhub.v1.radio.track.playing",
-							"de.ard.eventhub.v1.radio.track.next"
-						]
+						"enum": ["de.ard.eventhub.v1.radio.track.playing", "de.ard.eventhub.v1.radio.track.next"]
 					},
 					"type": {
 						"type": "string",
 						"description": "The type of the element that triggered this event. See additional file in docs for details.",
 						"example": "music",
-						"enum": [
-							"audio",
-							"commercial",
-							"jingle",
-							"live",
-							"music",
-							"news",
-							"traffic",
-							"weather"
-						]
+						"enum": ["audio", "commercial", "jingle", "live", "music", "news", "traffic", "weather"]
 					},
 					"start": {
 						"type": "string",
