@@ -32,6 +32,6 @@ const TEMP_PUBLISHER_MAPPING: Record<string, string> = {
  * @returns {Object} - Publisher
  */
 export const getPublisherById = (publisherId: string): ArdPublisher | undefined => {
-	const mappedPublisherId = TEMP_PUBLISHER_MAPPING[publisherId]
+	const mappedPublisherId = TEMP_PUBLISHER_MAPPING[publisherId] ?? publisherId
 	return ardFeed?.items?.find((x: ArdLivestream) => x.publisher.id === mappedPublisherId)?.publisher
 }
