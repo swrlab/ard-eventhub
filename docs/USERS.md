@@ -4,7 +4,7 @@ Um sich beim Eventhub zu authentifizieren und mit der API zu arbeiten, benötige
 
 ## Authentifizierung
 
-Siehe das Kapitel [Authentifizierung](/docs/de/AUTHENTICATION.md) für Details.
+Siehe das Kapitel [Authentifizierung](./AUTHENTICATION.md) für Details.
 
 ## Neue Benutzer anlegen
 

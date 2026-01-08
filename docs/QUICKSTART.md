@@ -58,7 +58,7 @@ In diesem Fall ist es wichtig, sicherzustellen, dass Ihre interne Filterung korr
 
 ### Wichtige Hinweise zu External IDs
 
-Details finden Sie in [EXTERNAL_IDS.md](EXTERNAL_IDS.md).
+Details finden Sie in [EXTERNAL_IDS.md](./EXTERNAL_IDS.md).
 
 ### Beispiel-Workflow
 
