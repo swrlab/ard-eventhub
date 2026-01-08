@@ -123,7 +123,7 @@ Please be aware that the type of events published to this service may be extende
 
 In case of nightly re-broadcasts you should create a permanent subscription and keep this one running 24/7. The filter based on the program schedule should be done on your side. Pub/Sub should not be used to create and delete subscriptions once the re-broadcast starts and ends.
 
-Make sure that your endpoint is reachable from the internet and that you have a valid SSL certificate installed. If the endpoint is periodically unreachable, the subscription will collect past events and will retry delivering them to you. Reference [`src/utils/pubsub/createSubscription.ts`](../src/utils/pubsub/createSubscription.ts) and [cloud.google.com/pubsub/docs/push](https://cloud.google.com/pubsub/docs/push#push_backoff) for more details about the default subscription config and retry behavior.
+Make sure that your endpoint is reachable from the internet and that you have a valid SSL certificate installed. If the endpoint is periodically unreachable, the subscription will collect past events and will retry delivering them to you. Reference [`src/utils/pubsub/createSubscription.ts`](../../src/utils/pubsub/createSubscription.ts) and [cloud.google.com/pubsub/docs/push](https://cloud.google.com/pubsub/docs/push#push_backoff) for more details about the default subscription config and retry behavior.
 
 Start receiving events with these steps:
 
