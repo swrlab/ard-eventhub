@@ -80,7 +80,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 			return response.badRequest(req, res, {
 				status: 422,
 				message: 'The URL in the body is missing',
-				errors: `The URL in the body is missing`,
+				errors: 'The URL in the body is missing',
 			})
 		}
 
@@ -111,7 +111,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 			return response.badRequest(req, res, {
 				status: 422,
 				message: 'An invalid URL was sent for the subscription',
-				errors: `URL is not an ARD one`,
+				errors: 'URL is not an ARD one',
 			})
 		}
 
