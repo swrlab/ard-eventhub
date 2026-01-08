@@ -72,6 +72,58 @@ export default async (req: UserTokenRequest, res: Response) => {
 			})
 		}
 
+		// check if there is an invalid url
+		const url: string = req.body.url
+
+		if (!url) {
+			// return 422 error
+			return response.badRequest(req, res, {
+				status: 422,
+				message: 'The URL in the body is missing',
+				errors: `The URL in the body is missing`,
+			})
+		}
+
+		// localhost check
+		if (url.includes('localhost')) {
+			// return 422 error
+			return response.badRequest(req, res, {
+				status: 422,
+				message: 'An invalid URL was sent for the subscription',
+				errors: `A localhost URL was sent ('${url}') which is not allowed`,
+			})
+		}
+
+		// ip address check
+		if (url.match('([\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}):([\\d]{1,5})') != null
+			|| url.match('([\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3})') != null) {
+			// return 422 error
+			return response.badRequest(req, res, {
+				status: 422,
+				message: 'An invalid URL was sent for the subscription',
+				errors: 'IP adresses are not valid urls',
+			})
+		}
+
+
+		if (!url.includes('ard')) {
+			// return 422 error
+			return response.badRequest(req, res, {
+				status: 422,
+				message: 'An invalid URL was sent for the subscription',
+				errors: `URL is not an ARD one`,
+			})
+		}
+
+		if (!url.includes('https')) {
+			// return 422 error
+			return response.badRequest(req, res, {
+				status: 422,
+				message: 'An invalid URL was sent for the subscription',
+				errors: 'The URL isn\'t a secure website please send one that starts with https',
+			})
+		}
+
 		// map inputs
 		let subscription: EventhubSubscriptionDatastore = {
 			id: undefined,
