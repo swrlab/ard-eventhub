@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - feat: enforce endpoint standards
 - chore: translate docs into german
+- chore: make docs more approachable
 
 ## [2.1.1] - 2025-11-27
 

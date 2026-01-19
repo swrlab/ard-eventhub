@@ -37,4 +37,4 @@ ARD Core IDs sind im externen System bereits gemappt. Änderungen an Ihren IDs (
 
 ## Weitere Plugins
 
-Es gibt technisch viele Möglichkeiten für Plugins; es gelten jedoch Richtlinien. Wenden Sie sich für Details an das Partner-Management.
+Obwohl es endlose Möglichkeiten für weitere Plugins gibt, gibt es jedoch Richtlinien, die eingehalten werden müssen. Wenden Sie sich für Details an das Partner-Management.

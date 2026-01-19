@@ -6,4 +6,4 @@ Alle Änderungen an der API sollten in [openapi.yaml](https://eventhub-ingest.ar
 
 ## YAML nach JSON konvertieren
 
-Nach dem Aktualisieren der OpenAPI-Konfiguration kopieren Sie den Inhalt von `openapi.yaml` in den [Swagger Editor](https://editor.swagger.io/). Wählen Sie `File` -> `Convert and save as JSON` und ersetzen Sie die `openapi.json` im Projektstamm.
+Nach dem Aktualisieren der OpenAPI-Konfiguration kopiere den Inhalt von `openapi.yaml` in den [Swagger Editor](https://editor.swagger.io/). Wähle `File` -> `Convert and save as JSON` und ersetze die `openapi.json` im Projektverzeichnis.

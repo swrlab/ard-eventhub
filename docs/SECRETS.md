@@ -5,12 +5,12 @@ Da das Projekt öffentlich gehalten wird, ist die komplette interne Konfiguratio
 
 ## Code
 
-Verschiedene Module benötigen unterschiedliche Variablen. Prüfen Sie die README der jeweiligen Module für Details.
+Einige Module können unterschiedliche Variablen benötigen. Prüfen Sie die README der jeweiligen Module für Details.
 In der Regel sind nur wenige API-Keys für externe Services erforderlich. Der Zugriff auf Google Cloud-Dienste erfolgt über ein [Service Account](https://cloud.google.com/iam/docs/service-accounts) (SA) mit minimalen Rechten. Dieser SA wird über eine Umgebungsvariable hinzugefügt.
 
 ## Github
 
-Secrets in Github sind standardmäßig für Benutzer write-only. Admins können sie in Settings -> Secrets ändern, lesen können sie die Werte jedoch nicht. Nur GitHub Actions hat Zugriff und kann die Werte in Workflows verwenden; die Werte werden standardmäßig in Logs verborgen.
+Secrets in Github sind standardmäßig für Benutzer write-only. Admins kannst du in Settings -> Secrets ändern, lesen kannst du die Werte jedoch nicht. Nur GitHub Actions hat Zugriff und kann die Werte in Workflows verwenden; die Werte werden standardmäßig in Logs verborgen.
 
 - `GCP_GITHUB_SERVICE_ACCOUNT_KEY`
   - Base64-kodiert
@@ -31,9 +31,9 @@ Secrets in Github sind standardmäßig für Benutzer write-only. Admins können 
 
 ## Google Cloud
 
-Bei Deployments in Google Cloud werden Umgebungsvariablen und Keys üblicherweise vom Runtime-System bzw. der Deployment-Konfiguration gestellt. Die Kubernetes-Deployment-Dateien sind hier nicht im Detail aufgeführt; bei Zugang zur Umgebung sollten Sie wissen, wo zu suchen ist.
+Bei Deployments in Google Cloud werden Umgebungsvariablen und Keys üblicherweise vom Runtime-System bzw. der Deployment-Konfiguration gestellt. Die Kubernetes-Deployment-Dateien sind hier nicht im Detail aufgeführt; sofern du Zugang zur Umgebung hast, solltest du wissen, wo zu suchen ist.
 
 ### Docker Image
 
-Kubernetes muss Images aus einem Registry ziehen. Für bewöhnlich gibt es dafür ein spezifisches Repository. Für Eventhub verwenden wir ein internes Project-Registry, um nicht diesen Key im Repo zu speichern zu müssen. Stattdessen speichern wir Container in unserem Eventhub-Projekt und gewähren den SA Zugriff.
-Öffnen Sie dazu die Console, navigieren Sie zum Eventhub-Projekt, wählen Sie storage und dann das artifact bucket. Fügen Sie in der Info-Ansicht die E‑Mail des Service Accounts mit der Berechtigung "_Storage Object Viewer_" hinzu.
+Kubernetes muss Images aus einem Registry ziehen. Für bewöhnlich gibt es dafür ein spezifisches Repository. Für Eventhub verwenden wir ein internes Project-Registry, um diesen Key nicht im Repo zu speichern zu müssen. Stattdessen speichern wir Container in unserem Eventhub-Projekt und gewähren den SA Zugriff.
+Öffne dazu die Console, navigiere zum Eventhub-Projekt, wähle storage und dann das artifact bucket. Füge in der Info-Ansicht die E‑Mail des Service Accounts mit der Berechtigung "_Storage Object Viewer_" hinzu.

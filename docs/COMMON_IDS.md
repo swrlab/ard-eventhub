@@ -2,7 +2,7 @@
 
 ## Nächtliche Landesweite Sendungen
 
-Einige Sender sind für die Bereitstellung von gemeinsamen nächtlichen landesweiten Sendungen verantwortlich. Da Sie möglicherweise die entsprechenden Metadaten für Ihre eigenen Sendungen benötigen, können Sie diese anhand der folgenden IDs identifizieren. Es handelt sich hierbei um spezielle `topics`, die ausschließlich die Daten der nächtlichen Sendungen betreffen.
+Einige Sender sind für die Bereitstellung von gemeinsamen nächtlichen landesweiten Sendungen verantwortlich. Da du möglicherweise die entsprechenden Metadaten für deine eigene Sendung benötigst, kannst du diese anhand der folgenden IDs identifizieren. Es handelt sich hierbei um spezielle `topics`, die ausschließlich die Daten der nächtlichen Sendungen betreffen.
 
 | Broadcast               | Publisher  | Core ID                                         | Nightly-only topic? |
 | ----------------------- | ---------- | ----------------------------------------------- | ------------------- |
@@ -15,8 +15,8 @@ Einige Sender sind für die Bereitstellung von gemeinsamen nächtlichen landeswe
 
 Jede Instanz des Eventhubs hat allgemeine `topics`, die für die Bereitstellung aller Ereignisse verwendet werden. Dies sind die sogenannten „firehose“-Themen.
 
-Sie sind nach Ereignistypen unterteilt, daher können Sie entweder `v1.radio.track.playing` oder `v1.radio.track.next` abonnieren. Bitte beachten Sie, dass Sie aufgrund der hohen Anzahl von für Sie wahrscheinlich irrelevanten Ereignissen vorzugsweise ein Abonnement für das `topic` eines einzelnen Livestreams verwenden sollten.
+Sie sind nach Ereignistypen unterteilt, daher kannst du entweder `v1.radio.track.playing` oder `v1.radio.track.next` abonnieren. Bitte beachte, dass du aufgrund der hohen Anzahl von für dich wahrscheinlich irrelevanten Ereignissen vorzugsweise ein Abonnement für das `topic` eines einzelnen Livestreams verwenden solltest.
 
 ## Andere IDs
 
-Alle anderen IDs für Livestreams finden Sie in der API. (`GET /topics`).
+Alle anderen IDs für Livestreams findest du in der API. (`GET /topics`).

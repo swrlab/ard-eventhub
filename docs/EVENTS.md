@@ -1,6 +1,6 @@
 # ARD Eventhub / Events
 
-In seiner ersten Version erwartet ARD Eventhub, dass der Wert `event` einer der folgenden Werte ist:
+Zurzeit erwartet ARD Eventhub, dass der Wert `event` einer der folgenden Werte ist (Änderungen möglich):
 
 ## `de.ard.eventhub.v1.radio.track.playing`
 

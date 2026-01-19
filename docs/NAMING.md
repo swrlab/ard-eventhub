@@ -1,6 +1,6 @@
 # ARD Eventhub / Namenskonventionen
 
-Verschiedene Teile dieses Dienstes erfordern durchgehende Namenskonventionen.
+Verschiedene Teile dieses Dienstes erfordern durchgehende (konsistente) Namenskonventionen.
 
 ## Google Cloud Pub/Sub
 

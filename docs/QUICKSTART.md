@@ -1,18 +1,18 @@
 # ARD Eventhub / Schnellstart
 
-Dieser Leitfaden hilft Ihnen beim Start in den ARD Eventhub.
+Dieser Leitfaden hilft dir beim Start in den ARD Eventhub.
 
-Egal, ob Sie Publisher oder Subscriber sind: Sie benötigen ein Benutzerkonto, um mit der API zu interagieren. Fordern Sie ein Konto über Ihre Ansprechpartner beim SWR Audio Lab oder ARD Online an. Administratoren können die `Users`-Dokumentation für die Registrierung heranziehen.
+Egal, ob du Publisher oder Subscriber bist: Du benötigst ein Benutzerkonto, um mit der API zu interagieren. Fordere ein Konto über deinen Ansprechpartner beim SWR Audio Lab oder ARD Online an. Administratoren können die `Users`-Dokumentation für die Registrierung heranziehen.
 
-Nachdem das Konto eingerichtet wurde, lesen Sie das Kapitel zur Authentifizierung, um mehr über Login und Token-Austausch zu erfahren.
+Nachdem das Konto eingerichtet wurde, lies das Kapitel zur Authentifizierung, um mehr über Login und den Token-Austausch zu erfahren.
 
 ## Publisher
 
-Wenn Sie als Hörfunkanstalt Events in den ARD Eventhub publizieren möchten, befolgen Sie diese einfachen Schritte:
+Wenn du als Hörfunkanstalt Events in den ARD Eventhub publizieren möchtest, befolge diese einfachen Schritte:
 
-- Richten Sie Ihr Konto ein und lesen und verstehen Sie den Authentifizierungsprozess
-- Verwenden Sie den POST-Endpoint `/events/{eventName}`, um Events zu senden
-- Hinweis: Auch wenn GET `/topics` Ihre Sender noch nicht auflistet, werden die Topics beim ersten veröffentlichten Event automatisch erstellt (die Antwort enthält z.B.):
+- Richte dein Konto ein, lese und verstehe den Authentifizierungsprozess
+- Verwende den POST-Endpoint `/events/{eventName}`, um Events zu senden
+- Hinweis: Auch wenn GET `/topics` deine Sender noch nicht auflistet, werden die Topics beim ersten veröffentlichten Event automatisch erstellt (die Antwort enthält z.B.):
 
 ```js
 {
@@ -42,33 +42,33 @@ Wenn Sie als Hörfunkanstalt Events in den ARD Eventhub publizieren möchten, be
 }
 ```
 
-Es wird empfohlen, zunächst das `test`-System des Eventhub zu nutzen, um alles zu prüfen, bevor Sie in die Produktion (`prod`) wechseln. Die Hostnamen finden Sie im Dokument zu den Stages.
+Es wird empfohlen, zunächst das `test`-System des Eventhub zu nutzen, um alles zu prüfen, bevor du in die Produktion (`prod`) wechselst. Die Hostnamen findest du im Dokument zu den Stages.
 
 Sicherheits-Hinweis: Jedes Benutzerkonto darf nur zu `publisherId`s seiner eigenen Institution publizieren. Sofern man einen Fehler zurückbekommt kann die ID falsch sein oder das Benutzerkonto wurde durch einen Admin falsch konfiguriert.
 
 ### Umgang mit Events aus externen Quellen
 
-Wenn Sie Eventhub benutzen um Events aus einer anderen Anstalt empfangen (z.B. Nightly-Broadcasts) und diese für Ihren Sender weiterveröffentlichen, ist es üblich, die empfangenen Events erneut an den Eventhub zu publizieren. 
+Wenn du Eventhub benutzt um Events aus einer anderen Anstalt zu empfangen (z.B. Nightly-Broadcasts) und diese für deinen Sender weiterveröffentlichst, ist es üblich, die empfangenen Events erneut an den Eventhub zu publizieren. 
 
-Das ist wichtig, da Ihre Abonnenten erwarten alle Events Ihres Senders zu erhalten – inklusive der von anderen Sendern erneut gesendeten Events. Sie wissen möglicherweise nicht, dass Sie das Programm von einer anderen Station weiterverbreiten und nutzen lediglich ein Abonnement für Ihre Station, um alle Events zu empfangen.
+Das ist wichtig, da deine Abonnenten erwarten alle Events deines Senders zu erhalten – inklusive der von anderen Sendern erneut gesendeten Events. Sie wissen möglicherweise nicht, dass du das Programm von einer anderen Station weiterverbreitest und nutzen lediglich ein Abonnement für deine Station, um alle Events zu empfangen.
 
-Für Dienste wie die ARD Audiothek ist dies wichtig, andernfalls verfügt Ihr Sender möglicherweise über unvollständige Live-Metadaten, wenn Sie andere Sender erneut ausstrahlen.
+Für Dienste wie die ARD Audiothek ist dies wichtig, andernfalls verfügt dein Sender möglicherweise über unvollständige Live-Metadaten, wenn du andere Sender erneut ausstrahlst.
 
-In diesem Fall ist es wichtig, sicherzustellen, dass Ihre interne Filterung korrekt funktioniert, wenn Sie Events von anderen Sendern empfangen, und diese nur zu veröffentlichen, wenn der Sender tatsächlich auf Sendung ist. Andernfalls könnte es zu einer Schleife kommen.
+In diesem Fall ist es wichtig, sicherzustellen, dass deine interne Filterung korrekt funktioniert, wenn du Events von anderen Sendern empfängst, und diese nur zu veröffentlichen, wenn der Sender tatsächlich auf Sendung ist. Andernfalls könnte es zu einer Schleife kommen.
 
 ### Wichtige Hinweise zu External IDs
 
-Details finden Sie in [EXTERNAL_IDS.md](./EXTERNAL_IDS.md).
+Details findest du in [EXTERNAL_IDS.md](./EXTERNAL_IDS.md).
 
 ### Beispiel-Workflow
 
-Ein möglicher Ablauf in Ihrem System für jedes neue Event könnte so aussehen:
+Ein möglicher Ablauf in deinem System für jedes neue Event könnte so aussehen:
 
-1. Check if you have `token` from a previous call that has not expired
-2. If not found, check if you have a `refreshToken` from a previous call
-   1. If found exchange it for a new `token`
-   2. If not found, create a new login
-3. POST the event using the pre-defined format. The example below might help you understand the different fields:
+1. Prüfe ob dein `token`, den du von einem früheren Aufruf hast, noch gültig ist
+2. Falls du keinen Gültigen mehr hast, prüfe ob du noch einen `refreshToken` von einem früheren Aufruf hast
+   1. Falls ja, tausche ihn für einen gültigen `token` ein
+   2. Falls nein, logge dich über die API erneut an
+3. POST das Event im vorgegebenen Format. Das folgende Beispiel kann dir dabei helfen, den Aufbau eines Events zu verstehen:
 
 ```js
 {
@@ -117,30 +117,30 @@ Ein möglicher Ablauf in Ihrem System für jedes neue Event könnte so aussehen:
 
 ## Subscriber
 
-Wenn Sie Events anderer Sender empfangen möchten, tragen Sie sich als Subscriber ein und erhalten Echtzeit-POSTs (Webhooks) für alle veröffentlichten Events. Diese können z.B. Ihre Web- oder App-Angebote während der Wiederholungen in den nächtlichen Sendungen verbessern.
+Wenn du Events anderer Sender empfangen möchtest, trage dich als Subscriber ein und erhalte Echtzeit-POSTs (Webhooks) für alle veröffentlichten Events. Diese können z.B. deine Web- oder App-Angebote während der Wiederholungen in den nächtlichen Sendungen verbessern.
 
-Beachten Sie, dass der Typ der hier veröffentlichten Events in Zukunft erweitert werden kann; filtern Sie deshalb entsprechend. Das Datenformat bleibt abwärtskompatibel, es können jedoch bei Bedarf neue Bereiche zu diesem Dienst hinzugefügt werden.
+Beachte, dass der Typ der hier veröffentlichten Events in Zukunft erweitert werden kann, filtere deshalb entsprechend. Das Datenformat bleibt abwärtskompatibel, es können jedoch bei Bedarf neue Bereiche zu diesem Dienst hinzugefügt werden.
 
-Bei nächtlichen Wiederholungen sollten Sie eine permanente Subscription 24/7 betreiben. Der Filter basierend auf dem Programmplan sollte auf Ihrer Seite durchgeführt werden. Pub/Sub sollte nicht zum wiederholten Erstellen/Löschen von Subscriptions während Start/Ende eines Re-Runs/Wiederholung genutzt werden.
+Bei nächtlichen Wiederholungen solltest du eine permanente Subscription 24/7 betreiben. Der Filter basierend auf dem Programmplan sollte auf deiner Seite durchgeführt werden. Pub/Sub sollte nicht zum wiederholten Erstellen/Löschen von Subscriptions während Start/Ende eines Re-Runs/Wiederholung genutzt werden.
 
-Stellen Sie sicher, dass Ihr Endpoint aus dem Internet erreichbar ist und ein gültiges SSL-Zertifikat installiert ist. Ist der Endpoint zeitweise nicht erreichbar, sammelt die Subscription vergangene Events und versucht die Zustellung erneut. Siehe dazu auch [`src/utils/pubsub/createSubscription.ts`](../src/utils/pubsub/createSubscription.ts) und [cloud.google.com/pubsub/docs/push](https://cloud.google.com/pubsub/docs/push#push_backoff).
+Stelle sicher, dass dein Endpoint aus dem Internet erreichbar ist und ein gültiges SSL-Zertifikat installiert ist. Ist der Endpoint zeitweise nicht erreichbar, sammelt die Subscription vergangene Events und versucht die Zustellung erneut. Siehe dazu auch [`src/utils/pubsub/createSubscription.ts`](../src/utils/pubsub/createSubscription.ts) und [cloud.google.com/pubsub/docs/push](https://cloud.google.com/pubsub/docs/push#push_backoff).
 
-Starten Sie mit diesen Schritten:
+Starte mit diesen Schritten:
 
-- Richten Sie Ihr Konto ein und verstehen Sie den Authentifizierungsprozess
-- Verwenden Sie GET `/topics`, um verfügbare Channels (Topics) zu sehen
+- Richte dein Konto ein und verstehe den Authentifizierungsprozess
+- Verwende GET `/topics`, um verfügbare Channels (Topics) zu sehen
 - Wenn ein Channel nicht sichtbar ist, wurde noch nicht darauf publiziert. Topics entstehen erst beim ersten Senden eines Events.
-- Erstellen Sie mit POST `/subscriptions` Ihre Subscription
-  - ACHTEN Sie darauf keine localhost Adressen als URL anzugeben.
-- Lesen Sie die Google-Dokumentation ["Receiving messages using Push"](https://cloud.google.com/pubsub/docs/push#receiving_messages) für das Nachrichtenformat
-- Verwenden Sie GET `/subcriptions`, um Subscriptions zu prüfen
+- Erstelle mit POST `/subscriptions` Ihre Subscription
+  - ACHTE darauf keine localhost Adressen als URL anzugeben.
+- Lese die Google-Dokumentation ["Receiving messages using Push"](https://cloud.google.com/pubsub/docs/push#receiving_messages) für das Nachrichtenformat
+- Verwende GET `/subcriptions`, um Subscriptions zu prüfen
 
-Sicherheits-Hinweis: Ein registrierter Benutzer ist einer Institution (_Landesrundfunkanstalt_ oder _GSEA_) zugeordnet. Benutzer können alle Subscriptions innerhalb ihrer Institution verwalten — löschen Sie keine Produktions-Einträge Ihrer Kollegen.
-Mit dieser Methode haben Sie weiterhin Zugriff auf alle Abonnements, auch wenn eine Person Ihre Einrichtung verlässt oder ihr Konto deaktiviert wird.
+Sicherheits-Hinweis: Ein registrierter Benutzer ist einer Institution (_Landesrundfunkanstalt_ oder _GSEA_) zugeordnet. Benutzer können alle Subscriptions innerhalb ihrer Institution verwalten — lösche keine Produktions-Einträge deiner Kollegen.
+Mit dieser Methode hast du weiterhin Zugriff auf alle Abonnements, auch wenn eine Person deine Einrichtung verlässt oder dein Konto deaktiviert wird.
 
 ### Sicherheit
 
-Generell empfiehlt es sich, Endpoints nicht öffentlich auffindbar zu machen. Um sicherzustellen, dass ein Event tatsächlich vom Eventhub stammt, verwenden Sie das mitgelieferte JWT-Token und den Service Account.
+Generell empfiehlt es sich, Endpoints nicht öffentlich auffindbar zu machen. Um sicherzustellen, dass ein Event tatsächlich vom Eventhub stammt, verwende das mitgelieferte JWT-Token und den Service Account.
 
 Die Antwort beim Erstellen einer Subscription enthält u.a. das verwendete Service Account-Feld:
 
@@ -152,7 +152,7 @@ Die Antwort beim Erstellen einer Subscription enthält u.a. das verwendete Servi
 }
 ```
 
-Bitte beachten Sie, dass das Dienstkonto derzeit in der Regel dieselbe Antwort enthält. Bei zukünftigen Abonnements kann es jedoch sein, dass es ein anderes Konto enthält. Konfigurieren Sie Ihren Dienst so, dass für jedes Abonnement das entsprechende Konto überprüft wird.
+Bitte beachte, dass das Dienstkonto derzeit in der Regel dieselbe Antwort enthält. Bei zukünftigen Abonnements kann es jedoch sein, dass es ein anderes Konto enthält. Konfiguriere deinen Dienst so, dass für jedes Abonnement das entsprechende Konto überprüft wird.
 
 ### Beispiel-Receiver
 

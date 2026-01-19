@@ -44,7 +44,7 @@ Ein Song oder kommerziell produziertes Musikstück. Es wird dringend empfohlen, 
 
 ## `live`
 
-Wenn ein Live-Element beginnt, z.B. Moderation, Interview oder andere Live-Beiträge. Verwenden Sie das Feld `title` für eine kurze, öffentlich darstellbare Beschreibung.
+Wenn ein Live-Element beginnt, z.B. Moderation, Interview oder andere Live-Beiträge. Verwende das Feld `title` für eine kurze, öffentlich darstellbare Beschreibung.
 
 ```json
 {
