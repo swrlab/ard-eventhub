@@ -5,7 +5,7 @@ Damit der Eventhub zuverlässig arbeitet, muss ein Dienst eindeutig identifizier
 ⚠️  Bitte verwende **genau** die `externalId`, mit der du die Metadaten deiner Livestreams an ARD Core (_PermanentLivestream_) übermittelst. Bei Unsicherheit wende dich an deinen Metadaten-Ansprechpartner oder an das SWR Audio Lab.
 
 > **Anforderungen und Empfehlungen für External IDs**
-> Das externalId-Feld kann beim Erstellen einer Entität übergeben werden.>
+> Das externalId-Feld kann beim Erstellen einer Entität übergeben werden.
 > Falls du noch nicht über TVA lieferst, steht dir bei der Wahl der External ID grundsätzlich Freiheit zu. Deine Wahl **muss** jedoch folgende Kriterien erfüllen:
 >
 > (a) Die External ID einer einzelnen Entität darf sich nicht ändern
