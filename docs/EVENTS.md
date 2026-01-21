@@ -4,7 +4,7 @@ Zurzeit erwartet ARD Eventhub, dass der Wert `event` einer der folgenden Werte i
 
 ## `de.ard.eventhub.v1.radio.track.playing`
 
-Dieses Ereignis markiert den Beginn eines neuen Spielelements/Tracks für den bereitstellenden Radiosender. Es sollte die `start` Zeitangabe der Quellinformation enthalten, um eine möglichst genaue Startzeit anzugeben und Abweichungen aufgrund von Netzwerklatenzen zu vermeiden.
+Dieses Ereignis markiert den Beginn eines neuen Elementes/ Tracks für den jeweiligen Radiosender. Es sollte die `start` Zeitangabe der Quellinformation enthalten, um eine möglichst genaue Startzeit anzugeben und Abweichungen aufgrund von Netzwerklatenzen zu vermeiden.
 
 ## `de.ard.eventhub.v1.radio.track.next`
 
@@ -14,4 +14,4 @@ Ein Paar aus `next` und `playing` Events sollte eine Referenz zueinander haben (
 
 ## `de.ard.eventhub.v1.radio.text`
 
-Dieses Event legt den Live-Encoder-Text fest.
+Dieses Event legt den Live-Encoder-Text fest und ist noch in der Erprobungsphase.

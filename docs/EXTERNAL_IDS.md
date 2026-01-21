@@ -7,10 +7,10 @@ Damit der Eventhub zuverlässig arbeitet, muss ein Dienst eindeutig identifizier
 > **Anforderungen und Empfehlungen für External IDs**
 > Das externalId-Feld kann beim Erstellen einer Entität übergeben werden.>
 > Falls du noch nicht über TVA lieferst, steht dir bei der Wahl der External ID grundsätzlich Freiheit zu. Deine Wahl **muss** jedoch folgende Kriterien erfüllen:
-> 
+>
 > (a) Die External ID einer einzelnen Entität darf sich nicht ändern
 > (b) Die External ID bezieht sich auf die lokale Entität, die du importieren möchtest
 > (c) Die External ID ist in Ihrem lokalen Kontext eindeutig
 > (d) Die External ID ist im gesamten ARD-Kontext eindeutig
 
-[Source: developer.ard.de](https://developer.ard.de/core-api-v2-delivering-content#ExternalIDRequirementsRecommendations)
+[Quelle: developer.ard.de](https://developer.ard.de/core-api-v2-delivering-content#ExternalIDRequirementsRecommendations)

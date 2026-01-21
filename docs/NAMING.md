@@ -4,10 +4,10 @@ Verschiedene Teile dieses Dienstes erfordern durchgehende (konsistente) Namensko
 
 ## Google Cloud Pub/Sub
 
-Pub/Sub stellt Einschränkungen für Namen, Keys und Werte auf. Für alle Felder (Module, Stage, serviceId etc.) gelten unter anderem folgende Regeln:
+Pub/Sub besitzt Einschränkungen für Namen, Keys und Werte. Für alle Felder (Module, Stage, serviceId etc.) gelten unter anderem folgende Regeln:
 
 - Keys außer `stage` dürfen keine Werte einer Staging-Umgebung enthalten (z.B. darf `service` nicht `prod` enthalten)
-- Alle Werte werden klein geschrieben und enthalten keine Sonderzeichen wie äöü.
+- Alle Werte werden klein geschrieben und enthalten keine Sonderzeichen wie `äöü`.
   - Dieser Dienst nutzt einen Slug-Converter, um Institutionennamen in verwendbare und lesbare Strings zu verwandeln
 - Google-Einschränkungen für IDs:
   - Muss 3–255 Zeichen lang sein, mit einem Buchstaben beginnen und darf nur die folgenden Zeichen enthalten: Buchstaben, Zahlen, Bindestriche (-), Punkte (.), Unterstriche (_), Tilden (~), Prozentzeichen (%) oder Pluszeichen (+). Darf nicht mit `goog` beginnen.

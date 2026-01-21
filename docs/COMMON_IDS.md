@@ -2,7 +2,7 @@
 
 ## Nächtliche Landesweite Sendungen
 
-Einige Sender sind für die Bereitstellung von gemeinsamen nächtlichen landesweiten Sendungen verantwortlich. Da du möglicherweise die entsprechenden Metadaten für deine eigene Sendung benötigst, kannst du diese anhand der folgenden IDs identifizieren. Es handelt sich hierbei um spezielle `topics`, die ausschließlich die Daten der nächtlichen Sendungen betreffen.
+Einige Sender sind für die Bereitstellung von gemeinsamen nächtlichen bundesweiten Sendungen verantwortlich. Da du möglicherweise die entsprechenden Metadaten für deine eigene Sendung benötigst, kannst du diese anhand der folgenden IDs identifizieren. Es handelt sich hierbei um spezielle `topics`, die ausschließlich die Daten der nächtlichen Sendungen betreffen.
 
 | Broadcast               | Publisher  | Core ID                                         | Nightly-only topic? |
 | ----------------------- | ---------- | ----------------------------------------------- | ------------------- |

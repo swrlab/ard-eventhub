@@ -2,9 +2,9 @@
 
 Dieser Leitfaden hilft dir beim Start in den ARD Eventhub.
 
-Egal, ob du Publisher oder Subscriber bist: Du benötigst ein Benutzerkonto, um mit der API zu interagieren. Fordere ein Konto über deinen Ansprechpartner beim SWR Audio Lab oder ARD Online an. Administratoren können die `Users`-Dokumentation für die Registrierung heranziehen.
+Egal, ob du Publisher oder Subscriber bist: Du benötigst ein Benutzerkonto, um mit der API zu interagieren. Fordere ein Konto über deinen Ansprechpartner beim SWR Audio Lab oder ARD Online an. Administratoren können die [*Benutzer*](./USERS.md)-Dokumentation für die Registrierung heranziehen.
 
-Nachdem das Konto eingerichtet wurde, lies das Kapitel zur Authentifizierung, um mehr über Login und den Token-Austausch zu erfahren.
+Nachdem das Konto eingerichtet wurde, lies das Kapitel [*Authentifizierung*](./AUTHENTICATION.md), um mehr über Login und den Token-Austausch zu erfahren.
 
 ## Publisher
 
@@ -42,15 +42,15 @@ Wenn du als Hörfunkanstalt Events in den ARD Eventhub publizieren möchtest, be
 }
 ```
 
-Es wird empfohlen, zunächst das `test`-System des Eventhub zu nutzen, um alles zu prüfen, bevor du in die Produktion (`prod`) wechselst. Die Hostnamen findest du im Dokument zu den Stages.
+Es wird empfohlen, zunächst das `test`-System des Eventhub zu nutzen, um alles zu prüfen, bevor du in die Produktion (`prod`) wechselst. Die Hostnamen findest du im Dokument zu den [Stages](./STAGES.md).
 
 Sicherheits-Hinweis: Jedes Benutzerkonto darf nur zu `publisherId`s seiner eigenen Institution publizieren. Sofern man einen Fehler zurückbekommt kann die ID falsch sein oder das Benutzerkonto wurde durch einen Admin falsch konfiguriert.
 
 ### Umgang mit Events aus externen Quellen
 
-Wenn du Eventhub benutzt um Events aus einer anderen Anstalt zu empfangen (z.B. Nightly-Broadcasts) und diese für deinen Sender weiterveröffentlichst, ist es üblich, die empfangenen Events erneut an den Eventhub zu publizieren. 
+Wenn du Eventhub benutzt, um Events aus einer anderen Anstalt zu empfangen (z.B. Nächtliche bundesweite Sendungen) und diese für deinen Sender weiterveröffentlichst, ist es wichtig, die empfangenen Events erneut an den Eventhub zu publizieren.
 
-Das ist wichtig, da deine Abonnenten erwarten alle Events deines Senders zu erhalten – inklusive der von anderen Sendern erneut gesendeten Events. Sie wissen möglicherweise nicht, dass du das Programm von einer anderen Station weiterverbreitest und nutzen lediglich ein Abonnement für deine Station, um alle Events zu empfangen.
+Das ist essentiell, da deine Abonnenten alle Events deines Senders erhalten müssen – inklusive der von anderen Sendern erneut gesendeten Events. Sie wissen möglicherweise nicht, dass du das Programm von einer anderen Station weiterverbreitest und nutzen lediglich ein Abonnement für deinen Sender, um alle Events zu empfangen.
 
 Für Dienste wie die ARD Audiothek ist dies wichtig, andernfalls verfügt dein Sender möglicherweise über unvollständige Live-Metadaten, wenn du andere Sender erneut ausstrahlst.
 
@@ -121,38 +121,40 @@ Wenn du Events anderer Sender empfangen möchtest, trage dich als Subscriber ein
 
 Beachte, dass der Typ der hier veröffentlichten Events in Zukunft erweitert werden kann, filtere deshalb entsprechend. Das Datenformat bleibt abwärtskompatibel, es können jedoch bei Bedarf neue Bereiche zu diesem Dienst hinzugefügt werden.
 
-Bei nächtlichen Wiederholungen solltest du eine permanente Subscription 24/7 betreiben. Der Filter basierend auf dem Programmplan sollte auf deiner Seite durchgeführt werden. Pub/Sub sollte nicht zum wiederholten Erstellen/Löschen von Subscriptions während Start/Ende eines Re-Runs/Wiederholung genutzt werden.
+Bei nächtlichen Sendungen solltest du eine permanente Subscription 24/7 betreiben. Der Filter basierend auf dem Programmplan sollte auf deiner Seite durchgeführt werden. **Pub/Sub sollte nicht zum wiederholten Erstellen/Löschen von Subscriptions genutzt werden.**
 
 Stelle sicher, dass dein Endpoint aus dem Internet erreichbar ist und ein gültiges SSL-Zertifikat installiert ist. Ist der Endpoint zeitweise nicht erreichbar, sammelt die Subscription vergangene Events und versucht die Zustellung erneut. Siehe dazu auch [`src/utils/pubsub/createSubscription.ts`](../src/utils/pubsub/createSubscription.ts) und [cloud.google.com/pubsub/docs/push](https://cloud.google.com/pubsub/docs/push#push_backoff).
+
+Aktuell ist ein Pull-Workflow für Subscriptions nicht vorgesehen.
 
 Starte mit diesen Schritten:
 
 - Richte dein Konto ein und verstehe den Authentifizierungsprozess
 - Verwende GET `/topics`, um verfügbare Channels (Topics) zu sehen
 - Wenn ein Channel nicht sichtbar ist, wurde noch nicht darauf publiziert. Topics entstehen erst beim ersten Senden eines Events.
-- Erstelle mit POST `/subscriptions` Ihre Subscription
-  - ACHTE darauf keine localhost Adressen als URL anzugeben.
+- Erstelle mit POST `/subscriptions` eine Subscription
+  - ACHTE darauf keine localhost oder internen Adressen als URL anzugeben.
 - Lese die Google-Dokumentation ["Receiving messages using Push"](https://cloud.google.com/pubsub/docs/push#receiving_messages) für das Nachrichtenformat
 - Verwende GET `/subcriptions`, um Subscriptions zu prüfen
 
-Sicherheits-Hinweis: Ein registrierter Benutzer ist einer Institution (_Landesrundfunkanstalt_ oder _GSEA_) zugeordnet. Benutzer können alle Subscriptions innerhalb ihrer Institution verwalten — lösche keine Produktions-Einträge deiner Kollegen.
-Mit dieser Methode hast du weiterhin Zugriff auf alle Abonnements, auch wenn eine Person deine Einrichtung verlässt oder dein Konto deaktiviert wird.
+Sicherheits-Hinweis: Ein registrierter Benutzer ist einer Institution (*Landesrundfunkanstalt*) zugeordnet. Benutzer können alle Subscriptions innerhalb ihrer Institution verwalten — lösche keine Produktions-Einträge deiner Kollegen.
+Mit diesem Workflow hat man weiterhin Zugriff auf alle Abonnements, auch wenn eine Person deinen Sender verlässt, oder dein Konto deaktiviert wird.
 
 ### Sicherheit
 
-Generell empfiehlt es sich, Endpoints nicht öffentlich auffindbar zu machen. Um sicherzustellen, dass ein Event tatsächlich vom Eventhub stammt, verwende das mitgelieferte JWT-Token und den Service Account.
+Um sicherzustellen, dass ein Event tatsächlich vom Eventhub stammt, verwende das mitgelieferte JWT-Token und den Service Account.
 
 Die Antwort beim Erstellen einer Subscription enthält u.a. das verwendete Service Account-Feld:
 
 ```js
 {
    ...
-   "serviceAccount": "somethin@something-else.iam.gserviceaccount.com",
+   "serviceAccount": "something@something-else.iam.gserviceaccount.com",
    ...
 }
 ```
 
-Bitte beachte, dass das Dienstkonto derzeit in der Regel dieselbe Antwort enthält. Bei zukünftigen Abonnements kann es jedoch sein, dass es ein anderes Konto enthält. Konfiguriere deinen Dienst so, dass für jedes Abonnement das entsprechende Konto überprüft wird.
+Bitte beachte, dass der Service Account derzeit in der Regel dieselbe Antwort enthält. Bei zukünftigen Abonnements kann es jedoch sein, dass ein anderes Konto verwendet wird. Konfiguriere deinen Dienst so, dass für jedes Abonnement das entsprechende Konto überprüft wird.
 
 ### Beispiel-Receiver
 

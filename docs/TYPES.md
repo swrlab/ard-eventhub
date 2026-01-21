@@ -1,6 +1,6 @@
 # ARD Eventhub / Types
 
-Jeder ausgelöste `track` muss einem bestimmten Typ entsprechen, damit er von empfangenden Subscribern korrekt dargestellt werden kann.
+Jeder gesendete `track` muss einem bestimmten Typ entsprechen, damit er von empfangenden Subscribern korrekt dargestellt werden kann.
 
 ## `music`
 
@@ -59,7 +59,7 @@ Wenn ein Live-Element beginnt, z.B. Moderation, Interview oder andere Live-Beitr
 
 ## `audio`
 
-Wird für Beiträge (pre-recorded) verwendet, die in keine andere Kategorie passen. So detailliert wie möglich ausfüllen. 
+Wird für Beiträge (pre-recorded) verwendet, die in keine andere Kategorie passen. So detailliert wie möglich ausfüllen.
 Das Feld `contributors` sollte Informationen zum `author` enthalten. `media` kann benutzt werden um zusätzliche Informationen zu liefern. `show` verweist auf die zugehörige Sendereihe.
 
 ```json
