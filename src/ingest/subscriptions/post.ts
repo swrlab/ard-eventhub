@@ -101,7 +101,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 			return response.badRequest(req, res, {
 				status: 422,
 				message: 'An invalid URL was sent for the subscription',
-				errors: 'IP adresses are not valid urls',
+				errors: 'IP addresses are not valid urls',
 			})
 		}
 
