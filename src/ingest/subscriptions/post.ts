@@ -73,9 +73,8 @@ export default async (req: UserTokenRequest, res: Response) => {
 		}
 
 		// check if there is an invalid url
-		const url: string = req.body.url
 
-		if (!url) {
+		if (!req.body.url) {
 			// return 422 error
 			return response.badRequest(req, res, {
 				status: 422,
@@ -84,8 +83,10 @@ export default async (req: UserTokenRequest, res: Response) => {
 			})
 		}
 
+		const url: URL = new URL(req.body.url)
+
 		// localhost check
-		if (url.includes('localhost')) {
+		if (url.hostname.startsWith('localhost')) {
 			// return 422 error
 			return response.badRequest(req, res, {
 				status: 422,
@@ -95,8 +96,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		}
 
 		// ip address check
-		if (url.match('([\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}):([\\d]{1,5})') != null
-			|| url.match('([\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3})') != null) {
+		if (url.hostname.match('([\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3})') != null) {
 			// return 422 error
 			return response.badRequest(req, res, {
 				status: 422,
@@ -105,17 +105,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 			})
 		}
 
-
-		if (!url.includes('ard')) {
-			// return 422 error
-			return response.badRequest(req, res, {
-				status: 422,
-				message: 'An invalid URL was sent for the subscription',
-				errors: 'URL is not an ARD one',
-			})
-		}
-
-		if (!url.includes('https')) {
+		if (url.protocol !== 'https:') {
 			// return 422 error
 			return response.badRequest(req, res, {
 				status: 422,
