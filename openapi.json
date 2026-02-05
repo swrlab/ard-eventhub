@@ -11,7 +11,7 @@
 			"name": "European Union Public License 1.2",
 			"url": "https://spdx.org/licenses/EUPL-1.2.html"
 		},
-		"version": "2.1.1"
+		"version": "2.2.0"
 	},
 	"externalDocs": {
 		"description": "ARD Eventhub Documentation",
@@ -1183,6 +1183,11 @@
 									"type": "string",
 									"example": "Photographer XYZ",
 									"nullable": true
+								},
+								"isFallback": {
+									"type": "boolean",
+									"example": false,
+									"description": "Optional flag to mark media as fallback data that subscribers can filter out"
 								}
 							}
 						}

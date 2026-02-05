@@ -6,6 +6,8 @@ Jeder gesendete `track` muss einem bestimmten Typ entsprechen, damit er von empf
 
 Ein Song oder kommerziell produziertes Musikstück. Es wird dringend empfohlen, mindestens `title` und `artist` zu setzen. Angaben zu beteiligten Künstlern im Feld `contributors` sind nützlich. Ideal sind außerdem Verweise auf Quell-IDs wie `confId` aus ARD's HFDB, `isrc` und `upc`.
 
+Das optionale `isFallback`-Boolean-Feld in `media`-Elementen ermöglicht es, Medien als Fallback-Daten zu kennzeichnen (z.B. benutzerdefinierte Sender-Bilder, wenn offizielle Cover nicht verfügbar sind). Subscriber können Fallback-Medien bei Bedarf herausfiltern.
+
 ```json
 {
   "event": "de.ard.eventhub.v1.radio.track.playing",
@@ -35,7 +37,8 @@ Ein Song oder kommerziell produziertes Musikstück. Es wird dringend empfohlen, 
       "url": "https://example.com/cover.jpg",
       "templateUrl": "https://example.com/cover.jpg?width={width}",
       "description": "Cover Demo Artist",
-      "attribution": "Photographer XYZ"
+      "attribution": "Photographer XYZ",
+      "isFallback": false
     }
   ],
   …

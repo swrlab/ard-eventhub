@@ -61,6 +61,7 @@ export type EventhubV1RadioPostBodyInput = {
 		templateUrl: string | null
 		description: string
 		attribution: string | null
+		isFallback?: boolean
 	}[]
 	plugins: {
 		type: string
