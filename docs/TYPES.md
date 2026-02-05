@@ -6,7 +6,7 @@ Jeder gesendete `track` muss einem bestimmten Typ entsprechen, damit er von empf
 
 Ein Song oder kommerziell produziertes Musikstück. Es wird dringend empfohlen, mindestens `title` und `artist` zu setzen. Angaben zu beteiligten Künstlern im Feld `contributors` sind nützlich. Ideal sind außerdem Verweise auf Quell-IDs wie `confId` aus ARD's HFDB, `isrc` und `upc`.
 
-The optional `isFallback` boolean field in `media` elements allows marking media items as fallback data (e.g., custom station images when official covers are unavailable). Subscribers can filter out fallback media if desired.
+Das optionale `isFallback`-Boolean-Feld in `media`-Elementen ermöglicht es, Medien als Fallback-Daten zu kennzeichnen (z.B. benutzerdefinierte Sender-Bilder, wenn offizielle Cover nicht verfügbar sind). Subscriber können Fallback-Medien bei Bedarf herausfiltern.
 
 ```json
 {
