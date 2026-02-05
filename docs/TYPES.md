@@ -6,6 +6,8 @@ Each triggered `track` can and must be of a certain type, to be properly display
 
 A song or commercially produced piece of music. It is highly recommended and expected to set both `title` and `artist`. Full details about participating artists inside `contributors` is a bonus. This type should ideally also include references to its source element, like `confId` from ARD's HFDB, `isrc` and `upc`.
 
+The optional `isFallback` boolean field in `media` elements allows marking media items as fallback data (e.g., custom station images when official covers are unavailable). Subscribers can filter out fallback media if desired.
+
 ```json
 {
   "event": "de.ard.eventhub.v1.radio.track.playing",
@@ -35,7 +37,8 @@ A song or commercially produced piece of music. It is highly recommended and exp
       "url": "https://example.com/cover.jpg",
       "templateUrl": "https://example.com/cover.jpg?width={width}",
       "description": "Cover Demo Artist",
-      "attribution": "Photographer XYZ"
+      "attribution": "Photographer XYZ",
+      "isFallback": false
     }
   ],
   …

@@ -236,6 +236,95 @@ describe(`POST ${eventPath}`, () => {
 		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
 		testResponse(res, 400)
 	})
+
+	it('publish a new event with media including isFallback flag set to true', async () => {
+		const eventWithFallbackMedia = {
+			event: eventName,
+			type: 'music',
+			start: DateTime.now().toISO(),
+			title: 'Unit Test Song with Fallback Media',
+			services: [
+				{
+					type: 'PermanentLivestream',
+					externalId: 'crid://swr.de/282310/unit',
+					publisherId: '282310',
+				},
+			],
+			playlistItemId: 'unit-test-id-in-playlist-567-fallback',
+			media: [
+				{
+					type: 'cover',
+					url: 'https://example.com/fallback-cover.jpg',
+					templateUrl: null,
+					description: 'Fallback Cover Image',
+					attribution: null,
+					isFallback: true,
+				},
+			],
+		}
+		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(eventWithFallbackMedia)
+		testResponse(res, 201)
+		testEventKeys(res.body)
+	})
+
+	it('publish a new event with media including isFallback flag set to false', async () => {
+		const eventWithNonFallbackMedia = {
+			event: eventName,
+			type: 'music',
+			start: DateTime.now().toISO(),
+			title: 'Unit Test Song with Non-Fallback Media',
+			services: [
+				{
+					type: 'PermanentLivestream',
+					externalId: 'crid://swr.de/282310/unit',
+					publisherId: '282310',
+				},
+			],
+			playlistItemId: 'unit-test-id-in-playlist-567-non-fallback',
+			media: [
+				{
+					type: 'cover',
+					url: 'https://example.com/cover.jpg',
+					templateUrl: null,
+					description: 'Official Cover Image',
+					attribution: 'Photographer XYZ',
+					isFallback: false,
+				},
+			],
+		}
+		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(eventWithNonFallbackMedia)
+		testResponse(res, 201)
+		testEventKeys(res.body)
+	})
+
+	it('publish a new event with media without isFallback flag (should be optional)', async () => {
+		const eventWithoutIsFallback = {
+			event: eventName,
+			type: 'music',
+			start: DateTime.now().toISO(),
+			title: 'Unit Test Song without isFallback',
+			services: [
+				{
+					type: 'PermanentLivestream',
+					externalId: 'crid://swr.de/282310/unit',
+					publisherId: '282310',
+				},
+			],
+			playlistItemId: 'unit-test-id-in-playlist-567-no-flag',
+			media: [
+				{
+					type: 'cover',
+					url: 'https://example.com/cover.jpg',
+					templateUrl: null,
+					description: 'Cover without isFallback field',
+					attribution: null,
+				},
+			],
+		}
+		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(eventWithoutIsFallback)
+		testResponse(res, 201)
+		testEventKeys(res.body)
+	})
 })
 
 const eventRadioTextName = 'de.ard.eventhub.v1.radio.text'

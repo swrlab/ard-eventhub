@@ -922,6 +922,10 @@ components:
                 type: string
                 example: Photographer XYZ
                 nullable: true
+              isFallback:
+                type: boolean
+                example: false
+                description: Optional flag to mark media as fallback data that subscribers can filter out
         plugins:
           type: array
           description: >-
