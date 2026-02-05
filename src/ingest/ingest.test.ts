@@ -325,6 +325,72 @@ describe(`POST ${eventPath}`, () => {
 		testResponse(res, 201)
 		testEventKeys(res.body)
 	})
+
+	it('publish event with blocked services should not be sent to common topic', async () => {
+		// Create an event with invalid publisher that will be blocked
+		const eventWithBlockedService = {
+			event: eventName,
+			type: 'music',
+			start: DateTime.now().toISO(),
+			title: 'Unit Test Song with Blocked Service',
+			services: [
+				{
+					type: 'PermanentLivestream',
+					externalId: 'crid://invalid.de/999999/unit',
+					publisherId: 'invalid-publisher-id', // This should be blocked
+				},
+			],
+			playlistItemId: 'unit-test-blocked-service',
+		}
+		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(eventWithBlockedService)
+		testResponse(res, 201)
+		testEventKeys(res.body)
+		
+		// Verify that the service was blocked
+		expect(res.body.statuses.blocked).toBeGreaterThan(0)
+		
+		// Verify that the common plugin was not sent (plugins array should not contain common type)
+		const commonPlugin = res.body.plugins?.find((p: any) => p.type === 'common')
+		// Common plugin should not be present if all services are blocked
+		if (res.body.statuses.published === 0) {
+			expect(commonPlugin).toBeUndefined()
+		}
+	})
+
+	it('publish event with mixed blocked and valid services - common topic should only contain valid services', async () => {
+		// Create an event with both valid and invalid services
+		const eventWithMixedServices = {
+			event: eventName,
+			type: 'music',
+			start: DateTime.now().toISO(),
+			title: 'Unit Test Song with Mixed Services',
+			services: [
+				{
+					type: 'PermanentLivestream',
+					externalId: 'crid://swr.de/282310/unit',
+					publisherId: '282310', // Valid service
+				},
+				{
+					type: 'PermanentLivestream',
+					externalId: 'crid://invalid.de/999999/unit',
+					publisherId: 'invalid-publisher-id', // This should be blocked
+				},
+			],
+			playlistItemId: 'unit-test-mixed-services',
+		}
+		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(eventWithMixedServices)
+		testResponse(res, 201)
+		testEventKeys(res.body)
+		
+		// Verify that one service was blocked and one was published
+		expect(res.body.statuses.blocked).toBe(1)
+		expect(res.body.statuses.published).toBe(1)
+		
+		// Verify that the common plugin was sent since at least one service is valid
+		const commonPlugin = res.body.plugins?.find((p: any) => p.type === 'common')
+		expect(commonPlugin).toBeDefined()
+		expect(commonPlugin.messageId).toBeDefined()
+	})
 })
 
 const eventRadioTextName = 'de.ard.eventhub.v1.radio.text'
