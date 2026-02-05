@@ -1,8 +1,8 @@
-# Common IDs
+# Allgemeine IDs
 
-## Nightly National Broadcasts
+## Nächtliche Landesweite Sendungen
 
-Some broadcasters are responsible for providing shared nightly national broadcasts. As you may need the corresponding metadata for your own broadcasts, you can use the following IDs to identify them. These are dedicated topics for just the nightly broadcast data.
+Einige Sender sind für die Bereitstellung von gemeinsamen nächtlichen bundesweiten Sendungen verantwortlich. Da du möglicherweise die entsprechenden Metadaten für deine eigene Sendung benötigst, kannst du diese anhand der folgenden IDs identifizieren. Es handelt sich hierbei um spezielle `topics`, die ausschließlich die Daten der nächtlichen Sendungen betreffen.
 
 | Broadcast               | Publisher  | Core ID                                         | Nightly-only topic? |
 | ----------------------- | ---------- | ----------------------------------------------- | ------------------- |
@@ -11,12 +11,12 @@ Some broadcasters are responsible for providing shared nightly national broadcas
 | ARD Popnacht            | SWR3       | `urn:ard:permanent-livestream:885aa9c84e5374bd` | true                |
 | Die Junge Nacht der ARD | WDR/ 1LIVE | `urn:ard:permanent-livestream:d22e908de85bfd44` | true                |
 
-## Common/ Firehose Topic
+## Allgemeine/ Firehose Topics
 
-Each stage of the Eventhub has some common topics that are used to deliver all events. These are the so-called "firehose" topics.
+Jede Instanz des Eventhubs hat allgemeine `topics`, die für die Bereitstellung aller Ereignisse verwendet werden. Dies sind die sogenannten „firehose“-Themen.
 
-They are split between event types; therefore, you could subscribe to either `v1.radio.track.playing` or `v1.radio.track.next`. Please note that due to the high volume of likely irrelevant events for you, you should preferably use a subscription to the topic of an individual livestream.
+Sie sind nach Ereignistypen unterteilt, daher kannst du entweder `v1.radio.track.playing` oder `v1.radio.track.next` abonnieren. Bitte beachte, dass du aufgrund der hohen Anzahl von für dich wahrscheinlich irrelevanten Ereignissen vorzugsweise ein Abonnement für das `topic` eines einzelnen Livestreams verwenden solltest.
 
-## Other IDs
+## Andere IDs
 
-All other IDs for livestreams can be found in the API (`GET /topics`).
+Alle anderen IDs für Livestreams findest du in der API. (`GET /topics`).

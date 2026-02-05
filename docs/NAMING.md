@@ -1,16 +1,16 @@
-# ARD Eventhub / Naming Conventions
+# ARD Eventhub / Namenskonventionen
 
-Several parts of this service require naming conventions that are followed throughout all parts.
+Verschiedene Teile dieses Dienstes erfordern durchgehende (konsistente) Namenskonventionen.
 
 ## Google Cloud Pub/Sub
 
-Pub/Sub includes a number of restrictions around names, keys and values. For all parts (module, stage, serviceId, etc.), there are some defined rules:
+Pub/Sub besitzt Einschränkungen für Namen, Keys und Werte. Für alle Felder (Module, Stage, serviceId etc.) gelten unter anderem folgende Regeln:
 
-- Keys other than `stage` must never include any value of a staging environment (e.g. `service` cannot include `prod`)
-- All values are always written in lower-case characters, without any special chars such as äöü.
-  - This service uses a slug converter to turn user-defined institution names into usable but still readable strings
-- Google restrictions for IDs:
-  - Must be 3-255 characters, start with a letter, and contain only the following characters: letters, numbers, dashes (-), periods (.), underscores (_), tildes (~), percents (%) or plus signs (+). Cannot start with goog.
+- Keys außer `stage` dürfen keine Werte einer Staging-Umgebung enthalten (z.B. darf `service` nicht `prod` enthalten)
+- Alle Werte werden klein geschrieben und enthalten keine Sonderzeichen wie `äöü`.
+  - Dieser Dienst nutzt einen Slug-Converter, um Institutionennamen in verwendbare und lesbare Strings zu verwandeln
+- Google-Einschränkungen für IDs:
+  - Muss 3–255 Zeichen lang sein, mit einem Buchstaben beginnen und darf nur die folgenden Zeichen enthalten: Buchstaben, Zahlen, Bindestriche (-), Punkte (.), Unterstriche (_), Tilden (~), Prozentzeichen (%) oder Pluszeichen (+). Darf nicht mit `goog` beginnen.
 
 ## Pub/Sub Topics
 

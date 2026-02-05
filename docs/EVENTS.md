@@ -1,16 +1,17 @@
 # ARD Eventhub / Events
 
-In its first version ARD Eventhub expects the `event` value to be one of the following:
+Zurzeit erwartet ARD Eventhub, dass der Wert `event` einer der folgenden Werte ist (Änderungen möglich):
 
 ## `de.ard.eventhub.v1.radio.track.playing`
 
-This event marks the beginning of a new playing element/ track for the providing radio station. It should have the `start` time information of the source information, to provide an as detailed as possible start time and avoid misalignments during network latencies.
+Dieses Ereignis markiert den Beginn eines neuen Elementes/ Tracks für den jeweiligen Radiosender. Es sollte die `start` Zeitangabe der Quellinformation enthalten, um eine möglichst genaue Startzeit anzugeben und Abweichungen aufgrund von Netzwerklatenzen zu vermeiden.
 
 ## `de.ard.eventhub.v1.radio.track.next`
 
-The `next` event is similar to `playing` but only signalizes the next scheduled upcoming track. The next element can be replaced by a new next element before a playing element to signalize a new scheduled track.
-A pair of next and playing events should have a reference between each other (`playlistId`), so subscribers can link these two incoming events.
+Das `next` Event hat Ähnlichkeiten zum `playing`Event aber kennzeichnet lediglich nur den planmäßig nächsten Titel. Das `next` Element kann durch ein neues `next` Element vor einem `playing` Element ersetzt werden, um einen neuen geplanten Titel zu kennzeichnen.
+
+Ein Paar aus `next` und `playing` Events sollte eine Referenz zueinander haben (`playlistId`), damit Abonnenten diese beiden eingehenden Events miteinander verknüpfen können.
 
 ## `de.ard.eventhub.v1.radio.text`
 
-This event sets the live encoder text
+Dieses Event legt den Live-Encoder-Text fest und ist noch in der Erprobungsphase.
