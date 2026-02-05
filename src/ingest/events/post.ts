@@ -147,7 +147,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 				if (commonEvent.messageId === 'TOPIC_ERROR' || commonEvent.messageId === 'TOPIC_NOT_FOUND') {
 					logger.log({
 						level: 'warning',
-						message: `failed common plugin > ${eventName} > ${commonMessage.services[0]?.publisherId}`,
+						message: `failed common plugin > ${eventName} > ${commonMessage.services[0]?.publisherId || 'unknown'}`,
 						source,
 						data: {
 							message: commonMessage,

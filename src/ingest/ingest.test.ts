@@ -356,6 +356,41 @@ describe(`POST ${eventPath}`, () => {
 			expect(commonPlugin).toBeUndefined()
 		}
 	})
+
+	it('publish event with mixed blocked and valid services - common topic should only contain valid services', async () => {
+		// Create an event with both valid and invalid services
+		const eventWithMixedServices = {
+			event: eventName,
+			type: 'music',
+			start: DateTime.now().toISO(),
+			title: 'Unit Test Song with Mixed Services',
+			services: [
+				{
+					type: 'PermanentLivestream',
+					externalId: 'crid://swr.de/282310/unit',
+					publisherId: '282310', // Valid service
+				},
+				{
+					type: 'PermanentLivestream',
+					externalId: 'crid://invalid.de/999999/unit',
+					publisherId: 'invalid-publisher-id', // This should be blocked
+				},
+			],
+			playlistItemId: 'unit-test-mixed-services',
+		}
+		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(eventWithMixedServices)
+		testResponse(res, 201)
+		testEventKeys(res.body)
+		
+		// Verify that one service was blocked and one was published
+		expect(res.body.statuses.blocked).toBe(1)
+		expect(res.body.statuses.published).toBe(1)
+		
+		// Verify that the common plugin was sent since at least one service is valid
+		const commonPlugin = res.body.plugins?.find((p: any) => p.type === 'common')
+		expect(commonPlugin).toBeDefined()
+		expect(commonPlugin.messageId).toBeDefined()
+	})
 })
 
 const eventRadioTextName = 'de.ard.eventhub.v1.radio.text'
