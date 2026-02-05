@@ -1,17 +1,16 @@
-# Importance of External IDs
+# Wichtigkeit von External IDs
 
-For the Eventhub to work it needs to be able to uniquely identify a service. This is defined as the so-called `externalId` in ARD's new Core API. You might currently know this as _CRID_, which you are using in the TVA documents.
+Damit der Eventhub zuverlässig arbeitet, muss ein Dienst eindeutig identifizierbar sein. Dies geschieht über das Feld `externalId` in der neuen ARD Core API. Evtl. kennst du bereits dieses Feld schon als _CRID_, welche in der TVA-Dokumentation verwendet wird.
 
-⚠️ Please make sure to use the **exact** `externalId` that you will be using to deliver the metadata of your livestreams to ARD Core (_PermanentLivestream_). When in doubt please reach out to your metadata contacts or to SWR Audio Lab.
+⚠️  Bitte verwende **genau** die `externalId`, mit der du die Metadaten deiner Livestreams an ARD Core (_PermanentLivestream_) übermittelst. Bei Unsicherheit wende dich an deinen Metadaten-Ansprechpartner oder an das SWR Audio Lab.
 
-> **External ID Requirements and Recommendations**
-> The external ID may be provided through the field `externalId` during an entity creation request.
+> **Anforderungen und Empfehlungen für External IDs**
+> Das externalId-Feld kann beim Erstellen einer Entität übergeben werden.
+> Falls du noch nicht über TVA lieferst, steht dir bei der Wahl der External ID grundsätzlich Freiheit zu. Deine Wahl **muss** jedoch folgende Kriterien erfüllen:
 >
-> If you do not already deliver content via TVA you are free in your choice of external ID. However, your choice **must** meet the following criteria:
->
-> (a) The external ID of a single entity does not change over time
-> (b) The external ID is referring to the local entity you want to import
-> (c) The external ID is unique in your own local context
-> (d) The external ID is unique in the whole ARD context
+> (a) Die External ID einer einzelnen Entität darf sich nicht ändern
+> (b) Die External ID bezieht sich auf die lokale Entität, die du importieren möchtest
+> (c) Die External ID ist in Ihrem lokalen Kontext eindeutig
+> (d) Die External ID ist im gesamten ARD-Kontext eindeutig
 
-[Source: developer.ard.de](https://developer.ard.de/core-api-v2-delivering-content#ExternalIDRequirementsRecommendations)
+[Quelle: developer.ard.de](https://developer.ard.de/core-api-v2-delivering-content#ExternalIDRequirementsRecommendations)

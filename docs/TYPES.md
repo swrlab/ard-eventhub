@@ -1,10 +1,10 @@
 # ARD Eventhub / Types
 
-Each triggered `track` can and must be of a certain type, to be properly displayed by receiving subscribers.
+Jeder gesendete `track` muss einem bestimmten Typ entsprechen, damit er von empfangenden Subscribern korrekt dargestellt werden kann.
 
 ## `music`
 
-A song or commercially produced piece of music. It is highly recommended and expected to set both `title` and `artist`. Full details about participating artists inside `contributors` is a bonus. This type should ideally also include references to its source element, like `confId` from ARD's HFDB, `isrc` and `upc`.
+Ein Song oder kommerziell produziertes Musikstück. Es wird dringend empfohlen, mindestens `title` und `artist` zu setzen. Angaben zu beteiligten Künstlern im Feld `contributors` sind nützlich. Ideal sind außerdem Verweise auf Quell-IDs wie `confId` aus ARD's HFDB, `isrc` und `upc`.
 
 The optional `isFallback` boolean field in `media` elements allows marking media items as fallback data (e.g., custom station images when official covers are unavailable). Subscribers can filter out fallback media if desired.
 
@@ -47,7 +47,7 @@ The optional `isFallback` boolean field in `media` elements allows marking media
 
 ## `live`
 
-If a live element is starting. This can be an moderation by an anchor, interview or other live pieces. Use the `title` field to provide a comprehensive and publicly displayable short description.
+Wenn ein Live-Element beginnt, z.B. Moderation, Interview oder andere Live-Beiträge. Verwende das Feld `title` für eine kurze, öffentlich darstellbare Beschreibung.
 
 ```json
 {
@@ -62,8 +62,8 @@ If a live element is starting. This can be an moderation by an anchor, interview
 
 ## `audio`
 
-This type was initially the least descriptive and is now used for items (de: _Beiträge_) – pre-recorded elements that don't fit any of the other categories. Get as detailed as possible. 
-The `contributors` field should be used to include details of the `author`. `media` may be used to supply additional elements. `show` references the correspoding broadcast series / grouping.
+Wird für Beiträge (pre-recorded) verwendet, die in keine andere Kategorie passen. So detailliert wie möglich ausfüllen.
+Das Feld `contributors` sollte Informationen zum `author` enthalten. `media` kann benutzt werden um zusätzliche Informationen zu liefern. `show` verweist auf die zugehörige Sendereihe.
 
 ```json
 {
@@ -100,7 +100,7 @@ The `contributors` field should be used to include details of the `author`. `med
 
 ## `news`
 
-This indicates the beginning of the news in general (de: _Nachrichten_).
+Dies kennzeichnet den Beginn der Nachrichten im Allgemeinen.
 
 ```json
 {
@@ -123,7 +123,7 @@ This indicates the beginning of the news in general (de: _Nachrichten_).
 
 ## `weather`
 
-Similar to `news` it marks the beginning of a weather segment.
+Ähnlich wie `news` markiert es den Beginn eines Wetterberichts.
 
 ```json
 {
@@ -138,7 +138,7 @@ Similar to `news` it marks the beginning of a weather segment.
 
 ## `traffic`
 
-Similar to `news` and `weather` it can mark the beginning of traffic announcements.
+Ähnlich wie `news` and `weather` markiert es den Beginn eines Verkehrberichts.
 
 ```json
 {
@@ -153,15 +153,15 @@ Similar to `news` and `weather` it can mark the beginning of traffic announcemen
 
 ## `commercial`
 
-Use this to provide triggers for playing commercials, such as ad breaks before the news. Doesn't need to be segmented or detailed in the `title` field.
+Verwenden Sie diese Option, um Auslöser für die Wiedergabe von Werbespots festzulegen, z. B. Werbepausen vor den Nachrichten. Eine Segmentierung oder detaillierte Angaben im Feld `title` sind nicht erforderlich.
 
 ## `jingle`
 
-Unfavorable but can be used to signalize a new item that ends the previous element. Should only be used if no information about its contents are available. E.g. a jingle that starts the news, should not be sent as `jingle`, but as `news`. The `title` field must be a value that can be displayed externally and must not be the jingle's filename.
+Ungünstig, kann jedoch verwendet werden, um einen neues Event zu signalisieren, der das vorherige Element beendet. Sollte nur verwendet werden, wenn keine Informationen über den Inhalt verfügbar ist. Beispielsweise sollte ein Jingle, der die Nachrichten einleitet, nicht als `jingle`, sondern als `news` gesendet werden. Das Feld `title` muss einen Wert enthalten, der extern angezeigt werden kann, und darf nicht der Dateiname des Jingles sein.
 
 ## `radio text`
 
-This type is used to set the live encoder text
+Dieser Typ wird verwendet, um den Live-Encoder-Text festzulegen.
 
 ```json
 {

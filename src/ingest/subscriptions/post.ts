@@ -72,6 +72,48 @@ export default async (req: UserTokenRequest, res: Response) => {
 			})
 		}
 
+		// check if there is an invalid url
+
+		if (!req.body.url) {
+			// return 422 error
+			return response.badRequest(req, res, {
+				status: 422,
+				message: 'The URL in the body is missing',
+				errors: 'The URL in the body is missing',
+			})
+		}
+
+		const url: URL = new URL(req.body.url)
+
+		// localhost check
+		if (url.hostname.startsWith('localhost')) {
+			// return 422 error
+			return response.badRequest(req, res, {
+				status: 422,
+				message: 'An invalid URL was sent for the subscription',
+				errors: `A localhost URL was sent ('${url}') which is not allowed`,
+			})
+		}
+
+		// ip address check
+		if (url.hostname.match('([\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3})') != null) {
+			// return 422 error
+			return response.badRequest(req, res, {
+				status: 422,
+				message: 'An invalid URL was sent for the subscription',
+				errors: 'IP addresses are not valid urls',
+			})
+		}
+
+		if (url.protocol !== 'https:') {
+			// return 422 error
+			return response.badRequest(req, res, {
+				status: 422,
+				message: 'An invalid URL was sent for the subscription',
+				errors: 'The URL isn\'t a secure website please send one that starts with https',
+			})
+		}
+
 		// map inputs
 		let subscription: EventhubSubscriptionDatastore = {
 			id: undefined,

@@ -475,7 +475,7 @@ describe(`POST ${subscriptPath}`, () => {
 		subscription = {
 			type: 'PUBSUB',
 			method: 'PUSH',
-			url: 'https://unit.test/eventhub/subscription',
+			url: 'https://ard.unit.test/eventhub/subscription',
 			contact: 'eventhub-unit-test@ard.de',
 			topic: topicName,
 		}
