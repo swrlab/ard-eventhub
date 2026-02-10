@@ -12,6 +12,22 @@ export type EventhubService = {
 	}
 }
 
+export type EventhubPlugin = {
+	type: string
+	isDeactivated: boolean
+	note?: string
+	delay?: number
+	album?: string
+	composer?: string
+	program?: string
+	subject?: string
+	webUrl?: string
+	preferArtistMedia?: boolean
+	enableThumbs?: boolean
+	email?: string
+	excludeFields?: string[]
+}
+
 export type EventhubV1RadioPostBodyInput = {
 	type: string
 	start: string
@@ -63,11 +79,7 @@ export type EventhubV1RadioPostBodyInput = {
 		attribution: string | null
 		isFallback?: boolean
 	}[]
-	plugins: {
-		type: string
-		isDeactivated: boolean
-		note?: string
-	}[]
+	plugins: EventhubPlugin[]
 }
 
 export type EventhubV1RadioPostBody = EventhubV1RadioPostBodyInput & {
@@ -121,4 +133,11 @@ export type EventhubSubscriptionWithLabels = EventhubSubscriptionLimited & {
 		'creator-slug': string
 		created: string
 	}
+}
+
+export type EventhubPluginMessage = {
+	action: string
+	event: EventhubV1RadioPostBody
+	plugin: EventhubPlugin
+	institutionId: string
 }

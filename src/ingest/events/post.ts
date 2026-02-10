@@ -10,7 +10,7 @@ import type { Response } from 'express'
 import { DateTime } from 'luxon'
 import { ulid } from 'ulid'
 
-import type { EventhubV1RadioPostBody } from '@/types.eventhub.ts'
+import type { EventhubPluginMessage, EventhubV1RadioPostBody } from '@/types.eventhub.ts'
 import config from '../../../config/index.ts'
 import { createNewTopic, processServices } from '../../utils/events/index.ts'
 import pubsub from '../../utils/pubsub/index.ts'
@@ -164,6 +164,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		// add opt-out plugins
 		const isDtsPluginSet = message.plugins?.find((plugin) => plugin.type === 'dts')
+		const isRadioplayerPluginSet = message.plugins?.find((plugin) => plugin.type === 'radioplayer')
 		const isMusic = req.body.type === 'music'
 
 		if (!isDtsPluginSet && isMusic) {
@@ -174,11 +175,19 @@ export default async (req: UserTokenRequest, res: Response) => {
 			})
 		}
 
+		if (!isRadioplayerPluginSet && isMusic) {
+			message.plugins.push({
+				type: 'radioplayer',
+				isDeactivated: false,
+				note: 'automatically enabled by opt-out',
+			})
+		}
+
 		// handle plugin integrations
 		if (message.plugins?.length > 0) {
 			for await (const plugin of message.plugins) {
 				if (!plugin.isDeactivated) {
-					const pluginMessage = {
+					const pluginMessage: EventhubPluginMessage = {
 						action: `plugins.${plugin.type}.event`,
 						event: message,
 						plugin,
@@ -213,7 +222,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 			level: data.statuses.blocked > 0 ? 'warning' : 'info',
 			message: `event processed > ${eventName} > ${message.services.length}x services (${message.services[0]?.publisherId})`,
 			source,
-			data: { ...data, body: req.body, isDtsPluginSet },
+			data: { ...data, body: req.body, isDtsPluginSet, isRadioplayerPluginSet },
 		})
 
 		// return ok

@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.3.0] - 2026-02-10
 
 - fix: ignore blocked services in common topic
+- feat: add radioplayer plugin
+- feat: add sops encryption logic
 
 ## [2.2.0] - 2026-02-05
 

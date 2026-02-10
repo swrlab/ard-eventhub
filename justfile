@@ -17,3 +17,47 @@ dev:
 # serve the documentation
 docs:
 	bun run docs:serve
+
+## ---------------------------------
+## ENCRYPTION shortcuts
+
+# add/ remove keys (if .sops.yaml setup was changed)
+[group('ENCRYPTION')]
+update-keys:
+	just _update-key .env.sops.yaml
+	just _update-key config/radioplayer-api-keys.sops.json
+
+_update-key file:
+	sops updatekeys {{file}}
+
+# rotate keys (refreshed internal encryption keys)
+[group('ENCRYPTION')]
+rotate-keys:
+	just _rotate-key .env.sops.yaml
+	just _rotate-key config/radioplayer-api-keys.sops.json
+
+_rotate-key file:
+	sops rotate --in-place {{file}}
+
+# list PGP keys and their fingerprints
+[group('ENCRYPTION')]
+list-pgp:
+	gpg --list-keys
+
+# make changes to a secret file
+[group('ENCRYPTION')]
+edit-key file:
+	EDITOR=nano sops edit {{file}}
+
+# decrypt a secret file
+[group('ENCRYPTION')]
+[confirm('This will overwrite any previously decrypted files, are you sure? (type `yes` to continue)')]
+decrypt-key file:
+	sops --output $(echo {{file}} | sed 's/\.sops//g') --decrypt {{file}}
+
+# decrypt all secret files
+[group('ENCRYPTION')]
+[confirm('This will overwrite all previously decrypted files, are you sure? (type `yes` to continue)')]
+decrypt:
+	just decrypt-key .env.sops.yaml
+	just decrypt-key config/radioplayer-api-keys.sops.json
