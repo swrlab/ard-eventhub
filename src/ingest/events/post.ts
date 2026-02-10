@@ -118,36 +118,48 @@ export default async (req: UserTokenRequest, res: Response) => {
 		// send event to common topic
 		// if it is not a radio text event
 		if (IS_COMMON_TOPIC_ENABLED && req.body.event !== 'de.ard.eventhub.v1.radio.text') {
-			// prepare common post
-			const topicName = pubsub.buildId(eventName.replace('de.ard.eventhub.', ''))
-			const commonEvent = {
-				messageId: null as null | string,
-				type: 'common',
-				topic: {
-					id: eventName,
-					name: topicName,
-				},
-			}
+			// filter out blocked services before sending to common topic
+			const nonBlockedServices = message.services.filter((service) => !service.blocked)
 
-			// try sending message
-			commonEvent.messageId = await publishPubSubMessage(topicName, message, attributes)
-
-			// handle errors
-			if (commonEvent.messageId === 'TOPIC_ERROR' || commonEvent.messageId === 'TOPIC_NOT_FOUND') {
-				logger.log({
-					level: 'warning',
-					message: `failed common plugin > ${eventName} > ${message.services[0]?.publisherId}`,
-					source,
-					data: {
-						message,
-						body: req.body,
-						commonEvent,
+			// only send to common topic if there are non-blocked services
+			if (nonBlockedServices.length > 0) {
+				// prepare common post
+				const topicName = pubsub.buildId(eventName.replace('de.ard.eventhub.', ''))
+				const commonEvent = {
+					messageId: null as null | string,
+					type: 'common',
+					topic: {
+						id: eventName,
+						name: topicName,
 					},
-				})
-			}
+				}
 
-			// add to output
-			pluginMessages.push(commonEvent)
+				// create filtered message with only non-blocked services
+				const filteredMessage = {
+					...message,
+					services: nonBlockedServices,
+				}
+
+				// try sending message
+				commonEvent.messageId = await publishPubSubMessage(topicName, filteredMessage, attributes)
+
+				// handle errors
+				if (commonEvent.messageId === 'TOPIC_ERROR' || commonEvent.messageId === 'TOPIC_NOT_FOUND') {
+					logger.log({
+						level: 'warning',
+						message: `failed common plugin > ${eventName} > ${nonBlockedServices[0]?.publisherId}`,
+						source,
+						data: {
+							message: filteredMessage,
+							body: req.body,
+							commonEvent,
+						},
+					})
+				}
+
+				// add to output
+				pluginMessages.push(commonEvent)
+			}
 		}
 
 		// add opt-out plugins
@@ -198,7 +210,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		// log success
 		logger.log({
-			level: 'info',
+			level: data.statuses.blocked > 0 ? 'warning' : 'info',
 			message: `event processed > ${eventName} > ${message.services.length}x services (${message.services[0]?.publisherId})`,
 			source,
 			data: { ...data, body: req.body, isDtsPluginSet },

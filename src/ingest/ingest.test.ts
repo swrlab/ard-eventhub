@@ -6,6 +6,7 @@
 	unit tests for the ingest service
 
 */
+/** biome-ignore-all lint/suspicious/noExplicitAny: <explanation> */
 
 import { beforeAll, describe, expect, it } from 'bun:test'
 import logger from '@frytg/logger'
@@ -178,15 +179,15 @@ const event = {
 	services: [
 		{
 			type: 'PermanentLivestream',
-			externalId: 'crid://swr.de/282310/unit',
-			publisherId: '282310',
+			externalId: 'crid://ard.de/28475/unit',
+			publisherId: '28475',
 		},
 	],
 	playlistItemId: 'unit-test-id-in-playlist-567',
 	references: [
 		{
 			type: 'Show',
-			externalId: 'crid://swr.de/my-show/1234567' as string | null,
+			externalId: 'crid://ard.de/my-show/1234567' as string | null,
 			alternateIds: [
 				'https://normdb.ivz.cn.ard.de/sendereihe/427',
 				'urn:ard:show:027708befb6bfe14',
@@ -246,8 +247,8 @@ describe(`POST ${eventPath}`, () => {
 			services: [
 				{
 					type: 'PermanentLivestream',
-					externalId: 'crid://swr.de/282310/unit',
-					publisherId: '282310',
+					externalId: 'crid://ard.de/28475/unit',
+					publisherId: '28475',
 				},
 			],
 			playlistItemId: 'unit-test-id-in-playlist-567-fallback',
@@ -262,7 +263,10 @@ describe(`POST ${eventPath}`, () => {
 				},
 			],
 		}
-		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(eventWithFallbackMedia)
+		const res = await request(server)
+			.post(eventPath)
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send(eventWithFallbackMedia)
 		testResponse(res, 201)
 		testEventKeys(res.body)
 	})
@@ -276,8 +280,8 @@ describe(`POST ${eventPath}`, () => {
 			services: [
 				{
 					type: 'PermanentLivestream',
-					externalId: 'crid://swr.de/282310/unit',
-					publisherId: '282310',
+					externalId: 'crid://ard.de/28475/unit',
+					publisherId: '28475',
 				},
 			],
 			playlistItemId: 'unit-test-id-in-playlist-567-non-fallback',
@@ -292,7 +296,10 @@ describe(`POST ${eventPath}`, () => {
 				},
 			],
 		}
-		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(eventWithNonFallbackMedia)
+		const res = await request(server)
+			.post(eventPath)
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send(eventWithNonFallbackMedia)
 		testResponse(res, 201)
 		testEventKeys(res.body)
 	})
@@ -306,8 +313,8 @@ describe(`POST ${eventPath}`, () => {
 			services: [
 				{
 					type: 'PermanentLivestream',
-					externalId: 'crid://swr.de/282310/unit',
-					publisherId: '282310',
+					externalId: 'crid://ard.de/28475/unit',
+					publisherId: '28475',
 				},
 			],
 			playlistItemId: 'unit-test-id-in-playlist-567-no-flag',
@@ -321,9 +328,117 @@ describe(`POST ${eventPath}`, () => {
 				},
 			],
 		}
-		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(eventWithoutIsFallback)
+		const res = await request(server)
+			.post(eventPath)
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send(eventWithoutIsFallback)
 		testResponse(res, 201)
 		testEventKeys(res.body)
+	})
+
+	it('publish event with blocked service - common plugin should not be sent', async () => {
+		const eventWithBlockedService = {
+			event: eventName,
+			type: 'music',
+			start: DateTime.now().toISO(),
+			title: 'Unit Test Song with Blocked Service',
+			services: [
+				{
+					type: 'PermanentLivestream',
+					externalId: 'crid://ard.de/999999/unit',
+					publisherId: '999999', // invalid publisherId that will be blocked
+				},
+			],
+			playlistItemId: 'unit-test-id-in-playlist-567-blocked',
+		}
+		const res = await request(server)
+			.post(eventPath)
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send(eventWithBlockedService)
+		testResponse(res, 201)
+		testEventKeys(res.body)
+
+		// verify service is blocked
+		expect(res.body.statuses.blocked).toBeGreaterThan(0)
+		expect(res.body.event.services.some((s: any) => s.blocked)).toBe(true)
+
+		// verify common plugin is NOT sent when all services are blocked
+		const commonPlugin = res.body.plugins.find((p: any) => p.type === 'common')
+		expect(commonPlugin).toBeUndefined()
+	})
+
+	it('publish event with mixed blocked and non-blocked services - common plugin should only contain non-blocked services', async () => {
+		const eventWithMixedServices = {
+			event: eventName,
+			type: 'music',
+			start: DateTime.now().toISO(),
+			title: 'Unit Test Song with Mixed Services',
+			services: [
+				{
+					type: 'PermanentLivestream',
+					externalId: 'crid://ard.de/28475/unit',
+					publisherId: '28475', // valid publisherId
+				},
+				{
+					type: 'PermanentLivestream',
+					externalId: 'crid://ard.de/999999/unit',
+					publisherId: '999999', // invalid publisherId that will be blocked
+				},
+			],
+			playlistItemId: 'unit-test-id-in-playlist-567-mixed',
+		}
+		const res = await request(server)
+			.post(eventPath)
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send(eventWithMixedServices)
+		testResponse(res, 201)
+		testEventKeys(res.body)
+
+		// verify some services are blocked
+		expect(res.body.statuses.blocked).toBeGreaterThan(0)
+		const blockedServices = res.body.event.services.filter((s: any) => s.blocked)
+		const nonBlockedServices = res.body.event.services.filter((s: any) => !s.blocked)
+		expect(blockedServices.length).toBeGreaterThan(0)
+		expect(nonBlockedServices.length).toBeGreaterThan(0)
+
+		// verify common plugin IS sent when there are non-blocked services
+		const commonPlugin = res.body.plugins.find((p: any) => p.type === 'common')
+		expect(commonPlugin).toBeDefined()
+		expect(commonPlugin.type).toBe('common')
+		expect(commonPlugin.topic).toBeDefined()
+	})
+
+	it('publish event with only non-blocked services - common plugin should be sent normally', async () => {
+		const eventWithNonBlockedServices = {
+			event: eventName,
+			type: 'music',
+			start: DateTime.now().toISO(),
+			title: 'Unit Test Song with Non-Blocked Services',
+			services: [
+				{
+					type: 'PermanentLivestream',
+					externalId: 'crid://ard.de/28475/unit',
+					publisherId: '28475', // valid publisherId
+				},
+			],
+			playlistItemId: 'unit-test-id-in-playlist-567-non-blocked',
+		}
+		const res = await request(server)
+			.post(eventPath)
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send(eventWithNonBlockedServices)
+		testResponse(res, 201)
+		testEventKeys(res.body)
+
+		// verify no services are blocked
+		expect(res.body.statuses.blocked).toBe(0)
+		expect(res.body.event.services.every((s: any) => !s.blocked)).toBe(true)
+
+		// verify common plugin IS sent when there are non-blocked services
+		const commonPlugin = res.body.plugins.find((p: any) => p.type === 'common')
+		expect(commonPlugin).toBeDefined()
+		expect(commonPlugin.type).toBe('common')
+		expect(commonPlugin.topic).toBeDefined()
 	})
 })
 
@@ -338,8 +453,8 @@ const eventRadioText = {
 	services: [
 		{
 			type: 'PermanentLivestream',
-			externalId: 'crid://swr.de/282310/unit',
-			publisherId: '282310',
+			externalId: 'crid://ard.de/28475/unit',
+			publisherId: '28475',
 		},
 	],
 }
@@ -416,7 +531,6 @@ describe(`GET ${topicPath}`, () => {
 	it('list all available topics', async () => {
 		const res = await request(server).get(topicPath).set('Authorization', `Bearer ${accessToken}`)
 		testResponse(res, 200)
-		console.log(res.body)
 		const isArray = Array.isArray(res.body)
 		expect(isArray).toBeTruthy()
 		res.body.every((i: any) => testTopicKeys(i))
@@ -463,7 +577,6 @@ function testSubscriptionKeys(body: any) {
 	expect(typeof body.ackDeadlineSeconds).toBe('number')
 	expect(typeof body.serviceAccount).toBe('string')
 	expect(typeof body.url).toBe('string')
-	console.log(body.contact)
 	expect(typeof body.contact).toBe('string')
 	expect(typeof body.institutionId).toBe('string')
 }
