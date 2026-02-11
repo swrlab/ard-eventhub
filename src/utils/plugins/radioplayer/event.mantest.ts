@@ -3,6 +3,9 @@
 	by SWR Audio Lab
 
 	unit tests for the Radioplayer plugin
+
+	this test file can be run manually and locally with `bun test`
+	it writes to the production system and therefore should be used sparingly
 */
 
 // Must be set before any plugin imports (api-keys loads at import)
@@ -19,6 +22,7 @@ import radioplayerEvent from './event.ts'
 // Livestream URN that exists in config/radioplayer-mapping.json5
 const MAPPED_LIVESTREAM_URN = 'urn:ard:permanent-livestream:b852cb677ac83775'
 const TEST_INSTITUTION = 'urn:ard:institution:a3004ff924ece1a2'
+const RUN_PRODUCTION_TESTS = process.env.RADIOPLAYER_RUN_TESTS === 'true'
 
 const createJob = (overrides: Partial<Parameters<typeof radioplayerEvent>[0]> = {}) => {
 	const plugin = { type: 'radioplayer', isDeactivated: false }
@@ -64,22 +68,24 @@ const createJob = (overrides: Partial<Parameters<typeof radioplayerEvent>[0]> = 
 }
 
 describe('Radioplayer plugin', () => {
-	it('sends HTTP POST with artist and title as URL params when event is music and in mapping', async () => {
-		const result = await radioplayerEvent(createJob())
+	if (RUN_PRODUCTION_TESTS) {
+		it('sends HTTP POST with artist and title as URL params when event is music and in mapping', async () => {
+			const result = await radioplayerEvent(createJob())
 
-		expect(result).toBeDefined()
-		expect(Array.isArray(result)).toBe(true)
-		expect(result.length).toBeGreaterThan(0)
-		for (const resultItem of result) {
-			expect(resultItem.url).toContain('https://')
-			expect(resultItem.url).toContain('np-ingest.radioplayer.cloud')
-			expect(resultItem.url).toContain('rpuid=2761425')
-			expect(resultItem.url).toContain('artist=Test+Artist')
-			expect(resultItem.url).toContain('title=Test+Song')
-			expect(resultItem.url).toContain('startTime=')
-			expect(resultItem.url).toContain('duration=10')
-		}
-	})
+			expect(result).toBeDefined()
+			expect(Array.isArray(result)).toBe(true)
+			expect(result.length).toBeGreaterThan(0)
+			for (const resultItem of result) {
+				expect(resultItem.url).toContain('https://')
+				expect(resultItem.url).toContain('np-ingest.radioplayer.cloud')
+				expect(resultItem.url).toContain('rpuid=2761425')
+				expect(resultItem.url).toContain('artist=Test+Artist')
+				expect(resultItem.url).toContain('title=Test+Song')
+				expect(resultItem.url).toContain('startTime=')
+				expect(resultItem.url).toContain('duration=10')
+			}
+		})
+	}
 
 	it('skips non-playing events', async () => {
 		const result = await radioplayerEvent(

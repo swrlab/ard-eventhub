@@ -2,6 +2,17 @@
 _default:
 	just --list
 
+# use a default sops file, or allow to be overridden by SOPS_ENV_FILE environment variable
+DEFAULT_SOPS_FILE:= '.env.sops.yaml'
+SELECTED_SOPS_FILE:= env('SOPS_ENV_FILE', DEFAULT_SOPS_FILE)
+
+# run a command with the selected sops file (injecting environment variables)
+[group('ENCRYPTION')]
+env *args:
+	sops exec-env --same-process {{SELECTED_SOPS_FILE}} "{{args}}"
+
+## ---------------------------------
+
 # run the ingest tests locally
 test:
 	bun run test
