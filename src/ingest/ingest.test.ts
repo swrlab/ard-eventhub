@@ -6,7 +6,7 @@
 	unit tests for the ingest service
 
 */
-/** biome-ignore-all lint/suspicious/noExplicitAny: <explanation> */
+/** biome-ignore-all lint/suspicious/noExplicitAny: ok */
 
 import { beforeAll, describe, expect, it } from 'bun:test'
 import logger from '@frytg/logger'

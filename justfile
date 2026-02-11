@@ -13,19 +13,28 @@ env *args:
 
 ## ---------------------------------
 
-# run the ingest tests locally
+# run the ingest tests locally with injected environment variables
+[group('LOCAL')]
 test:
-	bun run test
+	just env "bun run test"
 
 # generate a coreId for a given text
+[group('LOCAL')]
 coreId text:
 	bun run coreId "{{text}}"
 
 # start the ingest service in development mode
+[group('LOCAL')]
 dev:
 	bun run ingest
 
+# lint the code
+[group('LOCAL')]
+lint:
+	bun run lint
+
 # serve the documentation
+[group('LOCAL')]
 docs:
 	bun run docs:serve
 
