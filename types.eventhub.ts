@@ -2,7 +2,7 @@ export type EventhubService = {
 	type: string
 	externalId: string
 	publisherId: string
-	id: string
+	id?: string // TODO check this
 	blocked?: string
 	topic?: {
 		id: string
