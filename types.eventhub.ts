@@ -28,6 +28,15 @@ export type EventhubPlugin = {
 	excludeFields?: string[]
 }
 
+export type EventhubMedia = {
+	type: string
+	url: string
+	templateUrl: string | null
+	description: string
+	attribution: string | null
+	isFallback?: boolean
+}
+
 export type EventhubV1RadioPostBodyInput = {
 	type: string
 	start: string
@@ -71,14 +80,7 @@ export type EventhubV1RadioPostBodyInput = {
 	isrc: string | null
 	upc: string | null
 	mpn: string | null
-	media: {
-		type: string
-		url: string
-		templateUrl: string | null
-		description: string
-		attribution: string | null
-		isFallback?: boolean
-	}[]
+	media: EventhubMedia[]
 	plugins: EventhubPlugin[]
 }
 

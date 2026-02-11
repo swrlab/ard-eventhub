@@ -6,7 +6,7 @@
 import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
 import undici, { type Response } from 'undici'
-import type { EventhubPluginMessage, EventhubV1RadioPostBody } from '@/types.eventhub.ts'
+import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '@/types.eventhub.ts'
 import livestreamMapping from '../../../../config/radioplayer-mapping.json5'
 import apiKeys from './api-keys.ts'
 
@@ -23,7 +23,12 @@ type RadioplayerOutput =
 	  }[]
 	| null
 
-const sendRadioplayerEvent = async (rpUid: string, apiKey: string, event: EventhubV1RadioPostBody) => {
+const sendRadioplayerEvent = async (
+	rpUid: string,
+	apiKey: string,
+	event: EventhubV1RadioPostBody,
+	plugin: EventhubPlugin
+) => {
 	// build URL with query parameters
 	const url = new URL(RADIOPLAYER_API_URL)
 	url.searchParams.set('rpuid', rpUid as string)
@@ -31,6 +36,14 @@ const sendRadioplayerEvent = async (rpUid: string, apiKey: string, event: Eventh
 	if (event.title) url.searchParams.set('title', event.title)
 	if (event.start) url.searchParams.set('startTime', event.start)
 	if (event.length) url.searchParams.set('duration', event.length.toString())
+
+	// set thumbnail
+	const mediaType = plugin?.preferArtistMedia ? 'artist' : 'cover'
+	const media = event.media?.find((thisMedia) => thisMedia.type === mediaType)
+	if (media?.url || media?.templateUrl) {
+		const imageUrl = media.url || media.templateUrl?.replace('{width}', '512').replace('{height}', '512')
+		if (imageUrl) url.searchParams.set('imageUrl', imageUrl)
+	}
 
 	// post event
 	const radioplayerConfig = {
@@ -50,7 +63,7 @@ const sendRadioplayerEvent = async (rpUid: string, apiKey: string, event: Eventh
 
 export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> => {
 	// remap input
-	const { event, institutionId } = job
+	const { event, institutionId, plugin } = job
 	const output: RadioplayerOutput = []
 
 	// only process now playing events
@@ -131,7 +144,7 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 		let i = 0
 		for (const rpUid of rpUids) {
 			const startTime = getMs()
-			const { url, posted, response } = await sendRadioplayerEvent(rpUid, apiKey, event)
+			const { url, posted, response } = await sendRadioplayerEvent(rpUid, apiKey, event, plugin)
 			output.push({ url, posted, response })
 
 			// log result

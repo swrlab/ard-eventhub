@@ -69,8 +69,23 @@ const createJob = (overrides: Partial<Parameters<typeof radioplayerEvent>[0]> = 
 
 describe('Radioplayer plugin', () => {
 	if (RUN_PRODUCTION_TESTS) {
-		it('sends HTTP POST with artist and title as URL params when event is music and in mapping', async () => {
-			const result = await radioplayerEvent(createJob())
+		it('sends HTTP POST with artist and title when event is music and in mapping', async () => {
+			const result = await radioplayerEvent(
+				createJob({
+					event: {
+						...createJob().event,
+						media: [
+							{
+								type: 'cover',
+								url: 'https://cdn-static.lab.swr.de/images/v1/get/swr-cover-jingle/img.jpg',
+								templateUrl: null,
+								description: 'SWR Cover Test',
+								attribution: 'SWR',
+							},
+						],
+					},
+				})
+			)
 
 			expect(result).toBeDefined()
 			expect(Array.isArray(result)).toBe(true)

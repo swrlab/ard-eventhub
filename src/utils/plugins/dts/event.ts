@@ -122,8 +122,9 @@ export default async (job: EventhubPluginMessage) => {
 	// set thumbnail
 	const mediaType = plugin?.preferArtistMedia ? 'artist' : 'cover'
 	const media = event.media?.find((thisMedia) => thisMedia.type === mediaType)
-	if (media?.templateUrl) {
-		liveRadioEvent.imageURL = media.url || media.templateUrl.replace('{width}', '512').replace('{height}', '512')
+	if (media?.url || media?.templateUrl) {
+		liveRadioEvent.imageURL =
+			media.url || media.templateUrl?.replace('{width}', '512').replace('{height}', '512') || null
 	}
 
 	// handle exclusions
