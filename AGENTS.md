@@ -54,7 +54,7 @@ Follow SWR Audio Lab engineering principles:
 
 - ✅ **Always do:** Write tests for new code, run linter before committing, use English for code/docs, follow existing patterns
 - ⚠️ **Ask first:** Modifying Google Cloud configuration, changing authentication flows, updating dependencies, major architectural changes
-- 🚫 **Never do:** Commit secrets or API keys (use Secret Manager), modify `node_modules/` or `bun.lock`, remove failing tests without fixing them, use German in code/comments
+- 🚫 **Never do:** Commit unencrypted secrets or API keys (use Secret Manager), modify `node_modules/` or `bun.lock`, remove failing tests without fixing them, use German in code/comments
 
 ## Documentation
 
@@ -65,10 +65,10 @@ Follow SWR Audio Lab engineering principles:
 
 ## Security
 
-- Never commit secrets, API keys, or credentials
+- Never commit unencrypted secrets, API keys, or credentials
 - Use Google Cloud Secret Manager for sensitive data
 - Check `.env.example` for required environment variables
-- All secrets should be GPG-encrypted if shared
+- All secrets should be GPG- or age-encrypted (using sops) if shared
 
 ## Dependencies
 

@@ -9,9 +9,7 @@
 */
 
 // Must be set before any plugin imports (api-keys loads at import)
-const testApiKeys =
-	process.env.RADIOPLAYER_API_KEYS ||
-	Buffer.from(JSON.stringify({ 'urn:ard:institution:test': 'test-api-key-123' })).toString('base64')
+const testApiKeys = process.env.RADIOPLAYER_API_KEYS
 process.env.RADIOPLAYER_API_KEYS = testApiKeys
 
 import { describe, expect, it } from 'bun:test'

@@ -113,7 +113,7 @@
 	"urn:ard:permanent-livestream:a0b0b5c4575384d8": ["276509"], // SWR4 Friedrichshafen
 	"urn:ard:permanent-livestream:94568a21e73a5857": ["276510", "2761729"], // SWR4 Mainz, SWR4 Rheinland Pfalz
 	"urn:ard:permanent-livestream:b00b36d51bcf8348": ["276511"], // SWR4 Kaiserslautern
-	"urn:ard:permanent-livestream:b5c6c6c": "276512", // SWR4 Trier
+	"urn:ard:permanent-livestream:b5c6c6c61a73ddd5": "276512", // SWR4 Trier
 	"urn:ard:permanent-livestream:65920d2ae364afa6": ["276513"], // SWR4 Koblenz
 	"urn:ard:permanent-livestream:cbb0808a49c4428c": ["276514"], // SWR4 Ludwigshafen
 

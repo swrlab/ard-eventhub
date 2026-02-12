@@ -11,6 +11,7 @@ import livestreamMapping from '../../../../config/radioplayer-mapping.json5'
 import apiKeys from './api-keys.ts'
 
 const source = 'utils/plugins/radioplayer/event'
+const PERMITTED_EXCLUDED_FIELDS = ['imageUrl']
 
 // see API docs: https://radioplayerworldwide.atlassian.net/wiki/spaces/RPC/pages/1920073729/Programmatic+Ingest+of+Station+Information#V2-Endpoints
 const RADIOPLAYER_API_URL = 'https://np-ingest.radioplayer.cloud'
@@ -45,11 +46,20 @@ const sendRadioplayerEvent = async (
 		if (imageUrl) url.searchParams.set('imageUrl', imageUrl)
 	}
 
+	// handle exclusions
+	if (Array.isArray(plugin.excludeFields) && plugin.excludeFields.length > 0) {
+		for (const field of plugin.excludeFields) {
+			const permittedExcludedField = PERMITTED_EXCLUDED_FIELDS[field as keyof typeof PERMITTED_EXCLUDED_FIELDS]
+			if (permittedExcludedField) {
+				url.searchParams.delete(permittedExcludedField)
+			}
+		}
+	}
+
 	// post event
 	const radioplayerConfig = {
 		method: 'POST',
-		timeout: 7e3,
-		reject: false,
+		signal: AbortSignal.timeout(7e3),
 		headers: {
 			'X-API-KEY': apiKey,
 		},
