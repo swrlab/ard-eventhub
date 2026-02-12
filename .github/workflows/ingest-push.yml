@@ -57,6 +57,7 @@ jobs:
           TEST_USER: ${{ secrets.TEST_USER }}
           TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
           ARD_FEED_URL: ${{ secrets.ARD_FEED_URL }}
+          RADIOPLAYER_API_KEYS: e30=
         run: bun run test
 
   docker:

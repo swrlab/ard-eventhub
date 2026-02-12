@@ -5,9 +5,8 @@
 
 */
 
-// load pubsub for internal queues
-import datastoreClient from './_client'
 import config from '../../../config'
+import datastoreClient from './_client'
 
 export default async (data: any, kind: string, id: number | null) => {
 	const thisData = data
@@ -27,7 +26,7 @@ export default async (data: any, kind: string, id: number | null) => {
 
 	// insert key
 	if (key.id) {
-		thisData.id = Number.parseInt(key.id)
+		thisData.id = Number.parseInt(key.id, 10)
 	} else if (key.name) {
 		thisData.id = key.name
 	}

@@ -10,7 +10,7 @@ import type { Response } from 'express'
 import { DateTime } from 'luxon'
 import { ulid } from 'ulid'
 
-import type { EventhubV1RadioPostBody } from '@/types.eventhub.ts'
+import type { EventhubPluginMessage, EventhubV1RadioPostBody } from '@/types.eventhub.ts'
 import config from '../../../config/index.ts'
 import { createNewTopic, processServices } from '../../utils/events/index.ts'
 import pubsub from '../../utils/pubsub/index.ts'
@@ -115,43 +115,56 @@ export default async (req: UserTokenRequest, res: Response) => {
 		// replace services
 		message.services = newServices
 
+		// filter out blocked services before sending to common topic
+		const nonBlockedServices = message.services.filter((service) => !service.blocked)
+
 		// send event to common topic
 		// if it is not a radio text event
 		if (IS_COMMON_TOPIC_ENABLED && req.body.event !== 'de.ard.eventhub.v1.radio.text') {
-			// prepare common post
-			const topicName = pubsub.buildId(eventName.replace('de.ard.eventhub.', ''))
-			const commonEvent = {
-				messageId: null as null | string,
-				type: 'common',
-				topic: {
-					id: eventName,
-					name: topicName,
-				},
-			}
-
-			// try sending message
-			commonEvent.messageId = await publishPubSubMessage(topicName, message, attributes)
-
-			// handle errors
-			if (commonEvent.messageId === 'TOPIC_ERROR' || commonEvent.messageId === 'TOPIC_NOT_FOUND') {
-				logger.log({
-					level: 'warning',
-					message: `failed common plugin > ${eventName} > ${message.services[0]?.publisherId}`,
-					source,
-					data: {
-						message,
-						body: req.body,
-						commonEvent,
+			// only send to common topic if there are non-blocked services
+			if (nonBlockedServices.length > 0) {
+				// prepare common post
+				const topicName = pubsub.buildId(eventName.replace('de.ard.eventhub.', ''))
+				const commonEvent = {
+					messageId: null as null | string,
+					type: 'common',
+					topic: {
+						id: eventName,
+						name: topicName,
 					},
-				})
-			}
+				}
 
-			// add to output
-			pluginMessages.push(commonEvent)
+				// create filtered message with only non-blocked services
+				const filteredMessage = {
+					...message,
+					services: nonBlockedServices,
+				}
+
+				// try sending message
+				commonEvent.messageId = await publishPubSubMessage(topicName, filteredMessage, attributes)
+
+				// handle errors
+				if (commonEvent.messageId === 'TOPIC_ERROR' || commonEvent.messageId === 'TOPIC_NOT_FOUND') {
+					logger.log({
+						level: 'warning',
+						message: `failed common plugin > ${eventName} > ${nonBlockedServices[0]?.publisherId}`,
+						source,
+						data: {
+							message: filteredMessage,
+							body: req.body,
+							commonEvent,
+						},
+					})
+				}
+
+				// add to output
+				pluginMessages.push(commonEvent)
+			}
 		}
 
 		// add opt-out plugins
 		const isDtsPluginSet = message.plugins?.find((plugin) => plugin.type === 'dts')
+		const isRadioplayerPluginSet = message.plugins?.find((plugin) => plugin.type === 'radioplayer')
 		const isMusic = req.body.type === 'music'
 
 		if (!isDtsPluginSet && isMusic) {
@@ -162,13 +175,21 @@ export default async (req: UserTokenRequest, res: Response) => {
 			})
 		}
 
+		if (!isRadioplayerPluginSet && isMusic) {
+			message.plugins.push({
+				type: 'radioplayer',
+				isDeactivated: false,
+				note: 'automatically enabled by opt-out',
+			})
+		}
+
 		// handle plugin integrations
 		if (message.plugins?.length > 0) {
 			for await (const plugin of message.plugins) {
 				if (!plugin.isDeactivated) {
-					const pluginMessage = {
+					const pluginMessage: EventhubPluginMessage = {
 						action: `plugins.${plugin.type}.event`,
-						event: message,
+						event: { ...message, services: nonBlockedServices },
 						plugin,
 						institutionId: req.user.institutionId,
 					}
@@ -198,10 +219,10 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		// log success
 		logger.log({
-			level: 'info',
+			level: data.statuses.blocked > 0 ? 'warning' : 'info',
 			message: `event processed > ${eventName} > ${message.services.length}x services (${message.services[0]?.publisherId})`,
 			source,
-			data: { ...data, body: req.body, isDtsPluginSet },
+			data: { ...data, body: req.body, isDtsPluginSet, isRadioplayerPluginSet },
 		})
 
 		// return ok

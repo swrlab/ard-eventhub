@@ -2,7 +2,7 @@ export type EventhubService = {
 	type: string
 	externalId: string
 	publisherId: string
-	id: string
+	id?: string // TODO check this
 	blocked?: string
 	topic?: {
 		id: string
@@ -10,6 +10,31 @@ export type EventhubService = {
 		status?: string
 		messageId?: string | null
 	}
+}
+
+export type EventhubPlugin = {
+	type: string
+	isDeactivated: boolean
+	note?: string
+	delay?: number
+	album?: string
+	composer?: string
+	program?: string
+	subject?: string
+	webUrl?: string
+	preferArtistMedia?: boolean
+	enableThumbs?: boolean
+	email?: string
+	excludeFields?: string[]
+}
+
+export type EventhubMedia = {
+	type: string
+	url: string
+	templateUrl: string | null
+	description: string
+	attribution: string | null
+	isFallback?: boolean
 }
 
 export type EventhubV1RadioPostBodyInput = {
@@ -55,19 +80,8 @@ export type EventhubV1RadioPostBodyInput = {
 	isrc: string | null
 	upc: string | null
 	mpn: string | null
-	media: {
-		type: string
-		url: string
-		templateUrl: string | null
-		description: string
-		attribution: string | null
-		isFallback?: boolean
-	}[]
-	plugins: {
-		type: string
-		isDeactivated: boolean
-		note?: string
-	}[]
+	media: EventhubMedia[]
+	plugins: EventhubPlugin[]
 }
 
 export type EventhubV1RadioPostBody = EventhubV1RadioPostBodyInput & {
@@ -121,4 +135,11 @@ export type EventhubSubscriptionWithLabels = EventhubSubscriptionLimited & {
 		'creator-slug': string
 		created: string
 	}
+}
+
+export type EventhubPluginMessage = {
+	action: string
+	event: EventhubV1RadioPostBody
+	plugin: EventhubPlugin
+	institutionId: string
 }

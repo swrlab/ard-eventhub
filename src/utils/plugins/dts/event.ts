@@ -6,8 +6,8 @@
 */
 
 import logger from '@frytg/logger'
-import { isIncluded, notEmptyArray } from '@swrlab/utils/packages/strings'
 
+import type { EventhubPluginMessage } from '@/types.eventhub.ts'
 import config from '../../../../config'
 import dts from '../../../../config/dts-keys'
 import undici from '../../undici'
@@ -19,6 +19,33 @@ const DEFAULT_HEADERS = {
 	'Content-Type': 'application/json',
 }
 const LIVERADIO_URL = dts.endpoints.liveRadioEvent[config.stage as keyof typeof dts.endpoints.liveRadioEvent]
+
+// note all fields have a null options, since excludeFields can be used to exclude fields from the event
+export type LiveRadioEvent = {
+	broadcastId: string | null
+	contentId: string | null
+	type: string | null
+	status: string | null
+	client: string | null
+	clientVersion: string | null
+	timestamp: string | null
+	artist: string | null
+	title: string | null
+	isrc: string | null
+	email: string | null
+	duration: number | null
+	delay: number | null
+	album: string | null
+	composer: string | null
+	program: string | null
+	subject: string | null
+	webURL: string | null
+	enableShare: boolean | null
+	enableThumbs: boolean | null
+	year: number | null
+	fccId: string | null
+	imageURL: string | null
+}
 
 // provide remapping helpers
 const getCoreIds = (services: any) => services.map((service: any) => service.topic.id)
@@ -36,7 +63,7 @@ const getUserForInstitution = (institutionId: string) => {
 	}
 }
 
-export default async (job: any) => {
+export default async (job: EventhubPluginMessage) => {
 	// remap input
 	const { event, plugin, institutionId } = job
 
@@ -60,7 +87,7 @@ export default async (job: any) => {
 	if (event.type === 'advertisement') type = 'ad'
 
 	// remap Eventhub variables to external ones
-	const liveRadioEvent = {
+	const liveRadioEvent: LiveRadioEvent = {
 		broadcastId: null as string | null,
 		contentId: null as string | null,
 
@@ -70,39 +97,40 @@ export default async (job: any) => {
 		client: config.serviceName as string | null,
 		clientVersion: config.version as string | null,
 
-		timestamp: event.start as any | null,
-		artist: event.artist as any | null,
-		title: event.title as any | null,
-		isrc: event.isrc as any | null,
-		email: plugin?.email as any | null,
-		duration: Number.parseInt(event.length, 10) as number | null,
+		timestamp: event.start,
+		artist: event.artist,
+		title: event.title,
+		isrc: event.isrc,
+		email: plugin?.email || null,
+		duration: event.length || null,
 
-		delay: plugin?.delay || (0 as any | null),
-		album: plugin?.album || (null as any | null),
-		composer: plugin?.composer || (null as any | null),
-		program: plugin?.program || (null as any | null),
-		subject: plugin?.subject || (null as any | null),
-		webURL: plugin?.webUrl || (null as any | null),
-		enableShare: !!plugin?.webUrl as any | null,
+		delay: plugin?.delay || 0,
+		album: plugin?.album || null,
+		composer: plugin?.composer || null,
+		program: plugin?.program || null,
+		subject: plugin?.subject || null,
+		webURL: plugin?.webUrl || null,
+		enableShare: !!plugin?.webUrl,
 
 		enableThumbs:
 			plugin?.enableThumbs === true || plugin?.enableThumbs === false ? plugin.enableThumbs : (true as boolean | null),
-		year: null as any | null,
-		fccId: null as any | null,
+		year: null,
+		fccId: null,
 		imageURL: null as string | null,
 	}
 
 	// set thumbnail
 	const mediaType = plugin?.preferArtistMedia ? 'artist' : 'cover'
 	const media = event.media?.find((thisMedia) => thisMedia.type === mediaType)
-	if (media) {
-		liveRadioEvent.imageURL = media.url || media.templateUrl.replace('{width}', 512).replace('{height}', 512)
+	if (media?.url || media?.templateUrl) {
+		liveRadioEvent.imageURL =
+			media.url || media.templateUrl?.replace('{width}', '512').replace('{height}', '512') || null
 	}
 
 	// handle exclusions
-	if (notEmptyArray(plugin.excludeFields)) {
+	if (Array.isArray(plugin.excludeFields) && plugin.excludeFields.length > 0) {
 		for (const field of plugin.excludeFields) {
-			const permittedExcludedField = dts.permittedExcludedFields[field] as keyof typeof liveRadioEvent
+			const permittedExcludedField = dts.permittedExcludedFields[field] as keyof LiveRadioEvent
 			if (permittedExcludedField) {
 				liveRadioEvent[permittedExcludedField] = null
 			}
@@ -138,9 +166,9 @@ export default async (job: any) => {
 
 	// check response for keywords
 	let isDtsResponseOk = true
-	if (isIncluded(posted.string, 'error')) isDtsResponseOk = false
-	if (isIncluded(posted.string, 'dropped bids')) isDtsResponseOk = false
-	if (isIncluded(posted.string, 'not authorized')) isDtsResponseOk = false
+	if (posted.string.indexOf('error') !== -1) isDtsResponseOk = false
+	if (posted.string.indexOf('dropped bids') !== -1) isDtsResponseOk = false
+	if (posted.string.indexOf('not authorized') !== -1) isDtsResponseOk = false
 
 	// log result
 	const message = [

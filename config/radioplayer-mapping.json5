@@ -1,0 +1,186 @@
+{
+	// this is JSON5, so comments are available
+	"to-disable-a-permanent-livestream-set-it-to-false": false,
+
+	"urn:ard:permanent-livestream:309a63d8eb8db7c4": ["2761163"], // NDR 1 Niedersachsen - Braunschweig
+	"urn:ard:permanent-livestream:3a711f478abcfbdf": ["2761164"], // NDR 1 Niedersachsen - Lüneburg
+	"urn:ard:permanent-livestream:acffae8b251926bc": ["2761165"], // NDR 1 Niedersachsen - Oldenburg
+	"urn:ard:permanent-livestream:4d5f7532bafe061e": ["2761166"], // NDR 1 Niedersachsen - Osnabrück
+	"urn:ard:permanent-livestream:f6cbbe4ddcb7e8f0": ["2761167"], // NDR 1 Radio MV - Greifswald
+	"urn:ard:permanent-livestream:52918ccca3515d06": ["2761168"], // NDR 1 Radio MV - Rostock
+	"urn:ard:permanent-livestream:c8520f77efc57e7c": ["2761169"], // NDR 1 Radio MV - Neubrandenburg
+	"urn:ard:permanent-livestream:56d71679a77b2ca9": ["2761170"], // NDR 2 - Hamburg
+	"urn:ard:permanent-livestream:c2385aaccb2e88bc": ["2761171"], // NDR 2 - Mecklenburg-Vorpommern
+	"urn:ard:permanent-livestream:36789bfc00f26ddb": ["2761172"], // NDR 2 - Schleswig-Holstein
+	"urn:ard:permanent-livestream:5457f371b860dfee": ["2761173"], // NDR 1 Welle Nord - Flensburg
+	"urn:ard:permanent-livestream:dd6cf17c0b068270": ["2761174"], // NDR 1 Welle Nord - Heide
+	"urn:ard:permanent-livestream:6a5a2154312ea332": ["2761175"], // NDR 1 Welle Nord - Lübeck
+	"urn:ard:permanent-livestream:e98adaf7509fbeb7": ["2761176"], // NDR 1 Welle Nord - Norderstedt
+	"urn:ard:permanent-livestream:4a43e59ecf66f121": ["2761358"], // NDR 2 - Niedersachsen
+	"urn:ard:permanent-livestream:c98844993c223701": ["2763353", "2761391", "2761392", "2761393", "2761401"], // NDR Info - Hamburg, Mecklenburg-Vorpommern, Schleswig Holstein, Niedersachsen
+	"urn:ard:permanent-livestream:1e8e732dbefe1c37": ["2762786"], // NDR Schlager
+	"urn:ard:permanent-livestream:3630ff0ab0333cda": ["276344"], // NDR 1 Niedersachsen - Hannover
+	"urn:ard:permanent-livestream:d1d237658975e8e0": ["276345"], // NDR 1 Radio MV Schwerin
+	"urn:ard:permanent-livestream:33b331b16a5372a1": ["276347"], // N-JOY
+	"urn:ard:permanent-livestream:a9272427b14514f5": ["276348"], // NDR Blue
+	"urn:ard:permanent-livestream:ce6aa75693f78329": ["276349"], // NDR 90,3
+	"urn:ard:permanent-livestream:e47906b4a27aa0d6": ["276350"], // NDR 1 Welle Nord Kiel
+	"urn:ard:permanent-livestream:f342bfa63207cc0b": ["276351"], // NDR Kultur
+	"urn:ard:permanent-livestream:eab4bb45b27304de": ["276353"], // NDR Info Spezial
+
+	"urn:ard:permanent-livestream:7b28e76ec4c2959c": ["2761026"], // MDR SCHLAGERWELT Sachsen
+	"urn:ard:permanent-livestream:5d3273bf7e1499f1": ["2761027"], // MDR SCHLAGERWELT Sachsen-Anhalt
+	"urn:ard:permanent-livestream:430554531af8074d": ["2761028"], // MDR SCHLAGERWELT Thüringen
+	"urn:ard:permanent-livestream:823dcb1b2033a30c": ["2761886"], // MDR TWEENS
+	"urn:ard:permanent-livestream:9debbd83e147166b": ["2762000"], // MDR SACHSEN - Bautzen
+	"urn:ard:permanent-livestream:3a761199dd060810": ["2762001"], // MDR SACHSEN Chemnitz
+	"urn:ard:permanent-livestream:5a836d887c2c437a": ["2762002"], // MDR SACHSEN Leipzig
+	"urn:ard:permanent-livestream:6e9099353f695ea7": ["2762003"], // MDR Sachsen-Anhalt Dessau
+	"urn:ard:permanent-livestream:1f6dbcb634b580d3": ["2762004"], // MDR Sachsen-Anhalt Halle
+	"urn:ard:permanent-livestream:0a5a98a41ef6c259": ["2762005"], // MDR Sachsen-Anhalt Stendal
+	"urn:ard:permanent-livestream:e8edfa26cfa9661a": ["2762006"], // MDR THÜRINGEN Ost
+	"urn:ard:permanent-livestream:ebf2dcd2050be8e5": ["2762007"], // MDR THÜRINGEN Nord
+	"urn:ard:permanent-livestream:7d089b005b4c2db3": ["2762008"], // MDR THÜRINGEN Süd
+	// "xxx": "2762321", // MDR Sachsen Vogtland
+	"urn:ard:permanent-livestream:4127500380e33b19": ["276305"], // MDR KULTUR Livestream
+	"urn:ard:permanent-livestream:746477d13d92a028": ["276306"], // MDR KULTUR Klassik im Konzert
+	"urn:ard:permanent-livestream:f6796de5b1812b75": ["276322"], // MDR AKTUELL
+	"urn:ard:permanent-livestream:4ce6861c20c7af36": ["276323"], // MDR JUMP
+	"urn:ard:permanent-livestream:945239c58845f8d8": ["276324"], // MDR JUMP In The Mix
+	"urn:ard:permanent-livestream:e1f668143e05ddde": ["276325"], // MDR JUMP Trend
+	"urn:ard:permanent-livestream:a5061a5ebdcb12c0": ["276326"], // MDR JUMP Rock
+	"urn:ard:permanent-livestream:a4a713490dda3905": ["276327"], // MDR KLASSIK
+	"urn:ard:permanent-livestream:cb686e1bbd1c9adb": ["276328"], // MDR SPUTNIK
+	"urn:ard:permanent-livestream:38f055d0bc03e16e": ["276329"], // MDR SPUTNIK Black
+	"urn:ard:permanent-livestream:d68a29a554c58ef7": ["276330"], // MDR SPUTNIK Club
+	// "xxx": "276331", // MDR SPUTNIK Insomnia
+	"urn:ard:permanent-livestream:62d470446f2156a1": ["276332"], // MDR SPUTNIK Roboton
+	"urn:ard:permanent-livestream:eee1e451f4894828": ["276333"], // MDR SPUTNIK Popkult
+	"urn:ard:permanent-livestream:163f07b378c75798": ["276334"], // MDR SPUTNIK Rock
+	"urn:ard:permanent-livestream:373253aafb6675d7": ["276335"], // MDR SPUTNIK Soundcheck
+	"urn:ard:permanent-livestream:2c2ba1a9a224a773": ["276340"], // MDR SACHSEN - Dresden
+	"urn:ard:permanent-livestream:acab5d4e5c36577d": ["276341"], // MDR Sachsen-Anhalt Magdeburg
+	"urn:ard:permanent-livestream:4fe4449ee498fb97": ["276342"], // MDR THÜRINGEN Mitte-West
+	"urn:ard:permanent-livestream:79e67262b85dca0a": ["276474"], // MDR SACHSEN - Sorbisches Programm
+
+	// "xxx": "2762768", // BR Verkehr
+	"urn:ard:permanent-livestream:7c8ea944d2efeeee": ["276292"], // BAYERN 2
+	"urn:ard:permanent-livestream:e868c2d1ca1a735d": ["276293"], // BAYERN 3
+	"urn:ard:permanent-livestream:3a473398a03573a8": ["276294"], // BR KLASSIK
+	"urn:ard:permanent-livestream:6969ad3eee7f55e3": ["276295"], // BR24
+	"urn:ard:permanent-livestream:042f2d5c95376373": ["276296"], // BR Schlager
+	"urn:ard:permanent-livestream:5e898dfbcf9a5837": ["276298"], // BR24live
+	"urn:ard:permanent-livestream:6dae7e396446a822": ["276447"], // BR Heimat
+	"urn:ard:permanent-livestream:8354f410521b7ea8": ["276291", "276448"], // Main + BAYERN 1 - Oberbayern
+	"urn:ard:permanent-livestream:d2083a9d5cc1d15e": ["276449"], // BAYERN 1 - Franken
+	"urn:ard:permanent-livestream:ee6d67b7691b5f57": ["276450"], // BAYERN 1 - Niederbayern/Oberpfalz
+	"urn:ard:permanent-livestream:bc41b1f635b3f5f4": ["276451"], // BAYERN 1 - Schwaben
+	"urn:ard:permanent-livestream:e1c95a3b0f73a676": ["276452"], // BAYERN 1 - Mainfranken
+
+	// "xxx": "2762163", // SR 3 Oldiewelt
+	"urn:ard:permanent-livestream:cdfb629e6d74d6b9": ["276366"], // SR 1
+	"urn:ard:permanent-livestream:52bf2bc463ac2d9e": ["276367"], // SR kultur
+	"urn:ard:permanent-livestream:5e122c7ec0fff216": ["276368"], // SR 3 Saarlandwelle
+	"urn:ard:permanent-livestream:639c5e8d1e3fdbca": ["276369"], // SR UNSERDING
+	"urn:ard:permanent-livestream:04614d75c1e32de8": ["276370"], // Antenne Saar
+	// "xxx": "276496", // SR 1 Just Dance
+	// "xxx": "276498", // SR kultur -OffBeat
+	// "xxx": "276499", // SR 3 Schlagerwelt
+	// "xxx": "276500", // SR UNSERDING Webchannel ZUKUNFT
+
+	"urn:ard:permanent-livestream:b852cb677ac83775": ["2761425"], // SWR2 Archivradio
+	"urn:ard:permanent-livestream:ec2f73dd9e2c8174": ["2761426"], // SWR3 Lyrix
+	"urn:ard:permanent-livestream:620d37a46a50361e": ["2761427"], // DASDING Weekend WarmUp
+	"urn:ard:permanent-livestream:20fdd64fc3ba008d": ["2761428"], // SWR3 Rock
+	"urn:ard:permanent-livestream:e7ecf47339845b38": ["2761429"], // SWR3 Party
+	"urn:ard:permanent-livestream:a51c1598906e6dab": ["2761430"], // DASDING Partyfieber
+	"urn:ard:permanent-livestream:843b7b8a379c05c8": ["2761431"], // DASDING Chillout
+	"urn:ard:permanent-livestream:c6cb9a619e76335b": ["2761432"], // DASDING Rap
+	"urn:ard:permanent-livestream:01dab85d644868ee": ["2761433"], // DASDING Zukunftsmusik
+	"urn:ard:permanent-livestream:c2656164ae0f6745": ["276371"], // SWR1 Baden-Württemberg
+	"urn:ard:permanent-livestream:e55592f337f172a5": ["276372"], // SWR1 Rheinland-Pfalz
+	"urn:ard:permanent-livestream:2842238ca9012473": ["276373"], // SWR Kultur
+	"urn:ard:permanent-livestream:fcd7ffb2396f6fbd": ["276374"], // SWR3
+	"urn:ard:permanent-livestream:9e05cfcb5fd9c7b0": ["276377"], // DASDING
+	"urn:ard:permanent-livestream:5dd1df844b699812": ["276378"], // SWR Aktuell
+	"urn:ard:permanent-livestream:a9356cc0a8315ee0": ["276502"], // SWR4 Stuttgart
+	"urn:ard:permanent-livestream:05ef8204bc5555eb": ["276503"], // SWR4 Mannheim
+	"urn:ard:permanent-livestream:b445a15a0b87504c": ["276504"], // SWR4 Heilbronn
+	"urn:ard:permanent-livestream:a754229c1632f361": ["276505"], // SWR4 Karlsruhe
+	"urn:ard:permanent-livestream:8b51e3f83fa7c00a": ["276506"], // SWR4 Tübingen
+	"urn:ard:permanent-livestream:38ae7cae62de9782": ["276507"], // SWR4 Ulm
+	"urn:ard:permanent-livestream:b2a489822248d108": ["276508"], // SWR4 Südbaden
+	"urn:ard:permanent-livestream:a0b0b5c4575384d8": ["276509"], // SWR4 Friedrichshafen
+	"urn:ard:permanent-livestream:94568a21e73a5857": ["276510", "2761729"], // SWR4 Mainz, SWR4 Rheinland Pfalz
+	"urn:ard:permanent-livestream:b00b36d51bcf8348": ["276511"], // SWR4 Kaiserslautern
+	"urn:ard:permanent-livestream:b5c6c6c61a73ddd5": "276512", // SWR4 Trier
+	"urn:ard:permanent-livestream:65920d2ae364afa6": ["276513"], // SWR4 Koblenz
+	"urn:ard:permanent-livestream:cbb0808a49c4428c": ["276514"], // SWR4 Ludwigshafen
+
+	"urn:ard:permanent-livestream:2de1602d36586125": ["2761553"], // hr4 Südhessen
+	"urn:ard:permanent-livestream:5f5a02ee84420daa": ["2761554"], // hr4 Osthessen
+	"urn:ard:permanent-livestream:848503a0d4395b3b": ["2761555"], // hr3 Nordhessen
+	"urn:ard:permanent-livestream:cc89ca8be6e1e4bd": ["2761556"], // hr3 Osthessen
+	"urn:ard:permanent-livestream:933d6b03547f29d6": ["2761557"], // hr3 Südhessen
+	"urn:ard:permanent-livestream:c56beac1f68791c3": ["2761558"], // hr3 Mittelhessen
+	"urn:ard:permanent-livestream:fbbbdf64f82006c1": ["2761559"], // hr1 Nordhessen
+	"urn:ard:permanent-livestream:a7b5fc4a7ee0e948": ["2761560"], // hr1 Osthessen
+	"urn:ard:permanent-livestream:ec03b7c77866742c": ["2761561"], // hr1 Südhessen
+	"urn:ard:permanent-livestream:2675995635e59225": ["2761562"], // hr1 Mittelhessen
+	"urn:ard:permanent-livestream:d336a659fb7aa289": ["2762370"], // hr4 Mittelhessen
+	"urn:ard:permanent-livestream:009bd9c1603de6ac": ["2762371"], // hr4 Nordhessen
+	"urn:ard:permanent-livestream:02c8711701430a34": ["276299"], // hr1 Rhein-Main
+	"urn:ard:permanent-livestream:b137ee415c3a5dbc": ["276300"], // hr2-kultur
+	"urn:ard:permanent-livestream:1e32c42a0fb482b5": ["276301"], // hr3 Rhein-Main
+	"urn:ard:permanent-livestream:943831064f22c43f": ["276302"], // hr4 Rhein-Main
+	"urn:ard:permanent-livestream:3234916d9fbf2a76": ["276303"], // hr INFO
+	"urn:ard:permanent-livestream:a881787b1fcc4085": ["276304"], // YOU FM
+
+	"urn:ard:permanent-livestream:99b9c3e67c4f49ac": ["2762386"], // radioeins - Cottbus
+	"urn:ard:permanent-livestream:02d1c474fb9aa37a": ["2762387"], // radioeins - Frankfurt / Oder
+	"urn:ard:permanent-livestream:36c444681c987527": ["2762388"], // Inforadio - sorbisch
+	"urn:ard:permanent-livestream:328f0b31e0ff512c": ["2762389"], // Antenne Brandenburg - Cottbus
+	"urn:ard:permanent-livestream:515286f56605f097": ["2762390"], // Antenne Brandenburg - Frankfurt
+	"urn:ard:permanent-livestream:57dd43ef3160b03c": ["2762391"], // Antenne Brandenburg - Prenzlau
+	"urn:ard:permanent-livestream:3034b06553bfcedf": ["2762392"], // Antenne Brandenburg - Perleberg
+	"urn:ard:permanent-livestream:be8ca9fe99dc2115": ["276358"], // Antenne Brandenburg
+	"urn:ard:permanent-livestream:b9686d01b5ebc136": ["276359"], // rbb 88.8
+	"urn:ard:permanent-livestream:b10db8e5de2aab87": ["276360"], // radioeins
+	"urn:ard:permanent-livestream:59d7ea9aff468b01": ["276362"], // radio3
+	"urn:ard:permanent-livestream:cb6df5483c778969": ["276363"], // rbb24 Inforadio
+	"urn:ard:permanent-livestream:073b7c4a843982f4": ["276364"], // Fritz
+
+	"urn:ard:permanent-livestream:1ee2cfe6e2f61063": ["2761434"], // 1LIVE Dance Hits
+	"urn:ard:permanent-livestream:6ed1aebe18d6b705": ["2761435"], // 1LIVE Chillout
+	"urn:ard:permanent-livestream:ad2854227a24cd97": ["2761436"], // 1LIVE Hip Hop & RnB
+	"urn:ard:permanent-livestream:f78f4dfde4b1b205": ["2761440"], // 1LIVE Top Hits
+	"urn:ard:permanent-livestream:d5193e79f7d2c519": ["2761441"], // 1LIVE Rock Hits
+	"urn:ard:permanent-livestream:49a74388e5905a36": ["2761943"], // COSMO Afrobeat
+	"urn:ard:permanent-livestream:b4b07e7a617182de": ["2761944"], // COSMO Chillout
+	"urn:ard:permanent-livestream:0da28eb95856846f": ["2761945"], // COSMO Dance
+	// "xxx": "2761946", // COSMO Neu in Cosmo
+	// "xxx": "2761947", // COSMO Trap
+	"urn:ard:permanent-livestream:52e166c9367de0a4": ["2761948"], // COSMO Summer Vibes
+	"urn:ard:permanent-livestream:f54ba081d852129a": ["2761971"], // WDR 4 - Rheinland
+	"urn:ard:permanent-livestream:fcf73eda75586042": ["2761975"], // WDR 4 - Rhein-Ruhr
+	"urn:ard:permanent-livestream:a06af602ef34959e": ["2761981"], // WDR 4 - Aachen und Region
+	"urn:ard:permanent-livestream:26ca0ca86f487797": ["2762015"], // WDR 4 - Münsterland
+	"urn:ard:permanent-livestream:24d83f91c79a3c93": ["2762030"], // WDR 4 - Ostwestfalen-Lippe
+	"urn:ard:permanent-livestream:84433d0678701750": ["2762036"], // WDR 4 - Südwestfalen
+	"urn:ard:permanent-livestream:767b059329029e26": ["2762122"], // WDR - Die Maus
+	"urn:ard:permanent-livestream:52ab46cdf0baac57": ["276379"], // 1LIVE
+	"urn:ard:permanent-livestream:4e78bd44bd9d8b36": ["276381"], // WDR 3
+	"urn:ard:permanent-livestream:65999aca80fc92de": ["276382"], // WDR 4 Ruhrgebiet
+	"urn:ard:permanent-livestream:0fa94ef0c09df1df": ["276383"], // WDR 5
+	"urn:ard:permanent-livestream:d96db4783260aa14": ["276384"], // COSMO
+	"urn:ard:permanent-livestream:35b113ab25751a17": ["276477"], // 1LIVE DIGGI
+	"urn:ard:permanent-livestream:8b939df5fa39be0b": ["276482"], // WDR 2 - Rheinland
+	"urn:ard:permanent-livestream:9c0af28790c681fa": ["276483"], // WDR 2 - Ostwestfalen-Lippe
+	"urn:ard:permanent-livestream:36be5febc15a6bcd": ["276484", "276485"], // WDR 2 - Münsterland x2
+	"urn:ard:permanent-livestream:8966dec50d3692a4": ["276486"], // WDR 2 - Rhein und Ruhr
+	"urn:ard:permanent-livestream:eaca8e08741608dc": ["276487"], // WDR 2 - Bergisches Land
+	"urn:ard:permanent-livestream:d78a727b7282dc94": ["276488"], // WDR 2 - Südwestfalen
+	"urn:ard:permanent-livestream:ee9a086f00147c5d": ["276489"], // WDR 2 - Aachen und Region
+	"urn:ard:permanent-livestream:a6368f8093717313": ["276490"], // WDR Event
+	"urn:ard:permanent-livestream:7bc3ff29640bebe7": ["276582"], // 1Live Originale
+}
