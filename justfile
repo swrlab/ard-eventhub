@@ -38,6 +38,16 @@ lint:
 docs:
 	bun run docs:serve
 
+# print the radioplayer api keys in base64 format for kubernetes secret
+[group('KUBERNETES')]
+radioplayer-api-keys:
+	sops decrypt config/radioplayer-api-keys.sops.json | base64 | base64
+
+# deploy kubernetes secret to current cluster
+[group('KUBERNETES')]
+apply-k8s-secrets:
+	sops decrypt config/k8s-secrets.sops.yaml | kubectl apply -f -
+
 ## ---------------------------------
 ## ENCRYPTION shortcuts
 
