@@ -24,6 +24,7 @@ type RadioplayerOutput =
 			url: string
 			posted: Response | null
 			response: string | null
+			wasPosted: boolean
 	  }[]
 	| null
 
@@ -73,11 +74,11 @@ const sendRadioplayerEvent = async (
 		const response = await posted.text()
 
 		// log result
-		return { url: url.toString(), posted, response }
+		return { url: url.toString(), posted, response, wasPosted: true }
 	}
 
 	// else return url and null
-	return { url: url.toString(), posted: null, response: null }
+	return { url: url.toString(), posted: null, response: null, wasPosted: false }
 }
 
 export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> => {
@@ -163,21 +164,31 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 		let i = 0
 		for (const rpUid of rpUids) {
 			const startTime = getMs()
-			const { url, posted, response } = await sendRadioplayerEvent(rpUid, apiKey, event, plugin)
-			output.push({ url, posted, response })
+			const { url, posted, response, wasPosted } = await sendRadioplayerEvent(rpUid, apiKey, event, plugin)
+			output.push({ url, posted, response, wasPosted })
 
 			// log result
 			const message = [
-				`Radioplayer ${i + 1}/${rpUids.length} event done (${service.publisherId})`,
-				`status ${posted.status}`,
+				`Radioplayer ${i + 1}/${rpUids.length} event done`,
+				service.topic?.id || service.publisherId,
+				`status ${posted?.status}`,
 				`rpuid ${rpUid}`,
 				`in ${getMsOffset(startTime)}ms`,
 			]
 			logger.log({
-				level: posted.ok ? 'info' : 'error',
+				level: !wasPosted || posted?.ok ? 'info' : 'error',
 				message: message.join(' > '),
 				source,
-				data: { rpUid, statusCode: posted.status, response, url: url.toString() },
+				data: {
+					rpUid,
+					statusCode: posted?.status,
+					response,
+					url: url.toString(),
+					event,
+					institutionId,
+					plugin,
+					wasPosted,
+				},
 			})
 			i += 1
 		}

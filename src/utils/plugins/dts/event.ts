@@ -69,8 +69,7 @@ export default async (job: EventhubPluginMessage) => {
 
 	// only process now playing events
 	if (event.name !== 'de.ard.eventhub.v1.radio.track.playing') {
-		logger.log({
-			level: 'debug',
+		logger.warning({
 			message: `DTS skipping event (not playing) > ${event.name}`,
 			source,
 			data: { job },

@@ -9,7 +9,7 @@
         "@frytg/dates": "npm:@jsr/frytg__dates",
         "@frytg/logger": "npm:@jsr/frytg__logger",
         "@google-cloud/datastore": "^10.1.0",
-        "@google-cloud/pubsub": "^5.2.2",
+        "@google-cloud/pubsub": "^5.2.3",
         "@google-cloud/secret-manager": "^6.1.1",
         "@swrlab/utils": "^2.2.0",
         "@types/jest": "^30.0.0",

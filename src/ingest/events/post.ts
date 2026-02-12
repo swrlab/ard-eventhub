@@ -166,8 +166,9 @@ export default async (req: UserTokenRequest, res: Response) => {
 		const isDtsPluginSet = message.plugins?.find((plugin) => plugin.type === 'dts')
 		const isRadioplayerPluginSet = message.plugins?.find((plugin) => plugin.type === 'radioplayer')
 		const isMusic = req.body.type === 'music'
+		const isNowPlayingEvent = message.name === 'de.ard.eventhub.v1.radio.track.playing'
 
-		if (!isDtsPluginSet && isMusic) {
+		if (!isDtsPluginSet && isMusic && isNowPlayingEvent) {
 			message.plugins.push({
 				type: 'dts',
 				isDeactivated: false,
@@ -175,7 +176,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 			})
 		}
 
-		if (!isRadioplayerPluginSet && isMusic) {
+		if (!isRadioplayerPluginSet && isMusic && isNowPlayingEvent) {
 			message.plugins.push({
 				type: 'radioplayer',
 				isDeactivated: false,
