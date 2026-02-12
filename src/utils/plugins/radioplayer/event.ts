@@ -106,7 +106,7 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 		return Promise.resolve(null)
 	}
 
-	// only process music events
+	// reject if no artist or title is set
 	if (!event.artist || !event.title) {
 		logger.warning({
 			message: `Radioplayer skipping event (no artist or title) > ${event.services[0]?.publisherId}`,
