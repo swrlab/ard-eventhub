@@ -6,12 +6,15 @@
 import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
 import undici, { type Response } from 'undici'
+
 import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '@/types.eventhub.ts'
+import config from '../../../../config/index.ts'
 import livestreamMapping from '../../../../config/radioplayer-mapping.json5'
 import apiKeys from './api-keys.ts'
 
 const source = 'utils/plugins/radioplayer/event'
 const PERMITTED_EXCLUDED_FIELDS = ['imageUrl']
+const RUN_IN_NON_PROD = process.env.RADIOPLAYER_RUN_IN_NON_PROD === 'true'
 
 // see API docs: https://radioplayerworldwide.atlassian.net/wiki/spaces/RPC/pages/1920073729/Programmatic+Ingest+of+Station+Information#V2-Endpoints
 const RADIOPLAYER_API_URL = 'https://np-ingest.radioplayer.cloud'
@@ -19,8 +22,9 @@ const RADIOPLAYER_API_URL = 'https://np-ingest.radioplayer.cloud'
 type RadioplayerOutput =
 	| {
 			url: string
-			posted: Response
-			response: string
+			posted: Response | null
+			response: string | null
+			wasPosted: boolean
 	  }[]
 	| null
 
@@ -56,19 +60,25 @@ const sendRadioplayerEvent = async (
 		}
 	}
 
-	// post event
-	const radioplayerConfig = {
-		method: 'POST',
-		signal: AbortSignal.timeout(7e3),
-		headers: {
-			'X-API-KEY': apiKey,
-		},
-	}
-	const posted = await undici.fetch(url.toString(), radioplayerConfig)
-	const response = await posted.text()
+	// only send event in prod or non-prod if requested
+	if (config.stage === 'prod' || RUN_IN_NON_PROD) {
+		// post event
+		const radioplayerConfig = {
+			method: 'POST',
+			signal: AbortSignal.timeout(7e3),
+			headers: {
+				'X-API-KEY': apiKey,
+			},
+		}
+		const posted = await undici.fetch(url.toString(), radioplayerConfig)
+		const response = await posted.text()
 
-	// log result
-	return { url: url.toString(), posted, response }
+		// log result
+		return { url: url.toString(), posted, response, wasPosted: true }
+	}
+
+	// else return url and null
+	return { url: url.toString(), posted: null, response: null, wasPosted: false }
 }
 
 export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> => {
@@ -154,21 +164,31 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 		let i = 0
 		for (const rpUid of rpUids) {
 			const startTime = getMs()
-			const { url, posted, response } = await sendRadioplayerEvent(rpUid, apiKey, event, plugin)
-			output.push({ url, posted, response })
+			const { url, posted, response, wasPosted } = await sendRadioplayerEvent(rpUid, apiKey, event, plugin)
+			output.push({ url, posted, response, wasPosted })
 
 			// log result
 			const message = [
-				`Radioplayer ${i + 1}/${rpUids.length} event done (${service.publisherId})`,
-				`status ${posted.status}`,
+				`Radioplayer ${i + 1}/${rpUids.length} event done`,
+				service.topic?.id || service.publisherId,
+				`status ${posted?.status}`,
 				`rpuid ${rpUid}`,
 				`in ${getMsOffset(startTime)}ms`,
 			]
 			logger.log({
-				level: posted.ok ? 'info' : 'error',
+				level: !wasPosted || posted?.ok ? 'info' : 'error',
 				message: message.join(' > '),
 				source,
-				data: { rpUid, statusCode: posted.status, response, url: url.toString() },
+				data: {
+					rpUid,
+					statusCode: posted?.status,
+					response,
+					url: url.toString(),
+					event,
+					institutionId,
+					plugin,
+					wasPosted,
+				},
 			})
 			i += 1
 		}
