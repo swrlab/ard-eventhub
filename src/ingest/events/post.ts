@@ -115,12 +115,12 @@ export default async (req: UserTokenRequest, res: Response) => {
 		// replace services
 		message.services = newServices
 
+		// filter out blocked services before sending to common topic
+		const nonBlockedServices = message.services.filter((service) => !service.blocked)
+
 		// send event to common topic
 		// if it is not a radio text event
 		if (IS_COMMON_TOPIC_ENABLED && req.body.event !== 'de.ard.eventhub.v1.radio.text') {
-			// filter out blocked services before sending to common topic
-			const nonBlockedServices = message.services.filter((service) => !service.blocked)
-
 			// only send to common topic if there are non-blocked services
 			if (nonBlockedServices.length > 0) {
 				// prepare common post
@@ -189,7 +189,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 				if (!plugin.isDeactivated) {
 					const pluginMessage: EventhubPluginMessage = {
 						action: `plugins.${plugin.type}.event`,
-						event: message,
+						event: { ...message, services: nonBlockedServices },
 						plugin,
 						institutionId: req.user.institutionId,
 					}
