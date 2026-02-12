@@ -41,12 +41,19 @@ docs:
 # print the radioplayer api keys in base64 format for kubernetes secret
 [group('KUBERNETES')]
 radioplayer-api-keys:
-	sops decrypt config/radioplayer-api-keys.sops.json | base64 | base64
+	@echo ""
+	@echo "base64-wrapped once"
+	@sops decrypt keys/radioplayer-api-keys.sops.json | base64
+	@echo ""
+	@echo "--------------"
+	@echo ""
+	@echo "base64-wrapped twice"
+	@sops decrypt keys/radioplayer-api-keys.sops.json | base64 | base64
 
 # deploy kubernetes secret to current cluster
 [group('KUBERNETES')]
 apply-k8s-secrets:
-	sops decrypt config/k8s-secrets.sops.yaml | kubectl apply -f -
+	sops decrypt keys/k8s-secrets.sops.yaml | kubectl apply -f -
 
 ## ---------------------------------
 ## ENCRYPTION shortcuts
@@ -55,7 +62,7 @@ apply-k8s-secrets:
 [group('ENCRYPTION')]
 update-keys:
 	just _update-key .env.sops.yaml
-	just _update-key config/radioplayer-api-keys.sops.json
+	just _update-key keys/radioplayer-api-keys.sops.json
 
 _update-key file:
 	sops updatekeys {{file}}
@@ -64,7 +71,7 @@ _update-key file:
 [group('ENCRYPTION')]
 rotate-keys:
 	just _rotate-key .env.sops.yaml
-	just _rotate-key config/radioplayer-api-keys.sops.json
+	just _rotate-key keys/radioplayer-api-keys.sops.json
 
 _rotate-key file:
 	sops rotate --in-place {{file}}
@@ -90,4 +97,4 @@ decrypt-key file:
 [confirm('This will overwrite all previously decrypted files, are you sure? (type `yes` to continue)')]
 decrypt:
 	just decrypt-key .env.sops.yaml
-	just decrypt-key config/radioplayer-api-keys.sops.json
+	just decrypt-key keys/radioplayer-api-keys.sops.json

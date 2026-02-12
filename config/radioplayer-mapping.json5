@@ -182,5 +182,12 @@
 	"urn:ard:permanent-livestream:d78a727b7282dc94": ["276488"], // WDR 2 - Südwestfalen
 	"urn:ard:permanent-livestream:ee9a086f00147c5d": ["276489"], // WDR 2 - Aachen und Region
 	"urn:ard:permanent-livestream:a6368f8093717313": ["276490"], // WDR Event
-	"urn:ard:permanent-livestream:7bc3ff29640bebe7": ["276582"], // 1Live Originale
+	"urn:ard:permanent-livestream:7bc3ff29640bebe7": ["276582"], // 1Live Originale,
+
+	// "xxx": ["2762342"], // Bremen 4 Hip-Hop
+	"urn:ard:permanent-livestream:43b952d7b301bc4b": ["276354"], // Bremen Eins
+	"urn:ard:permanent-livestream:a081291373972e5a": ["276355"], // Bremen Vier
+	"urn:ard:permanent-livestream:f26c840eca9f7990": ["276356"], // Bremen Zwei
+	"urn:ard:permanent-livestream:31a01c8edf6870b0": ["276357"], // Bremen Next
+	// "xxx": ["2763359"], // Bremen Eins Xmas
 }

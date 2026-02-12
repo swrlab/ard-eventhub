@@ -24,12 +24,7 @@ jobs:
         STAGES: [dev]
     steps:
       - name: 👀 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🏗 Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+        uses: actions/checkout@v6
 
       - name: 🛠 Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -68,12 +63,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: 👀 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: ⛺️ Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+        uses: actions/checkout@v6
 
       - name: 🛠 Setup Bun
         uses: oven-sh/setup-bun@v2

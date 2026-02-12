@@ -13,7 +13,7 @@ import livestreamMapping from '../../../../config/radioplayer-mapping.json5'
 import apiKeys from './api-keys.ts'
 
 const source = 'utils/plugins/radioplayer/event'
-const PERMITTED_EXCLUDED_FIELDS = ['imageUrl']
+const PERMITTED_EXCLUDED_FIELDS: string[] = ['imageUrl']
 const RUN_IN_NON_PROD = process.env.RADIOPLAYER_RUN_IN_NON_PROD === 'true'
 
 // see API docs: https://radioplayerworldwide.atlassian.net/wiki/spaces/RPC/pages/1920073729/Programmatic+Ingest+of+Station+Information#V2-Endpoints
@@ -40,7 +40,7 @@ const sendRadioplayerEvent = async (
 	if (event.artist) url.searchParams.set('artist', event.artist)
 	if (event.title) url.searchParams.set('title', event.title)
 	if (event.start) url.searchParams.set('startTime', event.start)
-	if (event.length) url.searchParams.set('duration', event.length.toString())
+	if (event.length) url.searchParams.set('duration', Math.floor(event.length).toString())
 
 	// set thumbnail
 	const mediaType = plugin?.preferArtistMedia ? 'artist' : 'cover'
@@ -99,7 +99,17 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 	// only process music events
 	if (event.type !== 'music') {
 		logger.warning({
-			message: `Radioplayer skipping event (not music) > ${event.type}`,
+			message: `Radioplayer skipping event (not music) > ${event.type} > ${event.services[0]?.publisherId}`,
+			source,
+			data: { job },
+		})
+		return Promise.resolve(null)
+	}
+
+	// reject if no artist or title is set
+	if (!event.artist || !event.title) {
+		logger.warning({
+			message: `Radioplayer skipping event (no artist or title) > ${event.services[0]?.publisherId}`,
 			source,
 			data: { job },
 		})
