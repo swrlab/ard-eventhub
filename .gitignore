@@ -5,7 +5,8 @@ npm-debug.log*
 .DS_STORE
 
 # keys
-keys/
+keys/*.json
+!keys/*.sops.json
 .env
 
 # Dependency directories

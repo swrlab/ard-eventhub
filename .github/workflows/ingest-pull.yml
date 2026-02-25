@@ -24,12 +24,7 @@ jobs:
         STAGES: [dev]
     steps:
       - name: 👀 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🏗 Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+        uses: actions/checkout@v6
 
       - name: 🛠 Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -60,6 +55,7 @@ jobs:
           TEST_USER: ${{ secrets.TEST_USER }}
           TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
           ARD_FEED_URL: ${{ secrets.ARD_FEED_URL }}
+          RADIOPLAYER_API_KEYS: e30=
         run: bun run test
 
   license:
@@ -67,12 +63,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: 👀 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: ⛺️ Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+        uses: actions/checkout@v6
 
       - name: 🛠 Setup Bun
         uses: oven-sh/setup-bun@v2

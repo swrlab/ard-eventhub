@@ -1,39 +1,39 @@
 # ARD Eventhub / Secrets
 
-This repository obviously needs a number of secrets and configuration files that are kept in various places. This page documents what goes where.
-Since this project is designed to be kept public to allow a collaborative development process, the full configuration around secrets and their deployment process is not described to the fullest extend here. There are other places, which include more about the internal maintenance structure.
+Dieses Repository benötigt verschiedene Secrets und Konfigurationsdateien, die an unterschiedlichen Orten verwaltet werden. Diese Seite dokumentiert, welche Konfigurationen wie und wo verwaltet werden.
+Da das Projekt öffentlich gehalten wird, ist die komplette interne Konfiguration zu Secrets und deren Deployment hier nicht vollständig beschrieben. Detailliertere Informationen finden sich in internen Dokumenten.
 
 ## Code
 
-Different modules might need varying sets of variables. Check the README of each provided module to see more about those.
-Usually it only requires few API keys to external services. Access to Google Cloud services is given by a [service account](https://cloud.google.com/iam/docs/service-accounts) (SA), with only the minimum set of permissions needed. This SA is added using an environment variable.
+Einige Module können unterschiedliche Variablen benötigen. Prüfe die README der jeweiligen Module für Details.
+In der Regel sind nur wenige API-Keys für externe Services erforderlich. Der Zugriff auf Google Cloud-Dienste erfolgt über ein [Service Account](https://cloud.google.com/iam/docs/service-accounts) (SA) mit minimalen Rechten. Dieser SA wird über eine Umgebungsvariable hinzugefügt.
 
-## Github
+## GitHub
 
-Secrets in Github are write-only by default for users. Admins can change them in Settings -> Secrets but they cannot be read. Only Github Actions has access and can use them in workflows. They are hidden from logs in Actions by default.
+Secrets in GitHub sind standardmäßig für Benutzer write-only. Admins kannst du in Settings -> Secrets ändern, lesen kannst du die Werte jedoch nicht. Nur GitHub Actions hat Zugriff und kann die Werte in Workflows verwenden; die Werte werden standardmäßig in Logs verborgen.
 
 - `GCP_GITHUB_SERVICE_ACCOUNT_KEY`
-  - Encoded in base64
-  - Service Account used to log into Google Cloud services, used for pushing containers to registry and accessing services for pull checks
-  - Stored in Github to log into registry
+  - Base64-kodiert
+  - Service Account zum Einloggen in Google Cloud, nötig u. a. zum Pushen von Containern und für Pull-Checks
+  - In GitHub gespeichert, um im Registry-Workflow verwendet zu werden
 - `GCP_PROJECT_ID`
-  - The project ID of the Google Cloud account used for primary services such as Pub/Sub
-  - Stored in Github to run test workflows on pull checks
+  - Projekt-ID des Google Cloud-Projekts für Primärdienste wie Pub/Sub
+  - In GitHub gespeichert, um Test-Workflows zu ermöglichen
 - `GCP_SERVICE_ACCOUNT_INGEST`
-  - E-mail address of the service account used for Cloud Run
-  - Stored in Github to configure new revisions
+  - E‑Mail-Adresse des Service Accounts für Cloud Run
+  - In GitHub gespeichert, um neue Revisionskonfigurationen zu setzen
 - `TEST_FIREBASE_API_KEY`
-  - API key for Firebase, used to run pull checks
+  - API-Key für Firebase, genutzt bei Pull-Checks
 - `TEST_USER`
-  - E-mail address of the test user for `STAGE=dev` which is used to run test checks
+  - E‑Mail-Adresse des Testnutzers für `STAGE=dev` welche für Tests benutzt wird
 - `TEST_USER_PW`
-  - Corresponding password for the test user
+  - Passwort des Testnutzers
 
 ## Google Cloud
 
-When this project is deployed to Google Cloud for example, it also needs environment variables and keys. Those are usually provided by the runtime and its deployment configuration. The location of all Kubernetes deployments files is explicitly not mentioned here, but if have access to said environment, you should know where to start searching.
+Bei Deployments in Google Cloud werden Umgebungsvariablen und Keys üblicherweise vom Runtime-System bzw. der Deployment-Konfiguration gestellt. Die Kubernetes-Deployment-Dateien sind hier nicht im Detail aufgeführt; sofern du Zugang zur Umgebung hast, solltest du wissen, wo zu suchen ist.
 
 ### Docker Image
 
-Kubernetes needs to pull the image from some specified registry. Usually there's one central place for these images. For eventhub we are not using this place to avoid adding their key to this repository. Instead we are storing containers in our eventhub project and are giving access to their SA.
-To do this, open the console, navigate to the eventhub project, go to storage, select the artifact bucket. In the info panel, add their SA email address with the permission "_Storage Object Viewer_".
+Kubernetes muss Images aus einem Registry ziehen. Für bewöhnlich gibt es dafür ein spezifisches Repository. Für Eventhub verwenden wir ein internes Projekt-Registry, um diesen Key nicht im Repo zu speichern zu müssen. Stattdessen speichern wir Container in unserem Eventhub-Projekt und gewähren den SA Zugriff.
+Öffne dazu die Console, navigiere zum Eventhub-Projekt, wähle storage und dann das artifact bucket. Füge in der Info-Ansicht die E‑Mail des Service Accounts mit der Berechtigung "_Storage Object Viewer_" hinzu.

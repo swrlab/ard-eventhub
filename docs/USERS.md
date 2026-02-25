@@ -1,30 +1,30 @@
-# ARD Eventhub / Users
+# ARD Eventhub / Benutzer
 
-To authenticate and work with Eventhub API you will need a valid user. For now these user logins are kept separate from the ARD Core API, but are using a similar login method. This page covers the process of administrating users.
+Um sich beim Eventhub zu authentifizieren und mit der API zu arbeiten, benötigtst du ein gültiges Benutzerkonto. Die Logins sind derzeit von der ARD Core API getrennt, nutzen aber ein ähnliches Verfahren. Diese Seite beschreibt die Verwaltung von Benutzern.
 
-## Authentication
+## Authentifizierung
 
-Please see the [Authentication document](/docs/AUTHENTICATION.md) to learn more about this process.
+Siehe das Kapitel [Authentifizierung](./AUTHENTICATION.md) für Details.
 
-## Registering new users
+## Neue Benutzer anlegen
 
-New users cannot sign up themselves, but need to go through the ARD Online team to receive access to this service. The following step-by-step guide is targeted at admins, that want to add a new account for a user.
+Neue Benutzer können sich nicht selbst registrieren; der Zugang wird über das ARD Online Team gewährt. Die folgende Schritt-für-Schritt-Anleitung richtet sich an Admins, die ein neues Konto anlegen möchten.
 
-- Open Datastore in the GCP Eventhub project, go to the appropriate namespace (usually `prod`) and kind `users`
-- Check that the user really hasn't been registered, then add a new entity
-  - The entity key needs to be '_Custom Name_', with the user's email address (**in lowercase**)
-  - Set `active` to `true`
-  - In the field `institutionId`, you will need to add a string with the same ID that is being used in ARD Core in this format: `urn:ard:institution:hex`
-- Now that the user is entered in Datastore with its profile, you can register it in Firebase. Therefore go to the [Firebase Console](https://console.firebase.google.com/) in the section _Build_ -> _Authentication_.
-  - On this page, click on _Add user_ and enter the same email address (again in lowercase). The password can be something random, that will never be seen.
-  - Once the user has been added, click on the dropdown menu and select _Reset password_ and confirm the pop-up.
-- The user will now receive an email to set their password, that they can then use to interact with the API.
+- Öffne Datastore im GCP Eventhub-Projekt, wechsel zum passenden Namespace (meist `prod`) und zur Kind-Collection `users`
+- Prüfe, ob der Benutzer noch nicht existiert, und lege dann eine neue Entität an
+  - Der Entity-Key sollte der `_Custom Name_` sein, als Wert die E‑Mail-Adresse des Benutzers (**in Kleinbuchstaben**)
+  - Setze `active` auf `true`
+  - Im Feld `institutionId` trage die ID ein, die auch im ARD Core genutzt wird, z. B. `urn:ard:institution:hex`
+- Nachdem der Benutzer in Datastore angelegt wurde, registriere ihn in Firebase: Öffne die [Firebase Console](https://console.firebase.google.com/) unter _Build_ -> _Authentication_
+  - Klicke auf _Add user_ und verwende dieselbe E‑Mail-Adresse (kleingeschrieben). Das Passwort kann temporär zufällig sein.
+  - Nach dem Anlegen wähle im Dropdown _Reset password_ und bestätige die Aktion.
+- Der Benutzer erhält nun eine E‑Mail zum Setzen seines Passworts und kann anschließend die API nutzen.
 
-## Removing users
+## Benutzer entfernen
 
-If a user needs to be removed from this service, do the following steps:
+Wenn ein Benutzer gelöscht werden soll, gehe wie folgt vor:
 
-- Check if there are open subscriptions that they created, that might need to be removed (both in Pub/Sub and Datastore)
-  - Note that subscription permissions are given institution-wide, so even if one user gets removed, their colleagues would still be able to modify these entries.
-- Next, remove the user from Datastore by selecting and deleting their entry.
-- Then also remove their profile from Firebase Console.
+- Prüfe, ob der Benutzer Subscriptions angelegt hat, die eventuell entfernt werden müssen (Pub/Sub und Datastore)
+  - Hinweis: Zugriffsrechte für Subscriptions gelten institutionsweit; beim Entfernen eines Benutzers bleiben die Rechte ggf. für die Kollegen bestehen.
+- Lösche die Benutzer-Entität aus dem Datastore indem du ihn selektierst und seinen Eintrag löschst
+- Entferne anschließend das Benutzerprofil in der Firebase Console

@@ -1,18 +1,18 @@
-# ARD Eventhub / Quickstart
+# ARD Eventhub / Schnellstart
 
-This guide will help you get started with ARD Eventhub.
+Dieser Leitfaden hilft dir beim Start in den ARD Eventhub.
 
-No matter if you are a Publisher or Subscriber, you will need a user account to interact with the API. Request one through your contacts at SWR Audio Lab or ARD Online. Admins can reference the Users docs for account registrations.
+Egal, ob du Publisher oder Subscriber bist: Du benötigst ein Benutzerkonto, um mit der API zu interagieren. Fordere ein Konto über deinen Ansprechpartner beim SWR Audio Lab oder ARD Online an. Administratoren können die [*Benutzer*](./USERS.md)-Dokumentation für die Registrierung heranziehen.
 
-Once this has been set up, check the Authentication docs to learn more about the login and token exchange process.
+Nachdem das Konto eingerichtet wurde, lies das Kapitel [*Authentifizierung*](./AUTHENTICATION.md), um mehr über Login und den Token-Austausch zu erfahren.
 
-## Publishers
+## Publisher
 
-If you are a radio station that wants to start publishing events to ARD Eventhub, follow these easy steps:
+Wenn du als Hörfunkanstalt Events in den ARD Eventhub publizieren möchtest, befolge diese einfachen Schritte:
 
-- Set up your account and understand the authentication process
-- Use the POST `/events/{eventName}` endpoint to add your events
-- Note: Even if GET `/topics` does not list your radio station(s) beforehand, the topic(s) will be created during your first published event (response will contain):
+- Richte dein Konto ein, lese und verstehe den Authentifizierungsprozess
+- Verwende den POST-Endpoint `/events/{eventName}`, um Events zu senden
+- Hinweis: Auch wenn GET `/topics` deine Sender noch nicht auflistet, werden die Topics beim ersten veröffentlichten Event automatisch erstellt (die Antwort enthält z.B.):
 
 ```js
 {
@@ -42,33 +42,33 @@ If you are a radio station that wants to start publishing events to ARD Eventhub
 }
 ```
 
-It is recommended to use the Eventhub `test` system first, to make sure everything works. Then bring it to production on `prod`. The host names are listed in the Stages document.
+Es wird empfohlen, zunächst das `test`-System des Eventhub zu nutzen, um alles zu prüfen, bevor du in die Produktion (`prod`) wechselst. Die Hostnamen findest du im Dokument zu den [Stages](./STAGES.md).
 
-Security Note: Every user account can only publish to `publisherId`s from their own institution. If you are receiving an error, the Id could be misspelled, or the user account was wrongly configured by an admin.
+Sicherheits-Hinweis: Jedes Benutzerkonto darf nur zu `publisherId`s seiner eigenen Institution publizieren. Sofern man einen Fehler zurückbekommt kann die ID falsch sein oder das Benutzerkonto wurde durch einen Admin falsch konfiguriert.
 
-### Handling Events with External Data
+### Umgang mit Events aus externen Quellen
 
-Let's say you are using Eventhub to receive events from a station that belongs to another broadcaster (i.e. nightly broadcasts) for your own station. For this case, it is expected to also re-publish these events to Eventhub.
+Wenn du Eventhub benutzt, um Events aus einer anderen Anstalt zu empfangen (z.B. Nächtliche bundesweite Sendungen) und diese für deinen Sender weiterveröffentlichst, ist es wichtig, die empfangenen Events erneut an den Eventhub zu publizieren.
 
-This is important because your subscribers expect to receive all events from your station, including the ones that are re-broadcasted from other stations. They might not know that you are re-broadcasting the signal from another station and are simply using a subscription to your station to receive all events.
+Das ist essentiell, da deine Abonnenten alle Events deines Senders erhalten müssen – inklusive der von anderen Sendern erneut gesendeten Events. Sie wissen möglicherweise nicht, dass du das Programm von einer anderen Station weiterverbreitest und nutzen lediglich ein Abonnement für deinen Sender, um alle Events zu empfangen.
 
-For ARD Audiothek, this is also important. Otherwise, your station might have incomplete live metadata when re-broadcasting other stations.
+Für Dienste wie die ARD Audiothek ist dies wichtig, andernfalls verfügt dein Sender möglicherweise über unvollständige Live-Metadaten, wenn du andere Sender erneut ausstrahlst.
 
-For this case, it is important to make sure your internal filtering works correctly when receiving events from other stations and only publish them when the station is actually on air. Otherwise, it could create a loop.
+In diesem Fall ist es wichtig, sicherzustellen, dass deine interne Filterung korrekt funktioniert, wenn du Events von anderen Sendern empfängst, und diese nur zu veröffentlichen, wenn der Sender tatsächlich auf Sendung ist. Andernfalls könnte es zu einer Schleife kommen.
 
-### Importance of External IDs
+### Wichtige Hinweise zu External IDs
 
-This has moved to [EXTERNAL_IDS.md](EXTERNAL_IDS.md).
+Details findest du in [EXTERNAL_IDS.md](./EXTERNAL_IDS.md).
 
-### Workflow Example
+### Beispiel-Workflow
 
-In your system for every new event, you might follow a workflow like this:
+Ein möglicher Ablauf in deinem System für jedes neue Event könnte so aussehen:
 
-1. Check if you have `token` from a previous call that has not expired
-2. If not found, check if you have a `refreshToken` from a previous call
-   1. If found exchange it for a new `token`
-   2. If not found, create a new login
-3. POST the event using the pre-defined format. The example below might help you understand the different fields:
+1. Prüfe ob dein `token`, den du von einem früheren Aufruf hast, noch gültig ist
+2. Falls du keinen Gültigen mehr hast, prüfe ob du noch einen `refreshToken` von einem früheren Aufruf hast
+   1. Falls ja, tausche ihn für einen gültigen `token` ein
+   2. Falls nein, logge dich über die API erneut an
+3. POST das Event im vorgegebenen Format. Das folgende Beispiel kann dir dabei helfen, den Aufbau eines Events zu verstehen:
 
 ```js
 {
@@ -115,46 +115,50 @@ In your system for every new event, you might follow a workflow like this:
 
 ```
 
-## Subscribers
+## Subscriber
 
-If you plan to receive events published by other stations, add yourself as one of their subscribers and receive real-time POST webhooks for all published events. Those can then be used to improve your products such as websites and apps during re-broadcasts in the nightly tracks.
+Wenn du Events anderer Sender empfangen möchtest, trage dich als Subscriber ein und erhalte Echtzeit-POSTs (Webhooks) für alle veröffentlichten Events. Diese können z.B. deine Web- oder App-Angebote während der Wiederholungen in den nächtlichen Sendungen verbessern.
 
-Please be aware that the type of events published to this service may be extended in the future. Make sure to filter them appropriately. The data format should and will always be backwards-compatible, but new fields may be added to this service as needed.
+Beachte, dass der Typ der hier veröffentlichten Events in Zukunft erweitert werden kann, filtere deshalb entsprechend. Das Datenformat bleibt abwärtskompatibel, es können jedoch bei Bedarf neue Bereiche zu diesem Dienst hinzugefügt werden.
 
-In case of nightly re-broadcasts you should create a permanent subscription and keep this one running 24/7. The filter based on the program schedule should be done on your side. Pub/Sub should not be used to create and delete subscriptions once the re-broadcast starts and ends.
+Bei nächtlichen Sendungen solltest du eine permanente Subscription 24/7 betreiben. Der Filter basierend auf dem Programmplan sollte auf deiner Seite durchgeführt werden. **Pub/Sub sollte nicht zum wiederholten Erstellen/Löschen von Subscriptions genutzt werden.**
 
-Make sure that your endpoint is reachable from the internet and that you have a valid SSL certificate installed. If the endpoint is periodically unreachable, the subscription will collect past events and will retry delivering them to you. Reference [`src/utils/pubsub/createSubscription.ts`](../src/utils/pubsub/createSubscription.ts) and [cloud.google.com/pubsub/docs/push](https://cloud.google.com/pubsub/docs/push#push_backoff) for more details about the default subscription config and retry behavior.
+Stelle sicher, dass dein Endpoint aus dem Internet erreichbar ist und ein gültiges SSL-Zertifikat installiert ist. Ist der Endpoint zeitweise nicht erreichbar, sammelt die Subscription vergangene Events und versucht die Zustellung erneut. Siehe dazu auch [`src/utils/pubsub/createSubscription.ts`](../src/utils/pubsub/createSubscription.ts) und [cloud.google.com/pubsub/docs/push](https://cloud.google.com/pubsub/docs/push#push_backoff).
 
-Start receiving events with these steps:
+Aktuell ist ein Pull-Workflow für Subscriptions nicht vorgesehen.
 
-- Set up your account and understand the authentication process
-- Use the GET `/topics` endpoint to see a list of available channels (topics) that you can subscribe to
-- If a channel is not yet visible, no one has attempted to publish an event to it before. Topics are not created until someone starts publishing
-- Use the POST `/subscriptions` endpoint to create your own subscription.
-- Check the Google Cloud page ["Receiving messages using Push"](https://cloud.google.com/pubsub/docs/push#receiving_messages) to learn more about the format that you will be receiving those events in
-- Use GET `/subcriptions` to verify your new or existing subscriptions
+Starte mit diesen Schritten:
 
-Security Note: When a user is registered, it is linked to a specific institution (_Landesrundfunkanstalt_ or _GSEA_). Users can manage all subscriptions within this institution, so be careful not to delete your colleagues' (production) entries.
-With this method you will still have access to all subscriptions, even if a person leaves your institution or their account is deactivated.
+- Richte dein Konto ein und verstehe den Authentifizierungsprozess
+- Verwende GET `/topics`, um verfügbare Channels (Topics) zu sehen
+- Wenn ein Channel nicht sichtbar ist, wurde noch nicht darauf publiziert. Topics entstehen erst beim ersten Senden eines Events.
+- Erstelle mit POST `/subscriptions` eine Subscription
+  - ACHTE darauf keine localhost oder internen Adressen als URL anzugeben.
+- Lese die Google-Dokumentation ["Receiving messages using Push"](https://cloud.google.com/pubsub/docs/push#receiving_messages) für das Nachrichtenformat
+- Verwende GET `/subcriptions`, um Subscriptions zu prüfen
 
-### Security
+Sicherheits-Hinweis: Ein registrierter Benutzer ist einer Institution (*Landesrundfunkanstalt*) zugeordnet. Benutzer können alle Subscriptions innerhalb ihrer Institution verwalten — lösche keine Produktions-Einträge deiner Kollegen.
+Mit diesem Workflow hat man weiterhin Zugriff auf alle Abonnements, auch wenn eine Person deinen Sender verlässt, oder dein Konto deaktiviert wird.
 
-Generally it is recommended to keep your endpoints hidden from public indexes. To be absolutely sure that an event is actually being received from Eventhub, you can make use of the provided JWT token and service account.
-For every subscription that you create, the response will (amongst other metadata) also include a field about the used service account:
+### Sicherheit
+
+Um sicherzustellen, dass ein Event tatsächlich vom Eventhub stammt, verwende das mitgelieferte JWT-Token und den Service Account.
+
+Die Antwort beim Erstellen einer Subscription enthält u.a. das verwendete Service Account-Feld:
 
 ```js
 {
    ...
-   "serviceAccount": "somethin@something-else.iam.gserviceaccount.com",
+   "serviceAccount": "something@something-else.iam.gserviceaccount.com",
    ...
 }
 ```
 
-Please note that for now the service account usually contains the same response. However, for future subscriptions, it might contain a different account. Configure your service to validate the appropriate account for each subscription.
+Bitte beachte, dass der Service Account derzeit in der Regel dieselbe Antwort enthält. Bei zukünftigen Abonnements kann es jedoch sein, dass ein anderes Konto verwendet wird. Konfiguriere deinen Dienst so, dass für jedes Abonnement das entsprechende Konto überprüft wird.
 
-### Receiver Example
+### Beispiel-Receiver
 
-In a simplified way, your receiver might look something like this (example for NodeJS with Express). The Google Cloud section ["Authentication and authorization by the push endpoint"](https://cloud.google.com/pubsub/docs/push#authentication_and_authorization_by_the_push_endpoint) also holds more information about this process.
+Ein vereinfachtes Beispiel (Node.js mit Express): Die Google Cloud Sektion ["Authentication and authorization by the push endpoint"](https://cloud.google.com/pubsub/docs/push#authentication_and_authorization_by_the_push_endpoint) enthält weiterführende Informationen über diesen Prozess.
 
 ```js
 // load node packages

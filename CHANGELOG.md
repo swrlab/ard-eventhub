@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.2] - 2026-02-12
+
+- fix: ensure duration is an integer for radioplayer
+- fix: add missing mappings for radioplayer
+- chore: add ARD Musikclub to docs
+
+## [2.3.1] - 2026-02-12
+
+- fix: only run radioplayer in non-prod or when requested
+- fix: only post dts and radioplayer queues for now playing events
+
+## [2.3.0] - 2026-02-10
+
+- fix: ignore blocked services in common topic
+- feat: add radioplayer plugin
+- feat: add sops encryption logic
+
+## [2.2.0] - 2026-02-05
+
+- feat: add optional `isFallback` flag to media elements to mark fallback content
+
+## [2.1.2] - 2025-11-27
+
+- feat: enforce endpoint standards
+- chore: translate docs into german
+- chore: make docs more approachable
+
 ## [2.1.1] - 2025-11-27
 
 - fix: temporary publisher mapping for the ARD feed during the migration period

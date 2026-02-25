@@ -1,25 +1,25 @@
 # ARD Eventhub / Stages
 
-The Eventhub differentiates between stages given to the service via env `STAGE` and different runtime environments or deployments, such as beta, test, or similar.
+Der Eventhub unterscheidet zwischen dem über die Umgebungsvariable `STAGE` gesetzten Stage-Wert und verschiedenen Laufzeit-Umgebungen bzw. Deployments (z.B. `beta`, `test`, `prod`).
 
 ## Ingest
 
 ### Ingest Service Stages
 
-| Module / Stage | `dev`                 | `test`                 | `prod`                 |
-| -------------- | --------------------- | ---------------------- | ---------------------- |
-| Database       | Namespace `dev`       | Namespace `test`       | Namespace `prod`       |
-| Pub/Sub        | Prefix includes `dev` | Prefix includes `test` | Prefix includes `prod` |
-| Dev Logging    | true                  | true                   | false                  |
+| Module / Stage | `dev`                | `test`                | `prod`                |
+| -------------- | -------------------- | --------------------- | --------------------- |
+| Database       | Namespace `dev`      | Namespace `test`      | Namespace `prod`      |
+| Pub/Sub        | Prefix enthält `dev` | Prefix enthält `test` | Prefix enthält `prod` |
+| Dev Logging    | true                 | true                  | false                 |
 
 ### Ingest Deployment Stages
 
-| Module / Stage               | `dev`                        | `test`                              | `beta`                        | `prod`                   |
-| ---------------------------- | ---------------------------- | ----------------------------------- | ----------------------------- | ------------------------ |
-| Used Ingest Stage            | `dev`                        | `test`                              | `prod`                        | `prod`                   |
-| Stable                       | No, used for internal tests  | Yes, can be used for external tests | Yes, usually                  | Yes                      |
-| Runtime                      | Cloud Run                    | Kubernetes                          | Kubernetes                    | Kubernetes               |
-| Container Registry           | Eventhub project             | Eventhub project                    | Eventhub project              | Eventhub project         |
-| Host                         | For internal use only        | `eventhub-ingest-test.ard.de`       | `eventhub-ingest-beta.ard.de` | `eventhub-ingest.ard.de` |
-| Automatic Deployment         | Yes, with Github Actions     | Yes, through API with Review        | Yes, through API with Review  | No, manual trigger       |
-| Deployment Branch Protection | `main`, `dev/*`, `feature/*` | `main`                              | `main`                        | `main`                   |
+| Module / Stage               | `dev`                        | `test`                         | `beta`                        | `prod`                   |
+| ---------------------------- | ---------------------------- | ------------------------------ | ----------------------------- | ------------------------ |
+| Used Ingest Stage            | `dev`                        | `test`                         | `prod`                        | `prod`                   |
+| Stable                       | Nein, für interne Tests      | Ja, für externe Tests geeignet | Ja, normalerweise             | Ja                       |
+| Runtime                      | Cloud Run                    | Kubernetes                     | Kubernetes                    | Kubernetes               |
+| Container Registry           | Eventhub-Projekt             | Eventhub-Projekt               | Eventhub-Projekt              | Eventhub-Projekt         |
+| Host                         | Nur für internen Gebrauch    | `eventhub-ingest-test.ard.de`  | `eventhub-ingest-beta.ard.de` | `eventhub-ingest.ard.de` |
+| Automatic Deployment         | Ja, via Github Actions       | Ja, über API mit Review        | Ja, über API mit Review       | Nein, manueller Trigger  |
+| Deployment Branch Protection | `main`, `dev/*`, `feature/*` | `main`                         | `main`                        | `main`                   |

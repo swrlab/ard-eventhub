@@ -14,6 +14,6 @@
   - [Stages](/docs/STAGES.md)
 - _Admin Docs_
   - [Users](/docs/USERS.md)
-- [Changelog](/CHANGELOG.md)
+- [Changelog](../CHANGELOG.md)
 
 > Created by SWR Audio Lab and ARD Online

@@ -1,9 +1,9 @@
 # ARD Eventhub / OpenAPI
 
-The ARD Eventhub APIs are documented with [OpenAPI](https://swagger.io/specification/) specification (a standard, language-agnostic interface to RESTful APIs). With [Swagger-UI](https://swagger.io/tools/swagger-ui/) a testable interface is provided at `{service-endpoint}/openapi/`.
+Die ARD Eventhub-APIs sind im [OpenAPI](https://swagger.io/specification/)-Format dokumentiert (ein standardisiertes, sprachunabhängiges Interface für RESTful APIs). Es wird über [Swagger-UI](https://swagger.io/tools/swagger-ui/) eine testbare Oberfläche unter `{service-endpoint}/openapi/` zur Verfügung bereitgestellt.
 
-All changes in the API should be documented in [openapi.yaml](https://eventhub-ingest.ard.de/openapi/openapi.yaml) which must be converted to a JSON format afterwards.
+Alle Änderungen an der API sollten in [openapi.yaml](https://eventhub-ingest.ard.de/openapi/openapi.yaml) dokumentiert werden; dieses muss anschließend in JSON konvertiert werden.
 
-## Convert YAML to JSON
+## YAML nach JSON konvertieren
 
-After updating the OpenAPI configuration, copy the content of `openapi.yaml` and paste it to the [Swagger Editor](https://editor.swagger.io/). Select `File` -> `Convert and save as JSON` and replace the `openapi.json` in project root.
+Nach dem Aktualisieren der OpenAPI-Konfiguration kopiere den Inhalt von `openapi.yaml` in den [Swagger Editor](https://editor.swagger.io/). Wähle `File` -> `Convert and save as JSON` und ersetze die `openapi.json` im Projektverzeichnis.

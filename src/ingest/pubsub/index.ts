@@ -8,7 +8,8 @@
 import logger from '@frytg/logger'
 import type { Request, Response } from 'express'
 
-import plugins from '../../utils/plugins'
+import dtsEvent from '../../utils/plugins/dts/event.ts'
+import radioplayerEvent from '../../utils/plugins/radioplayer/event.ts'
 
 const source = 'ingest/pubsub'
 
@@ -30,7 +31,9 @@ export default async (req: Request, res: Response) => {
 
 		// handle actions
 		if (job.action === 'plugins.dts.event') {
-			await plugins.dts.event(job)
+			await dtsEvent(job)
+		} else if (job.action === 'plugins.radioplayer.event') {
+			await radioplayerEvent(job)
 		} else {
 			logger.log({
 				level: 'warning',

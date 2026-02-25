@@ -1,14 +1,9 @@
-# ARD Eventhub / Authentication
+# ARD Eventhub / Authentifizierung
+Auf dieser Seite wird der Prozess der Benutzerverwaltung beschrieben.
 
-To authenticate and work with Eventhub API you will need a valid user. For now these user logins are kept separate from the ARD Core API, but are using a similar login method. This page covers the authentication process.
+Um mit der Eventhub-API zu arbeiten (sich bei ihr zu authentifizieren), benötigst du einen gültigen Benutzer. Derzeit werden diese Benutzer getrennt von der ARD Core API verwaltet, verwenden jedoch eine ähnliche Anmeldemethode.
 
-## Authentication Overview
-
-The app uses an authentication workflow, that is kept very similar to the new ARD Core API, so once it goes live there, it can be easily migrated (variations may apply). You can find their documentation for ARD in the [developer portal](https://developer.ard.de/core-api-v2-roles-and-access-control).
-
-This page explicitly covers the login methods for the ARD Eventhub API. Compared to the ARD Core API the token exchange for ARD Eventhub is handled in this service directly, not externally so it does not need to expose the `API_KEY` to clients.
-
-## Exchange Credentials for Tokens
+## Logindaten gegen Token austauschen
 
 **POST `{HOST}/auth/login`**
 
@@ -19,7 +14,7 @@ This page explicitly covers the login methods for the ARD Eventhub API. Compared
 }
 ```
 
-Returns `200 OK`
+Ergibt `200 OK`
 
 ```json
 {
@@ -34,11 +29,11 @@ Returns `200 OK`
 }
 ```
 
-This endpoint will return a `token` and `refreshToken` alongside an expiry duration and date. The `token` can be used immediately during the returned time frame.
+Dieser Endpunkt gibt einen `token` und einen `refreshToken` zusammen mit einer Ablaufdauer und einem Datum zurück. Der `token` kann innerhalb des zurückgegebenen Zeitraums verwendet werden.
 
 ## Refresh Token
 
-While the normal `token` expires, the `refreshToken` can be used for a longer period of time. Therefore it can be used to be exchanged for a new `token`.
+Wenn der normale `token` abläuft, kannst du den `refreshToken` verwenden, um einen neuen `token` zu erhalten.
 
 **POST `{HOST}/auth/refresh`**
 
@@ -48,7 +43,7 @@ While the normal `token` expires, the `refreshToken` can be used for a longer pe
 }
 ```
 
-Returns `200 OK`
+Ergibt `200 OK`
 
 ```json
 {
@@ -63,19 +58,19 @@ Returns `200 OK`
 }
 ```
 
-### Expiration
+### Verfall der Refresh Token
 
-> Refresh tokens expire only when one of the following occurs:
->
-> - The user is deleted
-> - The user is disabled
-> - A major account change is detected for the user. This includes events like password or email address updates.
+Refresh Tokens verfallen nur, wenn einer der folgenden Fälle eintritt:
 
-[Source: Firebase docs](https://firebase.google.com/docs/auth/admin/manage-sessions)
+- Der Benutzer gelöscht wird
+- Der Benutzer deaktiviert wird
+- Für den Benutzer wurde eine wesentliche Änderung festgestellt. Dazu gehören Änderungen wie die Aktualisierung des Passworts oder der E-Mail-Adresse.
 
-## Reset password
+[Quelle: Firebase docs](https://firebase.google.com/docs/auth/admin/manage-sessions)
 
-Sometimes you might loose your old password and need to reset it. If this happens, use this endpoint to request a password reset email. This endpoint might be subject to throttling/ rate-limits in the future.
+## Passwort Reset
+
+Falls du dein Passwort verloren hast, kannst du über diesen Endpoint eine Passwort-Reset-E-Mail anfordern. Dieser Endpoint kann künftig einer Drosselung/Rate-Limitierung unterliegen.
 
 **POST `{HOST}/auth/reset`**
 
@@ -85,4 +80,4 @@ Sometimes you might loose your old password and need to reset it. If this happen
 }
 ```
 
-Returns `200 OK`
+Ergibt `200 OK`

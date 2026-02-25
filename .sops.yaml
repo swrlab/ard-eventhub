@@ -1,0 +1,21 @@
+# make sure to run `just update-keys` after any changes to this file
+
+# creation rules are evaluated sequentially, the first match wins
+creation_rules:
+  - age: >-
+      age1lauv6ajwq87ysx7pyjv92pyghy29rcrm4grnlernpxfcrqrksd0qcafhdd,
+      age12yfw7cg2kw5rlmh4fsdsqu0kaq26h0emqeykmlppth3s5q2zpymq53um3q
+    # see https://getsops.io/docs/#encrypting-using-age if you want to use this as your own main key
+    # this first age public key is a backup key for Audio Lab, created and saved by @frytg
+    # this second age public key is the key for GitHub Actions
+    pgp: >-
+      F2DAECD05ED6ADB532E0B70B48B9BE2FA319FE58,
+      EC400072D5EF8BEE57251ED3588FAABBFCD9F44B
+    # these fingerprints of PGP keys belong to the team
+    # they need to be comma-separated (except the last one)
+    # you can get your own fingerprints with `just list-pgp`
+    # make sure to update this list also in infra/justfile!
+    #
+    # this is the mapping of the keys to the team members:
+    # F2DAECD05ED6ADB532E0B70B48B9BE2FA319FE58 - rsa4096 daniel.freytag@swr.de
+    # EC400072D5EF8BEE57251ED3588FAABBFCD9F44B - rsa4096 lab@swr.de

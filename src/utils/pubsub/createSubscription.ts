@@ -68,5 +68,5 @@ export default async (subscription: EventhubSubscriptionDatastore) => {
 	})
 
 	// return data
-	return Promise.resolve(mappedSubscription)
+	return mappedSubscription
 }

@@ -27,13 +27,12 @@ Important places to go ahead:
 - Our [Quickstart](docs/QUICKSTART.md) documentation
 - The full docs on [swrlab.github.io/ard-eventhub](https://swrlab.github.io/ard-eventhub/)
 - OpenAPI specification on [eventhub-ingest.ard.de/openapi](https://eventhub-ingest.ard.de/openapi)
-- Internal documentation in [Confluence](https://confluence.ard.de/x/4AmgDw)
+- Internal documentation in [Confluence](https://confluence.ard.de/x/il8uGw)
 
 ## Get involved
 
 - Open an [issue](https://github.com/swrlab/ard-eventhub/issues) for problems, that you might experience
 - Join [ard-eventhub/discussions](https://github.com/swrlab/ard-eventhub/discussions) for ongoing topics about formats, etc.
-- Join _#eventhub_ in the _ARD Entwickler_ Slack
 
 ## Modules
 
