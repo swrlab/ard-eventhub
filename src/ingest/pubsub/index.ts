@@ -49,7 +49,11 @@ export default async (req: Request, res: Response) => {
 			message: 'error while processing PubSub message',
 			source,
 			error,
-			data: { messageId, body: req.body, headers: req.headers },
+			data: {
+				messageId,
+				body: req.body,
+				headers: req.headers,
+			},
 		})
 
 		return res.sendStatus(204)

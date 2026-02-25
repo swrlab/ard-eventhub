@@ -59,7 +59,7 @@ If a live element is starting. This can be an moderation by an anchor, interview
 
 ## `audio`
 
-This type was initially the least descriptive and is now used for items (de: _Beiträge_) – pre-recorded elements that don't fit any of the other categories. Get as detailed as possible. 
+This type was initially the least descriptive and is now used for items (de: _Beiträge_) – pre-recorded elements that don't fit any of the other categories. Get as detailed as possible.
 The `contributors` field should be used to include details of the `author`. `media` may be used to supply additional elements. `show` references the correspoding broadcast series / grouping.
 
 ```json

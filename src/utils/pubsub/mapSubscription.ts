@@ -19,11 +19,16 @@ import convertId from './convertId'
 
 export default async (
 	subscription: Subscription | (google.pubsub.v1.ISubscription & { metadata: any })
-): Promise<{ limited: EventhubSubscriptionLimited; full: EventhubSubscriptionWithLabels }> => {
+): Promise<{
+	limited: EventhubSubscriptionLimited
+	full: EventhubSubscriptionWithLabels
+}> => {
 	// remap vars to metadata object
 	// this is needed since pubsub feedback from new subscriptions is slightly different
 	if (!subscription.metadata) {
-		subscription.metadata = { ...subscription } as google.pubsub.v1.ISubscription
+		subscription.metadata = {
+			...subscription,
+		} as google.pubsub.v1.ISubscription
 	}
 
 	// preset vars

@@ -17,7 +17,10 @@ const source = 'ingest/auth/login'
 
 export default async (req: Request, res: Response) => {
 	try {
-		let login: Awaited<{ user: JwtPayload | string | null; login: any }>
+		let login: Awaited<{
+			user: JwtPayload | string | null
+			login: any
+		}>
 
 		// send email + password for verification, receive login and user object
 		try {

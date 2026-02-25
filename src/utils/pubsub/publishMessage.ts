@@ -27,7 +27,10 @@ export default async (topic: string, message: object, attributes: object) => {
 	// send message for each topic
 	try {
 		// attempt to send message
-		output = await pubSubClient.topic(topic).publishMessage({ json: message, attributes: customAttributes })
+		output = await pubSubClient.topic(topic).publishMessage({
+			json: message,
+			attributes: customAttributes,
+		})
 	} catch (error) {
 		if (error?.code === 5) {
 			output = 'TOPIC_NOT_FOUND'

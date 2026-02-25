@@ -55,7 +55,10 @@ export default async (subscription: EventhubSubscriptionDatastore) => {
 	})
 
 	// map and filter values
-	const mappedCreatedSubscription = { metadata: null, ...createdSubscription }
+	const mappedCreatedSubscription = {
+		metadata: null,
+		...createdSubscription,
+	}
 	const { limited: mappedSubscription } = await mapSubscription(mappedCreatedSubscription)
 	logger.log({
 		level: 'info',

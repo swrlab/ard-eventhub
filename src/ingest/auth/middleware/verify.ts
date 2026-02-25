@@ -27,7 +27,10 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 				level: 'notice',
 				message: 'user token missing',
 				source,
-				data: { ...req.headers, authorization: 'hidden' },
+				data: {
+					...req.headers,
+					authorization: 'hidden',
+				},
 			})
 			return res.sendStatus(401)
 		}
@@ -39,7 +42,10 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 				level: 'notice',
 				message: 'user token missing',
 				source,
-				data: { ...req.headers, authorization: 'hidden' },
+				data: {
+					...req.headers,
+					authorization: 'hidden',
+				},
 			})
 			return res.sendStatus(401)
 		}
@@ -57,7 +63,10 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 				message: 'user token invalid',
 				source,
 				error,
-				data: { ...req.headers, authorization: 'hidden' },
+				data: {
+					...req.headers,
+					authorization: 'hidden',
+				},
 			})
 			return res.status(403).json(ERROR_JSON)
 		}
@@ -67,7 +76,10 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 				level: 'notice',
 				message: 'user email missing',
 				source,
-				data: { ...req.headers, authorization: 'hidden' },
+				data: {
+					...req.headers,
+					authorization: 'hidden',
+				},
 			})
 			return res.status(403).json(ERROR_JSON)
 		}
@@ -81,7 +93,10 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 				level: 'notice',
 				message: 'user not found or not active',
 				source,
-				data: { ...req.headers, authorization: 'hidden' },
+				data: {
+					...req.headers,
+					authorization: 'hidden',
+				},
 			})
 			return res.status(403).json(ERROR_JSON)
 		}

@@ -22,12 +22,18 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		// check if subscription name is present
 		if (!subscriptionName) {
-			return response.badRequest(req, res, { status: 400, message: 'Subscription name is required' })
+			return response.badRequest(req, res, {
+				status: 400,
+				message: 'Subscription name is required',
+			})
 		}
 
 		// check if user is present
 		if (!req.user) {
-			return response.badRequest(req, res, { status: 401, message: 'User not found' })
+			return response.badRequest(req, res, {
+				status: 401,
+				message: 'User not found',
+			})
 		}
 
 		// load single subscription

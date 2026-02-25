@@ -5,13 +5,12 @@
 
 */
 
+import { DateTime } from 'luxon'
 // load node utils
 import slug from 'slug'
-import { DateTime } from 'luxon'
-
+import config from '../../../config'
 // load pubsub for internal queues
 import publisherClient from './_publisherClient'
-import config from '../../../config'
 
 export default async (newTopic: any) => {
 	// create new topic

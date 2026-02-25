@@ -35,7 +35,9 @@ export let ardFeed: ArdFeed | null = null
 export const getARDFeed = async () => {
 	try {
 		// download ard feed
-		const res = await fetch(ARD_FEED_URL, { signal: AbortSignal.timeout(10e3) })
+		const res = await fetch(ARD_FEED_URL, {
+			signal: AbortSignal.timeout(10e3),
+		})
 
 		// check api
 		if (!res.ok || res.status !== 200) return exitWithError(`API is not available (${res.status})`)

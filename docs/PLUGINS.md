@@ -8,14 +8,14 @@ This plugin makes it possible to send data to their system. It is currently set 
 
 ```json5
 {
-	"type": "music",
-	// ...
-	"plugins": [
-		{
-			"type": "dts",
-			"isDeactivated": false
-		}
-	]
+  type: 'music',
+  // ...
+  plugins: [
+    {
+      type: 'dts',
+      isDeactivated: false,
+    },
+  ],
 }
 ```
 

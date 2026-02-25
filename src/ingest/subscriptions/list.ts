@@ -22,7 +22,10 @@ export default async (req: UserTokenRequest, res: Response) => {
 				level: 'notice',
 				message: 'user not found',
 				source,
-				data: { ...req.headers, authorization: 'hidden' },
+				data: {
+					...req.headers,
+					authorization: 'hidden',
+				},
 			})
 			return response.internalServerError(req, res, new Error('User not found'))
 		}

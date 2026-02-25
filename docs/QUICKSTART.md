@@ -165,36 +165,36 @@ const authClient = new OAuth2Client()
 const serviceAccountEmail = 'somethin@something-else.iam.gserviceaccount.com'
 
 module.exports = async (req, res) => {
-   try {
-      // read token from header
-      const bearer = req.header('Authorization')
-      const [, idToken] = bearer.match(/Bearer (.*)/)
+  try {
+    // read token from header
+    const bearer = req.header('Authorization')
+    const [, idToken] = bearer.match(/Bearer (.*)/)
 
-      // verify token, throws error if invalid
-      const verification = await authClient.verifyIdToken({
-         idToken,
-      })
+    // verify token, throws error if invalid
+    const verification = await authClient.verifyIdToken({
+      idToken,
+    })
 
-      // check token email vs. subscription email
-      if(verification?.payload?.email === serviceAccountEmail) {
-         // get message and metadata from pubsub body
-         const { attributes, messageId } = req.body.message
-         const { subscription } = req.body
-         let data = Buffer.from(req.body.message.data, 'base64').toString()
-         data = JSON.parse(data)
+    // check token email vs. subscription email
+    if (verification?.payload?.email === serviceAccountEmail) {
+      // get message and metadata from pubsub body
+      const { attributes, messageId } = req.body.message
+      const { subscription } = req.body
+      let data = Buffer.from(req.body.message.data, 'base64').toString()
+      data = JSON.parse(data)
 
-         // request successful, you can now use the received data
-         console.log({ attributes, messageId, subscription, data })
+      // request successful, you can now use the received data
+      console.log({ attributes, messageId, subscription, data })
 
-         // close connection
-         return res.sendStatus(201)
-      } else {
-         // user provided valid token but failed email verification
-         return res.sendStatus(204)
-      }
-   } catch (error) {
-      // request failed or invalid token
+      // close connection
+      return res.sendStatus(201)
+    } else {
+      // user provided valid token but failed email verification
       return res.sendStatus(204)
-   }
+    }
+  } catch (error) {
+    // request failed or invalid token
+    return res.sendStatus(204)
+  }
 }
 ```

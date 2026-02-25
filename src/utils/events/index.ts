@@ -8,7 +8,4 @@
 import createNewTopic from './createNewTopic'
 import processServices from './processServices'
 
-export  {
-	createNewTopic,
-	processServices,
-}
+export { createNewTopic, processServices }

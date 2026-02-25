@@ -10,7 +10,7 @@ Pub/Sub includes a number of restrictions around names, keys and values. For all
 - All values are always written in lower-case characters, without any special chars such as äöü.
   - This service uses a slug converter to turn user-defined institution names into usable but still readable strings
 - Google restrictions for IDs:
-  - Must be 3-255 characters, start with a letter, and contain only the following characters: letters, numbers, dashes (-), periods (.), underscores (_), tildes (~), percents (%) or plus signs (+). Cannot start with goog.
+  - Must be 3-255 characters, start with a letter, and contain only the following characters: letters, numbers, dashes (-), periods (.), underscores (\_), tildes (~), percents (%) or plus signs (+). Cannot start with goog.
 
 ## Pub/Sub Topics
 
