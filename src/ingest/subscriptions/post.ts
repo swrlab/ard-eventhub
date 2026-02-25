@@ -113,7 +113,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 			return response.badRequest(req, res, {
 				status: 422,
 				message: 'An invalid URL was sent for the subscription',
-				errors: 'The URL isn\'t a secure website please send one that starts with https',
+				errors: "The URL isn't a secure website please send one that starts with https",
 			})
 		}
 
