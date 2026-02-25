@@ -27,7 +27,7 @@ export default async (data: any, kind: string, id: number | null) => {
 
 	// insert key
 	if (key.id) {
-		thisData.id = Number.parseInt(key.id)
+		thisData.id = Number.parseInt(key.id, 10)
 	} else if (key.name) {
 		thisData.id = key.name
 	}
