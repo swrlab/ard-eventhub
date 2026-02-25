@@ -6,7 +6,7 @@
 */
 
 // load pubsub for internal queues
-import pubSubClient from './_client'
+import pubSubClient from './_client.ts'
 
 export default async (name: string) => {
 	// fetch topic list

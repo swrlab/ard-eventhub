@@ -5,8 +5,8 @@
 
 */
 
-import config from '../../../config'
-import pubSubClient from './_client'
+import config from '#config'
+import pubSubClient from './_client.ts'
 import mapSubscription from './mapSubscription.ts'
 
 export default async () => {

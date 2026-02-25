@@ -6,10 +6,10 @@
 import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
 import undici, { type Response } from 'undici'
-
-import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '@/types.eventhub.ts'
-import config from '../../../../config/index.ts'
-import livestreamMapping from '../../../../config/radioplayer-mapping.json5'
+import config from '#config'
+import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '#types'
+// NOTE: Node.js does not support importing .json5 files.
+import livestreamMapping from '../../../config/radioplayer-mapping.json5'
 import apiKeys from './api-keys.ts'
 
 const source = 'utils/plugins/radioplayer/event'
@@ -107,7 +107,7 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 	}
 
 	// reject if no artist or title is set
-	if (!event.artist || !event.title) {
+	if (!(event.artist && event.title)) {
 		logger.warning({
 			message: `Radioplayer skipping event (no artist or title) > ${event.services[0]?.publisherId}`,
 			source,
@@ -174,6 +174,7 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 		let i = 0
 		for (const rpUid of rpUids) {
 			const startTime = getMs()
+			// biome-ignore lint/performance/noAwaitInLoops: here we make an exception
 			const { url, posted, response, wasPosted } = await sendRadioplayerEvent(rpUid, apiKey, event, plugin)
 			output.push({ url, posted, response, wasPosted })
 

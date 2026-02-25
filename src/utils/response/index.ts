@@ -5,8 +5,8 @@
 
 */
 
-import badRequest from './badRequest'
-import errors from './errors'
+import badRequest from './badRequest.ts'
+import errors from './errors/index.ts'
 import internalServerError from './internalServerError.ts'
 import notFound from './notFound.ts'
 import ok from './ok.ts'

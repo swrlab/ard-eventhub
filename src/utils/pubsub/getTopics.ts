@@ -5,7 +5,7 @@
 
 */
 
-import config from '../../../config/index.ts'
+import config from '#config'
 import pubSubClient from './_client.ts'
 import convertId from './convertId.ts'
 

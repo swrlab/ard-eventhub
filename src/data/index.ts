@@ -5,7 +5,7 @@ import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { fetch } from 'undici'
 
-import type { ArdFeed, ArdLivestream } from '@/types.ard.ts'
+import type { ArdFeed, ArdLivestream } from '../types.ts'
 
 const ARD_FEED_URL = getRequiredEnv('ARD_FEED_URL')
 const DOWNLOAD_TO_FILE = false
@@ -44,7 +44,7 @@ export const getARDFeed = async () => {
 
 		// parse reponse
 		const feed: ArdFeed = (await res.json()) as ArdFeed
-		if (!feed?.items || !Array.isArray(feed.items)) return exitWithError('Feed is not an array')
+		if (!(feed?.items && Array.isArray(feed.items))) return exitWithError('Feed is not an array')
 
 		// check integrity of feed length
 		const feedItemCount = feed.items.length
@@ -101,7 +101,7 @@ export const getARDFeed = async () => {
 
 		// save to local storage
 		if (DOWNLOAD_TO_FILE) {
-			fs.writeFileSync(`${__dirname}/../data/ard-core-livestreams.json`, JSON.stringify(feed, null, '\t'))
+			fs.writeFileSync(`${import.meta.dirname}/../data/ard-core-livestreams.json`, JSON.stringify(feed, null, '\t'))
 		}
 
 		logger.log({

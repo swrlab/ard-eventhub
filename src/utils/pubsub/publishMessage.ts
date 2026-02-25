@@ -7,8 +7,8 @@
 
 import logger from '@frytg/logger'
 
-import config from '../../../config'
-import pubSubClient from './_client'
+import config from '#config'
+import pubSubClient from './_client.ts'
 
 // set local config
 const source = 'pubsub.publishMessage'

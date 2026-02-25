@@ -1,15 +1,9 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
 
-// import version from package.json
-import { version } from '../package.json'
-import coreIdPrefixes from './core-id-prefixes.json'
+import packageJson from '../../package.json' with { type: 'json' }
+import coreIdPrefixes from './core-id-prefixes.json' with { type: 'json' }
+
+const { version } = packageJson
 
 const exitWithError = (message: string) => {
 	logger.log({

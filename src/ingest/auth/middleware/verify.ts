@@ -8,8 +8,8 @@
 import logger from '@frytg/logger'
 import type { NextFunction, Response } from 'express'
 
-import datastore from '../../../utils/datastore'
-import firebase from '../../../utils/firebase'
+import datastore from '../../../utils/datastore/index.ts'
+import firebase from '../../../utils/firebase/index.ts'
 import type UserTokenRequest from './userTokenRequest.ts'
 
 const source = 'ingest/auth/middleware/verify'
@@ -22,7 +22,7 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 		let authorization = req.headers['x-authorization']?.toString() || req.headers.authorization
 
 		// check existence of x-auth... header
-		if (!authorization || !regexp.test(authorization)) {
+		if (!(authorization && regexp.test(authorization))) {
 			logger.log({
 				level: 'notice',
 				message: 'user token missing',

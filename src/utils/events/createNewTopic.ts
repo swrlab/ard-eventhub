@@ -7,12 +7,11 @@
 
 import logger from '@frytg/logger'
 import { DateTime } from 'luxon'
-import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
-
-import type { EventhubService } from '@/types.eventhub.ts'
+import type { EventhubService } from '#types'
+import type UserTokenRequest from '../../ingest/auth/middleware/userTokenRequest.ts'
 import { getPublisherById } from '../ard-core.ts'
-import datastore from '../datastore'
-import pubsub from '../pubsub'
+import datastore from '../datastore/index.ts'
+import pubsub from '../pubsub/index.ts'
 
 const source = 'utils.events.createNewTopic'
 

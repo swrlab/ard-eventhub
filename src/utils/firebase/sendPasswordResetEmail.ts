@@ -7,7 +7,7 @@
 
 import logger from '@frytg/logger'
 
-import undici from '../undici'
+import undici from '../undici/index.ts'
 
 const source = 'firebase.sendPasswordResetEmail'
 

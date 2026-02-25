@@ -5,7 +5,7 @@
 
 */
 
-import del from './delete'
+import del from './delete.ts'
 import load from './load.ts'
 import save from './save.ts'
 

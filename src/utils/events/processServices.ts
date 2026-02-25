@@ -1,18 +1,10 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
-import { createHashedId } from '@swrlab/utils/packages/ard'
-
-import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
-import type { EventhubService } from '@/types.eventhub.ts'
-import config from '../../../config'
+import { createHashedId } from '@swrlab/utils/packages/ard/index.js'
+import config from '#config'
+import type { EventhubService } from '#types'
+import type UserTokenRequest from '../../ingest/auth/middleware/userTokenRequest.ts'
 import { getPublisherById } from '../ard-core.ts'
-import pubsub from '../pubsub'
+import pubsub from '../pubsub/index.ts'
 
 const source = 'utils.events.processServices'
 const URN_PUBLISHER_PREFIX = config.coreIdPrefixes.Publisher

@@ -1,24 +1,12 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import type { Subscription } from '@google-cloud/pubsub'
 import type { google } from '@google-cloud/pubsub/build/protos/protos'
-
-import type {
-	EventhubSubscriptionDatastore,
-	EventhubSubscriptionLimited,
-	EventhubSubscriptionWithLabels,
-} from '@/types.eventhub'
-import config from '../../../config'
-import datastore from '../datastore'
-import convertId from './convertId'
+import config from '#config'
+import type { EventhubSubscriptionDatastore, EventhubSubscriptionLimited, EventhubSubscriptionWithLabels } from '#types'
+import datastore from '../datastore/index.ts'
+import convertId from './convertId.ts'
 
 export default async (
-	subscription: Subscription | (google.pubsub.v1.ISubscription & { metadata: any })
+	subscription: Subscription | (google.pubsub.v1.ISubscription & { metadata: object })
 ): Promise<{
 	limited: EventhubSubscriptionLimited
 	full: EventhubSubscriptionWithLabels

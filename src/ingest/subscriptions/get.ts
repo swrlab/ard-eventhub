@@ -7,11 +7,10 @@
 
 import logger from '@frytg/logger'
 import type { Response } from 'express'
-import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
-
-import type { EventhubSubscriptionLimited } from '@/types.eventhub.ts'
+import type { EventhubSubscriptionLimited } from '#types'
 import getSubscription from '../../utils/pubsub/getSubscription.ts'
 import response from '../../utils/response/index.ts'
+import type UserTokenRequest from '../auth/middleware/userTokenRequest.ts'
 
 const source = 'ingest/subscriptions/get'
 
@@ -41,7 +40,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		try {
 			const subscription = await getSubscription(subscriptionName)
 			limitedSubscription = subscription.limited
-		} catch (_error) {
+		} catch {
 			return response.notFound(req, res, {
 				status: 404,
 				message: `Subscription '${subscriptionName}' not found`,

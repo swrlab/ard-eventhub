@@ -5,15 +5,15 @@
 
 */
 
-import buildId from './buildId'
-import convertId from './convertId'
-import createSubscription from './createSubscription'
-import createTopic from './createTopic'
-import deleteSubscription from './deleteSubscription'
-import getSubscription from './getSubscription'
-import getSubscriptions from './getSubscriptions'
-import getTopic from './getTopic'
-import getTopics from './getTopics'
+import buildId from './buildId.ts'
+import convertId from './convertId.ts'
+import createSubscription from './createSubscription.ts'
+import createTopic from './createTopic.ts'
+import deleteSubscription from './deleteSubscription.ts'
+import getSubscription from './getSubscription.ts'
+import getSubscriptions from './getSubscriptions.ts'
+import getTopic from './getTopic.ts'
+import getTopics from './getTopics.ts'
 
 export default {
 	buildId,

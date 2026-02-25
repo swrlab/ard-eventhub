@@ -9,6 +9,9 @@
 		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true,
 		"verbatimModuleSyntax": true,
+		"rewriteRelativeImportExtensions": true,
+		"erasableSyntaxOnly": true,
+
 		"noEmit": true,
 
 		"strict": true,
@@ -26,18 +29,15 @@
 		"isolatedModules": true,
 		"jsx": "preserve",
 		"jsxImportSource": "vue",
-		"incremental": true,
 		"allowSyntheticDefaultImports": true,
 
-		"types": ["node", "mocha", "express"],
+		"types": ["bun", "node", "express"],
 
 		"paths": {
-			"@/*": ["./*"]
+			"#config": ["./src/config/index.ts"],
+			"#types": ["./src/types.ts"]
 		}
 	},
-	"include": ["**/*.ts", "**/*.tsx", ".env"],
-	"ts-node": {
-		"esm": true
-	},
+	"include": ["**/*.ts", ".env"],
 	"exclude": ["node_modules"]
 }

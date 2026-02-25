@@ -13,7 +13,7 @@ import logger from '@frytg/logger'
 import { DateTime } from 'luxon'
 import request, { type Response } from 'supertest'
 
-import { default as server } from './index'
+import { default as server } from './index.ts'
 
 const exitWithError = (message: string) => {
 	logger.log({
@@ -45,7 +45,7 @@ function isJson(item: any) {
 	let value = typeof item !== 'string' ? JSON.stringify(item) : item
 	try {
 		value = JSON.parse(value)
-	} catch (_e) {
+	} catch {
 		return false
 	}
 

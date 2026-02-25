@@ -1,18 +1,17 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import { DateTime } from 'luxon'
-// load node utils
 import slug from 'slug'
-import config from '../../../config'
-// load pubsub for internal queues
-import publisherClient from './_publisherClient'
+import config from '#config'
+import publisherClient from './_publisherClient.ts'
 
-export default async (newTopic: any) => {
+type Topic = {
+	name: string
+	creator: string
+	id: string
+	institution: { title: string }
+	publisher: { title: string }
+}
+
+export default async (newTopic: Topic) => {
 	// create new topic
 	const topic = {
 		name: `projects/${process.env.GCP_PROJECT_ID}/topics/${newTopic.name}`,
@@ -25,7 +24,7 @@ export default async (newTopic: any) => {
 			'institution-slug': slug(newTopic.institution.title),
 			'publisher-slug': slug(newTopic.publisher.title),
 
-			stage: config.stage,
+			stage: config.stage as string,
 		},
 	}
 

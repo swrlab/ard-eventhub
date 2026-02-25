@@ -23,7 +23,7 @@ export default async (req: UserTicketRequest, res: Response, next: NextFunction)
 		const bearer = req.header('Authorization')
 
 		// check token email vs. subscription email
-		if (!bearer || !bearer.match(/Bearer (.*)/)) {
+		if (!bearer?.match(/Bearer (.*)/)) {
 			// user failed to provide auth header
 			return res.sendStatus(401)
 		}

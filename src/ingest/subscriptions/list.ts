@@ -7,10 +7,9 @@
 
 import logger from '@frytg/logger'
 import type { Response } from 'express'
-
-import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 import getSubscriptions from '../../utils/pubsub/getSubscriptions.ts'
 import response from '../../utils/response/index.ts'
+import type UserTokenRequest from '../auth/middleware/userTokenRequest.ts'
 
 const source = 'ingest/subscriptions/list'
 

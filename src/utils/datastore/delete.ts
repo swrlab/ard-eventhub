@@ -5,9 +5,9 @@
 
 */
 
-import config from '../../../config'
+import config from '#config'
 // load pubsub for internal queues
-import datastoreClient from './_client'
+import datastoreClient from './_client.ts'
 
 export default async (kind: string, id: string) => {
 	// set key

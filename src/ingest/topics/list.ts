@@ -8,8 +8,8 @@
 import logger from '@frytg/logger'
 import type { Request, Response } from 'express'
 
-import pubsub from '../../utils/pubsub'
-import response from '../../utils/response'
+import pubsub from '../../utils/pubsub/index.ts'
+import response from '../../utils/response/index.ts'
 
 const source = 'ingest/topics/list'
 

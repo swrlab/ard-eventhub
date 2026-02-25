@@ -1,14 +1,7 @@
-/*
+import config from '#config'
+import datastoreClient from './_client.ts'
 
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
-import config from '../../../config'
-import datastoreClient from './_client'
-
-export default async (data: any, kind: string, id: number | null) => {
+export default async (data: Record<PropertyKey, string | number | object>, kind: string, id: number | null) => {
 	const thisData = data
 
 	// set key

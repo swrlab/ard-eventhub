@@ -7,13 +7,12 @@
 
 import logger from '@frytg/logger'
 import type { Response } from 'express'
-
-import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
-import type { EventhubSubscriptionWithLabels } from '@/types.eventhub.ts'
+import type { EventhubSubscriptionWithLabels } from '#types'
 import datastore from '../../utils/datastore/index.ts'
 import deleteSubscription from '../../utils/pubsub/deleteSubscription.ts'
 import getSubscription from '../../utils/pubsub/getSubscription.ts'
 import response from '../../utils/response/index.ts'
+import type UserTokenRequest from '../auth/middleware/userTokenRequest.ts'
 
 const source = 'ingest/subscriptions/delete'
 
@@ -41,7 +40,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		// load single subscription to get owner
 		let fullSubscription: EventhubSubscriptionWithLabels
 		try {
-			const subscription = await getSubscription(subscriptionName)
+			const subscription = await getSubscription(subscriptionName as string)
 			fullSubscription = subscription.full
 		} catch (error) {
 			logger.log({
@@ -52,7 +51,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 				data: { subscriptionName },
 			})
 
-			if (error.code === 5) {
+			if (error && error?.code === 5) {
 				// pubsub error code 5 seems to be 'Resource not found'
 				return response.notFound(req, res, {
 					status: 404,

@@ -20,25 +20,66 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
+			"complexity": {
+				"noForEach": "error",
+				"noImplicitCoercions": "error",
+				"noUselessCatchBinding": "error",
+				"noUselessCatch": "error",
+				"noUselessUndefined": "error",
+				"noUselessStringConcat": "error",
+				"useSimplifiedLogicExpression": "error",
+				"useWhile": "error"
+			},
 			"correctness": {
-				"noNodejsModules": "off"
+				"noGlobalDirnameFilename": "error",
+				"noUndeclaredDependencies": "error",
+				"noUndeclaredVariables": "error",
+				"noUnresolvedImports": "off",
+				"useJsonImportAttributes": "error",
+				"useImportExtensions": "off"
 			},
-			"performance": {},
+			"nursery": {
+				"noForIn": "error",
+				"noEqualsToNull": "off",
+				"noMisusedPromises": "error",
+				"noMultiAssign": "error",
+				"noMultiStr": "error",
+				"noProto": "error",
+				"noReturnAssign": "error",
+				"noShadow": "error",
+				"noUndeclaredEnvVars": "error",
+				"noUselessReturn": "error",
+				"useAwaitThenable": "error",
+				"useGlobalThis": "error",
+				"useSpread": "error"
+			},
+			"performance": {
+				"noAwaitInLoops": "error",
+				"noBarrelFile": "error",
+				"noNamespaceImport": "error",
+				"noDelete": "error",
+				"noReExportAll": "error"
+			},
 			"security": {},
-			"suspicious": {
-				"noExplicitAny": "off"
-			},
+			"suspicious": {},
 			"style": {
+				"noCommonJs": "error",
+				"noDoneCallback": "error",
+				"noEnum": "error",
+				"noNamespace": "error",
 				"noParameterAssign": "error",
+				"noProcessEnv": "off",
+				"noSubstr": "error",
+				"noUnusedTemplateLiteral": "error",
+				"noNegationElse": "error",
+				"noInferrableTypes": "error",
+				"noUselessElse": "error",
+				"useNumberNamespace": "error",
 				"useAsConstAssertion": "error",
 				"useDefaultParameterLast": "error",
 				"useEnumInitializers": "error",
 				"useSelfClosingElements": "error",
-				"useSingleVarDeclarator": "error",
-				"noUnusedTemplateLiteral": "error",
-				"useNumberNamespace": "error",
-				"noInferrableTypes": "error",
-				"noUselessElse": "error"
+				"useSingleVarDeclarator": "error"
 			}
 		}
 	},

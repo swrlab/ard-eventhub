@@ -9,9 +9,8 @@ import logger from '@frytg/logger'
 import type { Response } from 'express'
 import { DateTime } from 'luxon'
 import { ulid } from 'ulid'
-
-import type { EventhubPluginMessage, EventhubV1RadioPostBody } from '@/types.eventhub.ts'
-import config from '../../../config/index.ts'
+import config from '#config'
+import type { EventhubPluginMessage, EventhubV1RadioPostBody } from '#types'
 import { createNewTopic, processServices } from '../../utils/events/index.ts'
 import pubsub from '../../utils/pubsub/index.ts'
 import publishPubSubMessage from '../../utils/pubsub/publishMessage.ts'
@@ -41,19 +40,21 @@ export default async (req: UserTokenRequest, res: Response) => {
 		}
 
 		// fetch inputs
-		const { eventName } = req.params
-		const start = DateTime.fromISO(req.body.start, {
-			zone: DEFAULT_ZONE,
-		})
-		const pluginMessages = []
-
+		const { eventName: eventNameParam } = req.params
 		// check if event name is present
-		if (!eventName) {
+		if (!eventNameParam) {
 			return response.badRequest(req, res, {
 				status: 400,
 				message: 'Event name not found',
 			})
 		}
+
+		const eventName = eventNameParam as string
+
+		const start = DateTime.fromISO(req.body.start, {
+			zone: DEFAULT_ZONE,
+		})
+		const pluginMessages = []
 
 		// check eventName consistency
 		if (req.body?.event && req.body.event !== eventName) {
@@ -215,7 +216,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 			statuses: {
 				published: message.services.filter((service) => service.topic?.messageId).length,
 				blocked: message.services.filter((service) => service.blocked).length,
-				failed: message.services.filter((service) => !service.topic?.messageId && !service.blocked).length,
+				failed: message.services.filter((service) => !(service.topic?.messageId || service.blocked)).length,
 			},
 			plugins: pluginMessages,
 			event: message,

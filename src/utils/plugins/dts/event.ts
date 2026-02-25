@@ -1,16 +1,9 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
-
-import type { EventhubPluginMessage } from '@/types.eventhub.ts'
-import config from '../../../../config'
-import dts from '../../../../config/dts-keys'
-import undici from '../../undici'
+import config from '#config'
+import type { EventhubPluginMessage, EventhubService } from '#types'
+import type { LiveradioCredential } from '../../../config/dts-keys.ts'
+import dts from '../../../config/dts-keys.ts'
+import undici from '../../undici/index.ts'
 
 const source = 'utils/plugins/dts/event'
 
@@ -48,11 +41,11 @@ export type LiveRadioEvent = {
 }
 
 // provide remapping helpers
-const getCoreIds = (services: any) => services.map((service: any) => service.topic.id)
+const getCoreIds = (services: EventhubService[]) => services.map((service: EventhubService) => service.topic.id)
 
 const getUserForInstitution = (institutionId: string) => {
 	// get user or reject if not found
-	const liveradioUser = dts.credentials.liveradio.find((user: any) => user.coreId === institutionId)
+	const liveradioUser = dts.credentials.liveradio.find((user: LiveradioCredential) => user.coreId === institutionId)
 	if (!liveradioUser) return { token: null, username: null }
 
 	// encode token
@@ -109,7 +102,7 @@ export default async (job: EventhubPluginMessage) => {
 		program: plugin?.program || null,
 		subject: plugin?.subject || null,
 		webURL: plugin?.webUrl || null,
-		enableShare: !!plugin?.webUrl,
+		enableShare: Boolean(plugin?.webUrl),
 
 		enableThumbs:
 			plugin?.enableThumbs === true || plugin?.enableThumbs === false ? plugin.enableThumbs : (true as boolean | null),
@@ -138,7 +131,7 @@ export default async (job: EventhubPluginMessage) => {
 
 	// set event host and auth
 	const { token: liveradioToken, username } = getUserForInstitution(institutionId)
-	if (!LIVERADIO_URL || !liveradioToken) {
+	if (!(LIVERADIO_URL && liveradioToken)) {
 		logger.log({
 			level: 'error',
 			message: 'failed loading DTS user for liveradio API',

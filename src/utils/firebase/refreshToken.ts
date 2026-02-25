@@ -8,7 +8,7 @@
 import logger from '@frytg/logger'
 import jwt from 'jsonwebtoken'
 
-import undici from '../undici'
+import undici from '../undici/index.ts'
 
 const source = 'firebase.refreshToken'
 

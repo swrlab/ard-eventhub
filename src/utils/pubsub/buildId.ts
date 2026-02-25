@@ -9,7 +9,7 @@
 */
 
 // load config
-import config from '../../../config'
+import config from '#config'
 // load util
 import convertId from './convertId.ts'
 

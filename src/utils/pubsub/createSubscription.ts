@@ -9,10 +9,9 @@ import logger from '@frytg/logger'
 import type { google } from '@google-cloud/pubsub/build/protos/protos'
 import { DateTime } from 'luxon'
 import slug from 'slug'
-
-import type { EventhubSubscriptionDatastore } from '@/types.eventhub.ts'
-import config from '../../../config'
-import pubSubSubscriberClient from './_subscriberClient'
+import config from '#config'
+import type { EventhubSubscriptionDatastore } from '#types'
+import pubSubSubscriberClient from './_subscriberClient.ts'
 import mapSubscription from './mapSubscription.ts'
 
 const source = 'utils/pubsub/createSubscription'
