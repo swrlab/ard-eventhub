@@ -10,12 +10,12 @@ import type { Response } from 'express'
 import { DateTime } from 'luxon'
 import { ulid } from 'ulid'
 import config from '#config'
+import type { ArdLivestream, EventhubSubscriptionDatastore, Response, UserTokenRequest } from '#types'
 import { ardFeed } from '../../data/index.ts'
 import type { ArdLivestream, EventhubSubscriptionDatastore } from '../../types.ts'
 import datastore from '../../utils/datastore/index.ts'
 import pubsub from '../../utils/pubsub/index.ts'
-import response from '../../utils/response/index.ts'
-import type UserTokenRequest from '../auth/middleware/userTokenRequest.ts'
+import { badRequest, internalServerError, notFound } from '../../utils/response/index.ts'
 
 const source = 'ingest/subscriptions/post'
 
@@ -35,7 +35,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 					authorization: 'hidden',
 				},
 			})
-			return response.internalServerError(req, res, new Error('User not found'))
+			return internalServerError(req, res, new Error('User not found'))
 		}
 
 		// generate subscription name
@@ -66,7 +66,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 			})
 
 			// return 401 error
-			return response.badRequest(req, res, {
+			return badRequest(req, res, {
 				status: 401,
 				message: `New subscriptions are not allowed for user '${user.email}'`,
 				errors: `The institution '${institutionId}' (${institutionName}) wasn't found in ARD Core-API`,
@@ -77,7 +77,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		if (!req.body.url) {
 			// return 422 error
-			return response.badRequest(req, res, {
+			return badRequest(req, res, {
 				status: 422,
 				message: 'The URL in the body is missing',
 				errors: 'The URL in the body is missing',
@@ -89,7 +89,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		// localhost check
 		if (url.hostname.startsWith('localhost')) {
 			// return 422 error
-			return response.badRequest(req, res, {
+			return badRequest(req, res, {
 				status: 422,
 				message: 'An invalid URL was sent for the subscription',
 				errors: `A localhost URL was sent ('${url}') which is not allowed`,
@@ -99,7 +99,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		// ip address check
 		if (url.hostname.match('([\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3})') != null) {
 			// return 422 error
-			return response.badRequest(req, res, {
+			return badRequest(req, res, {
 				status: 422,
 				message: 'An invalid URL was sent for the subscription',
 				errors: 'IP addresses are not valid urls',
@@ -108,7 +108,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		if (url.protocol !== 'https:') {
 			// return 422 error
-			return response.badRequest(req, res, {
+			return badRequest(req, res, {
 				status: 422,
 				message: 'An invalid URL was sent for the subscription',
 				errors: "The URL isn't a secure website please send one that starts with https",
@@ -116,8 +116,8 @@ export default async (req: UserTokenRequest, res: Response) => {
 		}
 
 		// map inputs
-		let subscription: EventhubSubscriptionDatastore = {
-			id: undefined,
+		const subscriptionInputData: EventhubSubscriptionDatastore = {
+			id: undefined as undefined | string,
 			name: `${prefix}${ulid()}`,
 			type: req.body.type,
 			method: req.body.method,
@@ -132,42 +132,43 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		// check existence of topic
 		try {
-			await pubsub.getTopic(subscription.topic)
+			await pubsub.getTopic(subscriptionInputData.topic)
 		} catch (error) {
 			// log error
 			logger.log({
 				level: 'warning',
-				message: `failed to find desired topic > ${subscription.topic}`,
+				message: `failed to find desired topic > ${subscriptionInputData.topic}`,
 				source,
 				error,
-				data: { subscription },
+				data: { subscription: subscriptionInputData },
 			})
 
 			// return 404 error
-			return response.notFound(req, res, {
+			return notFound(req, res, {
 				status: 404,
-				message: `Topic '${subscription.topic}' not found`,
+				message: `Topic '${subscriptionInputData.topic}' not found`,
 			})
 		}
 
 		// save to datastore
-		subscription = await datastore.save(subscription, 'subscriptions', null)
+		const subscriptionId = await datastore.save(subscriptionInputData, 'subscriptions')
 
 		// check if subscription was saved
-		if (!subscription.id) {
+		if (!subscriptionId) {
 			logger.log({
 				level: 'error',
 				message: 'failed to save subscription to datastore',
 				source,
-				data: { subscription },
+				data: { subscriptionInputData },
 			})
-			return response.internalServerError(req, res, new Error('Failed to save subscription'))
+			return internalServerError(req, res, new Error('Failed to save subscription'))
 		}
+
+		const subscription = { ...subscriptionInputData, id: subscriptionId }
 
 		// request creation of subscription
 		const createdSubscription = await pubsub.createSubscription(subscription)
 
-		// return data
 		return res.status(201).json(createdSubscription)
 	} catch (error) {
 		logger.log({
@@ -178,6 +179,6 @@ export default async (req: UserTokenRequest, res: Response) => {
 			data: { body: req.body },
 		})
 
-		return response.internalServerError(req, res, error as Error)
+		return internalServerError(req, res, error as Error)
 	}
 }

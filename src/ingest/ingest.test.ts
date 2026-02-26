@@ -233,6 +233,7 @@ describe(`POST ${eventPath}`, () => {
 	})
 
 	it('publish a new event with invalid externalId in references', async () => {
+		// @ts-expect-error - we know that the object won't be null
 		event.references[1].externalId = null
 		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
 		testResponse(res, 400)

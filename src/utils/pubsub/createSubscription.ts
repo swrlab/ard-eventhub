@@ -1,16 +1,8 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
-import type { google } from '@google-cloud/pubsub/build/protos/protos'
 import { DateTime } from 'luxon'
 import slug from 'slug'
 import config from '#config'
-import type { EventhubSubscriptionDatastore } from '#types'
+import type { EventhubSubscriptionDatastore, ISubscription } from '#types'
 import pubSubSubscriberClient from './_subscriberClient.ts'
 import mapSubscription from './mapSubscription.ts'
 
@@ -18,7 +10,7 @@ const source = 'utils/pubsub/createSubscription'
 
 export default async (subscription: EventhubSubscriptionDatastore) => {
 	// map inputs for pubsub
-	const options: google.pubsub.v1.ISubscription = {
+	const options: ISubscription = {
 		name: `projects/${process.env.GCP_PROJECT_ID}/subscriptions/${subscription.name}`,
 		topic: `projects/${process.env.GCP_PROJECT_ID}/topics/${subscription.topic}`,
 		pushConfig: {
@@ -29,7 +21,7 @@ export default async (subscription: EventhubSubscriptionDatastore) => {
 			},
 		},
 		labels: {
-			id: subscription.id ?? '',
+			id: subscription.id?.toString() ?? '',
 			stage: config.stage ?? '',
 			'creator-slug': slug(subscription.creator),
 			created: DateTime.now().toFormat('yyyy-LL-dd'),
@@ -54,11 +46,7 @@ export default async (subscription: EventhubSubscriptionDatastore) => {
 	})
 
 	// map and filter values
-	const mappedCreatedSubscription = {
-		metadata: null,
-		...createdSubscription,
-	}
-	const { limited: mappedSubscription } = await mapSubscription(mappedCreatedSubscription)
+	const { limited: mappedSubscription } = await mapSubscription(createdSubscription)
 	logger.log({
 		level: 'info',
 		message: 'mapped subscription',
@@ -66,6 +54,5 @@ export default async (subscription: EventhubSubscriptionDatastore) => {
 		data: { mappedSubscription },
 	})
 
-	// return data
 	return mappedSubscription
 }

@@ -1,10 +1,3 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
 import jwt from 'jsonwebtoken'
 
@@ -40,12 +33,11 @@ export default async (email: string, password: string) => {
 			data: { statusCode, response },
 		})
 
-		return Promise.reject(new Error(response))
+		throw new Error(response)
 	}
 
 	// decode JWT token to receive user object
 	const user = jwt.decode(response.idToken)
 
-	// return data
-	return Promise.resolve({ user, login: response })
+	return { user, login: response }
 }

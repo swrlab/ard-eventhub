@@ -1,20 +1,10 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
-import type { Response } from 'express'
-
-import type UserTokenRequest from '../../../ingest/auth/middleware/userTokenRequest.ts'
+import type { Response, UserTokenRequest } from '#types'
 import badRequest from '../badRequest.ts'
 
 const source = 'utils.response.errors.mismatchingEventName'
 
 export default (req: UserTokenRequest, res: Response) => {
-	// log access attempt
 	logger.log({
 		level: 'warning',
 		message: 'User attempted event with mismatching names',

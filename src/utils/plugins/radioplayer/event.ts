@@ -53,9 +53,10 @@ const sendRadioplayerEvent = async (
 	// handle exclusions
 	if (Array.isArray(plugin.excludeFields) && plugin.excludeFields.length > 0) {
 		for (const field of plugin.excludeFields) {
+			// TODO: make sure this works
 			const permittedExcludedField = PERMITTED_EXCLUDED_FIELDS[field as keyof typeof PERMITTED_EXCLUDED_FIELDS]
 			if (permittedExcludedField) {
-				url.searchParams.delete(permittedExcludedField)
+				url.searchParams.delete(permittedExcludedField as string)
 			}
 		}
 	}

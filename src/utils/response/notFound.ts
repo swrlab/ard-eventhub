@@ -1,12 +1,4 @@
-import type { Request, Response } from 'express'
-
-export type RequestError = {
-	status: number
-	message: string
-	errors?: string
-	data?: Record<string, string>
-	trace?: string
-}
+import type { Request, RequestError, Response } from '#types'
 
 export default (req: Request, res: Response, err: RequestError) => {
 	try {

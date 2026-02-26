@@ -1,7 +1,12 @@
 import logger from '@frytg/logger'
 import config from '#config'
-import type { EventhubPluginMessage, EventhubService } from '#types'
-import type { LiveradioCredential } from '../../../config/dts-keys.ts'
+import type {
+	EventhubPluginMessage,
+	EventhubService,
+	LiveRadioEvent,
+	LiveradioCredential,
+	PermittedExcludedFields,
+} from '#types'
 import dts from '../../../config/dts-keys.ts'
 import undici from '../../undici/index.ts'
 
@@ -13,35 +18,9 @@ const DEFAULT_HEADERS = {
 }
 const LIVERADIO_URL = dts.endpoints.liveRadioEvent[config.stage as keyof typeof dts.endpoints.liveRadioEvent]
 
-// note all fields have a null options, since excludeFields can be used to exclude fields from the event
-export type LiveRadioEvent = {
-	broadcastId: string | null
-	contentId: string | null
-	type: string | null
-	status: string | null
-	client: string | null
-	clientVersion: string | null
-	timestamp: string | null
-	artist: string | null
-	title: string | null
-	isrc: string | null
-	email: string | null
-	duration: number | null
-	delay: number | null
-	album: string | null
-	composer: string | null
-	program: string | null
-	subject: string | null
-	webURL: string | null
-	enableShare: boolean | null
-	enableThumbs: boolean | null
-	year: number | null
-	fccId: string | null
-	imageURL: string | null
-}
-
 // provide remapping helpers
-const getCoreIds = (services: EventhubService[]) => services.map((service: EventhubService) => service.topic.id)
+const getCoreIds = (services: EventhubService[]) =>
+	services.flatMap((service) => (service.topic?.id ? [service.topic.id] : []))
 
 const getUserForInstitution = (institutionId: string) => {
 	// get user or reject if not found

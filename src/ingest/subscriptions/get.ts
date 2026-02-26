@@ -1,20 +1,11 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
-import type { Response } from 'express'
-import type { EventhubSubscriptionLimited } from '#types'
+import type { EventhubSubscriptionLimited, Response, UserTokenRequestWithParams } from '#types'
 import getSubscription from '../../utils/pubsub/getSubscription.ts'
 import response from '../../utils/response/index.ts'
-import type UserTokenRequest from '../auth/middleware/userTokenRequest.ts'
 
 const source = 'ingest/subscriptions/get'
 
-export default async (req: UserTokenRequest, res: Response) => {
+export default async (req: UserTokenRequestWithParams<{ subscriptionName?: string }>, res: Response) => {
 	try {
 		// preset vars
 		const { subscriptionName } = req.params

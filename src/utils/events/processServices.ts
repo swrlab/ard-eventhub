@@ -1,8 +1,8 @@
 import logger from '@frytg/logger'
+// @ts-expect-error
 import { createHashedId } from '@swrlab/utils/packages/ard/index.js'
 import config from '#config'
-import type { EventhubService } from '#types'
-import type UserTokenRequest from '../../ingest/auth/middleware/userTokenRequest.ts'
+import type { EventhubService, UserTokenRequest } from '#types'
 import { getPublisherById } from '../ard-core.ts'
 import pubsub from '../pubsub/index.ts'
 

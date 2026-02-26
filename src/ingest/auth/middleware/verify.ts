@@ -6,11 +6,9 @@
 */
 
 import logger from '@frytg/logger'
-import type { NextFunction, Response } from 'express'
-
+import type { NextFunction, Response, UserTokenRequest } from '#types'
 import datastore from '../../../utils/datastore/index.ts'
 import firebase from '../../../utils/firebase/index.ts'
-import type UserTokenRequest from './userTokenRequest.ts'
 
 const source = 'ingest/auth/middleware/verify'
 const ERROR_JSON = { message: 'Forbidden', errors: [], status: 403 }

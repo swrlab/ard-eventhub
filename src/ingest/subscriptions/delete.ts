@@ -7,16 +7,15 @@
 
 import logger from '@frytg/logger'
 import type { Response } from 'express'
-import type { EventhubSubscriptionWithLabels } from '#types'
+import type { EventhubSubscriptionWithLabels, UserTokenRequestWithParams } from '#types'
 import datastore from '../../utils/datastore/index.ts'
 import deleteSubscription from '../../utils/pubsub/deleteSubscription.ts'
 import getSubscription from '../../utils/pubsub/getSubscription.ts'
 import response from '../../utils/response/index.ts'
-import type UserTokenRequest from '../auth/middleware/userTokenRequest.ts'
 
 const source = 'ingest/subscriptions/delete'
 
-export default async (req: UserTokenRequest, res: Response) => {
+export default async (req: UserTokenRequestWithParams<{ subscriptionName?: string }>, res: Response) => {
 	try {
 		// preset vars
 		const { subscriptionName } = req.params
@@ -51,7 +50,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 				data: { subscriptionName },
 			})
 
-			if (error && error?.code === 5) {
+			if (isCode5Error(error)) {
 				// pubsub error code 5 seems to be 'Resource not found'
 				return response.notFound(req, res, {
 					status: 404,
@@ -81,7 +80,11 @@ export default async (req: UserTokenRequest, res: Response) => {
 		// request actual deletion
 		await deleteSubscription(subscriptionName)
 
+		if (!fullSubscription.labels?.id) {
+			throw new Error('The label id is missing in the subscriptions.')
+		}
 		// also delete from datastore
+		// TODO: why is the id parsed as a number?
 		const subscriptionId = Number.parseInt(fullSubscription.labels.id, 10)
 		await datastore.delete('subscriptions', subscriptionId.toString())
 
@@ -111,4 +114,8 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		return response.internalServerError(req, res, error as Error)
 	}
+}
+
+function isCode5Error(e: unknown): e is { code: 5 } {
+	return typeof e === 'object' && e !== null && 'code' in e && (e as { code: unknown }).code === 5
 }

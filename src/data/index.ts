@@ -5,7 +5,7 @@ import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { fetch } from 'undici'
 
-import type { ArdFeed, ArdLivestream } from '../types.ts'
+import type { ArdFeed, ArdLivestream } from '#types'
 
 const ARD_FEED_URL = getRequiredEnv('ARD_FEED_URL')
 const DOWNLOAD_TO_FILE = false

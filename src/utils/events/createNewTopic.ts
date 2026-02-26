@@ -1,14 +1,6 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
 import { DateTime } from 'luxon'
-import type { EventhubService } from '#types'
-import type UserTokenRequest from '../../ingest/auth/middleware/userTokenRequest.ts'
+import type { EventhubService, EventhubTopicDatastore, UserTokenRequest } from '#types'
 import { getPublisherById } from '../ard-core.ts'
 import datastore from '../datastore/index.ts'
 import pubsub from '../pubsub/index.ts'
@@ -53,8 +45,8 @@ export default async (service: EventhubService, req: UserTokenRequest) => {
 	}
 
 	// try creating new topic
-	const newTopic = {
-		id: undefined as string | undefined,
+	const newTopic: EventhubTopicDatastore = {
+		// id: undefined, // id remains undefined
 		created: DateTime.now().toISO(),
 		creator: req.user.email,
 
@@ -74,14 +66,16 @@ export default async (service: EventhubService, req: UserTokenRequest) => {
 	}
 
 	// save topic to datastore
-	await datastore.save(newTopic, 'topics', null)
-	newTopic.id = newTopic.id?.toString()
+	const topicId = await datastore.save(newTopic, 'topics')
+	// newTopic.id = newTopic.id?.toString()
+	const topic = { ...newTopic, id: topicId }
 
 	// create topic
-	const [result] = await pubsub.createTopic(newTopic)
+	const [result] = await pubsub.createTopic(topic)
 
 	// handle feedback
-	if (result?.name?.indexOf(service.topic.name) !== -1) {
+	// TODO: can we use the `topic` var instead of modifying `service.topic`?
+	if (result?.name?.includes(service.topic.name)) {
 		// update api result that topic was created
 		service.topic.status = 'TOPIC_CREATED'
 
@@ -106,5 +100,5 @@ export default async (service: EventhubService, req: UserTokenRequest) => {
 	// insert empty id
 	service.topic.messageId = null
 
-	return Promise.resolve(service.topic)
+	return service.topic
 }

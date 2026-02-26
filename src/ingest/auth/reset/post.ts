@@ -1,5 +1,5 @@
 import logger from '@frytg/logger'
-import type { Request, Response } from 'express'
+import type { Request, Response } from '#types'
 
 import firebase from '../../../utils/firebase/index.ts'
 import response from '../../../utils/response/index.ts'

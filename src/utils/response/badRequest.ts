@@ -1,5 +1,4 @@
-import type { Request, Response } from 'express'
-import type { RequestError } from './notFound.ts'
+import type { Request, RequestError, Response } from '#types'
 
 export default (req: Request, res: Response, err: RequestError) => {
 	try {
