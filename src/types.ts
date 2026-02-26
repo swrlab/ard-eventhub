@@ -108,7 +108,7 @@ export type EventhubPlugin = {
 	excludeFields?: string[]
 }
 
-export type EventhubMedia = {
+type EventhubMedia = {
 	type: string
 	url: string
 	templateUrl: string | null
@@ -206,10 +206,6 @@ export type EventhubTopicDatastore = {
 		title: ArdPublisher['title']
 	}
 }
-export type WithId = {
-	id?: string | number
-}
-// export type EventhubTopicDatastoreWithOptionalId = Omit<EventhubTopicDatastore, 'id'> & { id?: string }
 
 export type EventhubSubscriptionLimited = {
 	type: string

@@ -1,18 +1,9 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
-import type { Response } from 'express'
 import { DateTime } from 'luxon'
 import { ulid } from 'ulid'
 import config from '#config'
 import type { ArdLivestream, EventhubSubscriptionDatastore, Response, UserTokenRequest } from '#types'
 import { ardFeed } from '../../data/index.ts'
-import type { ArdLivestream, EventhubSubscriptionDatastore } from '../../types.ts'
 import datastore from '../../utils/datastore/index.ts'
 import pubsub from '../../utils/pubsub/index.ts'
 import { badRequest, internalServerError, notFound } from '../../utils/response/index.ts'

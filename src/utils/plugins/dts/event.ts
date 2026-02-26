@@ -101,7 +101,9 @@ export default async (job: EventhubPluginMessage) => {
 	// handle exclusions
 	if (Array.isArray(plugin.excludeFields) && plugin.excludeFields.length > 0) {
 		for (const field of plugin.excludeFields) {
-			const permittedExcludedField = dts.permittedExcludedFields[field] as keyof LiveRadioEvent
+			const permittedExcludedField = dts.permittedExcludedFields[
+				field as keyof PermittedExcludedFields
+			] as keyof LiveRadioEvent
 			if (permittedExcludedField) {
 				liveRadioEvent[permittedExcludedField] = null
 			}

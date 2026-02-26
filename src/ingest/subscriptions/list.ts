@@ -1,10 +1,3 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
 import type { Response, UserTokenRequest } from '#types'
 import getSubscriptions from '../../utils/pubsub/getSubscriptions.ts'
@@ -32,6 +25,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		let subscriptions = await getSubscriptions()
 
 		// verify if user is allowed to list subscriptions (same institution)
+		// TODO: verify that `req.user?.institutionId` is not undefined
 		subscriptions = subscriptions.filter((subscription) => subscription?.institutionId === req.user?.institutionId)
 
 		// return data
