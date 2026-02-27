@@ -1,5 +1,5 @@
+import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
-import { DateTime } from 'luxon'
 import slug from 'slug'
 import { projectId, stage } from '#env'
 import type { EventhubSubscriptionDatastore, ISubscription } from '#types'

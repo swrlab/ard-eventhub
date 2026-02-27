@@ -1,8 +1,7 @@
+import { getNow } from '@frytg/dates'
 import logger from '@frytg/logger'
 import type { Request, Response } from 'express'
 import type { JwtPayload } from 'jsonwebtoken'
-import { DateTime } from 'luxon'
-
 import firebase from '../../../utils/firebase/index.ts'
 import response from '../../../utils/response/index.ts'
 
@@ -32,7 +31,7 @@ export default async (req: Request, res: Response) => {
 		const expiresIn = Number.parseInt(login.login.expiresIn, 10)
 		return response.ok(req, res, {
 			expiresIn,
-			expires: DateTime.now().plus({ seconds: expiresIn }).toISO(),
+			expires: getNow().plus({ seconds: expiresIn }).toISO(),
 
 			token: login.login.idToken,
 			refreshToken: login.login.refreshToken,

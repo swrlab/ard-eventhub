@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon'
+import { DateTime } from '@frytg/dates'
 import slug from 'slug'
 import { projectId, stage } from '#env'
 import type { EventhubTopicDatastore, ITopic } from '#types'

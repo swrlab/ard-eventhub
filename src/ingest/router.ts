@@ -1,6 +1,6 @@
+import { DateTime } from '@frytg/dates'
 import express, { type Request, type Response } from 'express'
 import { middleware } from 'express-openapi-validator'
-import { DateTime } from 'luxon'
 
 import swaggerUi from 'swagger-ui-express'
 import swaggerDocument from '../../openapi.json' with { type: 'json' }

@@ -1,5 +1,5 @@
+import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
-import { DateTime } from 'luxon'
 import { ulid } from 'ulid'
 import { pubSubPrefix } from '#config'
 import { stage } from '#env'

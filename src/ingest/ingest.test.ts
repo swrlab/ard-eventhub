@@ -10,8 +10,8 @@
 
 import { beforeAll, describe, expect, it } from 'bun:test'
 import process from 'node:process'
+import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
-import { DateTime } from 'luxon'
 import request, { type Response } from 'supertest'
 
 import server from './index.ts'
