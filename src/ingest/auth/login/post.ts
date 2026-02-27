@@ -27,7 +27,6 @@ export default async (req: Request, res: Response) => {
 			return response.badRequest(req, res, { status: 500, message: 'Could not login.' })
 		}
 
-		// return ok
 		const expiresIn = Number.parseInt(login.login.expiresIn, 10)
 		return response.ok(req, res, {
 			expiresIn,

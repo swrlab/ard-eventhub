@@ -1,5 +1,6 @@
 import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
+import { defaultHeaders } from '#config'
 import { radioplayerAPIKeys, stage } from '#env'
 import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '#types'
 // NOTE: Node.js does not support importing .json5 files.
@@ -58,6 +59,7 @@ const sendRadioplayerEvent = async (
 			method: 'POST',
 			signal: AbortSignal.timeout(7e3),
 			headers: {
+				...defaultHeaders,
 				'X-API-KEY': apiKey,
 			},
 		}

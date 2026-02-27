@@ -119,7 +119,7 @@ export function getEnvString(key: string, defaultValue?: string, required = true
 	if (required === false && defaultValue === undefined) {
 		throw new Error('Missing default value for optional env string.')
 	}
-	return getEnv<string>(key, { defaultValue: defaultValue ?? '', required, type: 'string' })
+	return getEnv<string>(key, { defaultValue, required, type: 'string' })
 }
 
 /**
