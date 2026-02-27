@@ -1,22 +1,13 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
-import config from '#config'
+import { pubSubPrefix } from '#config'
 import pubSubClient from './_client.ts'
 import convertId from './convertId.ts'
 
 export default async () => {
-	// fetch topic list
-	let [topics] = await pubSubClient.getTopics()
+	const [allTopics] = await pubSubClient.getTopics()
 
 	// filter topics by prefix (stage)
-	topics = topics.filter((topic) => topic.name.indexOf(config.pubSubPrefix) !== -1)
+	const topics = allTopics.filter((topic) => topic.name.includes(pubSubPrefix))
 
-	// map values
 	const mappedTopics = topics.map((topic) => {
 		const name = topic.name.split('/').pop()
 
@@ -24,13 +15,12 @@ export default async () => {
 
 		return {
 			type: 'PUBSUB',
-			id: convertId.decode(name).replace(config.pubSubPrefix, ''),
+			id: convertId.decode(name).replace(pubSubPrefix, ''),
 			name,
 			path: topic.name,
 			labels: topic.metadata?.labels,
 		}
 	})
 
-	// return data
-	return Promise.resolve(mappedTopics)
+	return mappedTopics
 }

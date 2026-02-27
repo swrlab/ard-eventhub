@@ -1,7 +1,8 @@
 import logger from '@frytg/logger'
 import { DateTime } from 'luxon'
 import { ulid } from 'ulid'
-import config from '#config'
+import { pubSubPrefix } from '#config'
+import { stage } from '#env'
 import type { ArdLivestream, EventhubSubscriptionDatastore, Response, UserTokenRequest } from '#types'
 import { ardFeed } from '../../data/index.ts'
 import datastore from '../../utils/datastore/index.ts'
@@ -30,7 +31,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		}
 
 		// generate subscription name
-		const prefix = `${config.pubSubPrefix}subscription.`
+		const prefix = `${pubSubPrefix}subscription.`
 
 		// check existence of user institution
 		const institutionExists = ardFeed?.items?.some((entry: ArdLivestream) => {
@@ -49,7 +50,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 				source,
 				data: {
 					topic: req.body.topic,
-					stage: config.stage,
+					stage: stage,
 					email: user.email,
 					institutionExists,
 					userInstitution: user.institution,
@@ -88,7 +89,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		}
 
 		// ip address check
-		if (url.hostname.match('([\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3})') != null) {
+		if (url.hostname.match('([\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3})') !== null) {
 			// return 422 error
 			return badRequest(req, res, {
 				status: 422,
@@ -108,7 +109,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		// map inputs
 		const subscriptionInputData: EventhubSubscriptionDatastore = {
-			id: undefined as undefined | string,
+			// id: undefined,
 			name: `${prefix}${ulid()}`,
 			type: req.body.type,
 			method: req.body.method,

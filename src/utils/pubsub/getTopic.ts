@@ -1,11 +1,4 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
-import config from '#config'
+import { pubSubPrefix } from '#config'
 import pubSubClient from './_client.ts'
 
 export default async (topicName: string) => {
@@ -13,9 +6,9 @@ export default async (topicName: string) => {
 	const [topic] = await pubSubClient.topic(topicName).get()
 
 	// filter topics by prefix (stage)
-	if (!topic || topic.name.indexOf(config.pubSubPrefix) === -1)
-		return Promise.reject(new Error(`topic not found > ${topicName}`))
+	if (!topic?.name.includes(pubSubPrefix)) {
+		throw new Error(`topic not found > ${topicName}`)
+	}
 
-	// return data
-	return Promise.resolve(topic)
+	return topic
 }

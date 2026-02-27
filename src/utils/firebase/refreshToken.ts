@@ -1,26 +1,20 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
-import jwt from 'jsonwebtoken'
-
-import undici from '../undici/index.ts'
+import { decode } from 'jsonwebtoken'
+import { defaultHeaders } from '#config'
+import { firebaseAPIKey } from '#env'
 
 const source = 'firebase.refreshToken'
 
 export default async (refreshToken: string) => {
 	// set firebase sign in url
-	const url = `https://securetoken.googleapis.com/v1/token?key=${process.env.FIREBASE_API_KEY}`
+	const url = `https://securetoken.googleapis.com/v1/token?key=${firebaseAPIKey}`
 
 	// query firebase
-	const { statusCode, json: response } = await undici(url, {
+	const response = await globalThis.fetch(url, {
 		method: 'POST',
-		timeout: 4e3,
+		signal: AbortSignal.timeout(4e3),
 		headers: {
+			...defaultHeaders,
 			Accept: 'application/json',
 			'Content-Type': 'application/json',
 		},
@@ -31,20 +25,22 @@ export default async (refreshToken: string) => {
 	})
 
 	// handle errors
-	if (statusCode !== 200) {
+	if (response.status !== 200) {
 		logger.log({
 			source,
 			level: 'warning',
-			message: `failed with status > ${statusCode}`,
-			data: { statusCode, response },
+			message: `failed with status > ${response.status}`,
+			data: { statusCode: response.status, response },
 		})
 
-		return Promise.reject(new Error(response))
+		const text = await response.text()
+		throw new Error(text)
 	}
 
-	// decode JWT token to receive user object
-	const user = jwt.decode(response.id_token)
+	const json = await response.json()
 
-	// return data
-	return Promise.resolve({ login: response, user })
+	// decode JWT token to receive user object
+	const user = decode(json.id_token)
+
+	return { login: json, user }
 }

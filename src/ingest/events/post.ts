@@ -1,15 +1,8 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
 import type { Response } from 'express'
 import { DateTime } from 'luxon'
 import { ulid } from 'ulid'
-import config from '#config'
+import { pubSubTopicSelf } from '#config'
 import type { EventhubPluginMessage, EventhubV1RadioPostBody, UserTokenRequest } from '#types'
 import { createNewTopic, processServices } from '../../utils/events/index.ts'
 import pubsub from '../../utils/pubsub/index.ts'
@@ -199,7 +192,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 					}
 
 					// try sending message
-					const messageId = await publishPubSubMessage(config.pubSubTopicSelf, pluginMessage, attributes)
+					const messageId = await publishPubSubMessage(pubSubTopicSelf, pluginMessage, attributes)
 
 					// add to output
 					pluginMessages.push({
@@ -229,7 +222,6 @@ export default async (req: UserTokenRequest, res: Response) => {
 			data: { ...data, body: req.body, isDtsPluginSet, isRadioplayerPluginSet },
 		})
 
-		// return ok
 		return response.ok(req, res, data, 201)
 	} catch (error) {
 		logger.log({

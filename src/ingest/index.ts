@@ -1,30 +1,23 @@
-/*
-
-    ard-eventhub
-    by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
 import compression from 'compression'
 import express from 'express'
-import config from '#config'
+import { serviceUrl, userAgent, version } from '#config'
+import { isLocal, port, serviceName } from '#env'
 
 import { getARDFeed } from '../data/index.ts'
 import router from './router.ts'
 
 await getARDFeed()
 
-// set up express server
 const server = express()
 
 // add debugging information to all headers
 server.use((req, res, next) => {
 	// add service information
-	res.set('x-service', config.userAgent)
+	res.set('x-service', userAgent)
 
 	// log all headers in local mode
-	if (config.isLocal) {
+	if (isLocal) {
 		const logHeaders = {
 			...req.headers,
 			authorization: 'hidden',
@@ -36,22 +29,21 @@ server.use((req, res, next) => {
 			data: { logHeaders, path: req.path },
 		})
 	}
-
-	// continue with normal workflow
 	next()
 })
 
-// import router
 server.use('/', router)
-
-// start express server
 server.use(compression())
 server.disable('x-powered-by')
-server.listen(config.port)
 
-if (config.isLocal) {
-	console.log(`${config.serviceName} (v${config.version}) is running at: ${config.serviceUrl}`)
-	console.log(`  - OpenAPI documentation: ${config.serviceUrl}/openapi`)
+// Run the server if this file is invoked directly
+if (import.meta.main) {
+	server.listen(port)
+}
+
+if (isLocal) {
+	console.log(`${serviceName} (v${version}) is running at: ${serviceUrl}`)
+	console.log(`  - OpenAPI documentation: ${serviceUrl}/openapi`)
 }
 
 export default server

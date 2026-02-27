@@ -3,7 +3,6 @@ import { exitWithError } from '@frytg/check-required-env/exit'
 import { getRequiredEnv } from '@frytg/check-required-env/get'
 import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
-import { fetch } from 'undici'
 
 import type { ArdFeed, ArdLivestream } from '#types'
 
@@ -35,15 +34,15 @@ export let ardFeed: ArdFeed | null = null
 export const getARDFeed = async () => {
 	try {
 		// download ard feed
-		const res = await fetch(ARD_FEED_URL, {
+		const res = await globalThis.fetch(ARD_FEED_URL, {
 			signal: AbortSignal.timeout(10e3),
 		})
 
 		// check api
-		if (!res.ok || res.status !== 200) return exitWithError(`API is not available (${res.status})`)
+		if (res.status !== 200) return exitWithError(`API is not available (${res.status})`)
 
 		// parse reponse
-		const feed: ArdFeed = (await res.json()) as ArdFeed
+		const feed = (await res.json()) as ArdFeed
 		if (!(feed?.items && Array.isArray(feed.items))) return exitWithError('Feed is not an array')
 
 		// check integrity of feed length

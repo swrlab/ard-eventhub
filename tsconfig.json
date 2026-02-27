@@ -7,8 +7,9 @@
 		"types": ["bun", "node", "express"],
 
 		"paths": {
-			"#config": ["./src/config/index.ts"],
-			"#types": ["./src/types.ts"]
+			"#config": ["./src/config.ts"],
+			"#env": ["./src/env.ts"],
+			"#types": ["./src/types/index.ts"]
 		},
 
 		"target": "ESNext",

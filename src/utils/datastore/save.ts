@@ -1,9 +1,9 @@
-import config from '#config'
+import { stage } from '#env'
 import datastoreClient from './_client.ts'
 
 export default async <T>(data: T, kind: string, id?: number | string): Promise<string> => {
 	const key = datastoreClient.key({
-		namespace: config.stage,
+		namespace: stage,
 		path: id ? [kind, id] : [kind],
 	})
 

@@ -8,6 +8,8 @@
 	it writes to the production system and therefore should be used sparingly
 */
 
+import process from 'node:process'
+
 // Must be set before any plugin imports (api-keys loads at import)
 const testApiKeys = process.env.RADIOPLAYER_API_KEYS
 process.env.RADIOPLAYER_API_KEYS = testApiKeys

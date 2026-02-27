@@ -1,20 +1,21 @@
 import logger from '@frytg/logger'
 
-import config from '#config'
+import { version } from '#config'
+import { stage } from '#env'
 import pubSubClient from './_client.ts'
 
 // set local config
 const source = 'pubsub.publishMessage'
 
-export default async (topic: string, message: object, attributes: object) => {
+export default async (topic: string, message: object, attributes: Record<PropertyKey, string>) => {
 	// initialize output
 	let output: string
 
 	// add runtime information as attributes
 	const customAttributes = {
 		...attributes,
-		stage: config.stage ?? '',
-		version: config.version,
+		stage,
+		version,
 	}
 
 	// send message for each topic

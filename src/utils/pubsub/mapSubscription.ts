@@ -1,4 +1,4 @@
-import config from '#config'
+import { pubSubPrefix } from '#config'
 import type {
 	EventhubSubscriptionDatastore,
 	EventhubSubscriptionLimited,
@@ -35,7 +35,7 @@ export default async (
 		path: subscription.name,
 
 		topic: {
-			id: convertId.decode(topicName).replace(config.pubSubPrefix, ''),
+			id: convertId.decode(topicName).replace(pubSubPrefix, ''),
 			name: topicName,
 			path: topic,
 		},

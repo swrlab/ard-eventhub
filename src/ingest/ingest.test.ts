@@ -9,11 +9,12 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: ok */
 
 import { beforeAll, describe, expect, it } from 'bun:test'
+import process from 'node:process'
 import logger from '@frytg/logger'
 import { DateTime } from 'luxon'
 import request, { type Response } from 'supertest'
 
-import { default as server } from './index.ts'
+import server from './index.ts'
 
 const exitWithError = (message: string) => {
 	logger.log({

@@ -14,7 +14,7 @@
 			"semicolons": "asNeeded",
 			"trailingCommas": "es5"
 		},
-		"globals": ["Bun"]
+		"globals": ["Bun", "node"]
 	},
 	"linter": {
 		"enabled": true,
@@ -32,6 +32,7 @@
 			},
 			"correctness": {
 				"noGlobalDirnameFilename": "error",
+				"noNodejsModules": "off",
 				"noUndeclaredDependencies": "error",
 				"noUndeclaredVariables": "error",
 				"noUnresolvedImports": "off",
@@ -40,7 +41,7 @@
 			},
 			"nursery": {
 				"noForIn": "error",
-				"noEqualsToNull": "off",
+				"noEqualsToNull": "warn",
 				"noMisusedPromises": "error",
 				"noMultiAssign": "error",
 				"noMultiStr": "error",
@@ -68,13 +69,14 @@
 				"noEnum": "error",
 				"noNamespace": "error",
 				"noParameterAssign": "error",
-				"noProcessEnv": "off",
+				"noProcessEnv": "warn",
 				"noSubstr": "error",
 				"noUnusedTemplateLiteral": "error",
 				"noNegationElse": "error",
 				"noInferrableTypes": "error",
 				"noUselessElse": "error",
 				"useNumberNamespace": "error",
+				"useNodejsImportProtocol": "error",
 				"useAsConstAssertion": "error",
 				"useDefaultParameterLast": "error",
 				"useEnumInitializers": "error",

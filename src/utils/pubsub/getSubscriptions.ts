@@ -1,4 +1,4 @@
-import config from '#config'
+import { pubSubPrefix } from '#config'
 import pubSubClient from './_client.ts'
 import mapSubscription from './mapSubscription.ts'
 
@@ -7,7 +7,7 @@ export default async () => {
 	let [subscriptions] = await pubSubClient.getSubscriptions()
 
 	// filter subscriptions by prefix (stage)
-	subscriptions = subscriptions.filter((subscription) => subscription.name.includes(config.pubSubPrefix))
+	subscriptions = subscriptions.filter((subscription) => subscription.name.includes(pubSubPrefix))
 
 	// map and filter values
 	const filteredSubscriptions = await Promise.all(

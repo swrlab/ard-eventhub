@@ -1,19 +1,19 @@
 import logger from '@frytg/logger'
 // @ts-expect-error
 import { createHashedId } from '@swrlab/utils/packages/ard/index.js'
-import config from '#config'
+import { coreIdPrefixes } from '#config'
 import type { EventhubService, UserTokenRequest } from '#types'
 import { getPublisherById } from '../ard-core.ts'
 import pubsub from '../pubsub/index.ts'
 
 const source = 'utils.events.processServices'
-const URN_PUBLISHER_PREFIX = config.coreIdPrefixes.Publisher
+const URN_PUBLISHER_PREFIX = coreIdPrefixes.Publisher
 const URN_PUBLISHER_REGEX = /(?=urn:ard:publisher:[a-z0-9]{16})/g
 
 export default async (service: EventhubService, req: UserTokenRequest) => {
 	// fetch prefix from configured list
-	const type = service.type as keyof typeof config.coreIdPrefixes
-	let urnPrefix = config.coreIdPrefixes[type]
+	const type = service.type as keyof typeof coreIdPrefixes
+	let urnPrefix = coreIdPrefixes[type]
 
 	// add a different suffix for radio text topics to not confuse subscribers with new event
 	if (req.body.event === 'de.ard.eventhub.v1.radio.text') {

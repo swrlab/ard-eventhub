@@ -1,21 +1,12 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
-// load firebase
 import firebaseAdmin from 'firebase-admin'
+import { projectId } from '#env'
+import type { DecodedIdToken } from '#types'
 
 firebaseAdmin.initializeApp({
-	projectId: process.env.GCP_PROJECT_ID,
+	projectId,
 })
 
-export default async (token: string) => {
-	// attempt to verify token
+export default async (token: string): Promise<DecodedIdToken> => {
 	const verification = await firebaseAdmin.auth().verifyIdToken(token)
-
-	// return data
-	return Promise.resolve(verification)
+	return verification
 }

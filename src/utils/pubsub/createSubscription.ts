@@ -1,7 +1,7 @@
 import logger from '@frytg/logger'
 import { DateTime } from 'luxon'
 import slug from 'slug'
-import config from '#config'
+import { projectId, stage } from '#env'
 import type { EventhubSubscriptionDatastore, ISubscription } from '#types'
 import pubSubSubscriberClient from './_subscriberClient.ts'
 import mapSubscription from './mapSubscription.ts'
@@ -11,8 +11,8 @@ const source = 'utils/pubsub/createSubscription'
 export default async (subscription: EventhubSubscriptionDatastore) => {
 	// map inputs for pubsub
 	const options: ISubscription = {
-		name: `projects/${process.env.GCP_PROJECT_ID}/subscriptions/${subscription.name}`,
-		topic: `projects/${process.env.GCP_PROJECT_ID}/topics/${subscription.topic}`,
+		name: `projects/${projectId}/subscriptions/${subscription.name}`,
+		topic: `projects/${projectId}/topics/${subscription.topic}`,
 		pushConfig: {
 			pushEndpoint: subscription.url,
 			oidcToken: {
@@ -22,7 +22,7 @@ export default async (subscription: EventhubSubscriptionDatastore) => {
 		},
 		labels: {
 			id: subscription.id?.toString() ?? '',
-			stage: config.stage ?? '',
+			stage: stage,
 			'creator-slug': slug(subscription.creator),
 			created: DateTime.now().toFormat('yyyy-LL-dd'),
 		},

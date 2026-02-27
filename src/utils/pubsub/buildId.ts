@@ -8,11 +8,7 @@
 
 */
 
-// load config
-import config from '#config'
-// load util
+import { pubSubPrefix } from '#config'
 import convertId from './convertId.ts'
 
-export default (input: string) => {
-	return `${config.pubSubPrefix}${convertId.encode(input)}`
-}
+export default (input: string) => `${pubSubPrefix}${convertId.encode(input)}`

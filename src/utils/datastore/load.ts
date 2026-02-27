@@ -1,14 +1,12 @@
-import config from '#config'
+import { stage } from '#env'
 import datastoreClient from './_client.ts'
 
 export default async (kind: string, id: string | number) => {
-	// set key
 	const key = datastoreClient.key({
-		namespace: config.stage,
+		namespace: stage,
 		path: id ? [kind, id] : [kind],
 	})
 
-	// save data
 	const [data] = await datastoreClient.get(key)
 
 	// insert key
@@ -18,6 +16,5 @@ export default async (kind: string, id: string | number) => {
 		data.id = key.name
 	}
 
-	// return data
-	return Promise.resolve(data)
+	return data
 }
