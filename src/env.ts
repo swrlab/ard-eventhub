@@ -4,7 +4,7 @@ import { getEnvBase64, getEnvBoolean, getEnvNumber, getEnvString } from './utils
 // NOTE: all environment keys in this files are required and cause an error if missing.
 
 export const stage: Stage = getEnvString('STAGE') as Stage
-export const isLocal = getEnvBoolean('IS_LOCAL')
+export const isLocal = getEnvBoolean('IS_LOCAL', false) as boolean
 
 export const serviceName = getEnvString('SERVICE_NAME')
 export const ardFeedUrl = getEnvString('ARD_FEED_URL')

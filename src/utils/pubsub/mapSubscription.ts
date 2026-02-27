@@ -23,9 +23,15 @@ export default async (
 		? await datastore.load('subscriptions', Number.parseInt(labels.id, 10))
 		: undefined
 
+	const topic = metadata.topic
+	if (!topic) {
+		throw new Error('The topic is missing from the subscription metadata.')
+	}
+	const topicName = topic.split('/').pop()
+	if (!topicName) {
+		throw new Error(`The topicName is missing from the topic '${topic}'.`)
+	}
 	// remap values
-	const topic = metadata.topic as string
-	const topicName = topic.split('/').pop() as string
 	const limited: EventhubSubscriptionLimited = {
 		type: 'PUBSUB',
 		method: metadata.pushConfig?.pushEndpoint ? 'PUSH' : 'PULL',

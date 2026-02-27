@@ -46,7 +46,6 @@ export default async (service: EventhubService, req: UserTokenRequest) => {
 
 	// try creating new topic
 	const newTopic: EventhubTopicDatastore = {
-		// id: undefined, // id remains undefined
 		created: DateTime.now().toISO(),
 		creator: req.user.email,
 
@@ -67,7 +66,6 @@ export default async (service: EventhubService, req: UserTokenRequest) => {
 
 	// save topic to datastore
 	const topicId = await datastore.save(newTopic, 'topics')
-	// newTopic.id = newTopic.id?.toString()
 	const topic = { ...newTopic, id: topicId.toString() }
 
 	// create topic

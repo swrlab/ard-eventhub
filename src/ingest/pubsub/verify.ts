@@ -21,7 +21,7 @@ export default async (req: UserTicketRequest, res: Response, next: NextFunction)
 			return res.sendStatus(401)
 		}
 
-		const [_, idToken] = bearerMatch
+		const [_match, idToken] = bearerMatch
 		if (!idToken) throw Error('No ID token could be found.')
 
 		// verify token, throws error if invalid

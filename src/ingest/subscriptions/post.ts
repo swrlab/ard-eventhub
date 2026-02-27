@@ -109,7 +109,6 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		// map inputs
 		const subscriptionInputData: EventhubSubscriptionDatastore = {
-			// id: undefined,
 			name: `${prefix}${ulid()}`,
 			type: req.body.type,
 			method: req.body.method,

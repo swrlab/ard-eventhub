@@ -153,6 +153,7 @@ export default async (job: EventhubPluginMessage): Promise<void> => {
 	]
 	let json: object | undefined
 	try {
+		// the json parsing can fail silently, since we then re-use the text.
 		json = JSON.parse(text)
 	} catch {}
 	logger.log({

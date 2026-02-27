@@ -16,7 +16,6 @@ export default async <T>(data: T, kind: string, id?: number | string): Promise<s
 		throw new Error('Did not create a datastore key.')
 	}
 	return key.id ? Number.parseInt(key.id, 10) : (key.name as string)
-	// return key.name ?? (key.id as string)
 }
 
 function hasKeyIdentifier(key: { id?: string; name?: string }): key is { id: string } | { name: string } {

@@ -1,14 +1,14 @@
-import { env } from 'node:process'
 import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { radioplayerAPIKeys, stage } from '#env'
 import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '#types'
 // NOTE: Node.js does not support importing .json5 files.
 import livestreamMapping from '../../../config/radioplayer-mapping.json5'
+import { getEnvBoolean } from '../../env.ts'
 
 const source = 'utils/plugins/radioplayer/event'
 const PERMITTED_EXCLUDED_FIELDS = new Set(['imageUrl'])
-const RUN_IN_NON_PROD = env.RADIOPLAYER_RUN_IN_NON_PROD === 'true'
+const RUN_IN_NON_PROD = getEnvBoolean('RADIOPLAYER_RUN_IN_NON_PROD', false) === true
 
 // see API docs: https://radioplayerworldwide.atlassian.net/wiki/spaces/RPC/pages/1920073729/Programmatic+Ingest+of+Station+Information#V2-Endpoints
 const RADIOPLAYER_API_URL = 'https://np-ingest.radioplayer.cloud'

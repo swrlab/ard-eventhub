@@ -172,7 +172,7 @@ export default async (req, res) => {
   try {
     // read token from header
     const bearer = req.header('Authorization')
-    const [_, idToken] = bearer.match(/Bearer (.*)/)
+    const [_match, idToken] = bearer.match(/Bearer (.*)/) ?? []
 
     if (!idToken) throw Error('No ID token could be found.')
 

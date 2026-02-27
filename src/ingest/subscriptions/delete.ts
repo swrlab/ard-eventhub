@@ -71,12 +71,13 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 			})
 		}
 
-		// request actual deletion
-		await deleteSubscription(subscriptionName)
-
 		if (!fullSubscription.labels?.id) {
 			throw new Error('The label id is missing in the subscriptions.')
 		}
+
+		// request actual deletion
+		await deleteSubscription(subscriptionName)
+
 		// also delete from datastore
 		const subscriptionId = Number.parseInt(fullSubscription.labels.id, 10)
 		await datastore.delete('subscriptions', subscriptionId.toString())

@@ -39,13 +39,13 @@ describe('mocked env values', () => {
 	} as const
 
 	beforeAll(() => {
-		// @ts-expect-error - __VitestMockEnv to mock values for `utils/env.ts`
-		globalThis.__VitestMockEnv = mocked
+		// @ts-expect-error - __BunTestMockEnv__ to mock values for `utils/env.ts`
+		globalThis.__BunTestMockEnv__ = mocked
 	})
 	afterAll(() => {
 		// clean up
-		// @ts-expect-error - __VitestMockEnv to mock values for `utils/env.ts`
-		globalThis.__VitestMockEnv = undefined
+		// @ts-expect-error - __BunTestMockEnv__ to mock values for `utils/env.ts`
+		globalThis.__BunTestMockEnv__ = undefined
 	})
 	it('should throw an error for missing required values', () => {
 		expect(() => getEnv<string>('MISSING', { type: 'string', required: true })).toThrow()
@@ -71,6 +71,13 @@ describe('mocked env values', () => {
 			expect(() => getEnvBase64('BROKEN_JSON')).toThrow('SyntaxError: JSON Parse error: Unexpected identifier')
 		})
 	})
+	describe('getEnvString', () => {
+		it('should throw a SyntaxError for mal-formed json', () => {
+			expect(() => getEnvString('MISSING_STR', undefined, false)).toThrow(
+				'Missing default value for optional env string.'
+			)
+		})
+	})
 })
 
 // base64 helper
@@ -83,7 +90,7 @@ describe('toBase64', () => {
 		expect(toBase64('')).toStrictEqual('')
 	})
 	it('should throw a TypeError if a number is passed', () => {
-		// @ts-expect-error - A number will won't work.
+		// @ts-expect-error - A number will not work.
 		expect(() => toBase64(123456789)).toThrowError(TypeError)
 	})
 })

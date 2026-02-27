@@ -7,7 +7,7 @@ import { Buffer } from 'node:buffer'
 import process from 'node:process'
 
 /**
- * Encode the given string into it's base64 representation.
+ * Encode the given string into its base64 representation.
  * @param str - The input string encoded in utf-8.
  * @returns - The base64 encoded string.
  */
@@ -32,7 +32,7 @@ type EnvVarType = 'string' | 'number' | 'boolean' | 'json' | 'base64'
  */
 interface EnvConfig<T> {
 	/** Default value if environment variable is not set */
-	defaultValue?: T
+	defaultValue?: T | undefined
 	/** Whether the environment variable is required */
 	required?: boolean
 	/** Type of the environment variable */
@@ -61,8 +61,8 @@ export class MissingEnvVarError extends Error {
 export function getEnv<T = string>(key: string, config: EnvConfig<T> = {}): T {
 	const { defaultValue, required = false, type = 'string' } = config
 
-	// @ts-expect-error - Insert mocked values from vitest test.
-	const env = globalThis.__VitestMockEnv ?? process.env
+	// @ts-expect-error - Insert mocked values from the bun test.
+	const env = globalThis.__BunTestMockEnv__ ?? process.env
 	const value = env[key]
 
 	if (value === undefined) {
@@ -115,9 +115,9 @@ export function getEnv<T = string>(key: string, config: EnvConfig<T> = {}): T {
  * @param required - Whether the environment variable is required
  * @returns The string value of the environment variable
  */
-export function getEnvString(key: string, defaultValue?: string, required = true): string {
+export function getEnvString(key: string, defaultValue?: string, required = true): string | never {
 	if (required === false && defaultValue === undefined) {
-		console.warn('When the env value is optional, a default value should be passed.')
+		throw new Error('Missing default value for optional env string.')
 	}
 	return getEnv<string>(key, { defaultValue: defaultValue ?? '', required, type: 'string' })
 }

@@ -142,24 +142,26 @@ export type EventhubSubscriptionLimited = {
 		path: string
 	}
 
-	ackDeadlineSeconds?: number | null
+	ackDeadlineSeconds: undefined | number | null
 	// biome-ignore lint/suspicious/noExplicitAny: here any is alright since we cannot reference the original type.
-	retryPolicy?: Record<PropertyKey, any> | null
-	serviceAccount?: string | null
+	retryPolicy: Record<PropertyKey, any> | null | undefined
+	serviceAccount: string | null | undefined
 
-	url?: string | null
-	contact?: string
-	institutionId?: string
+	url: string | null | undefined
+	contact: string | undefined
+	institutionId: string | undefined
 }
 
 export type EventhubSubscriptionWithLabels = EventhubSubscriptionLimited & {
-	labels?: {
-		/** Integer (as string) */
-		id: string
-		stage: string
-		'creator-slug': string
-		created: string
-	}
+	labels:
+		| {
+				/** Integer (as string) */
+				id: string
+				stage: string
+				'creator-slug': string
+				created: string
+		  }
+		| undefined
 }
 
 export type EventhubPluginMessage = {
