@@ -23,11 +23,10 @@ export const dtsKeys = getEnvBase64<DTSKeys>('DTS_KEYS')
 export const radioplayerAPIKeys = getEnvBase64<RadioplayerApiKeys>('RADIOPLAYER_API_KEYS')
 
 const DEFAULT_HTTP_PORT = 8080
-export const port = getEnvNumber('PORT', DEFAULT_HTTP_PORT)
+export const port = getEnvNumber('PORT', DEFAULT_HTTP_PORT) as number
 
 /**
  * Datadog tracer enabled (`DD_TRACER_ENABLED === 'true'`).
  * `false` by default.
- * @type {boolean}
  */
-export const tracerEnabled: boolean = getEnvBoolean('DD_TRACER_ENABLED', false)
+export const tracerEnabled = getEnvBoolean('DD_TRACER_ENABLED', false)

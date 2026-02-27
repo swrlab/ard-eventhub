@@ -1,10 +1,3 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
 import type { NextFunction, Response } from 'express'
 import { OAuth2Client } from 'google-auth-library'
@@ -14,7 +7,6 @@ import type { UserTicketRequest } from '#types'
 
 const authClient = new OAuth2Client()
 
-// set config
 const source = 'ingest/pubsub/verify'
 
 export default async (req: UserTicketRequest, res: Response, next: NextFunction) => {
@@ -29,7 +21,7 @@ export default async (req: UserTicketRequest, res: Response, next: NextFunction)
 			return res.sendStatus(401)
 		}
 
-		const [_ignore, idToken] = bearerMatch
+		const [_, idToken] = bearerMatch
 		if (!idToken) throw Error('No ID token could be found.')
 
 		// verify token, throws error if invalid

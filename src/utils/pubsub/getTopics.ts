@@ -1,6 +1,5 @@
 import { pubSubPrefix } from '#config'
 import pubSubClient from './_client.ts'
-import convertId from './convertId.ts'
 
 export default async () => {
 	const [allTopics] = await pubSubClient.getTopics()
@@ -15,7 +14,7 @@ export default async () => {
 
 		return {
 			type: 'PUBSUB',
-			id: convertId.decode(name).replace(pubSubPrefix, ''),
+			id: decodeURIComponent(name).replace(pubSubPrefix, ''),
 			name,
 			path: topic.name,
 			labels: topic.metadata?.labels,

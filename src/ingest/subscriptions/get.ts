@@ -50,7 +50,6 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 			})
 		}
 
-		// return data
 		return res.status(200).json(limitedSubscription)
 	} catch (error) {
 		logger.log({

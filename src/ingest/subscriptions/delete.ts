@@ -1,16 +1,10 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
 import type { Response } from 'express'
 import type { EventhubSubscriptionWithLabels, UserTokenRequestWithParams } from '#types'
 import datastore from '../../utils/datastore/index.ts'
 import deleteSubscription from '../../utils/pubsub/deleteSubscription.ts'
 import getSubscription from '../../utils/pubsub/getSubscription.ts'
+import { isCode5Error } from '../../utils/pubsub/publishMessage.ts'
 import response from '../../utils/response/index.ts'
 
 const source = 'ingest/subscriptions/delete'
@@ -84,11 +78,9 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 			throw new Error('The label id is missing in the subscriptions.')
 		}
 		// also delete from datastore
-		// TODO: why is the id parsed as a number?
 		const subscriptionId = Number.parseInt(fullSubscription.labels.id, 10)
 		await datastore.delete('subscriptions', subscriptionId.toString())
 
-		// log progress
 		logger.log({
 			level: 'info',
 			message: 'removed subscription',
@@ -101,7 +93,6 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 			},
 		})
 
-		// return data
 		return response.ok(req, res, { valid: true })
 	} catch (error) {
 		logger.log({
@@ -114,8 +105,4 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 
 		return response.internalServerError(req, res, error as Error)
 	}
-}
-
-function isCode5Error(e: unknown): e is { code: 5 } {
-	return typeof e === 'object' && e !== null && 'code' in e && (e as { code: unknown }).code === 5
 }

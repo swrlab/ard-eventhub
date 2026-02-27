@@ -22,16 +22,16 @@ export default async (email: string): Promise<void> => {
 			email,
 		}),
 	})
-	const text = await response.text()
-
-	logger.log({
-		source,
-		level: 'warning',
-		message: `failed with status > ${response.status}`,
-		data: { statusCode: response.status, response },
-	})
 
 	if (response.status !== 200) {
+		logger.log({
+			source,
+			level: 'warning',
+			message: `failed with status > ${response.status}`,
+			data: { statusCode: response.status, response },
+		})
+
+		const text = await response.text()
 		throw new Error(text)
 	}
 }

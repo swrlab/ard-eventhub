@@ -30,8 +30,7 @@ router.use(
 	})
 )
 
-// load response util
-import response from '../utils/response/index.ts'
+import { badRequest } from '../utils/response/index.ts'
 
 // register swagger endpoints
 router.get('/openapi/openapi.json', (_req: Request, res: Response) => res.json(swaggerDocument))
@@ -87,12 +86,11 @@ router.use((err: Record<PropertyKey, any>, req: Request, res: Response) => {
 	if (allowedErrors.includes(err.message)) useOriginalError = true
 	if (err.message.includes('must have required property')) useOriginalError = true
 
-	return response.badRequest(req, res, {
+	return badRequest(req, res, {
 		message: useOriginalError ? err.message : 'Bad request',
 		errors: useOriginalError ? err.errors : [],
 		status: err.status === 401 ? 401 : 400,
 	})
 })
 
-// export router object to server
 export default router

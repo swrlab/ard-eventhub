@@ -1,5 +1,3 @@
-import type { ArdInstitution, ArdPublisher } from './ard.ts'
-
 type EventhubTopic = {
 	id: string
 	name: string
@@ -121,13 +119,13 @@ export type EventhubTopicDatastore = {
 	name: EventhubTopic['name']
 
 	institution: {
-		id: ArdInstitution['id'] // TODO: or Number?
-		title: ArdInstitution['title']
+		id: string // ArdInstitution['id']
+		title: string // ArdInstitution['title']
 	}
 
 	publisher: {
-		id: ArdPublisher['id']
-		title: ArdPublisher['title']
+		id: string // ArdPublisher['id']
+		title: string // ArdPublisher['title']
 	}
 }
 
@@ -156,6 +154,7 @@ export type EventhubSubscriptionLimited = {
 
 export type EventhubSubscriptionWithLabels = EventhubSubscriptionLimited & {
 	labels?: {
+		/** Integer (as string) */
 		id: string
 		stage: string
 		'creator-slug': string

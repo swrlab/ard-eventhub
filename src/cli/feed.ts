@@ -1,5 +1,5 @@
 /**
- * @fileoverview this file creates a CLI for hashing ids
+ * @fileoverview CLI entry point that fetches the ARD feed and then exits.
  */
 
 import { exit } from 'node:process'

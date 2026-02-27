@@ -116,9 +116,10 @@ export function getEnv<T = string>(key: string, config: EnvConfig<T> = {}): T {
  * @returns The string value of the environment variable
  */
 export function getEnvString(key: string, defaultValue?: string, required = true): string {
-	if (required === false && defaultValue === undefined)
+	if (required === false && defaultValue === undefined) {
 		console.warn('When the env value is optional, a default value should be passed.')
-	return getEnv<string>(key, { defaultValue, required, type: 'string' })
+	}
+	return getEnv<string>(key, { defaultValue: defaultValue ?? '', required, type: 'string' })
 }
 
 /**
@@ -142,7 +143,7 @@ export function getEnvBase64<T>(key: string, defaultValue?: T, required = true):
  * @param required - Whether the environment variable is required
  * @returns The number value of the environment variable
  */
-export function getEnvNumber(key: string, defaultValue?: number, required = false): number {
+export function getEnvNumber(key: string, defaultValue?: number, required = false): number | undefined {
 	return getEnv<number>(key, { defaultValue, required, type: 'number' })
 }
 
@@ -154,7 +155,7 @@ export function getEnvNumber(key: string, defaultValue?: number, required = fals
  * @param required - Whether the environment variable is required
  * @returns The boolean value of the environment variable
  */
-export function getEnvBoolean(key: string, defaultValue?: boolean, required = false): boolean {
+export function getEnvBoolean(key: string, defaultValue?: boolean, required = false): boolean | undefined {
 	return getEnv<boolean>(key, { defaultValue, required, type: 'boolean' })
 }
 

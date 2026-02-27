@@ -7,7 +7,6 @@ import type {
 	Subscription,
 } from '#types'
 import datastore from '../datastore/index.ts'
-import convertId from './convertId.ts'
 
 export default async (
 	subscription: Subscription | ISubscription
@@ -20,7 +19,7 @@ export default async (
 		: (subscription as ISubscription)
 
 	const labels = metadata.labels as EventhubSubscriptionWithLabels['labels']
-	const lookup: EventhubSubscriptionDatastore = labels?.id
+	const lookup: EventhubSubscriptionDatastore | undefined = labels?.id
 		? await datastore.load('subscriptions', Number.parseInt(labels.id, 10))
 		: undefined
 
@@ -35,7 +34,7 @@ export default async (
 		path: subscription.name,
 
 		topic: {
-			id: convertId.decode(topicName).replace(pubSubPrefix, ''),
+			id: decodeURIComponent(topicName).replace(pubSubPrefix, ''),
 			name: topicName,
 			path: topic,
 		},

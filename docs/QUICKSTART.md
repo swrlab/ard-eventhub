@@ -162,17 +162,19 @@ Ein vereinfachtes Beispiel (Node.js mit Express): Die Google Cloud Sektion ["Aut
 
 ```js
 // load node packages
-const { OAuth2Client } = require('google-auth-library')
+import { OAuth2Client } from 'google-auth-library'
 const authClient = new OAuth2Client()
 
 // set received serviceAccount
 const serviceAccountEmail = 'somethin@something-else.iam.gserviceaccount.com'
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   try {
     // read token from header
     const bearer = req.header('Authorization')
-    const [, idToken] = bearer.match(/Bearer (.*)/)
+    const [_, idToken] = bearer.match(/Bearer (.*)/)
+
+    if (!idToken) throw Error('No ID token could be found.')
 
     // verify token, throws error if invalid
     const verification = await authClient.verifyIdToken({

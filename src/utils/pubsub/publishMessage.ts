@@ -52,7 +52,6 @@ export default async (topic: string, message: object, attributes: Record<Propert
 	return output
 }
 
-// TODO: move to separte util file (since it is reused in subscriptions/delete.ts)
-function isCode5Error(e: unknown): e is { code: 5 } {
+export function isCode5Error(e: unknown): e is { code: 5 } {
 	return typeof e === 'object' && e !== null && 'code' in e && (e as { code: unknown }).code === 5
 }

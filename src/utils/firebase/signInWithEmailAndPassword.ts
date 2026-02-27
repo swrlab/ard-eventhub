@@ -54,6 +54,6 @@ export default async (email: string, password: string) => {
 		})
 
 		// rethrow error
-		throw new Error('', { cause: error })
+		throw new Error('the request failed', { cause: error })
 	}
 }

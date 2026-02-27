@@ -1,24 +1,14 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
-import type { Request, Response } from 'express'
+import type { Request, Response } from '#types'
 
 import pubsub from '../../utils/pubsub/index.ts'
-import response from '../../utils/response/index.ts'
+import { internalServerError } from '../../utils/response/index.ts'
 
 const source = 'ingest/topics/list'
 
 export default async (req: Request, res: Response) => {
 	try {
-		// load all topics
 		const topics = await pubsub.getTopics()
-
-		// return data
 		return res.status(200).json(topics)
 	} catch (error) {
 		logger.log({
@@ -27,7 +17,6 @@ export default async (req: Request, res: Response) => {
 			source,
 			error,
 		})
-
-		return response.internalServerError(req, res, error as Error)
+		return internalServerError(req, res, error as Error)
 	}
 }
