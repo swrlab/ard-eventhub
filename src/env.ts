@@ -4,7 +4,7 @@ import { getEnvBase64, getEnvBoolean, getEnvNumber, getEnvString } from './utils
 // NOTE: all environment keys in this files are required and cause an error if missing.
 
 export const stage: Stage = getEnvString('STAGE') as Stage
-export const isLocal = getEnvBoolean('IS_LOCAL', false) as boolean
+export const isLocal = getEnvBoolean('IS_LOCAL', false)
 
 export const serviceName = getEnvString('SERVICE_NAME')
 export const ardFeedUrl = getEnvString('ARD_FEED_URL')
@@ -23,7 +23,7 @@ export const dtsKeys = getEnvBase64<DTSKeys>('DTS_KEYS')
 export const radioplayerAPIKeys = getEnvBase64<RadioplayerApiKeys>('RADIOPLAYER_API_KEYS')
 
 const DEFAULT_HTTP_PORT = 8080
-export const port = getEnvNumber('PORT', DEFAULT_HTTP_PORT) as number
+export const port = getEnvNumber('PORT', DEFAULT_HTTP_PORT)
 
 /**
  * Datadog tracer enabled (`DD_TRACER_ENABLED === 'true'`).

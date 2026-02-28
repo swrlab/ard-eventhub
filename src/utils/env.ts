@@ -170,21 +170,3 @@ export function getEnvBoolean(key: string, defaultValue?: boolean, required = fa
 export function getEnvJson<T>(key: string, defaultValue?: T, required = false): T {
 	return getEnv<T>(key, { defaultValue, required, type: 'json' })
 }
-
-// Old implementation: TODO: remove
-/**
- * Get list of required environment key values.
- * @throws if a key is missing
- * @param keys - List of required env keys.
- * @returns - Object with key-value pairs.
- */
-export const _getEnvVars = <T extends readonly string[]>(keys: T): { [K in T[number]]: string } | undefined => {
-	const missing = keys.find((key) => process.env[key] === undefined)
-	if (missing) throw new Error(`The required env var '${missing}' is missing.`)
-	// All keys exist, so we can safely cast
-	const result: { [K in T[number]]: string } = {} as { [K in T[number]]: string }
-	for (const key of keys) {
-		result[key as T[number]] = process.env[key] as string
-	}
-	return result
-}

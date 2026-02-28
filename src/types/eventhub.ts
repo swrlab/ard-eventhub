@@ -9,7 +9,7 @@ export type EventhubService = {
 	type: string
 	externalId: string
 	publisherId: string
-	id?: string // TODO: check this if it has not ne Nullable
+	id?: string
 	blocked?: string
 	topic?: EventhubTopic
 }

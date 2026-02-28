@@ -9,7 +9,7 @@ import { getEnvBoolean } from '../../env.ts'
 
 const source = 'utils/plugins/radioplayer/event'
 const PERMITTED_EXCLUDED_FIELDS = new Set(['imageUrl'])
-const RUN_IN_NON_PROD = getEnvBoolean('RADIOPLAYER_RUN_IN_NON_PROD', false) === true
+const RUN_IN_NON_PROD = getEnvBoolean('RADIOPLAYER_RUN_IN_NON_PROD', false)
 
 // see API docs: https://radioplayerworldwide.atlassian.net/wiki/spaces/RPC/pages/1920073729/Programmatic+Ingest+of+Station+Information#V2-Endpoints
 const RADIOPLAYER_API_URL = 'https://np-ingest.radioplayer.cloud'
