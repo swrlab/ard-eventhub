@@ -26,15 +26,15 @@ export default async (refreshToken: string) => {
 
 	// handle errors
 	if (response.status !== 200) {
+		const text = await response.text().catch(() => '')
 		logger.log({
 			source,
 			level: 'warning',
 			message: `failed with status > ${response.status}`,
-			data: { statusCode: response.status, response },
+			data: { statusCode: response.status, response: { statusText: response.statusText, text } },
 		})
 
-		const text = await response.text()
-		throw new Error(text)
+		throw new Error(text || 'Could not refresh token')
 	}
 
 	const json = await response.json()

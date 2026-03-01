@@ -24,10 +24,12 @@ export default async (req: Request, res: Response) => {
 		try {
 			login = await firebase.refreshToken(req.body.refreshToken)
 		} catch (error) {
-			return response.badRequest(req, res, { status: 500, message: `Could not refresh > ${error}` })
+			return response.badRequest(req, res, {
+				status: 500,
+				message: `Could not refresh login > ${(error as Error)?.message ?? error}`,
+			})
 		}
 
-		// return ok
 		const expiresIn = Number.parseInt(login.login.expires_in, 10)
 		return response.ok(req, res, {
 			expiresIn,

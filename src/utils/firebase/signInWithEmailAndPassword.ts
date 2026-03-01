@@ -30,11 +30,13 @@ export default async (email: string, password: string) => {
 		if (response.status !== 200) {
 			const message = `failed with status > ${response.status}`
 
+			const text = await response.text().catch(() => '')
+
 			logger.log({
 				source,
 				level: 'warning',
 				message,
-				data: { statusCode: response.status, response },
+				data: { statusCode: response.status, response: { statusText: response.statusText, text } },
 			})
 
 			throw new Error(message)
