@@ -1,13 +1,6 @@
-/*
+import type { Request, RequestError, Response } from '#types'
 
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
-import type { Request, Response } from 'express'
-
-export default (req: Request, res: Response, err: any) => {
+export default (req: Request, res: Response, err: RequestError) => {
 	try {
 		return res.status(err.status || 400).json({
 			...err.data,
@@ -15,7 +8,7 @@ export default (req: Request, res: Response, err: any) => {
 			errors: err.errors,
 			trace: req.headers['x-cloud-trace-context'] || null,
 		})
-	} catch (_error) {
+	} catch {
 		return res.sendStatus(500)
 	}
 }

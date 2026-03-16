@@ -1,20 +1,15 @@
-/*
-	ard-eventhub
-	by SWR Audio Lab
-*/
-
 import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
-import undici, { type Response } from 'undici'
-
-import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '@/types.eventhub.ts'
-import config from '../../../../config/index.ts'
-import livestreamMapping from '../../../../config/radioplayer-mapping.json5'
-import apiKeys from './api-keys.ts'
+import { defaultHeaders } from '#config'
+import { radioplayerAPIKeys, stage } from '#env'
+import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '#types'
+// NOTE: Node.js does not support importing .json5 files.
+import livestreamMapping from '../../../config/radioplayer-mapping.json5'
+import { getEnvBoolean } from '../../env.ts'
 
 const source = 'utils/plugins/radioplayer/event'
-const PERMITTED_EXCLUDED_FIELDS: string[] = ['imageUrl']
-const RUN_IN_NON_PROD = process.env.RADIOPLAYER_RUN_IN_NON_PROD === 'true'
+const PERMITTED_EXCLUDED_FIELDS = new Set(['imageUrl'])
+const RUN_IN_NON_PROD = getEnvBoolean('RADIOPLAYER_RUN_IN_NON_PROD', false)
 
 // see API docs: https://radioplayerworldwide.atlassian.net/wiki/spaces/RPC/pages/1920073729/Programmatic+Ingest+of+Station+Information#V2-Endpoints
 const RADIOPLAYER_API_URL = 'https://np-ingest.radioplayer.cloud'
@@ -51,26 +46,24 @@ const sendRadioplayerEvent = async (
 	}
 
 	// handle exclusions
-	if (Array.isArray(plugin.excludeFields) && plugin.excludeFields.length > 0) {
-		for (const field of plugin.excludeFields) {
-			const permittedExcludedField = PERMITTED_EXCLUDED_FIELDS[field as keyof typeof PERMITTED_EXCLUDED_FIELDS]
-			if (permittedExcludedField) {
-				url.searchParams.delete(permittedExcludedField)
-			}
+	for (const field of plugin.excludeFields ?? []) {
+		if (PERMITTED_EXCLUDED_FIELDS.has(field)) {
+			url.searchParams.delete(field)
 		}
 	}
 
 	// only send event in prod or non-prod if requested
-	if (config.stage === 'prod' || RUN_IN_NON_PROD) {
+	if (stage === 'prod' || RUN_IN_NON_PROD) {
 		// post event
 		const radioplayerConfig = {
 			method: 'POST',
 			signal: AbortSignal.timeout(7e3),
 			headers: {
+				...defaultHeaders,
 				'X-API-KEY': apiKey,
 			},
 		}
-		const posted = await undici.fetch(url.toString(), radioplayerConfig)
+		const posted = await globalThis.fetch(url.toString(), radioplayerConfig)
 		const response = await posted.text()
 
 		// log result
@@ -93,7 +86,7 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 			source,
 			data: { job },
 		})
-		return Promise.resolve(null)
+		return null
 	}
 
 	// only process music events
@@ -103,28 +96,28 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 			source,
 			data: { job },
 		})
-		return Promise.resolve(null)
+		return null
 	}
 
 	// reject if no artist or title is set
-	if (!event.artist || !event.title) {
+	if (!(event.artist && event.title)) {
 		logger.warning({
 			message: `Radioplayer skipping event (no artist or title) > ${event.services[0]?.publisherId}`,
 			source,
 			data: { job },
 		})
-		return Promise.resolve(null)
+		return null
 	}
 
 	// get API key for institution
-	const apiKey = apiKeys[institutionId]
+	const apiKey = radioplayerAPIKeys[institutionId]
 	if (!apiKey) {
 		logger.error({
 			message: `Radioplayer API key not found for institution > ${institutionId}`,
 			source,
 			data: { job },
 		})
-		return Promise.resolve(null)
+		return null
 	}
 
 	// process each service
@@ -174,6 +167,7 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 		let i = 0
 		for (const rpUid of rpUids) {
 			const startTime = getMs()
+			// biome-ignore lint/performance/noAwaitInLoops: here we make an exception
 			const { url, posted, response, wasPosted } = await sendRadioplayerEvent(rpUid, apiKey, event, plugin)
 			output.push({ url, posted, response, wasPosted })
 
@@ -204,5 +198,5 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 		}
 	}
 
-	return Promise.resolve(output)
+	return output
 }

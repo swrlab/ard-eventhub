@@ -5,10 +5,7 @@
 
 */
 
-import createNewTopic from './createNewTopic'
-import processServices from './processServices'
+import createNewTopic from './createNewTopic.ts'
+import processServices from './processServices.ts'
 
-export  {
-	createNewTopic,
-	processServices,
-}
+export { createNewTopic, processServices }

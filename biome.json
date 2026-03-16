@@ -1,7 +1,7 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.3.15/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.4.4/schema.json",
 	"files": {
-		"maxSize": 90485760
+		"maxSize": 2097152
 	},
 	"formatter": {
 		"indentStyle": "tab",
@@ -14,28 +14,74 @@
 			"semicolons": "asNeeded",
 			"trailingCommas": "es5"
 		},
-		"globals": ["Bun"]
+		"globals": ["Bun", "node"]
 	},
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"recommended": true,
-			"correctness": {
-				"noNodejsModules": "off"
+			"complexity": {
+				"noForEach": "error",
+				"noImplicitCoercions": "error",
+				"noUselessCatchBinding": "error",
+				"noUselessCatch": "error",
+				"noUselessUndefined": "error",
+				"noUselessStringConcat": "error",
+				"useSimplifiedLogicExpression": "error",
+				"useWhile": "error"
 			},
-			"performance": {},
+			"correctness": {
+				"noGlobalDirnameFilename": "error",
+				"noNodejsModules": "off",
+				"noUndeclaredDependencies": "error",
+				"noUndeclaredVariables": "error",
+				"noUnresolvedImports": "off",
+				"useJsonImportAttributes": "error",
+				"useImportExtensions": "off"
+			},
+			"nursery": {
+				"noForIn": "error",
+				"noEqualsToNull": "warn",
+				"noMisusedPromises": "error",
+				"noMultiAssign": "error",
+				"noMultiStr": "error",
+				"noProto": "error",
+				"noReturnAssign": "error",
+				"noShadow": "error",
+				"noUndeclaredEnvVars": "error",
+				"noUselessReturn": "error",
+				"useAwaitThenable": "error",
+				"useGlobalThis": "error",
+				"useSpread": "error"
+			},
+			"performance": {
+				"noAwaitInLoops": "error",
+				"noBarrelFile": "error",
+				"noNamespaceImport": "error",
+				"noDelete": "error",
+				"noReExportAll": "error"
+			},
 			"security": {},
+			"suspicious": {},
 			"style": {
+				"noCommonJs": "error",
+				"noDoneCallback": "error",
+				"noEnum": "error",
+				"noNamespace": "error",
 				"noParameterAssign": "error",
+				"noProcessEnv": "warn",
+				"noSubstr": "error",
+				"noUnusedTemplateLiteral": "error",
+				"noNegationElse": "error",
+				"noInferrableTypes": "error",
+				"noUselessElse": "error",
+				"useNumberNamespace": "error",
+				"useNodejsImportProtocol": "error",
 				"useAsConstAssertion": "error",
 				"useDefaultParameterLast": "error",
 				"useEnumInitializers": "error",
 				"useSelfClosingElements": "error",
-				"useSingleVarDeclarator": "error",
-				"noUnusedTemplateLiteral": "error",
-				"useNumberNamespace": "error",
-				"noInferrableTypes": "error",
-				"noUselessElse": "error"
+				"useSingleVarDeclarator": "error"
 			}
 		}
 	},

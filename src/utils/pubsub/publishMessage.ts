@@ -1,35 +1,32 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
 
-import config from '../../../config'
-import pubSubClient from './_client'
+import { version } from '#config'
+import { stage } from '#env'
+import pubSubClient from './_client.ts'
 
 // set local config
 const source = 'pubsub.publishMessage'
 
-export default async (topic: string, message: object, attributes: object) => {
+export default async (topic: string, message: object, attributes: Record<PropertyKey, string>) => {
 	// initialize output
 	let output: string
 
 	// add runtime information as attributes
 	const customAttributes = {
 		...attributes,
-		stage: config.stage ?? '',
-		version: config.version,
+		stage,
+		version,
 	}
 
 	// send message for each topic
 	try {
 		// attempt to send message
-		output = await pubSubClient.topic(topic).publishMessage({ json: message, attributes: customAttributes })
+		output = await pubSubClient.topic(topic).publishMessage({
+			json: message,
+			attributes: customAttributes,
+		})
 	} catch (error) {
-		if (error?.code === 5) {
+		if (isCode5Error(error)) {
 			output = 'TOPIC_NOT_FOUND'
 
 			logger.log({
@@ -52,5 +49,9 @@ export default async (topic: string, message: object, attributes: object) => {
 		}
 	}
 
-	return Promise.resolve(output)
+	return output
+}
+
+export function isCode5Error(e: unknown): e is { code: 5 } {
+	return typeof e === 'object' && e !== null && 'code' in e && (e as { code: unknown }).code === 5
 }

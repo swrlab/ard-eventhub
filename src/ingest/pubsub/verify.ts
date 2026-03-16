@@ -1,37 +1,28 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
 import type { NextFunction, Response } from 'express'
 import { OAuth2Client } from 'google-auth-library'
+import { serviceAccountEmail } from '#env'
 
-import type UserTicketRequest from './userTicketRequest.ts'
+import type { UserTicketRequest } from '#types'
 
 const authClient = new OAuth2Client()
 
-// set config
-const serviceAccountEmail = process.env.PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL
 const source = 'ingest/pubsub/verify'
 
 export default async (req: UserTicketRequest, res: Response, next: NextFunction) => {
 	try {
 		// read token from header
 		const bearer = req.header('Authorization')
+		const bearerMatch = bearer?.match(/Bearer (.*)/)
 
 		// check token email vs. subscription email
-		if (!bearer || !bearer.match(/Bearer (.*)/)) {
+		if (!bearerMatch) {
 			// user failed to provide auth header
 			return res.sendStatus(401)
 		}
 
-		// parse token
-		const [_ignore, idToken] = bearer.match(/Bearer (.*)/) || []
-
-		if (idToken == null) throw Error('No ID token could be found.')
+		const [_match, idToken] = bearerMatch
+		if (!idToken) throw Error('No ID token could be found.')
 
 		// verify token, throws error if invalid
 		req.user = await authClient.verifyIdToken({

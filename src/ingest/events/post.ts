@@ -1,22 +1,13 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
+import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
 import type { Response } from 'express'
-import { DateTime } from 'luxon'
 import { ulid } from 'ulid'
-
-import type { EventhubPluginMessage, EventhubV1RadioPostBody } from '@/types.eventhub.ts'
-import config from '../../../config/index.ts'
+import { pubSubTopicSelf } from '#config'
+import type { EventhubPluginMessage, EventhubV1RadioPostBody, UserTokenRequest } from '#types'
 import { createNewTopic, processServices } from '../../utils/events/index.ts'
 import pubsub from '../../utils/pubsub/index.ts'
 import publishPubSubMessage from '../../utils/pubsub/publishMessage.ts'
 import response from '../../utils/response/index.ts'
-import type UserTokenRequest from '../auth/middleware/userTokenRequest.ts'
 
 const source = 'ingest/events/post'
 const DEFAULT_ZONE = 'Europe/Berlin'
@@ -32,25 +23,30 @@ export default async (req: UserTokenRequest, res: Response) => {
 				level: 'notice',
 				message: 'user not found',
 				source,
-				data: { ...req.headers, authorization: 'hidden' },
+				data: {
+					...req.headers,
+					authorization: 'hidden',
+				},
 			})
 			return response.internalServerError(req, res, new Error('User not found'))
 		}
 
 		// fetch inputs
-		const { eventName } = req.params
-		const start = DateTime.fromISO(req.body.start, {
-			zone: DEFAULT_ZONE,
-		})
-		const pluginMessages = []
-
+		const { eventName: eventNameParam } = req.params
 		// check if event name is present
-		if (!eventName) {
+		if (!eventNameParam) {
 			return response.badRequest(req, res, {
 				status: 400,
 				message: 'Event name not found',
 			})
 		}
+
+		const eventName = eventNameParam as string
+
+		const start = DateTime.fromISO(req.body.start, {
+			zone: DEFAULT_ZONE,
+		})
+		const pluginMessages = []
 
 		// check eventName consistency
 		if (req.body?.event && req.body.event !== eventName) {
@@ -196,7 +192,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 					}
 
 					// try sending message
-					const messageId = await publishPubSubMessage(config.pubSubTopicSelf, pluginMessage, attributes)
+					const messageId = await publishPubSubMessage(pubSubTopicSelf, pluginMessage, attributes)
 
 					// add to output
 					pluginMessages.push({
@@ -212,7 +208,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 			statuses: {
 				published: message.services.filter((service) => service.topic?.messageId).length,
 				blocked: message.services.filter((service) => service.blocked).length,
-				failed: message.services.filter((service) => !service.topic?.messageId && !service.blocked).length,
+				failed: message.services.filter((service) => !(service.topic?.messageId || service.blocked)).length,
 			},
 			plugins: pluginMessages,
 			event: message,
@@ -226,7 +222,6 @@ export default async (req: UserTokenRequest, res: Response) => {
 			data: { ...data, body: req.body, isDtsPluginSet, isRadioplayerPluginSet },
 		})
 
-		// return ok
 		return response.ok(req, res, data, 201)
 	} catch (error) {
 		logger.log({

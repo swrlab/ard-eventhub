@@ -3,9 +3,8 @@ import { exitWithError } from '@frytg/check-required-env/exit'
 import { getRequiredEnv } from '@frytg/check-required-env/get'
 import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
-import { fetch } from 'undici'
 
-import type { ArdFeed, ArdLivestream } from '@/types.ard.ts'
+import type { ArdFeed, ArdLivestream } from '#types'
 
 const ARD_FEED_URL = getRequiredEnv('ARD_FEED_URL')
 const DOWNLOAD_TO_FILE = false
@@ -35,14 +34,16 @@ export let ardFeed: ArdFeed | null = null
 export const getARDFeed = async () => {
 	try {
 		// download ard feed
-		const res = await fetch(ARD_FEED_URL, { signal: AbortSignal.timeout(10e3) })
+		const res = await globalThis.fetch(ARD_FEED_URL, {
+			signal: AbortSignal.timeout(10e3),
+		})
 
 		// check api
-		if (!res.ok || res.status !== 200) return exitWithError(`API is not available (${res.status})`)
+		if (res.status !== 200) return exitWithError(`API is not available (${res.status})`)
 
 		// parse reponse
-		const feed: ArdFeed = (await res.json()) as ArdFeed
-		if (!feed?.items || !Array.isArray(feed.items)) return exitWithError('Feed is not an array')
+		const feed = (await res.json()) as ArdFeed
+		if (!(feed?.items && Array.isArray(feed.items))) return exitWithError('Feed is not an array')
 
 		// check integrity of feed length
 		const feedItemCount = feed.items.length
@@ -99,7 +100,7 @@ export const getARDFeed = async () => {
 
 		// save to local storage
 		if (DOWNLOAD_TO_FILE) {
-			fs.writeFileSync(`${__dirname}/../data/ard-core-livestreams.json`, JSON.stringify(feed, null, '\t'))
+			fs.writeFileSync(`${import.meta.dirname}/../data/ard-core-livestreams.json`, JSON.stringify(feed, null, '\t'))
 		}
 
 		logger.log({

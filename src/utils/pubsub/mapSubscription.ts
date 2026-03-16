@@ -1,66 +1,67 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
-import type { Subscription } from '@google-cloud/pubsub'
-import type { google } from '@google-cloud/pubsub/build/protos/protos'
-
+import { pubSubPrefix } from '#config'
 import type {
 	EventhubSubscriptionDatastore,
 	EventhubSubscriptionLimited,
 	EventhubSubscriptionWithLabels,
-} from '@/types.eventhub'
-import config from '../../../config'
-import datastore from '../datastore'
-import convertId from './convertId'
+	ISubscription,
+	Subscription,
+} from '#types'
+import datastore from '../datastore/index.ts'
 
 export default async (
-	subscription: Subscription | (google.pubsub.v1.ISubscription & { metadata: any })
-): Promise<{ limited: EventhubSubscriptionLimited; full: EventhubSubscriptionWithLabels }> => {
-	// remap vars to metadata object
-	// this is needed since pubsub feedback from new subscriptions is slightly different
-	if (!subscription.metadata) {
-		subscription.metadata = { ...subscription } as google.pubsub.v1.ISubscription
+	subscription: Subscription | ISubscription
+): Promise<{
+	limited: EventhubSubscriptionLimited
+	full: EventhubSubscriptionWithLabels
+}> => {
+	const metadata = isSubscription(subscription)
+		? (subscription.metadata as ISubscription)
+		: (subscription as ISubscription)
+
+	const labels = metadata.labels as EventhubSubscriptionWithLabels['labels']
+	const lookup: EventhubSubscriptionDatastore | undefined = labels?.id
+		? await datastore.load('subscriptions', Number.parseInt(labels.id, 10))
+		: undefined
+
+	const topic = metadata.topic
+	if (!topic) {
+		throw new Error('The topic is missing from the subscription metadata.')
 	}
-
-	// preset vars
-	const lookup: EventhubSubscriptionDatastore | null = subscription.metadata?.labels?.id
-		? await datastore.load('subscriptions', Number.parseInt(subscription.metadata.labels.id, 10))
-		: null
-
+	const topicName = topic.split('/').pop()
+	if (!topicName) {
+		throw new Error(`The topicName is missing from the topic '${topic}'.`)
+	}
 	// remap values
-	const topicName = subscription.metadata?.topic?.split('/').pop()
 	const limited: EventhubSubscriptionLimited = {
 		type: 'PUBSUB',
-		method: subscription.metadata?.pushConfig?.pushEndpoint ? 'PUSH' : 'PULL',
+		method: metadata.pushConfig?.pushEndpoint ? 'PUSH' : 'PULL',
 
 		name: subscription.name?.split('/').pop(),
 		path: subscription.name,
 
 		topic: {
-			id: convertId.decode(topicName).replace(config.pubSubPrefix, ''),
+			id: decodeURIComponent(topicName).replace(pubSubPrefix, ''),
 			name: topicName,
-			path: subscription.metadata?.topic,
+			path: topic,
 		},
 
-		ackDeadlineSeconds: subscription.metadata?.ackDeadlineSeconds,
-		retryPolicy: subscription.metadata?.retryPolicy,
-		serviceAccount: subscription.metadata?.pushConfig?.oidcToken?.serviceAccountEmail ?? null,
+		ackDeadlineSeconds: metadata.ackDeadlineSeconds,
+		retryPolicy: metadata.retryPolicy,
+		serviceAccount: metadata.pushConfig?.oidcToken?.serviceAccountEmail,
 
-		url: subscription.metadata?.pushConfig?.pushEndpoint ?? null,
-		contact: lookup?.contact ?? null,
-		institutionId: lookup?.institutionId ?? null,
+		url: metadata.pushConfig?.pushEndpoint,
+		contact: lookup?.contact,
+		institutionId: lookup?.institutionId,
 	}
 
 	const full: EventhubSubscriptionWithLabels = {
 		...limited,
-
-		labels: subscription.metadata?.labels,
+		labels,
 	}
 
-	// return data
-	return Promise.resolve({ limited, full })
+	return { limited, full }
+}
+
+function isSubscription(s: Subscription | ISubscription): s is Subscription {
+	return 'metadata' in s && Boolean(s.metadata)
 }

@@ -1,39 +1,39 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
+import { getNow } from '@frytg/dates'
 import logger from '@frytg/logger'
 import type { Request, Response } from 'express'
 import type { JwtPayload } from 'jsonwebtoken'
-import { DateTime } from 'luxon'
-
-import firebase from '../../../utils/firebase'
-import response from '../../../utils/response'
+import firebase from '../../../utils/firebase/index.ts'
+import response from '../../../utils/response/index.ts'
 
 const source = 'ingest/auth/refresh'
+
+type JwtLogin = {
+	expires_in: string
+	id_token: string
+	refresh_token: string
+}
 
 export default async (req: Request, res: Response) => {
 	try {
 		let login: Awaited<{
 			user: JwtPayload | string | null
-			login: any
+			login: JwtLogin
 		}>
 
 		// swap previously received refresh token for new id token
 		try {
 			login = await firebase.refreshToken(req.body.refreshToken)
-		} catch (_error) {
-			return response.badRequest(req, res, { status: 500 })
+		} catch (error) {
+			return response.badRequest(req, res, {
+				status: 500,
+				message: `Could not refresh login > ${(error as Error)?.message ?? error}`,
+			})
 		}
 
-		// return ok
 		const expiresIn = Number.parseInt(login.login.expires_in, 10)
 		return response.ok(req, res, {
 			expiresIn,
-			expires: DateTime.now().plus({ seconds: expiresIn }).toISO(),
+			expires: getNow().plus({ seconds: expiresIn }).toISO(),
 
 			token: login.login.id_token,
 			refreshToken: login.login.refresh_token,

@@ -1,22 +1,12 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
-// load node utils
+import { DateTime } from '@frytg/dates'
 import slug from 'slug'
-import { DateTime } from 'luxon'
+import { projectId, stage } from '#env'
+import type { EventhubTopicDatastore, ITopic } from '#types'
+import publisherClient from './_publisherClient.ts'
 
-// load pubsub for internal queues
-import publisherClient from './_publisherClient'
-import config from '../../../config'
-
-export default async (newTopic: any) => {
-	// create new topic
-	const topic = {
-		name: `projects/${process.env.GCP_PROJECT_ID}/topics/${newTopic.name}`,
+export default async (newTopic: EventhubTopicDatastore & { id: string }) => {
+	const topic: ITopic = {
+		name: `projects/${projectId}/topics/${newTopic.name}`,
 		labels: {
 			created: DateTime.now().toFormat('yyyy-LL-dd'),
 			'creator-slug': slug(newTopic.creator),
@@ -26,7 +16,7 @@ export default async (newTopic: any) => {
 			'institution-slug': slug(newTopic.institution.title),
 			'publisher-slug': slug(newTopic.publisher.title),
 
-			stage: config.stage,
+			stage,
 		},
 	}
 

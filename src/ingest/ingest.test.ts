@@ -9,11 +9,12 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: ok */
 
 import { beforeAll, describe, expect, it } from 'bun:test'
+import process from 'node:process'
+import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
-import { DateTime } from 'luxon'
 import request, { type Response } from 'supertest'
 
-import { default as server } from './index'
+import server from './index.ts'
 
 const exitWithError = (message: string) => {
 	logger.log({
@@ -45,7 +46,7 @@ function isJson(item: any) {
 	let value = typeof item !== 'string' ? JSON.stringify(item) : item
 	try {
 		value = JSON.parse(value)
-	} catch (_e) {
+	} catch {
 		return false
 	}
 
@@ -233,6 +234,7 @@ describe(`POST ${eventPath}`, () => {
 	})
 
 	it('publish a new event with invalid externalId in references', async () => {
+		// @ts-expect-error - we know that the object won't be null
 		event.references[1].externalId = null
 		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
 		testResponse(res, 400)

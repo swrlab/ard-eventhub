@@ -6,9 +6,7 @@
 */
 
 import logger from '@frytg/logger'
-import type { Response } from 'express'
-
-import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
+import type { Response, UserTokenRequest } from '#types'
 import badRequest from '../badRequest.ts'
 
 const source = 'utils.response.errors.expiredStartTime'

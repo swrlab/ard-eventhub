@@ -1,27 +1,19 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
-import { createHashedId } from '@swrlab/utils/packages/ard'
-
-import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
-import type { EventhubService } from '@/types.eventhub.ts'
-import config from '../../../config'
+// @ts-expect-error - The package does not yet have types.
+import { createHashedId } from '@swrlab/utils/packages/ard/index.js'
+import { coreIdPrefixes } from '#config'
+import type { EventhubService, UserTokenRequest } from '#types'
 import { getPublisherById } from '../ard-core.ts'
-import pubsub from '../pubsub'
+import pubsub from '../pubsub/index.ts'
 
 const source = 'utils.events.processServices'
-const URN_PUBLISHER_PREFIX = config.coreIdPrefixes.Publisher
+const URN_PUBLISHER_PREFIX = coreIdPrefixes.Publisher
 const URN_PUBLISHER_REGEX = /(?=urn:ard:publisher:[a-z0-9]{16})/g
 
 export default async (service: EventhubService, req: UserTokenRequest) => {
 	// fetch prefix from configured list
-	const type = service.type as keyof typeof config.coreIdPrefixes
-	let urnPrefix = config.coreIdPrefixes[type]
+	const type = service.type as keyof typeof coreIdPrefixes
+	let urnPrefix = coreIdPrefixes[type]
 
 	// add a different suffix for radio text topics to not confuse subscribers with new event
 	if (req.body.event === 'de.ard.eventhub.v1.radio.text') {

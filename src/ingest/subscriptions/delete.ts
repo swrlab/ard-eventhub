@@ -1,41 +1,39 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
 import type { Response } from 'express'
-
-import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
-import type { EventhubSubscriptionWithLabels } from '@/types.eventhub.ts'
+import type { EventhubSubscriptionWithLabels, UserTokenRequestWithParams } from '#types'
 import datastore from '../../utils/datastore/index.ts'
 import deleteSubscription from '../../utils/pubsub/deleteSubscription.ts'
 import getSubscription from '../../utils/pubsub/getSubscription.ts'
+import { isCode5Error } from '../../utils/pubsub/publishMessage.ts'
 import response from '../../utils/response/index.ts'
 
 const source = 'ingest/subscriptions/delete'
 
-export default async (req: UserTokenRequest, res: Response) => {
+export default async (req: UserTokenRequestWithParams<{ subscriptionName?: string }>, res: Response) => {
 	try {
 		// preset vars
 		const { subscriptionName } = req.params
 
 		// check if subscription name is present
 		if (!subscriptionName) {
-			return response.badRequest(req, res, { status: 400, message: 'Subscription name is required' })
+			return response.badRequest(req, res, {
+				status: 400,
+				message: 'Subscription name is required',
+			})
 		}
 
 		// check if user is present
 		if (!req.user) {
-			return response.badRequest(req, res, { status: 401, message: 'User not found' })
+			return response.badRequest(req, res, {
+				status: 401,
+				message: 'User not found',
+			})
 		}
 
 		// load single subscription to get owner
 		let fullSubscription: EventhubSubscriptionWithLabels
 		try {
-			const subscription = await getSubscription(subscriptionName)
+			const subscription = await getSubscription(subscriptionName as string)
 			fullSubscription = subscription.full
 		} catch (error) {
 			logger.log({
@@ -46,7 +44,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 				data: { subscriptionName },
 			})
 
-			if (error.code === 5) {
+			if (isCode5Error(error)) {
 				// pubsub error code 5 seems to be 'Resource not found'
 				return response.notFound(req, res, {
 					status: 404,
@@ -73,6 +71,10 @@ export default async (req: UserTokenRequest, res: Response) => {
 			})
 		}
 
+		if (!fullSubscription.labels?.id) {
+			throw new Error('The label id is missing in the subscriptions.')
+		}
+
 		// request actual deletion
 		await deleteSubscription(subscriptionName)
 
@@ -80,15 +82,18 @@ export default async (req: UserTokenRequest, res: Response) => {
 		const subscriptionId = Number.parseInt(fullSubscription.labels.id, 10)
 		await datastore.delete('subscriptions', subscriptionId.toString())
 
-		// log progress
 		logger.log({
 			level: 'info',
 			message: 'removed subscription',
 			source,
-			data: { email: req.user.email, subscriptionName, subscriptionId, fullSubscription },
+			data: {
+				email: req.user.email,
+				subscriptionName,
+				subscriptionId,
+				fullSubscription,
+			},
 		})
 
-		// return data
 		return response.ok(req, res, { valid: true })
 	} catch (error) {
 		logger.log({

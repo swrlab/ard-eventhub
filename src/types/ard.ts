@@ -1,4 +1,8 @@
-export type ArdBinary = {
+/**
+ * @fileoverview ARD Livestream Feed Types
+ */
+
+type ArdBinary = {
 	coremediaId: string
 	href: string
 	availableFrom: string
@@ -12,7 +16,7 @@ export type ArdBinary = {
 	audioCodec: string
 }
 
-export type ArdImage = {
+type ArdImage = {
 	id: string
 	url: string
 	aspectRatio: string

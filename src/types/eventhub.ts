@@ -1,15 +1,17 @@
+type EventhubTopic = {
+	id: string
+	name: string
+	status?: string
+	messageId?: string | null
+}
+
 export type EventhubService = {
 	type: string
 	externalId: string
 	publisherId: string
-	id?: string // TODO check this
+	id?: string
 	blocked?: string
-	topic?: {
-		id: string
-		name: string
-		status?: string
-		messageId?: string | null
-	}
+	topic?: EventhubTopic
 }
 
 export type EventhubPlugin = {
@@ -28,7 +30,7 @@ export type EventhubPlugin = {
 	excludeFields?: string[]
 }
 
-export type EventhubMedia = {
+type EventhubMedia = {
 	type: string
 	url: string
 	templateUrl: string | null
@@ -92,7 +94,7 @@ export type EventhubV1RadioPostBody = EventhubV1RadioPostBodyInput & {
 }
 
 export type EventhubSubscriptionDatastore = {
-	id: string | undefined // dynamically set by datastore
+	id?: string | number // dynamically set by datastore
 
 	name: string
 	type: string
@@ -104,6 +106,27 @@ export type EventhubSubscriptionDatastore = {
 	creator: string
 	institutionId: string
 	created: string
+}
+
+export type EventhubTopicDatastore = {
+	// id: string // dynamically set by datastore
+
+	created: string // ISO Date
+	creator: string // email
+
+	coreId: EventhubTopic['id']
+	externalId: EventhubService['externalId']
+	name: EventhubTopic['name']
+
+	institution: {
+		id: string // ArdInstitution['id']
+		title: string // ArdInstitution['title']
+	}
+
+	publisher: {
+		id: string // ArdPublisher['id']
+		title: string // ArdPublisher['title']
+	}
 }
 
 export type EventhubSubscriptionLimited = {
@@ -119,22 +142,26 @@ export type EventhubSubscriptionLimited = {
 		path: string
 	}
 
-	ackDeadlineSeconds: number
-	retryPolicy: string
-	serviceAccount: string
+	ackDeadlineSeconds: undefined | number | null
+	// biome-ignore lint/suspicious/noExplicitAny: here any is alright since we cannot reference the original type.
+	retryPolicy: Record<PropertyKey, any> | null | undefined
+	serviceAccount: string | null | undefined
 
-	url: string
-	contact: string | null
-	institutionId: string | null
+	url: string | null | undefined
+	contact: string | undefined
+	institutionId: string | undefined
 }
 
 export type EventhubSubscriptionWithLabels = EventhubSubscriptionLimited & {
-	labels: {
-		id: string
-		stage: string
-		'creator-slug': string
-		created: string
-	}
+	labels:
+		| {
+				/** Integer (as string) */
+				id: string
+				stage: string
+				'creator-slug': string
+				created: string
+		  }
+		| undefined
 }
 
 export type EventhubPluginMessage = {

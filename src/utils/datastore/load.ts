@@ -1,21 +1,12 @@
-/*
+import { stage } from '#env'
+import datastoreClient from './_client.ts'
 
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
-import config from '../../../config'
-import datastoreClient from './_client'
-
-export default async (kind: string, id: any) => {
-	// set key
+export default async (kind: string, id: string | number) => {
 	const key = datastoreClient.key({
-		namespace: config.stage,
+		namespace: stage,
 		path: id ? [kind, id] : [kind],
 	})
 
-	// save data
 	const [data] = await datastoreClient.get(key)
 
 	// insert key
@@ -25,6 +16,5 @@ export default async (kind: string, id: any) => {
 		data.id = key.name
 	}
 
-	// return data
-	return Promise.resolve(data)
+	return data
 }
