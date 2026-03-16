@@ -37,7 +37,7 @@ ARD Core IDs sind im externen System bereits gemappt. Änderungen an Ihren IDs (
 
 ## Radioplayer
 
-Das Radioplayer-Plugin sendet Now-Playing-Metadaten (aktuell spielende Titel) an die Radioplayer-Plattform. Es verarbeitet ausschließlich Musik-Events (`type: music`) vom Typ `de.ard.eventhub.v1.radio.track.playing`.
+Das Radioplayer-Plugin sendet Now-Playing-Metadaten (aktuell spielende Titel) an die Radioplayer-Plattform (https://play.radioplayer.org). Es verarbeitet ausschließlich Musik-Events (`type: music`) vom Typ `de.ard.eventhub.v1.radio.track.playing`.
 
 ### Radioplayer Opt-out
 
