@@ -39,7 +39,7 @@
 		"@google-cloud/secret-manager": "^6.1.1",
 		"@swrlab/utils": "^2.2.0",
 		"@types/jest": "^30.0.0",
-		"@types/supertest": "^6.0.3",
+		"@types/supertest": "^7.2.0",
 		"compression": "^1.8.1",
 		"dd-trace": "^5.86.0",
 		"dotenv": "^17.2.4",
