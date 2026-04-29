@@ -10,8 +10,10 @@ import type { Request, Response } from 'express'
 import type { JwtPayload } from 'jsonwebtoken'
 import { DateTime } from 'luxon'
 
-import firebase from '../../../utils/firebase'
-import response from '../../../utils/response'
+import firebaseSignIn from '../../../utils/firebase/signInWithEmailAndPassword'
+import responseOk from '../../../utils/response/ok.ts'
+import responseBadRequest from '../../../utils/response/badRequest.ts'
+import responseInternalServerError from '../../../utils/response/internalServerError.ts'
 
 const source = 'ingest/auth/login'
 
@@ -21,14 +23,14 @@ export default async (req: Request, res: Response) => {
 
 		// send email + password for verification, receive login and user object
 		try {
-			login = await firebase.signInWithEmailAndPassword(req.body.email, req.body.password)
+			login = await firebaseSignIn(req.body.email, req.body.password)
 		} catch (_error) {
-			return response.badRequest(req, res, { status: 500 })
+			return responseBadRequest(req, res, { status: 500 })
 		}
 
 		// return ok
 		const expiresIn = Number.parseInt(login.login.expiresIn, 10)
-		return response.ok(req, res, {
+		return responseOk(req, res, {
 			expiresIn,
 			expires: DateTime.now().plus({ seconds: expiresIn }).toISO(),
 
@@ -46,6 +48,6 @@ export default async (req: Request, res: Response) => {
 			data: { headers: req.headers },
 		})
 
-		return response.internalServerError(req, res, error as Error)
+		return responseInternalServerError(req, res, error as Error)
 	}
 }
