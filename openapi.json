@@ -1,5 +1,5 @@
 {
-	"openapi": "3.0.4",
+	"openapi": "3.0.3",
 	"info": {
 		"title": "ARD Eventhub",
 		"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
@@ -11,7 +11,7 @@
 			"name": "European Union Public License 1.2",
 			"url": "https://spdx.org/licenses/EUPL-1.2.html"
 		},
-		"version": "2.3.3"
+		"version": "2.3.4"
 	},
 	"externalDocs": {
 		"description": "ARD Eventhub Documentation",
