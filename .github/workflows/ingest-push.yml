@@ -7,6 +7,7 @@ on:
       - dev/*
   pull_request:
     types: [closed]
+  workflow_dispatch:
 
 env:
   IMAGE_NAME: ard-eventhub-europe-west3/ingest
@@ -15,7 +16,7 @@ env:
 jobs:
   security:
     name: Check permissions for action runs
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true || github.event_name == 'push'
     steps:
       - run: |
@@ -23,7 +24,7 @@ jobs:
 
   test:
     needs: security
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: 👀 Checkout Code
         uses: actions/checkout@v6
@@ -61,7 +62,7 @@ jobs:
         run: bun run test
 
   docker:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: test
     outputs:
       VERSION: ${{ steps.push.outputs.VERSION }}
@@ -140,7 +141,7 @@ jobs:
     if: github.event.pull_request.merged == true
     environment: dev
     needs: docker
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: 🚀 Trigger deployment to dev
         run: |
@@ -155,7 +156,7 @@ jobs:
     if: github.event.pull_request.merged == true
     environment: test
     needs: docker
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: 🚀 Trigger deployment to test
         run: |
@@ -170,7 +171,7 @@ jobs:
     if: github.event.pull_request.merged == true
     environment: beta
     needs: docker
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: 🚀 Trigger deployment to beta
         run: |
