@@ -14,7 +14,7 @@ import type {
 	EventhubSubscriptionWithLabels,
 } from '@/types.eventhub'
 import config from '../../../config'
-import datastore from '../datastore'
+import datastoreLoad from '../datastore/load.ts'
 import convertId from './convertId'
 
 export default async (
@@ -28,7 +28,7 @@ export default async (
 
 	// preset vars
 	const lookup: EventhubSubscriptionDatastore | null = subscription.metadata?.labels?.id
-		? await datastore.load('subscriptions', Number.parseInt(subscription.metadata.labels.id, 10))
+		? await datastoreLoad('subscriptions', Number.parseInt(subscription.metadata.labels.id, 10))
 		: null
 
 	// remap values

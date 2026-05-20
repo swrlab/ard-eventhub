@@ -10,7 +10,7 @@ import type { Response } from 'express'
 
 import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 import getSubscriptions from '../../utils/pubsub/getSubscriptions.ts'
-import response from '../../utils/response/index.ts'
+import responseInternalServerError from '../../utils/response/internalServerError.ts'
 
 const source = 'ingest/subscriptions/list'
 
@@ -24,7 +24,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 				source,
 				data: { ...req.headers, authorization: 'hidden' },
 			})
-			return response.internalServerError(req, res, new Error('User not found'))
+			return responseInternalServerError(req, res, new Error('User not found'))
 		}
 
 		// load all subscriptions
@@ -43,6 +43,6 @@ export default async (req: UserTokenRequest, res: Response) => {
 			error,
 		})
 
-		return response.internalServerError(req, res, error as Error)
+		return responseInternalServerError(req, res, error as Error)
 	}
 }

@@ -8,15 +8,15 @@
 import logger from '@frytg/logger'
 import type { Request, Response } from 'express'
 
-import pubsub from '../../utils/pubsub'
-import response from '../../utils/response'
+import pubsubGetTopics from '../../utils/pubsub/getTopics'
+import responseInternalServerError from '../../utils/response/internalServerError'
 
 const source = 'ingest/topics/list'
 
 export default async (req: Request, res: Response) => {
 	try {
 		// load all topics
-		const topics = await pubsub.getTopics()
+		const topics = await pubsubGetTopics()
 
 		// return data
 		return res.status(200).json(topics)
@@ -28,6 +28,6 @@ export default async (req: Request, res: Response) => {
 			error,
 		})
 
-		return response.internalServerError(req, res, error as Error)
+		return responseInternalServerError(req, res, error as Error)
 	}
 }

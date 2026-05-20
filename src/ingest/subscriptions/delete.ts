@@ -10,10 +10,13 @@ import type { Response } from 'express'
 
 import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
 import type { EventhubSubscriptionWithLabels } from '@/types.eventhub.ts'
-import datastore from '../../utils/datastore/index.ts'
+import datastoreDelete from '../../utils/datastore/delete.ts'
 import deleteSubscription from '../../utils/pubsub/deleteSubscription.ts'
 import getSubscription from '../../utils/pubsub/getSubscription.ts'
-import response from '../../utils/response/index.ts'
+import responseOk from '../../utils/response/ok.ts'
+import responseBadRequest from '../../utils/response/badRequest.ts'
+import responseInternalServerError from '../../utils/response/internalServerError.ts'
+import responseNotFound from '../../utils/response/notFound.ts'
 
 const source = 'ingest/subscriptions/delete'
 
@@ -24,12 +27,12 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		// check if subscription name is present
 		if (!subscriptionName) {
-			return response.badRequest(req, res, { status: 400, message: 'Subscription name is required' })
+			return responseBadRequest(req, res, { status: 400, message: 'Subscription name is required' })
 		}
 
 		// check if user is present
 		if (!req.user) {
-			return response.badRequest(req, res, { status: 401, message: 'User not found' })
+			return responseBadRequest(req, res, { status: 401, message: 'User not found' })
 		}
 
 		// load single subscription to get owner
@@ -48,14 +51,14 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 			if (error.code === 5) {
 				// pubsub error code 5 seems to be 'Resource not found'
-				return response.notFound(req, res, {
+				return responseNotFound(req, res, {
 					status: 404,
 					message: `Subscription '${subscriptionName}' not found`,
 				})
 			}
 
 			// return generic error
-			return response.badRequest(req, res, {
+			return responseBadRequest(req, res, {
 				status: 500,
 				message: 'Error while loading desired subscription',
 			})
@@ -66,7 +69,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 			const userInstitution = req.user.institutionId
 
 			// return 400 error
-			return response.badRequest(req, res, {
+			return responseBadRequest(req, res, {
 				status: 400,
 				message: 'Mismatch of user and subscription institution',
 				errors: `Subscription of this institution cannot be deleted by user of institution '${userInstitution}'`,
@@ -78,7 +81,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		// also delete from datastore
 		const subscriptionId = Number.parseInt(fullSubscription.labels.id, 10)
-		await datastore.delete('subscriptions', subscriptionId.toString())
+		await datastoreDelete('subscriptions', subscriptionId.toString())
 
 		// log progress
 		logger.log({
@@ -89,7 +92,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		})
 
 		// return data
-		return response.ok(req, res, { valid: true })
+		return responseOk(req, res, { valid: true })
 	} catch (error) {
 		logger.log({
 			level: 'error',
@@ -99,6 +102,6 @@ export default async (req: UserTokenRequest, res: Response) => {
 			data: { params: req.params },
 		})
 
-		return response.internalServerError(req, res, error as Error)
+		return responseInternalServerError(req, res, error as Error)
 	}
 }

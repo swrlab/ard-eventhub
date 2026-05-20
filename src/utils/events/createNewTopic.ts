@@ -11,8 +11,8 @@ import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest
 
 import type { EventhubService } from '@/types.eventhub.ts'
 import { getPublisherById } from '../ard-core.ts'
-import datastore from '../datastore'
-import pubsub from '../pubsub'
+import datastoreSave from '../datastore/save.ts'
+import pubsubCreateTopic from '../pubsub/createTopic.ts'
 
 const source = 'utils.events.createNewTopic'
 
@@ -75,11 +75,11 @@ export default async (service: EventhubService, req: UserTokenRequest) => {
 	}
 
 	// save topic to datastore
-	await datastore.save(newTopic, 'topics', null)
+	await datastoreSave(newTopic, 'topics', null)
 	newTopic.id = newTopic.id?.toString()
 
 	// create topic
-	const [result] = await pubsub.createTopic(newTopic)
+	const [result] = await pubsubCreateTopic(newTopic)
 
 	// handle feedback
 	if (result?.name?.indexOf(service.topic.name) !== -1) {

@@ -12,7 +12,7 @@ import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest
 import type { EventhubService } from '@/types.eventhub.ts'
 import config from '../../../config'
 import { getPublisherById } from '../ard-core.ts'
-import pubsub from '../pubsub'
+import pubsubBuildId from '../pubsub/buildId.ts'
 
 const source = 'utils.events.processServices'
 const URN_PUBLISHER_PREFIX = config.coreIdPrefixes.Publisher
@@ -39,7 +39,7 @@ export default async (service: EventhubService, req: UserTokenRequest) => {
 		id: topicId,
 
 		// add pub/sub-compliant name
-		name: pubsub.buildId(topicId),
+		name: pubsubBuildId(topicId),
 	}
 
 	// convert publisher if not in new ARD urn format
