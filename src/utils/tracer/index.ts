@@ -11,10 +11,6 @@ const tracerI = Index.init({
 	logInjection: true,
 })
 
-tracerI.use('express', {
-	headers: ['dnt', 'user-agent', 'x-forwarded-host'],
-})
-
 tracerI.use('http', {
 	blocklist: ['/', '/health'],
 })

@@ -7,7 +7,7 @@
 
 import logger from '@frytg/logger'
 import { DateTime } from 'luxon'
-import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
+import type { LegacyUserRequest } from '@/src/ingest/legacyRequest.ts'
 
 import type { EventhubService } from '@/types.eventhub.ts'
 import { getPublisherById } from '../ard-core.ts'
@@ -16,7 +16,7 @@ import pubsubCreateTopic from '../pubsub/createTopic.ts'
 
 const source = 'utils.events.createNewTopic'
 
-export default async (service: EventhubService, req: UserTokenRequest) => {
+export default async (service: EventhubService, req: LegacyUserRequest) => {
 	// check if user is present
 	if (!req.user?.email) {
 		logger.log({
