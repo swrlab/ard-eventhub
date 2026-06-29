@@ -8,7 +8,6 @@
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 import type { ResponseContext } from './context.ts'
-import { getTrace } from './context.ts'
 
 export default (c: ResponseContext, err: { message?: string; errors?: unknown; status?: number; data?: object }) => {
 	try {
@@ -17,7 +16,7 @@ export default (c: ResponseContext, err: { message?: string; errors?: unknown; s
 				...err.data,
 				message: err.message,
 				errors: err.errors,
-				trace: getTrace(c),
+				trace: null,
 			},
 			(err.status || 400) as ContentfulStatusCode,
 		)
