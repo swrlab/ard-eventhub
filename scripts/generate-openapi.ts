@@ -1,7 +1,6 @@
 import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import * as z from 'zod'
-import { stringify } from 'yaml'
 
 import { version } from '../package.json'
 import '@/src/ingest/schemas/index.ts'
@@ -388,6 +387,5 @@ const document = {
 
 const root = process.cwd()
 writeFileSync(join(root, 'openapi.json'), `${JSON.stringify(document, null, 2)}\n`)
-writeFileSync(join(root, 'openapi.yaml'), stringify(document))
 
-console.log('Generated openapi.json and openapi.yaml')
+console.log('Generated openapi.json')

@@ -9,4 +9,4 @@ bun run openapi:generate
 bun run openapi:format
 ```
 
-Die generierten Dateien `openapi.json` und `openapi.yaml` im Projektverzeichnis sind die veröffentlichte API-Spezifikation.
+Die generierte Datei `openapi.json` im Projektverzeichnis ist die veröffentlichte API-Spezifikation.

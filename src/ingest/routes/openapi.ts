@@ -12,11 +12,6 @@ openapiRoutes.get('/openapi.json', (c) => {
 	return c.json(JSON.parse(document))
 })
 
-openapiRoutes.get('/openapi.yaml', (c) => {
-	const document = readFileSync(join(process.cwd(), 'openapi.yaml'), 'utf8')
-	return c.text(document, 200, { 'Content-Type': 'application/yaml' })
-})
-
 openapiRoutes.get(
 	'/',
 	swaggerUI({

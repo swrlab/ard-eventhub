@@ -19,7 +19,7 @@
 		"docker:run": "docker run --env-file .env -p 8080:8080 --name ard-eventhub swr/ard-eventhub",
 		"docker:scan": "bun docker:build && docker scout quickview",
 		"docker:clean": "docker rm ard-eventhub",
-		"openapi:format": "bunx biome format openapi.json --write && bunx prettier openapi.yaml -w",
+		"openapi:format": "bunx biome format openapi.json --write",
 		"openapi:generate": "bun run scripts/generate-openapi.ts",
 		"license": "bunx license-compliance -f json -r detailed",
 		"reinstall": "rm -rf node_modules && rm bun.lockb && bun install"
@@ -69,8 +69,7 @@
 		"docsify-cli": "^4.4.4",
 		"license-compliance": "^3.0.1",
 		"prettier": "^3.8.3",
-		"ts-node": "^10.9.2",
-		"yaml": "^2.9.0"
+		"ts-node": "^10.9.2"
 	},
 	"resolutions": {
 		"ansi-regex": "^5.0.1",

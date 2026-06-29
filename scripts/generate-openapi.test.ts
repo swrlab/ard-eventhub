@@ -10,9 +10,4 @@ describe('openapi artifacts', () => {
 		expect(document.paths['/auth/login']).toBeDefined()
 		expect(document.components.schemas.eventV1PostBody).toBeDefined()
 	})
-
-	it('openapi.yaml exists', () => {
-		const yaml = readFileSync(join(process.cwd(), 'openapi.yaml'), 'utf8')
-		expect(yaml).toContain('openapi: 3.0.3')
-	})
 })
