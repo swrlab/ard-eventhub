@@ -2,8 +2,11 @@
 
 Die ARD Eventhub-APIs sind im [OpenAPI](https://swagger.io/specification/)-Format dokumentiert (ein standardisiertes, sprachunabhängiges Interface für RESTful APIs). Es wird über [Swagger-UI](https://swagger.io/tools/swagger-ui/) eine testbare Oberfläche unter `{service-endpoint}/openapi/` zur Verfügung bereitgestellt.
 
-Alle Änderungen an der API sollten in [openapi.yaml](https://eventhub-ingest.ard.de/openapi/openapi.yaml) dokumentiert werden; dieses muss anschließend in JSON konvertiert werden.
+Alle Änderungen an der API sollten in den Zod-Schemas unter `src/ingest/schemas/` dokumentiert werden. Anschließend die OpenAPI-Dateien neu generieren:
 
-## YAML nach JSON konvertieren
+```bash
+bun run openapi:generate
+bun run openapi:format
+```
 
-Nach dem Aktualisieren der OpenAPI-Konfiguration kopiere den Inhalt von `openapi.yaml` in den [Swagger Editor](https://editor.swagger.io/). Wähle `File` -> `Convert and save as JSON` und ersetze die `openapi.json` im Projektverzeichnis.
+Die generierte Datei `openapi.json` im Projektverzeichnis ist die veröffentlichte API-Spezifikation.

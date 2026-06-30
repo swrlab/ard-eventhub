@@ -5,15 +5,20 @@
 
 */
 
-import type { Request, Response } from 'express'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
-export default (req: Request, res: Response, data: object, status?: number) => {
+import type { ResponseContext } from './context.ts'
+
+export default (c: ResponseContext, data: object, status: ContentfulStatusCode = 200) => {
 	try {
-		return res.status(status || 200).json({
-			...data,
-			trace: req.headers['x-cloud-trace-context'] || null,
-		})
+		return c.json(
+			{
+				...data,
+				trace: null,
+			},
+			status,
+		)
 	} catch (_error) {
-		return res.sendStatus(500)
+		return c.body(null, 500)
 	}
 }

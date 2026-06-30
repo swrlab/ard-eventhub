@@ -6,28 +6,26 @@
 */
 
 import logger from '@frytg/logger'
-import type { Response } from 'express'
+import type { Context } from 'hono'
 
-import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
+import type { AppVariables } from '@/src/ingest/types.ts'
 import badRequest from '../badRequest.ts'
 
 const source = 'utils.response.errors.mismatchingEventName'
 
-export default (req: UserTokenRequest, res: Response) => {
-	// log access attempt
+export default (c: Context<{ Variables: AppVariables }>, body: Record<string, unknown>) => {
 	logger.log({
 		level: 'warning',
 		message: 'User attempted event with mismatching names',
 		source,
 		data: {
-			email: req.user?.email,
-			body: req.body,
-			params: req.params,
+			email: c.get('user')?.email,
+			body,
+			params: c.req.param(),
 		},
 	})
 
-	// return 400
-	return badRequest(req, res, {
+	return badRequest(c, {
 		message: 'request.body.event should match URL parameter',
 		errors: [
 			{

@@ -29,7 +29,7 @@
 		"incremental": true,
 		"allowSyntheticDefaultImports": true,
 
-		"types": ["node", "mocha", "express"],
+		"types": ["node", "mocha"],
 
 		"paths": {
 			"@/*": ["./*"]

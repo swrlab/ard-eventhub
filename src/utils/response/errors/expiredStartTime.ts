@@ -6,27 +6,25 @@
 */
 
 import logger from '@frytg/logger'
-import type { Response } from 'express'
+import type { Context } from 'hono'
 
-import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
+import type { AppVariables } from '@/src/ingest/types.ts'
 import badRequest from '../badRequest.ts'
 
 const source = 'utils.response.errors.expiredStartTime'
 
-export default (req: UserTokenRequest, res: Response) => {
-	// log access attempt
+export default (c: Context<{ Variables: AppVariables }>, body: Record<string, unknown>) => {
 	logger.log({
 		level: 'notice',
-		message: `User attempted event with expired start time > ${req.body.start}`,
+		message: `User attempted event with expired start time > ${body.start}`,
 		source,
 		data: {
-			email: req.user?.email,
-			body: req.body,
+			email: c.get('user')?.email,
+			body,
 		},
 	})
 
-	// return 400
-	return badRequest(req, res, {
+	return badRequest(c, {
 		message: 'request.body.start should be recent',
 		errors: [
 			{

@@ -4,15 +4,18 @@
 	by SWR Audio Lab
 
 */
-import type { Request, Response } from 'express'
+import type { ResponseContext } from './context.ts'
 
-export default (req: Request, res: Response, error?: Error) => {
+export default (c: ResponseContext, error?: Error) => {
 	try {
-		return res.status(500).json({
-			message: error?.message || 'Internal Server Error',
-			trace: req.headers['x-cloud-trace-context'] || null,
-		})
+		return c.json(
+			{
+				message: error?.message || 'Internal Server Error',
+				trace: null,
+			},
+			500,
+		)
 	} catch (_error) {
-		return res.sendStatus(500)
+		return c.body(null, 500)
 	}
 }

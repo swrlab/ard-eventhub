@@ -10,10 +10,18 @@
 
 import { beforeAll, describe, expect, it } from 'bun:test'
 import logger from '@frytg/logger'
+import { getRequestListener } from '@hono/node-server'
 import { DateTime } from 'luxon'
 import request, { type Response } from 'supertest'
 
-import { default as server } from './index'
+import { getARDFeed } from '@/src/data/index.ts'
+import { app } from '@/src/ingest/app.ts'
+
+const server = getRequestListener(app.fetch)
+
+beforeAll(async () => {
+	await getARDFeed()
+})
 
 const exitWithError = (message: string) => {
 	logger.log({

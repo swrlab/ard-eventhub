@@ -8,7 +8,7 @@
 import logger from '@frytg/logger'
 import { createHashedId } from '@swrlab/utils/packages/ard'
 
-import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
+import type { LegacyUserRequest } from '@/src/ingest/legacyRequest.ts'
 import type { EventhubService } from '@/types.eventhub.ts'
 import config from '../../../config'
 import { getPublisherById } from '../ard-core.ts'
@@ -18,7 +18,7 @@ const source = 'utils.events.processServices'
 const URN_PUBLISHER_PREFIX = config.coreIdPrefixes.Publisher
 const URN_PUBLISHER_REGEX = /(?=urn:ard:publisher:[a-z0-9]{16})/g
 
-export default async (service: EventhubService, req: UserTokenRequest) => {
+export default async (service: EventhubService, req: LegacyUserRequest) => {
 	// fetch prefix from configured list
 	const type = service.type as keyof typeof config.coreIdPrefixes
 	let urnPrefix = config.coreIdPrefixes[type]
