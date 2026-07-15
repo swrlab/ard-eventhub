@@ -16,20 +16,19 @@ import type {
 import datastoreLoad from '../datastore/load.ts'
 import convertId from './convertId.ts'
 
+type MappableSubscription = Subscription | (ISubscription & { metadata?: ISubscription })
+
 export default async (
-	subscription: Subscription | ISubscription
+	subscription: MappableSubscription
 ): Promise<{ limited: EventhubSubscriptionLimited; full: EventhubSubscriptionWithLabels }> => {
 	// remap vars to metadata object
 	// this is needed since pubsub feedback from new subscriptions is slightly different
-	if (isSubscription(subscription) && !subscription.metadata) {
+	if (!subscription.metadata) {
 		subscription.metadata = { ...subscription } as ISubscription
 	}
 
-	const metadata = isSubscription(subscription)
-		? (subscription.metadata as ISubscription)
-		: (subscription as ISubscription)
-
-	const name = isSubscription(subscription) ? subscription.name : undefined
+	const metadata = subscription.metadata as ISubscription
+	const subscriptionName = subscription.name ?? metadata.name
 
 	// preset vars
 	const lookup: EventhubSubscriptionDatastore | undefined = metadata.labels?.id
@@ -50,8 +49,8 @@ export default async (
 		type: 'PUBSUB',
 		method: metadata.pushConfig?.pushEndpoint ? 'PUSH' : 'PULL',
 
-		name: name?.split('/').pop(),
-		path: name,
+		name: subscriptionName?.split('/').pop(),
+		path: subscriptionName,
 
 		topic: {
 			id: convertId.decode(topicName).replace(pubSubPrefix, ''),
@@ -74,8 +73,4 @@ export default async (
 	}
 
 	return { limited, full }
-}
-
-function isSubscription(s: Subscription | ISubscription): s is Subscription {
-	return 'metadata' in s
 }
