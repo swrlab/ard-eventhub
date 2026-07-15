@@ -19,7 +19,7 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true,
+			"preset": "recommended",
 			"complexity": {
 				"noForEach": "error",
 				"noImplicitCoercions": "error",
@@ -28,7 +28,8 @@
 				"noUselessUndefined": "error",
 				"noUselessStringConcat": "error",
 				"useSimplifiedLogicExpression": "error",
-				"useWhile": "error"
+				"useWhile": "error",
+				"noUselessReturn": "error"
 			},
 			"correctness": {
 				"noGlobalDirnameFilename": "error",
@@ -40,19 +41,8 @@
 				"useImportExtensions": "off"
 			},
 			"nursery": {
-				"noForIn": "error",
-				"noEqualsToNull": "warn",
 				"noMisusedPromises": "error",
-				"noMultiAssign": "error",
-				"noMultiStr": "error",
-				"noProto": "error",
-				"noReturnAssign": "error",
-				"noShadow": "error",
-				"noUndeclaredEnvVars": "error",
-				"noUselessReturn": "error",
-				"useAwaitThenable": "error",
-				"useGlobalThis": "error",
-				"useSpread": "error"
+				"useAwaitThenable": "error"
 			},
 			"performance": {
 				"noAwaitInLoops": "error",
@@ -62,7 +52,14 @@
 				"noReExportAll": "error"
 			},
 			"security": {},
-			"suspicious": {},
+			"suspicious": {
+				"noForIn": "error",
+				"noEqualsToNull": "warn",
+				"noProto": "error",
+				"noReturnAssign": "error",
+				"noShadow": "error",
+				"noUndeclaredEnvVars": "error"
+			},
 			"style": {
 				"noCommonJs": "error",
 				"noDoneCallback": "error",
@@ -81,7 +78,11 @@
 				"useDefaultParameterLast": "error",
 				"useEnumInitializers": "error",
 				"useSelfClosingElements": "error",
-				"useSingleVarDeclarator": "error"
+				"useSingleVarDeclarator": "error",
+				"noMultiAssign": "error",
+				"noMultilineString": "error",
+				"useGlobalThis": "error",
+				"useSpreadOverApply": "error"
 			}
 		}
 	},

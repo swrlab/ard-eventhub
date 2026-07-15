@@ -43,7 +43,7 @@ function testResponse(res: Response, status: number) {
 }
 
 function isJson(item: any) {
-	let value = typeof item !== 'string' ? JSON.stringify(item) : item
+	let value = typeof item === 'string' ? item : JSON.stringify(item)
 	try {
 		value = JSON.parse(value)
 	} catch {

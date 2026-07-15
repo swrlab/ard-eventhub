@@ -86,7 +86,7 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 		const userDb = await datastoreLoad('users', req.user.email)
 
 		// check if profile exists and valid
-		if (!userDb || userDb.active !== true) {
+		if (userDb?.active !== true) {
 			logger.log({
 				level: 'notice',
 				message: 'user not found or not active',
