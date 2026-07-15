@@ -23,6 +23,11 @@ test:
 coreId text:
 	bun run coreId "{{text}}"
 
+# download the ARD feed
+[group('LOCAL')]
+feed:
+	bun run feed
+
 # start the ingest service in development mode
 [group('LOCAL')]
 dev:

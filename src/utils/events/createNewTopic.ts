@@ -2,8 +2,8 @@ import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
 import type { EventhubService, EventhubTopicDatastore, UserTokenRequest } from '#types'
 import { getPublisherById } from '../ard-core.ts'
-import datastore from '../datastore/index.ts'
-import pubsub from '../pubsub/index.ts'
+import datastoreSave from '../datastore/save.ts'
+import pubsubCreateTopic from '../pubsub/createTopic.ts'
 
 const source = 'utils.events.createNewTopic'
 
@@ -65,11 +65,11 @@ export default async (service: EventhubService, req: UserTokenRequest) => {
 	}
 
 	// save topic to datastore
-	const topicId = await datastore.save(newTopic, 'topics')
+	const topicId = await datastoreSave(newTopic, 'topics')
 	const topic = { ...newTopic, id: topicId.toString() }
 
 	// create topic
-	const [result] = await pubsub.createTopic(topic)
+	const [result] = await pubsubCreateTopic(topic)
 
 	// handle feedback
 	// TODO: can we use the `topic` var instead of modifying `service.topic`?

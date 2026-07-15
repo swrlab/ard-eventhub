@@ -4,7 +4,7 @@ import { createHashedId } from '@swrlab/utils/packages/ard/index.js'
 import { coreIdPrefixes } from '#config'
 import type { EventhubService, UserTokenRequest } from '#types'
 import { getPublisherById } from '../ard-core.ts'
-import pubsub from '../pubsub/index.ts'
+import pubsubBuildId from '../pubsub/buildId.ts'
 
 const source = 'utils.events.processServices'
 const URN_PUBLISHER_PREFIX = coreIdPrefixes.Publisher
@@ -31,7 +31,7 @@ export default async (service: EventhubService, req: UserTokenRequest) => {
 		id: topicId,
 
 		// add pub/sub-compliant name
-		name: pubsub.buildId(topicId),
+		name: pubsubBuildId(topicId),
 	}
 
 	// convert publisher if not in new ARD urn format

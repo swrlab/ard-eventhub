@@ -55,6 +55,6 @@ bun run ingest
 
 ## Deployment
 
-The deployment process of Eventhub-Ingest is different for `Non-Prod` and `Prod`-Stages
+The deployment process of Eventhub-Ingest is different for `Non-Prod` and `Prod`-Stages.
 
-Deployments for all stages will be done in Github-Actions after the run completed successful.
+GitHub Actions builds and pushes the Docker image to the container registry. Deploying to Kubernetes environments is handled separately outside of GitHub Actions.

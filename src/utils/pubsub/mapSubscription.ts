@@ -1,3 +1,10 @@
+/*
+
+	ard-eventhub
+	by SWR Audio Lab
+
+*/
+
 import { pubSubPrefix } from '#config'
 import type {
 	EventhubSubscriptionDatastore,
@@ -6,21 +13,27 @@ import type {
 	ISubscription,
 	Subscription,
 } from '#types'
-import datastore from '../datastore/index.ts'
+import datastoreLoad from '../datastore/load.ts'
+import convertId from './convertId.ts'
 
 export default async (
 	subscription: Subscription | ISubscription
-): Promise<{
-	limited: EventhubSubscriptionLimited
-	full: EventhubSubscriptionWithLabels
-}> => {
+): Promise<{ limited: EventhubSubscriptionLimited; full: EventhubSubscriptionWithLabels }> => {
+	// remap vars to metadata object
+	// this is needed since pubsub feedback from new subscriptions is slightly different
+	if (isSubscription(subscription) && !subscription.metadata) {
+		subscription.metadata = { ...subscription } as ISubscription
+	}
+
 	const metadata = isSubscription(subscription)
 		? (subscription.metadata as ISubscription)
 		: (subscription as ISubscription)
 
-	const labels = metadata.labels as EventhubSubscriptionWithLabels['labels']
-	const lookup: EventhubSubscriptionDatastore | undefined = labels?.id
-		? await datastore.load('subscriptions', Number.parseInt(labels.id, 10))
+	const name = isSubscription(subscription) ? subscription.name : undefined
+
+	// preset vars
+	const lookup: EventhubSubscriptionDatastore | undefined = metadata.labels?.id
+		? await datastoreLoad('subscriptions', Number.parseInt(metadata.labels.id, 10))
 		: undefined
 
 	const topic = metadata.topic
@@ -31,37 +44,38 @@ export default async (
 	if (!topicName) {
 		throw new Error(`The topicName is missing from the topic '${topic}'.`)
 	}
+
 	// remap values
 	const limited: EventhubSubscriptionLimited = {
 		type: 'PUBSUB',
 		method: metadata.pushConfig?.pushEndpoint ? 'PUSH' : 'PULL',
 
-		name: subscription.name?.split('/').pop(),
-		path: subscription.name,
+		name: name?.split('/').pop(),
+		path: name,
 
 		topic: {
-			id: decodeURIComponent(topicName).replace(pubSubPrefix, ''),
+			id: convertId.decode(topicName).replace(pubSubPrefix, ''),
 			name: topicName,
 			path: topic,
 		},
 
 		ackDeadlineSeconds: metadata.ackDeadlineSeconds,
 		retryPolicy: metadata.retryPolicy,
-		serviceAccount: metadata.pushConfig?.oidcToken?.serviceAccountEmail,
+		serviceAccount: metadata.pushConfig?.oidcToken?.serviceAccountEmail ?? null,
 
-		url: metadata.pushConfig?.pushEndpoint,
+		url: metadata.pushConfig?.pushEndpoint ?? null,
 		contact: lookup?.contact,
 		institutionId: lookup?.institutionId,
 	}
 
 	const full: EventhubSubscriptionWithLabels = {
 		...limited,
-		labels,
+		labels: metadata.labels as EventhubSubscriptionWithLabels['labels'],
 	}
 
 	return { limited, full }
 }
 
 function isSubscription(s: Subscription | ISubscription): s is Subscription {
-	return 'metadata' in s && Boolean(s.metadata)
+	return 'metadata' in s
 }

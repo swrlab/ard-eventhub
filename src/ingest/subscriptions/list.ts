@@ -1,7 +1,7 @@
 import logger from '@frytg/logger'
 import type { Response, UserTokenRequest } from '#types'
 import getSubscriptions from '../../utils/pubsub/getSubscriptions.ts'
-import response from '../../utils/response/index.ts'
+import responseInternalServerError from '../../utils/response/internalServerError.ts'
 
 const source = 'ingest/subscriptions/list'
 
@@ -18,7 +18,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 					authorization: 'hidden',
 				},
 			})
-			return response.internalServerError(req, res, new Error('User not found'))
+			return responseInternalServerError(req, res, new Error('User not found'))
 		}
 
 		// check if a user has an institutionId
@@ -33,7 +33,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 					authorization: 'hidden',
 				},
 			})
-			return response.internalServerError(req, res, new Error('User not found'))
+			return responseInternalServerError(req, res, new Error('User not found'))
 		}
 
 		// load all subscriptions
@@ -51,6 +51,6 @@ export default async (req: UserTokenRequest, res: Response) => {
 			error,
 		})
 
-		return response.internalServerError(req, res, error as Error)
+		return responseInternalServerError(req, res, error as Error)
 	}
 }

@@ -1,7 +1,9 @@
 import logger from '@frytg/logger'
 import type { EventhubSubscriptionLimited, Response, UserTokenRequestWithParams } from '#types'
 import getSubscription from '../../utils/pubsub/getSubscription.ts'
-import response from '../../utils/response/index.ts'
+import responseBadRequest from '../../utils/response/badRequest.ts'
+import responseInternalServerError from '../../utils/response/internalServerError.ts'
+import responseNotFound from '../../utils/response/notFound.ts'
 
 const source = 'ingest/subscriptions/get'
 
@@ -12,18 +14,12 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 
 		// check if subscription name is present
 		if (!subscriptionName) {
-			return response.badRequest(req, res, {
-				status: 400,
-				message: 'Subscription name is required',
-			})
+			return responseBadRequest(req, res, { status: 400, message: 'Subscription name is required' })
 		}
 
 		// check if user is present
 		if (!req.user) {
-			return response.badRequest(req, res, {
-				status: 401,
-				message: 'User not found',
-			})
+			return responseBadRequest(req, res, { status: 401, message: 'User not found' })
 		}
 
 		// load single subscription
@@ -32,7 +28,7 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 			const subscription = await getSubscription(subscriptionName)
 			limitedSubscription = subscription.limited
 		} catch {
-			return response.notFound(req, res, {
+			return responseNotFound(req, res, {
 				status: 404,
 				message: `Subscription '${subscriptionName}' not found`,
 			})
@@ -43,7 +39,7 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 			const userInstitution = req.user.institutionId
 
 			// return 400 error
-			return response.badRequest(req, res, {
+			return responseBadRequest(req, res, {
 				status: 400,
 				message: 'Mismatch of user and subscription institution',
 				errors: `Subscription of this institution is not visible for user of institution '${userInstitution}'`,
@@ -60,6 +56,6 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 			data: { params: req.params },
 		})
 
-		return response.internalServerError(req, res, error as Error)
+		return responseInternalServerError(req, res, error as Error)
 	}
 }

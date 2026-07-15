@@ -2,8 +2,10 @@ import { getNow } from '@frytg/dates'
 import logger from '@frytg/logger'
 import type { Request, Response } from 'express'
 import type { JwtPayload } from 'jsonwebtoken'
-import firebase from '../../../utils/firebase/index.ts'
-import response from '../../../utils/response/index.ts'
+import firebaseRefreshToken from '../../../utils/firebase/refreshToken.ts'
+import responseBadRequest from '../../../utils/response/badRequest.ts'
+import responseInternalServerError from '../../../utils/response/internalServerError.ts'
+import responseOk from '../../../utils/response/ok.ts'
 
 const source = 'ingest/auth/refresh'
 
@@ -22,16 +24,16 @@ export default async (req: Request, res: Response) => {
 
 		// swap previously received refresh token for new id token
 		try {
-			login = await firebase.refreshToken(req.body.refreshToken)
+			login = await firebaseRefreshToken(req.body.refreshToken)
 		} catch (error) {
-			return response.badRequest(req, res, {
+			return responseBadRequest(req, res, {
 				status: 500,
 				message: `Could not refresh login > ${(error as Error)?.message ?? error}`,
 			})
 		}
 
 		const expiresIn = Number.parseInt(login.login.expires_in, 10)
-		return response.ok(req, res, {
+		return responseOk(req, res, {
 			expiresIn,
 			expires: getNow().plus({ seconds: expiresIn }).toISO(),
 
@@ -49,6 +51,6 @@ export default async (req: Request, res: Response) => {
 			data: { headers: req.headers },
 		})
 
-		return response.internalServerError(req, res, error as Error)
+		return responseInternalServerError(req, res, error as Error)
 	}
 }

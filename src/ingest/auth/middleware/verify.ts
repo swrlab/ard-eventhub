@@ -7,8 +7,8 @@
 
 import logger from '@frytg/logger'
 import type { NextFunction, Response, UserTokenRequest } from '#types'
-import datastore from '../../../utils/datastore/index.ts'
-import firebase from '../../../utils/firebase/index.ts'
+import datastoreLoad from '../../../utils/datastore/load.ts'
+import firebaseVerifyToken from '../../../utils/firebase/verifyToken.ts'
 
 const source = 'ingest/auth/middleware/verify'
 const ERROR_JSON = { message: 'Forbidden', errors: [], status: 403 }
@@ -51,7 +51,7 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 		// validate JWT token with firebase
 		try {
 			// successful verifications will save JWT user profile to req
-			const user = await firebase.verifyToken(authorization)
+			const user = await firebaseVerifyToken(authorization)
 
 			req.user = user
 			res.set('x-ard-eventhub-uid', user.uid)
@@ -83,7 +83,7 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 		}
 
 		// lookup user in DB
-		const userDb = await datastore.load('users', req.user.email)
+		const userDb = await datastoreLoad('users', req.user.email)
 
 		// check if profile exists and valid
 		if (!userDb || userDb.active !== true) {

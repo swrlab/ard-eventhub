@@ -1,14 +1,13 @@
 import logger from '@frytg/logger'
 import type { Request, Response } from '#types'
-
-import pubsub from '../../utils/pubsub/index.ts'
-import { internalServerError } from '../../utils/response/index.ts'
+import pubsubGetTopics from '../../utils/pubsub/getTopics.ts'
+import responseInternalServerError from '../../utils/response/internalServerError.ts'
 
 const source = 'ingest/topics/list'
 
 export default async (req: Request, res: Response) => {
 	try {
-		const topics = await pubsub.getTopics()
+		const topics = await pubsubGetTopics()
 		return res.status(200).json(topics)
 	} catch (error) {
 		logger.log({
@@ -17,6 +16,7 @@ export default async (req: Request, res: Response) => {
 			source,
 			error,
 		})
-		return internalServerError(req, res, error as Error)
+
+		return responseInternalServerError(req, res, error as Error)
 	}
 }

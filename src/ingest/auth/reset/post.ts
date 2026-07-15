@@ -1,8 +1,9 @@
 import logger from '@frytg/logger'
 import type { Request, Response } from '#types'
-
-import firebase from '../../../utils/firebase/index.ts'
-import response from '../../../utils/response/index.ts'
+import firebaseSendPasswordResetEmail from '../../../utils/firebase/sendPasswordResetEmail.ts'
+import responseBadRequest from '../../../utils/response/badRequest.ts'
+import responseInternalServerError from '../../../utils/response/internalServerError.ts'
+import responseOk from '../../../utils/response/ok.ts'
 
 const source = 'ingest/auth/reset'
 
@@ -10,7 +11,7 @@ export default async (req: Request, res: Response) => {
 	try {
 		// try to reset email (may fail if not found)
 		try {
-			await firebase.sendPasswordResetEmail(req.body.email)
+			await firebaseSendPasswordResetEmail(req.body.email)
 		} catch (error) {
 			logger.log({
 				level: 'notice',
@@ -20,11 +21,11 @@ export default async (req: Request, res: Response) => {
 				data: { email: req.body.email },
 			})
 
-			return response.badRequest(req, res, { status: 500, message: 'Could not reset auth' })
+			return responseBadRequest(req, res, { status: 500, message: 'Could not reset auth' })
 		}
 
 		// return ok
-		return response.ok(req, res, { valid: true })
+		return responseOk(req, res, { valid: true })
 	} catch (error) {
 		logger.log({
 			level: 'error',
@@ -34,6 +35,6 @@ export default async (req: Request, res: Response) => {
 			data: { body: req.body, headers: req.headers },
 		})
 
-		return response.internalServerError(req, res, error as Error)
+		return responseInternalServerError(req, res, error as Error)
 	}
 }

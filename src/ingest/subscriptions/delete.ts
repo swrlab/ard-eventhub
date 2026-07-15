@@ -1,11 +1,14 @@
 import logger from '@frytg/logger'
 import type { Response } from 'express'
 import type { EventhubSubscriptionWithLabels, UserTokenRequestWithParams } from '#types'
-import datastore from '../../utils/datastore/index.ts'
+import datastoreDelete from '../../utils/datastore/delete.ts'
 import deleteSubscription from '../../utils/pubsub/deleteSubscription.ts'
 import getSubscription from '../../utils/pubsub/getSubscription.ts'
 import { isCode5Error } from '../../utils/pubsub/publishMessage.ts'
-import response from '../../utils/response/index.ts'
+import responseBadRequest from '../../utils/response/badRequest.ts'
+import responseInternalServerError from '../../utils/response/internalServerError.ts'
+import responseNotFound from '../../utils/response/notFound.ts'
+import responseOk from '../../utils/response/ok.ts'
 
 const source = 'ingest/subscriptions/delete'
 
@@ -16,18 +19,12 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 
 		// check if subscription name is present
 		if (!subscriptionName) {
-			return response.badRequest(req, res, {
-				status: 400,
-				message: 'Subscription name is required',
-			})
+			return responseBadRequest(req, res, { status: 400, message: 'Subscription name is required' })
 		}
 
 		// check if user is present
 		if (!req.user) {
-			return response.badRequest(req, res, {
-				status: 401,
-				message: 'User not found',
-			})
+			return responseBadRequest(req, res, { status: 401, message: 'User not found' })
 		}
 
 		// load single subscription to get owner
@@ -46,14 +43,14 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 
 			if (isCode5Error(error)) {
 				// pubsub error code 5 seems to be 'Resource not found'
-				return response.notFound(req, res, {
+				return responseNotFound(req, res, {
 					status: 404,
 					message: `Subscription '${subscriptionName}' not found`,
 				})
 			}
 
 			// return generic error
-			return response.badRequest(req, res, {
+			return responseBadRequest(req, res, {
 				status: 500,
 				message: 'Error while loading desired subscription',
 			})
@@ -64,7 +61,7 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 			const userInstitution = req.user.institutionId
 
 			// return 400 error
-			return response.badRequest(req, res, {
+			return responseBadRequest(req, res, {
 				status: 400,
 				message: 'Mismatch of user and subscription institution',
 				errors: `Subscription of this institution cannot be deleted by user of institution '${userInstitution}'`,
@@ -80,7 +77,7 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 
 		// also delete from datastore
 		const subscriptionId = Number.parseInt(fullSubscription.labels.id, 10)
-		await datastore.delete('subscriptions', subscriptionId.toString())
+		await datastoreDelete('subscriptions', subscriptionId.toString())
 
 		logger.log({
 			level: 'info',
@@ -94,7 +91,7 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 			},
 		})
 
-		return response.ok(req, res, { valid: true })
+		return responseOk(req, res, { valid: true })
 	} catch (error) {
 		logger.log({
 			level: 'error',
@@ -104,6 +101,6 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 			data: { params: req.params },
 		})
 
-		return response.internalServerError(req, res, error as Error)
+		return responseInternalServerError(req, res, error as Error)
 	}
 }
