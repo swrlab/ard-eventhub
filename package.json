@@ -71,7 +71,7 @@
 		"@types/express": "^5.0.6",
 		"@types/node": "^25.3.2",
 		"@types/slug": "^5.0.9",
-		"@types/supertest": "^6.0.3",
+		"@types/supertest": "^7.2.1",
 		"@types/swagger-ui-express": "^4.1.8",
 		"@typescript/native-preview": "^7.0.0-dev.20260227.1",
 		"docsify-cli": "^4.4.4",
