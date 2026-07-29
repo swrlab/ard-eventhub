@@ -75,7 +75,7 @@
 		"@types/swagger-ui-express": "^4.1.8",
 		"@typescript/native-preview": "^7.0.0-dev.20260227.1",
 		"docsify-cli": "^4.4.4",
-		"knip": "^5.85.0",
+		"knip": "^6.29.0",
 		"license-compliance": "^3.0.1",
 		"prettier": "^3.8.3",
 		"supertest": "^7.2.2"
