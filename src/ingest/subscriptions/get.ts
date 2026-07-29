@@ -1,24 +1,13 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
-import type { Response } from 'express'
-import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
-
-import type { EventhubSubscriptionLimited } from '@/types.eventhub.ts'
+import type { EventhubSubscriptionLimited, Response, UserTokenRequestWithParams } from '#types'
 import getSubscription from '../../utils/pubsub/getSubscription.ts'
-
-import responseNotFound from '../../utils/response/notFound.ts'
 import responseBadRequest from '../../utils/response/badRequest.ts'
 import responseInternalServerError from '../../utils/response/internalServerError.ts'
+import responseNotFound from '../../utils/response/notFound.ts'
 
 const source = 'ingest/subscriptions/get'
 
-export default async (req: UserTokenRequest, res: Response) => {
+export default async (req: UserTokenRequestWithParams<{ subscriptionName?: string }>, res: Response) => {
 	try {
 		// preset vars
 		const { subscriptionName } = req.params
@@ -38,7 +27,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		try {
 			const subscription = await getSubscription(subscriptionName)
 			limitedSubscription = subscription.limited
-		} catch (_error) {
+		} catch {
 			return responseNotFound(req, res, {
 				status: 404,
 				message: `Subscription '${subscriptionName}' not found`,
@@ -57,7 +46,6 @@ export default async (req: UserTokenRequest, res: Response) => {
 			})
 		}
 
-		// return data
 		return res.status(200).json(limitedSubscription)
 	} catch (error) {
 		logger.log({

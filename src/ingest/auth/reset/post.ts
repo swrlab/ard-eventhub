@@ -1,18 +1,9 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
-import type { Request, Response } from 'express'
-
+import type { Request, Response } from '#types'
 import firebaseSendPasswordResetEmail from '../../../utils/firebase/sendPasswordResetEmail.ts'
-
-import responseOk from '../../../utils/response/ok.ts'
 import responseBadRequest from '../../../utils/response/badRequest.ts'
 import responseInternalServerError from '../../../utils/response/internalServerError.ts'
+import responseOk from '../../../utils/response/ok.ts'
 
 const source = 'ingest/auth/reset'
 
@@ -30,7 +21,7 @@ export default async (req: Request, res: Response) => {
 				data: { email: req.body.email },
 			})
 
-			return responseBadRequest(req, res, { status: 500 })
+			return responseBadRequest(req, res, { status: 500, message: 'Could not reset auth' })
 		}
 
 		// return ok

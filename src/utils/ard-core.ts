@@ -6,7 +6,7 @@
 */
 // load api feed (needed to get the file initialized)
 
-import type { ArdLivestream, ArdPublisher } from '../../types.ard.ts'
+import type { ArdLivestream, ArdPublisher } from '#types'
 import { ardFeed } from '../data/index.ts'
 
 /**

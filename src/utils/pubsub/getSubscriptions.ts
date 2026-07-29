@@ -1,12 +1,5 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
-import config from '../../../config'
-import pubSubClient from './_client'
+import { pubSubPrefix } from '#config'
+import pubSubClient from './_client.ts'
 import mapSubscription from './mapSubscription.ts'
 
 export default async () => {
@@ -14,16 +7,15 @@ export default async () => {
 	let [subscriptions] = await pubSubClient.getSubscriptions()
 
 	// filter subscriptions by prefix (stage)
-	subscriptions = subscriptions.filter((subscription) => subscription.name.indexOf(config.pubSubPrefix) !== -1)
+	subscriptions = subscriptions.filter((subscription) => subscription.name.includes(pubSubPrefix))
 
 	// map and filter values
 	const filteredSubscriptions = await Promise.all(
 		subscriptions.map(async (subscription) => {
 			const { limited } = await mapSubscription(subscription)
-			return Promise.resolve(limited)
+			return limited
 		})
 	)
 
-	// return data
-	return Promise.resolve(filteredSubscriptions)
+	return filteredSubscriptions
 }

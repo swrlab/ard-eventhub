@@ -1,14 +1,11 @@
-// import express.router
-// @ts-expect-error
-import { isIncluded } from '@swrlab/utils/packages/strings'
+import { DateTime } from '@frytg/dates'
 import express, { type Request, type Response } from 'express'
 import { middleware } from 'express-openapi-validator'
-import { DateTime } from 'luxon'
 
-// load swagger UI
 import swaggerUi from 'swagger-ui-express'
-import swaggerConfig from '../../config/swagger-ui'
-import swaggerDocument from '../../openapi.json'
+import swaggerDocument from '../../openapi.json' with { type: 'json' }
+import responseBadRequest from '../utils/response/badRequest.ts'
+import swaggerConfig from '../config/swagger-ui.ts'
 
 // set up router
 const router = express.Router()
@@ -28,14 +25,11 @@ router.use(
 		formats: {
 			'iso8601-timestamp': {
 				type: 'string',
-				validate: (value) => isIncluded(value, 'T') && DateTime.fromISO(value).isValid,
+				validate: (value) => value.includes('T') && DateTime.fromISO(value).isValid,
 			},
 		},
 	})
 )
-
-// load response util
-import responseBadRequest from '../utils/response/badRequest'
 
 // register swagger endpoints
 router.get('/openapi/openapi.json', (_req: Request, res: Response) => res.json(swaggerDocument))
@@ -43,20 +37,20 @@ router.get('/openapi/openapi.yaml', (_req: Request, res: Response) => res.sendFi
 router.use('/openapi', swaggerUi.serve, swaggerUi.setup({}, swaggerConfig))
 
 // register API endpoints
-import login from './auth/login/post'
+import login from './auth/login/post.ts'
 // load auth middleware
-import authVerify from './auth/middleware/verify'
-import refresh from './auth/refresh/post'
-import reset from './auth/reset/post'
-import events from './events/post'
-import pubsub from './pubsub'
-import pubsubAuthVerify from './pubsub/verify'
-import subscriptionsDelete from './subscriptions/delete'
-import subscriptionsGet from './subscriptions/get'
-import subscriptionsList from './subscriptions/list'
-import subscriptionsPost from './subscriptions/post'
+import authVerify from './auth/middleware/verify.ts'
+import refresh from './auth/refresh/post.ts'
+import reset from './auth/reset/post.ts'
+import events from './events/post.ts'
+import pubsub from './pubsub/index.ts'
+import pubsubAuthVerify from './pubsub/verify.ts'
+import subscriptionsDelete from './subscriptions/delete.ts'
+import subscriptionsGet from './subscriptions/get.ts'
+import subscriptionsList from './subscriptions/list.ts'
+import subscriptionsPost from './subscriptions/post.ts'
 
-import topics from './topics/list'
+import topics from './topics/list.ts'
 
 router.post('/auth/login', login)
 router.post('/auth/refresh', refresh)
@@ -84,7 +78,8 @@ router.get(['/', '/health'], (_req: Request, res: Response) => {
 const allowedErrors = ['Authorization header required', 'GET method not allowed']
 
 // set openapi error handler
-router.use((err: any, req: Request, res: Response) => {
+// biome-ignore lint/suspicious/noExplicitAny: cannot find proper type for err
+router.use((err: Record<PropertyKey, any>, req: Request, res: Response) => {
 	// set error message
 	let useOriginalError = false
 	if (allowedErrors.includes(err.message)) useOriginalError = true
@@ -97,5 +92,4 @@ router.use((err: any, req: Request, res: Response) => {
 	})
 })
 
-// export router object to server
 export default router

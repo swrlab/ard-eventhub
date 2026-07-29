@@ -12,7 +12,7 @@ export default (req: Request, res: Response, error?: Error) => {
 			message: error?.message || 'Internal Server Error',
 			trace: req.headers['x-cloud-trace-context'] || null,
 		})
-	} catch (_error) {
+	} catch {
 		return res.sendStatus(500)
 	}
 }

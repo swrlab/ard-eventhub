@@ -1,13 +1,6 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
-// load pubsub for internal queues
 import { Datastore } from '@google-cloud/datastore'
+import { projectId } from '#env'
 
 export default new Datastore({
-	projectId: process.env.GCP_PROJECT_ID,
+	projectId,
 })

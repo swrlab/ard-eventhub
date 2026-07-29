@@ -1,28 +1,17 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
+import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
-import type { Response } from 'express'
-import { DateTime } from 'luxon'
 import { ulid } from 'ulid'
-
-import type UserTokenRequest from '@/src/ingest/auth/middleware/userTokenRequest.ts'
-import type { ArdLivestream } from '@/types.ard.ts'
-import type { EventhubSubscriptionDatastore } from '@/types.eventhub.ts'
-import config from '../../../config'
+import { pubSubPrefix } from '#config'
+import { stage } from '#env'
+import type { ArdLivestream, EventhubSubscriptionDatastore, Response, UserTokenRequest } from '#types'
 import { ardFeed } from '../../data/index.ts'
 import datastoreSave from '../../utils/datastore/save.ts'
 import pubsubBuildId from '../../utils/pubsub/buildId.ts'
-import pubsubGetTopic from '../../utils/pubsub/getTopic.ts'
 import pubsubCreateSubscription from '../../utils/pubsub/createSubscription.ts'
-
-import responseNotFound from '../../utils/response/notFound.ts'
+import pubsubGetTopic from '../../utils/pubsub/getTopic.ts'
 import responseBadRequest from '../../utils/response/badRequest.ts'
 import responseInternalServerError from '../../utils/response/internalServerError.ts'
+import responseNotFound from '../../utils/response/notFound.ts'
 
 const source = 'ingest/subscriptions/post'
 
@@ -37,13 +26,16 @@ export default async (req: UserTokenRequest, res: Response) => {
 				level: 'notice',
 				message: 'user not found',
 				source,
-				data: { ...req.headers, authorization: 'hidden' },
+				data: {
+					...req.headers,
+					authorization: 'hidden',
+				},
 			})
 			return responseInternalServerError(req, res, new Error('User not found'))
 		}
 
 		// generate subscription name
-		const prefix = `${config.pubSubPrefix}subscription.`
+		const prefix = `${pubSubPrefix}subscription.`
 
 		// check existence of user institution
 		const institutionExists = ardFeed?.items?.some((entry: ArdLivestream) => {
@@ -62,7 +54,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 				source,
 				data: {
 					topic: req.body.topic,
-					stage: config.stage,
+					stage: stage,
 					email: user.email,
 					institutionExists,
 					userInstitution: user.institution,
@@ -101,7 +93,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		}
 
 		// ip address check
-		if (url.hostname.match('([\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3})') != null) {
+		if (url.hostname.match('([\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3})') !== null) {
 			// return 422 error
 			return responseBadRequest(req, res, {
 				status: 422,
@@ -115,13 +107,12 @@ export default async (req: UserTokenRequest, res: Response) => {
 			return responseBadRequest(req, res, {
 				status: 422,
 				message: 'An invalid URL was sent for the subscription',
-				errors: 'The URL isn\'t a secure website please send one that starts with https',
+				errors: "The URL isn't a secure website please send one that starts with https",
 			})
 		}
 
 		// map inputs
-		let subscription: EventhubSubscriptionDatastore = {
-			id: undefined,
+		const subscriptionInputData: EventhubSubscriptionDatastore = {
 			name: `${prefix}${ulid()}`,
 			type: req.body.type,
 			method: req.body.method,
@@ -136,42 +127,32 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		// check existence of topic
 		try {
-			await pubsubGetTopic(subscription.topic)
+			await pubsubGetTopic(subscriptionInputData.topic)
 		} catch (error) {
 			// log error
 			logger.log({
 				level: 'warning',
-				message: `failed to find desired topic > ${subscription.topic}`,
+				message: `failed to find desired topic > ${subscriptionInputData.topic}`,
 				source,
 				error,
-				data: { subscription },
+				data: { subscription: subscriptionInputData },
 			})
 
 			// return 404 error
 			return responseNotFound(req, res, {
 				status: 404,
-				message: `Topic '${subscription.topic}' not found`,
+				message: `Topic '${subscriptionInputData.topic}' not found`,
 			})
 		}
 
 		// save to datastore
-		subscription = await datastoreSave(subscription, 'subscriptions', null)
+		const subscriptionId = await datastoreSave(subscriptionInputData, 'subscriptions')
 
-		// check if subscription was saved
-		if (!subscription.id) {
-			logger.log({
-				level: 'error',
-				message: 'failed to save subscription to datastore',
-				source,
-				data: { subscription },
-			})
-			return responseInternalServerError(req, res, new Error('Failed to save subscription'))
-		}
+		const subscription = { ...subscriptionInputData, id: subscriptionId }
 
 		// request creation of subscription
 		const createdSubscription = await pubsubCreateSubscription(subscription)
 
-		// return data
 		return res.status(201).json(createdSubscription)
 	} catch (error) {
 		logger.log({

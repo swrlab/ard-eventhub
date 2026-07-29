@@ -8,6 +8,8 @@
 	it writes to the production system and therefore should be used sparingly
 */
 
+import process from 'node:process'
+
 // Must be set before any plugin imports (api-keys loads at import)
 const testApiKeys = process.env.RADIOPLAYER_API_KEYS
 process.env.RADIOPLAYER_API_KEYS = testApiKeys
@@ -87,8 +89,8 @@ describe('Radioplayer plugin', () => {
 
 			expect(result).toBeDefined()
 			expect(Array.isArray(result)).toBe(true)
-			expect(result.length).toBeGreaterThan(0)
-			for (const resultItem of result) {
+			expect(result?.length).toBeGreaterThan(0)
+			for (const resultItem of result as NonNullable<{ url: string }[]>) {
 				expect(resultItem.url).toContain('https://')
 				expect(resultItem.url).toContain('np-ingest.radioplayer.cloud')
 				expect(resultItem.url).toContain('rpuid=2761425')

@@ -1,58 +1,30 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
-
-import type { EventhubPluginMessage } from '@/types.eventhub.ts'
-import config from '../../../../config'
-import dts from '../../../../config/dts-keys'
-import undici from '../../undici'
+import { defaultHeaders, version } from '#config'
+import { dtsKeys, serviceName, stage } from '#env'
+import type {
+	EventhubPluginMessage,
+	EventhubService,
+	LiveRadioEvent,
+	LiveradioCredential,
+	PermittedExcludedFields,
+} from '#types'
 
 const source = 'utils/plugins/dts/event'
 
-const DEFAULT_HEADERS = {
+const DEFAULT_HEADERS: RequestInit['headers'] = {
+	...defaultHeaders,
 	Accept: 'application/json',
 	'Content-Type': 'application/json',
 }
-const LIVERADIO_URL = dts.endpoints.liveRadioEvent[config.stage as keyof typeof dts.endpoints.liveRadioEvent]
-
-// note all fields have a null options, since excludeFields can be used to exclude fields from the event
-export type LiveRadioEvent = {
-	broadcastId: string | null
-	contentId: string | null
-	type: string | null
-	status: string | null
-	client: string | null
-	clientVersion: string | null
-	timestamp: string | null
-	artist: string | null
-	title: string | null
-	isrc: string | null
-	email: string | null
-	duration: number | null
-	delay: number | null
-	album: string | null
-	composer: string | null
-	program: string | null
-	subject: string | null
-	webURL: string | null
-	enableShare: boolean | null
-	enableThumbs: boolean | null
-	year: number | null
-	fccId: string | null
-	imageURL: string | null
-}
+const LIVERADIO_URL = dtsKeys.endpoints.liveRadioEvent[stage as keyof typeof dtsKeys.endpoints.liveRadioEvent]
 
 // provide remapping helpers
-const getCoreIds = (services: any) => services.map((service: any) => service.topic.id)
+const getCoreIds = (services: EventhubService[]) =>
+	services.flatMap((service) => (service.topic?.id ? [service.topic.id] : []))
 
 const getUserForInstitution = (institutionId: string) => {
 	// get user or reject if not found
-	const liveradioUser = dts.credentials.liveradio.find((user: any) => user.coreId === institutionId)
+	const liveradioUser = dtsKeys.credentials.liveradio.find((user: LiveradioCredential) => user.coreId === institutionId)
 	if (!liveradioUser) return { token: null, username: null }
 
 	// encode token
@@ -63,8 +35,7 @@ const getUserForInstitution = (institutionId: string) => {
 	}
 }
 
-export default async (job: EventhubPluginMessage) => {
-	// remap input
+export default async (job: EventhubPluginMessage): Promise<void> => {
 	const { event, plugin, institutionId } = job
 
 	// only process now playing events
@@ -74,7 +45,7 @@ export default async (job: EventhubPluginMessage) => {
 			source,
 			data: { job },
 		})
-		return Promise.resolve()
+		return
 	}
 
 	// collect ARD Core ids
@@ -87,14 +58,14 @@ export default async (job: EventhubPluginMessage) => {
 
 	// remap Eventhub variables to external ones
 	const liveRadioEvent: LiveRadioEvent = {
-		broadcastId: null as string | null,
-		contentId: null as string | null,
+		broadcastId: null,
+		contentId: null,
 
 		type,
-		status: 'playing' as string | null,
+		status: 'playing',
 
-		client: config.serviceName as string | null,
-		clientVersion: config.version as string | null,
+		client: serviceName,
+		clientVersion: version,
 
 		timestamp: event.start,
 		artist: event.artist,
@@ -103,19 +74,18 @@ export default async (job: EventhubPluginMessage) => {
 		email: plugin?.email || null,
 		duration: event.length || null,
 
-		delay: plugin?.delay || 0,
+		delay: plugin?.delay ?? 0,
 		album: plugin?.album || null,
 		composer: plugin?.composer || null,
 		program: plugin?.program || null,
 		subject: plugin?.subject || null,
 		webURL: plugin?.webUrl || null,
-		enableShare: !!plugin?.webUrl,
+		enableShare: Boolean(plugin?.webUrl),
 
-		enableThumbs:
-			plugin?.enableThumbs === true || plugin?.enableThumbs === false ? plugin.enableThumbs : (true as boolean | null),
+		enableThumbs: plugin?.enableThumbs ?? true,
 		year: null,
 		fccId: null,
-		imageURL: null as string | null,
+		imageURL: null,
 	}
 
 	// set thumbnail
@@ -129,7 +99,9 @@ export default async (job: EventhubPluginMessage) => {
 	// handle exclusions
 	if (Array.isArray(plugin.excludeFields) && plugin.excludeFields.length > 0) {
 		for (const field of plugin.excludeFields) {
-			const permittedExcludedField = dts.permittedExcludedFields[field] as keyof LiveRadioEvent
+			const permittedExcludedField = dtsKeys.permittedExcludedFields[
+				field as keyof PermittedExcludedFields
+			] as keyof LiveRadioEvent
 			if (permittedExcludedField) {
 				liveRadioEvent[permittedExcludedField] = null
 			}
@@ -138,14 +110,14 @@ export default async (job: EventhubPluginMessage) => {
 
 	// set event host and auth
 	const { token: liveradioToken, username } = getUserForInstitution(institutionId)
-	if (!LIVERADIO_URL || !liveradioToken) {
+	if (!(LIVERADIO_URL && liveradioToken)) {
 		logger.log({
 			level: 'error',
 			message: 'failed loading DTS user for liveradio API',
 			source,
 			data: { job, ids: { coreIds } },
 		})
-		return Promise.resolve()
+		return
 	}
 
 	// insert coreId into events
@@ -154,29 +126,38 @@ export default async (job: EventhubPluginMessage) => {
 	})
 
 	// post event
-	const liveradioConfig = {
+	const liveradioConfig: RequestInit = {
 		method: 'POST',
 		body: JSON.stringify(liveRadioEvents),
-		timeout: 7e3,
-		reject: false,
+		signal: AbortSignal.timeout(10e3),
 		headers: { ...DEFAULT_HEADERS, Authorization: liveradioToken },
 	}
-	const posted = await undici(LIVERADIO_URL, liveradioConfig)
+	let response: Response | undefined
+	let text: string
+	try {
+		// During a timeout or when the network fails, fetch will throw an error
+		response = await globalThis.fetch(LIVERADIO_URL, liveradioConfig)
+		text = await response.text()
+	} catch (error) {
+		text = `network error or timeout: ${error}`
+	}
 
-	// check response for keywords
-	let isDtsResponseOk = true
-	if (posted.string.indexOf('error') !== -1) isDtsResponseOk = false
-	if (posted.string.indexOf('dropped bids') !== -1) isDtsResponseOk = false
-	if (posted.string.indexOf('not authorized') !== -1) isDtsResponseOk = false
+	// check response for possible error keywords
+	const isDtsResponseOk = !['error', 'dropped bids', 'not authorized'].some((err) => text.includes(err))
 
 	// log result
 	const message = [
 		`DTS event done (${event.services[0]?.publisherId})`,
-		`status ${posted.statusCode}`,
+		`status ${response?.status}`,
 		`${coreIds.length}x Core IDs`,
 	]
+	let json: object | undefined
+	try {
+		// the json parsing can fail silently, since we then re-use the text.
+		json = JSON.parse(text)
+	} catch {}
 	logger.log({
-		level: isDtsResponseOk && posted.ok ? 'info' : 'error',
+		level: isDtsResponseOk && response?.ok ? 'info' : 'error',
 		message: message.join(' > '),
 		source,
 		data: {
@@ -184,12 +165,10 @@ export default async (job: EventhubPluginMessage) => {
 			coreIds,
 			dts: {
 				username,
-				statusCode: posted.statusCode,
-				response: posted.json || posted.string,
+				statusCode: response?.status,
+				response: json ?? text,
 				liveRadioEvent,
 			},
 		},
 	})
-
-	return Promise.resolve()
 }

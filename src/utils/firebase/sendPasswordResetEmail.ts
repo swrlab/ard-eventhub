@@ -1,25 +1,19 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
 import logger from '@frytg/logger'
-
-import undici from '../undici'
+import { defaultHeaders } from '#config'
+import { firebaseAPIKey } from '#env'
 
 const source = 'firebase.sendPasswordResetEmail'
 
-export default async (email: string) => {
+export default async (email: string): Promise<void> => {
 	// set firebase sign in url
-	const url = `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${process.env.FIREBASE_API_KEY}`
+	const url = `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${firebaseAPIKey}`
 
 	// query firebase
-	const { statusCode, json: response } = await undici(url, {
+	const response = await globalThis.fetch(url, {
 		method: 'POST',
-		timeout: 4e3,
+		signal: AbortSignal.timeout(4e3),
 		headers: {
+			...defaultHeaders,
 			Accept: 'application/json',
 			'Content-Type': 'application/json',
 		},
@@ -29,18 +23,15 @@ export default async (email: string) => {
 		}),
 	})
 
-	// handle errors
-	if (statusCode !== 200) {
+	if (response.status !== 200) {
 		logger.log({
 			source,
 			level: 'warning',
-			message: `failed with status > ${statusCode}`,
-			data: { statusCode, response },
+			message: `failed with status > ${response.status}`,
+			data: { statusCode: response.status, response },
 		})
 
-		return Promise.reject(new Error(response))
+		const text = await response.text()
+		throw new Error(text)
 	}
-
-	// return ok
-	return Promise.resolve()
 }

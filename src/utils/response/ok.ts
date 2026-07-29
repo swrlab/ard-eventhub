@@ -13,7 +13,7 @@ export default (req: Request, res: Response, data: object, status?: number) => {
 			...data,
 			trace: req.headers['x-cloud-trace-context'] || null,
 		})
-	} catch (_error) {
+	} catch {
 		return res.sendStatus(500)
 	}
 }

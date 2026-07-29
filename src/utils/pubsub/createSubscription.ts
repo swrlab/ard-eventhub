@@ -1,27 +1,18 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
+import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
-import type { google } from '@google-cloud/pubsub/build/protos/protos'
-import { DateTime } from 'luxon'
 import slug from 'slug'
-
-import type { EventhubSubscriptionDatastore } from '@/types.eventhub.ts'
-import config from '../../../config'
-import pubSubSubscriberClient from './_subscriberClient'
+import { projectId, stage } from '#env'
+import type { EventhubSubscriptionDatastore, ISubscription } from '#types'
+import pubSubSubscriberClient from './_subscriberClient.ts'
 import mapSubscription from './mapSubscription.ts'
 
 const source = 'utils/pubsub/createSubscription'
 
 export default async (subscription: EventhubSubscriptionDatastore) => {
 	// map inputs for pubsub
-	const options: google.pubsub.v1.ISubscription = {
-		name: `projects/${process.env.GCP_PROJECT_ID}/subscriptions/${subscription.name}`,
-		topic: `projects/${process.env.GCP_PROJECT_ID}/topics/${subscription.topic}`,
+	const options: ISubscription = {
+		name: `projects/${projectId}/subscriptions/${subscription.name}`,
+		topic: `projects/${projectId}/topics/${subscription.topic}`,
 		pushConfig: {
 			pushEndpoint: subscription.url,
 			oidcToken: {
@@ -30,8 +21,8 @@ export default async (subscription: EventhubSubscriptionDatastore) => {
 			},
 		},
 		labels: {
-			id: subscription.id ?? '',
-			stage: config.stage ?? '',
+			id: subscription.id?.toString() ?? '',
+			stage: stage,
 			'creator-slug': slug(subscription.creator),
 			created: DateTime.now().toFormat('yyyy-LL-dd'),
 		},
@@ -55,8 +46,7 @@ export default async (subscription: EventhubSubscriptionDatastore) => {
 	})
 
 	// map and filter values
-	const mappedCreatedSubscription = { metadata: null, ...createdSubscription }
-	const { limited: mappedSubscription } = await mapSubscription(mappedCreatedSubscription)
+	const { limited: mappedSubscription } = await mapSubscription(createdSubscription)
 	logger.log({
 		level: 'info',
 		message: 'mapped subscription',
@@ -64,6 +54,5 @@ export default async (subscription: EventhubSubscriptionDatastore) => {
 		data: { mappedSubscription },
 	})
 
-	// return data
 	return mappedSubscription
 }
