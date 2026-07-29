@@ -57,7 +57,7 @@
 		"firebase-admin": "^13.9.0",
 		"google-auth-library": "^10.6.2",
 		"jsonwebtoken": "^9.0.3",
-		"slug": "^11.0.1",
+		"slug": "^12.0.1",
 		"swagger-ui-express": "^5.0.1",
 		"typescript": "^5.9.3",
 		"ulid": "^3.0.2"
