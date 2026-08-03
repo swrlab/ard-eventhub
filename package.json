@@ -76,7 +76,7 @@
 		"@typescript/native-preview": "^7.0.0-dev.20260227.1",
 		"docsify-cli": "^4.4.4",
 		"knip": "^5.85.0",
-		"license-compliance": "^3.0.1",
+		"license-compliance": "^4.0.0",
 		"prettier": "^3.8.3",
 		"supertest": "^7.2.2"
 	},
