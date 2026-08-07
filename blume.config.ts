@@ -15,9 +15,7 @@ export default defineConfig({
 		repo: 'ard-eventhub',
 	},
 	content: {
-		sources: [
-			{ type: 'filesystem', root: 'docs' },
-		],
+		sources: [{ type: 'filesystem', root: 'docs' }],
 	},
 	export: {
 		pdf: true,
