@@ -36,7 +36,12 @@ dev:
 # lint the code
 [group('LOCAL')]
 lint:
-	bun run lint
+	bun x biome lint
+
+# format everything
+[group('LOCAL')]
+format:
+	bun x biome format --write
 
 # serve the documentation (dev server with hot reload)
 [group('LOCAL')]

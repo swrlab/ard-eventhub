@@ -4,6 +4,7 @@ description: "Verwaltung von Secrets und Konfigurationsdateien."
 sidebar:
   order: 10
 ---
+
 Dieses Repository benötigt verschiedene Secrets und Konfigurationsdateien, die an unterschiedlichen Orten verwaltet werden. Diese Seite dokumentiert, welche Konfigurationen wie und wo verwaltet werden.
 Da das Projekt öffentlich gehalten wird, ist die komplette interne Konfiguration zu Secrets und deren Deployment hier nicht vollständig beschrieben. Detailliertere Informationen finden sich in internen Dokumenten.
 

@@ -1,9 +1,10 @@
 ---
-title: "Events"
-description: "Unterstützte Event-Typen im ARD Eventhub."
+title: "Event-Types"
+description: "Unterstützte Optionen im ARD Eventhub."
 sidebar:
   order: 5
 ---
+
 Zurzeit erwartet ARD Eventhub, dass der Wert `event` einer der folgenden Werte ist (Änderungen möglich):
 
 ## `de.ard.eventhub.v1.radio.track.playing`

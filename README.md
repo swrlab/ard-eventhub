@@ -2,29 +2,12 @@
 
 ARD system to distribute real-time (live) metadata for primarily radio broadcasts.
 
-## Active Data Suppliers
-
-These ARD broadcasters are currently sending live metadata via ARD Eventhub:
-
-| Broadcaster      | TEST | PROD |
-| ---------------- | ---- | ---- |
-| BR               | ✅   | ✅   |
-| HR               | ✅   | ✅   |
-| MDR              | -    | ✅   |
-| NDR              | ✅   | ✅   |
-| Radio Bremen     | -    | ✅   |
-| RBB              | -    | ✅   |
-| SR               | -    | ✅   |
-| SWR              | ✅   | ✅   |
-| WDR              | ✅   | ✅   |
-| Deutschlandradio | -    | -    |
-
 ## Get Started and Documentation
 
 Important places to go ahead:
 
 - The [ard-eventhub](https://github.com/swrlab/ard-eventhub) repository
-- Our [Quickstart](docs/quickstart.md) documentation
+- Our [Quickstart](docs/user/quickstart.md) documentation
 - The full docs on [swrlab.github.io/ard-eventhub](https://swrlab.github.io/ard-eventhub/)
 - Internal documentation in [Confluence](https://confluence.ard.de/x/il8uGw)
 
@@ -98,7 +81,7 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `winston`                      | [MIT](https://github.com/winstonjs/winston/blob/master/LICENSE)                                    |
 | NPM     | `ulid`                         | [MIT](https://github.com/ulid/javascript/blob/master/LICENSE)                                      |
 | NPM DEV | `@biomejs/biome`               | [MIT](https://github.com/biomejs/biome/blob/main/LICENSE-MIT)                                      |
-| NPM DEV | `blume`                         | [MIT](https://github.com/haydenbleasel/blume/blob/main/LICENSE)                                    |
+| NPM DEV | `blume`                        | [MIT](https://github.com/haydenbleasel/blume/blob/main/LICENSE)                                    |
 | NPM DEV | `cookie`                       | [MIT](https://github.com/jshttp/cookie/blob/master/LICENSE)                                        |
 | NPM DEV | `@swrlab/swr-prettier-config`  | [MIT](https://github.com/swrlab/swr-prettier-config/blob/main/LICENSE.txt)                         |
 | NPM DEV | `chai`                         | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                          |

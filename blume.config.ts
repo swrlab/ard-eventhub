@@ -1,17 +1,26 @@
 import { defineConfig } from 'blume'
 
+// icons are documented in https://lucide.dev/icons/
+
 export default defineConfig({
 	title: 'ARD Eventhub',
 	description: 'Echtzeit-Metadaten für Hörfunksendungen der ARD verteilen.',
+	// banner: 'if needed',
+	feedback: false,
+	logo: {
+		image: 'favicon.svg',
+	},
 	github: {
 		owner: 'swrlab',
 		repo: 'ard-eventhub',
 	},
 	content: {
-		root: 'docs',
+		sources: [
+			{ type: 'filesystem', root: 'docs' },
+		],
 	},
 	export: {
-		pdf: true
+		pdf: true,
 	},
 	i18n: {
 		defaultLocale: 'de',
@@ -23,8 +32,14 @@ export default defineConfig({
 		output: 'static',
 	},
 	theme: {
-		accent: 'blue',
-		mode: 'system',
+		accent: 'rgb(29, 11, 64)', // a named preset or any CSS color
+		radius: 'none', // none | sm | md | lg
+		mode: 'dark', // system | light | dark
+		fonts: {
+			display: 'geist',
+			body: 'geist',
+			mono: 'geist-mono',
+		},
 	},
 	openapi: {
 		enabled: true,
@@ -34,7 +49,7 @@ export default defineConfig({
 	navigation: {
 		tabs: [
 			{ label: 'Docs', path: '/', href: '/' },
-			{ label: 'Open API', path: '/api', href: '/api' },
+			{ label: 'OpenAPI', path: '/api', href: '/api' },
 		],
 		featured: [
 			{
@@ -42,24 +57,15 @@ export default defineConfig({
 				href: 'https://github.com/swrlab/ard-eventhub/blob/main/CHANGELOG.md',
 				icon: 'newspaper',
 			},
-		],
-		sidebar: [
-			'/',
 			{
-				label: 'Schnellstart',
-				collapsed: false,
-				items: ['/quickstart', '/authentication', '/common-ids', '/external-ids', '/events', '/plugins', '/types'],
-			},
-			'/openapi',
-			{
-				label: 'Tech',
-				collapsed: false,
-				items: ['/naming', '/secrets', '/stages'],
+				label: 'Issues/ Roadmap',
+				href: 'https://github.com/swrlab/ard-eventhub/issues',
+				icon: 'bug',
 			},
 			{
-				label: 'Admin',
-				collapsed: true,
-				items: ['/users'],
+				label: 'Confluence',
+				href: 'https://confluence.ard.de/x/il8uGw',
+				icon: 'book-open-text',
 			},
 		],
 	},
@@ -68,8 +74,10 @@ export default defineConfig({
 			enabled: true,
 			openapi: true,
 		},
+		mcp: {
+			enabled: false,
+		},
 	},
-	feedback: false,
 	seo: {
 		og: { enabled: true },
 		sitemap: true,

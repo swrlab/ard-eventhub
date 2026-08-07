@@ -1,6 +1,6 @@
 {
 	"name": "ard-eventhub",
-	"version": "3.0.0",
+	"version": "2.4.0",
 	"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
 	"main": "./src/ingest/index.ts",
 	"imports": {
@@ -94,7 +94,11 @@
 	"type": "module",
 	"prettier": "@swrlab/style-guide/prettier",
 	"knip": {
-		"entry": ["blume.config.ts!"],
-		"ignoreDependencies": ["cookie"]
+		"entry": [
+			"blume.config.ts!"
+		],
+		"ignoreDependencies": [
+			"cookie"
+		]
 	}
 }
