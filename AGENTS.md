@@ -13,6 +13,10 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 - **Run tests:** `just test`
 - **Lint code:** `just lint` (uses Biome)
 - **Format code:** Biome handles formatting automatically
+- **Docs (dev):** `just docs` (Blume)
+- **Docs (build):** `just docs-build` (writes to `dist/`)
+
+Docs deploy via [`.github/workflows/docs-push.yml`](.github/workflows/docs-push.yml) to GitHub Pages. The repo Pages source must be set to **GitHub Actions** (not “Deploy from a branch”). `cookie@2` is pinned as a devDependency so Astro’s prerender can resolve ESM exports while Express keeps nested `cookie@0.7`.
 
 ## Project Knowledge
 
@@ -22,7 +26,8 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
   - `src/utils/` – Shared utilities (Pub/Sub, Datastore, Firebase, plugins)
   - `cli/` – Command-line utilities
   - `config/` – Configuration files
-  - `docs/` – Documentation (Markdown)
+  - `docs/` – Documentation (Markdown, built with Blume)
+  - `blume.config.ts` – Docs site configuration
   - `tests/` – Test files (co-located with source files using `.test.ts`)
 
 ## Code Style

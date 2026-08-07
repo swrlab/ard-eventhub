@@ -18,7 +18,9 @@
 		"checks": "bun --parallel check typecheck knip",
 		"check": "biome check",
 		"check:fix": "biome check --write",
-		"docs:serve": "docsify serve . --port 3000",
+		"docs:dev": "blume dev",
+		"docs:build": "blume build",
+		"docs:preview": "blume preview",
 		"coreId": "bun run ./src/cli/core-id.ts",
 		"feed": "bun run ./src/cli/feed.ts",
 		"format": "biome format --write",
@@ -74,7 +76,8 @@
 		"@types/supertest": "^6.0.3",
 		"@types/swagger-ui-express": "^4.1.8",
 		"@typescript/native-preview": "^7.0.0-dev.20260227.1",
-		"docsify-cli": "^4.4.4",
+		"blume": "1.3.1",
+		"cookie": "2.0.1",
 		"knip": "^5.85.0",
 		"license-compliance": "^3.0.1",
 		"prettier": "^3.8.3",
@@ -84,8 +87,14 @@
 		"ansi-regex": "^5.0.1",
 		"got": "^11.8.6",
 		"strip-ansi": "^6.0.1",
-		"update-notifier": "^5.1.0"
+		"update-notifier": "^5.1.0",
+		"@scalar/schemas": "0.8.0",
+		"@scalar/types": "0.17.0"
 	},
 	"type": "module",
-	"prettier": "@swrlab/style-guide/prettier"
+	"prettier": "@swrlab/style-guide/prettier",
+	"knip": {
+		"entry": ["blume.config.ts!"],
+		"ignoreDependencies": ["cookie"]
+	}
 }
