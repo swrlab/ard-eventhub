@@ -1,4 +1,7 @@
-# ARD Eventhub / Events
+---
+title: "Event-Types"
+description: "Unterstützte Optionen im ARD Eventhub."
+---
 
 Zurzeit erwartet ARD Eventhub, dass der Wert `event` einer der folgenden Werte ist (Änderungen möglich):
 

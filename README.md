@@ -2,32 +2,21 @@
 
 ARD system to distribute real-time (live) metadata for primarily radio broadcasts.
 
-## Active Data Suppliers
-
-These ARD broadcasters are currently sending live metadata via ARD Eventhub:
-
-| Broadcaster      | TEST | PROD |
-| ---------------- | ---- | ---- |
-| BR               | ✅   | ✅   |
-| HR               | ✅   | ✅   |
-| MDR              | -    | ✅   |
-| NDR              | ✅   | ✅   |
-| Radio Bremen     | -    | ✅   |
-| RBB              | -    | ✅   |
-| SR               | -    | ✅   |
-| SWR              | ✅   | ✅   |
-| WDR              | ✅   | ✅   |
-| Deutschlandradio | -    | -    |
-
 ## Get Started and Documentation
 
 Important places to go ahead:
 
 - The [ard-eventhub](https://github.com/swrlab/ard-eventhub) repository
-- Our [Quickstart](docs/QUICKSTART.md) documentation
+- Our [Quickstart](docs/user/quickstart.md) documentation
 - The full docs on [swrlab.github.io/ard-eventhub](https://swrlab.github.io/ard-eventhub/)
-- OpenAPI specification on [eventhub-ingest.ard.de/openapi](https://eventhub-ingest.ard.de/openapi)
 - Internal documentation in [Confluence](https://confluence.ard.de/x/il8uGw)
+
+Local docs commands:
+
+```sh
+just docs        # blume dev server
+just docs-build  # static build to dist/
+```
 
 ## Get involved
 
@@ -88,13 +77,13 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `jsonwebtoken`                 | [MIT](https://github.com/auth0/node-jsonwebtoken/blob/master/LICENSE)                              |
 | NPM     | `luxon`                        | [MIT](https://github.com/moment/luxon/blob/master/LICENSE.md)                                      |
 | NPM     | `slug`                         | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                           |
-| NPM     | `swagger-ui-express`           | [MIT](https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE)                       |
-| NPM     | `winston`                      | [MIT](https://github.com/winstonjs/winston/blob/master/LICENSE)                                    |
+| NPM     | `ulid`                         | [MIT](https://github.com/ulid/javascript/blob/master/LICENSE)                                      |
 | NPM DEV | `@biomejs/biome`               | [MIT](https://github.com/biomejs/biome/blob/main/LICENSE-MIT)                                      |
+| NPM DEV | `blume`                        | [MIT](https://github.com/haydenbleasel/blume/blob/main/LICENSE)                                    |
+| NPM DEV | `cookie`                       | [MIT](https://github.com/jshttp/cookie/blob/master/LICENSE)                                        |
 | NPM DEV | `@swrlab/swr-prettier-config`  | [MIT](https://github.com/swrlab/swr-prettier-config/blob/main/LICENSE.txt)                         |
 | NPM DEV | `chai`                         | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                          |
 | NPM DEV | `chai-http`                    | [MIT](https://github.com/chaijs/chai-http/blob/master/package.json)                                |
-| NPM DEV | `docsify-cli`                  | [MIT](https://github.com/docsifyjs/docsify-cli/blob/master/LICENSE)                                |
 | NPM DEV | `license-compliance`           | [MIT](https://github.com/tmorell/license-compliance/blob/master/LICENSE)                           |
 | NPM DEV | `mocha`                        | [MIT](https://github.com/mochajs/mocha/blob/master/LICENSE)                                        |
 | NPM DEV | `nodemon`                      | [MIT](https://github.com/remy/nodemon/blob/master/LICENSE)                                         |

@@ -2,10 +2,10 @@ import { DateTime } from '@frytg/dates'
 import express, { type Request, type Response } from 'express'
 import { middleware } from 'express-openapi-validator'
 
-import swaggerUi from 'swagger-ui-express'
-import swaggerDocument from '../../openapi.json' with { type: 'json' }
 import responseBadRequest from '../utils/response/badRequest.ts'
-import swaggerConfig from '../config/swagger-ui.ts'
+
+/** Docs API reference (Blume); replaces the former in-service Swagger UI. */
+const DOCS_API_URL = 'https://swrlab.github.io/ard-eventhub/api'
 
 // set up router
 const router = express.Router()
@@ -31,10 +31,10 @@ router.use(
 	})
 )
 
-// register swagger endpoints
-router.get('/openapi/openapi.json', (_req: Request, res: Response) => res.json(swaggerDocument))
-router.get('/openapi/openapi.yaml', (_req: Request, res: Response) => res.sendFile('openapi.yaml', { root: '.' }))
-router.use('/openapi', swaggerUi.serve, swaggerUi.setup({}, swaggerConfig))
+// redirect former Swagger UI to the public docs API reference
+router.use('/openapi', (_req: Request, res: Response) => {
+	res.redirect(302, DOCS_API_URL)
+})
 
 // register API endpoints
 import login from './auth/login/post.ts'

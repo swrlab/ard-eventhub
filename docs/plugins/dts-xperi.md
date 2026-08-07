@@ -1,0 +1,35 @@
+---
+title: "DTS Xperi"
+description: "Verwendung des DTS Xperi Plugins im Eventhub."
+---
+
+Dieses Plugin ermöglicht das Übermitteln von Metadaten an das DTS-System. Aktuell ist es als Opt-out-Feature konfiguriert — die Übermittlung erfolgt also standardmäßig. Das Opt-out gilt derzeit nur für Musiktitel (`type: music`). Das Senden kann für jedes einzelne Event überschrieben werden, sofern man es selber setzen möchte:
+
+```jsonc
+{
+  "type": "music",
+  // ...
+  "plugins": [
+    {
+      "type": "dts",
+      "isDeactivated": false,
+    },
+  ],
+}
+```
+
+Folgende Optionen können gesetzt werden:
+
+- `isDeactivated` (boolean, Standard `false`) - bei `true` werden keine Daten an das externe System gesendet
+- `delay` (int, Standard `0`) - Verzögerung, die gewartet wird, bis die Daten angezeigt werden
+- `album` (string, Standard `null`) - Albumtitel, falls vorhanden
+- `composer` (string, Standard `null`) - Komponist, falls vorhanden
+- `program` (string, Standard `null`) - Programmtitel, falls vorhanden
+- `subject` (string, Standard `null`) - Thema, falls vorhanden
+- `webUrl` (string, Standard `null`) - URL zur Webseite des Events
+- `preferArtistMedia` (boolean, Standard `false`) - bei `true` wird Medienmaterial des Künstlers dem Cover vorgezogen
+- `excludeFields` (array, Standard `[]`) - Felder, die vom Versand an das externe System ausgeschlossen werden
+
+Wenn `plugins[].type === 'dts'` nicht gesetzt ist, wird es automatisch hinzugefügt (Opt-out-Prinzip). Das `isDeactivated` Feld ist optional und standardmäßig auf `false` gesetzt. Setzt man es auf `true`, werden die Daten nicht gesendet.
+
+ARD Core IDs sind im externen System bereits gemappt. Änderungen an Ihren IDs (nicht empfohlen) erfordern manuelle Anpassungen — wenden Sie sich bei Bedarf an die zuständigen Stellen.

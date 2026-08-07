@@ -1,10 +1,15 @@
-# ARD Eventhub / Schnellstart
+---
+title: "Schnellstart"
+description: "Leitfaden für Publisher und Subscriber im ARD Eventhub."
+sidebar:
+  order: 1
+---
 
 Dieser Leitfaden hilft dir beim Start in den ARD Eventhub.
 
-Egal, ob du Publisher oder Subscriber bist: Du benötigst ein Benutzerkonto, um mit der API zu interagieren. Fordere ein Konto über deinen Ansprechpartner beim SWR Audio Lab oder ARD Online an. Administratoren können die [*Benutzer*](./USERS.md)-Dokumentation für die Registrierung heranziehen.
+Egal, ob du Publisher oder Subscriber bist: Du benötigst ein Benutzerkonto, um mit der API zu interagieren. Fordere ein Konto über deinen Ansprechpartner beim SWR Audio Lab oder ARD Online an.
 
-Nachdem das Konto eingerichtet wurde, lies das Kapitel [*Authentifizierung*](./AUTHENTICATION.md), um mehr über Login und den Token-Austausch zu erfahren.
+Nachdem das Konto eingerichtet wurde, lies das Kapitel [_Authentifizierung_](./authentication), um mehr über Login und den Token-Austausch zu erfahren.
 
 ## Publisher
 
@@ -14,35 +19,35 @@ Wenn du als Hörfunkanstalt Events in den ARD Eventhub publizieren möchtest, be
 - Verwende den POST-Endpoint `/events/{eventName}`, um Events zu senden
 - Hinweis: Auch wenn GET `/topics` deine Sender noch nicht auflistet, werden die Topics beim ersten veröffentlichten Event automatisch erstellt (die Antwort enthält z.B.):
 
-```js
+```jsonc
 {
-    "statuses": {
-        "published": 0,
-        "blocked": 0,
-        "failed": 1
-    },
-    "event": {
-        "name": "de.ard.eventhub.v1.radio.track.next",
-        // ...
-        "services": [
-            {
-                "type": "PermanentLivestream",
-                "externalId": "crid://swr.de/282310/demo7",
-                "publisherId": "urn:ard:publisher:75dbb3dace15f610",
-                "topic": {
-                    "id": "urn:ard:permanent-livestream:234690e18c2c7863",
-                    "name": "de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3A234690e18c2c7863",
-                    "status": "TOPIC_CREATED",
-                    "messageId": null
-                }
-            }
-        ],
-        // ...
-    }
+  "statuses": {
+    "published": 0,
+    "blocked": 0,
+    "failed": 1,
+  },
+  "event": {
+    "name": "de.ard.eventhub.v1.radio.track.next",
+    // ...
+    "services": [
+      {
+        "type": "PermanentLivestream",
+        "externalId": "crid://swr.de/282310/demo7",
+        "publisherId": "urn:ard:publisher:75dbb3dace15f610",
+        "topic": {
+          "id": "urn:ard:permanent-livestream:234690e18c2c7863",
+          "name": "de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3A234690e18c2c7863",
+          "status": "TOPIC_CREATED",
+          "messageId": null,
+        },
+      },
+    ],
+    // ...
+  },
 }
 ```
 
-Es wird empfohlen, zunächst das `test`-System des Eventhub zu nutzen, um alles zu prüfen, bevor du in die Produktion (`prod`) wechselst. Die Hostnamen findest du im Dokument zu den [Stages](./STAGES.md).
+Es wird empfohlen, zunächst das `test`-System des Eventhub zu nutzen, um alles zu prüfen, bevor du in die Produktion (`prod`) wechselst. Die Hostnamen findest du im Dokument zu den [Stages](../development/stages).
 
 Sicherheits-Hinweis: Jedes Benutzerkonto darf nur zu `publisherId`s seiner eigenen Institution publizieren. Sofern man einen Fehler zurückbekommt kann die ID falsch sein oder das Benutzerkonto wurde durch einen Admin falsch konfiguriert.
 
@@ -56,10 +61,6 @@ Für Dienste wie die ARD Audiothek ist dies wichtig, andernfalls verfügt dein S
 
 In diesem Fall ist es wichtig, sicherzustellen, dass deine interne Filterung korrekt funktioniert, wenn du Events von anderen Sendern empfängst, und diese nur zu veröffentlichen, wenn der Sender tatsächlich auf Sendung ist. Andernfalls könnte es zu einer Schleife kommen.
 
-### Wichtige Hinweise zu External IDs
-
-Details findest du in [EXTERNAL_IDS.md](./EXTERNAL_IDS.md).
-
 ### Beispiel-Workflow
 
 Ein möglicher Ablauf in deinem System für jedes neue Event könnte so aussehen:
@@ -70,49 +71,46 @@ Ein möglicher Ablauf in deinem System für jedes neue Event könnte so aussehen
    2. Falls nein, logge dich über die API erneut an
 3. POST das Event im vorgegebenen Format. Das folgende Beispiel kann dir dabei helfen, den Aufbau eines Events zu verstehen:
 
-```js
+```json
 {
-   "type": "music",
-   "start": "2021-03-17T10:04:35+01:00",
-   "length": 215.2,
-   "title": "Save your tears",
-   "artist": "The Weeknd",
-   "contributors": [
-      {
+  "type": "music",
+  "start": "2021-03-17T10:04:35+01:00",
+  "length": 215.2,
+  "title": "Save your tears",
+  "artist": "The Weeknd",
+  "contributors": [
+    {
       "name": "The Weeknd",
       "role": "artist",
       "normDb": {
-         "type": "Person",
-         "id": "12345"
+        "type": "Person",
+        "id": "12345"
       }
-      }
-   ],
-   "services": [
-      {
-         "type": "PermanentLivestream",
-         "externalId": "crid://swr.de/282310",
-         "publisherId": "282310"
-      }
-   ],
-   "playlistItemId": "radiomax:SWR3-BAD-MAX:12569153",
-   "externalId": "M0589810001",
-   "isrc": null,
-   "upc": null,
-   "mpn": null,
-   "media": [
-      {
-         "type": "cover",
-         "url": "http://my-server/covers/M0589810.001",
-         "templateUrl": null,
-         "description": "SWR Cover zu Save your tears von The Weeknd",
-         "attribution": ""
-      }
-   ],
-   "hfdbIds": [
-      "swrhfdb1.KONF.12345"
-   ]
+    }
+  ],
+  "services": [
+    {
+      "type": "PermanentLivestream",
+      "externalId": "crid://swr.de/282310",
+      "publisherId": "282310"
+    }
+  ],
+  "playlistItemId": "radiomax:SWR3-BAD-MAX:12569153",
+  "externalId": "M0589810001",
+  "isrc": null,
+  "upc": null,
+  "mpn": null,
+  "media": [
+    {
+      "type": "cover",
+      "url": "http://my-server/covers/M0589810.001",
+      "templateUrl": null,
+      "description": "SWR Cover zu Save your tears von The Weeknd",
+      "attribution": ""
+    }
+  ],
+  "hfdbIds": ["swrhfdb1.KONF.12345"]
 }
-
 ```
 
 ## Subscriber
@@ -137,7 +135,7 @@ Starte mit diesen Schritten:
 - Lese die Google-Dokumentation ["Receiving messages using Push"](https://cloud.google.com/pubsub/docs/push#receiving_messages) für das Nachrichtenformat
 - Verwende GET `/subcriptions`, um Subscriptions zu prüfen
 
-Sicherheits-Hinweis: Ein registrierter Benutzer ist einer Institution (*Landesrundfunkanstalt*) zugeordnet. Benutzer können alle Subscriptions innerhalb ihrer Institution verwalten — lösche keine Produktions-Einträge deiner Kollegen.
+Sicherheits-Hinweis: Ein registrierter Benutzer ist einer Institution (_Landesrundfunkanstalt_) zugeordnet. Benutzer können alle Subscriptions innerhalb ihrer Institution verwalten — lösche keine Produktions-Einträge deiner Kollegen.
 Mit diesem Workflow hat man weiterhin Zugriff auf alle Abonnements, auch wenn eine Person deinen Sender verlässt, oder dein Konto deaktiviert wird.
 
 ### Sicherheit
@@ -146,11 +144,11 @@ Um sicherzustellen, dass ein Event tatsächlich vom Eventhub stammt, verwende da
 
 Die Antwort beim Erstellen einer Subscription enthält u.a. das verwendete Service Account-Feld:
 
-```js
+```jsonc
 {
-   ...
-   "serviceAccount": "something@something-else.iam.gserviceaccount.com",
-   ...
+  // ...
+  "serviceAccount": "something@something-else.iam.gserviceaccount.com",
+  // ...
 }
 ```
 
@@ -162,45 +160,45 @@ Ein vereinfachtes Beispiel (Node.js mit Express): Die Google Cloud Sektion ["Aut
 
 ```js
 // load node packages
-import { OAuth2Client } from 'google-auth-library'
-const authClient = new OAuth2Client()
+import { OAuth2Client } from "google-auth-library";
+const authClient = new OAuth2Client();
 
 // set received serviceAccount
-const serviceAccountEmail = 'somethin@something-else.iam.gserviceaccount.com'
+const serviceAccountEmail = "somethin@something-else.iam.gserviceaccount.com";
 
 export default async (req, res) => {
   try {
     // read token from header
-    const bearer = req.header('Authorization')
-    const [_match, idToken] = bearer.match(/Bearer (.*)/) ?? []
+    const bearer = req.header("Authorization");
+    const [_match, idToken] = bearer.match(/Bearer (.*)/) ?? [];
 
-    if (!idToken) throw Error('No ID token could be found.')
+    if (!idToken) throw Error("No ID token could be found.");
 
     // verify token, throws error if invalid
     const verification = await authClient.verifyIdToken({
       idToken,
-    })
+    });
 
     // check token email vs. subscription email
     if (verification?.payload?.email === serviceAccountEmail) {
       // get message and metadata from pubsub body
-      const { attributes, messageId } = req.body.message
-      const { subscription } = req.body
-      let data = Buffer.from(req.body.message.data, 'base64').toString()
-      data = JSON.parse(data)
+      const { attributes, messageId } = req.body.message;
+      const { subscription } = req.body;
+      let data = Buffer.from(req.body.message.data, "base64").toString();
+      data = JSON.parse(data);
 
       // request successful, you can now use the received data
-      console.log({ attributes, messageId, subscription, data })
+      console.log({ attributes, messageId, subscription, data });
 
       // close connection
-      return res.sendStatus(201)
+      return res.sendStatus(201);
     } else {
       // user provided valid token but failed email verification
-      return res.sendStatus(204)
+      return res.sendStatus(204);
     }
   } catch (error) {
     // request failed or invalid token
-    return res.sendStatus(204)
+    return res.sendStatus(204);
   }
-}
+};
 ```

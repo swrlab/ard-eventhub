@@ -1,4 +1,8 @@
-# ARD Eventhub / Authentifizierung
+---
+title: "Authentifizierung"
+description: "Login und Token-Austausch für die Eventhub-API."
+---
+
 Auf dieser Seite wird der Prozess der Benutzerverwaltung beschrieben.
 
 Um mit der Eventhub-API zu arbeiten (sich bei ihr zu authentifizieren), benötigst du einen gültigen Benutzer. Derzeit werden diese Benutzer getrennt von der ARD Core API verwaltet, verwenden jedoch eine ähnliche Anmeldemethode.

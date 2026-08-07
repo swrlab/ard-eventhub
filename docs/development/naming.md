@@ -1,4 +1,9 @@
-# ARD Eventhub / Namenskonventionen
+---
+title: "Namenskonventionen"
+description: "Konsistente Namen für Pub/Sub und Services."
+sidebar:
+  order: 9
+---
 
 Verschiedene Teile dieses Dienstes erfordern durchgehende (konsistente) Namenskonventionen.
 

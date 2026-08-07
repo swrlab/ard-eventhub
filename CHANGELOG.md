@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+- docs: migrate documentation site from docsify to Blume (GitHub Pages static build)
+- refactor: replace in-service Swagger UI with redirect to docs API reference
+
 ## [2.3.4] - 2026-05-12
 
 - refact: remove barrel files

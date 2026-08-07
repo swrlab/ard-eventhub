@@ -15,6 +15,10 @@ coverage
 lib-cov
 .nyc_output
 
+# Blume docs build
+.blume/
+dist/
+
 # Optional npm cache directory
 .npm
 .licenses
@@ -27,3 +31,4 @@ lib-cov
 
 # livestreams that get downloaded
 /src/data/ard-core-livestreams.json
+.blume-verify/

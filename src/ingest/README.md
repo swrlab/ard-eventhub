@@ -51,7 +51,7 @@ To run this project locally in your development environment you'll need these pr
 bun run ingest
 ```
 
-6. Open [localhost:8080/openapi](http://localhost:8080/openapi/)
+6. API reference: [swrlab.github.io/ard-eventhub/api](https://swrlab.github.io/ard-eventhub/api) (`/openapi` on the service redirects there)
 
 ## Deployment
 
