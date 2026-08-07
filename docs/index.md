@@ -21,8 +21,3 @@ Diese ARD-Anstalten senden derzeit Live-Metadaten über den ARD Eventhub:
 | SWR              | ✅   | ✅   |
 | WDR              | ✅   | ✅   |
 | Deutschlandradio | -    | -    |
-
-## Mitmachen
-
-- [Issues](https://github.com/swrlab/ard-eventhub/issues) für Probleme öffnen
-- [Discussions](https://github.com/swrlab/ard-eventhub/discussions) für Formate und laufende Themen
