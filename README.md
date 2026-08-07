@@ -82,13 +82,7 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM DEV | `oxlint`                       | [MIT](https://github.com/oxc-project/oxc/blob/main/crates/oxlint/LICENSE)                          |
 | NPM DEV | `blume`                        | [MIT](https://github.com/haydenbleasel/blume/blob/main/LICENSE)                                    |
 | NPM DEV | `cookie`                       | [MIT](https://github.com/jshttp/cookie/blob/master/LICENSE)                                        |
-| NPM DEV | `@swrlab/swr-prettier-config`  | [MIT](https://github.com/swrlab/swr-prettier-config/blob/main/LICENSE.txt)                         |
-| NPM DEV | `chai`                         | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                          |
-| NPM DEV | `chai-http`                    | [MIT](https://github.com/chaijs/chai-http/blob/master/package.json)                                |
 | NPM DEV | `license-compliance`           | [MIT](https://github.com/tmorell/license-compliance/blob/master/LICENSE)                           |
-| NPM DEV | `mocha`                        | [MIT](https://github.com/mochajs/mocha/blob/master/LICENSE)                                        |
-| NPM DEV | `nodemon`                      | [MIT](https://github.com/remy/nodemon/blob/master/LICENSE)                                         |
-| NPM DEV | `prettier`                     | [MIT](https://github.com/prettier/prettier/blob/main/LICENSE)                                      |
 
 ## Authors
 

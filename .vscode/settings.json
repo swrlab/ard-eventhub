@@ -13,7 +13,7 @@
 		"editor.defaultFormatter": "oxc.oxc-vscode"
 	},
 	"[yaml]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
+		"editor.defaultFormatter": "oxc.oxc-vscode"
 	},
 	"[markdown]": {
 		"editor.defaultFormatter": "oxc.oxc-vscode"

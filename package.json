@@ -36,7 +36,7 @@
 		"license": "bunx license-compliance -f json -r detailed",
 		"lint": "oxlint",
 		"lint:fix": "oxlint --fix",
-		"openapi:format": "bunx oxfmt openapi.json && bunx prettier openapi.yaml -w",
+		"openapi:format": "oxfmt openapi.json openapi.yaml",
 		"test": "bun test --timeout 120000",
 		"typecheck": "tsgo"
 	},
@@ -59,7 +59,6 @@
 		"ulid": "^3.0.2"
 	},
 	"devDependencies": {
-		"@swrlab/style-guide": "^2.1.10",
 		"@types/bun": "^1.3.13",
 		"@types/compression": "^1.8.1",
 		"@types/dd-trace": "^0.9.3",
@@ -74,7 +73,6 @@
 		"license-compliance": "^3.0.1",
 		"oxfmt": "^0.61.0",
 		"oxlint": "^1.77.0",
-		"prettier": "^3.8.3",
 		"supertest": "^7.2.2"
 	},
 	"resolutions": {
@@ -85,7 +83,6 @@
 		"strip-ansi": "^6.0.1",
 		"update-notifier": "^5.1.0"
 	},
-	"prettier": "@swrlab/style-guide/prettier",
 	"engines": {
 		"bun": ">=1.3.9",
 		"node": "^22.18.0 || >= 24.13.0",
