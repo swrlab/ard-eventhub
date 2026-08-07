@@ -1,5 +1,9 @@
-# ARD Eventhub / Stages
-
+---
+title: "Stages"
+description: "Stage-Werte und Deployment-Umgebungen."
+sidebar:
+  order: 11
+---
 Der Eventhub unterscheidet zwischen dem über die Umgebungsvariable `STAGE` gesetzten Stage-Wert und verschiedenen Laufzeit-Umgebungen bzw. Deployments (z.B. `beta`, `test`, `prod`).
 
 ## Ingest

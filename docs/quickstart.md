@@ -1,10 +1,14 @@
-# ARD Eventhub / Schnellstart
-
+---
+title: "Schnellstart"
+description: "Leitfaden für Publisher und Subscriber im ARD Eventhub."
+sidebar:
+  order: 1
+---
 Dieser Leitfaden hilft dir beim Start in den ARD Eventhub.
 
-Egal, ob du Publisher oder Subscriber bist: Du benötigst ein Benutzerkonto, um mit der API zu interagieren. Fordere ein Konto über deinen Ansprechpartner beim SWR Audio Lab oder ARD Online an. Administratoren können die [*Benutzer*](./USERS.md)-Dokumentation für die Registrierung heranziehen.
+Egal, ob du Publisher oder Subscriber bist: Du benötigst ein Benutzerkonto, um mit der API zu interagieren. Fordere ein Konto über deinen Ansprechpartner beim SWR Audio Lab oder ARD Online an. Administratoren können die [*Benutzer*](./users)-Dokumentation für die Registrierung heranziehen.
 
-Nachdem das Konto eingerichtet wurde, lies das Kapitel [*Authentifizierung*](./AUTHENTICATION.md), um mehr über Login und den Token-Austausch zu erfahren.
+Nachdem das Konto eingerichtet wurde, lies das Kapitel [*Authentifizierung*](./authentication), um mehr über Login und den Token-Austausch zu erfahren.
 
 ## Publisher
 
@@ -42,7 +46,7 @@ Wenn du als Hörfunkanstalt Events in den ARD Eventhub publizieren möchtest, be
 }
 ```
 
-Es wird empfohlen, zunächst das `test`-System des Eventhub zu nutzen, um alles zu prüfen, bevor du in die Produktion (`prod`) wechselst. Die Hostnamen findest du im Dokument zu den [Stages](./STAGES.md).
+Es wird empfohlen, zunächst das `test`-System des Eventhub zu nutzen, um alles zu prüfen, bevor du in die Produktion (`prod`) wechselst. Die Hostnamen findest du im Dokument zu den [Stages](./stages).
 
 Sicherheits-Hinweis: Jedes Benutzerkonto darf nur zu `publisherId`s seiner eigenen Institution publizieren. Sofern man einen Fehler zurückbekommt kann die ID falsch sein oder das Benutzerkonto wurde durch einen Admin falsch konfiguriert.
 
@@ -58,7 +62,7 @@ In diesem Fall ist es wichtig, sicherzustellen, dass deine interne Filterung kor
 
 ### Wichtige Hinweise zu External IDs
 
-Details findest du in [EXTERNAL_IDS.md](./EXTERNAL_IDS.md).
+Details findest du in [EXTERNAL_IDS.md](./external-ids).
 
 ### Beispiel-Workflow
 

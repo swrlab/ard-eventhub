@@ -1,5 +1,9 @@
-# ARD Eventhub / Plugins
-
+---
+title: "Plugins"
+description: "Überblick über verfügbare Eventhub-Plugins."
+sidebar:
+  order: 6
+---
 Der Eventhub ermöglicht die Integration verschiedener Plugins. Diese werden dafür verwendet Daten zu verarbeiten und zu transformieren und sie dann an die jeweils vorgesehenen Ziele zu senden. Diese Seite gibt einen Überblick über die aktuell verfügbaren Plugins.
 
 ## DTS Xperi
