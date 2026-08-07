@@ -77,8 +77,6 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `jsonwebtoken`                 | [MIT](https://github.com/auth0/node-jsonwebtoken/blob/master/LICENSE)                              |
 | NPM     | `luxon`                        | [MIT](https://github.com/moment/luxon/blob/master/LICENSE.md)                                      |
 | NPM     | `slug`                         | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                           |
-| NPM     | `swagger-ui-express`           | [MIT](https://github.com/scottie1984/swagger-ui-express/blob/master/LICENSE)                       |
-| NPM     | `winston`                      | [MIT](https://github.com/winstonjs/winston/blob/master/LICENSE)                                    |
 | NPM     | `ulid`                         | [MIT](https://github.com/ulid/javascript/blob/master/LICENSE)                                      |
 | NPM DEV | `@biomejs/biome`               | [MIT](https://github.com/biomejs/biome/blob/main/LICENSE-MIT)                                      |
 | NPM DEV | `blume`                        | [MIT](https://github.com/haydenbleasel/blume/blob/main/LICENSE)                                    |

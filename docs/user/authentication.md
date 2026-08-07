@@ -1,8 +1,6 @@
 ---
 title: "Authentifizierung"
 description: "Login und Token-Austausch für die Eventhub-API."
-sidebar:
-  order: 2
 ---
 
 Auf dieser Seite wird der Prozess der Benutzerverwaltung beschrieben.

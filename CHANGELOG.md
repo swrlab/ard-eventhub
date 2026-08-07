@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 - docs: migrate documentation site from docsify to Blume (GitHub Pages static build)
+- refactor: replace in-service Swagger UI with redirect to docs API reference
 
 ## [2.3.4] - 2026-05-12
 
