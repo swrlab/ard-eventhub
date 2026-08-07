@@ -1,6 +1,6 @@
 ---
-title: "ARD Sounds"
-description: "Zentrale Weitergabe der Titel an ARD Sounds."
+title: 'ARD Sounds'
+description: 'Zentrale Weitergabe der Titel an ARD Sounds.'
 ---
 
 Der Eventhub leitet alle Events an das ARD Play-out-Center (POC) weiter. Dort werden sie in die Radio-APIs (Now & Next) eingespeist und an Clients wie [ARD Sounds](https://www.ardsounds.de) ausgespielt.

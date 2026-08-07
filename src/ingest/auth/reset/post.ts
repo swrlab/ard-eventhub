@@ -1,5 +1,5 @@
-import logger from '@frytg/logger'
 import type { Request, Response } from '#types'
+import logger from '@frytg/logger'
 import firebaseSendPasswordResetEmail from '../../../utils/firebase/sendPasswordResetEmail.ts'
 import responseBadRequest from '../../../utils/response/badRequest.ts'
 import responseInternalServerError from '../../../utils/response/internalServerError.ts'

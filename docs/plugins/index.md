@@ -1,6 +1,6 @@
 ---
-title: "Plugins"
-description: "Überblick über verfügbare Eventhub-Plugins."
+title: 'Plugins'
+description: 'Überblick über verfügbare Eventhub-Plugins.'
 sidebar:
   order: 1
 ---

@@ -1,5 +1,5 @@
-import logger from '@frytg/logger'
 import type { EventhubSubscriptionLimited, Response, UserTokenRequestWithParams } from '#types'
+import logger from '@frytg/logger'
 import getSubscription from '../../utils/pubsub/getSubscription.ts'
 import responseBadRequest from '../../utils/response/badRequest.ts'
 import responseInternalServerError from '../../utils/response/internalServerError.ts'

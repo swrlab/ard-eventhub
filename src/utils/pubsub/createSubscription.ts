@@ -1,8 +1,8 @@
+import type { EventhubSubscriptionDatastore, ISubscription } from '#types'
 import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
 import slug from 'slug'
 import { projectId, stage } from '#env'
-import type { EventhubSubscriptionDatastore, ISubscription } from '#types'
 import pubSubSubscriberClient from './_subscriberClient.ts'
 import mapSubscription from './mapSubscription.ts'
 

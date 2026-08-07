@@ -1,6 +1,6 @@
 ---
-title: "Allgemeine IDs"
-description: "Gemeinsame nächtliche Sendungen und Firehose-Topics."
+title: 'Allgemeine IDs'
+description: 'Gemeinsame nächtliche Sendungen und Firehose-Topics.'
 sidebar:
   order: 3
 ---

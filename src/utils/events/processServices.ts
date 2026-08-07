@@ -1,8 +1,8 @@
+import type { EventhubService, UserTokenRequest } from '#types'
 import logger from '@frytg/logger'
 // @ts-expect-error - The package does not yet have types.
 import { createHashedId } from '@swrlab/utils/packages/ard/index.js'
 import { coreIdPrefixes } from '#config'
-import type { EventhubService, UserTokenRequest } from '#types'
 import { getPublisherById } from '../ard-core.ts'
 import pubsubBuildId from '../pubsub/buildId.ts'
 

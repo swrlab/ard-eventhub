@@ -6,14 +6,13 @@
 	unit tests for the ingest service
 
 */
-/** biome-ignore-all lint/suspicious/noExplicitAny: ok */
+/* oxlint-disable typescript/no-explicit-any -- test fixtures use loose typing */
 
-import { beforeAll, describe, expect, it } from 'bun:test'
 import process from 'node:process'
+import { beforeAll, describe, expect, it } from 'bun:test'
 import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
 import request, { type Response } from 'supertest'
-
 import server from './index.ts'
 
 const exitWithError = (message: string) => {

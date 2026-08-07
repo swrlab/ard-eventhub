@@ -1,9 +1,8 @@
-import logger from '@frytg/logger'
 import type { NextFunction, Response } from 'express'
+import type { UserTicketRequest } from '#types'
+import logger from '@frytg/logger'
 import { OAuth2Client } from 'google-auth-library'
 import { serviceAccountEmail } from '#env'
-
-import type { UserTicketRequest } from '#types'
 
 const authClient = new OAuth2Client()
 

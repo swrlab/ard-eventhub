@@ -1,6 +1,6 @@
 ---
-title: "OpenAPI"
-description: "OpenAPI-Spezifikation und API-Referenz."
+title: 'OpenAPI'
+description: 'OpenAPI-Spezifikation und API-Referenz.'
 sidebar:
   order: 8
 ---

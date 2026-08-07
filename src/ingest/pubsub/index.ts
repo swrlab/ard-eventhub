@@ -5,9 +5,8 @@
 
 */
 
-import logger from '@frytg/logger'
 import type { Request, Response } from 'express'
-
+import logger from '@frytg/logger'
 import dtsEvent from '../../utils/plugins/dts/event.ts'
 import radioplayerEvent from '../../utils/plugins/radioplayer/event.ts'
 

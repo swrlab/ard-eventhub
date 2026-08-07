@@ -1,6 +1,6 @@
+import type { EventhubService, EventhubTopicDatastore, UserTokenRequest } from '#types'
 import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
-import type { EventhubService, EventhubTopicDatastore, UserTokenRequest } from '#types'
 import { getPublisherById } from '../ard-core.ts'
 import datastoreSave from '../datastore/save.ts'
 import pubsubCreateTopic from '../pubsub/createTopic.ts'

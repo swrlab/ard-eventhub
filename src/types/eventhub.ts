@@ -143,7 +143,7 @@ export type EventhubSubscriptionLimited = {
 	}
 
 	ackDeadlineSeconds: undefined | number | null
-	// biome-ignore lint/suspicious/noExplicitAny: here any is alright since we cannot reference the original type.
+	// oxlint-disable-next-line typescript/no-explicit-any -- cannot reference the original type
 	retryPolicy: Record<PropertyKey, any> | null | undefined
 	serviceAccount: string | null | undefined
 

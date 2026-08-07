@@ -1,6 +1,6 @@
 ---
-title: "Stages"
-description: "Stage-Werte und Deployment-Umgebungen."
+title: 'Stages'
+description: 'Stage-Werte und Deployment-Umgebungen.'
 sidebar:
   order: 11
 ---

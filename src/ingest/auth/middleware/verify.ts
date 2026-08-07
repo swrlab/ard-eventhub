@@ -5,8 +5,8 @@
 
 */
 
-import logger from '@frytg/logger'
 import type { NextFunction, Response, UserTokenRequest } from '#types'
+import logger from '@frytg/logger'
 import datastoreLoad from '../../../utils/datastore/load.ts'
 import firebaseVerifyToken from '../../../utils/firebase/verifyToken.ts'
 

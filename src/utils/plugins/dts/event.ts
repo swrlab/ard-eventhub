@@ -1,6 +1,3 @@
-import logger from '@frytg/logger'
-import { defaultHeaders, version } from '#config'
-import { dtsKeys, serviceName, stage } from '#env'
 import type {
 	EventhubPluginMessage,
 	EventhubService,
@@ -8,6 +5,9 @@ import type {
 	LiveradioCredential,
 	PermittedExcludedFields,
 } from '#types'
+import logger from '@frytg/logger'
+import { defaultHeaders, version } from '#config'
+import { dtsKeys, serviceName, stage } from '#env'
 
 const source = 'utils/plugins/dts/event'
 
