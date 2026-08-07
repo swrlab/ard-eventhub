@@ -1,8 +1,6 @@
 ---
 title: "DTS Xperi"
 description: "Verwendung des DTS Xperi Plugins im Eventhub."
-sidebar:
-  order: 2
 ---
 
 Dieses Plugin ermöglicht das Übermitteln von Metadaten an das DTS-System. Aktuell ist es als Opt-out-Feature konfiguriert — die Übermittlung erfolgt also standardmäßig. Das Opt-out gilt derzeit nur für Musiktitel (`type: music`). Das Senden kann für jedes einzelne Event überschrieben werden, sofern man es selber setzen möchte:

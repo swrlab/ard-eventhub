@@ -1,8 +1,6 @@
 ---
 title: "Radioplayer"
 description: "Verwendung des Radioplayer Plugins im Eventhub."
-sidebar:
-  order: 3
 ---
 
 Das Radioplayer-Plugin sendet Now-Playing-Metadaten (aktuell spielende Titel) an die Radioplayer-Plattform (https://play.radioplayer.org). Es verarbeitet ausschließlich Musik-Events (`type: music`) vom Typ `de.ard.eventhub.v1.radio.track.playing`.
