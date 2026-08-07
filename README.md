@@ -78,7 +78,8 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `luxon`                        | [MIT](https://github.com/moment/luxon/blob/master/LICENSE.md)                                      |
 | NPM     | `slug`                         | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                           |
 | NPM     | `ulid`                         | [MIT](https://github.com/ulid/javascript/blob/master/LICENSE)                                      |
-| NPM DEV | `@biomejs/biome`               | [MIT](https://github.com/biomejs/biome/blob/main/LICENSE-MIT)                                      |
+| NPM DEV | `oxfmt`                        | [MIT](https://github.com/oxc-project/oxc/blob/main/crates/oxfmt/LICENSE)                           |
+| NPM DEV | `oxlint`                       | [MIT](https://github.com/oxc-project/oxc/blob/main/crates/oxlint/LICENSE)                          |
 | NPM DEV | `blume`                        | [MIT](https://github.com/haydenbleasel/blume/blob/main/LICENSE)                                    |
 | NPM DEV | `cookie`                       | [MIT](https://github.com/jshttp/cookie/blob/master/LICENSE)                                        |
 | NPM DEV | `@swrlab/swr-prettier-config`  | [MIT](https://github.com/swrlab/swr-prettier-config/blob/main/LICENSE.txt)                         |

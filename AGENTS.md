@@ -11,8 +11,8 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 - **Install dependencies:** `bun install`
 - **Start ingest service:** `bun run ingest` (runs with hot reload)
 - **Run tests:** `just test`
-- **Lint code:** `just lint` (uses Biome)
-- **Format code:** Biome handles formatting automatically
+- **Lint code:** `just lint` (uses Oxlint)
+- **Format code:** Oxfmt handles formatting automatically
 - **Docs (dev):** `just docs` (Blume)
 - **Docs (build):** `just docs-build` (writes to `dist/`)
 
@@ -35,7 +35,7 @@ Docs deploy via [`.github/workflows/docs-push.yml`](.github/workflows/docs-push.
 Follow SWR Audio Lab engineering principles:
 
 - **Language:** Use English for filenames, variables, comments, and documentation
-- **Formatting:** Biome handles formatting (single quotes, no semicolons, tabs for indentation, 120 char line width)
+- **Formatting:** Oxfmt handles formatting (single quotes, no semicolons, tabs for indentation, 120 char line width)
 - **TypeScript:** Strict mode enabled, prefer explicit types over inference where it improves clarity
 - **Naming:** Use descriptive, clear names. Follow existing patterns in the codebase
 - **Comments:** Include inline comments for complex logic, but prefer self-documenting code

@@ -1,0 +1,50 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"ignorePatterns": ["**/.blume/**", "**/dist/**", "**/keys/**", "**/node_modules/**", "**/*.sops.*"],
+	"categories": {
+		"correctness": "warn",
+		"nursery": "off",
+		"pedantic": "off",
+		"perf": "off",
+		"restriction": "off",
+		"style": "off",
+		"suspicious": "warn"
+	},
+	"rules": {
+		"import/no-nodejs-modules": "off",
+		"no-param-reassign": "error",
+		"typescript/prefer-as-const": "error",
+		"default-param-last": "error",
+		"typescript/prefer-enum-initializers": "error",
+		"unicorn/prefer-number-properties": "error",
+		"typescript/no-inferrable-types": "error",
+		"no-unassigned-import": "off",
+		"no-underscore-dangle": [
+			"warn",
+			{
+				"allow": [
+					"_id",
+					"_link",
+					"_login",
+					"_path",
+					"_attr",
+					"_char",
+					"__v",
+					"__BunTestMockEnv__",
+					"__config__",
+					"__dirname",
+					"__message",
+					"__responseHeader",
+					"__responseObject",
+					"__server",
+					"__status"
+				]
+			}
+		]
+	},
+	"plugins": ["oxc", "typescript", "unicorn", "import"],
+	"globals": {
+		"Bun": "readonly",
+		"node": "readonly"
+	}
+}

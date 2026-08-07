@@ -1,49 +1,54 @@
 {
 	"lsp": {
-		"biome": {
-			"settings": {
-				"require_config_file": true
+		"oxlint": {
+			"initialization_options": {
+				"settings": {
+					"configPath": ".oxlintrc.json",
+					"run": "onType",
+					"disableNestedConfig": false,
+					"fixKind": "safe_fix",
+					"unusedDisableDirectives": "deny"
+				}
+			}
+		},
+		"oxfmt": {
+			"initialization_options": {
+				"settings": {
+					"fmt.configPath": ".oxfmtrc.json",
+					"run": "onSave"
+				}
 			}
 		}
 	},
+	"auto_install_extensions": {
+		"just": true,
+		"oxc": true
+	},
 	"languages": {
-		"JSONC": {
-			"formatter": {
-				"language_server": {
-					"name": "biome"
-				}
-			},
-			"code_actions_on_format": {
-				"source.fixAll.biome": true
-			},
-			"format_on_save": "on"
-		},
-		"JSON": {
-			"formatter": {
-				"language_server": {
-					"name": "biome"
-				}
-			},
-			"code_actions_on_format": {
-				"source.fixAll.biome": true
-			},
-			"format_on_save": "on"
-		},
 		"JavaScript": {
-			"formatter": { "language_server": { "name": "biome" } },
-			"code_actions_on_format": {
-				"source.fixAll.biome": true,
-				"source.organizeImports.biome": true
-			},
-			"format_on_save": "on"
+			"format_on_save": "on",
+			"prettier": { "allowed": false },
+			"formatter": [{ "language_server": { "name": "oxfmt" } }, { "code_action": "source.fixAll.oxc" }]
 		},
 		"TypeScript": {
-			"formatter": { "language_server": { "name": "biome" } },
-			"code_actions_on_format": {
-				"source.fixAll.biome": true,
-				"source.organizeImports.biome": true
-			},
-			"format_on_save": "on"
+			"format_on_save": "on",
+			"prettier": { "allowed": false },
+			"formatter": [{ "language_server": { "name": "oxfmt" } }]
+		},
+		"JSON": {
+			"format_on_save": "on",
+			"prettier": { "allowed": false },
+			"formatter": [{ "language_server": { "name": "oxfmt" } }]
+		},
+		"JSONC": {
+			"format_on_save": "on",
+			"prettier": { "allowed": false },
+			"formatter": [{ "language_server": { "name": "oxfmt" } }]
+		},
+		"Markdown": {
+			"format_on_save": "on",
+			"prettier": { "allowed": false },
+			"formatter": [{ "language_server": { "name": "oxfmt" } }]
 		}
 	}
 }
