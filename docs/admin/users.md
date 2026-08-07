@@ -1,6 +1,6 @@
 ---
-title: "Benutzer"
-description: "Benutzerverwaltung für Admins."
+title: 'Benutzer'
+description: 'Benutzerverwaltung für Admins.'
 ---
 
 Um sich beim Eventhub zu authentifizieren und mit der API zu arbeiten, benötigtst du ein gültiges Benutzerkonto. Die Logins sind derzeit von der ARD Core API getrennt, nutzen aber ein ähnliches Verfahren. Diese Seite beschreibt die Verwaltung von Benutzern.

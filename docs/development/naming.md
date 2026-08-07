@@ -1,6 +1,6 @@
 ---
-title: "Namenskonventionen"
-description: "Konsistente Namen für Pub/Sub und Services."
+title: 'Namenskonventionen'
+description: 'Konsistente Namen für Pub/Sub und Services.'
 sidebar:
   order: 9
 ---

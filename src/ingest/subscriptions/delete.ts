@@ -1,6 +1,6 @@
-import logger from '@frytg/logger'
 import type { Response } from 'express'
 import type { EventhubSubscriptionWithLabels, UserTokenRequestWithParams } from '#types'
+import logger from '@frytg/logger'
 import datastoreDelete from '../../utils/datastore/delete.ts'
 import deleteSubscription from '../../utils/pubsub/deleteSubscription.ts'
 import getSubscription from '../../utils/pubsub/getSubscription.ts'

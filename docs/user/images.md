@@ -1,6 +1,6 @@
 ---
-title: "Bilder"
-description: "Infos zu Covern und Bildern."
+title: 'Bilder'
+description: 'Infos zu Covern und Bildern.'
 sidebar:
   order: 5
 ---

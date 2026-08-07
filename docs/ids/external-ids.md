@@ -1,6 +1,6 @@
 ---
-title: "External IDs"
-description: "Anforderungen an externalId / CRID für Livestreams."
+title: 'External IDs'
+description: 'Anforderungen an externalId / CRID für Livestreams.'
 sidebar:
   order: 4
 ---

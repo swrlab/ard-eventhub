@@ -1,6 +1,6 @@
 ---
-title: "Schnellstart"
-description: "Leitfaden für Publisher und Subscriber im ARD Eventhub."
+title: 'Schnellstart'
+description: 'Leitfaden für Publisher und Subscriber im ARD Eventhub.'
 sidebar:
   order: 1
 ---
@@ -21,29 +21,29 @@ Wenn du als Hörfunkanstalt Events in den ARD Eventhub publizieren möchtest, be
 
 ```jsonc
 {
-  "statuses": {
-    "published": 0,
-    "blocked": 0,
-    "failed": 1,
-  },
-  "event": {
-    "name": "de.ard.eventhub.v1.radio.track.next",
-    // ...
-    "services": [
-      {
-        "type": "PermanentLivestream",
-        "externalId": "crid://swr.de/282310/demo7",
-        "publisherId": "urn:ard:publisher:75dbb3dace15f610",
-        "topic": {
-          "id": "urn:ard:permanent-livestream:234690e18c2c7863",
-          "name": "de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3A234690e18c2c7863",
-          "status": "TOPIC_CREATED",
-          "messageId": null,
-        },
-      },
-    ],
-    // ...
-  },
+	"statuses": {
+		"published": 0,
+		"blocked": 0,
+		"failed": 1,
+	},
+	"event": {
+		"name": "de.ard.eventhub.v1.radio.track.next",
+		// ...
+		"services": [
+			{
+				"type": "PermanentLivestream",
+				"externalId": "crid://swr.de/282310/demo7",
+				"publisherId": "urn:ard:publisher:75dbb3dace15f610",
+				"topic": {
+					"id": "urn:ard:permanent-livestream:234690e18c2c7863",
+					"name": "de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3A234690e18c2c7863",
+					"status": "TOPIC_CREATED",
+					"messageId": null,
+				},
+			},
+		],
+		// ...
+	},
 }
 ```
 
@@ -73,43 +73,43 @@ Ein möglicher Ablauf in deinem System für jedes neue Event könnte so aussehen
 
 ```json
 {
-  "type": "music",
-  "start": "2021-03-17T10:04:35+01:00",
-  "length": 215.2,
-  "title": "Save your tears",
-  "artist": "The Weeknd",
-  "contributors": [
-    {
-      "name": "The Weeknd",
-      "role": "artist",
-      "normDb": {
-        "type": "Person",
-        "id": "12345"
-      }
-    }
-  ],
-  "services": [
-    {
-      "type": "PermanentLivestream",
-      "externalId": "crid://swr.de/282310",
-      "publisherId": "282310"
-    }
-  ],
-  "playlistItemId": "radiomax:SWR3-BAD-MAX:12569153",
-  "externalId": "M0589810001",
-  "isrc": null,
-  "upc": null,
-  "mpn": null,
-  "media": [
-    {
-      "type": "cover",
-      "url": "http://my-server/covers/M0589810.001",
-      "templateUrl": null,
-      "description": "SWR Cover zu Save your tears von The Weeknd",
-      "attribution": ""
-    }
-  ],
-  "hfdbIds": ["swrhfdb1.KONF.12345"]
+	"type": "music",
+	"start": "2021-03-17T10:04:35+01:00",
+	"length": 215.2,
+	"title": "Save your tears",
+	"artist": "The Weeknd",
+	"contributors": [
+		{
+			"name": "The Weeknd",
+			"role": "artist",
+			"normDb": {
+				"type": "Person",
+				"id": "12345"
+			}
+		}
+	],
+	"services": [
+		{
+			"type": "PermanentLivestream",
+			"externalId": "crid://swr.de/282310",
+			"publisherId": "282310"
+		}
+	],
+	"playlistItemId": "radiomax:SWR3-BAD-MAX:12569153",
+	"externalId": "M0589810001",
+	"isrc": null,
+	"upc": null,
+	"mpn": null,
+	"media": [
+		{
+			"type": "cover",
+			"url": "http://my-server/covers/M0589810.001",
+			"templateUrl": null,
+			"description": "SWR Cover zu Save your tears von The Weeknd",
+			"attribution": ""
+		}
+	],
+	"hfdbIds": ["swrhfdb1.KONF.12345"]
 }
 ```
 
@@ -146,9 +146,9 @@ Die Antwort beim Erstellen einer Subscription enthält u.a. das verwendete Servi
 
 ```jsonc
 {
-  // ...
-  "serviceAccount": "something@something-else.iam.gserviceaccount.com",
-  // ...
+	// ...
+	"serviceAccount": "something@something-else.iam.gserviceaccount.com",
+	// ...
 }
 ```
 
@@ -160,45 +160,45 @@ Ein vereinfachtes Beispiel (Node.js mit Express): Die Google Cloud Sektion ["Aut
 
 ```js
 // load node packages
-import { OAuth2Client } from "google-auth-library";
-const authClient = new OAuth2Client();
+import { OAuth2Client } from 'google-auth-library'
+const authClient = new OAuth2Client()
 
 // set received serviceAccount
-const serviceAccountEmail = "somethin@something-else.iam.gserviceaccount.com";
+const serviceAccountEmail = 'somethin@something-else.iam.gserviceaccount.com'
 
 export default async (req, res) => {
-  try {
-    // read token from header
-    const bearer = req.header("Authorization");
-    const [_match, idToken] = bearer.match(/Bearer (.*)/) ?? [];
+	try {
+		// read token from header
+		const bearer = req.header('Authorization')
+		const [_match, idToken] = bearer.match(/Bearer (.*)/) ?? []
 
-    if (!idToken) throw Error("No ID token could be found.");
+		if (!idToken) throw Error('No ID token could be found.')
 
-    // verify token, throws error if invalid
-    const verification = await authClient.verifyIdToken({
-      idToken,
-    });
+		// verify token, throws error if invalid
+		const verification = await authClient.verifyIdToken({
+			idToken,
+		})
 
-    // check token email vs. subscription email
-    if (verification?.payload?.email === serviceAccountEmail) {
-      // get message and metadata from pubsub body
-      const { attributes, messageId } = req.body.message;
-      const { subscription } = req.body;
-      let data = Buffer.from(req.body.message.data, "base64").toString();
-      data = JSON.parse(data);
+		// check token email vs. subscription email
+		if (verification?.payload?.email === serviceAccountEmail) {
+			// get message and metadata from pubsub body
+			const { attributes, messageId } = req.body.message
+			const { subscription } = req.body
+			let data = Buffer.from(req.body.message.data, 'base64').toString()
+			data = JSON.parse(data)
 
-      // request successful, you can now use the received data
-      console.log({ attributes, messageId, subscription, data });
+			// request successful, you can now use the received data
+			console.log({ attributes, messageId, subscription, data })
 
-      // close connection
-      return res.sendStatus(201);
-    } else {
-      // user provided valid token but failed email verification
-      return res.sendStatus(204);
-    }
-  } catch (error) {
-    // request failed or invalid token
-    return res.sendStatus(204);
-  }
-};
+			// close connection
+			return res.sendStatus(201)
+		} else {
+			// user provided valid token but failed email verification
+			return res.sendStatus(204)
+		}
+	} catch (error) {
+		// request failed or invalid token
+		return res.sendStatus(204)
+	}
+}
 ```

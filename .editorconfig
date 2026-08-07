@@ -1,6 +1,5 @@
 # docs: https://editorconfig.org
 # please make sure to keep this file in sync between repositories
-# to main file should be edited in `swr-prettier-config` and copied where needed
 
 root = true
 

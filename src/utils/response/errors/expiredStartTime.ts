@@ -5,8 +5,8 @@
 
 */
 
-import logger from '@frytg/logger'
 import type { Response, UserTokenRequest } from '#types'
+import logger from '@frytg/logger'
 import badRequest from '../badRequest.ts'
 
 const source = 'utils.response.errors.expiredStartTime'

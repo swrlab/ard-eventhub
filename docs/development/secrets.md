@@ -1,6 +1,6 @@
 ---
-title: "Secrets"
-description: "Verwaltung von Secrets und Konfigurationsdateien."
+title: 'Secrets'
+description: 'Verwaltung von Secrets und Konfigurationsdateien.'
 sidebar:
   order: 10
 ---

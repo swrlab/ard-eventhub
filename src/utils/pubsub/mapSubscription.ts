@@ -5,7 +5,6 @@
 
 */
 
-import { pubSubPrefix } from '#config'
 import type {
 	EventhubSubscriptionDatastore,
 	EventhubSubscriptionLimited,
@@ -13,6 +12,7 @@ import type {
 	ISubscription,
 	Subscription,
 } from '#types'
+import { pubSubPrefix } from '#config'
 import datastoreLoad from '../datastore/load.ts'
 import convertId from './convertId.ts'
 

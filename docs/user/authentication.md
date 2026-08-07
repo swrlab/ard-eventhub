@@ -1,6 +1,6 @@
 ---
-title: "Authentifizierung"
-description: "Login und Token-Austausch für die Eventhub-API."
+title: 'Authentifizierung'
+description: 'Login und Token-Austausch für die Eventhub-API.'
 ---
 
 Auf dieser Seite wird der Prozess der Benutzerverwaltung beschrieben.
@@ -13,8 +13,8 @@ Um mit der Eventhub-API zu arbeiten (sich bei ihr zu authentifizieren), benötig
 
 ```json
 {
-  "email": "my-email@example.com",
-  "password": "my-password"
+	"email": "my-email@example.com",
+	"password": "my-password"
 }
 ```
 
@@ -22,14 +22,14 @@ Ergibt `200 OK`
 
 ```json
 {
-  "expiresIn": 3600,
-  "expires": "2021-03-12T12:55:22.995Z",
-  "token": "eyABCDEF.GHIJKL....",
-  "refreshToken": "AOabcdefghijkl",
-  "user": {
-    "some": "objects"
-  },
-  "trace": null
+	"expiresIn": 3600,
+	"expires": "2021-03-12T12:55:22.995Z",
+	"token": "eyABCDEF.GHIJKL....",
+	"refreshToken": "AOabcdefghijkl",
+	"user": {
+		"some": "objects"
+	},
+	"trace": null
 }
 ```
 
@@ -43,7 +43,7 @@ Wenn der normale `token` abläuft, kannst du den `refreshToken` verwenden, um ei
 
 ```json
 {
-  "refreshToken": "abcXYZ..."
+	"refreshToken": "abcXYZ..."
 }
 ```
 
@@ -51,14 +51,14 @@ Ergibt `200 OK`
 
 ```json
 {
-  "expiresIn": 3600,
-  "expires": "2021-03-12T12:55:22.995Z",
-  "token": "eyABCDEF.GHIJKL....",
-  "refreshToken": "AOabcdefghijkl",
-  "user": {
-    "some": "objects"
-  },
-  "trace": null
+	"expiresIn": 3600,
+	"expires": "2021-03-12T12:55:22.995Z",
+	"token": "eyABCDEF.GHIJKL....",
+	"refreshToken": "AOabcdefghijkl",
+	"user": {
+		"some": "objects"
+	},
+	"trace": null
 }
 ```
 
@@ -80,7 +80,7 @@ Falls du dein Passwort verloren hast, kannst du über diesen Endpoint eine Passw
 
 ```json
 {
-  "email": "my-email@example.com"
+	"email": "my-email@example.com"
 }
 ```
 

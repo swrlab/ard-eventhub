@@ -1,8 +1,8 @@
+import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '#types'
 import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { defaultHeaders } from '#config'
 import { radioplayerAPIKeys, stage } from '#env'
-import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '#types'
 // NOTE: Node.js does not support importing .json5 files.
 import livestreamMapping from '../../../config/radioplayer-mapping.json5'
 import { getEnvBoolean } from '../../env.ts'
@@ -167,7 +167,7 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 		let i = 0
 		for (const rpUid of rpUids) {
 			const startTime = getMs()
-			// biome-ignore lint/performance/noAwaitInLoops: here we make an exception
+			// oxlint-disable-next-line no-await-in-loop -- sequential Radioplayer API calls per UID
 			const { url, posted, response, wasPosted } = await sendRadioplayerEvent(rpUid, apiKey, event, plugin)
 			output.push({ url, posted, response, wasPosted })
 

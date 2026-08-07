@@ -78,16 +78,11 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `luxon`                        | [MIT](https://github.com/moment/luxon/blob/master/LICENSE.md)                                      |
 | NPM     | `slug`                         | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                           |
 | NPM     | `ulid`                         | [MIT](https://github.com/ulid/javascript/blob/master/LICENSE)                                      |
-| NPM DEV | `@biomejs/biome`               | [MIT](https://github.com/biomejs/biome/blob/main/LICENSE-MIT)                                      |
+| NPM DEV | `oxfmt`                        | [MIT](https://github.com/oxc-project/oxc/blob/main/crates/oxfmt/LICENSE)                           |
+| NPM DEV | `oxlint`                       | [MIT](https://github.com/oxc-project/oxc/blob/main/crates/oxlint/LICENSE)                          |
 | NPM DEV | `blume`                        | [MIT](https://github.com/haydenbleasel/blume/blob/main/LICENSE)                                    |
 | NPM DEV | `cookie`                       | [MIT](https://github.com/jshttp/cookie/blob/master/LICENSE)                                        |
-| NPM DEV | `@swrlab/swr-prettier-config`  | [MIT](https://github.com/swrlab/swr-prettier-config/blob/main/LICENSE.txt)                         |
-| NPM DEV | `chai`                         | [MIT](https://github.com/chaijs/chai/blob/master/LICENSE)                                          |
-| NPM DEV | `chai-http`                    | [MIT](https://github.com/chaijs/chai-http/blob/master/package.json)                                |
 | NPM DEV | `license-compliance`           | [MIT](https://github.com/tmorell/license-compliance/blob/master/LICENSE)                           |
-| NPM DEV | `mocha`                        | [MIT](https://github.com/mochajs/mocha/blob/master/LICENSE)                                        |
-| NPM DEV | `nodemon`                      | [MIT](https://github.com/remy/nodemon/blob/master/LICENSE)                                         |
-| NPM DEV | `prettier`                     | [MIT](https://github.com/prettier/prettier/blob/main/LICENSE)                                      |
 
 ## Authors
 

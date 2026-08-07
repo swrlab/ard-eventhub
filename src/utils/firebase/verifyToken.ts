@@ -1,6 +1,6 @@
+import type { DecodedIdToken } from '#types'
 import firebaseAdmin from 'firebase-admin'
 import { projectId } from '#env'
-import type { DecodedIdToken } from '#types'
 
 firebaseAdmin.initializeApp({
 	projectId,

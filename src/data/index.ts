@@ -1,10 +1,9 @@
+import type { ArdFeed, ArdLivestream } from '#types'
 import fs from 'node:fs'
 import { exitWithError } from '@frytg/check-required-env/exit'
 import { getRequiredEnv } from '@frytg/check-required-env/get'
 import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
-
-import type { ArdFeed, ArdLivestream } from '#types'
 
 const ARD_FEED_URL = getRequiredEnv('ARD_FEED_URL')
 const DOWNLOAD_TO_FILE = false

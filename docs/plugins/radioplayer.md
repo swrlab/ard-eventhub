@@ -1,6 +1,6 @@
 ---
-title: "Radioplayer"
-description: "Verwendung des Radioplayer Plugins im Eventhub."
+title: 'Radioplayer'
+description: 'Verwendung des Radioplayer Plugins im Eventhub.'
 ---
 
 Das Radioplayer-Plugin sendet Now-Playing-Metadaten (aktuell spielende Titel) an die Radioplayer-Plattform (https://play.radioplayer.org). Es verarbeitet ausschließlich Musik-Events (`type: music`) vom Typ `de.ard.eventhub.v1.radio.track.playing`.
@@ -44,15 +44,15 @@ Standardmäßig wird das Medien-Element von `type: 'cover'` verwendet. Soll das 
 
 ```jsonc
 {
-  "type": "music",
-  // ...
-  "plugins": [
-    {
-      "type": "radioplayer",
-      "isDeactivated": false,
-      "preferArtistMedia": true,
-    },
-  ],
+	"type": "music",
+	// ...
+	"plugins": [
+		{
+			"type": "radioplayer",
+			"isDeactivated": false,
+			"preferArtistMedia": true,
+		},
+	],
 }
 ```
 

@@ -1,5 +1,5 @@
-import logger from '@frytg/logger'
 import type { Response, UserTokenRequest } from '#types'
+import logger from '@frytg/logger'
 import getSubscriptions from '../../utils/pubsub/getSubscriptions.ts'
 import responseInternalServerError from '../../utils/response/internalServerError.ts'
 

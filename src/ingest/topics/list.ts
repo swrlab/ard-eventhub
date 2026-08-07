@@ -1,5 +1,5 @@
-import logger from '@frytg/logger'
 import type { Request, Response } from '#types'
+import logger from '@frytg/logger'
 import pubsubGetTopics from '../../utils/pubsub/getTopics.ts'
 import responseInternalServerError from '../../utils/response/internalServerError.ts'
 

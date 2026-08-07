@@ -3,7 +3,6 @@ import compression from 'compression'
 import express from 'express'
 import { serviceUrl, userAgent, version } from '#config'
 import { isLocal, port, serviceName } from '#env'
-
 import { getARDFeed } from '../data/index.ts'
 import router from './router.ts'
 

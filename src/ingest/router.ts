@@ -1,7 +1,6 @@
 import { DateTime } from '@frytg/dates'
 import express, { type Request, type Response } from 'express'
 import { middleware } from 'express-openapi-validator'
-
 import responseBadRequest from '../utils/response/badRequest.ts'
 
 /** Docs API reference (Blume); replaces the former in-service Swagger UI. */
@@ -49,7 +48,6 @@ import subscriptionsDelete from './subscriptions/delete.ts'
 import subscriptionsGet from './subscriptions/get.ts'
 import subscriptionsList from './subscriptions/list.ts'
 import subscriptionsPost from './subscriptions/post.ts'
-
 import topics from './topics/list.ts'
 
 router.post('/auth/login', login)
@@ -78,7 +76,7 @@ router.get(['/', '/health'], (_req: Request, res: Response) => {
 const allowedErrors = ['Authorization header required', 'GET method not allowed']
 
 // set openapi error handler
-// biome-ignore lint/suspicious/noExplicitAny: cannot find proper type for err
+// oxlint-disable-next-line typescript/no-explicit-any -- express-openapi-validator error shape
 router.use((err: Record<PropertyKey, any>, req: Request, res: Response) => {
 	// set error message
 	let useOriginalError = false

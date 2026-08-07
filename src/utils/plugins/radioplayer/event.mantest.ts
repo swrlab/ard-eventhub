@@ -16,7 +16,6 @@ process.env.RADIOPLAYER_API_KEYS = testApiKeys
 
 import { describe, expect, it } from 'bun:test'
 import { getISO } from '@frytg/dates'
-
 import radioplayerEvent from './event.ts'
 
 // Livestream URN that exists in config/radioplayer-mapping.json5

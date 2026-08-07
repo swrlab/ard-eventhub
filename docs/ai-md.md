@@ -1,6 +1,6 @@
 ---
-title: "KI-kompatible Dokumentation"
-description: "Diese Docs für LLMs und Coding-Agenten nutzen — Markdown-URLs, Copy as Markdown und llms.txt."
+title: 'KI-kompatible Dokumentation'
+description: 'Diese Docs für LLMs und Coding-Agenten nutzen — Markdown-URLs, Copy as Markdown und llms.txt.'
 sidebar:
   order: 2
 ---

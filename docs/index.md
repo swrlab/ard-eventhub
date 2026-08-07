@@ -1,6 +1,6 @@
 ---
-title: "ARD Eventhub"
-description: "Echtzeit-Metadaten für Hörfunksendungen der ARD verteilen."
+title: 'ARD Eventhub'
+description: 'Echtzeit-Metadaten für Hörfunksendungen der ARD verteilen.'
 ---
 
 ARD Eventhub verteilt Echtzeit-Metadaten (Live) vor allem für Hörfunksendungen.
