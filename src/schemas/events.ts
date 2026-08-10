@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { iso8601Timestamp } from './common.ts'
+import { iso8601Timestamp, responseTrace } from './common.ts'
 
 /**
  * Required string enum that reports missing values as `invalid_type` (OpenAPI required parity).
@@ -291,10 +291,7 @@ export const eventV1ResBody = z
 				.meta({ examples: [0] }),
 		}),
 		event: eventV1PostBody,
-		trace: z
-			.string()
-			.nullable()
-			.meta({ examples: [null] }),
+		trace: responseTrace,
 	})
 	.meta({ id: 'eventV1ResBody' })
 

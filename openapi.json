@@ -728,6 +728,8 @@
 					},
 					"trace": {
 						"nullable": true,
+						"deprecated": true,
+						"description": "Always null. Deprecated; may be removed in a future release.",
 						"examples": [null],
 						"type": "string"
 					}
@@ -751,6 +753,8 @@
 					},
 					"trace": {
 						"nullable": true,
+						"deprecated": true,
+						"description": "Always null. Deprecated; may be removed in a future release.",
 						"examples": [null],
 						"type": "string"
 					}
@@ -792,6 +796,8 @@
 					},
 					"trace": {
 						"nullable": true,
+						"deprecated": true,
+						"description": "Always null. Deprecated; may be removed in a future release.",
 						"examples": [null],
 						"type": "string"
 					}
@@ -833,6 +839,8 @@
 					},
 					"trace": {
 						"nullable": true,
+						"deprecated": true,
+						"description": "Always null. Deprecated; may be removed in a future release.",
 						"examples": [null],
 						"type": "string"
 					}
@@ -867,6 +875,8 @@
 					},
 					"trace": {
 						"nullable": true,
+						"deprecated": true,
+						"description": "Always null. Deprecated; may be removed in a future release.",
 						"examples": [null],
 						"type": "string"
 					}
@@ -883,6 +893,8 @@
 					},
 					"trace": {
 						"nullable": true,
+						"deprecated": true,
+						"description": "Always null. Deprecated; may be removed in a future release.",
 						"examples": [null],
 						"type": "string"
 					}
@@ -1270,6 +1282,8 @@
 					},
 					"trace": {
 						"nullable": true,
+						"deprecated": true,
+						"description": "Always null. Deprecated; may be removed in a future release.",
 						"examples": [null],
 						"type": "string"
 					}
@@ -1786,6 +1800,8 @@
 					},
 					"trace": {
 						"nullable": true,
+						"deprecated": true,
+						"description": "Always null. Deprecated; may be removed in a future release.",
 						"examples": [null],
 						"type": "string"
 					}

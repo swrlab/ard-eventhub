@@ -37,7 +37,7 @@ export const subscriptionsPost = async (c: Context) => {
 				source,
 				data: getSafeHeaders(c.req.raw.headers),
 			})
-			return responseInternalServerError(c, new Error('User not found'))
+			return responseInternalServerError(c)
 		}
 
 		// generate subscription name
@@ -186,6 +186,6 @@ export const subscriptionsPost = async (c: Context) => {
 			data: { body },
 		})
 
-		return responseInternalServerError(c, error as Error)
+		return responseInternalServerError(c)
 	}
 }

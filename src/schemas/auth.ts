@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { iso8601Timestamp } from './common.ts'
+import { iso8601Timestamp, responseTrace } from './common.ts'
 
 /**
  * POST /auth/login request body (fields optional in OpenAPI; validated as strings when present).
@@ -58,10 +58,7 @@ export const authResponse = z
 			.object({})
 			.passthrough()
 			.meta({ description: 'Firebase-type user object obtained by decoding the JWT token' }),
-		trace: z
-			.string()
-			.nullable()
-			.meta({ examples: [null] }),
+		trace: responseTrace,
 	})
 	.meta({ id: 'authResponse' })
 

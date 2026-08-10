@@ -9,7 +9,7 @@ import { responseInternalServerError } from '../../utils/response/internal-serve
 import { getConfigUser } from '../../utils/users/get-user.ts'
 
 const source = 'ingest/auth/middleware/verify'
-const ERROR_JSON = { message: 'Forbidden', errors: [], status: 403 }
+const ERROR_JSON = { message: 'Forbidden', errors: [], status: 403, trace: null }
 
 /** OpenAPI `errorUnauthorized` body for missing Bearer / x-authorization. */
 const unauthorizedError: RequestError = {
@@ -88,6 +88,6 @@ export const authVerify: MiddlewareHandler = async (c, next) => {
 	} catch (error) {
 		logger.error({ message: 'failed to verify user', source, error, data: getSafeHeaders(c.req.raw.headers) })
 
-		return responseInternalServerError(c, error instanceof Error ? error : undefined)
+		return responseInternalServerError(c)
 	}
 }

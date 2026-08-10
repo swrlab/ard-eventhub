@@ -1,16 +1,16 @@
 import type { Context } from 'hono'
 
 /**
- * Send an internal server error JSON response. `trace` is always null (deprecated).
+ * Send an internal server error JSON response with a generic message.
+ * Never expose Error details to clients. `trace` is always null (deprecated).
  * @param c - Hono context
- * @param error - Optional Error whose message is exposed
  * @returns Hono response
  */
-export const responseInternalServerError = (c: Context, error?: Error) => {
+export const responseInternalServerError = (c: Context) => {
 	try {
 		return c.json(
 			{
-				message: error?.message || 'Internal Server Error',
+				message: 'Internal Server Error',
 				trace: null,
 			},
 			500

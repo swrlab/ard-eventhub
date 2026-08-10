@@ -28,7 +28,7 @@ export const eventsPost = async (c: Context) => {
 				source,
 				data: getSafeHeaders(c.req.raw.headers),
 			})
-			return responseInternalServerError(c, new Error('User not found'))
+			return responseInternalServerError(c)
 		}
 
 		const eventName = c.req.param('eventName')
@@ -60,6 +60,6 @@ export const eventsPost = async (c: Context) => {
 			data: { body, headers: getSafeHeaders(c.req.raw.headers) },
 		})
 
-		return responseInternalServerError(c, error as Error)
+		return responseInternalServerError(c)
 	}
 }

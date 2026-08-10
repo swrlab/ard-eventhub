@@ -37,6 +37,6 @@ export const authResetPost = async (c: Context) => {
 			data: { body, headers: getSafeHeaders(c.req.raw.headers) },
 		})
 
-		return responseInternalServerError(c, error as Error)
+		return responseInternalServerError(c)
 	}
 }

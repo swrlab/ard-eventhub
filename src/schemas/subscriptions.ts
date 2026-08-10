@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { responseTrace } from './common.ts'
 
 /**
  * Required string enum that reports missing values as `invalid_type` (OpenAPI required parity).
@@ -87,10 +88,7 @@ export const subscriptionsList = z.array(subscriptionResponse).meta({ id: 'subsc
 export const subscriptionDeleted = z
 	.object({
 		valid: z.boolean().meta({ examples: [true] }),
-		trace: z
-			.string()
-			.nullable()
-			.meta({ examples: [null] }),
+		trace: responseTrace,
 	})
 	.meta({ id: 'subscriptionDeleted' })
 

@@ -116,7 +116,7 @@ function testMissingAuth(res: TestResponse) {
 	assertExists(res.body.errors)
 	assertStrictEquals(Array.isArray(res.body.errors), true)
 	assertGreater(res.body.errors.length, 0)
-	assertStrictEquals(res.body.trace === null || typeof res.body.trace === 'string', true)
+	assertStrictEquals(res.body.trace, null)
 }
 
 /*

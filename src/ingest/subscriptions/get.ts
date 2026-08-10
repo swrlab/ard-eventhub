@@ -81,6 +81,6 @@ export const subscriptionsGet = async (c: Context) => {
 			data: { params: c.req.param() },
 		})
 
-		return responseInternalServerError(c, error as Error)
+		return responseInternalServerError(c)
 	}
 }

@@ -21,6 +21,6 @@ export const topicsList = async (c: Context) => {
 			error,
 		})
 
-		return responseInternalServerError(c, error as Error)
+		return responseInternalServerError(c)
 	}
 }

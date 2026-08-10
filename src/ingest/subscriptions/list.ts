@@ -18,7 +18,7 @@ export const subscriptionsList = async (c: Context) => {
 		// check if user is present
 		if (!user) {
 			logger.notice({ message: 'user not found', source, data: getSafeHeaders(c.req.raw.headers) })
-			return responseInternalServerError(c, new Error('User not found'))
+			return responseInternalServerError(c)
 		}
 
 		// load all subscriptions
@@ -35,6 +35,6 @@ export const subscriptionsList = async (c: Context) => {
 			error,
 		})
 
-		return responseInternalServerError(c, error as Error)
+		return responseInternalServerError(c)
 	}
 }
