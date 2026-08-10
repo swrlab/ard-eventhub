@@ -10,8 +10,7 @@ import { app } from './server.ts'
  * @param message - Error message to log
  */
 const exitWithError = (message: string) => {
-	logger.log({
-		level: 'error',
+	logger.error({
 		message,
 		source: 'config',
 	})

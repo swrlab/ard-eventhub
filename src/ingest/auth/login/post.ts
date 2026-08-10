@@ -49,8 +49,7 @@ export const authLoginPost = async (c: Context) => {
 			user: login.user,
 		})
 	} catch (error) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'failed to sign in w/ email+password',
 			source,
 			error,

@@ -20,8 +20,7 @@ export const authVerify: MiddlewareHandler = async (c, next) => {
 
 		// check existence of x-auth... header
 		if (!(authorization && regexp.test(authorization))) {
-			logger.log({
-				level: 'notice',
+			logger.notice({
 				message: 'user token missing',
 				source,
 				data: getSafeHeaders(c.req.raw.headers),
@@ -32,8 +31,7 @@ export const authVerify: MiddlewareHandler = async (c, next) => {
 		;[authorization] = authorization.match(regexp) || []
 
 		if (!authorization) {
-			logger.log({
-				level: 'notice',
+			logger.notice({
 				message: 'user token missing',
 				source,
 				data: getSafeHeaders(c.req.raw.headers),
@@ -48,19 +46,12 @@ export const authVerify: MiddlewareHandler = async (c, next) => {
 			c.set('user', user)
 			c.header('x-ard-eventhub-uid', user.uid)
 		} catch (error) {
-			logger.log({
-				level: 'notice',
-				message: 'user token invalid',
-				source,
-				error,
-				data: getSafeHeaders(c.req.raw.headers),
-			})
+			logger.notice({ message: 'user token invalid', source, error, data: getSafeHeaders(c.req.raw.headers) })
 			return c.json(ERROR_JSON, 403)
 		}
 
 		if (!user.email) {
-			logger.log({
-				level: 'notice',
+			logger.notice({
 				message: 'user email missing',
 				source,
 				data: getSafeHeaders(c.req.raw.headers),
@@ -73,8 +64,7 @@ export const authVerify: MiddlewareHandler = async (c, next) => {
 
 		// check if profile exists and valid
 		if (userDb?.active !== true) {
-			logger.log({
-				level: 'notice',
+			logger.notice({
 				message: 'user not found or not active',
 				source,
 				data: getSafeHeaders(c.req.raw.headers),
@@ -90,8 +80,7 @@ export const authVerify: MiddlewareHandler = async (c, next) => {
 		await next()
 		return
 	} catch (error) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'failed to verify user',
 			source,
 			error,

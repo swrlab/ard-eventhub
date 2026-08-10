@@ -30,8 +30,7 @@ export const pubsubCreateSubscription = async (subscription: EventhubSubscriptio
 		ackDeadlineSeconds: 20,
 		expirationPolicy: {},
 	}
-	logger.log({
-		level: 'info',
+	logger.info({
 		message: 'built options',
 		source,
 		data: { subscription, options },
@@ -39,8 +38,7 @@ export const pubsubCreateSubscription = async (subscription: EventhubSubscriptio
 
 	// submit subscription
 	const [createdSubscription] = await pubSubSubscriberClient.createSubscription(options)
-	logger.log({
-		level: 'info',
+	logger.info({
 		message: 'created subscription',
 		source,
 		data: { createdSubscription },
@@ -48,8 +46,7 @@ export const pubsubCreateSubscription = async (subscription: EventhubSubscriptio
 
 	// map and filter values
 	const { limited: mappedSubscription } = await mapSubscription(createdSubscription)
-	logger.log({
-		level: 'info',
+	logger.info({
 		message: 'mapped subscription',
 		source,
 		data: { mappedSubscription },

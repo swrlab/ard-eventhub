@@ -49,8 +49,7 @@ export const getARDFeed = async () => {
 
 		// check if feed has enough items
 		if (feedItemCount < MIN_FEED_ITEMS) {
-			logger.log({
-				level: 'error',
+			logger.error({
 				message: `ARD Feed contains an unexpected amount of stations: ${feedItemCount}`,
 				source,
 			})
@@ -61,8 +60,7 @@ export const getARDFeed = async () => {
 		// check if feed has too many items
 		if (feedItemCount >= MAX_FEED_ITEMS) {
 			const message = `ARD Feed contains an unexpected amount of stations: ${feedItemCount}`
-			logger.log({
-				level: 'error',
+			logger.error({
 				message: message,
 				source,
 			})
@@ -72,8 +70,7 @@ export const getARDFeed = async () => {
 
 		// check for pagination
 		if (feed.totalPageCount > 1) {
-			logger.log({
-				level: 'error',
+			logger.error({
 				message: 'Pagination is not supported',
 				source,
 			})
@@ -94,8 +91,7 @@ export const getARDFeed = async () => {
 			fs.writeFileSync(`${import.meta.dirname}/../data/ard-core-livestreams.json`, JSON.stringify(feed, null, '\t'))
 		}
 
-		logger.log({
-			level: 'info',
+		logger.info({
 			message: `ARD feed downloaded successfully > ${getMsOffset(START_TIME)}ms`,
 			source,
 		})
@@ -105,8 +101,7 @@ export const getARDFeed = async () => {
 
 		return feed
 	} catch (error) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'Failed to download ARD feed',
 			source,
 			error,

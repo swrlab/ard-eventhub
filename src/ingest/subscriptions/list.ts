@@ -17,8 +17,7 @@ export const subscriptionsList = async (c: Context) => {
 		const user = c.get('user') as AuthUser | undefined
 		// check if user is present
 		if (!user) {
-			logger.log({
-				level: 'notice',
+			logger.notice({
 				message: 'user not found',
 				source,
 				data: getSafeHeaders(c.req.raw.headers),
@@ -29,8 +28,7 @@ export const subscriptionsList = async (c: Context) => {
 		// check if a user has an institutionId
 		const institutionId = user.institutionId
 		if (!institutionId) {
-			logger.log({
-				level: 'notice',
+			logger.notice({
 				message: `institutionId not found for user > ${user.email}`,
 				source,
 				data: getSafeHeaders(c.req.raw.headers),
@@ -46,8 +44,7 @@ export const subscriptionsList = async (c: Context) => {
 
 		return c.json(subscriptions, 200)
 	} catch (error) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'failed to list subscriptions',
 			source,
 			error,

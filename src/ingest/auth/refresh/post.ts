@@ -52,8 +52,7 @@ export const authRefreshPost = async (c: Context) => {
 			user: login.user,
 		})
 	} catch (error) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'failed to refresh token',
 			source,
 			error,

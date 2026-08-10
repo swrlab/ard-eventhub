@@ -106,8 +106,7 @@ export const dtsEvent = async (job: EventhubPluginMessage): Promise<void> => {
 	// set event host and auth
 	const { token: liveradioToken, username } = getUserForInstitution(institutionId)
 	if (!(LIVERADIO_URL && liveradioToken)) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'failed loading DTS user for liveradio API',
 			source,
 			data: { job, ids: { coreIds } },

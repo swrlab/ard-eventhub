@@ -15,8 +15,7 @@ export const topicsList = async (c: Context) => {
 		const topics = await pubsubGetTopics()
 		return c.json(topics, 200)
 	} catch (error) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'failed to list topics',
 			source,
 			error,

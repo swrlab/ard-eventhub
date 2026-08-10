@@ -18,8 +18,7 @@ app.use('*', async (c, next) => {
 	// log all headers in local mode
 	if (isLocal) {
 		const logHeaders = getSafeHeaders(c.req.raw.headers)
-		logger.log({
-			level: 'debug',
+		logger.debug({
 			message: 'middleware logging',
 			source: 'DEV',
 			data: { logHeaders, path: c.req.path },

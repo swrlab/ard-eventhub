@@ -28,8 +28,7 @@ export const publishPubSubMessage = async (topic: string, message: object, attri
 		if (isCode5Error(error)) {
 			output = 'TOPIC_NOT_FOUND'
 
-			logger.log({
-				level: 'warning',
+			logger.warning({
 				message: `topic not found > ${topic}`,
 				source,
 				error,
@@ -38,8 +37,7 @@ export const publishPubSubMessage = async (topic: string, message: object, attri
 		} else {
 			output = 'TOPIC_ERROR'
 
-			logger.log({
-				level: 'error',
+			logger.error({
 				message: `failed sending message > ${topic}`,
 				source,
 				error,

@@ -8,13 +8,13 @@ import { pubSubPrefix } from '#config'
 import { stage } from '#env'
 import { ardFeed } from '../../data/index.ts'
 import { datastoreSave } from '../../utils/datastore/save.ts'
+import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 import { pubsubBuildId } from '../../utils/pubsub/build-id.ts'
 import { pubsubCreateSubscription } from '../../utils/pubsub/create-subscription.ts'
 import { pubsubGetTopic } from '../../utils/pubsub/get-topic.ts'
 import { badRequest as responseBadRequest } from '../../utils/response/bad-request.ts'
 import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
 import { responseNotFound } from '../../utils/response/not-found.ts'
-import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 import { getValidatedBody } from '../../utils/validation/zod-validate.ts'
 
 const source = 'ingest/subscriptions/post'
@@ -32,8 +32,7 @@ export const subscriptionsPost = async (c: Context) => {
 
 		// check if user is present
 		if (!user?.email) {
-			logger.log({
-				level: 'notice',
+			logger.notice({
 				message: 'user not found',
 				source,
 				data: getSafeHeaders(c.req.raw.headers),
@@ -55,8 +54,7 @@ export const subscriptionsPost = async (c: Context) => {
 			const institutionName = user.institution?.name
 
 			// log action
-			logger.log({
-				level: 'warning',
+			logger.warning({
 				message: 'user attempted to create subscription without institution',
 				source,
 				data: {
@@ -79,6 +77,11 @@ export const subscriptionsPost = async (c: Context) => {
 		// check if there is an invalid url
 
 		if (!body.url) {
+			logger.notice({
+				message: 'The URL in the body is missing',
+				source,
+				data: { email: user.email, topic: body.topic },
+			})
 			// return 422 error
 			return responseBadRequest(c, {
 				status: 422,
@@ -91,6 +94,11 @@ export const subscriptionsPost = async (c: Context) => {
 
 		// localhost check
 		if (url.hostname.startsWith('localhost')) {
+			logger.notice({
+				message: 'An invalid URL was sent for the subscription',
+				source,
+				data: { email: user.email, topic: body.topic, url: body.url, reason: 'localhost' },
+			})
 			// return 422 error
 			return responseBadRequest(c, {
 				status: 422,
@@ -101,6 +109,11 @@ export const subscriptionsPost = async (c: Context) => {
 
 		// ip address check
 		if (url.hostname.match('([\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3})') !== null) {
+			logger.notice({
+				message: 'An invalid URL was sent for the subscription',
+				source,
+				data: { email: user.email, topic: body.topic, url: body.url, reason: 'ip-address' },
+			})
 			// return 422 error
 			return responseBadRequest(c, {
 				status: 422,
@@ -110,6 +123,11 @@ export const subscriptionsPost = async (c: Context) => {
 		}
 
 		if (url.protocol !== 'https:') {
+			logger.notice({
+				message: 'An invalid URL was sent for the subscription',
+				source,
+				data: { email: user.email, topic: body.topic, url: body.url, reason: 'insecure-protocol' },
+			})
 			// return 422 error
 			return responseBadRequest(c, {
 				status: 422,
@@ -137,8 +155,7 @@ export const subscriptionsPost = async (c: Context) => {
 			await pubsubGetTopic(subscriptionInputData.topic)
 		} catch (error) {
 			// log error
-			logger.log({
-				level: 'warning',
+			logger.warning({
 				message: `failed to find desired topic > ${subscriptionInputData.topic}`,
 				source,
 				error,
@@ -162,8 +179,7 @@ export const subscriptionsPost = async (c: Context) => {
 
 		return c.json(createdSubscription, 201)
 	} catch (error) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'failed to create subscription',
 			source,
 			error,

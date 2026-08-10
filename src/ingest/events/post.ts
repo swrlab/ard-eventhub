@@ -7,6 +7,7 @@ import { ulid } from 'ulid'
 import { pubSubTopicSelf } from '#config'
 import { createNewTopic } from '../../utils/events/create-new-topic.ts'
 import { processServices } from '../../utils/events/process-services.ts'
+import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 import { pubsubBuildId } from '../../utils/pubsub/build-id.ts'
 import { publishPubSubMessage } from '../../utils/pubsub/publish-message.ts'
 import { badRequest as responseBadRequest } from '../../utils/response/bad-request.ts'
@@ -14,7 +15,6 @@ import { errorsExpiredStartTime } from '../../utils/response/errors/expired-star
 import { errorsMismatchingEventName } from '../../utils/response/errors/mismatching-event-name.ts'
 import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
 import { responseOk } from '../../utils/response/ok.ts'
-import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 import { getValidatedBody } from '../../utils/validation/zod-validate.ts'
 
 const source = 'ingest/events/post'
@@ -46,8 +46,7 @@ export const eventsPost = async (c: Context) => {
 	try {
 		const user = c.get('user') as AuthUser | undefined
 		if (!user) {
-			logger.log({
-				level: 'notice',
+			logger.notice({
 				message: 'user not found',
 				source,
 				data: getSafeHeaders(c.req.raw.headers),
@@ -59,6 +58,11 @@ export const eventsPost = async (c: Context) => {
 		const eventNameParam = c.req.param('eventName')
 		// check if event name is present
 		if (!eventNameParam) {
+			logger.notice({
+				message: 'Event name not found',
+				source,
+				data: { email: user.email, params: c.req.param() },
+			})
 			return responseBadRequest(c, {
 				status: 400,
 				message: 'Event name not found',
@@ -166,8 +170,7 @@ export const eventsPost = async (c: Context) => {
 
 				// handle errors
 				if (commonEvent.messageId === 'TOPIC_ERROR' || commonEvent.messageId === 'TOPIC_NOT_FOUND') {
-					logger.log({
-						level: 'warning',
+					logger.warning({
 						message: `failed common plugin > ${eventName} > ${nonBlockedServices[0]?.publisherId}`,
 						source,
 						data: {
@@ -249,8 +252,7 @@ export const eventsPost = async (c: Context) => {
 
 		return responseOk(c, data, 201)
 	} catch (error) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'failed to publish event',
 			source,
 			error,

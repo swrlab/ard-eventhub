@@ -21,12 +21,22 @@ export const subscriptionsGet = async (c: Context) => {
 
 		// check if subscription name is present
 		if (!subscriptionName) {
+			logger.notice({
+				message: 'Subscription name is required',
+				source,
+				data: { params: c.req.param() },
+			})
 			return responseBadRequest(c, { status: 400, message: 'Subscription name is required' })
 		}
 
 		const user = c.get('user') as AuthUser | undefined
 		// check if user is present
 		if (!user) {
+			logger.notice({
+				message: 'User not found',
+				source,
+				data: { subscriptionName },
+			})
 			return responseBadRequest(c, { status: 401, message: 'User not found' })
 		}
 
@@ -36,6 +46,11 @@ export const subscriptionsGet = async (c: Context) => {
 			const subscription = await getSubscription(subscriptionName)
 			limitedSubscription = subscription.limited
 		} catch {
+			logger.notice({
+				message: `Subscription '${subscriptionName}' not found`,
+				source,
+				data: { email: user.email, subscriptionName },
+			})
 			return responseNotFound(c, {
 				status: 404,
 				message: `Subscription '${subscriptionName}' not found`,
@@ -45,6 +60,17 @@ export const subscriptionsGet = async (c: Context) => {
 		// verify if user is allowed to get subscription (same institution)
 		if (limitedSubscription.institutionId !== user.institutionId) {
 			const userInstitution = user.institutionId
+
+			logger.warning({
+				message: 'Mismatch of user and subscription institution',
+				source,
+				data: {
+					email: user.email,
+					subscriptionName,
+					userInstitution,
+					subscriptionInstitution: limitedSubscription.institutionId,
+				},
+			})
 
 			// return 400 error
 			return responseBadRequest(c, {
@@ -56,8 +82,7 @@ export const subscriptionsGet = async (c: Context) => {
 
 		return c.json(limitedSubscription, 200)
 	} catch (error) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'failed to get subscription',
 			source,
 			error,

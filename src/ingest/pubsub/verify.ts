@@ -42,8 +42,7 @@ export const pubsubAuthVerify: MiddlewareHandler = async (c, next) => {
 		await next()
 		return
 	} catch (error) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'failed to verify user',
 			source,
 			error,

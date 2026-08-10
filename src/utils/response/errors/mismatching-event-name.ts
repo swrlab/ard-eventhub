@@ -13,8 +13,7 @@ const source = 'utils.response.errors.mismatchingEventName'
  */
 export const errorsMismatchingEventName = (c: Context, body: unknown) => {
 	const user = c.get('user') as AuthUser | undefined
-	logger.log({
-		level: 'warning',
+	logger.warning({
 		message: 'User attempted event with mismatching names',
 		source,
 		data: {

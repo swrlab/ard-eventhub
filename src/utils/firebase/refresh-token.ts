@@ -27,9 +27,8 @@ export const firebaseRefreshToken = async (refreshToken: string) => {
 	// handle errors
 	if (response.status !== 200) {
 		const text = await response.text().catch(() => '')
-		logger.log({
+		logger.warning({
 			source,
-			level: 'warning',
 			message: `failed with status > ${response.status}`,
 			data: { statusCode: response.status, response: { statusText: response.statusText, text } },
 		})

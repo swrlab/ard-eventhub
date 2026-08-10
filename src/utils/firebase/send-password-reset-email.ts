@@ -24,9 +24,8 @@ export const firebaseSendPasswordResetEmail = async (email: string): Promise<voi
 	})
 
 	if (response.status !== 200) {
-		logger.log({
+		logger.warning({
 			source,
-			level: 'warning',
 			message: `failed with status > ${response.status}`,
 			data: { statusCode: response.status, response },
 		})

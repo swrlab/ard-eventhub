@@ -56,8 +56,7 @@ export const processServices = async (service: EventhubService, req: EventReques
 		service.blocked = `Publisher not found > ${service.publisherId}`
 
 		// log access attempt
-		logger.log({
-			level: 'warning',
+		logger.warning({
 			message: `Publisher not found (${service.publisherId})`,
 			source,
 			data: { service, user: req.user, originalPublisherId },
@@ -73,8 +72,7 @@ export const processServices = async (service: EventhubService, req: EventReques
 		service.blocked = 'User unauthorized for service'
 
 		// log access attempt
-		logger.log({
-			level: 'warning',
+		logger.warning({
 			message: `User unauthorized for service > ${service.externalId} (${service.publisherId})`,
 			source,
 			data: {

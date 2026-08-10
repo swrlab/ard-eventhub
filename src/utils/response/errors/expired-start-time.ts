@@ -13,8 +13,7 @@ const source = 'utils.response.errors.expiredStartTime'
  */
 export const errorsExpiredStartTime = (c: Context, body: { start?: string }) => {
 	const user = c.get('user') as AuthUser | undefined
-	logger.log({
-		level: 'notice',
+	logger.notice({
 		message: `User attempted event with expired start time > ${body.start}`,
 		source,
 		data: {

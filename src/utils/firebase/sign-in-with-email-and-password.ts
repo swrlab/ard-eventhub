@@ -32,9 +32,8 @@ export const firebaseSignIn = async (email: string, password: string) => {
 
 			const text = await response.text().catch(() => '')
 
-			logger.log({
+			logger.warning({
 				source,
-				level: 'warning',
 				message,
 				data: { statusCode: response.status, response: { statusText: response.statusText, text } },
 			})
@@ -48,9 +47,8 @@ export const firebaseSignIn = async (email: string, password: string) => {
 		return { user, login: json }
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error)
-		logger.log({
+		logger.warning({
 			source,
-			level: 'warning',
 			message: `failed with error > ${errorMessage}`,
 			data: { error },
 		})

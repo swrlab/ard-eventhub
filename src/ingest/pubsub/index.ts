@@ -41,8 +41,7 @@ export const pubsubHandler = async (c: Context) => {
 			// oxlint-disable-next-line typescript/no-explicit-any -- Pub/Sub job payload is dynamically shaped
 			await radioplayerEvent(jobRecord as any)
 		} else {
-			logger.log({
-				level: 'warning',
+			logger.warning({
 				message: 'undetected PubSub message action',
 				source,
 				data: { messageId, job: jobRecord, headers: getSafeHeaders(c.req.raw.headers) },
@@ -54,8 +53,7 @@ export const pubsubHandler = async (c: Context) => {
 	} catch (error) {
 		const message = body?.message as Record<string, unknown> | undefined
 		const messageId = message?.messageId
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'error while processing PubSub message',
 			source,
 			error,

@@ -19,8 +19,7 @@ const source = 'utils.events.createNewTopic'
 export const createNewTopic = async (service: EventhubService, req: EventRequestContext) => {
 	// check if user is present
 	if (!req.user?.email) {
-		logger.log({
-			level: 'notice',
+		logger.notice({
 			message: 'user not found',
 			source,
 			data: getSafeHeaders(req.headers),
@@ -30,8 +29,7 @@ export const createNewTopic = async (service: EventhubService, req: EventRequest
 
 	// check if topic is present
 	if (!service.topic) {
-		logger.log({
-			level: 'notice',
+		logger.notice({
 			message: 'topic not found',
 			source,
 			data: { service },
@@ -44,8 +42,7 @@ export const createNewTopic = async (service: EventhubService, req: EventRequest
 
 	// check if publisher is present
 	if (!publisher) {
-		logger.log({
-			level: 'notice',
+		logger.notice({
 			message: 'publisher not found',
 			source,
 			data: { service },
@@ -86,8 +83,7 @@ export const createNewTopic = async (service: EventhubService, req: EventRequest
 		// update api result that topic was created
 		service.topic.status = 'TOPIC_CREATED'
 
-		logger.log({
-			level: 'notice',
+		logger.notice({
 			message: `topic created > ${service.topic.name}`,
 			source,
 			data: { service, result },
@@ -96,8 +92,7 @@ export const createNewTopic = async (service: EventhubService, req: EventRequest
 		// update api result that topic was not created
 		service.topic.status = 'TOPIC_NOT_CREATED'
 
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: `failed creating topic > ${service.topic.name}`,
 			source,
 			data: { service, result },
