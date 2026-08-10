@@ -5,11 +5,11 @@ import { compress } from 'hono/compress'
 import { serviceUrl, userAgent, version } from '#config'
 import { isLocal, port, serviceName } from '#env'
 import { getARDFeed } from '../data/index.ts'
-import createRouter from './router.ts'
+import { createRouter } from './router.ts'
 
 await getARDFeed()
 
-const app = new Hono<{ Variables: AppVariables }>({ strict: false })
+export const app = new Hono<{ Variables: AppVariables }>({ strict: false })
 
 // add debugging information to all headers
 app.use('*', async (c, next) => {
@@ -46,4 +46,3 @@ if (isLocal) {
 	console.log(`${serviceName} (v${version}) is running at: ${serviceUrl}`)
 }
 
-export default app

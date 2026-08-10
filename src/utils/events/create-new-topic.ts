@@ -2,8 +2,8 @@ import type { EventhubService, EventhubTopicDatastore, EventRequestContext } fro
 import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { getPublisherById } from '../ard-core.ts'
-import datastoreSave from '../datastore/save.ts'
-import pubsubCreateTopic from '../pubsub/createTopic.ts'
+import { datastoreSave } from '../datastore/save.ts'
+import { pubsubCreateTopic } from '../pubsub/create-topic.ts'
 
 const source = 'utils.events.createNewTopic'
 
@@ -13,7 +13,7 @@ const source = 'utils.events.createNewTopic'
  * @param req - Event request context (user)
  * @returns Topic metadata attached to the service
  */
-export default async (service: EventhubService, req: EventRequestContext) => {
+export const createNewTopic = async (service: EventhubService, req: EventRequestContext) => {
 	// check if user is present
 	if (!req.user?.email) {
 		logger.log({

@@ -6,7 +6,7 @@ firebaseAdmin.initializeApp({
 	projectId,
 })
 
-export default async (token: string): Promise<DecodedIdToken> => {
+export const firebaseVerifyToken = async (token: string): Promise<DecodedIdToken> => {
 	const verification = await firebaseAdmin.auth().verifyIdToken(token)
 	return verification
 }

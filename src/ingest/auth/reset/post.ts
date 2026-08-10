@@ -1,10 +1,10 @@
 import type { Context } from 'hono'
 import type { AuthResetBody } from '../../../schemas/auth.ts'
 import logger from '@frytg/logger'
-import firebaseSendPasswordResetEmail from '../../../utils/firebase/sendPasswordResetEmail.ts'
-import responseBadRequest from '../../../utils/response/badRequest.ts'
-import responseInternalServerError from '../../../utils/response/internalServerError.ts'
-import responseOk from '../../../utils/response/ok.ts'
+import { firebaseSendPasswordResetEmail } from '../../../utils/firebase/send-password-reset-email.ts'
+import { badRequest as responseBadRequest } from '../../../utils/response/bad-request.ts'
+import { responseInternalServerError } from '../../../utils/response/internal-server-error.ts'
+import { responseOk } from '../../../utils/response/ok.ts'
 import { getValidatedBody } from '../../../utils/validation/zod-validate.ts'
 
 const source = 'ingest/auth/reset'
@@ -14,7 +14,7 @@ const source = 'ingest/auth/reset'
  * @param c - Hono context
  * @returns Success payload
  */
-export default async (c: Context) => {
+export const authResetPost = async (c: Context) => {
 	const body = getValidatedBody<AuthResetBody>(c)
 	try {
 		// try to reset email (may fail if not found)

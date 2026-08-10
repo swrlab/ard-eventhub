@@ -10,15 +10,15 @@ import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { ulid } from 'ulid'
 import { pubSubTopicSelf } from '#config'
-import createNewTopic from '../../utils/events/createNewTopic.ts'
-import processServices from '../../utils/events/processServices.ts'
-import pubsubBuildId from '../../utils/pubsub/buildId.ts'
-import publishPubSubMessage from '../../utils/pubsub/publishMessage.ts'
-import responseBadRequest from '../../utils/response/badRequest.ts'
-import errorsExpiredStartTime from '../../utils/response/errors/expiredStartTime.ts'
-import errorsMismatchingEventName from '../../utils/response/errors/mismatchingEventName.ts'
-import responseInternalServerError from '../../utils/response/internalServerError.ts'
-import responseOk from '../../utils/response/ok.ts'
+import { createNewTopic } from '../../utils/events/create-new-topic.ts'
+import { processServices } from '../../utils/events/process-services.ts'
+import { pubsubBuildId } from '../../utils/pubsub/build-id.ts'
+import { publishPubSubMessage } from '../../utils/pubsub/publish-message.ts'
+import { badRequest as responseBadRequest } from '../../utils/response/bad-request.ts'
+import { errorsExpiredStartTime } from '../../utils/response/errors/expired-start-time.ts'
+import { errorsMismatchingEventName } from '../../utils/response/errors/mismatching-event-name.ts'
+import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
+import { responseOk } from '../../utils/response/ok.ts'
 import { getValidatedBody } from '../../utils/validation/zod-validate.ts'
 
 const source = 'ingest/events/post'
@@ -48,7 +48,7 @@ const toEventRequestContext = (
  * @param c - Hono context
  * @returns Event publish response
  */
-export default async (c: Context<{ Variables: AppVariables }>) => {
+export const eventsPost = async (c: Context<{ Variables: AppVariables }>) => {
 	const body = getValidatedBody<Record<string, unknown>>(c)
 	try {
 		const user = c.get('user') as AuthUser | undefined

@@ -7,13 +7,13 @@ import { ulid } from 'ulid'
 import { pubSubPrefix } from '#config'
 import { stage } from '#env'
 import { ardFeed } from '../../data/index.ts'
-import datastoreSave from '../../utils/datastore/save.ts'
-import pubsubBuildId from '../../utils/pubsub/buildId.ts'
-import pubsubCreateSubscription from '../../utils/pubsub/createSubscription.ts'
-import pubsubGetTopic from '../../utils/pubsub/getTopic.ts'
-import responseBadRequest from '../../utils/response/badRequest.ts'
-import responseInternalServerError from '../../utils/response/internalServerError.ts'
-import responseNotFound from '../../utils/response/notFound.ts'
+import { datastoreSave } from '../../utils/datastore/save.ts'
+import { pubsubBuildId } from '../../utils/pubsub/build-id.ts'
+import { pubsubCreateSubscription } from '../../utils/pubsub/create-subscription.ts'
+import { pubsubGetTopic } from '../../utils/pubsub/get-topic.ts'
+import { badRequest as responseBadRequest } from '../../utils/response/bad-request.ts'
+import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
+import { responseNotFound } from '../../utils/response/not-found.ts'
 import { getValidatedBody } from '../../utils/validation/zod-validate.ts'
 
 const source = 'ingest/subscriptions/post'
@@ -23,7 +23,7 @@ const source = 'ingest/subscriptions/post'
  * @param c - Hono context
  * @returns Created subscription
  */
-export default async (c: Context<{ Variables: AppVariables }>) => {
+export const subscriptionsPost = async (c: Context<{ Variables: AppVariables }>) => {
 	const body = getValidatedBody<SubscriptionPost>(c)
 	try {
 		// fetch user from request

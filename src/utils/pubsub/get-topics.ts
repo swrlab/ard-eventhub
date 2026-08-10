@@ -1,7 +1,7 @@
 import { pubSubPrefix } from '#config'
-import pubSubClient from './_client.ts'
+import { pubSubClient } from './_client.ts'
 
-export default async () => {
+export const pubsubGetTopics = async () => {
 	const [allTopics] = await pubSubClient.getTopics()
 
 	// filter topics by prefix (stage)

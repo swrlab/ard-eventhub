@@ -11,7 +11,7 @@ const source = 'ingest/pubsub/verify'
  * Verify Google OIDC bearer token for Pub/Sub push delivery.
  * @returns Hono middleware
  */
-const pubsubAuthVerify: MiddlewareHandler = async (c, next) => {
+export const pubsubAuthVerify: MiddlewareHandler = async (c, next) => {
 	try {
 		// read token from header
 		const bearer = c.req.header('Authorization')
@@ -53,4 +53,3 @@ const pubsubAuthVerify: MiddlewareHandler = async (c, next) => {
 	}
 }
 
-export default pubsubAuthVerify

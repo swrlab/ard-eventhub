@@ -1,7 +1,7 @@
 import type { Context } from 'hono'
 import type { AuthUser } from '#types'
 import logger from '@frytg/logger'
-import badRequest from '../badRequest.ts'
+import { badRequest } from '../bad-request.ts'
 
 const source = 'utils.response.errors.mismatchingEventName'
 
@@ -11,7 +11,7 @@ const source = 'utils.response.errors.mismatchingEventName'
  * @param body - Request body used for logging
  * @returns Hono bad-request response
  */
-export default (c: Context, body: unknown) => {
+export const errorsMismatchingEventName = (c: Context, body: unknown) => {
 	const user = c.get('user') as AuthUser | undefined
 	logger.log({
 		level: 'warning',

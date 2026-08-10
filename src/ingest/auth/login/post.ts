@@ -3,10 +3,10 @@ import type { JwtPayload } from 'jsonwebtoken'
 import type { AuthLoginBody } from '../../../schemas/auth.ts'
 import { getNow } from '@frytg/dates'
 import logger from '@frytg/logger'
-import firebaseSignIn from '../../../utils/firebase/signInWithEmailAndPassword.ts'
-import responseBadRequest from '../../../utils/response/badRequest.ts'
-import responseInternalServerError from '../../../utils/response/internalServerError.ts'
-import responseOk from '../../../utils/response/ok.ts'
+import { firebaseSignIn } from '../../../utils/firebase/sign-in-with-email-and-password.ts'
+import { badRequest as responseBadRequest } from '../../../utils/response/bad-request.ts'
+import { responseInternalServerError } from '../../../utils/response/internal-server-error.ts'
+import { responseOk } from '../../../utils/response/ok.ts'
 import { getValidatedBody } from '../../../utils/validation/zod-validate.ts'
 
 const source = 'ingest/auth/login'
@@ -22,7 +22,7 @@ type Login = {
  * @param c - Hono context
  * @returns Auth response
  */
-export default async (c: Context) => {
+export const authLoginPost = async (c: Context) => {
 	const body = getValidatedBody<AuthLoginBody>(c)
 	try {
 		let login: Awaited<{

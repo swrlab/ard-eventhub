@@ -1,6 +1,6 @@
 import { v1 } from '@google-cloud/pubsub'
 import { projectId } from '#env'
 
-export default new v1.PublisherClient({
+export const pubSubSubscriberClient = new v1.SubscriberClient({
 	projectId,
 })

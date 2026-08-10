@@ -5,7 +5,7 @@ import { firebaseAPIKey } from '#env'
 
 const source = 'firebase.signInWithEmailAndPassword'
 
-export default async (email: string, password: string) => {
+export const firebaseSignIn = async (email: string, password: string) => {
 	// set firebase sign in url
 	const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseAPIKey}`
 

@@ -1,8 +1,8 @@
 import { pubSubPrefix } from '#config'
-import pubSubClient from './_client.ts'
-import mapSubscription from './mapSubscription.ts'
+import { pubSubClient } from './_client.ts'
+import { mapSubscription } from './map-subscription.ts'
 
-export default async (name: string) => {
+export const getSubscription = async (name: string) => {
 	// fetch subscription list
 	const [subscription] = await pubSubClient.subscription(name).getMetadata()
 

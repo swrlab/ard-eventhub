@@ -1,7 +1,7 @@
 import type { Context } from 'hono'
 import logger from '@frytg/logger'
-import pubsubGetTopics from '../../utils/pubsub/getTopics.ts'
-import responseInternalServerError from '../../utils/response/internalServerError.ts'
+import { pubsubGetTopics } from '../../utils/pubsub/get-topics.ts'
+import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
 
 const source = 'ingest/topics/list'
 
@@ -10,7 +10,7 @@ const source = 'ingest/topics/list'
  * @param c - Hono context
  * @returns Topics array
  */
-export default async (c: Context) => {
+export const topicsList = async (c: Context) => {
 	try {
 		const topics = await pubsubGetTopics()
 		return c.json(topics, 200)

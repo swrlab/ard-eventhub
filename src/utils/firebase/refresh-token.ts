@@ -5,7 +5,7 @@ import { firebaseAPIKey } from '#env'
 
 const source = 'firebase.refreshToken'
 
-export default async (refreshToken: string) => {
+export const firebaseRefreshToken = async (refreshToken: string) => {
 	// set firebase sign in url
 	const url = `https://securetoken.googleapis.com/v1/token?key=${firebaseAPIKey}`
 

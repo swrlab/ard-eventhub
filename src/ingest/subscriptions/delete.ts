@@ -1,14 +1,14 @@
 import type { Context } from 'hono'
 import type { AppVariables, AuthUser, EventhubSubscriptionWithLabels } from '#types'
 import logger from '@frytg/logger'
-import datastoreDelete from '../../utils/datastore/delete.ts'
-import deleteSubscription from '../../utils/pubsub/deleteSubscription.ts'
-import getSubscription from '../../utils/pubsub/getSubscription.ts'
-import { isCode5Error } from '../../utils/pubsub/publishMessage.ts'
-import responseBadRequest from '../../utils/response/badRequest.ts'
-import responseInternalServerError from '../../utils/response/internalServerError.ts'
-import responseNotFound from '../../utils/response/notFound.ts'
-import responseOk from '../../utils/response/ok.ts'
+import { datastoreDelete } from '../../utils/datastore/delete.ts'
+import { deleteSubscription } from '../../utils/pubsub/delete-subscription.ts'
+import { getSubscription } from '../../utils/pubsub/get-subscription.ts'
+import { isCode5Error } from '../../utils/pubsub/publish-message.ts'
+import { badRequest as responseBadRequest } from '../../utils/response/bad-request.ts'
+import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
+import { responseNotFound } from '../../utils/response/not-found.ts'
+import { responseOk } from '../../utils/response/ok.ts'
 
 const source = 'ingest/subscriptions/delete'
 
@@ -17,7 +17,7 @@ const source = 'ingest/subscriptions/delete'
  * @param c - Hono context
  * @returns Deletion confirmation
  */
-export default async (c: Context<{ Variables: AppVariables }>) => {
+export const subscriptionsDelete = async (c: Context<{ Variables: AppVariables }>) => {
 	try {
 		// preset vars
 		const subscriptionName = c.req.param('subscriptionName')

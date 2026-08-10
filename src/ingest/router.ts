@@ -3,19 +3,19 @@ import { Hono } from 'hono'
 import { authLoginBody, authRefreshBody, authResetBody } from '../schemas/auth.ts'
 import { subscriptionPost } from '../schemas/subscriptions.ts'
 import { zodValidate } from '../utils/validation/zod-validate.ts'
-import login from './auth/login/post.ts'
-import authVerify from './auth/middleware/verify.ts'
-import refresh from './auth/refresh/post.ts'
-import reset from './auth/reset/post.ts'
-import events from './events/post.ts'
-import validateEventBody from './events/validate.ts'
-import pubsub from './pubsub/index.ts'
-import pubsubAuthVerify from './pubsub/verify.ts'
-import subscriptionsDelete from './subscriptions/delete.ts'
-import subscriptionsGet from './subscriptions/get.ts'
-import subscriptionsList from './subscriptions/list.ts'
-import subscriptionsPost from './subscriptions/post.ts'
-import topics from './topics/list.ts'
+import { authLoginPost as login } from './auth/login/post.ts'
+import { authVerify } from './auth/middleware/verify.ts'
+import { authRefreshPost as refresh } from './auth/refresh/post.ts'
+import { authResetPost as reset } from './auth/reset/post.ts'
+import { eventsPost as events } from './events/post.ts'
+import { validateEventBody } from './events/validate.ts'
+import { pubsubHandler as pubsub } from './pubsub/index.ts'
+import { pubsubAuthVerify } from './pubsub/verify.ts'
+import { subscriptionsDelete } from './subscriptions/delete.ts'
+import { subscriptionsGet } from './subscriptions/get.ts'
+import { subscriptionsList } from './subscriptions/list.ts'
+import { subscriptionsPost } from './subscriptions/post.ts'
+import { topicsList as topics } from './topics/list.ts'
 
 /** Docs API reference (Blume); replaces the former in-service Swagger UI. */
 const DOCS_API_URL = 'https://swrlab.github.io/ard-eventhub/api'
@@ -24,7 +24,7 @@ const DOCS_API_URL = 'https://swrlab.github.io/ard-eventhub/api'
  * Build the ingest API router.
  * @returns Hono router with all ingest routes
  */
-const createRouter = () => {
+export const createRouter = () => {
 	const router = new Hono<{ Variables: AppVariables }>()
 
 	// redirect former Swagger UI to the public docs API reference
@@ -60,4 +60,3 @@ const createRouter = () => {
 	return router
 }
 
-export default createRouter

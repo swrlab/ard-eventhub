@@ -1,8 +1,8 @@
 import type { MiddlewareHandler } from 'hono'
 import type { AppVariables, AuthUser } from '#types'
 import logger from '@frytg/logger'
-import datastoreLoad from '../../../utils/datastore/load.ts'
-import firebaseVerifyToken from '../../../utils/firebase/verifyToken.ts'
+import { datastoreLoad } from '../../../utils/datastore/load.ts'
+import { firebaseVerifyToken } from '../../../utils/firebase/verify-token.ts'
 
 const source = 'ingest/auth/middleware/verify'
 const ERROR_JSON = { message: 'Forbidden', errors: [], status: 403 }
@@ -11,7 +11,7 @@ const ERROR_JSON = { message: 'Forbidden', errors: [], status: 403 }
  * Verify Bearer / x-authorization JWT, load active user, and set `c.get('user')`.
  * @returns Hono middleware
  */
-const authVerify: MiddlewareHandler<{ Variables: AppVariables }> = async (c, next) => {
+export const authVerify: MiddlewareHandler<{ Variables: AppVariables }> = async (c, next) => {
 	try {
 		// parse input, preset vars
 		const regexp = /(?!Bearer\s{1})([a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+)/g
@@ -116,4 +116,3 @@ const authVerify: MiddlewareHandler<{ Variables: AppVariables }> = async (c, nex
 	}
 }
 
-export default authVerify

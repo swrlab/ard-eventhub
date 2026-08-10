@@ -1,8 +1,8 @@
 import type { Context } from 'hono'
 import type { AppVariables, AuthUser } from '#types'
 import logger from '@frytg/logger'
-import getSubscriptions from '../../utils/pubsub/getSubscriptions.ts'
-import responseInternalServerError from '../../utils/response/internalServerError.ts'
+import { getSubscriptions } from '../../utils/pubsub/get-subscriptions.ts'
+import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
 
 const source = 'ingest/subscriptions/list'
 
@@ -11,7 +11,7 @@ const source = 'ingest/subscriptions/list'
  * @param c - Hono context
  * @returns Subscription list
  */
-export default async (c: Context<{ Variables: AppVariables }>) => {
+export const subscriptionsList = async (c: Context<{ Variables: AppVariables }>) => {
 	try {
 		const user = c.get('user') as AuthUser | undefined
 		// check if user is present

@@ -1,7 +1,7 @@
 import type { Context } from 'hono'
 import type { AuthUser } from '#types'
 import logger from '@frytg/logger'
-import badRequest from '../badRequest.ts'
+import { badRequest } from '../bad-request.ts'
 
 const source = 'utils.response.errors.expiredStartTime'
 
@@ -11,7 +11,7 @@ const source = 'utils.response.errors.expiredStartTime'
  * @param body - Request body containing `start`
  * @returns Hono bad-request response
  */
-export default (c: Context, body: { start?: string }) => {
+export const errorsExpiredStartTime = (c: Context, body: { start?: string }) => {
 	const user = c.get('user') as AuthUser | undefined
 	logger.log({
 		level: 'notice',

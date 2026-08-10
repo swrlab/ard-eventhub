@@ -6,7 +6,7 @@ import type { Context } from 'hono'
  * @param error - Optional Error whose message is exposed
  * @returns Hono response
  */
-export default (c: Context, error?: Error) => {
+export const responseInternalServerError = (c: Context, error?: Error) => {
 	try {
 		return c.json(
 			{

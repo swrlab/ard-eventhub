@@ -1,6 +1,6 @@
 import type { Context, MiddlewareHandler, ValidationTargets } from 'hono'
 import type { ZodType } from 'zod'
-import responseBadRequest from '../response/badRequest.ts'
+import { badRequest as responseBadRequest } from '../response/bad-request.ts'
 import { sanitizeValidationError, zodToOpenApiError } from './zod-to-openapi-error.ts'
 
 type Target = keyof Pick<ValidationTargets, 'json' | 'param'>

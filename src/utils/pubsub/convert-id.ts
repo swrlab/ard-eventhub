@@ -8,7 +8,7 @@
 
 */
 
-export default {
+export const convertId = {
 	encode: (input: string) => {
 		return encodeURIComponent(input)
 	},

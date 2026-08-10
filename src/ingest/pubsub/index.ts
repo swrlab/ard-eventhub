@@ -1,7 +1,7 @@
 import type { Context } from 'hono'
 import logger from '@frytg/logger'
-import dtsEvent from '../../utils/plugins/dts/event.ts'
-import radioplayerEvent from '../../utils/plugins/radioplayer/event.ts'
+import { dtsEvent } from '../../utils/plugins/dts/event.ts'
+import { radioplayerEvent } from '../../utils/plugins/radioplayer/event.ts'
 
 const source = 'ingest/pubsub'
 
@@ -10,7 +10,7 @@ const source = 'ingest/pubsub'
  * @param c - Hono context
  * @returns Empty success/error status
  */
-export default async (c: Context) => {
+export const pubsubHandler = async (c: Context) => {
 	let body: Record<string, unknown> = {}
 	try {
 		body = await c.req.json()

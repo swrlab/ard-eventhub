@@ -3,10 +3,10 @@ import type { JwtPayload } from 'jsonwebtoken'
 import type { AuthRefreshBody } from '../../../schemas/auth.ts'
 import { getNow } from '@frytg/dates'
 import logger from '@frytg/logger'
-import firebaseRefreshToken from '../../../utils/firebase/refreshToken.ts'
-import responseBadRequest from '../../../utils/response/badRequest.ts'
-import responseInternalServerError from '../../../utils/response/internalServerError.ts'
-import responseOk from '../../../utils/response/ok.ts'
+import { firebaseRefreshToken } from '../../../utils/firebase/refresh-token.ts'
+import { badRequest as responseBadRequest } from '../../../utils/response/bad-request.ts'
+import { responseInternalServerError } from '../../../utils/response/internal-server-error.ts'
+import { responseOk } from '../../../utils/response/ok.ts'
 import { getValidatedBody } from '../../../utils/validation/zod-validate.ts'
 
 const source = 'ingest/auth/refresh'
@@ -22,7 +22,7 @@ type JwtLogin = {
  * @param c - Hono context
  * @returns Auth response
  */
-export default async (c: Context) => {
+export const authRefreshPost = async (c: Context) => {
 	const body = getValidatedBody<AuthRefreshBody>(c)
 	try {
 		let login: Awaited<{

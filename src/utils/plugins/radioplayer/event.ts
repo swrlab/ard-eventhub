@@ -74,7 +74,7 @@ const sendRadioplayerEvent = async (
 	return { url: url.toString(), posted: null, response: null, wasPosted: false }
 }
 
-export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> => {
+export const radioplayerEvent = async (job: EventhubPluginMessage): Promise<RadioplayerOutput> => {
 	// remap input
 	const { event, institutionId, plugin } = job
 	const output: RadioplayerOutput = []

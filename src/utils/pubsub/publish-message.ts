@@ -1,12 +1,12 @@
 import logger from '@frytg/logger'
 import { version } from '#config'
 import { stage } from '#env'
-import pubSubClient from './_client.ts'
+import { pubSubClient } from './_client.ts'
 
 // set local config
 const source = 'pubsub.publishMessage'
 
-export default async (topic: string, message: object, attributes: Record<PropertyKey, string>) => {
+export const publishPubSubMessage = async (topic: string, message: object, attributes: Record<PropertyKey, string>) => {
 	// initialize output
 	let output: string
 

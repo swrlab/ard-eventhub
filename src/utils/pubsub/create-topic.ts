@@ -2,9 +2,9 @@ import type { EventhubTopicDatastore, ITopic } from '#types'
 import { DateTime } from '@frytg/dates'
 import slug from 'slug'
 import { projectId, stage } from '#env'
-import publisherClient from './_publisherClient.ts'
+import { publisherClient } from './_publisher-client.ts'
 
-export default async (newTopic: EventhubTopicDatastore & { id: string }) => {
+export const pubsubCreateTopic = async (newTopic: EventhubTopicDatastore & { id: string }) => {
 	const topic: ITopic = {
 		name: `projects/${projectId}/topics/${newTopic.name}`,
 		labels: {

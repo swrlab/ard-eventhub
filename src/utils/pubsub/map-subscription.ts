@@ -13,12 +13,12 @@ import type {
 	Subscription,
 } from '#types'
 import { pubSubPrefix } from '#config'
-import datastoreLoad from '../datastore/load.ts'
-import convertId from './convertId.ts'
+import { datastoreLoad } from '../datastore/load.ts'
+import { convertId } from './convert-id.ts'
 
 type MappableSubscription = Subscription | (ISubscription & { metadata?: ISubscription })
 
-export default async (
+export const mapSubscription = async (
 	subscription: MappableSubscription
 ): Promise<{ limited: EventhubSubscriptionLimited; full: EventhubSubscriptionWithLabels }> => {
 	// remap vars to metadata object

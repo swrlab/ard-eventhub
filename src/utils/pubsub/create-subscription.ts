@@ -3,12 +3,12 @@ import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
 import slug from 'slug'
 import { projectId, stage } from '#env'
-import pubSubSubscriberClient from './_subscriberClient.ts'
-import mapSubscription from './mapSubscription.ts'
+import { pubSubSubscriberClient } from './_subscriber-client.ts'
+import { mapSubscription } from './map-subscription.ts'
 
 const source = 'utils/pubsub/createSubscription'
 
-export default async (subscription: EventhubSubscriptionDatastore) => {
+export const pubsubCreateSubscription = async (subscription: EventhubSubscriptionDatastore) => {
 	// map inputs for pubsub
 	const options: ISubscription = {
 		name: `projects/${projectId}/subscriptions/${subscription.name}`,

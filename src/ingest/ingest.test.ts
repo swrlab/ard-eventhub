@@ -5,7 +5,7 @@ import { test } from '@cross/test'
 import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { assert, assertExists, assertGreater, assertStrictEquals } from '@std/assert'
-import app from './index.ts'
+import { app } from './index.ts'
 
 /**
  * Log an error and exit the process when required test env is missing.

@@ -4,7 +4,7 @@ import { firebaseAPIKey } from '#env'
 
 const source = 'firebase.sendPasswordResetEmail'
 
-export default async (email: string): Promise<void> => {
+export const firebaseSendPasswordResetEmail = async (email: string): Promise<void> => {
 	// set firebase sign in url
 	const url = `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${firebaseAPIKey}`
 

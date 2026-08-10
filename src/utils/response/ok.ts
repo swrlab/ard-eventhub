@@ -8,7 +8,7 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status'
  * @param status - HTTP status (default 200)
  * @returns Hono response
  */
-export default (c: Context, data: object, status?: number) => {
+export const responseOk = (c: Context, data: object, status?: number) => {
 	try {
 		return c.json(
 			{

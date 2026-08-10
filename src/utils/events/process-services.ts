@@ -4,7 +4,7 @@ import logger from '@frytg/logger'
 import { createHashedId } from '@swrlab/utils/packages/ard/index.js'
 import { coreIdPrefixes } from '#config'
 import { getPublisherById } from '../ard-core.ts'
-import pubsubBuildId from '../pubsub/buildId.ts'
+import { pubsubBuildId } from '../pubsub/build-id.ts'
 
 const source = 'utils.events.processServices'
 const URN_PUBLISHER_PREFIX = coreIdPrefixes.Publisher
@@ -16,7 +16,7 @@ const URN_PUBLISHER_REGEX = /(?=urn:ard:publisher:[a-z0-9]{16})/g
  * @param req - Event request context (user + body)
  * @returns Updated service (possibly blocked)
  */
-export default async (service: EventhubService, req: EventRequestContext) => {
+export const processServices = async (service: EventhubService, req: EventRequestContext) => {
 	// fetch prefix from configured list
 	const type = service.type as keyof typeof coreIdPrefixes
 	let urnPrefix = coreIdPrefixes[type]

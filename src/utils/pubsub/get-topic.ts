@@ -1,7 +1,7 @@
 import { pubSubPrefix } from '#config'
-import pubSubClient from './_client.ts'
+import { pubSubClient } from './_client.ts'
 
-export default async (topicName: string) => {
+export const pubsubGetTopic = async (topicName: string) => {
 	// fetch topic list
 	const [topic] = await pubSubClient.topic(topicName).get()
 

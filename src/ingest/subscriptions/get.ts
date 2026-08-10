@@ -1,10 +1,10 @@
 import type { Context } from 'hono'
 import type { AppVariables, AuthUser, EventhubSubscriptionLimited } from '#types'
 import logger from '@frytg/logger'
-import getSubscription from '../../utils/pubsub/getSubscription.ts'
-import responseBadRequest from '../../utils/response/badRequest.ts'
-import responseInternalServerError from '../../utils/response/internalServerError.ts'
-import responseNotFound from '../../utils/response/notFound.ts'
+import { getSubscription } from '../../utils/pubsub/get-subscription.ts'
+import { badRequest as responseBadRequest } from '../../utils/response/bad-request.ts'
+import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
+import { responseNotFound } from '../../utils/response/not-found.ts'
 
 const source = 'ingest/subscriptions/get'
 
@@ -13,7 +13,7 @@ const source = 'ingest/subscriptions/get'
  * @param c - Hono context
  * @returns Limited subscription object
  */
-export default async (c: Context<{ Variables: AppVariables }>) => {
+export const subscriptionsGet = async (c: Context<{ Variables: AppVariables }>) => {
 	try {
 		// preset vars
 		const subscriptionName = c.req.param('subscriptionName')

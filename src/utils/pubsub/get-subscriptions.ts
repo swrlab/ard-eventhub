@@ -1,8 +1,8 @@
 import { pubSubPrefix } from '#config'
-import pubSubClient from './_client.ts'
-import mapSubscription from './mapSubscription.ts'
+import { pubSubClient } from './_client.ts'
+import { mapSubscription } from './map-subscription.ts'
 
-export default async () => {
+export const getSubscriptions = async () => {
 	// fetch subscriptions list
 	let [subscriptions] = await pubSubClient.getSubscriptions()
 

@@ -1,4 +1,4 @@
-import type { ZodError, ZodIssue } from 'zod'
+import { z } from 'zod'
 
 /** Single OpenAPI-validator-compatible error item. */
 export type OpenApiValidationErrorItem = {
@@ -31,7 +31,7 @@ const formatPath = (location: string, path: PropertyKey[]): string => {
  * @param issue - Zod issue
  * @returns True when the value was missing
  */
-const isMissingValue = (issue: ZodIssue): boolean => {
+const isMissingValue = (issue: z.core.$ZodIssue): boolean => {
 	const typed = issue as { input?: unknown }
 	if ('input' in typed) return typed.input === undefined
 	return issue.message.includes('undefined')
@@ -43,7 +43,7 @@ const isMissingValue = (issue: ZodIssue): boolean => {
  * @param location - Request location prefix
  * @returns OpenAPI-style error item
  */
-const mapIssue = (issue: ZodIssue, location: string): OpenApiValidationErrorItem => {
+const mapIssue = (issue: z.core.$ZodIssue, location: string): OpenApiValidationErrorItem => {
 	const path = formatPath(location, issue.path)
 	const lastSegment = issue.path.length > 0 ? String(issue.path[issue.path.length - 1]) : location
 
@@ -135,7 +135,7 @@ const buildTopLevelMessage = (issue: OpenApiValidationErrorItem, location: strin
  * @returns OpenAPI-validator-shaped error
  */
 export const zodToOpenApiError = (
-	error: ZodError,
+	error: z.ZodError,
 	location: 'body' | 'params' | 'headers' = 'body',
 	status = 400
 ): OpenApiValidationError => {

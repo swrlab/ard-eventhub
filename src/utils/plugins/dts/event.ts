@@ -35,7 +35,7 @@ const getUserForInstitution = (institutionId: string) => {
 	}
 }
 
-export default async (job: EventhubPluginMessage): Promise<void> => {
+export const dtsEvent = async (job: EventhubPluginMessage): Promise<void> => {
 	const { event, plugin, institutionId } = job
 
 	// only process now playing events
