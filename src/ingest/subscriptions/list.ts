@@ -1,6 +1,7 @@
 import type { Context } from 'hono'
-import type { AppVariables, AuthUser } from '#types'
+import type { AuthUser } from '#types'
 import logger from '@frytg/logger'
+import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 import { getSubscriptions } from '../../utils/pubsub/get-subscriptions.ts'
 import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
 
@@ -11,7 +12,7 @@ const source = 'ingest/subscriptions/list'
  * @param c - Hono context
  * @returns Subscription list
  */
-export const subscriptionsList = async (c: Context<{ Variables: AppVariables }>) => {
+export const subscriptionsList = async (c: Context) => {
 	try {
 		const user = c.get('user') as AuthUser | undefined
 		// check if user is present
@@ -20,10 +21,7 @@ export const subscriptionsList = async (c: Context<{ Variables: AppVariables }>)
 				level: 'notice',
 				message: 'user not found',
 				source,
-				data: {
-					...Object.fromEntries(c.req.raw.headers),
-					authorization: 'hidden',
-				},
+				data: getSafeHeaders(c.req.raw.headers),
 			})
 			return responseInternalServerError(c, new Error('User not found'))
 		}
@@ -35,10 +33,7 @@ export const subscriptionsList = async (c: Context<{ Variables: AppVariables }>)
 				level: 'notice',
 				message: `institutionId not found for user > ${user.email}`,
 				source,
-				data: {
-					...Object.fromEntries(c.req.raw.headers),
-					authorization: 'hidden',
-				},
+				data: getSafeHeaders(c.req.raw.headers),
 			})
 			return responseInternalServerError(c, new Error('User not found'))
 		}

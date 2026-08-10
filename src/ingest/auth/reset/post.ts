@@ -2,6 +2,7 @@ import type { Context } from 'hono'
 import type { AuthResetBody } from '../../../schemas/auth.ts'
 import logger from '@frytg/logger'
 import { firebaseSendPasswordResetEmail } from '../../../utils/firebase/send-password-reset-email.ts'
+import { getSafeHeaders } from '../../../utils/get-safe-headers.ts'
 import { badRequest as responseBadRequest } from '../../../utils/response/bad-request.ts'
 import { responseInternalServerError } from '../../../utils/response/internal-server-error.ts'
 import { responseOk } from '../../../utils/response/ok.ts'
@@ -40,7 +41,7 @@ export const authResetPost = async (c: Context) => {
 			message: 'failed to reset password',
 			source,
 			error,
-			data: { body, headers: Object.fromEntries(c.req.raw.headers) },
+			data: { body, headers: getSafeHeaders(c.req.raw.headers) },
 		})
 
 		return responseInternalServerError(c, error as Error)

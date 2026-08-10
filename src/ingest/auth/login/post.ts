@@ -4,6 +4,7 @@ import type { AuthLoginBody } from '../../../schemas/auth.ts'
 import { getNow } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { firebaseSignIn } from '../../../utils/firebase/sign-in-with-email-and-password.ts'
+import { getSafeHeaders } from '../../../utils/get-safe-headers.ts'
 import { badRequest as responseBadRequest } from '../../../utils/response/bad-request.ts'
 import { responseInternalServerError } from '../../../utils/response/internal-server-error.ts'
 import { responseOk } from '../../../utils/response/ok.ts'
@@ -53,7 +54,7 @@ export const authLoginPost = async (c: Context) => {
 			message: 'failed to sign in w/ email+password',
 			source,
 			error,
-			data: { headers: Object.fromEntries(c.req.raw.headers) },
+			data: { headers: getSafeHeaders(c.req.raw.headers) },
 		})
 
 		return responseInternalServerError(c, error as Error)

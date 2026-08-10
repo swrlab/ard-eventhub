@@ -2,6 +2,7 @@ import type { MiddlewareHandler } from 'hono'
 import logger from '@frytg/logger'
 import { OAuth2Client } from 'google-auth-library'
 import { serviceAccountEmail } from '#env'
+import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 
 const authClient = new OAuth2Client()
 
@@ -46,7 +47,7 @@ export const pubsubAuthVerify: MiddlewareHandler = async (c, next) => {
 			message: 'failed to verify user',
 			source,
 			error,
-			data: { ...Object.fromEntries(c.req.raw.headers), authorization: 'hidden' },
+			data: getSafeHeaders(c.req.raw.headers),
 		})
 
 		return c.body(null, 500)

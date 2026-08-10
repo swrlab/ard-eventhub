@@ -5,6 +5,7 @@ import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { getPublisherById } from '../ard-core.ts'
 import { datastoreSave } from '../datastore/save.ts'
+import { getSafeHeaders } from '../get-safe-headers.ts'
 import { pubsubCreateTopic } from '../pubsub/create-topic.ts'
 
 const source = 'utils.events.createNewTopic'
@@ -22,7 +23,7 @@ export const createNewTopic = async (service: EventhubService, req: EventRequest
 			level: 'notice',
 			message: 'user not found',
 			source,
-			data: { ...req.headers, authorization: 'hidden' },
+			data: getSafeHeaders(req.headers),
 		})
 		throw new Error('User not found')
 	}

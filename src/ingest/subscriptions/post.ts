@@ -1,5 +1,5 @@
 import type { Context } from 'hono'
-import type { AppVariables, ArdLivestream, AuthUser } from '#types'
+import type { ArdLivestream, AuthUser } from '#types'
 import type { EventhubSubscriptionDatastore, SubscriptionPost } from '../../schemas/subscriptions.ts'
 import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
@@ -14,6 +14,7 @@ import { pubsubGetTopic } from '../../utils/pubsub/get-topic.ts'
 import { badRequest as responseBadRequest } from '../../utils/response/bad-request.ts'
 import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
 import { responseNotFound } from '../../utils/response/not-found.ts'
+import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 import { getValidatedBody } from '../../utils/validation/zod-validate.ts'
 
 const source = 'ingest/subscriptions/post'
@@ -23,7 +24,7 @@ const source = 'ingest/subscriptions/post'
  * @param c - Hono context
  * @returns Created subscription
  */
-export const subscriptionsPost = async (c: Context<{ Variables: AppVariables }>) => {
+export const subscriptionsPost = async (c: Context) => {
 	const body = getValidatedBody<SubscriptionPost>(c)
 	try {
 		// fetch user from request
@@ -35,10 +36,7 @@ export const subscriptionsPost = async (c: Context<{ Variables: AppVariables }>)
 				level: 'notice',
 				message: 'user not found',
 				source,
-				data: {
-					...Object.fromEntries(c.req.raw.headers),
-					authorization: 'hidden',
-				},
+				data: getSafeHeaders(c.req.raw.headers),
 			})
 			return responseInternalServerError(c, new Error('User not found'))
 		}

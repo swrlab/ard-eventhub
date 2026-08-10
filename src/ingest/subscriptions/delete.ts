@@ -1,5 +1,5 @@
 import type { Context } from 'hono'
-import type { AppVariables, AuthUser } from '#types'
+import type { AuthUser } from '#types'
 import type { EventhubSubscriptionWithLabels } from '../../schemas/subscriptions.ts'
 import logger from '@frytg/logger'
 import { datastoreDelete } from '../../utils/datastore/delete.ts'
@@ -18,7 +18,7 @@ const source = 'ingest/subscriptions/delete'
  * @param c - Hono context
  * @returns Deletion confirmation
  */
-export const subscriptionsDelete = async (c: Context<{ Variables: AppVariables }>) => {
+export const subscriptionsDelete = async (c: Context) => {
 	try {
 		// preset vars
 		const subscriptionName = c.req.param('subscriptionName')

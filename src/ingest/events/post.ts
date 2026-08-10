@@ -1,5 +1,5 @@
 import type { Context } from 'hono'
-import type { AppVariables, AuthUser, EventRequestContext } from '#types'
+import type { AuthUser, EventRequestContext } from '#types'
 import type { EventhubPluginMessage, EventhubV1RadioPostBody } from '../../schemas/events.ts'
 import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
@@ -14,6 +14,7 @@ import { errorsExpiredStartTime } from '../../utils/response/errors/expired-star
 import { errorsMismatchingEventName } from '../../utils/response/errors/mismatching-event-name.ts'
 import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
 import { responseOk } from '../../utils/response/ok.ts'
+import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 import { getValidatedBody } from '../../utils/validation/zod-validate.ts'
 
 const source = 'ingest/events/post'
@@ -29,11 +30,8 @@ const MAX_OFFSET_IN_MINUTES = 15
  * @param body - Validated event body
  * @returns Event request context
  */
-const toEventRequestContext = (
-	c: Context<{ Variables: AppVariables }>,
-	body: Record<string, unknown>
-): EventRequestContext => ({
-	user: c.get('user'),
+const toEventRequestContext = (c: Context, body: Record<string, unknown>): EventRequestContext => ({
+	user: c.get('user') as AuthUser | undefined,
 	body,
 	headers: Object.fromEntries(c.req.raw.headers),
 })
@@ -43,7 +41,7 @@ const toEventRequestContext = (
  * @param c - Hono context
  * @returns Event publish response
  */
-export const eventsPost = async (c: Context<{ Variables: AppVariables }>) => {
+export const eventsPost = async (c: Context) => {
 	const body = getValidatedBody<Record<string, unknown>>(c)
 	try {
 		const user = c.get('user') as AuthUser | undefined
@@ -52,10 +50,7 @@ export const eventsPost = async (c: Context<{ Variables: AppVariables }>) => {
 				level: 'notice',
 				message: 'user not found',
 				source,
-				data: {
-					...Object.fromEntries(c.req.raw.headers),
-					authorization: 'hidden',
-				},
+				data: getSafeHeaders(c.req.raw.headers),
 			})
 			return responseInternalServerError(c, new Error('User not found'))
 		}
@@ -259,7 +254,7 @@ export const eventsPost = async (c: Context<{ Variables: AppVariables }>) => {
 			message: 'failed to publish event',
 			source,
 			error,
-			data: { body, headers: Object.fromEntries(c.req.raw.headers) },
+			data: { body, headers: getSafeHeaders(c.req.raw.headers) },
 		})
 
 		return responseInternalServerError(c, error as Error)

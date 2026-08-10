@@ -1,5 +1,5 @@
 import type { Context } from 'hono'
-import type { AppVariables, AuthUser } from '#types'
+import type { AuthUser } from '#types'
 import type { EventhubSubscriptionLimited } from '../../schemas/subscriptions.ts'
 import logger from '@frytg/logger'
 import { getSubscription } from '../../utils/pubsub/get-subscription.ts'
@@ -14,7 +14,7 @@ const source = 'ingest/subscriptions/get'
  * @param c - Hono context
  * @returns Limited subscription object
  */
-export const subscriptionsGet = async (c: Context<{ Variables: AppVariables }>) => {
+export const subscriptionsGet = async (c: Context) => {
 	try {
 		// preset vars
 		const subscriptionName = c.req.param('subscriptionName')

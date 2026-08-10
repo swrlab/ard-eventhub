@@ -10,7 +10,7 @@
 	"license": "EUPL-1.2",
 	"author": "SWR Audio Lab <lab@swr.de>",
 	"type": "module",
-	"main": "./src/ingest/index.ts",
+	"main": "./src/ingest/server.ts",
 	"imports": {
 		"#config": "./src/config.ts",
 		"#env": "./src/env.ts",
@@ -22,7 +22,7 @@
 		"docker:run": "docker run --env-file .env -p 8080:8080 --name ard-eventhub swr/ard-eventhub",
 		"docker:scan": "bun docker:build && docker scout quickview",
 		"format:check": "oxfmt --check",
-		"ingest": "bun run --hot ./src/ingest/index.ts"
+		"ingest": "bun run --hot ./src/ingest/server.ts"
 	},
 	"dependencies": {
 		"@frytg/check-required-env": "npm:@jsr/frytg__check-required-env",

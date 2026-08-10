@@ -1,5 +1,6 @@
 import type { Context } from 'hono'
 import logger from '@frytg/logger'
+import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 import { dtsEvent } from '../../utils/plugins/dts/event.ts'
 import { radioplayerEvent } from '../../utils/plugins/radioplayer/event.ts'
 
@@ -44,7 +45,7 @@ export const pubsubHandler = async (c: Context) => {
 				level: 'warning',
 				message: 'undetected PubSub message action',
 				source,
-				data: { messageId, job: jobRecord, headers: Object.fromEntries(c.req.raw.headers) },
+				data: { messageId, job: jobRecord, headers: getSafeHeaders(c.req.raw.headers) },
 			})
 		}
 
@@ -61,7 +62,7 @@ export const pubsubHandler = async (c: Context) => {
 			data: {
 				messageId,
 				body,
-				headers: Object.fromEntries(c.req.raw.headers),
+				headers: getSafeHeaders(c.req.raw.headers),
 			},
 		})
 

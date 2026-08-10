@@ -4,6 +4,7 @@ import type { AuthRefreshBody } from '../../../schemas/auth.ts'
 import { getNow } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { firebaseRefreshToken } from '../../../utils/firebase/refresh-token.ts'
+import { getSafeHeaders } from '../../../utils/get-safe-headers.ts'
 import { badRequest as responseBadRequest } from '../../../utils/response/bad-request.ts'
 import { responseInternalServerError } from '../../../utils/response/internal-server-error.ts'
 import { responseOk } from '../../../utils/response/ok.ts'
@@ -56,7 +57,7 @@ export const authRefreshPost = async (c: Context) => {
 			message: 'failed to refresh token',
 			source,
 			error,
-			data: { headers: Object.fromEntries(c.req.raw.headers) },
+			data: { headers: getSafeHeaders(c.req.raw.headers) },
 		})
 
 		return responseInternalServerError(c, error as Error)

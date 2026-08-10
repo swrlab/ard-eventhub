@@ -11,4 +11,4 @@ COPY . .
 EXPOSE 80
 
 # Run app
-CMD [ "bun", "./src/ingest/index.ts" ]
+CMD [ "bun", "./src/ingest/server.ts" ]
