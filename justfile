@@ -4,8 +4,6 @@ import 'just/encryption.just'
 _default:
 	just --list
 
-## ---------------------------------
-
 # install toolchain (mise) + package dependencies (aube) (pass --env ci if needed)
 [group('DEV-SETUP')]
 install *args:
@@ -25,7 +23,36 @@ update *args:
 # run the ingest tests locally with injected environment variables
 [group('LOCAL')]
 test:
-	just env "bun test --timeout 120000"
+	just env "just test-with-env"
+
+# run testing (envs need to be provided)
+test-with-env:
+	bun test --timeout 120000
+
+# run hurl integration tests against a host (default: local ingest)
+[group('LOCAL')]
+integration host="http://localhost:8080":
+	just env "just integration-with-env {{host}}"
+
+# run hurl suite (envs need to be provided: TEST_USER, TEST_USER_PW)
+integration-with-env host:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	: "${TEST_USER:?TEST_USER is required}"
+	: "${TEST_USER_PW:?TEST_USER_PW is required}"
+	mkdir -p integration/res
+	start="$(bun -e 'console.log(new Date().toISOString())')"
+	start_expired="$(bun -e 'console.log(new Date(Date.now() - 20 * 60 * 1000).toISOString())')"
+	start_invalid="${start}00"
+	hurl \
+		--variable host="{{host}}" \
+		--variable email="$TEST_USER" \
+		--variable password="$TEST_USER_PW" \
+		--variable start="$start" \
+		--variable start_expired="$start_expired" \
+		--variable start_invalid="$start_invalid" \
+		--test \
+		integration/ingest-api.hurl
 
 # generate a coreId for a given text
 [group('LOCAL')]
@@ -46,54 +73,20 @@ dev:
 [group('LOCAL')]
 lint:
 	bun x oxlint
+	bun x oxfmt --check
+	bun x knip
+	bun x tsc
 
-# lint and auto-fix
-[group('LOCAL')]
-lint-fix:
-	bun x oxlint --fix
-
-# format everything
+# fix and format everything
 [group('LOCAL')]
 format:
+	bun x oxlint --fix
 	bun x oxfmt
-
-# lint and format-check
-[group('LOCAL')]
-check:
-	bun x oxlint
-	bun x oxfmt --check
 
 # check dependency licenses
 [group('LOCAL')]
 license:
 	bun x license-compliance -f json -r detailed
-
-# typecheck
-[group('LOCAL')]
-typecheck:
-	bun x tsgo
-
-# find unused files, exports, and dependencies
-[group('LOCAL')]
-knip:
-	bun x knip
-
-# run check, typecheck, and knip in parallel
-[group('LOCAL')]
-checks:
-	#!/usr/bin/env bash
-	set -euo pipefail
-	just check &
-	p1=$!
-	just typecheck &
-	p2=$!
-	just knip &
-	p3=$!
-	status=0
-	wait "$p1" || status=1
-	wait "$p2" || status=1
-	wait "$p3" || status=1
-	exit "$status"
 
 # regenerate openapi.json from Zod schemas
 [group('LOCAL')]

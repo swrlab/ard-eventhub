@@ -31,3 +31,14 @@ just test
 # or CI-equivalent:
 SOPS_ENV_FILE=.env.ci.sops.yaml just env "bun test --timeout 120000"
 ```
+
+## Hurl integration tests
+
+[`integration/`](integration/) mirrors the HTTP flows in `src/ingest/server.test.ts` as [hurl](https://hurl.dev/) scripts (same idea as ard-vox). Requires a running ingest (`just dev`) or a remote host, plus `hurl` on `PATH` (`brew install hurl`).
+
+```sh
+just integration
+just integration "https://eventhub-ingest-test.ard.de"
+```
+
+See [`integration/README.md`](integration/README.md) for coverage and variables.
