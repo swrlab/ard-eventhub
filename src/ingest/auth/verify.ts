@@ -1,12 +1,28 @@
 import type { MiddlewareHandler } from 'hono'
 import type { AuthUser } from '#types'
 import logger from '@frytg/logger'
+import type { RequestError } from '../../schemas/common.ts'
 import { firebaseVerifyToken } from '../../utils/firebase/verify-token.ts'
 import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
+import { badRequest } from '../../utils/response/bad-request.ts'
+import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
 import { getConfigUser } from '../../utils/users/get-user.ts'
 
 const source = 'ingest/auth/middleware/verify'
 const ERROR_JSON = { message: 'Forbidden', errors: [], status: 403 }
+
+/** OpenAPI `errorUnauthorized` body for missing Bearer / x-authorization. */
+const unauthorizedError: RequestError = {
+	status: 401,
+	message: "request.headers should have required property 'Authorization'",
+	errors: [
+		{
+			path: '.headers.authorization',
+			message: "should have required property 'authorization'",
+			errorCode: 'required.openapi.validation',
+		},
+	],
+}
 
 /**
  * Verify Bearer / x-authorization JWT, load active user, and set `c.get('user')`.
@@ -21,14 +37,14 @@ export const authVerify: MiddlewareHandler = async (c, next) => {
 		// check existence of x-auth... header
 		if (!(authorization && regexp.test(authorization))) {
 			logger.notice({ message: 'user token missing', source, data: getSafeHeaders(c.req.raw.headers) })
-			return c.body(null, 401)
+			return badRequest(c, unauthorizedError)
 		}
 		// extract token
 		;[authorization] = authorization.match(regexp) || []
 
 		if (!authorization) {
 			logger.notice({ message: 'user token missing', source, data: getSafeHeaders(c.req.raw.headers) })
-			return c.body(null, 401)
+			return badRequest(c, unauthorizedError)
 		}
 
 		// validate JWT token with firebase
@@ -72,6 +88,6 @@ export const authVerify: MiddlewareHandler = async (c, next) => {
 	} catch (error) {
 		logger.error({ message: 'failed to verify user', source, error, data: getSafeHeaders(c.req.raw.headers) })
 
-		return c.body(null, 500)
+		return responseInternalServerError(c, error instanceof Error ? error : undefined)
 	}
 }

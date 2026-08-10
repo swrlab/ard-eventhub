@@ -87,6 +87,14 @@ output: res/03-events-missing-auth.json
 }
 ```
 HTTP 401
+[Asserts]
+jsonpath "$.message" isString
+jsonpath "$.errors" isCollection
+jsonpath "$.errors" count >= 1
+jsonpath "$.errors[0].path" isString
+jsonpath "$.errors[0].message" isString
+jsonpath "$.errors[0].errorCode" isString
+jsonpath "$.trace" exists
 
 # --- EVENTS: invalid auth → 403 ---
 POST {{host}}/events/de.ard.eventhub.v1.radio.track.playing

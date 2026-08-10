@@ -27,6 +27,18 @@ const openApiErrorItem = z
 	.meta({ id: 'openApiErrorItem' })
 
 /**
+ * Deprecated response `trace` field. Always null; kept for compatibility and may be removed later.
+ */
+export const responseTrace = z
+	.string()
+	.nullable()
+	.meta({
+		deprecated: true,
+		description: 'Always null. Deprecated; may be removed in a future release.',
+		examples: [null],
+	})
+
+/**
  * Error payload passed to HTTP response helpers.
  */
 export const requestError = z.object({
@@ -46,10 +58,7 @@ export const errorBadRequest = z
 	.object({
 		message: z.string().meta({ examples: ["request.body should have required property 'XYZ'"] }),
 		errors: z.array(openApiErrorItem).min(1),
-		trace: z
-			.string()
-			.nullable()
-			.meta({ examples: [null] }),
+		trace: responseTrace,
 	})
 	.meta({ id: 'errorBadRequest' })
 
@@ -60,10 +69,7 @@ export const errorUnauthorized = z
 	.object({
 		message: z.string().meta({ examples: ["request.headers should have required property 'Authorization'"] }),
 		errors: z.array(openApiErrorItem).min(1),
-		trace: z
-			.string()
-			.nullable()
-			.meta({ examples: [null] }),
+		trace: responseTrace,
 	})
 	.meta({ id: 'errorUnauthorized' })
 
@@ -74,10 +80,7 @@ export const errorForbidden = z
 	.object({
 		message: z.string().meta({ examples: ['user is missing required permission'] }),
 		errors: z.array(openApiErrorItem).min(1),
-		trace: z
-			.string()
-			.nullable()
-			.meta({ examples: [null] }),
+		trace: responseTrace,
 	})
 	.meta({ id: 'errorForbidden' })
 
@@ -87,10 +90,7 @@ export const errorForbidden = z
 export const errorNotFound = z
 	.object({
 		message: z.string().meta({ examples: ["object 'object.name' not found"] }),
-		trace: z
-			.string()
-			.nullable()
-			.meta({ examples: [null] }),
+		trace: responseTrace,
 	})
 	.meta({ id: 'errorNotFound' })
 
@@ -100,9 +100,6 @@ export const errorNotFound = z
 export const errorInternalServerError = z
 	.object({
 		message: z.string().meta({ examples: ['Internal Server Error'] }),
-		trace: z
-			.string()
-			.nullable()
-			.meta({ examples: [null] }),
+		trace: responseTrace,
 	})
 	.meta({ id: 'errorInternalServerError' })

@@ -107,11 +107,16 @@ function testFailedAuth(res: TestResponse) {
 }
 
 /**
- * Assert a missing auth response (401).
+ * Assert a missing auth response (401) with OpenAPI `errorUnauthorized` body.
  * @param res - App response
  */
 function testMissingAuth(res: TestResponse) {
-	assertStrictEquals(res.status, 401)
+	testResponse(res, 401)
+	assertExists(res.body.message)
+	assertExists(res.body.errors)
+	assertStrictEquals(Array.isArray(res.body.errors), true)
+	assertGreater(res.body.errors.length, 0)
+	assertStrictEquals(res.body.trace === null || typeof res.body.trace === 'string', true)
 }
 
 /*
