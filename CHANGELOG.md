@@ -5,7 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.0.0-beta.1] - 2026-08-10
+
+### Added
+
+- feat: add integration API testing with `hurl`
+- feat: use mise for dev setup
+
+### Changed
+
+- **BREAKING:** refactor!: remove radiotext event type
+- **BREAKING:** refactor!: drop `x-ard-eventhub-uid` header
+- refactor: migrate express to hono; use zod for validation
+- refactor: lookup users in file not database
+- refactor: replace `bun:test` for more universal testing
+- feat: add `mise` for local and CI setup
+
+### Fixed
+
+- **BREAKING:** fix!: adding explicit details about usage of `length` field
+- fix: deprecate `trace`
+- fix: post with missing header returns correct 401 as documented
+- fix: more strict publisher validation; add allowlist for non-core livestreams
+
+## [2.4.0] - 2026-08-07
 
 - docs: migrate documentation site from docsify to Blume (GitHub Pages static build)
 - refactor: replace in-service Swagger UI with redirect to docs API reference

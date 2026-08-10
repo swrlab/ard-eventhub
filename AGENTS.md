@@ -20,7 +20,7 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 
 Docs deploy via [`.github/workflows/docs-push.yml`](.github/workflows/docs-push.yml) to GitHub Pages. The repo Pages source must be set to **GitHub Actions** (not “Deploy from a branch”). `cookie@2` is pinned as a devDependency so Astro’s prerender can resolve ESM exports while Express keeps nested `cookie@0.7`.
 
-Regenerate OpenAPI for docs with `just openapi` (Zod schemas → `openapi.json` via `z.toJSONSchema`).
+Regenerate OpenAPI for docs with `just openapi` (Zod schemas → `openapi.json` via `z.toJSONSchema`). **Always run `just openapi` after changing `package.json` version** (or any other field that feeds the OpenAPI `info` block) so `openapi.json` stays in sync.
 
 ## Project Knowledge
 
@@ -64,7 +64,7 @@ Follow SWR Audio Lab engineering principles:
 
 ## Boundaries
 
-- ✅ **Always do:** Write tests for new code, run linter before committing, use English for code/docs, follow existing patterns
+- ✅ **Always do:** Write tests for new code, run linter before committing, use English for code/docs, follow existing patterns, run `just openapi` after changing `package.json` version (keeps `openapi.json` in sync)
 - ⚠️ **Ask first:** Modifying Google Cloud configuration, changing authentication flows, updating dependencies, major architectural changes
 - 🚫 **Never do:** Commit unencrypted secrets or API keys (use Secret Manager), modify `node_modules/` or `bun.lock`, remove failing tests without fixing them, use German in code/comments
 
