@@ -52,4 +52,3 @@ export const pubsubAuthVerify: MiddlewareHandler = async (c, next) => {
 		return c.body(null, 500)
 	}
 }
-

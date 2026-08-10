@@ -51,8 +51,15 @@ export const subscriptionResponse = z
 			examples: ['projects/ard-eventhub/subscriptions/subscription-name'],
 		}),
 		topic: subscriptionTopic,
-		ackDeadlineSeconds: z.number().int().meta({ examples: [20] }),
-		retryPolicy: z.string().nullable().optional().meta({ examples: [null] }),
+		ackDeadlineSeconds: z
+			.number()
+			.int()
+			.meta({ examples: [20] }),
+		retryPolicy: z
+			.string()
+			.nullable()
+			.optional()
+			.meta({ examples: [null] }),
 		serviceAccount: z.string().meta({ examples: ['name-of-service-account'] }),
 		url: z.string().meta({
 			description: 'Publicly accessible URL that should receive the events',
@@ -80,7 +87,10 @@ export const subscriptionsList = z.array(subscriptionResponse).meta({ id: 'subsc
 export const subscriptionDeleted = z
 	.object({
 		valid: z.boolean().meta({ examples: [true] }),
-		trace: z.string().nullable().meta({ examples: [null] }),
+		trace: z
+			.string()
+			.nullable()
+			.meta({ examples: [null] }),
 	})
 	.meta({ id: 'subscriptionDeleted' })
 

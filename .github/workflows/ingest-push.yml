@@ -44,7 +44,7 @@ jobs:
           create_credentials_file: true
 
       - name: 📚 Lint Code
-        run: bun lint
+        run: bun x oxlint
 
       - name: 🧪 Run Ingest Tests
         env:
@@ -59,7 +59,7 @@ jobs:
           TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
           ARD_FEED_URL: ${{ secrets.ARD_FEED_URL }}
           RADIOPLAYER_API_KEYS: e30=
-        run: bun run test
+        run: bun test --timeout 120000
 
   docker:
     runs-on: ubuntu-latest

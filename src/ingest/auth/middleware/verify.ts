@@ -115,4 +115,3 @@ export const authVerify: MiddlewareHandler<{ Variables: AppVariables }> = async 
 		return c.body(null, 500)
 	}
 }
-

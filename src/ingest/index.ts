@@ -45,4 +45,3 @@ if (import.meta.main) {
 if (isLocal) {
 	console.log(`${serviceName} (v${version}) is running at: ${serviceUrl}`)
 }
-

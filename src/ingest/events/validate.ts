@@ -35,4 +35,3 @@ export const validateEventBody: MiddlewareHandler = async (c, next) => {
 	await next()
 	return
 }
-
