@@ -45,13 +45,13 @@ export const subscriptionsPost = async (c: Context) => {
 
 		// check existence of user institution
 		const institutionExists = ardFeed?.items?.some((entry: ArdLivestream) => {
-			return user.institutionId === entry.publisher.institution.id
+			return user.institution.id === entry.publisher.institution.id
 		})
 
 		// check if user has institution set
 		if (!institutionExists) {
-			const institutionId = user.institution?.id
-			const institutionName = user.institution?.name
+			const institutionId = user.institution.id
+			const institutionName = user.institution.name
 
 			// log action
 			logger.warning({
@@ -146,7 +146,7 @@ export const subscriptionsPost = async (c: Context) => {
 			topic: pubsubBuildId(body.topic),
 
 			creator: user.email,
-			institutionId: user.institutionId as string,
+			institutionId: user.institution.id,
 			created: DateTime.now().toISO(),
 		}
 

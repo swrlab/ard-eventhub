@@ -21,22 +21,11 @@ export const subscriptionsList = async (c: Context) => {
 			return responseInternalServerError(c, new Error('User not found'))
 		}
 
-		// check if a user has an institutionId
-		const institutionId = user.institutionId
-		if (!institutionId) {
-			logger.notice({
-				message: `institutionId not found > ${user.email}`,
-				source,
-				data: getSafeHeaders(c.req.raw.headers),
-			})
-			return responseInternalServerError(c, new Error('User not found'))
-		}
-
 		// load all subscriptions
 		let subscriptions = await getSubscriptions()
 
 		// verify if user is allowed to list subscriptions (same institution)
-		subscriptions = subscriptions.filter((subscription) => subscription?.institutionId === institutionId)
+		subscriptions = subscriptions.filter((subscription) => subscription?.institutionId === user.institution.id)
 
 		return c.json(subscriptions, 200)
 	} catch (error) {

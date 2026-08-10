@@ -6,11 +6,10 @@ export type ISubscription = google.pubsub.v1.ISubscription
 export type ITopic = google.pubsub.v1.ITopic
 
 /**
- * Authenticated Firebase user with Eventhub institution fields attached at runtime.
+ * Authenticated Firebase user with Eventhub institution attached after allow-list lookup.
  */
 export type AuthUser = DecodedIdToken & {
-	institutionId?: string
-	institution?: {
+	institution: {
 		id: string
 		name: string
 	}

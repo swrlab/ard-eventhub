@@ -50,8 +50,8 @@ export const subscriptionsGet = async (c: Context) => {
 		}
 
 		// verify if user is allowed to get subscription (same institution)
-		if (limitedSubscription.institutionId !== user.institutionId) {
-			const userInstitution = user.institutionId
+		if (limitedSubscription.institutionId !== user.institution.id) {
+			const userInstitution = user.institution.id
 
 			logger.warning({
 				message: 'Mismatch of user and subscription institution',

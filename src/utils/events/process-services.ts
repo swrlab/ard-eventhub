@@ -67,7 +67,7 @@ export const processServices = async (service: EventhubService, req: EventReques
 	}
 
 	// check allowed institutions for current user
-	if (!req.user || req.user.institutionId !== publisher?.institution.id) {
+	if (!req.user || req.user.institution.id !== publisher?.institution.id) {
 		// set blocked flag to be filtered out
 		service.blocked = 'User unauthorized for service'
 

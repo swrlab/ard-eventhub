@@ -108,7 +108,7 @@ export const eventsPost = async (c: Context) => {
 		message.services = await Promise.all(message.services.map((service) => processServices(service, req)))
 
 		// generate unique Id from the institution id and a random ULID
-		message.id = `${user.institutionId}-${ulid()}`
+		message.id = `${user.institution.id}-${ulid()}`
 
 		// collect unknown topics from returning errors
 		const newServices = []
@@ -216,7 +216,7 @@ export const eventsPost = async (c: Context) => {
 						action: `plugins.${plugin.type}.event`,
 						event: { ...message, services: nonBlockedServices },
 						plugin,
-						institutionId: user.institutionId as string,
+						institutionId: user.institution?.id as string,
 					}
 
 					// try sending message

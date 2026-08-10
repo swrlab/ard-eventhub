@@ -1,6 +1,6 @@
 import type { ConfigUser } from '../../schemas/config.ts'
-import { usersConfig } from '../../schemas/config.ts'
 import usersJson from '../../config/users.json' with { type: 'json' }
+import { usersConfig } from '../../schemas/config.ts'
 
 const parsed = usersConfig.parse(usersJson)
 

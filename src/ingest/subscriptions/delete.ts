@@ -78,8 +78,8 @@ export const subscriptionsDelete = async (c: Context) => {
 		}
 
 		// check subscription permission by user institution
-		if (fullSubscription.institutionId !== user.institutionId) {
-			const userInstitution = user.institutionId
+		if (fullSubscription.institutionId !== user.institution.id) {
+			const userInstitution = user.institution.id
 
 			logger.warning({
 				message: 'Mismatch of user and subscription institution',

@@ -40,17 +40,16 @@ export const authVerify: MiddlewareHandler = async (c, next) => {
 		}
 
 		// validate JWT token with firebase
-		let user: AuthUser
+		let tokenUser: Awaited<ReturnType<typeof firebaseVerifyToken>>
 		try {
-			user = await firebaseVerifyToken(authorization)
-			c.set('user', user)
-			c.header('x-ard-eventhub-uid', user.uid)
+			tokenUser = await firebaseVerifyToken(authorization)
+			c.header('x-ard-eventhub-uid', tokenUser.uid)
 		} catch (error) {
 			logger.notice({ message: 'user token invalid', source, error, data: getSafeHeaders(c.req.raw.headers) })
 			return c.json(ERROR_JSON, 403)
 		}
 
-		if (!user.email) {
+		if (!tokenUser.email) {
 			logger.notice({
 				message: 'user email missing',
 				source,
@@ -60,22 +59,23 @@ export const authVerify: MiddlewareHandler = async (c, next) => {
 		}
 
 		// lookup user in local allow-list (`src/config/users.json`)
-		const configUser = getConfigUser(user.email)
+		const configUser = getConfigUser(tokenUser.email)
 
 		if (!configUser) {
 			logger.notice({
-				message: `user not found or not active > ${user.email}`,
+				message: `user not found or not active > ${tokenUser.email}`,
 				source,
 				data: getSafeHeaders(c.req.raw.headers),
 			})
 			return c.json(ERROR_JSON, 403)
 		}
 
-		// add institution details from allow-list to request profile
-		user.institutionId = configUser.institutionId
-		user.institution = {
-			id: configUser.institutionId,
-			name: configUser.institution,
+		const user: AuthUser = {
+			...tokenUser,
+			institution: {
+				id: configUser.institutionId,
+				name: configUser.institution,
+			},
 		}
 		c.set('user', user)
 

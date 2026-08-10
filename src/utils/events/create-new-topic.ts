@@ -60,7 +60,7 @@ export const createNewTopic = async (service: EventhubService, req: EventRequest
 		name: service.topic.name,
 
 		institution: {
-			id: req.user.institutionId as string,
+			id: req.user.institution.id,
 			title: publisher.institution.title,
 		},
 
