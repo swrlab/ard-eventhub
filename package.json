@@ -45,7 +45,7 @@
 		"@frytg/dates": "npm:@jsr/frytg__dates",
 		"@frytg/logger": "npm:@jsr/frytg__logger",
 		"@google-cloud/datastore": "^10.1.0",
-		"@google-cloud/pubsub": "^5.3.0",
+		"@google-cloud/pubsub": "^6.0.0",
 		"@swrlab/utils": "^2.2.0",
 		"compression": "^1.8.1",
 		"dd-trace": "^5.102.0",
