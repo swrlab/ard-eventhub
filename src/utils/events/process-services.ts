@@ -1,4 +1,5 @@
-import type { EventhubService, EventRequestContext } from '#types'
+import type { EventRequestContext } from '#types'
+import type { EventhubService } from '../../schemas/events.ts'
 import logger from '@frytg/logger'
 // @ts-expect-error - The package does not yet have types.
 import { createHashedId } from '@swrlab/utils/packages/ard/index.js'

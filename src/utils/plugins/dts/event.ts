@@ -1,10 +1,5 @@
-import type {
-	EventhubPluginMessage,
-	EventhubService,
-	LiveRadioEvent,
-	LiveradioCredential,
-	PermittedExcludedFields,
-} from '#types'
+import type { LiveRadioEvent, LiveradioCredential, PermittedExcludedFields } from '../../../schemas/config.ts'
+import type { EventhubPluginMessage, EventhubService } from '../../../schemas/events.ts'
 import logger from '@frytg/logger'
 import { defaultHeaders, version } from '#config'
 import { dtsKeys, serviceName, stage } from '#env'

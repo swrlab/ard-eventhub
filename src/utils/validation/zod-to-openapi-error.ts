@@ -1,14 +1,14 @@
 import { z } from 'zod'
 
 /** Single OpenAPI-validator-compatible error item. */
-export type OpenApiValidationErrorItem = {
+type OpenApiValidationErrorItem = {
 	path: string
 	message: string
 	errorCode: string
 }
 
 /** OpenAPI-validator-compatible validation error payload. */
-export type OpenApiValidationError = {
+type OpenApiValidationError = {
 	status: number
 	message: string
 	errors: OpenApiValidationErrorItem[]

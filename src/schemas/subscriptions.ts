@@ -7,6 +7,12 @@ import { z } from 'zod'
  */
 const requiredEnum = <const T extends [string, ...string[]]>(values: T) => z.string().pipe(z.enum(values))
 
+const subscriptionTopic = z.object({
+	id: z.string().meta({ examples: ['urn:ard:permanent-livestream:topic-id'] }),
+	name: z.string().meta({ examples: ['de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3Atopic-id'] }),
+	path: z.string().meta({ examples: ['projects/ard-eventhub/topics/topic-name'] }),
+})
+
 /**
  * POST /subscriptions request body.
  */
@@ -30,7 +36,7 @@ export const subscriptionPost = z
 	.meta({ id: 'subscriptionPost' })
 
 /**
- * Subscription response object.
+ * Subscription response object (OpenAPI docs).
  */
 export const subscriptionResponse = z
 	.object({
@@ -44,20 +50,9 @@ export const subscriptionResponse = z
 			description: 'Path of subscription in project',
 			examples: ['projects/ard-eventhub/subscriptions/subscription-name'],
 		}),
-		topic: z.object({
-			id: z.string().meta({ examples: ['urn:ard:permanent-livestream:topic-id'] }),
-			name: z.string().meta({ examples: ['de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3Atopic-id'] }),
-			path: z.string().meta({ examples: ['projects/ard-eventhub/topics/topic-name'] }),
-		}),
-		ackDeadlineSeconds: z
-			.number()
-			.int()
-			.meta({ examples: [20] }),
-		retryPolicy: z
-			.string()
-			.nullable()
-			.optional()
-			.meta({ examples: [null] }),
+		topic: subscriptionTopic,
+		ackDeadlineSeconds: z.number().int().meta({ examples: [20] }),
+		retryPolicy: z.string().nullable().optional().meta({ examples: [null] }),
 		serviceAccount: z.string().meta({ examples: ['name-of-service-account'] }),
 		url: z.string().meta({
 			description: 'Publicly accessible URL that should receive the events',
@@ -85,11 +80,86 @@ export const subscriptionsList = z.array(subscriptionResponse).meta({ id: 'subsc
 export const subscriptionDeleted = z
 	.object({
 		valid: z.boolean().meta({ examples: [true] }),
-		trace: z
-			.string()
-			.nullable()
-			.meta({ examples: [null] }),
+		trace: z.string().nullable().meta({ examples: [null] }),
 	})
 	.meta({ id: 'subscriptionDeleted' })
 
+/**
+ * Subscription record stored in Datastore.
+ */
+export const subscriptionDatastore = z
+	.object({
+		id: z.union([z.string(), z.number()]).optional(),
+		name: z.string(),
+		type: z.string(),
+		method: z.string(),
+		url: z.string(),
+		contact: z.string(),
+		topic: z.string(),
+		creator: z.string(),
+		institutionId: z.string(),
+		created: z.string(),
+	})
+	.meta({ id: 'subscriptionDatastore' })
+
+/**
+ * Limited subscription view returned by the API runtime (defensive / partial fields).
+ */
+export const subscriptionLimited = z
+	.object({
+		type: z.string(),
+		method: z.string(),
+		name: z.string().optional(),
+		path: z.string().nullable().optional(),
+		topic: subscriptionTopic,
+		ackDeadlineSeconds: z.number().nullable().optional(),
+		retryPolicy: z.record(z.string(), z.any()).nullable().optional(),
+		serviceAccount: z.string().nullable().optional(),
+		url: z.string().nullable().optional(),
+		contact: z.string().optional(),
+		institutionId: z.string().optional(),
+	})
+	.meta({ id: 'subscriptionLimited' })
+
+/**
+ * Limited subscription plus Pub/Sub labels (used for delete / ownership checks).
+ */
+export const subscriptionWithLabels = subscriptionLimited
+	.extend({
+		labels: z
+			.object({
+				id: z.string(),
+				stage: z.string(),
+				'creator-slug': z.string(),
+				created: z.string(),
+			})
+			.optional(),
+	})
+	.meta({ id: 'subscriptionWithLabels' })
+
+/**
+ * Topic record stored in Datastore when a new service topic is created.
+ */
+export const topicDatastore = z
+	.object({
+		created: z.string(),
+		creator: z.string(),
+		coreId: z.string(),
+		externalId: z.string(),
+		name: z.string(),
+		institution: z.object({
+			id: z.string(),
+			title: z.string(),
+		}),
+		publisher: z.object({
+			id: z.string(),
+			title: z.string(),
+		}),
+	})
+	.meta({ id: 'topicDatastore' })
+
 export type SubscriptionPost = z.infer<typeof subscriptionPost>
+export type EventhubSubscriptionDatastore = z.infer<typeof subscriptionDatastore>
+export type EventhubSubscriptionLimited = z.infer<typeof subscriptionLimited>
+export type EventhubSubscriptionWithLabels = z.infer<typeof subscriptionWithLabels>
+export type EventhubTopicDatastore = z.infer<typeof topicDatastore>

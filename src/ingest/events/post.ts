@@ -1,11 +1,6 @@
 import type { Context } from 'hono'
-import type {
-	AppVariables,
-	AuthUser,
-	EventhubPluginMessage,
-	EventhubV1RadioPostBody,
-	EventRequestContext,
-} from '#types'
+import type { AppVariables, AuthUser, EventRequestContext } from '#types'
+import type { EventhubPluginMessage, EventhubV1RadioPostBody } from '../../schemas/events.ts'
 import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { ulid } from 'ulid'

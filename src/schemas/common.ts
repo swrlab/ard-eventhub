@@ -16,7 +16,7 @@ export const iso8601Timestamp = z
 	})
 
 /**
- * Shared OpenAPI error item shape used in docs.
+ * Shared OpenAPI error item shape used in docs and request errors.
  */
 const openApiErrorItem = z
 	.object({
@@ -25,6 +25,19 @@ const openApiErrorItem = z
 		errorCode: z.string(),
 	})
 	.meta({ id: 'openApiErrorItem' })
+
+/**
+ * Error payload passed to HTTP response helpers.
+ */
+export const requestError = z.object({
+	status: z.number().optional(),
+	message: z.string(),
+	errors: z.union([z.string(), z.array(openApiErrorItem)]).optional(),
+	data: z.record(z.string(), z.string()).optional(),
+	trace: z.string().optional(),
+})
+
+export type RequestError = z.infer<typeof requestError>
 
 /**
  * Bad request error response schema for OpenAPI docs.

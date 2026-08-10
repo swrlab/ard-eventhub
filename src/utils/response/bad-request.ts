@@ -1,6 +1,6 @@
 import type { Context } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
-import type { RequestError } from '#types'
+import type { RequestError } from '../../schemas/common.ts'
 
 /**
  * Send a bad-request JSON response with optional error details and cloud trace.

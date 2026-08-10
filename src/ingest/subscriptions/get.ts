@@ -1,5 +1,6 @@
 import type { Context } from 'hono'
-import type { AppVariables, AuthUser, EventhubSubscriptionLimited } from '#types'
+import type { AppVariables, AuthUser } from '#types'
+import type { EventhubSubscriptionLimited } from '../../schemas/subscriptions.ts'
 import logger from '@frytg/logger'
 import { getSubscription } from '../../utils/pubsub/get-subscription.ts'
 import { badRequest as responseBadRequest } from '../../utils/response/bad-request.ts'

@@ -1,9 +1,3 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
 // load api feed (needed to get the file initialized)
 
 import type { ArdLivestream, ArdPublisher } from '#types'

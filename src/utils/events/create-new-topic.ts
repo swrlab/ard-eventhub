@@ -1,4 +1,6 @@
-import type { EventhubService, EventhubTopicDatastore, EventRequestContext } from '#types'
+import type { EventRequestContext } from '#types'
+import type { EventhubService } from '../../schemas/events.ts'
+import type { EventhubTopicDatastore } from '../../schemas/subscriptions.ts'
 import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { getPublisherById } from '../ard-core.ts'

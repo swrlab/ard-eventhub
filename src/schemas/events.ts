@@ -119,7 +119,7 @@ const mediaItem = z
 	.meta({ id: 'mediaItem' })
 
 /**
- * Optional third-party plugin configuration on an event.
+ * Optional third-party plugin configuration on an event (OpenAPI / request body).
  */
 const eventPlugin = z
 	.object({
@@ -130,6 +130,53 @@ const eventPlugin = z
 	})
 	.passthrough()
 	.meta({ id: 'eventPlugin' })
+
+/**
+ * Topic metadata attached to a service at runtime after ingest processing.
+ */
+const eventhubTopic = z.object({
+	id: z.string(),
+	name: z.string(),
+	status: z.string().optional(),
+	messageId: z.string().nullable().optional(),
+})
+
+/**
+ * Service entry after ingest enrichment (blocked flag + topic).
+ * Uses plain strings so Pub/Sub / Datastore paths stay assignable.
+ */
+export const eventhubService = z
+	.object({
+		type: z.string(),
+		externalId: z.string(),
+		publisherId: z.string(),
+		id: z.string().optional(),
+		blocked: z.string().optional(),
+		topic: eventhubTopic.optional(),
+	})
+	.meta({ id: 'eventhubService' })
+
+/**
+ * Runtime plugin configuration used by DTS / Radioplayer integrations.
+ */
+export const eventhubPlugin = z
+	.object({
+		type: z.string(),
+		isDeactivated: z.boolean(),
+		note: z.string().optional(),
+		delay: z.number().optional(),
+		album: z.string().optional(),
+		composer: z.string().optional(),
+		program: z.string().optional(),
+		subject: z.string().optional(),
+		webUrl: z.string().optional(),
+		preferArtistMedia: z.boolean().optional(),
+		enableThumbs: z.boolean().optional(),
+		email: z.string().optional(),
+		excludeFields: z.array(z.string()).optional(),
+	})
+	.passthrough()
+	.meta({ id: 'eventhubPlugin' })
 
 /**
  * POST /events/de.ard.eventhub.v1.radio.track.* request body.
@@ -308,5 +355,92 @@ export const eventV1PostRadioTextResBody = z
 	})
 	.meta({ id: 'eventV1PostRadioTextResBody' })
 
-export type EventV1PostBody = z.infer<typeof eventV1PostBody>
-export type EventV1PostRadioTextBody = z.infer<typeof eventV1PostRadioTextBody>
+/**
+ * Contributor shape on enriched runtime events (looser than the HTTP contract).
+ */
+const eventhubContributor = z.object({
+	name: z.string(),
+	role: contributorRole.nullable(),
+	normDb: z
+		.object({
+			type: z.string(),
+			id: z.string(),
+		})
+		.nullable(),
+	isni: z.string().nullable(),
+	url: z.string().nullable(),
+})
+
+/**
+ * Reference shape on enriched runtime events (looser than the HTTP contract).
+ */
+const eventhubReference = z.object({
+	type: z.string(),
+	externalId: z.string(),
+	alternateIds: z.array(z.string()),
+	id: z.string().optional(),
+	title: z.string().optional(),
+	url: z.string().optional(),
+})
+
+/**
+ * Media shape on enriched runtime events.
+ */
+const eventhubMedia = z.object({
+	type: z.string(),
+	url: z.string(),
+	templateUrl: z.string().nullable(),
+	description: z.string(),
+	attribution: z.string().nullable(),
+	isFallback: z.boolean().optional(),
+})
+
+/**
+ * Internal event message after ingest enrichment (name/creator/id/plugins/services).
+ * Kept intentionally looser than the HTTP schema so plugins can carry runtime fields.
+ */
+export const eventhubV1RadioPostBody = z
+	.object({
+		type: z.string(),
+		start: z.string(),
+		title: z.string(),
+		services: z.array(eventhubService),
+		playlistItemId: z.string(),
+		event: z.string(),
+		length: z.number().nullable(),
+		artist: z.string().nullable(),
+		contributors: z.array(eventhubContributor),
+		references: z.array(eventhubReference),
+		hfdbIds: z.array(z.string().nullable()),
+		externalId: z.string(),
+		isrc: z.string().nullable(),
+		upc: z.string().nullable(),
+		mpn: z.string().nullable(),
+		media: z.array(eventhubMedia),
+		plugins: z.array(eventhubPlugin),
+		validUntil: z.string().optional(),
+		text: z.string().optional(),
+		name: z.string(),
+		creator: z.string(),
+		created: z.string(),
+		id: z.string(),
+	})
+	.passthrough()
+	.meta({ id: 'eventhubV1RadioPostBody' })
+
+/**
+ * Pub/Sub job payload for plugin handlers.
+ */
+export const eventhubPluginMessage = z
+	.object({
+		action: z.string(),
+		event: eventhubV1RadioPostBody,
+		plugin: eventhubPlugin,
+		institutionId: z.string(),
+	})
+	.meta({ id: 'eventhubPluginMessage' })
+
+export type EventhubService = z.infer<typeof eventhubService>
+export type EventhubPlugin = z.infer<typeof eventhubPlugin>
+export type EventhubV1RadioPostBody = z.infer<typeof eventhubV1RadioPostBody>
+export type EventhubPluginMessage = z.infer<typeof eventhubPluginMessage>

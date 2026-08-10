@@ -1,4 +1,4 @@
-import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '#types'
+import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '../../../schemas/events.ts'
 import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { defaultHeaders } from '#config'

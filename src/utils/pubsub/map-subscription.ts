@@ -1,17 +1,10 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
+import type { Subscription } from '@google-cloud/pubsub'
+import type { ISubscription } from '#types'
 import type {
 	EventhubSubscriptionDatastore,
 	EventhubSubscriptionLimited,
 	EventhubSubscriptionWithLabels,
-	ISubscription,
-	Subscription,
-} from '#types'
+} from '../../schemas/subscriptions.ts'
 import { pubSubPrefix } from '#config'
 import { datastoreLoad } from '../datastore/load.ts'
 import { convertId } from './convert-id.ts'

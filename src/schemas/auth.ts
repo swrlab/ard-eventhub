@@ -68,4 +68,3 @@ export const authResponse = z
 export type AuthLoginBody = z.infer<typeof authLoginBody>
 export type AuthRefreshBody = z.infer<typeof authRefreshBody>
 export type AuthResetBody = z.infer<typeof authResetBody>
-export type AuthResponse = z.infer<typeof authResponse>

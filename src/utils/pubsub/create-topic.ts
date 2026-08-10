@@ -1,4 +1,5 @@
-import type { EventhubTopicDatastore, ITopic } from '#types'
+import type { ITopic } from '#types'
+import type { EventhubTopicDatastore } from '../../schemas/subscriptions.ts'
 import { DateTime } from '@frytg/dates'
 import slug from 'slug'
 import { projectId, stage } from '#env'

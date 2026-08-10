@@ -1,9 +1,5 @@
 import type { google } from '@google-cloud/pubsub/build/protos/protos.js'
 import type { DecodedIdToken } from 'firebase-admin/auth'
-import type { LoginTicket } from 'google-auth-library'
-
-export type { Subscription } from '@google-cloud/pubsub'
-export type { DecodedIdToken }
 
 // Google PubSub
 export type ISubscription = google.pubsub.v1.ISubscription
@@ -21,7 +17,7 @@ export type AuthUser = DecodedIdToken & {
 }
 
 /**
- * Minimal request context passed to event helpers (replaces Express UserTokenRequest).
+ * Minimal request context passed to event helpers.
  */
 export type EventRequestContext = {
 	user?: AuthUser | undefined
@@ -32,11 +28,4 @@ export type EventRequestContext = {
 		[key: string]: unknown
 	}
 	headers: Record<string, string | undefined>
-}
-
-/**
- * Pub/Sub push auth context holding a verified Google LoginTicket.
- */
-export type PubSubAuthContext = {
-	user?: LoginTicket
 }

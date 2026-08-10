@@ -1,28 +1,20 @@
-import type { Context, MiddlewareHandler, ValidationTargets } from 'hono'
+import type { Context, MiddlewareHandler } from 'hono'
 import type { ZodType } from 'zod'
 import { badRequest as responseBadRequest } from '../response/bad-request.ts'
 import { sanitizeValidationError, zodToOpenApiError } from './zod-to-openapi-error.ts'
 
-type Target = keyof Pick<ValidationTargets, 'json' | 'param'>
-
 /**
- * Create Hono middleware that validates a request target with Zod.
+ * Create Hono middleware that validates a JSON request body with Zod.
  * On failure, responds with the legacy OpenAPI-validator error envelope.
- * @param target - Validation target (`json` body or `param`)
  * @param schema - Zod schema to apply
  * @returns Hono middleware
  */
-export const zodValidate = <T extends ZodType>(target: Target, schema: T): MiddlewareHandler => {
+export const zodValidate = <T extends ZodType>(schema: T): MiddlewareHandler => {
 	return async (c, next) => {
-		const location = target === 'json' ? 'body' : 'params'
 		let value: unknown
 
 		try {
-			if (target === 'json') {
-				value = await c.req.json()
-			} else {
-				value = c.req.param()
-			}
+			value = await c.req.json()
 		} catch {
 			const sanitized = sanitizeValidationError({
 				status: 400,
@@ -34,17 +26,12 @@ export const zodValidate = <T extends ZodType>(target: Target, schema: T): Middl
 
 		const result = schema.safeParse(value)
 		if (!result.success) {
-			const mapped = zodToOpenApiError(result.error, location)
+			const mapped = zodToOpenApiError(result.error, 'body')
 			const sanitized = sanitizeValidationError(mapped)
 			return responseBadRequest(c, sanitized)
 		}
 
-		if (target === 'json') {
-			c.set('validatedBody', result.data)
-		} else {
-			c.set('validatedParams', result.data)
-		}
-
+		c.set('validatedBody', result.data)
 		await next()
 		return
 	}
@@ -57,13 +44,4 @@ export const zodValidate = <T extends ZodType>(target: Target, schema: T): Middl
  */
 export const getValidatedBody = <T>(c: Context): T => {
 	return c.get('validatedBody') as T
-}
-
-/**
- * Read previously validated path params from the Hono context.
- * @param c - Hono context
- * @returns Validated params
- */
-export const getValidatedParams = <T>(c: Context): T => {
-	return c.get('validatedParams') as T
 }

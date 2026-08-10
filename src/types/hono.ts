@@ -6,5 +6,4 @@ import type { AuthUser } from './external.ts'
 export type AppVariables = {
 	user?: AuthUser
 	validatedBody?: unknown
-	validatedParams?: unknown
 }

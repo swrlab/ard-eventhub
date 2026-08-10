@@ -1,7 +1,4 @@
 /*
-	ard-eventhub
-	by SWR Audio Lab
-
 	unit tests for the Radioplayer plugin
 
 	this test file can be run manually and locally with `bun test src/utils/plugins/radioplayer/event.mantest.ts`

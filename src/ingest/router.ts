@@ -31,9 +31,9 @@ export const createRouter = () => {
 	router.all('/openapi', (c) => c.redirect(DOCS_API_URL, 302))
 	router.all('/openapi/*', (c) => c.redirect(DOCS_API_URL, 302))
 
-	router.post('/auth/login', zodValidate('json', authLoginBody), login)
-	router.post('/auth/refresh', zodValidate('json', authRefreshBody), refresh)
-	router.post('/auth/reset', zodValidate('json', authResetBody), reset)
+	router.post('/auth/login', zodValidate(authLoginBody), login)
+	router.post('/auth/refresh', zodValidate(authRefreshBody), refresh)
+	router.post('/auth/reset', zodValidate(authResetBody), reset)
 
 	router.post('/events/:eventName', authVerify, validateEventBody, events)
 
@@ -44,8 +44,8 @@ export const createRouter = () => {
 
 	router.get('/subscriptions', authVerify, subscriptionsList)
 	router.get('/subscriptions/', authVerify, subscriptionsList)
-	router.post('/subscriptions', authVerify, zodValidate('json', subscriptionPost), subscriptionsPost)
-	router.post('/subscriptions/', authVerify, zodValidate('json', subscriptionPost), subscriptionsPost)
+	router.post('/subscriptions', authVerify, zodValidate(subscriptionPost), subscriptionsPost)
+	router.post('/subscriptions/', authVerify, zodValidate(subscriptionPost), subscriptionsPost)
 	router.get('/subscriptions/:subscriptionName', authVerify, subscriptionsGet)
 	router.delete('/subscriptions/:subscriptionName', authVerify, subscriptionsDelete)
 
@@ -59,4 +59,3 @@ export const createRouter = () => {
 
 	return router
 }
-
