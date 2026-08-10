@@ -197,9 +197,12 @@ export const eventV1PostBody = z
 		start: iso8601Timestamp,
 		length: z
 			.number()
-			.nullable()
-			.optional()
-			.meta({ description: 'Scheduled length of the element in seconds', examples: [240] }),
+			.positive()
+			.meta({
+				description:
+					'Estimated length of the element in seconds. Must be set to a positive number (not 0 or null). The end of the current element is defined by the start of the next element.',
+				examples: [240],
+			}),
 		title: z.string().meta({ description: 'Representative title for external use', examples: ['Song name'] }),
 		artist: z
 			.string()

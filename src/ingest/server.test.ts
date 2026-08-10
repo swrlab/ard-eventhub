@@ -210,6 +210,7 @@ const event = {
 	event: eventName,
 	type: 'music',
 	start: DateTime.now().toISO(),
+	length: 240,
 	title: 'Unit Test Song',
 	services: [
 		{
@@ -280,11 +281,30 @@ test(`POST ${eventPath}`, async (t) => {
 	})
 
 	await t.step('publish a new event with invalid externalId in references', async () => {
+		event.start = DateTime.now().toISO()
 		// @ts-expect-error - we know that the object won't be null
 		event.references[1].externalId = null
 		const res = await request('POST', eventPath, {
 			headers: { Authorization: `Bearer ${accessToken}` },
 			body: event,
+		})
+		testResponse(res, 400)
+		// restore for later shared-event steps
+		event.references[1].externalId = 'crid://dlf.de/article/1234567'
+	})
+
+	await t.step('publish a new event with length 0', async () => {
+		const res = await request('POST', eventPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: { ...event, start: DateTime.now().toISO(), length: 0 },
+		})
+		testResponse(res, 400)
+	})
+
+	await t.step('publish a new event with length null', async () => {
+		const res = await request('POST', eventPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: { ...event, start: DateTime.now().toISO(), length: null },
 		})
 		testResponse(res, 400)
 	})
@@ -294,6 +314,7 @@ test(`POST ${eventPath}`, async (t) => {
 			event: eventName,
 			type: 'music',
 			start: DateTime.now().toISO(),
+			length: 240,
 			title: 'Unit Test Song with Fallback Media',
 			services: [
 				{
@@ -327,6 +348,7 @@ test(`POST ${eventPath}`, async (t) => {
 			event: eventName,
 			type: 'music',
 			start: DateTime.now().toISO(),
+			length: 240,
 			title: 'Unit Test Song with Non-Fallback Media',
 			services: [
 				{
@@ -360,6 +382,7 @@ test(`POST ${eventPath}`, async (t) => {
 			event: eventName,
 			type: 'music',
 			start: DateTime.now().toISO(),
+			length: 240,
 			title: 'Unit Test Song without isFallback',
 			services: [
 				{
@@ -392,6 +415,7 @@ test(`POST ${eventPath}`, async (t) => {
 			event: eventName,
 			type: 'music',
 			start: DateTime.now().toISO(),
+			length: 240,
 			title: 'Unit Test Song with Blocked Service',
 			services: [
 				{
@@ -425,6 +449,7 @@ test(`POST ${eventPath}`, async (t) => {
 				event: eventName,
 				type: 'music',
 				start: DateTime.now().toISO(),
+				length: 240,
 				title: 'Unit Test Song with Mixed Services',
 				services: [
 					{
@@ -467,6 +492,7 @@ test(`POST ${eventPath}`, async (t) => {
 			event: eventName,
 			type: 'music',
 			start: DateTime.now().toISO(),
+			length: 240,
 			title: 'Unit Test Song with Non-Blocked Services',
 			services: [
 				{

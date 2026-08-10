@@ -984,10 +984,11 @@
 						"examples": ["2020-01-19T06:00:00+01:00"]
 					},
 					"length": {
-						"description": "Scheduled length of the element in seconds",
-						"examples": [240],
-						"nullable": true,
-						"type": "number"
+						"type": "number",
+						"minimum": 0,
+						"exclusiveMinimum": true,
+						"description": "Estimated length of the element in seconds. Must be set to a positive number (not 0 or null). The end of the current element is defined by the start of the next element.",
+						"examples": [240]
 					},
 					"title": {
 						"type": "string",
@@ -1081,7 +1082,7 @@
 						"type": "string"
 					}
 				},
-				"required": ["type", "start", "title", "services", "playlistItemId"],
+				"required": ["type", "start", "length", "title", "services", "playlistItemId"],
 				"additionalProperties": false,
 				"description": "**Please also note the details in the `POST /events/v1` endpoint above!**",
 				"definitions": {
@@ -1312,10 +1313,11 @@
 								"examples": ["2020-01-19T06:00:00+01:00"]
 							},
 							"length": {
-								"description": "Scheduled length of the element in seconds",
-								"examples": [240],
-								"nullable": true,
-								"type": "number"
+								"type": "number",
+								"minimum": 0,
+								"exclusiveMinimum": true,
+								"description": "Estimated length of the element in seconds. Must be set to a positive number (not 0 or null). The end of the current element is defined by the start of the next element.",
+								"examples": [240]
 							},
 							"title": {
 								"type": "string",
@@ -1409,7 +1411,7 @@
 								"type": "string"
 							}
 						},
-						"required": ["type", "start", "title", "services", "playlistItemId"],
+						"required": ["type", "start", "length", "title", "services", "playlistItemId"],
 						"additionalProperties": false,
 						"description": "**Please also note the details in the `POST /events/v1` endpoint above!**"
 					},

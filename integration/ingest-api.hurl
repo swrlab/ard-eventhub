@@ -58,6 +58,7 @@ output: res/03-events-missing-auth.json
 	"event": "de.ard.eventhub.v1.radio.track.playing",
 	"type": "music",
 	"start": "{{start}}",
+	"length": 240,
 	"title": "Unit Test Song",
 	"services": [
 		{
@@ -107,6 +108,7 @@ output: res/03-events-invalid-auth.json
 	"event": "de.ard.eventhub.v1.radio.track.playing",
 	"type": "music",
 	"start": "{{start}}",
+	"length": 240,
 	"title": "Unit Test Song",
 	"services": [
 		{
@@ -148,6 +150,7 @@ output: res/03-events-publish.json
 	"event": "de.ard.eventhub.v1.radio.track.playing",
 	"type": "music",
 	"start": "{{start}}",
+	"length": 240,
 	"title": "Unit Test Song",
 	"services": [
 		{
@@ -192,6 +195,7 @@ output: res/03-events-expired-start.json
 	"event": "de.ard.eventhub.v1.radio.track.playing",
 	"type": "music",
 	"start": "{{start_expired}}",
+	"length": 240,
 	"title": "Unit Test Song",
 	"services": [
 		{
@@ -233,6 +237,7 @@ output: res/03-events-invalid-start.json
 	"event": "de.ard.eventhub.v1.radio.track.playing",
 	"type": "music",
 	"start": "{{start_invalid}}",
+	"length": 240,
 	"title": "Unit Test Song",
 	"services": [
 		{
@@ -275,6 +280,7 @@ output: res/03-events-invalid-reference.json
 	"event": "de.ard.eventhub.v1.radio.track.playing",
 	"type": "music",
 	"start": "{{start}}",
+	"length": 240,
 	"title": "Unit Test Song",
 	"services": [
 		{
@@ -305,6 +311,56 @@ output: res/03-events-invalid-reference.json
 ```
 HTTP 400
 
+# --- EVENTS: length 0 → 400 ---
+POST {{host}}/events/de.ard.eventhub.v1.radio.track.playing
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+[Options]
+output: res/03-events-length-zero.json
+```json
+{
+	"event": "de.ard.eventhub.v1.radio.track.playing",
+	"type": "music",
+	"start": "{{start}}",
+	"length": 0,
+	"title": "Unit Test Song",
+	"services": [
+		{
+			"type": "PermanentLivestream",
+			"externalId": "crid://ard.de/28475/unit",
+			"publisherId": "28475"
+		}
+	],
+	"playlistItemId": "unit-test-id-in-playlist-567-length-zero"
+}
+```
+HTTP 400
+
+# --- EVENTS: length null → 400 ---
+POST {{host}}/events/de.ard.eventhub.v1.radio.track.playing
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+[Options]
+output: res/03-events-length-null.json
+```json
+{
+	"event": "de.ard.eventhub.v1.radio.track.playing",
+	"type": "music",
+	"start": "{{start}}",
+	"length": null,
+	"title": "Unit Test Song",
+	"services": [
+		{
+			"type": "PermanentLivestream",
+			"externalId": "crid://ard.de/28475/unit",
+			"publisherId": "28475"
+		}
+	],
+	"playlistItemId": "unit-test-id-in-playlist-567-length-null"
+}
+```
+HTTP 400
+
 # --- EVENTS: media isFallback true → 201 ---
 POST {{host}}/events/de.ard.eventhub.v1.radio.track.playing
 Authorization: Bearer {{access_token}}
@@ -316,6 +372,7 @@ output: res/04-events-media-fallback-true.json
 	"event": "de.ard.eventhub.v1.radio.track.playing",
 	"type": "music",
 	"start": "{{start}}",
+	"length": 240,
 	"title": "Unit Test Song with Fallback Media",
 	"services": [
 		{
@@ -353,6 +410,7 @@ output: res/04-events-media-fallback-false.json
 	"event": "de.ard.eventhub.v1.radio.track.playing",
 	"type": "music",
 	"start": "{{start}}",
+	"length": 240,
 	"title": "Unit Test Song with Non-Fallback Media",
 	"services": [
 		{
@@ -390,6 +448,7 @@ output: res/04-events-media-no-fallback-flag.json
 	"event": "de.ard.eventhub.v1.radio.track.playing",
 	"type": "music",
 	"start": "{{start}}",
+	"length": 240,
 	"title": "Unit Test Song without isFallback",
 	"services": [
 		{
@@ -426,6 +485,7 @@ output: res/05-events-blocked-service.json
 	"event": "de.ard.eventhub.v1.radio.track.playing",
 	"type": "music",
 	"start": "{{start}}",
+	"length": 240,
 	"title": "Unit Test Song with Blocked Service",
 	"services": [
 		{
@@ -456,6 +516,7 @@ output: res/05-events-mixed-services.json
 	"event": "de.ard.eventhub.v1.radio.track.playing",
 	"type": "music",
 	"start": "{{start}}",
+	"length": 240,
 	"title": "Unit Test Song with Mixed Services",
 	"services": [
 		{
@@ -493,6 +554,7 @@ output: res/05-events-non-blocked-services.json
 	"event": "de.ard.eventhub.v1.radio.track.playing",
 	"type": "music",
 	"start": "{{start}}",
+	"length": 240,
 	"title": "Unit Test Song with Non-Blocked Services",
 	"services": [
 		{
