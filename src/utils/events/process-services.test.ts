@@ -7,10 +7,13 @@ import { createHashedId } from '@swrlab/utils/packages/ard/index.js'
 import { createSandbox } from 'sinon'
 import { coreIdPrefixes, pubSubPrefix } from '#config'
 import { publisherLookup } from '../ard-core.ts'
-import { processServices } from './process-services.ts'
+import { allowedLivestreamLookup, processServices } from './process-services.ts'
 
 const INSTITUTION_ID = 'urn:ard:institution:swr'
 const PUBLISHER_URN = 'urn:ard:publisher:abcdef0123456789'
+const ALLOWED_EXTERNAL_ID = 'ext-allowed-common'
+const ALLOWED_TOPIC_ID = `${coreIdPrefixes.PermanentLivestream}${createHashedId(ALLOWED_EXTERNAL_ID)}`
+const ALLOWED_PUBLISHER_ID = 'urn:ard:publisher:fedcba9876543210'
 
 const user = {
 	email: 'lab@swr.de',
@@ -45,6 +48,23 @@ const stubPublisher = (institutionId: string = INSTITUTION_ID) => {
 			}) as ArdPublisher
 	)
 	return sandbox
+}
+
+/**
+ * Stub COMMON_IDS allow-list lookup for a synthetic topic/publisher pair.
+ * @param sandbox - Existing sinon sandbox to attach the stub to
+ */
+const stubAllowedLivestream = (sandbox: ReturnType<typeof createSandbox>) => {
+	sandbox.stub(allowedLivestreamLookup, 'getById').callsFake((topicId: string) =>
+		topicId === ALLOWED_TOPIC_ID
+			? {
+					id: ALLOWED_TOPIC_ID,
+					name: 'Probe Common Night',
+					note: 'test allow-list entry',
+					publisherId: ALLOWED_PUBLISHER_ID,
+				}
+			: undefined
+	)
 }
 
 test('processServices sets topic id and pubsub name for an authorized publisher', async () => {
@@ -95,6 +115,47 @@ test('processServices blocks when the user institution does not match the publis
 		const result = await processServices(makeService(), { user })
 
 		assertEquals(result.blocked, 'User unauthorized for service')
+	} finally {
+		sandbox.restore()
+	}
+})
+
+test('processServices allows COMMON_IDS livestream under its designated publisher', async () => {
+	const sandbox = stubPublisher()
+	stubAllowedLivestream(sandbox)
+
+	try {
+		const result = await processServices(
+			makeService({
+				externalId: ALLOWED_EXTERNAL_ID,
+				publisherId: ALLOWED_PUBLISHER_ID,
+			}),
+			{ user }
+		)
+
+		assertEquals(result.blocked, undefined)
+		assertEquals(result.topic?.id, ALLOWED_TOPIC_ID)
+		assertEquals(result.publisherId, ALLOWED_PUBLISHER_ID)
+	} finally {
+		sandbox.restore()
+	}
+})
+
+test('processServices blocks COMMON_IDS livestream when publisherId does not match allow-list', async () => {
+	const sandbox = stubPublisher()
+	stubAllowedLivestream(sandbox)
+
+	try {
+		const result = await processServices(
+			makeService({
+				externalId: ALLOWED_EXTERNAL_ID,
+				publisherId: PUBLISHER_URN,
+			}),
+			{ user }
+		)
+
+		assertEquals(result.blocked, 'User unauthorized for service')
+		assertEquals(result.topic?.id, ALLOWED_TOPIC_ID)
 	} finally {
 		sandbox.restore()
 	}

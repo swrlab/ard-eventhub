@@ -4,6 +4,8 @@ import logger from '@frytg/logger'
 // @ts-expect-error - The package does not yet have types.
 import { createHashedId } from '@swrlab/utils/packages/ard/index.js'
 import { coreIdPrefixes } from '#config'
+import allowedLivestreamsJson from '../../config/allowed-livestreams.json' with { type: 'json' }
+import { allowedLivestreamsConfig } from '../../schemas/config.ts'
 import { getPublisherById } from '../ard-core.ts'
 import { pubsubBuildId } from '../pubsub/build-id.ts'
 
@@ -11,8 +13,31 @@ const source = 'utils.events.processServices'
 const URN_PUBLISHER_PREFIX = coreIdPrefixes.Publisher
 const URN_PUBLISHER_REGEX = /(?=urn:ard:publisher:[a-z0-9]{16})/g
 
+const parsedAllowedLivestreams = allowedLivestreamsConfig.parse(allowedLivestreamsJson)
+
+/** Topic id → allow-listed COMMON_IDS livestream, built once at module load. */
+const allowedLivestreamsById = new Map(
+	parsedAllowedLivestreams.livestreams.map((livestream) => [livestream.id, livestream])
+)
+
+/**
+ * Allow-listed COMMON_IDS livestream lookup. Tests stub `getById` with sinon.
+ */
+export const allowedLivestreamLookup = {
+	/**
+	 * Look up an allow-listed COMMON_IDS livestream by topic id.
+	 * @param topicId - Computed topic URN (`service.topic.id`)
+	 * @returns Allow-list entry when present
+	 */
+	getById(topicId: string) {
+		return allowedLivestreamsById.get(topicId)
+	},
+}
+
 /**
  * Enrich a service with topic ids and block unauthorized publishers.
+ * Allow-listed COMMON_IDS topics (absent from the ARD feed) may only be published
+ * under their configured `publisherId`; institution is still checked via the feed.
  * @param service - Service from the event body
  * @param params - Authenticated user
  * @returns Updated service (possibly blocked)
@@ -49,7 +74,22 @@ export const processServices = async (
 		service.publisherId = `${URN_PUBLISHER_PREFIX}${createHashedId(service.publisherId)}`
 	}
 
-	// fetch publisher
+	const allowedLivestream = allowedLivestreamLookup.getById(topicId)
+
+	// COMMON_IDS topics may only be published under their designated publisher
+	if (allowedLivestream && allowedLivestream.publisherId !== service.publisherId) {
+		service.blocked = 'User unauthorized for service'
+
+		logger.warning({
+			message: `publisher mismatch for allow-listed livestream > ${allowedLivestream.name} > ${service.publisherId}`,
+			source,
+			data: { service, user, originalPublisherId, allowedLivestream },
+		})
+
+		return service
+	}
+
+	// fetch publisher (ARD feed); allow-listed topics still resolve institution via publisherId
 	const publisher = getPublisherById(service.publisherId)
 
 	// block access if publisher not found
@@ -61,7 +101,7 @@ export const processServices = async (
 		logger.warning({
 			message: `publisher not found > ${service.publisherId}`,
 			source,
-			data: { service, user, originalPublisherId },
+			data: { service, user, originalPublisherId, allowedLivestream },
 		})
 
 		// stop processing
@@ -82,6 +122,7 @@ export const processServices = async (
 				user,
 				institution: publisher.institution,
 				originalPublisherId,
+				allowedLivestream,
 			},
 		})
 

@@ -89,6 +89,24 @@ export const usersConfig = z.object({
 	users: z.array(configUser),
 })
 
+/**
+ * Livestream topic that may be published even though it is absent from the ARD feed.
+ * @see docs/ids/common-ids.md
+ */
+export const allowedLivestream = z.object({
+	id: z.string(),
+	name: z.string(),
+	publisherId: z.string(),
+})
+
+/**
+ * Allow-list of COMMON_IDS nightly topics (`src/config/allowed-livestreams.json`).
+ */
+export const allowedLivestreamsConfig = z.object({
+	note: z.string(),
+	livestreams: z.array(allowedLivestream),
+})
+
 export type Stage = z.infer<typeof stage>
 export type LiveradioCredential = z.infer<typeof liveradioCredential>
 export type DTSKeys = z.infer<typeof dtsKeys>
@@ -96,3 +114,5 @@ export type RadioplayerApiKeys = z.infer<typeof radioplayerApiKeys>
 export type LiveRadioEvent = z.infer<typeof liveRadioEvent>
 export type PermittedExcludedFields = DTSKeys['permittedExcludedFields']
 export type ConfigUser = z.infer<typeof configUser>
+export type AllowedLivestream = z.infer<typeof allowedLivestream>
+export type AllowedLivestreamsConfig = z.infer<typeof allowedLivestreamsConfig>

@@ -10,6 +10,7 @@ _default:
 [group('DEV-SETUP')]
 install *args:
 	mise install {{ args }}  
+	mise lock {{ args }}
 	bun install --silent
 
 # update package dependencies (pass --env ci if needed)
@@ -17,6 +18,7 @@ install *args:
 update *args:
 	mise upgrade --bump -y --local {{ args }}
 	mise outdated --quiet {{ args }}
+	mise lock {{ args }}
 	bun update
 	just format
 
