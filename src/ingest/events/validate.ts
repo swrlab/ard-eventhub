@@ -1,18 +1,13 @@
 import type { MiddlewareHandler } from 'hono'
-import { eventV1PostBody, eventV1PostRadioTextBody } from '../../schemas/events.ts'
+import { eventV1PostBody } from '../../schemas/events.ts'
 import { badRequest as responseBadRequest } from '../../utils/response/bad-request.ts'
 import { sanitizeValidationError, zodToOpenApiError } from '../../utils/validation/zod-to-openapi-error.ts'
 
-const RADIO_TEXT_EVENT = 'de.ard.eventhub.v1.radio.text'
-
 /**
- * Validate the event POST body with the Zod schema matching the URL event name.
+ * Validate the event POST body with the track event Zod schema.
  * @returns Hono middleware
  */
 export const validateEventBody: MiddlewareHandler = async (c, next) => {
-	const eventName = c.req.param('eventName')
-	const schema = eventName === RADIO_TEXT_EVENT ? eventV1PostRadioTextBody : eventV1PostBody
-
 	let value: unknown
 	try {
 		value = await c.req.json()
@@ -24,7 +19,7 @@ export const validateEventBody: MiddlewareHandler = async (c, next) => {
 		})
 	}
 
-	const result = schema.safeParse(value)
+	const result = eventV1PostBody.safeParse(value)
 	if (!result.success) {
 		const mapped = zodToOpenApiError(result.error, 'body')
 		const sanitized = sanitizeValidationError(mapped)

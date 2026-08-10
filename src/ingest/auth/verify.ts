@@ -1,9 +1,9 @@
 import type { MiddlewareHandler } from 'hono'
 import type { AuthUser } from '#types'
 import logger from '@frytg/logger'
-import { firebaseVerifyToken } from '../../../utils/firebase/verify-token.ts'
-import { getSafeHeaders } from '../../../utils/get-safe-headers.ts'
-import { getConfigUser } from '../../../utils/users/get-user.ts'
+import { firebaseVerifyToken } from '../../utils/firebase/verify-token.ts'
+import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
+import { getConfigUser } from '../../utils/users/get-user.ts'
 
 const source = 'ingest/auth/middleware/verify'
 const ERROR_JSON = { message: 'Forbidden', errors: [], status: 403 }

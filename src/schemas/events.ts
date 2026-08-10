@@ -272,36 +272,6 @@ export const eventV1PostBody = z
 	})
 
 /**
- * POST /events/de.ard.eventhub.v1.radio.text request body.
- */
-export const eventV1PostRadioTextBody = z
-	.object({
-		event: z
-			.enum(['de.ard.eventhub.v1.radio.text'])
-			.optional()
-			.meta({
-				description: 'If set, it needs to match the URL event parameter',
-				examples: ['de.ard.eventhub.v1.radio.text'],
-			}),
-		start: iso8601Timestamp,
-		validUntil: iso8601Timestamp.meta({
-			description: 'ISO8601 compliant timestamp how long this text can be displayed (fallback to title - artist)',
-		}),
-		text: z.string().meta({
-			description: 'one line of Radiotext for live encoder (limited in length)',
-			examples: ['Catchy one Liner'],
-		}),
-		services: z
-			.array(services)
-			.meta({ description: 'The playing stations unique Service-IDs. Do not include the Service-Type suffix.' }),
-	})
-	.strict()
-	.meta({
-		id: 'eventV1PostRadioTextBody',
-		description: '**Please also note the details in the `POST /events/v1` endpoint above!**',
-	})
-
-/**
  * Event publish success response for track events.
  */
 export const eventV1ResBody = z
@@ -327,33 +297,6 @@ export const eventV1ResBody = z
 			.meta({ examples: [null] }),
 	})
 	.meta({ id: 'eventV1ResBody' })
-
-/**
- * Event publish success response for radio text events.
- */
-export const eventV1PostRadioTextResBody = z
-	.object({
-		statuses: z.object({
-			published: z
-				.number()
-				.int()
-				.meta({ examples: [1] }),
-			blocked: z
-				.number()
-				.int()
-				.meta({ examples: [0] }),
-			failed: z
-				.number()
-				.int()
-				.meta({ examples: [0] }),
-		}),
-		event: eventV1PostRadioTextBody,
-		trace: z
-			.string()
-			.nullable()
-			.meta({ examples: [null] }),
-	})
-	.meta({ id: 'eventV1PostRadioTextResBody' })
 
 /**
  * Contributor shape on enriched runtime events (looser than the HTTP contract).

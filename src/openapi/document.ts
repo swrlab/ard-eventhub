@@ -11,8 +11,6 @@ import {
 	errorNotFound,
 	errorUnauthorized,
 	eventV1PostBody,
-	eventV1PostRadioTextBody,
-	eventV1PostRadioTextResBody,
 	eventV1ResBody,
 	reference,
 	services,
@@ -36,9 +34,7 @@ const schemaById = {
 	services,
 	reference,
 	eventV1PostBody,
-	eventV1PostRadioTextBody,
 	eventV1ResBody,
-	eventV1PostRadioTextResBody,
 	subscriptionPost,
 	subscriptionResponse,
 	subscriptionsList,
@@ -154,50 +150,6 @@ If the request returns the status \`blocked: 1\`, it indicates that you are not 
 	content: {
 		'application/json': {
 			schema: ref('eventV1ResBody'),
-		},
-	},
-}
-
-const eventRadioTextRequestBody = {
-	description: `
-New event to be distributed to subscribers.
-The Eventhub format validation expects only a subset of these variables as minimum set. All other fields are technically optional, but **highly encouraged** to be included, so a best-possible metadata exchange is possible.
-The subset is defined in the list of required fields of Schemas \`eventV1PostRadioTextBody\`, resulting in this body:
-\`\`\`json
-{
-  "event": "de.ard.eventhub.v1.radio.text",
-  "start": "2020-01-19T06:00:00+01:00",
-  "validUntil": "2026-01-19T06:00:00+01:00",
-  "text": "Catchy one Liner",
-  "services": [ { ... } ]
- }
-\`\`\`
-Required fields not specified in the Schema, will cause your request to fail.
-`,
-	content: {
-		'application/json': {
-			schema: ref('eventV1PostRadioTextBody'),
-		},
-	},
-	required: true,
-}
-
-const eventRadioTextResponse = {
-	description: `
-Event created
-*Note:* The first request of an event for an externalId that is not registered yet, will return the status \`failed: 1\`. This indicates that a new topic for the externalId has been created, and the request needs to be repeated:
-\`\`\`json
-"statuses": {
-  "published": 0,
-  "blocked": 0,
-  "failed": 1
-}
-\`\`\`
-If the request returns the status \`blocked: 1\`, it indicates that you are not allowed to publish events under the given publisherId.
-`,
-	content: {
-		'application/json': {
-			schema: ref('eventV1PostRadioTextResBody'),
 		},
 	},
 }
@@ -330,20 +282,6 @@ export const buildOpenApiDocument = () => {
 					requestBody: eventTrackRequestBody,
 					responses: {
 						'201': eventTrackResponse,
-						'400': badRequestResponse,
-						...authErrorResponses,
-					},
-				},
-			},
-			'/events/de.ard.eventhub.v1.radio.text': {
-				post: {
-					tags: ['events'],
-					summary: 'Set a live encoder text for a track',
-					operationId: 'eventPostV1RadioText',
-					security: [{ bearerAuth: [] }],
-					requestBody: eventRadioTextRequestBody,
-					responses: {
-						'201': eventRadioTextResponse,
 						'400': badRequestResponse,
 						...authErrorResponses,
 					},

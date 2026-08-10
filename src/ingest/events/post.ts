@@ -14,7 +14,7 @@ import { getValidatedBody } from '../../utils/validation/zod-validate.ts'
 const source = 'ingest/events/post'
 
 /**
- * Distribute a radio track or text event to subscribers.
+ * Distribute a radio track event to subscribers.
  * @param c - Hono context
  * @returns Event publish response
  */

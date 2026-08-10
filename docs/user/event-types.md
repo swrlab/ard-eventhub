@@ -14,7 +14,3 @@ Dieses Ereignis markiert den Beginn eines neuen Elementes/ Tracks für den jewei
 Das `next` Event hat Ähnlichkeiten zum `playing`Event aber kennzeichnet lediglich nur den planmäßig nächsten Titel. Das `next` Element kann durch ein neues `next` Element vor einem `playing` Element ersetzt werden, um einen neuen geplanten Titel zu kennzeichnen.
 
 Ein Paar aus `next` und `playing` Events sollte eine Referenz zueinander haben (`playlistId`), damit Abonnenten diese beiden eingehenden Events miteinander verknüpfen können.
-
-## `de.ard.eventhub.v1.radio.text`
-
-Dieses Event legt den Live-Encoder-Text fest und ist noch in der Erprobungsphase.

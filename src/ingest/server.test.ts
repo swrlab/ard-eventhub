@@ -491,65 +491,6 @@ test(`POST ${eventPath}`, async (t) => {
 	})
 })
 
-const eventRadioTextName = 'de.ard.eventhub.v1.radio.text'
-const eventRadioTextPath = `/events/${eventRadioTextName}`
-
-const eventRadioText = {
-	event: eventRadioTextName,
-	start: DateTime.now().toISO(),
-	validUntil: DateTime.now().toISO(),
-	text: 'Unit Test Song',
-	services: [
-		{
-			type: 'PermanentLivestream',
-			externalId: 'crid://ard.de/28475/unit',
-			publisherId: '28475',
-		},
-	],
-}
-
-test(`POST ${eventRadioTextPath}`, async (t) => {
-	await t.step('test missing auth for POST /event', async () => {
-		const res = await request('POST', eventRadioTextPath, { body: eventRadioText })
-		testMissingAuth(res)
-	})
-
-	await t.step('test invalid auth for POST /event', async () => {
-		const res = await request('POST', eventRadioTextPath, {
-			headers: { Authorization: `Bearer invalid${accessToken}` },
-			body: eventRadioText,
-		})
-		testFailedAuth(res)
-	})
-
-	await t.step('publish a new event', async () => {
-		const res = await request('POST', eventRadioTextPath, {
-			headers: { Authorization: `Bearer ${accessToken}` },
-			body: eventRadioText,
-		})
-		testResponse(res, 201)
-		testEventKeys(res.body)
-	})
-
-	await t.step('publish a new event with expired time', async () => {
-		eventRadioText.start = DateTime.now().minus({ minutes: 20 }).toISO()
-		const res = await request('POST', eventRadioTextPath, {
-			headers: { Authorization: `Bearer ${accessToken}` },
-			body: eventRadioText,
-		})
-		testResponse(res, 400)
-	})
-
-	await t.step('publish a new event with invalid time', async () => {
-		eventRadioText.start = `${DateTime.now().toISO()}00`
-		const res = await request('POST', eventRadioTextPath, {
-			headers: { Authorization: `Bearer ${accessToken}` },
-			body: eventRadioText,
-		})
-		testResponse(res, 400)
-	})
-})
-
 /*
 	TOPICS - Access to topics details
 */

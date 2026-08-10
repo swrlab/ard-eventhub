@@ -14,26 +14,20 @@ const URN_PUBLISHER_REGEX = /(?=urn:ard:publisher:[a-z0-9]{16})/g
 /**
  * Enrich a service with topic ids and block unauthorized publishers.
  * @param service - Service from the event body
- * @param params - Authenticated user and event name
+ * @param params - Authenticated user
  * @returns Updated service (possibly blocked)
  */
 export const processServices = async (
 	service: EventhubService,
 	params: {
 		user: AuthUser
-		eventName: string
 	}
 ) => {
-	const { user, eventName } = params
+	const { user } = params
 
 	// fetch prefix from configured list
 	const type = service.type as keyof typeof coreIdPrefixes
-	let urnPrefix = coreIdPrefixes[type]
-
-	// add a different suffix for radio text topics to not confuse subscribers with new event
-	if (eventName === 'de.ard.eventhub.v1.radio.text') {
-		urnPrefix = `radio-text:${urnPrefix}`
-	}
+	const urnPrefix = coreIdPrefixes[type]
 
 	const topicId = `${urnPrefix}${createHashedId(service.externalId)}`
 

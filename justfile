@@ -61,12 +61,6 @@ check:
 	bun x oxlint
 	bun x oxfmt --check
 
-# lint --fix and format
-[group('LOCAL')]
-check-fix:
-	bun x oxlint --fix
-	bun x oxfmt
-
 # check dependency licenses
 [group('LOCAL')]
 license:

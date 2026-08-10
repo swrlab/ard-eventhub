@@ -73,10 +73,6 @@ export const publishEventToCommonTopic = async (params: {
 }): Promise<EventPluginResult | undefined> => {
 	const { eventName, message, body, attributes, nonBlockedServices } = params
 
-	if (eventName === 'de.ard.eventhub.v1.radio.text') {
-		return undefined
-	}
-
 	if (nonBlockedServices.length === 0) {
 		return undefined
 	}
@@ -170,7 +166,7 @@ export const processEvent = async (params: {
 	const message = buildEventMessage({ eventName, user, body, start })
 
 	// compile core hashes and pubsub names for every service
-	message.services = await Promise.all(message.services.map((service) => processServices(service, { user, eventName })))
+	message.services = await Promise.all(message.services.map((service) => processServices(service, { user })))
 
 	// generate unique Id from the institution id and a random ULID
 	message.id = `${user.institution.id}-${ulid()}`

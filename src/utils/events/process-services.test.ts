@@ -51,10 +51,7 @@ test('processServices sets topic id and pubsub name for an authorized publisher'
 	const sandbox = stubPublisher()
 	try {
 		const service = makeService()
-		const result = await processServices(service, {
-			user,
-			eventName: 'de.ard.eventhub.v1.radio.track.playing',
-		})
+		const result = await processServices(service, { user })
 
 		const expectedTopicId = `${coreIdPrefixes.PermanentLivestream}${createHashedId('ext-1')}`
 		assertEquals(result.blocked, undefined)
@@ -66,28 +63,10 @@ test('processServices sets topic id and pubsub name for an authorized publisher'
 	}
 })
 
-test('processServices prefixes radio-text topic ids for radio.text events', async () => {
-	const sandbox = stubPublisher()
-	try {
-		const result = await processServices(makeService(), {
-			user,
-			eventName: 'de.ard.eventhub.v1.radio.text',
-		})
-
-		assertExists(result.topic?.id)
-		assertEquals(result.topic.id.startsWith(`radio-text:${coreIdPrefixes.PermanentLivestream}`), true)
-	} finally {
-		sandbox.restore()
-	}
-})
-
 test('processServices hashes legacy publisher ids into ARD URNs', async () => {
 	const sandbox = stubPublisher()
 	try {
-		const result = await processServices(makeService({ publisherId: 'legacy-pub' }), {
-			user,
-			eventName: 'de.ard.eventhub.v1.radio.track.playing',
-		})
+		const result = await processServices(makeService({ publisherId: 'legacy-pub' }), { user })
 
 		assertEquals(result.publisherId, `${coreIdPrefixes.Publisher}${createHashedId('legacy-pub')}`)
 		assertEquals(result.blocked, undefined)
@@ -101,10 +80,7 @@ test('processServices blocks when the publisher is unknown', async () => {
 	sandbox.stub(publisherLookup, 'getById').returns(undefined)
 
 	try {
-		const result = await processServices(makeService(), {
-			user,
-			eventName: 'de.ard.eventhub.v1.radio.track.playing',
-		})
+		const result = await processServices(makeService(), { user })
 
 		assertEquals(result.blocked, `Publisher not found > ${PUBLISHER_URN}`)
 		assertExists(result.topic)
@@ -116,10 +92,7 @@ test('processServices blocks when the publisher is unknown', async () => {
 test('processServices blocks when the user institution does not match the publisher', async () => {
 	const sandbox = stubPublisher('urn:ard:institution:other')
 	try {
-		const result = await processServices(makeService(), {
-			user,
-			eventName: 'de.ard.eventhub.v1.radio.track.playing',
-		})
+		const result = await processServices(makeService(), { user })
 
 		assertEquals(result.blocked, 'User unauthorized for service')
 	} finally {
