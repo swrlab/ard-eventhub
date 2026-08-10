@@ -57,7 +57,7 @@ export const processServices = async (service: EventhubService, req: EventReques
 
 		// log access attempt
 		logger.warning({
-			message: `Publisher not found (${service.publisherId})`,
+			message: `publisher not found > ${service.publisherId}`,
 			source,
 			data: { service, user: req.user, originalPublisherId },
 		})
@@ -73,7 +73,7 @@ export const processServices = async (service: EventhubService, req: EventReques
 
 		// log access attempt
 		logger.warning({
-			message: `User unauthorized for service > ${service.externalId} (${service.publisherId})`,
+			message: `user unauthorized for service > ${service.externalId} > ${service.publisherId}`,
 			source,
 			data: {
 				service,

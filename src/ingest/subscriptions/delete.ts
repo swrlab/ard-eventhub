@@ -53,7 +53,7 @@ export const subscriptionsDelete = async (c: Context) => {
 			if (isCode5Error(error)) {
 				// pubsub error code 5 seems to be 'Resource not found'
 				logger.notice({
-					message: `Subscription '${subscriptionName}' not found`,
+					message: `subscription not found > ${subscriptionName}`,
 					source,
 					data: { email: user.email, subscriptionName },
 				})

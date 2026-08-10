@@ -36,7 +36,7 @@ export const dtsEvent = async (job: EventhubPluginMessage): Promise<void> => {
 	// only process now playing events
 	if (event.name !== 'de.ard.eventhub.v1.radio.track.playing') {
 		logger.warning({
-			message: `DTS skipping event (not playing) > ${event.name}`,
+			message: `dts skipping event not playing > ${event.name}`,
 			source,
 			data: { job },
 		})
@@ -141,9 +141,10 @@ export const dtsEvent = async (job: EventhubPluginMessage): Promise<void> => {
 
 	// log result
 	const message = [
-		`DTS event done (${event.services[0]?.publisherId})`,
+		'dts event done',
+		event.services[0]?.publisherId,
 		`status ${response?.status}`,
-		`${coreIds.length}x Core IDs`,
+		`${coreIds.length}x core ids`,
 	]
 	let json: object | undefined
 	try {

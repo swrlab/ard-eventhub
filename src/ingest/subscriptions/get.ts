@@ -21,22 +21,14 @@ export const subscriptionsGet = async (c: Context) => {
 
 		// check if subscription name is present
 		if (!subscriptionName) {
-			logger.notice({
-				message: 'Subscription name is required',
-				source,
-				data: { params: c.req.param() },
-			})
+			logger.notice({ message: 'Subscription name is required', source, data: { params: c.req.param() } })
 			return responseBadRequest(c, { status: 400, message: 'Subscription name is required' })
 		}
 
 		const user = c.get('user') as AuthUser | undefined
 		// check if user is present
 		if (!user) {
-			logger.notice({
-				message: 'User not found',
-				source,
-				data: { subscriptionName },
-			})
+			logger.notice({ message: 'User not found', source, data: { subscriptionName } })
 			return responseBadRequest(c, { status: 401, message: 'User not found' })
 		}
 
@@ -47,7 +39,7 @@ export const subscriptionsGet = async (c: Context) => {
 			limitedSubscription = subscription.limited
 		} catch {
 			logger.notice({
-				message: `Subscription '${subscriptionName}' not found`,
+				message: `subscription not found > ${subscriptionName}`,
 				source,
 				data: { email: user.email, subscriptionName },
 			})

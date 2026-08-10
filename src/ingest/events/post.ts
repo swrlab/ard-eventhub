@@ -245,7 +245,7 @@ export const eventsPost = async (c: Context) => {
 		// log success
 		logger.log({
 			level: data.statuses.blocked > 0 ? 'warning' : 'info',
-			message: `event processed > ${eventName} > ${message.services.length}x services (${message.services[0]?.publisherId})`,
+			message: `event processed > ${eventName} > ${message.services.length}x services > ${message.services[0]?.publisherId}`,
 			source,
 			data: { ...data, body, isDtsPluginSet, isRadioplayerPluginSet },
 		})

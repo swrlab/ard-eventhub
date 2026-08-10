@@ -17,11 +17,7 @@ export const subscriptionsList = async (c: Context) => {
 		const user = c.get('user') as AuthUser | undefined
 		// check if user is present
 		if (!user) {
-			logger.notice({
-				message: 'user not found',
-				source,
-				data: getSafeHeaders(c.req.raw.headers),
-			})
+			logger.notice({ message: 'user not found', source, data: getSafeHeaders(c.req.raw.headers) })
 			return responseInternalServerError(c, new Error('User not found'))
 		}
 
@@ -29,7 +25,7 @@ export const subscriptionsList = async (c: Context) => {
 		const institutionId = user.institutionId
 		if (!institutionId) {
 			logger.notice({
-				message: `institutionId not found for user > ${user.email}`,
+				message: `institutionId not found > ${user.email}`,
 				source,
 				data: getSafeHeaders(c.req.raw.headers),
 			})

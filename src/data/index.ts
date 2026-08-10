@@ -50,7 +50,7 @@ export const getARDFeed = async () => {
 		// check if feed has enough items
 		if (feedItemCount < MIN_FEED_ITEMS) {
 			logger.error({
-				message: `ARD Feed contains an unexpected amount of stations: ${feedItemCount}`,
+				message: `unexpected station count in ARD feed > ${feedItemCount}`,
 				source,
 			})
 
@@ -59,9 +59,9 @@ export const getARDFeed = async () => {
 
 		// check if feed has too many items
 		if (feedItemCount >= MAX_FEED_ITEMS) {
-			const message = `ARD Feed contains an unexpected amount of stations: ${feedItemCount}`
+			const message = `unexpected station count in ARD feed > ${feedItemCount}`
 			logger.error({
-				message: message,
+				message,
 				source,
 			})
 
@@ -92,7 +92,7 @@ export const getARDFeed = async () => {
 		}
 
 		logger.info({
-			message: `ARD feed downloaded successfully > ${getMsOffset(START_TIME)}ms`,
+			message: `ard feed downloaded successfully > ${getMsOffset(START_TIME)}ms`,
 			source,
 		})
 
