@@ -43,9 +43,9 @@ Follow SWR Audio Lab engineering principles:
 ## Testing
 
 - All code changes should include or update tests
-- Tests use Bun's built-in test runner
+- Tests use [`@cross/test`](https://jsr.io/@cross/test) with [`@std/assert`](https://jsr.io/@std/assert) (and [sinon](https://sinonjs.org/) for stubs/spies) so they run on Bun, Node, or Deno
 - Test files are co-located with source files (`.test.ts` extension)
-- Run `just test` before committing changes
+- Run with `just test` (Bun via sops env) or `bun test`; Node/Deno: `node --import tsx --test` / `deno test` against the same files
 - Tests must pass before merging PRs
 
 ## Git Workflow

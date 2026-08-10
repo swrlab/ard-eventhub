@@ -4,7 +4,7 @@
 
 	unit tests for the Radioplayer plugin
 
-	this test file can be run manually and locally with `bun test`
+	this test file can be run manually and locally with `bun test src/utils/plugins/radioplayer/event.mantest.ts`
 	it writes to the production system and therefore should be used sparingly
 */
 
@@ -14,8 +14,9 @@ import process from 'node:process'
 const testApiKeys = process.env.RADIOPLAYER_API_KEYS
 process.env.RADIOPLAYER_API_KEYS = testApiKeys
 
-import { describe, expect, it } from 'bun:test'
+import { test } from '@cross/test'
 import { getISO } from '@frytg/dates'
+import { assert, assertEquals, assertExists, assertGreater, assertStringIncludes } from '@std/assert'
 import radioplayerEvent from './event.ts'
 
 // Livestream URN that exists in config/radioplayer-mapping.json5
@@ -23,6 +24,11 @@ const MAPPED_LIVESTREAM_URN = 'urn:ard:permanent-livestream:b852cb677ac83775'
 const TEST_INSTITUTION = 'urn:ard:institution:a3004ff924ece1a2'
 const RUN_PRODUCTION_TESTS = process.env.RADIOPLAYER_RUN_TESTS === 'true'
 
+/**
+ * Build a radioplayer plugin job fixture.
+ * @param overrides - Partial job fields to merge over defaults
+ * @returns Job payload for `radioplayerEvent`
+ */
 const createJob = (overrides: Partial<Parameters<typeof radioplayerEvent>[0]> = {}) => {
 	const plugin = { type: 'radioplayer', isDeactivated: false }
 	return {
@@ -66,9 +72,9 @@ const createJob = (overrides: Partial<Parameters<typeof radioplayerEvent>[0]> = 
 	}
 }
 
-describe('Radioplayer plugin', () => {
+test('Radioplayer plugin', async (t) => {
 	if (RUN_PRODUCTION_TESTS) {
-		it('sends HTTP POST with artist and title when event is music and in mapping', async () => {
+		await t.step('sends HTTP POST with artist and title when event is music and in mapping', async () => {
 			const result = await radioplayerEvent(
 				createJob({
 					event: {
@@ -86,22 +92,22 @@ describe('Radioplayer plugin', () => {
 				})
 			)
 
-			expect(result).toBeDefined()
-			expect(Array.isArray(result)).toBe(true)
-			expect(result?.length).toBeGreaterThan(0)
+			assertExists(result)
+			assert(Array.isArray(result))
+			assertGreater(result.length, 0)
 			for (const resultItem of result as NonNullable<{ url: string }[]>) {
-				expect(resultItem.url).toContain('https://')
-				expect(resultItem.url).toContain('np-ingest.radioplayer.cloud')
-				expect(resultItem.url).toContain('rpuid=2761425')
-				expect(resultItem.url).toContain('artist=Test+Artist')
-				expect(resultItem.url).toContain('title=Test+Song')
-				expect(resultItem.url).toContain('startTime=')
-				expect(resultItem.url).toContain('duration=10')
+				assertStringIncludes(resultItem.url, 'https://')
+				assertStringIncludes(resultItem.url, 'np-ingest.radioplayer.cloud')
+				assertStringIncludes(resultItem.url, 'rpuid=2761425')
+				assertStringIncludes(resultItem.url, 'artist=Test+Artist')
+				assertStringIncludes(resultItem.url, 'title=Test+Song')
+				assertStringIncludes(resultItem.url, 'startTime=')
+				assertStringIncludes(resultItem.url, 'duration=10')
 			}
 		})
 	}
 
-	it('skips non-playing events', async () => {
+	await t.step('skips non-playing events', async () => {
 		const result = await radioplayerEvent(
 			createJob({
 				event: {
@@ -111,10 +117,10 @@ describe('Radioplayer plugin', () => {
 			})
 		)
 
-		expect(result).toEqual(null)
+		assertEquals(result, null)
 	})
 
-	it('skips non-music events', async () => {
+	await t.step('skips non-music events', async () => {
 		const result = await radioplayerEvent(
 			createJob({
 				event: {
@@ -124,20 +130,20 @@ describe('Radioplayer plugin', () => {
 			})
 		)
 
-		expect(result).toEqual(null)
+		assertEquals(result, null)
 	})
 
-	it('skips when institution has no API key', async () => {
+	await t.step('skips when institution has no API key', async () => {
 		const result = await radioplayerEvent(
 			createJob({
 				institutionId: 'urn:ard:institution:unknown',
 			})
 		)
 
-		expect(result).toEqual(null)
+		assertEquals(result, null)
 	})
 
-	it('skips services not in mapping', async () => {
+	await t.step('skips services not in mapping', async () => {
 		const result = await radioplayerEvent(
 			createJob({
 				event: {
@@ -157,10 +163,10 @@ describe('Radioplayer plugin', () => {
 			})
 		)
 
-		expect(result).toEqual([])
+		assertEquals(result, [])
 	})
 
-	it('skips non-PermanentLivestream services', async () => {
+	await t.step('skips non-PermanentLivestream services', async () => {
 		const result = await radioplayerEvent(
 			createJob({
 				event: {
@@ -180,10 +186,10 @@ describe('Radioplayer plugin', () => {
 			})
 		)
 
-		expect(result).toEqual([])
+		assertEquals(result, [])
 	})
 
-	it('skips services without livestream ID', async () => {
+	await t.step('skips services without livestream ID', async () => {
 		const result = await radioplayerEvent(
 			createJob({
 				event: {
@@ -200,6 +206,6 @@ describe('Radioplayer plugin', () => {
 			})
 		)
 
-		expect(result).toEqual([])
+		assertEquals(result, [])
 	})
 })

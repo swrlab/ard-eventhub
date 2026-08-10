@@ -50,6 +50,20 @@ export class MissingEnvVarError extends Error {
 }
 
 /**
+ * Env lookup source. Tests stub `get` with sinon instead of touching `process.env`.
+ */
+export const envLookup = {
+	/**
+	 * Read a raw environment variable value.
+	 * @param key - Environment variable name
+	 * @returns The raw string value, or `undefined` if unset
+	 */
+	get(key: string): string | undefined {
+		return process.env[key]
+	},
+}
+
+/**
  * Get an environment variable with proper typing
  *
  * @param key - The name of the environment variable
@@ -61,9 +75,7 @@ export class MissingEnvVarError extends Error {
 export function getEnv<T = string>(key: string, config: EnvConfig<T> = {}): T {
 	const { defaultValue, required = false, type = 'string' } = config
 
-	// @ts-expect-error - Insert mocked values from the bun test.
-	const env = globalThis.__BunTestMockEnv__ ?? process.env
-	const value = env[key]
+	const value = envLookup.get(key)
 
 	if (value === undefined) {
 		if (required) {

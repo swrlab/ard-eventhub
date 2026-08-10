@@ -1,20 +1,17 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-	unit tests for the ingest service
-
-*/
 /* oxlint-disable typescript/no-explicit-any -- test fixtures use loose typing */
 
 import process from 'node:process'
-import { beforeAll, describe, expect, it } from 'bun:test'
+import { test } from '@cross/test'
 import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
+import { assert, assertExists, assertGreater, assertStrictEquals } from '@std/assert'
 import request, { type Response } from 'supertest'
 import server from './index.ts'
 
+/**
+ * Log an error and exit the process when required test env is missing.
+ * @param message - Error message to log
+ */
 const exitWithError = (message: string) => {
 	logger.log({
 		level: 'error',
@@ -33,14 +30,23 @@ const testUser = process.env.TEST_USER
 const testUserPass = process.env.TEST_USER_PW
 const testUserReset = process.env.TEST_USER_RESET
 
-// define general tests
+/**
+ * Assert a JSON response with the expected HTTP status.
+ * @param res - Supertest response
+ * @param status - Expected status code
+ */
 function testResponse(res: Response, status: number) {
 	console.log(`comparing response with statusCode ${res.statusCode} (should be ${status})`)
 
-	expect(isJson(res)).toBe(true)
-	expect(res.status).toBe(status)
+	assert(isJson(res))
+	assertStrictEquals(res.status, status)
 }
 
+/**
+ * Check whether a value is JSON-serializable object data.
+ * @param item - Value to inspect
+ * @returns True when the value parses to a non-null object
+ */
 function isJson(item: any) {
 	let value = typeof item === 'string' ? item : JSON.stringify(item)
 	try {
@@ -52,11 +58,18 @@ function isJson(item: any) {
 	return typeof value === 'object' && value !== null
 }
 
-// check rejection of invalid token
+/**
+ * Assert a failed auth response (403).
+ * @param res - Supertest response
+ */
 function testFailedAuth(res: Response) {
 	testResponse(res, 403)
 }
 
+/**
+ * Assert a missing auth response (401).
+ * @param res - Supertest response
+ */
 function testMissingAuth(res: Response) {
 	testResponse(res, 401)
 }
@@ -69,90 +82,63 @@ const loginPath = '/auth/login'
 let accessToken = null as string | null
 let refreshToken = null as string | null
 
+/**
+ * Assert auth response body shape.
+ * @param body - Response body
+ */
 function testAuthKeys(body: any) {
-	expect(isJson(body)).toBe(true)
-	expect(body).toHaveProperty('expiresIn')
-	//expect(body.expiresIn).toBeInstanceOf(Number)
-	expect(body).toHaveProperty('expires')
-	//expect(body.expires).toBeInstanceOf(String)
-	expect(body).toHaveProperty('token')
-	//expect(body.token).toBeInstanceOf(String)
-	expect(body).toHaveProperty('refreshToken')
-	//expect(body.refreshToken).toBeInstanceOf(String)
+	assert(isJson(body))
+	assertExists(body.expiresIn)
+	assertExists(body.expires)
+	assertExists(body.token)
+	assertExists(body.refreshToken)
 
-	expect(body).toHaveProperty('user')
-	expect(isJson(body.user)).toBe(true)
-	expect(body.user).toHaveProperty('user_id')
-	//expect(body.user.user_id).toBeInstanceOf(String)
-	expect(body.user).toHaveProperty('email_verified')
-	//expect(body.user.email_verified).toBeInstanceOf(Boolean)
+	assertExists(body.user)
+	assert(isJson(body.user))
+	assertExists(body.user.user_id)
+	assertExists(body.user.email_verified)
 }
 
-async function _login() {
+test(`POST ${loginPath}`, async () => {
 	const loginRequest = {
 		email: testUser,
 		password: testUserPass,
 	}
 
-	const response = await request(server).post(loginPath).send(loginRequest)
-
-	return response
-}
-
-//beforeAll((done) => {
-//	 login().then(( res) => {
-//		 // Store tokens for further tests
-//		 accessToken = res.body.token
-//		 refreshToken = res.body.refreshToken
-//		 done()})
-//})
-
-describe(`POST ${loginPath}`, () => {
-	it('swap login credentials for an id-token', async () => {
-		const loginRequest = {
-			email: testUser,
-			password: testUserPass,
-		}
-
-		const res = await request(server).post(loginPath).send(loginRequest)
-		testResponse(res, 200)
-		testAuthKeys(res.body)
-		// Store tokens for further tests
-		accessToken = res.body.token
-		refreshToken = res.body.refreshToken
-	})
+	const res = await request(server).post(loginPath).send(loginRequest)
+	testResponse(res, 200)
+	testAuthKeys(res.body)
+	// Store tokens for further tests
+	accessToken = res.body.token
+	refreshToken = res.body.refreshToken
 })
 
 const refreshPath = '/auth/refresh'
 
-describe(`POST ${refreshPath}`, () => {
-	it('swap refresh-token for new id-token', async () => {
-		const refreshRequest = {
-			refreshToken: refreshToken,
-		}
+test(`POST ${refreshPath}`, async () => {
+	const refreshRequest = {
+		refreshToken: refreshToken,
+	}
 
-		const res = await request(server).post(refreshPath).send(refreshRequest)
-		testResponse(res, 200)
-		testAuthKeys(res.body)
+	const res = await request(server).post(refreshPath).send(refreshRequest)
+	testResponse(res, 200)
+	testAuthKeys(res.body)
 
-		// store new token for further tests
-		accessToken = res.body.token
-	})
+	// store new token for further tests
+	accessToken = res.body.token
 })
 
 // 🚨 firebase limit is 150 requests per day 🚨
 const resetPath = '/auth/reset'
 
 if (testUserReset === 'true') {
-	describe(`POST ${resetPath}`, () => {
-		it('request password reset email', async () => {
-			const resetRequest = {
-				email: testUser,
-			}
+	test(`POST ${resetPath}`, async () => {
+		const resetRequest = {
+			email: testUser,
+		}
 
-			const res = await request(server).post(resetPath).send(resetRequest)
-			testResponse(res, 200)
-		})
+		const res = await request(server).post(resetPath).send(resetRequest)
+		testResponse(res, 200)
 	})
 }
 
@@ -160,11 +146,15 @@ if (testUserReset === 'true') {
 	EVENTS - Manage events
 */
 
+/**
+ * Assert event publish response body shape.
+ * @param body - Response body
+ */
 function testEventKeys(body: any) {
 	isJson(body)
-	expect(body).toHaveProperty('statuses')
+	assertExists(body.statuses)
 	isJson(body.statuses)
-	expect(body).toHaveProperty('event')
+	assertExists(body.event)
 	isJson(body.event)
 }
 
@@ -203,43 +193,43 @@ const event = {
 	],
 }
 
-describe(`POST ${eventPath}`, () => {
-	it('test invalid auth for POST /event', async () => {
+test(`POST ${eventPath}`, async (t) => {
+	await t.step('test missing auth for POST /event', async () => {
 		const res = await request(server).post(eventPath).send(event)
 		testMissingAuth(res)
 	})
 
-	it('test invalid auth for POST /event', async () => {
+	await t.step('test invalid auth for POST /event', async () => {
 		const res = await request(server).post(eventPath).set('Authorization', `Bearer invalid${accessToken}`).send(event)
 		testFailedAuth(res)
 	})
 
-	it('publish a new event', async () => {
+	await t.step('publish a new event', async () => {
 		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
 		testResponse(res, 201)
 		testEventKeys(res.body)
 	})
 
-	it('publish a new event with expired time', async () => {
+	await t.step('publish a new event with expired time', async () => {
 		event.start = DateTime.now().minus({ minutes: 20 }).toISO()
 		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
 		testResponse(res, 400)
 	})
 
-	it('publish a new event with invalid time', async () => {
+	await t.step('publish a new event with invalid time', async () => {
 		event.start = `${DateTime.now().toISO()}00`
 		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
 		testResponse(res, 400)
 	})
 
-	it('publish a new event with invalid externalId in references', async () => {
+	await t.step('publish a new event with invalid externalId in references', async () => {
 		// @ts-expect-error - we know that the object won't be null
 		event.references[1].externalId = null
 		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
 		testResponse(res, 400)
 	})
 
-	it('publish a new event with media including isFallback flag set to true', async () => {
+	await t.step('publish a new event with media including isFallback flag set to true', async () => {
 		const eventWithFallbackMedia = {
 			event: eventName,
 			type: 'music',
@@ -272,7 +262,7 @@ describe(`POST ${eventPath}`, () => {
 		testEventKeys(res.body)
 	})
 
-	it('publish a new event with media including isFallback flag set to false', async () => {
+	await t.step('publish a new event with media including isFallback flag set to false', async () => {
 		const eventWithNonFallbackMedia = {
 			event: eventName,
 			type: 'music',
@@ -305,7 +295,7 @@ describe(`POST ${eventPath}`, () => {
 		testEventKeys(res.body)
 	})
 
-	it('publish a new event with media without isFallback flag (should be optional)', async () => {
+	await t.step('publish a new event with media without isFallback flag (should be optional)', async () => {
 		const eventWithoutIsFallback = {
 			event: eventName,
 			type: 'music',
@@ -337,7 +327,7 @@ describe(`POST ${eventPath}`, () => {
 		testEventKeys(res.body)
 	})
 
-	it('publish event with blocked service - common plugin should not be sent', async () => {
+	await t.step('publish event with blocked service - common plugin should not be sent', async () => {
 		const eventWithBlockedService = {
 			event: eventName,
 			type: 'music',
@@ -360,56 +350,59 @@ describe(`POST ${eventPath}`, () => {
 		testEventKeys(res.body)
 
 		// verify service is blocked
-		expect(res.body.statuses.blocked).toBeGreaterThan(0)
-		expect(res.body.event.services.some((s: any) => s.blocked)).toBe(true)
+		assertGreater(res.body.statuses.blocked, 0)
+		assert(res.body.event.services.some((s: any) => s.blocked))
 
 		// verify common plugin is NOT sent when all services are blocked
 		const commonPlugin = res.body.plugins.find((p: any) => p.type === 'common')
-		expect(commonPlugin).toBeUndefined()
+		assertStrictEquals(commonPlugin, undefined)
 	})
 
-	it('publish event with mixed blocked and non-blocked services - common plugin should only contain non-blocked services', async () => {
-		const eventWithMixedServices = {
-			event: eventName,
-			type: 'music',
-			start: DateTime.now().toISO(),
-			title: 'Unit Test Song with Mixed Services',
-			services: [
-				{
-					type: 'PermanentLivestream',
-					externalId: 'crid://ard.de/28475/unit',
-					publisherId: '28475', // valid publisherId
-				},
-				{
-					type: 'PermanentLivestream',
-					externalId: 'crid://ard.de/999999/unit',
-					publisherId: '999999', // invalid publisherId that will be blocked
-				},
-			],
-			playlistItemId: 'unit-test-id-in-playlist-567-mixed',
+	await t.step(
+		'publish event with mixed blocked and non-blocked services - common plugin should only contain non-blocked services',
+		async () => {
+			const eventWithMixedServices = {
+				event: eventName,
+				type: 'music',
+				start: DateTime.now().toISO(),
+				title: 'Unit Test Song with Mixed Services',
+				services: [
+					{
+						type: 'PermanentLivestream',
+						externalId: 'crid://ard.de/28475/unit',
+						publisherId: '28475', // valid publisherId
+					},
+					{
+						type: 'PermanentLivestream',
+						externalId: 'crid://ard.de/999999/unit',
+						publisherId: '999999', // invalid publisherId that will be blocked
+					},
+				],
+				playlistItemId: 'unit-test-id-in-playlist-567-mixed',
+			}
+			const res = await request(server)
+				.post(eventPath)
+				.set('Authorization', `Bearer ${accessToken}`)
+				.send(eventWithMixedServices)
+			testResponse(res, 201)
+			testEventKeys(res.body)
+
+			// verify some services are blocked
+			assertGreater(res.body.statuses.blocked, 0)
+			const blockedServices = res.body.event.services.filter((s: any) => s.blocked)
+			const nonBlockedServices = res.body.event.services.filter((s: any) => !s.blocked)
+			assertGreater(blockedServices.length, 0)
+			assertGreater(nonBlockedServices.length, 0)
+
+			// verify common plugin IS sent when there are non-blocked services
+			const commonPlugin = res.body.plugins.find((p: any) => p.type === 'common')
+			assertExists(commonPlugin)
+			assertStrictEquals(commonPlugin.type, 'common')
+			assertExists(commonPlugin.topic)
 		}
-		const res = await request(server)
-			.post(eventPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send(eventWithMixedServices)
-		testResponse(res, 201)
-		testEventKeys(res.body)
+	)
 
-		// verify some services are blocked
-		expect(res.body.statuses.blocked).toBeGreaterThan(0)
-		const blockedServices = res.body.event.services.filter((s: any) => s.blocked)
-		const nonBlockedServices = res.body.event.services.filter((s: any) => !s.blocked)
-		expect(blockedServices.length).toBeGreaterThan(0)
-		expect(nonBlockedServices.length).toBeGreaterThan(0)
-
-		// verify common plugin IS sent when there are non-blocked services
-		const commonPlugin = res.body.plugins.find((p: any) => p.type === 'common')
-		expect(commonPlugin).toBeDefined()
-		expect(commonPlugin.type).toBe('common')
-		expect(commonPlugin.topic).toBeDefined()
-	})
-
-	it('publish event with only non-blocked services - common plugin should be sent normally', async () => {
+	await t.step('publish event with only non-blocked services - common plugin should be sent normally', async () => {
 		const eventWithNonBlockedServices = {
 			event: eventName,
 			type: 'music',
@@ -432,14 +425,14 @@ describe(`POST ${eventPath}`, () => {
 		testEventKeys(res.body)
 
 		// verify no services are blocked
-		expect(res.body.statuses.blocked).toBe(0)
-		expect(res.body.event.services.every((s: any) => !s.blocked)).toBe(true)
+		assertStrictEquals(res.body.statuses.blocked, 0)
+		assert(res.body.event.services.every((s: any) => !s.blocked))
 
 		// verify common plugin IS sent when there are non-blocked services
 		const commonPlugin = res.body.plugins.find((p: any) => p.type === 'common')
-		expect(commonPlugin).toBeDefined()
-		expect(commonPlugin.type).toBe('common')
-		expect(commonPlugin.topic).toBeDefined()
+		assertExists(commonPlugin)
+		assertStrictEquals(commonPlugin.type, 'common')
+		assertExists(commonPlugin.topic)
 	})
 })
 
@@ -460,13 +453,13 @@ const eventRadioText = {
 	],
 }
 
-describe(`POST ${eventRadioTextPath}`, () => {
-	it('test invalid auth for POST /event', async () => {
+test(`POST ${eventRadioTextPath}`, async (t) => {
+	await t.step('test missing auth for POST /event', async () => {
 		const res = await request(server).post(eventRadioTextPath).send(eventRadioText)
 		testMissingAuth(res)
 	})
 
-	it('test invalid auth for POST /event', async () => {
+	await t.step('test invalid auth for POST /event', async () => {
 		const res = await request(server)
 			.post(eventRadioTextPath)
 			.set('Authorization', `Bearer invalid${accessToken}`)
@@ -474,7 +467,7 @@ describe(`POST ${eventRadioTextPath}`, () => {
 		testFailedAuth(res)
 	})
 
-	it('publish a new event', async () => {
+	await t.step('publish a new event', async () => {
 		const res = await request(server)
 			.post(eventRadioTextPath)
 			.set('Authorization', `Bearer ${accessToken}`)
@@ -483,7 +476,7 @@ describe(`POST ${eventRadioTextPath}`, () => {
 		testEventKeys(res.body)
 	})
 
-	it('publish a new event with expired time', async () => {
+	await t.step('publish a new event with expired time', async () => {
 		eventRadioText.start = DateTime.now().minus({ minutes: 20 }).toISO()
 		const res = await request(server)
 			.post(eventRadioTextPath)
@@ -492,7 +485,7 @@ describe(`POST ${eventRadioTextPath}`, () => {
 		testResponse(res, 400)
 	})
 
-	it('publish a new event with invalid time', async () => {
+	await t.step('publish a new event with invalid time', async () => {
 		eventRadioText.start = `${DateTime.now().toISO()}00`
 		const res = await request(server)
 			.post(eventRadioTextPath)
@@ -509,31 +502,34 @@ describe(`POST ${eventRadioTextPath}`, () => {
 const topicPath = '/topics'
 let topicName: string
 
+/**
+ * Assert topic response body shape.
+ * @param body - Response body
+ */
 function testTopicKeys(body: any) {
 	isJson(body)
 
-	expect(body).toHaveProperty('type')
-	expect(body).toHaveProperty('id')
-	expect(body).toHaveProperty('name')
+	assertExists(body.type)
+	assertExists(body.id)
+	assertExists(body.name)
 
-	expect(typeof body.type).toBe('string')
-	expect(typeof body.id).toBe('string')
-	expect(typeof body.name).toBe('string')
+	assertStrictEquals(typeof body.type, 'string')
+	assertStrictEquals(typeof body.id, 'string')
+	assertStrictEquals(typeof body.name, 'string')
 
 	isJson(body.labels)
 }
 
-describe(`GET ${topicPath}`, () => {
-	it(`test auth for GET ${topicPath}`, async () => {
+test(`GET ${topicPath}`, async (t) => {
+	await t.step(`test auth for GET ${topicPath}`, async () => {
 		const res = await request(server).get(topicPath).set('Authorization', `Bearer invalid${accessToken}`)
 		testFailedAuth(res)
 	})
 
-	it('list all available topics', async () => {
+	await t.step('list all available topics', async () => {
 		const res = await request(server).get(topicPath).set('Authorization', `Bearer ${accessToken}`)
 		testResponse(res, 200)
-		const isArray = Array.isArray(res.body)
-		expect(isArray).toBeTruthy()
+		assert(Array.isArray(res.body))
 		res.body.every((i: any) => testTopicKeys(i))
 		topicName = res.body[0].id
 	})
@@ -546,56 +542,56 @@ describe(`GET ${topicPath}`, () => {
 const subscriptPath = '/subscriptions'
 let subscriptionName: string
 
+/**
+ * Assert subscription response body shape.
+ * @param body - Response body
+ */
 function testSubscriptionKeys(body: any) {
 	isJson(body)
 
-	expect(body).toHaveProperty('type')
-	expect(body).toHaveProperty('method')
-	expect(body).toHaveProperty('name')
-	expect(body).toHaveProperty('path')
+	assertExists(body.type)
+	assertExists(body.method)
+	assertExists(body.name)
+	assertExists(body.path)
 
-	expect(typeof body.type).toBe('string')
-	expect(typeof body.method).toBe('string')
-	expect(typeof body.name).toBe('string')
-	expect(typeof body.path).toBe('string')
+	assertStrictEquals(typeof body.type, 'string')
+	assertStrictEquals(typeof body.method, 'string')
+	assertStrictEquals(typeof body.name, 'string')
+	assertStrictEquals(typeof body.path, 'string')
 
 	isJson(body.topic)
 
-	expect(body.topic).toHaveProperty('id')
-	expect(body.topic).toHaveProperty('name')
-	expect(body.topic).toHaveProperty('path')
+	assertExists(body.topic.id)
+	assertExists(body.topic.name)
+	assertExists(body.topic.path)
 
-	expect(typeof body.topic.id).toBe('string')
-	expect(typeof body.topic.name).toBe('string')
-	expect(typeof body.topic.path).toBe('string')
+	assertStrictEquals(typeof body.topic.id, 'string')
+	assertStrictEquals(typeof body.topic.name, 'string')
+	assertStrictEquals(typeof body.topic.path, 'string')
 
-	expect(body).toHaveProperty('ackDeadlineSeconds')
-	expect(body).toHaveProperty('serviceAccount')
-	expect(body).toHaveProperty('url')
-	expect(body).toHaveProperty('contact')
-	expect(body).toHaveProperty('institutionId')
+	assertExists(body.ackDeadlineSeconds)
+	assertExists(body.serviceAccount)
+	assertExists(body.url)
+	assertExists(body.contact)
+	assertExists(body.institutionId)
 
-	expect(typeof body.ackDeadlineSeconds).toBe('number')
-	expect(typeof body.serviceAccount).toBe('string')
-	expect(typeof body.url).toBe('string')
-	expect(typeof body.contact).toBe('string')
-	expect(typeof body.institutionId).toBe('string')
+	assertStrictEquals(typeof body.ackDeadlineSeconds, 'number')
+	assertStrictEquals(typeof body.serviceAccount, 'string')
+	assertStrictEquals(typeof body.url, 'string')
+	assertStrictEquals(typeof body.contact, 'string')
+	assertStrictEquals(typeof body.institutionId, 'string')
 }
 
-describe(`POST ${subscriptPath}`, () => {
-	let subscription: any
+test(`POST ${subscriptPath}`, async (t) => {
+	const subscription = {
+		type: 'PUBSUB',
+		method: 'PUSH',
+		url: 'https://ard.unit.test/eventhub/subscription',
+		contact: 'eventhub-unit-test@ard.de',
+		topic: topicName,
+	}
 
-	beforeAll(() => {
-		subscription = {
-			type: 'PUBSUB',
-			method: 'PUSH',
-			url: 'https://ard.unit.test/eventhub/subscription',
-			contact: 'eventhub-unit-test@ard.de',
-			topic: topicName,
-		}
-	})
-
-	it(`test auth for POST ${subscriptPath}`, async () => {
+	await t.step(`test auth for POST ${subscriptPath}`, async () => {
 		const res = await request(server)
 			.post(subscriptPath)
 			.set('Authorization', `Bearer invalid${accessToken}`)
@@ -603,7 +599,7 @@ describe(`POST ${subscriptPath}`, () => {
 		testFailedAuth(res)
 	})
 
-	it('add a new subscription to this user', async () => {
+	await t.step('add a new subscription to this user', async () => {
 		const res = await request(server)
 			.post(subscriptPath)
 			.set('Authorization', `Bearer ${accessToken}`)
@@ -615,28 +611,28 @@ describe(`POST ${subscriptPath}`, () => {
 	})
 })
 
-describe(`GET ${subscriptPath}`, () => {
-	it(`test auth for GET ${subscriptPath}`, async () => {
+test(`GET ${subscriptPath}`, async (t) => {
+	await t.step(`test auth for GET ${subscriptPath}`, async () => {
 		const res = await request(server).get(subscriptPath).set('Authorization', `Bearer invalid${accessToken}`)
 		testFailedAuth(res)
 	})
 
-	it('list all subscriptions for this user', async () => {
+	await t.step('list all subscriptions for this user', async () => {
 		const res = await request(server).get(subscriptPath).set('Authorization', `Bearer ${accessToken}`)
 		testResponse(res, 200)
 		res.body.every((i: any) => testSubscriptionKeys(i))
 	})
 })
 
-describe(`GET ${subscriptPath}/{name}`, () => {
-	it(`test auth for GET ${subscriptPath}/{name}`, async () => {
+test(`GET ${subscriptPath}/{name}`, async (t) => {
+	await t.step(`test auth for GET ${subscriptPath}/{name}`, async () => {
 		const res = await request(server)
 			.get(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer invalid${accessToken}`)
 		testFailedAuth(res)
 	})
 
-	it('get details about single subscription from this user', async () => {
+	await t.step('get details about single subscription from this user', async () => {
 		const res = await request(server)
 			.get(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer ${accessToken}`)
@@ -645,20 +641,20 @@ describe(`GET ${subscriptPath}/{name}`, () => {
 	})
 })
 
-describe(`DELETE ${subscriptPath}/{name}`, () => {
-	it(`test auth for DELETE ${subscriptPath}/{name}`, async () => {
+test(`DELETE ${subscriptPath}/{name}`, async (t) => {
+	await t.step(`test auth for DELETE ${subscriptPath}/{name}`, async () => {
 		const res = await request(server)
 			.delete(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer invalid${accessToken}`)
 		testFailedAuth(res)
 	})
 
-	it('remove a single subscription by this user', async () => {
+	await t.step('remove a single subscription by this user', async () => {
 		const res = await request(server)
 			.delete(`${subscriptPath}/${subscriptionName}`)
 			.set('Authorization', `Bearer ${accessToken}`)
 		testResponse(res, 200)
-		expect(res.body).toHaveProperty('valid')
-		expect(res.body.valid).toBe(true)
+		assertExists(res.body.valid)
+		assertStrictEquals(res.body.valid, true)
 	})
 })
