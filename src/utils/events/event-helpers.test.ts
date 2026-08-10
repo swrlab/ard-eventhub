@@ -1,8 +1,8 @@
 import type { AuthUser } from '#types'
 import type { EventhubV1RadioPostBody } from '../../schemas/events.ts'
 import { test } from '@cross/test'
-import { assertEquals } from '@std/assert'
 import { DateTime } from '@frytg/dates'
+import { assertEquals } from '@std/assert'
 import {
 	buildEventMessage,
 	ensureDefaultPlugins,

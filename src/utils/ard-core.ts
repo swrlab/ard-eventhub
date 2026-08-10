@@ -40,5 +40,4 @@ export const publisherLookup = {
  * @param publisherId - Publisher id
  * @returns Publisher, or `undefined` when unknown
  */
-export const getPublisherById = (publisherId: string): ArdPublisher | undefined =>
-	publisherLookup.getById(publisherId)
+export const getPublisherById = (publisherId: string): ArdPublisher | undefined => publisherLookup.getById(publisherId)

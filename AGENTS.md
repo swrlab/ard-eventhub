@@ -8,6 +8,7 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 
 ## Setup Commands
 
+- **Install tools:** [mise](https://mise.jdx.dev) → `mise install` (pins `just` + `sops` in [`mise.toml`](mise.toml))
 - **Install dependencies:** `bun install`
 - **Start ingest service:** `bun run ingest` (runs with hot reload)
 - **Run tests:** `just test`

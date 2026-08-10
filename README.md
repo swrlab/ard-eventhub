@@ -35,6 +35,12 @@ The Ingest service is responsible for receiving and publishing events and managi
 
 This project uses `bun` as package manager and runtime environment. Please note that this only applies to the package manager and CLI commands. JavaScript still uses the 'traditional' `node` runtime. Check the [Bun documentation](https://bun.sh/docs/installation) for installation instructions.
 
+CLI tools (`just`, `sops`) are pinned in [`mise.toml`](mise.toml). Install [mise](https://mise.jdx.dev), then:
+
+```sh
+mise install
+```
+
 To install dependencies run:
 
 ```sh

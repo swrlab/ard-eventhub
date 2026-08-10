@@ -6,6 +6,20 @@ _default:
 
 ## ---------------------------------
 
+# install toolchain (mise) + package dependencies (aube) (pass --env ci if needed)
+[group('DEV-SETUP')]
+install *args:
+	mise install {{ args }}  
+	bun install --silent
+
+# update package dependencies (pass --env ci if needed)
+[group('DEV-SETUP')]
+update *args:
+	mise upgrade --bump -y --local {{ args }}
+	mise outdated --quiet {{ args }}
+	bun update
+	just format
+
 # run the ingest tests locally with injected environment variables
 [group('LOCAL')]
 test:

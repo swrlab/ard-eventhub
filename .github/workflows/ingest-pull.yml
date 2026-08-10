@@ -40,11 +40,11 @@ jobs:
           credentials_json: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
           create_credentials_file: true
 
-      - name: 🛠 Setup SOPS
-        run: |
-          curl -fsSL https://github.com/getsops/sops/releases/download/v3.10.2/sops-v3.10.2.linux.amd64 -o "$HOME/sops"
-          chmod +x "$HOME/sops"
-          echo "$HOME" >> "$GITHUB_PATH"
+      - name: 🛠 Setup mise tools
+        uses: jdx/mise-action@v4
+        with:
+          cache: true
+          github_token: ${{ github.token }}
 
       - name: 🔐 Decrypt users allow-list
         env:

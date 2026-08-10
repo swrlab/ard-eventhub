@@ -12,12 +12,7 @@ import { pubSubTopicSelf } from '#config'
 import { pubsubBuildId } from '../pubsub/build-id.ts'
 import { publishPubSubMessage } from '../pubsub/publish-message.ts'
 import { createNewTopic } from './create-new-topic.ts'
-import {
-	buildEventMessage,
-	ensureDefaultPlugins,
-	parseEventStart,
-	summarizeEventStatuses,
-} from './event-helpers.ts'
+import { buildEventMessage, ensureDefaultPlugins, parseEventStart, summarizeEventStatuses } from './event-helpers.ts'
 import { processServices } from './process-services.ts'
 
 const source = 'utils.events.processEvent'
