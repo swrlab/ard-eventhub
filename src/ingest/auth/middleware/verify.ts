@@ -43,7 +43,6 @@ export const authVerify: MiddlewareHandler = async (c, next) => {
 		let tokenUser: Awaited<ReturnType<typeof firebaseVerifyToken>>
 		try {
 			tokenUser = await firebaseVerifyToken(authorization)
-			c.header('x-ard-eventhub-uid', tokenUser.uid)
 		} catch (error) {
 			logger.notice({ message: 'user token invalid', source, error, data: getSafeHeaders(c.req.raw.headers) })
 			return c.json(ERROR_JSON, 403)
