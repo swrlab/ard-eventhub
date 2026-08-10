@@ -41,7 +41,8 @@ export default defineConfig({
 	},
 	openapi: {
 		enabled: true,
-		spec: './openapi.yaml',
+		spec: './openapi.json',
+		codeSamples: ['curl', 'js'],
 		route: '/api',
 	},
 	navigation: {

@@ -73,22 +73,36 @@ apply-k8s-secrets:
 ## ---------------------------------
 ## ENCRYPTION shortcuts
 
+_sops-files:
+	#!/usr/bin/env bash
+	find . -name '*.sops.*' -not -name '.sops.yaml' -not -path '*/node_modules/*' -not -path '*/.git/*' | sort
+
 # add/ remove keys (if .sops.yaml setup was changed)
 [group('ENCRYPTION')]
 update-keys:
-	just _update-key .env.sops.yaml
-	just _update-key keys/radioplayer-api-keys.sops.json
+	#!/usr/bin/env bash
+	set -euo pipefail
+	while IFS= read -r file; do
+		sops updatekeys -y "$file"
+	done < <(just _sops-files)
 
-_update-key file:
-	sops updatekeys {{ file }}
+# add/ remove a single key (if .sops.yaml setup was changed)
+[group('ENCRYPTION')]
+update-key file:
+	sops updatekeys -y {{ file }}
 
 # rotate keys (refreshed internal encryption keys)
 [group('ENCRYPTION')]
 rotate-keys:
-	just _rotate-key .env.sops.yaml
-	just _rotate-key keys/radioplayer-api-keys.sops.json
+	#!/usr/bin/env bash
+	set -euo pipefail
+	while IFS= read -r file; do
+		sops rotate --in-place "$file"
+	done < <(just _sops-files)
 
-_rotate-key file:
+# rotate a single key (refreshed internal encryption key)
+[group('ENCRYPTION')]
+rotate-key file:
 	sops rotate --in-place {{ file }}
 
 # list PGP keys and their fingerprints
