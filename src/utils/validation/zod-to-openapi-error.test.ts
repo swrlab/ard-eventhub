@@ -39,6 +39,7 @@ test('zodToOpenApiError maps null externalId on reference', () => {
 	const result = eventV1PostBody.safeParse({
 		type: 'music',
 		start: '2020-01-19T06:00:00+01:00',
+		length: 240,
 		title: 'Song',
 		services: [
 			{
@@ -61,6 +62,28 @@ test('zodToOpenApiError maps null externalId on reference', () => {
 	const mapped = zodToOpenApiError(result.error, 'body')
 	assertEquals(mapped.errors[0]?.path, '.body.references.0.externalId')
 	assertEquals(mapped.errors[0]?.errorCode, 'type.openapi.validation')
+})
+
+test('zodToOpenApiError maps length 0 as invalid', () => {
+	const result = eventV1PostBody.safeParse({
+		type: 'music',
+		start: '2020-01-19T06:00:00+01:00',
+		length: 0,
+		title: 'Song',
+		services: [
+			{
+				type: 'PermanentLivestream',
+				externalId: 'crid://ard.de/28475/unit',
+				publisherId: '28475',
+			},
+		],
+		playlistItemId: 'x',
+	})
+	assertStrictEquals(result.success, false)
+	if (result.success) return
+
+	const mapped = zodToOpenApiError(result.error, 'body')
+	assertEquals(mapped.errors[0]?.path, '.body.length')
 })
 
 test('sanitizeValidationError allows required-property messages', () => {
