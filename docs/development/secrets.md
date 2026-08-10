@@ -23,9 +23,6 @@ Secrets in GitHub sind standardmäßig für Benutzer write-only. Admins kannst d
   - In GitHub gespeichert, um im Registry-Workflow verwendet zu werden
 - `GCP_PROJECT_ID`
   - Projekt-ID des Google Cloud-Projekts (u. a. Image-Push-Pfad)
-- `GCP_SERVICE_ACCOUNT_INGEST`
-  - E‑Mail-Adresse des Service Accounts für Cloud Run
-  - In GitHub gespeichert, um neue Revisionskonfigurationen zu setzen
 - `SOPS_AGE_PRIVATE_KEY`
   - Age-Private-Key für `.ci.sops.*`-Dateien (`.env.ci.sops.yaml`, `users.ci.sops.json`)
   - Wird in Workflows als `SOPS_AGE_KEY` an sops übergeben
