@@ -3,27 +3,52 @@ title: 'Benutzer'
 description: 'Benutzerverwaltung für Admins.'
 ---
 
-Um sich beim Eventhub zu authentifizieren und mit der API zu arbeiten, benötigtst du ein gültiges Benutzerkonto. Die Logins sind derzeit von der ARD Core API getrennt, nutzen aber ein ähnliches Verfahren. Diese Seite beschreibt die Verwaltung von Benutzern.
+Um sich beim Eventhub zu authentifizieren und mit der API zu arbeiten, benötigst du ein gültiges Benutzerkonto. Die Logins sind derzeit von der ARD Core API getrennt, nutzen aber ein ähnliches Verfahren. Diese Seite beschreibt die Verwaltung von Benutzern.
+
+## Allow-List
+
+Zur Laufzeit liest der Ingest-Service `src/config/users.json` (gitignored; in Kubernetes oft als Volume gemountet).
+
+Quellen in Git (verschlüsselt):
+
+- `users-test.sops.json` — Vorlagen/Quelle für Test/Dev
+- `users-prod.sops.json` — Vorlagen/Quelle für Prod
+
+Lokal erzeugen z. B. mit:
+
+```sh
+just decrypt-key src/config/users-test.sops.json
+# bzw. für den Laufzeit-Pfad:
+sops decrypt src/config/users-test.sops.json > src/config/users.json
+```
+
+Jeder Eintrag hat die Form:
+
+```json
+{
+	"email": "name@example.de",
+	"institution": "SWR",
+	"institutionId": "urn:ard:institution:hex"
+}
+```
+
+E‑Mail-Adressen müssen exakt mit dem Firebase-Login übereinstimmen (kein Trim/Lowercase). Wer in der Datei steht, gilt als aktiv.
 
 ## Neue Benutzer anlegen
 
-Neue Benutzer können sich nicht selbst registrieren; der Zugang wird über das ARD Online Team gewährt. Die folgende Schritt-für-Schritt-Anleitung richtet sich an Admins, die ein neues Konto anlegen möchten.
+Neue Benutzer können sich nicht selbst registrieren; der Zugang wird über das ARD Online Team gewährt.
 
-- Öffne Datastore im GCP Eventhub-Projekt, wechsel zum passenden Namespace (meist `prod`) und zur Kind-Collection `users`
-- Prüfe, ob der Benutzer noch nicht existiert, und lege dann eine neue Entität an
-  - Der Entity-Key sollte der `_Custom Name_` sein, als Wert die E‑Mail-Adresse des Benutzers (**in Kleinbuchstaben**)
-  - Setze `active` auf `true`
-  - Im Feld `institutionId` trage die ID ein, die auch im ARD Core genutzt wird, z. B. `urn:ard:institution:hex`
-- Nachdem der Benutzer in Datastore angelegt wurde, registriere ihn in Firebase: Öffne die [Firebase Console](https://console.firebase.google.com/) unter _Build_ -> _Authentication_
-  - Klicke auf _Add user_ und verwende dieselbe E‑Mail-Adresse (kleingeschrieben). Das Passwort kann temporär zufällig sein.
-  - Nach dem Anlegen wähle im Dropdown _Reset password_ und bestätige die Aktion.
-- Der Benutzer erhält nun eine E‑Mail zum Setzen seines Passworts und kann anschließend die API nutzen.
+- Öffne die passende `users-*.sops.json` (`just edit-key src/config/users-test.sops.json` bzw. `users-prod`)
+- Prüfe, ob die E‑Mail noch nicht existiert, und füge einen neuen Eintrag mit `institution` + `institutionId` hinzu
+- Committe die aktualisierte `.sops.json` und stelle sicher, dass Deployments `users.json` bereitstellen (Decrypt oder Mount)
+- Registriere den Benutzer in Firebase: [Firebase Console](https://console.firebase.google.com/) unter _Build_ → _Authentication_
+  - _Add user_ mit derselben E‑Mail; Passwort kann temporär zufällig sein
+  - Danach im Dropdown _Reset password_ auslösen
+- Der Benutzer erhält eine E‑Mail zum Setzen des Passworts und kann anschließend die API nutzen
 
 ## Benutzer entfernen
 
-Wenn ein Benutzer gelöscht werden soll, gehe wie folgt vor:
-
 - Prüfe, ob der Benutzer Subscriptions angelegt hat, die eventuell entfernt werden müssen (Pub/Sub und Datastore)
-  - Hinweis: Zugriffsrechte für Subscriptions gelten institutionsweit; beim Entfernen eines Benutzers bleiben die Rechte ggf. für die Kollegen bestehen.
-- Lösche die Benutzer-Entität aus dem Datastore indem du ihn selektierst und seinen Eintrag löschst
+  - Hinweis: Zugriffsrechte für Subscriptions gelten institutionsweit; beim Entfernen eines Benutzers bleiben die Rechte ggf. für die Kollegen bestehen
+- Entferne den Eintrag aus der passenden `users-*.sops.json` und aktualisiere das gemountete/`users.json`
 - Entferne anschließend das Benutzerprofil in der Firebase Console

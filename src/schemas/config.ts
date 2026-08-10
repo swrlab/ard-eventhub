@@ -73,9 +73,26 @@ export const liveRadioEvent = z.object({
 	imageURL: z.string().nullable(),
 })
 
+/**
+ * Single allow-listed Eventhub user from `src/config/users-$stage.json`.
+ */
+export const configUser = z.object({
+	email: z.string(),
+	institutionId: z.string(),
+	institution: z.string(),
+})
+
+/**
+ * Users allow-list file shape.
+ */
+export const usersConfig = z.object({
+	users: z.array(configUser),
+})
+
 export type Stage = z.infer<typeof stage>
 export type LiveradioCredential = z.infer<typeof liveradioCredential>
 export type DTSKeys = z.infer<typeof dtsKeys>
 export type RadioplayerApiKeys = z.infer<typeof radioplayerApiKeys>
 export type LiveRadioEvent = z.infer<typeof liveRadioEvent>
 export type PermittedExcludedFields = DTSKeys['permittedExcludedFields']
+export type ConfigUser = z.infer<typeof configUser>

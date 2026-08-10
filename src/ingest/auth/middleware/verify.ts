@@ -1,9 +1,9 @@
 import type { MiddlewareHandler } from 'hono'
 import type { AuthUser } from '#types'
 import logger from '@frytg/logger'
-import { datastoreLoad } from '../../../utils/datastore/load.ts'
 import { firebaseVerifyToken } from '../../../utils/firebase/verify-token.ts'
 import { getSafeHeaders } from '../../../utils/get-safe-headers.ts'
+import { getConfigUser } from '../../../utils/users/get-user.ts'
 
 const source = 'ingest/auth/middleware/verify'
 const ERROR_JSON = { message: 'Forbidden', errors: [], status: 403 }
@@ -59,21 +59,24 @@ export const authVerify: MiddlewareHandler = async (c, next) => {
 			return c.json(ERROR_JSON, 403)
 		}
 
-		// lookup user in DB
-		const userDb = await datastoreLoad('users', user.email)
+		// lookup user in local allow-list (`src/config/users.json`)
+		const configUser = getConfigUser(user.email)
 
-		// check if profile exists and valid
-		if (userDb?.active !== true) {
+		if (!configUser) {
 			logger.notice({
-				message: 'user not found or not active',
+				message: `user not found or not active > ${user.email}`,
 				source,
 				data: getSafeHeaders(c.req.raw.headers),
 			})
 			return c.json(ERROR_JSON, 403)
 		}
 
-		// add user details to request profile
-		user.institutionId = userDb.institutionId
+		// add institution details from allow-list to request profile
+		user.institutionId = configUser.institutionId
+		user.institution = {
+			id: configUser.institutionId,
+			name: configUser.institution,
+		}
 		c.set('user', user)
 
 		// continue with normal workflow, user is authenticated 🎉

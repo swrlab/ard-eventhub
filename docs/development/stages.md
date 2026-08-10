@@ -15,6 +15,7 @@ Der Eventhub unterscheidet zwischen dem über die Umgebungsvariable `STAGE` gese
 | -------------- | -------------------- | --------------------- | --------------------- |
 | Database       | Namespace `dev`      | Namespace `test`      | Namespace `prod`      |
 | Pub/Sub        | Prefix enthält `dev` | Prefix enthält `test` | Prefix enthält `prod` |
+| Users file     | `users.json` (mount) | `users.json` (mount)  | `users.json` (mount)  |
 | Dev Logging    | true                 | true                  | false                 |
 
 ### Ingest Deployment Stages

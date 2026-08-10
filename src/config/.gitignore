@@ -1,1 +1,4 @@
 ard-core-livestreams.*
+users.json
+users-*.json
+!users-*.sops.json

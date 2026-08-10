@@ -59,5 +59,7 @@ decrypt-key file:
 [confirm('This will overwrite all previously decrypted files, are you sure? (type `yes` to continue)')]
 [group('ENCRYPTION')]
 decrypt:
-	just decrypt-key .env.sops.yaml
+	# just decrypt-key .env.sops.yaml
+	just decrypt-key src/config/users-test.sops.json
+	just decrypt-key src/config/users-prod.sops.json
 	just decrypt-key keys/radioplayer-api-keys.sops.json

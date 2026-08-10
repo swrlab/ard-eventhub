@@ -40,6 +40,17 @@ jobs:
           credentials_json: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
           create_credentials_file: true
 
+      - name: 🛠 Setup SOPS
+        run: |
+          curl -fsSL https://github.com/getsops/sops/releases/download/v3.10.2/sops-v3.10.2.linux.amd64 -o "$HOME/sops"
+          chmod +x "$HOME/sops"
+          echo "$HOME" >> "$GITHUB_PATH"
+
+      - name: 🔐 Decrypt users allow-list
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: sops decrypt src/config/users-test.sops.json > src/config/users.json
+
       - name: 📚 Lint Code
         run: bun x oxlint
 
