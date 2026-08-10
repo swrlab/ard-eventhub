@@ -1,4 +1,4 @@
-import type { EventRequestContext } from '#types'
+import type { AuthUser } from '#types'
 import type { EventhubService } from '../../schemas/events.ts'
 import logger from '@frytg/logger'
 // @ts-expect-error - The package does not yet have types.
@@ -14,16 +14,24 @@ const URN_PUBLISHER_REGEX = /(?=urn:ard:publisher:[a-z0-9]{16})/g
 /**
  * Enrich a service with topic ids and block unauthorized publishers.
  * @param service - Service from the event body
- * @param req - Event request context (user + body)
+ * @param params - Authenticated user and event name
  * @returns Updated service (possibly blocked)
  */
-export const processServices = async (service: EventhubService, req: EventRequestContext) => {
+export const processServices = async (
+	service: EventhubService,
+	params: {
+		user: AuthUser
+		eventName: string
+	}
+) => {
+	const { user, eventName } = params
+
 	// fetch prefix from configured list
 	const type = service.type as keyof typeof coreIdPrefixes
 	let urnPrefix = coreIdPrefixes[type]
 
 	// add a different suffix for radio text topics to not confuse subscribers with new event
-	if (req.body.event === 'de.ard.eventhub.v1.radio.text') {
+	if (eventName === 'de.ard.eventhub.v1.radio.text') {
 		urnPrefix = `radio-text:${urnPrefix}`
 	}
 
@@ -59,7 +67,7 @@ export const processServices = async (service: EventhubService, req: EventReques
 		logger.warning({
 			message: `publisher not found > ${service.publisherId}`,
 			source,
-			data: { service, user: req.user, originalPublisherId },
+			data: { service, user, originalPublisherId },
 		})
 
 		// stop processing
@@ -67,7 +75,7 @@ export const processServices = async (service: EventhubService, req: EventReques
 	}
 
 	// check allowed institutions for current user
-	if (!req.user || req.user.institution.id !== publisher?.institution.id) {
+	if (user.institution.id !== publisher.institution.id) {
 		// set blocked flag to be filtered out
 		service.blocked = 'User unauthorized for service'
 
@@ -77,8 +85,8 @@ export const processServices = async (service: EventhubService, req: EventReques
 			source,
 			data: {
 				service,
-				user: req.user,
-				institution: publisher?.institution,
+				user,
+				institution: publisher.institution,
 				originalPublisherId,
 			},
 		})

@@ -21,11 +21,24 @@ const TEMP_PUBLISHER_MAPPING: Record<string, string> = {
 }
 
 /**
- * Gets a publisher by id from core livestreams data
- * @param {string} publisherId - Publisher id
- * @returns {Object} - Publisher
+ * Publisher lookup source. Tests stub `getById` with sinon instead of seeding the ARD feed.
  */
-export const getPublisherById = (publisherId: string): ArdPublisher | undefined => {
-	const mappedPublisherId = TEMP_PUBLISHER_MAPPING[publisherId] ?? publisherId
-	return ardFeed?.items?.find((x: ArdLivestream) => x.publisher.id === mappedPublisherId)?.publisher
+export const publisherLookup = {
+	/**
+	 * Resolve a publisher by id from core livestreams data.
+	 * @param publisherId - Publisher id (URN or legacy)
+	 * @returns Publisher, or `undefined` when unknown
+	 */
+	getById(publisherId: string): ArdPublisher | undefined {
+		const mappedPublisherId = TEMP_PUBLISHER_MAPPING[publisherId] ?? publisherId
+		return ardFeed?.items?.find((x: ArdLivestream) => x.publisher.id === mappedPublisherId)?.publisher
+	},
 }
+
+/**
+ * Gets a publisher by id from core livestreams data
+ * @param publisherId - Publisher id
+ * @returns Publisher, or `undefined` when unknown
+ */
+export const getPublisherById = (publisherId: string): ArdPublisher | undefined =>
+	publisherLookup.getById(publisherId)

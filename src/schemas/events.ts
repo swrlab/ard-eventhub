@@ -440,7 +440,44 @@ export const eventhubPluginMessage = z
 	})
 	.meta({ id: 'eventhubPluginMessage' })
 
+/**
+ * Result of publishing to the common topic or a plugin job.
+ */
+export const eventPluginResult = z
+	.union([
+		z.object({
+			messageId: z.string().nullable(),
+			type: z.string(),
+			topic: z.object({
+				id: z.string(),
+				name: z.string(),
+			}),
+		}),
+		z.object({
+			type: z.string(),
+			messageId: z.string(),
+		}),
+	])
+	.meta({ id: 'eventPluginResult' })
+
+/**
+ * Transport-agnostic result of processing an event publish.
+ */
+export const eventProcessResult = z
+	.object({
+		statuses: z.object({
+			published: z.number(),
+			blocked: z.number(),
+			failed: z.number(),
+		}),
+		plugins: z.array(eventPluginResult),
+		event: eventhubV1RadioPostBody,
+	})
+	.meta({ id: 'eventProcessResult' })
+
 export type EventhubService = z.infer<typeof eventhubService>
 export type EventhubPlugin = z.infer<typeof eventhubPlugin>
 export type EventhubV1RadioPostBody = z.infer<typeof eventhubV1RadioPostBody>
 export type EventhubPluginMessage = z.infer<typeof eventhubPluginMessage>
+export type EventPluginResult = z.infer<typeof eventPluginResult>
+export type EventProcessResult = z.infer<typeof eventProcessResult>

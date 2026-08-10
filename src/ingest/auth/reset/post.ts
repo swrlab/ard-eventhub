@@ -22,12 +22,7 @@ export const authResetPost = async (c: Context) => {
 		try {
 			await firebaseSendPasswordResetEmail(body.email as string)
 		} catch (error) {
-			logger.notice({
-				message: 'failed resetting password',
-				source,
-				error,
-				data: { email: body.email },
-			})
+			logger.notice({ message: 'failed resetting password', source, error, data: { email: body.email } })
 
 			return responseBadRequest(c, { status: 500, message: 'Could not reset auth' })
 		}

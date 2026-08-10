@@ -14,17 +14,3 @@ export type AuthUser = DecodedIdToken & {
 		name: string
 	}
 }
-
-/**
- * Minimal request context passed to event helpers.
- */
-export type EventRequestContext = {
-	user?: AuthUser | undefined
-	body: {
-		event?: string
-		type?: string
-		start?: string
-		[key: string]: unknown
-	}
-	headers: Record<string, string | undefined>
-}

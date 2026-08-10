@@ -20,22 +20,14 @@ export const authVerify: MiddlewareHandler = async (c, next) => {
 
 		// check existence of x-auth... header
 		if (!(authorization && regexp.test(authorization))) {
-			logger.notice({
-				message: 'user token missing',
-				source,
-				data: getSafeHeaders(c.req.raw.headers),
-			})
+			logger.notice({ message: 'user token missing', source, data: getSafeHeaders(c.req.raw.headers) })
 			return c.body(null, 401)
 		}
 		// extract token
 		;[authorization] = authorization.match(regexp) || []
 
 		if (!authorization) {
-			logger.notice({
-				message: 'user token missing',
-				source,
-				data: getSafeHeaders(c.req.raw.headers),
-			})
+			logger.notice({ message: 'user token missing', source, data: getSafeHeaders(c.req.raw.headers) })
 			return c.body(null, 401)
 		}
 
@@ -61,11 +53,7 @@ export const authVerify: MiddlewareHandler = async (c, next) => {
 		const configUser = getConfigUser(tokenUser.email)
 
 		if (!configUser) {
-			logger.notice({
-				message: `user not found or not active > ${tokenUser.email}`,
-				source,
-				data: getSafeHeaders(c.req.raw.headers),
-			})
+			logger.notice({ message: `user not found > ${tokenUser.email}`, source, data: getSafeHeaders(c.req.raw.headers) })
 			return c.json(ERROR_JSON, 403)
 		}
 
@@ -82,12 +70,7 @@ export const authVerify: MiddlewareHandler = async (c, next) => {
 		await next()
 		return
 	} catch (error) {
-		logger.error({
-			message: 'failed to verify user',
-			source,
-			error,
-			data: getSafeHeaders(c.req.raw.headers),
-		})
+		logger.error({ message: 'failed to verify user', source, error, data: getSafeHeaders(c.req.raw.headers) })
 
 		return c.body(null, 500)
 	}
