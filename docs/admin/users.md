@@ -9,10 +9,11 @@ Um sich beim Eventhub zu authentifizieren und mit der API zu arbeiten, benötigs
 
 Zur Laufzeit liest der Ingest-Service `src/config/users.json` (gitignored; in Kubernetes oft als Volume gemountet).
 
-Quellen in Git (verschlüsselt):
+Quellen in Git:
 
-- `users-test.sops.json` — Vorlagen/Quelle für Test/Dev
-- `users-prod.sops.json` — Vorlagen/Quelle für Prod
+- `users-test.sops.json` — verschlüsselte Vorlagen/Quelle für Test/Dev
+- `users-prod.sops.json` — verschlüsselte Vorlagen/Quelle für Prod
+- `users.ci.json` — öffentliche CI-/Test-Fixture (kein SOPS)
 
 Lokal erzeugen z. B. mit:
 
@@ -20,6 +21,9 @@ Lokal erzeugen z. B. mit:
 just decrypt-key src/config/users-test.sops.json
 # bzw. für den Laufzeit-Pfad:
 sops decrypt src/config/users-test.sops.json > src/config/users.json
+
+# für CI-ähnliche lokale Tests ohne SOPS:
+cp src/config/users.ci.json src/config/users.json
 ```
 
 Jeder Eintrag hat die Form:

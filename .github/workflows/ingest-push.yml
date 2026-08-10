@@ -49,10 +49,8 @@ jobs:
           cache: true
           github_token: ${{ github.token }}
 
-      - name: 🔐 Decrypt users allow-list
-        env:
-          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-        run: sops decrypt src/config/users-test.sops.json > src/config/users.json
+      - name: 🧾 Install CI users allow-list
+        run: cp src/config/users.ci.json src/config/users.json
 
       - name: 📚 Lint Code
         run: bun x oxlint
@@ -100,10 +98,8 @@ jobs:
           cache: true
           github_token: ${{ github.token }}
 
-      - name: 🔐 Decrypt users allow-lists
-        env:
-          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-        run: sops decrypt src/config/users-test.sops.json > src/config/users.json
+      - name: 🧾 Install CI users allow-list
+        run: cp src/config/users.ci.json src/config/users.json
 
       - name: 🔑 Login to Registry
         run: 'gcloud auth configure-docker $REGISTRY_DOMAIN'

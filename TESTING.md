@@ -15,7 +15,13 @@ In addition to the [ingest-env](../src/ingest/README.md#Environments), following
 
 ## Setup
 
-Follow the [ingest-setup](../src/ingest/README.md) first, then run tests with
+Follow the [ingest-setup](../src/ingest/README.md) first. Tests import `src/config/users.json`; for a CI-like allow-list without decrypting SOPS:
+
+```sh
+cp src/config/users.ci.json src/config/users.json
+```
+
+Then run tests with:
 
 ```sh
 just test
