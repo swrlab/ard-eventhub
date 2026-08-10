@@ -15,10 +15,11 @@ In addition to the [ingest-env](../src/ingest/README.md#Environments), following
 
 ## Setup
 
-Follow the [ingest-setup](../src/ingest/README.md) first. Tests import `src/config/users.json`; for a CI-like allow-list without decrypting SOPS:
+Follow the [ingest-setup](../src/ingest/README.md) first. Tests import `src/config/users.json`. For the CI allow-list fixture:
 
 ```sh
-cp src/config/users.ci.json src/config/users.json
+# requires the CI age private key in SOPS_AGE_KEY
+sops decrypt src/config/users.ci.sops.json > src/config/users.json
 ```
 
 Then run tests with:

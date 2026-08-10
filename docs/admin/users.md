@@ -13,7 +13,7 @@ Quellen in Git:
 
 - `users-test.sops.json` — verschlüsselte Vorlagen/Quelle für Test/Dev
 - `users-prod.sops.json` — verschlüsselte Vorlagen/Quelle für Prod
-- `users.ci.json` — öffentliche CI-/Test-Fixture (kein SOPS)
+- `users.ci.sops.json` — CI-Fixture (age-Key für GitHub Actions, Regel `.ci.sops.*` in `.sops.yaml`)
 
 Lokal erzeugen z. B. mit:
 
@@ -22,8 +22,8 @@ just decrypt-key src/config/users-test.sops.json
 # bzw. für den Laufzeit-Pfad:
 sops decrypt src/config/users-test.sops.json > src/config/users.json
 
-# für CI-ähnliche lokale Tests ohne SOPS:
-cp src/config/users.ci.json src/config/users.json
+# CI-Fixture (benötigt den CI-age-Private-Key als SOPS_AGE_KEY):
+sops decrypt src/config/users.ci.sops.json > src/config/users.json
 ```
 
 Jeder Eintrag hat die Form:

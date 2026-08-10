@@ -33,6 +33,9 @@ Secrets in GitHub sind standardmäßig für Benutzer write-only. Admins kannst d
   - E‑Mail-Adresse des Testnutzers für `STAGE=dev` welche für Tests benutzt wird
 - `TEST_USER_PW`
   - Passwort des Testnutzers
+- `SOPS_AGE_PRIVATE_KEY`
+  - Age-Private-Key für `.ci.sops.*`-Dateien (z. B. `users.ci.sops.json`)
+  - Wird in Workflows als `SOPS_AGE_KEY` an sops übergeben
 
 ## Google Cloud
 
