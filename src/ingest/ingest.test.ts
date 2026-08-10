@@ -5,8 +5,7 @@ import { test } from '@cross/test'
 import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { assert, assertExists, assertGreater, assertStrictEquals } from '@std/assert'
-import request, { type Response } from 'supertest'
-import server from './index.ts'
+import app from './index.ts'
 
 /**
  * Log an error and exit the process when required test env is missing.
@@ -30,15 +29,59 @@ const testUser = process.env.TEST_USER
 const testUserPass = process.env.TEST_USER_PW
 const testUserReset = process.env.TEST_USER_RESET
 
+/** Parsed HTTP response for ingest tests. */
+type TestResponse = {
+	status: number
+	statusCode: number
+	body: any
+	headers: Headers
+}
+
+/**
+ * Perform an HTTP request against the Hono app.
+ * @param method - HTTP method
+ * @param path - Request path
+ * @param options - Optional headers and JSON body
+ * @returns Parsed response
+ */
+const request = async (
+	method: string,
+	path: string,
+	options: { headers?: Record<string, string>; body?: unknown } = {}
+): Promise<TestResponse> => {
+	const headers = new Headers(options.headers)
+	let body: string | undefined
+	if (options.body !== undefined) {
+		headers.set('content-type', 'application/json')
+		body = JSON.stringify(options.body)
+	}
+
+	const res = await app.request(path, body === undefined ? { method, headers } : { method, headers, body })
+	const text = await res.text()
+	let parsed: any = text
+	try {
+		parsed = text ? JSON.parse(text) : null
+	} catch {
+		parsed = text
+	}
+
+	return {
+		status: res.status,
+		statusCode: res.status,
+		body: parsed,
+		headers: res.headers,
+	}
+}
+
 /**
  * Assert a JSON response with the expected HTTP status.
- * @param res - Supertest response
+ * @param res - App response
  * @param status - Expected status code
  */
-function testResponse(res: Response, status: number) {
+function testResponse(res: TestResponse, status: number) {
 	console.log(`comparing response with statusCode ${res.statusCode} (should be ${status})`)
 
-	assert(isJson(res))
+	assert(isJson(res.body))
 	assertStrictEquals(res.status, status)
 }
 
@@ -60,18 +103,18 @@ function isJson(item: any) {
 
 /**
  * Assert a failed auth response (403).
- * @param res - Supertest response
+ * @param res - App response
  */
-function testFailedAuth(res: Response) {
+function testFailedAuth(res: TestResponse) {
 	testResponse(res, 403)
 }
 
 /**
  * Assert a missing auth response (401).
- * @param res - Supertest response
+ * @param res - App response
  */
-function testMissingAuth(res: Response) {
-	testResponse(res, 401)
+function testMissingAuth(res: TestResponse) {
+	assertStrictEquals(res.status, 401)
 }
 
 /*
@@ -105,7 +148,7 @@ test(`POST ${loginPath}`, async () => {
 		password: testUserPass,
 	}
 
-	const res = await request(server).post(loginPath).send(loginRequest)
+	const res = await request('POST', loginPath, { body: loginRequest })
 	testResponse(res, 200)
 	testAuthKeys(res.body)
 	// Store tokens for further tests
@@ -120,7 +163,7 @@ test(`POST ${refreshPath}`, async () => {
 		refreshToken: refreshToken,
 	}
 
-	const res = await request(server).post(refreshPath).send(refreshRequest)
+	const res = await request('POST', refreshPath, { body: refreshRequest })
 	testResponse(res, 200)
 	testAuthKeys(res.body)
 
@@ -137,7 +180,7 @@ if (testUserReset === 'true') {
 			email: testUser,
 		}
 
-		const res = await request(server).post(resetPath).send(resetRequest)
+		const res = await request('POST', resetPath, { body: resetRequest })
 		testResponse(res, 200)
 	})
 }
@@ -195,37 +238,52 @@ const event = {
 
 test(`POST ${eventPath}`, async (t) => {
 	await t.step('test missing auth for POST /event', async () => {
-		const res = await request(server).post(eventPath).send(event)
+		const res = await request('POST', eventPath, { body: event })
 		testMissingAuth(res)
 	})
 
 	await t.step('test invalid auth for POST /event', async () => {
-		const res = await request(server).post(eventPath).set('Authorization', `Bearer invalid${accessToken}`).send(event)
+		const res = await request('POST', eventPath, {
+			headers: { Authorization: `Bearer invalid${accessToken}` },
+			body: event,
+		})
 		testFailedAuth(res)
 	})
 
 	await t.step('publish a new event', async () => {
-		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
+		const res = await request('POST', eventPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: event,
+		})
 		testResponse(res, 201)
 		testEventKeys(res.body)
 	})
 
 	await t.step('publish a new event with expired time', async () => {
 		event.start = DateTime.now().minus({ minutes: 20 }).toISO()
-		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
+		const res = await request('POST', eventPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: event,
+		})
 		testResponse(res, 400)
 	})
 
 	await t.step('publish a new event with invalid time', async () => {
 		event.start = `${DateTime.now().toISO()}00`
-		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
+		const res = await request('POST', eventPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: event,
+		})
 		testResponse(res, 400)
 	})
 
 	await t.step('publish a new event with invalid externalId in references', async () => {
 		// @ts-expect-error - we know that the object won't be null
 		event.references[1].externalId = null
-		const res = await request(server).post(eventPath).set('Authorization', `Bearer ${accessToken}`).send(event)
+		const res = await request('POST', eventPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: event,
+		})
 		testResponse(res, 400)
 	})
 
@@ -254,10 +312,10 @@ test(`POST ${eventPath}`, async (t) => {
 				},
 			],
 		}
-		const res = await request(server)
-			.post(eventPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send(eventWithFallbackMedia)
+		const res = await request('POST', eventPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: eventWithFallbackMedia,
+		})
 		testResponse(res, 201)
 		testEventKeys(res.body)
 	})
@@ -287,10 +345,10 @@ test(`POST ${eventPath}`, async (t) => {
 				},
 			],
 		}
-		const res = await request(server)
-			.post(eventPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send(eventWithNonFallbackMedia)
+		const res = await request('POST', eventPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: eventWithNonFallbackMedia,
+		})
 		testResponse(res, 201)
 		testEventKeys(res.body)
 	})
@@ -319,10 +377,10 @@ test(`POST ${eventPath}`, async (t) => {
 				},
 			],
 		}
-		const res = await request(server)
-			.post(eventPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send(eventWithoutIsFallback)
+		const res = await request('POST', eventPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: eventWithoutIsFallback,
+		})
 		testResponse(res, 201)
 		testEventKeys(res.body)
 	})
@@ -342,10 +400,10 @@ test(`POST ${eventPath}`, async (t) => {
 			],
 			playlistItemId: 'unit-test-id-in-playlist-567-blocked',
 		}
-		const res = await request(server)
-			.post(eventPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send(eventWithBlockedService)
+		const res = await request('POST', eventPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: eventWithBlockedService,
+		})
 		testResponse(res, 201)
 		testEventKeys(res.body)
 
@@ -380,10 +438,10 @@ test(`POST ${eventPath}`, async (t) => {
 				],
 				playlistItemId: 'unit-test-id-in-playlist-567-mixed',
 			}
-			const res = await request(server)
-				.post(eventPath)
-				.set('Authorization', `Bearer ${accessToken}`)
-				.send(eventWithMixedServices)
+			const res = await request('POST', eventPath, {
+				headers: { Authorization: `Bearer ${accessToken}` },
+				body: eventWithMixedServices,
+			})
 			testResponse(res, 201)
 			testEventKeys(res.body)
 
@@ -417,10 +475,10 @@ test(`POST ${eventPath}`, async (t) => {
 			],
 			playlistItemId: 'unit-test-id-in-playlist-567-non-blocked',
 		}
-		const res = await request(server)
-			.post(eventPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send(eventWithNonBlockedServices)
+		const res = await request('POST', eventPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: eventWithNonBlockedServices,
+		})
 		testResponse(res, 201)
 		testEventKeys(res.body)
 
@@ -455,42 +513,42 @@ const eventRadioText = {
 
 test(`POST ${eventRadioTextPath}`, async (t) => {
 	await t.step('test missing auth for POST /event', async () => {
-		const res = await request(server).post(eventRadioTextPath).send(eventRadioText)
+		const res = await request('POST', eventRadioTextPath, { body: eventRadioText })
 		testMissingAuth(res)
 	})
 
 	await t.step('test invalid auth for POST /event', async () => {
-		const res = await request(server)
-			.post(eventRadioTextPath)
-			.set('Authorization', `Bearer invalid${accessToken}`)
-			.send(eventRadioText)
+		const res = await request('POST', eventRadioTextPath, {
+			headers: { Authorization: `Bearer invalid${accessToken}` },
+			body: eventRadioText,
+		})
 		testFailedAuth(res)
 	})
 
 	await t.step('publish a new event', async () => {
-		const res = await request(server)
-			.post(eventRadioTextPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send(eventRadioText)
+		const res = await request('POST', eventRadioTextPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: eventRadioText,
+		})
 		testResponse(res, 201)
 		testEventKeys(res.body)
 	})
 
 	await t.step('publish a new event with expired time', async () => {
 		eventRadioText.start = DateTime.now().minus({ minutes: 20 }).toISO()
-		const res = await request(server)
-			.post(eventRadioTextPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send(eventRadioText)
+		const res = await request('POST', eventRadioTextPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: eventRadioText,
+		})
 		testResponse(res, 400)
 	})
 
 	await t.step('publish a new event with invalid time', async () => {
 		eventRadioText.start = `${DateTime.now().toISO()}00`
-		const res = await request(server)
-			.post(eventRadioTextPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send(eventRadioText)
+		const res = await request('POST', eventRadioTextPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: eventRadioText,
+		})
 		testResponse(res, 400)
 	})
 })
@@ -522,12 +580,16 @@ function testTopicKeys(body: any) {
 
 test(`GET ${topicPath}`, async (t) => {
 	await t.step(`test auth for GET ${topicPath}`, async () => {
-		const res = await request(server).get(topicPath).set('Authorization', `Bearer invalid${accessToken}`)
+		const res = await request('GET', topicPath, {
+			headers: { Authorization: `Bearer invalid${accessToken}` },
+		})
 		testFailedAuth(res)
 	})
 
 	await t.step('list all available topics', async () => {
-		const res = await request(server).get(topicPath).set('Authorization', `Bearer ${accessToken}`)
+		const res = await request('GET', topicPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		})
 		testResponse(res, 200)
 		assert(Array.isArray(res.body))
 		res.body.every((i: any) => testTopicKeys(i))
@@ -592,18 +654,18 @@ test(`POST ${subscriptPath}`, async (t) => {
 	}
 
 	await t.step(`test auth for POST ${subscriptPath}`, async () => {
-		const res = await request(server)
-			.post(subscriptPath)
-			.set('Authorization', `Bearer invalid${accessToken}`)
-			.send(subscription)
+		const res = await request('POST', subscriptPath, {
+			headers: { Authorization: `Bearer invalid${accessToken}` },
+			body: subscription,
+		})
 		testFailedAuth(res)
 	})
 
 	await t.step('add a new subscription to this user', async () => {
-		const res = await request(server)
-			.post(subscriptPath)
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send(subscription)
+		const res = await request('POST', subscriptPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: subscription,
+		})
 		testResponse(res, 201)
 		testSubscriptionKeys(res.body)
 		// Store subscription name for further tests
@@ -613,12 +675,16 @@ test(`POST ${subscriptPath}`, async (t) => {
 
 test(`GET ${subscriptPath}`, async (t) => {
 	await t.step(`test auth for GET ${subscriptPath}`, async () => {
-		const res = await request(server).get(subscriptPath).set('Authorization', `Bearer invalid${accessToken}`)
+		const res = await request('GET', subscriptPath, {
+			headers: { Authorization: `Bearer invalid${accessToken}` },
+		})
 		testFailedAuth(res)
 	})
 
 	await t.step('list all subscriptions for this user', async () => {
-		const res = await request(server).get(subscriptPath).set('Authorization', `Bearer ${accessToken}`)
+		const res = await request('GET', subscriptPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		})
 		testResponse(res, 200)
 		res.body.every((i: any) => testSubscriptionKeys(i))
 	})
@@ -626,16 +692,16 @@ test(`GET ${subscriptPath}`, async (t) => {
 
 test(`GET ${subscriptPath}/{name}`, async (t) => {
 	await t.step(`test auth for GET ${subscriptPath}/{name}`, async () => {
-		const res = await request(server)
-			.get(`${subscriptPath}/${subscriptionName}`)
-			.set('Authorization', `Bearer invalid${accessToken}`)
+		const res = await request('GET', `${subscriptPath}/${subscriptionName}`, {
+			headers: { Authorization: `Bearer invalid${accessToken}` },
+		})
 		testFailedAuth(res)
 	})
 
 	await t.step('get details about single subscription from this user', async () => {
-		const res = await request(server)
-			.get(`${subscriptPath}/${subscriptionName}`)
-			.set('Authorization', `Bearer ${accessToken}`)
+		const res = await request('GET', `${subscriptPath}/${subscriptionName}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		})
 		testResponse(res, 200)
 		testSubscriptionKeys(res.body)
 	})
@@ -643,16 +709,16 @@ test(`GET ${subscriptPath}/{name}`, async (t) => {
 
 test(`DELETE ${subscriptPath}/{name}`, async (t) => {
 	await t.step(`test auth for DELETE ${subscriptPath}/{name}`, async () => {
-		const res = await request(server)
-			.delete(`${subscriptPath}/${subscriptionName}`)
-			.set('Authorization', `Bearer invalid${accessToken}`)
+		const res = await request('DELETE', `${subscriptPath}/${subscriptionName}`, {
+			headers: { Authorization: `Bearer invalid${accessToken}` },
+		})
 		testFailedAuth(res)
 	})
 
 	await t.step('remove a single subscription by this user', async () => {
-		const res = await request(server)
-			.delete(`${subscriptPath}/${subscriptionName}`)
-			.set('Authorization', `Bearer ${accessToken}`)
+		const res = await request('DELETE', `${subscriptPath}/${subscriptionName}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		})
 		testResponse(res, 200)
 		assertExists(res.body.valid)
 		assertStrictEquals(res.body.valid, true)

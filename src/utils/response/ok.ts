@@ -1,19 +1,23 @@
-/*
+import type { Context } from 'hono'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
-import type { Request, Response } from 'express'
-
-export default (req: Request, res: Response, data: object, status?: number) => {
+/**
+ * Send a successful JSON response including the cloud trace header when present.
+ * @param c - Hono context
+ * @param data - Response body fields
+ * @param status - HTTP status (default 200)
+ * @returns Hono response
+ */
+export default (c: Context, data: object, status?: number) => {
 	try {
-		return res.status(status || 200).json({
-			...data,
-			trace: req.headers['x-cloud-trace-context'] || null,
-		})
+		return c.json(
+			{
+				...data,
+				trace: c.req.header('x-cloud-trace-context') || null,
+			},
+			(status || 200) as ContentfulStatusCode
+		)
 	} catch {
-		return res.sendStatus(500)
+		return c.body(null, 500)
 	}
 }

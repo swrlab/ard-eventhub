@@ -1,39 +1,46 @@
-import type { Response, UserTokenRequest } from '#types'
+import type { Context } from 'hono'
+import type { AppVariables, AuthUser } from '#types'
 import logger from '@frytg/logger'
 import getSubscriptions from '../../utils/pubsub/getSubscriptions.ts'
 import responseInternalServerError from '../../utils/response/internalServerError.ts'
 
 const source = 'ingest/subscriptions/list'
 
-export default async (req: UserTokenRequest, res: Response) => {
+/**
+ * List subscriptions for the authenticated user's institution.
+ * @param c - Hono context
+ * @returns Subscription list
+ */
+export default async (c: Context<{ Variables: AppVariables }>) => {
 	try {
+		const user = c.get('user') as AuthUser | undefined
 		// check if user is present
-		if (!req.user) {
+		if (!user) {
 			logger.log({
 				level: 'notice',
 				message: 'user not found',
 				source,
 				data: {
-					...req.headers,
+					...Object.fromEntries(c.req.raw.headers),
 					authorization: 'hidden',
 				},
 			})
-			return responseInternalServerError(req, res, new Error('User not found'))
+			return responseInternalServerError(c, new Error('User not found'))
 		}
 
 		// check if a user has an institutionId
-		const institutionId = req.user.institutionId
+		const institutionId = user.institutionId
 		if (!institutionId) {
 			logger.log({
 				level: 'notice',
-				message: `institutionId not found for user > ${req.user.email}`,
+				message: `institutionId not found for user > ${user.email}`,
 				source,
 				data: {
-					...req.headers,
+					...Object.fromEntries(c.req.raw.headers),
 					authorization: 'hidden',
 				},
 			})
-			return responseInternalServerError(req, res, new Error('User not found'))
+			return responseInternalServerError(c, new Error('User not found'))
 		}
 
 		// load all subscriptions
@@ -42,7 +49,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		// verify if user is allowed to list subscriptions (same institution)
 		subscriptions = subscriptions.filter((subscription) => subscription?.institutionId === institutionId)
 
-		return res.status(200).json(subscriptions)
+		return c.json(subscriptions, 200)
 	} catch (error) {
 		logger.log({
 			level: 'error',
@@ -51,6 +58,6 @@ export default async (req: UserTokenRequest, res: Response) => {
 			error,
 		})
 
-		return responseInternalServerError(req, res, error as Error)
+		return responseInternalServerError(c, error as Error)
 	}
 }

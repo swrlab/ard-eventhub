@@ -1,47 +1,49 @@
+import type { AppVariables } from '#types'
 import logger from '@frytg/logger'
-import compression from 'compression'
-import express from 'express'
+import { Hono } from 'hono'
+import { compress } from 'hono/compress'
 import { serviceUrl, userAgent, version } from '#config'
 import { isLocal, port, serviceName } from '#env'
 import { getARDFeed } from '../data/index.ts'
-import router from './router.ts'
+import createRouter from './router.ts'
 
 await getARDFeed()
 
-const server = express()
+const app = new Hono<{ Variables: AppVariables }>({ strict: false })
 
 // add debugging information to all headers
-server.use((req, res, next) => {
-	// add service information
-	res.set('x-service', userAgent)
+app.use('*', async (c, next) => {
+	c.header('x-service', userAgent)
 
 	// log all headers in local mode
 	if (isLocal) {
 		const logHeaders = {
-			...req.headers,
+			...Object.fromEntries(c.req.raw.headers),
 			authorization: 'hidden',
 		}
 		logger.log({
 			level: 'debug',
 			message: 'middleware logging',
 			source: 'DEV',
-			data: { logHeaders, path: req.path },
+			data: { logHeaders, path: c.req.path },
 		})
 	}
-	next()
+	await next()
 })
 
-server.use('/', router)
-server.use(compression())
-server.disable('x-powered-by')
+app.use('*', compress())
+app.route('/', createRouter())
 
 // Run the server if this file is invoked directly
 if (import.meta.main) {
-	server.listen(port)
+	Bun.serve({
+		fetch: app.fetch,
+		port: port ?? 8080,
+	})
 }
 
 if (isLocal) {
 	console.log(`${serviceName} (v${version}) is running at: ${serviceUrl}`)
 }
 
-export default server
+export default app

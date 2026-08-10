@@ -1,11 +1,5 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
-import type { NextFunction, Response, UserTokenRequest } from '#types'
+import type { MiddlewareHandler } from 'hono'
+import type { AppVariables, AuthUser } from '#types'
 import logger from '@frytg/logger'
 import datastoreLoad from '../../../utils/datastore/load.ts'
 import firebaseVerifyToken from '../../../utils/firebase/verifyToken.ts'
@@ -13,11 +7,15 @@ import firebaseVerifyToken from '../../../utils/firebase/verifyToken.ts'
 const source = 'ingest/auth/middleware/verify'
 const ERROR_JSON = { message: 'Forbidden', errors: [], status: 403 }
 
-export default async (req: UserTokenRequest, res: Response, next: NextFunction) => {
+/**
+ * Verify Bearer / x-authorization JWT, load active user, and set `c.get('user')`.
+ * @returns Hono middleware
+ */
+const authVerify: MiddlewareHandler<{ Variables: AppVariables }> = async (c, next) => {
 	try {
 		// parse input, preset vars
 		const regexp = /(?!Bearer\s{1})([a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+)/g
-		let authorization = req.headers['x-authorization']?.toString() || req.headers.authorization
+		let authorization = c.req.header('x-authorization') || c.req.header('authorization')
 
 		// check existence of x-auth... header
 		if (!(authorization && regexp.test(authorization))) {
@@ -26,11 +24,11 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 				message: 'user token missing',
 				source,
 				data: {
-					...req.headers,
+					...Object.fromEntries(c.req.raw.headers),
 					authorization: 'hidden',
 				},
 			})
-			return res.sendStatus(401)
+			return c.body(null, 401)
 		}
 		// extract token
 		;[authorization] = authorization.match(regexp) || []
@@ -41,20 +39,19 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 				message: 'user token missing',
 				source,
 				data: {
-					...req.headers,
+					...Object.fromEntries(c.req.raw.headers),
 					authorization: 'hidden',
 				},
 			})
-			return res.sendStatus(401)
+			return c.body(null, 401)
 		}
 
 		// validate JWT token with firebase
+		let user: AuthUser
 		try {
-			// successful verifications will save JWT user profile to req
-			const user = await firebaseVerifyToken(authorization)
-
-			req.user = user
-			res.set('x-ard-eventhub-uid', user.uid)
+			user = await firebaseVerifyToken(authorization)
+			c.set('user', user)
+			c.header('x-ard-eventhub-uid', user.uid)
 		} catch (error) {
 			logger.log({
 				level: 'notice',
@@ -62,28 +59,28 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 				source,
 				error,
 				data: {
-					...req.headers,
+					...Object.fromEntries(c.req.raw.headers),
 					authorization: 'hidden',
 				},
 			})
-			return res.status(403).json(ERROR_JSON)
+			return c.json(ERROR_JSON, 403)
 		}
 
-		if (!req.user.email) {
+		if (!user.email) {
 			logger.log({
 				level: 'notice',
 				message: 'user email missing',
 				source,
 				data: {
-					...req.headers,
+					...Object.fromEntries(c.req.raw.headers),
 					authorization: 'hidden',
 				},
 			})
-			return res.status(403).json(ERROR_JSON)
+			return c.json(ERROR_JSON, 403)
 		}
 
 		// lookup user in DB
-		const userDb = await datastoreLoad('users', req.user.email)
+		const userDb = await datastoreLoad('users', user.email)
 
 		// check if profile exists and valid
 		if (userDb?.active !== true) {
@@ -92,27 +89,31 @@ export default async (req: UserTokenRequest, res: Response, next: NextFunction) 
 				message: 'user not found or not active',
 				source,
 				data: {
-					...req.headers,
+					...Object.fromEntries(c.req.raw.headers),
 					authorization: 'hidden',
 				},
 			})
-			return res.status(403).json(ERROR_JSON)
+			return c.json(ERROR_JSON, 403)
 		}
 
 		// add user details to request profile
-		req.user.institutionId = userDb.institutionId
+		user.institutionId = userDb.institutionId
+		c.set('user', user)
 
 		// continue with normal workflow, user is authenticated 🎉
-		return next()
+		await next()
+		return
 	} catch (error) {
 		logger.log({
 			level: 'error',
 			message: 'failed to verify user',
 			source,
 			error,
-			data: { ...req.headers, authorization: 'hidden' },
+			data: { ...Object.fromEntries(c.req.raw.headers), authorization: 'hidden' },
 		})
 
-		return res.sendStatus(500)
+		return c.body(null, 500)
 	}
 }
+
+export default authVerify

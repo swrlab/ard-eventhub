@@ -6,7 +6,9 @@ on:
       - main
     paths:
       - docs/**
-      - openapi.yaml
+      - openapi.json
+      - src/schemas/**
+      - src/openapi/**
       - blume.config.ts
       - public/**
       - package.json

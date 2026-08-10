@@ -1,4 +1,6 @@
-import type { ArdLivestream, EventhubSubscriptionDatastore, Response, UserTokenRequest } from '#types'
+import type { Context } from 'hono'
+import type { AppVariables, ArdLivestream, AuthUser, EventhubSubscriptionDatastore } from '#types'
+import type { SubscriptionPost } from '../../schemas/subscriptions.ts'
 import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { ulid } from 'ulid'
@@ -12,13 +14,20 @@ import pubsubGetTopic from '../../utils/pubsub/getTopic.ts'
 import responseBadRequest from '../../utils/response/badRequest.ts'
 import responseInternalServerError from '../../utils/response/internalServerError.ts'
 import responseNotFound from '../../utils/response/notFound.ts'
+import { getValidatedBody } from '../../utils/validation/zod-validate.ts'
 
 const source = 'ingest/subscriptions/post'
 
-export default async (req: UserTokenRequest, res: Response) => {
+/**
+ * Create a new push subscription for the authenticated user.
+ * @param c - Hono context
+ * @returns Created subscription
+ */
+export default async (c: Context<{ Variables: AppVariables }>) => {
+	const body = getValidatedBody<SubscriptionPost>(c)
 	try {
 		// fetch user from request
-		const user = req.user
+		const user = c.get('user') as AuthUser | undefined
 
 		// check if user is present
 		if (!user?.email) {
@@ -27,11 +36,11 @@ export default async (req: UserTokenRequest, res: Response) => {
 				message: 'user not found',
 				source,
 				data: {
-					...req.headers,
+					...Object.fromEntries(c.req.raw.headers),
 					authorization: 'hidden',
 				},
 			})
-			return responseInternalServerError(req, res, new Error('User not found'))
+			return responseInternalServerError(c, new Error('User not found'))
 		}
 
 		// generate subscription name
@@ -44,8 +53,8 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		// check if user has institution set
 		if (!institutionExists) {
-			const institutionId = user.institution.id
-			const institutionName = user.institution.name
+			const institutionId = user.institution?.id
+			const institutionName = user.institution?.name
 
 			// log action
 			logger.log({
@@ -53,7 +62,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 				message: 'user attempted to create subscription without institution',
 				source,
 				data: {
-					topic: req.body.topic,
+					topic: body.topic,
 					stage: stage,
 					email: user.email,
 					institutionExists,
@@ -62,7 +71,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 			})
 
 			// return 401 error
-			return responseBadRequest(req, res, {
+			return responseBadRequest(c, {
 				status: 401,
 				message: `New subscriptions are not allowed for user '${user.email}'`,
 				errors: `The institution '${institutionId}' (${institutionName}) wasn't found in ARD Core-API`,
@@ -71,21 +80,21 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		// check if there is an invalid url
 
-		if (!req.body.url) {
+		if (!body.url) {
 			// return 422 error
-			return responseBadRequest(req, res, {
+			return responseBadRequest(c, {
 				status: 422,
 				message: 'The URL in the body is missing',
 				errors: 'The URL in the body is missing',
 			})
 		}
 
-		const url: URL = new URL(req.body.url)
+		const url: URL = new URL(body.url)
 
 		// localhost check
 		if (url.hostname.startsWith('localhost')) {
 			// return 422 error
-			return responseBadRequest(req, res, {
+			return responseBadRequest(c, {
 				status: 422,
 				message: 'An invalid URL was sent for the subscription',
 				errors: `A localhost URL was sent ('${url}') which is not allowed`,
@@ -95,7 +104,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		// ip address check
 		if (url.hostname.match('([\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3})') !== null) {
 			// return 422 error
-			return responseBadRequest(req, res, {
+			return responseBadRequest(c, {
 				status: 422,
 				message: 'An invalid URL was sent for the subscription',
 				errors: 'IP addresses are not valid urls',
@@ -104,7 +113,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		if (url.protocol !== 'https:') {
 			// return 422 error
-			return responseBadRequest(req, res, {
+			return responseBadRequest(c, {
 				status: 422,
 				message: 'An invalid URL was sent for the subscription',
 				errors: "The URL isn't a secure website please send one that starts with https",
@@ -114,14 +123,14 @@ export default async (req: UserTokenRequest, res: Response) => {
 		// map inputs
 		const subscriptionInputData: EventhubSubscriptionDatastore = {
 			name: `${prefix}${ulid()}`,
-			type: req.body.type,
-			method: req.body.method,
-			url: req.body.url,
-			contact: req.body.contact,
-			topic: pubsubBuildId(req.body.topic),
+			type: body.type,
+			method: body.method,
+			url: body.url,
+			contact: body.contact,
+			topic: pubsubBuildId(body.topic),
 
 			creator: user.email,
-			institutionId: user.institutionId,
+			institutionId: user.institutionId as string,
 			created: DateTime.now().toISO(),
 		}
 
@@ -139,7 +148,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 			})
 
 			// return 404 error
-			return responseNotFound(req, res, {
+			return responseNotFound(c, {
 				status: 404,
 				message: `Topic '${subscriptionInputData.topic}' not found`,
 			})
@@ -153,16 +162,16 @@ export default async (req: UserTokenRequest, res: Response) => {
 		// request creation of subscription
 		const createdSubscription = await pubsubCreateSubscription(subscription)
 
-		return res.status(201).json(createdSubscription)
+		return c.json(createdSubscription, 201)
 	} catch (error) {
 		logger.log({
 			level: 'error',
 			message: 'failed to create subscription',
 			source,
 			error,
-			data: { body: req.body },
+			data: { body },
 		})
 
-		return responseInternalServerError(req, res, error as Error)
+		return responseInternalServerError(c, error as Error)
 	}
 }

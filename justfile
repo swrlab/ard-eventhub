@@ -43,6 +43,11 @@ lint:
 format:
 	bun x oxfmt
 
+# regenerate openapi.json from Zod schemas
+[group('LOCAL')]
+openapi:
+	bun run openapi
+
 # serve the documentation (dev server with hot reload)
 [group('LOCAL')]
 docs:

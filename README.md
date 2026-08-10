@@ -68,10 +68,9 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `@google-cloud/secret-manager` | [Apache License 2.0](https://github.com/googleapis/nodejs-secret-manager/blob/master/LICENSE)      |
 | NPM     | `@std/ulid`                    | [MIT](https://github.com/swrlab/node-utils/blob/main/LICENSE.md)                                   |
 | NPM     | `@swrlab/utils`                | [MIT](https://github.com/swrlab/node-utils/blob/main/LICENSE.md)                                   |
-| NPM     | `compression`                  | [MIT](https://github.com/expressjs/compression/blob/master/LICENSE)                                |
 | NPM     | `dd-trace`                     | [Apache-2.0 OR BSD-3-Clause](https://github.com/DataDog/dd-trace-js/blob/master/LICENSE)           |
-| NPM     | `express`                      | [MIT](https://github.com/expressjs/express/blob/master/LICENSE)                                    |
-| NPM     | `express-openapi-validator`    | [MIT](https://github.com/cdimascio/express-openapi-validator/blob/master/LICENSE)                  |
+| NPM     | `hono`                         | [MIT](https://github.com/honojs/hono/blob/main/LICENSE)                                            |
+| NPM     | `zod`                          | [MIT](https://github.com/colinhacks/zod/blob/main/LICENSE)                                         |
 | NPM     | `firebase-admin`               | [Apache License 2.0](https://github.com/firebase/firebase-admin-node/blob/master/LICENSE)          |
 | NPM     | `google-auth-library`          | [Apache License 2.0](https://github.com/googleapis/google-auth-library-nodejs/blob/master/LICENSE) |
 | NPM     | `jsonwebtoken`                 | [MIT](https://github.com/auth0/node-jsonwebtoken/blob/master/LICENSE)                              |

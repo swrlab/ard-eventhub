@@ -1,5 +1,11 @@
-import type { Response } from 'express'
-import type { EventhubPluginMessage, EventhubV1RadioPostBody, UserTokenRequest } from '#types'
+import type { Context } from 'hono'
+import type {
+	AppVariables,
+	AuthUser,
+	EventhubPluginMessage,
+	EventhubV1RadioPostBody,
+	EventRequestContext,
+} from '#types'
 import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { ulid } from 'ulid'
@@ -13,6 +19,7 @@ import errorsExpiredStartTime from '../../utils/response/errors/expiredStartTime
 import errorsMismatchingEventName from '../../utils/response/errors/mismatchingEventName.ts'
 import responseInternalServerError from '../../utils/response/internalServerError.ts'
 import responseOk from '../../utils/response/ok.ts'
+import { getValidatedBody } from '../../utils/validation/zod-validate.ts'
 
 const source = 'ingest/events/post'
 const DEFAULT_ZONE = 'Europe/Berlin'
@@ -21,61 +28,84 @@ const DEFAULT_ZONE = 'Europe/Berlin'
 const IS_COMMON_TOPIC_ENABLED = true
 const MAX_OFFSET_IN_MINUTES = 15
 
-export default async (req: UserTokenRequest, res: Response) => {
+/**
+ * Build a request context for event helpers from the Hono context.
+ * @param c - Hono context
+ * @param body - Validated event body
+ * @returns Event request context
+ */
+const toEventRequestContext = (
+	c: Context<{ Variables: AppVariables }>,
+	body: Record<string, unknown>
+): EventRequestContext => ({
+	user: c.get('user'),
+	body,
+	headers: Object.fromEntries(c.req.raw.headers),
+})
+
+/**
+ * Distribute a radio track or text event to subscribers.
+ * @param c - Hono context
+ * @returns Event publish response
+ */
+export default async (c: Context<{ Variables: AppVariables }>) => {
+	const body = getValidatedBody<Record<string, unknown>>(c)
 	try {
-		if (!req.user) {
+		const user = c.get('user') as AuthUser | undefined
+		if (!user) {
 			logger.log({
 				level: 'notice',
 				message: 'user not found',
 				source,
 				data: {
-					...req.headers,
+					...Object.fromEntries(c.req.raw.headers),
 					authorization: 'hidden',
 				},
 			})
-			return responseInternalServerError(req, res, new Error('User not found'))
+			return responseInternalServerError(c, new Error('User not found'))
 		}
 
 		// fetch inputs
-		const { eventName: eventNameParam } = req.params
+		const eventNameParam = c.req.param('eventName')
 		// check if event name is present
 		if (!eventNameParam) {
-			return responseBadRequest(req, res, {
+			return responseBadRequest(c, {
 				status: 400,
 				message: 'Event name not found',
 			})
 		}
 
-		const eventName = eventNameParam as string
+		const eventName = eventNameParam
 
-		const start = DateTime.fromISO(req.body.start, {
+		const start = DateTime.fromISO(String(body.start), {
 			zone: DEFAULT_ZONE,
 		})
 		const pluginMessages = []
+		const req = toEventRequestContext(c, body)
 
 		// check eventName consistency
-		if (req.body?.event && req.body.event !== eventName) {
-			return errorsMismatchingEventName(req, res)
+		if (body?.event && body.event !== eventName) {
+			return errorsMismatchingEventName(c, body)
 		}
 
 		// check offset for start event
 		if (start.plus({ minutes: MAX_OFFSET_IN_MINUTES }) < DateTime.now()) {
-			return errorsExpiredStartTime(req, res)
+			return errorsExpiredStartTime(c, body)
 		}
 
 		// insert name, creator and timestamp into object
-		const message: EventhubV1RadioPostBody = {
+		const message = {
 			name: eventName,
-			creator: req.user.email,
+			creator: user.email as string,
 			created: DateTime.now().toLocal().toISO(),
-			plugins: [],
+			plugins: [] as EventhubV1RadioPostBody['plugins'],
 
 			// use entire POST body to include potentially new fields
-			...structuredClone(req.body),
+			...structuredClone(body),
 
 			// reformat start time
-			start: start.toLocal().toISO(),
-		}
+			start: start.toLocal().toISO() as string,
+		} as unknown as EventhubV1RadioPostBody
 
 		// create custom attributes for pubsub metadata
 		const attributes = { event: eventName }
@@ -84,7 +114,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		message.services = await Promise.all(message.services.map((service) => processServices(service, req)))
 
 		// generate unique Id from the institution id and a random ULID
-		message.id = `${req.user.institutionId}-${ulid()}`
+		message.id = `${user.institutionId}-${ulid()}`
 
 		// collect unknown topics from returning errors
 		const newServices = []
@@ -121,7 +151,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 
 		// send event to common topic
 		// if it is not a radio text event
-		if (IS_COMMON_TOPIC_ENABLED && req.body.event !== 'de.ard.eventhub.v1.radio.text') {
+		if (IS_COMMON_TOPIC_ENABLED && body.event !== 'de.ard.eventhub.v1.radio.text') {
 			// only send to common topic if there are non-blocked services
 			if (nonBlockedServices.length > 0) {
 				// prepare common post
@@ -152,7 +182,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 						source,
 						data: {
 							message: filteredMessage,
-							body: req.body,
+							body,
 							commonEvent,
 						},
 					})
@@ -166,7 +196,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 		// add opt-out plugins
 		const isDtsPluginSet = message.plugins?.find((plugin) => plugin.type === 'dts')
 		const isRadioplayerPluginSet = message.plugins?.find((plugin) => plugin.type === 'radioplayer')
-		const isMusic = req.body.type === 'music'
+		const isMusic = body.type === 'music'
 		const isNowPlayingEvent = message.name === 'de.ard.eventhub.v1.radio.track.playing'
 
 		if (!isDtsPluginSet && isMusic && isNowPlayingEvent) {
@@ -193,7 +223,7 @@ export default async (req: UserTokenRequest, res: Response) => {
 						action: `plugins.${plugin.type}.event`,
 						event: { ...message, services: nonBlockedServices },
 						plugin,
-						institutionId: req.user.institutionId,
+						institutionId: user.institutionId as string,
 					}
 
 					// try sending message
@@ -224,19 +254,19 @@ export default async (req: UserTokenRequest, res: Response) => {
 			level: data.statuses.blocked > 0 ? 'warning' : 'info',
 			message: `event processed > ${eventName} > ${message.services.length}x services (${message.services[0]?.publisherId})`,
 			source,
-			data: { ...data, body: req.body, isDtsPluginSet, isRadioplayerPluginSet },
+			data: { ...data, body, isDtsPluginSet, isRadioplayerPluginSet },
 		})
 
-		return responseOk(req, res, data, 201)
+		return responseOk(c, data, 201)
 	} catch (error) {
 		logger.log({
 			level: 'error',
 			message: 'failed to publish event',
 			source,
 			error,
-			data: { body: req.body, headers: req.headers },
+			data: { body, headers: Object.fromEntries(c.req.raw.headers) },
 		})
 
-		return responseInternalServerError(req, res, error as Error)
+		return responseInternalServerError(c, error as Error)
 	}
 }

@@ -1,3 +1,5 @@
+import type { EventV1PostBody } from '../schemas/events.ts'
+
 type EventhubTopic = {
 	id: string
 	name: string
@@ -39,7 +41,14 @@ type EventhubMedia = {
 	isFallback?: boolean
 }
 
-export type EventhubV1RadioPostBodyInput = {
+/** Validated HTTP event body (Zod / OpenAPI contract). */
+export type EventhubV1RadioPostBodyInput = EventV1PostBody
+
+/**
+ * Internal event message after ingest enrichment (name/creator/id/plugins/services).
+ * Kept intentionally looser than the HTTP schema so plugins can carry runtime fields.
+ */
+export type EventhubV1RadioPostBody = {
 	type: string
 	start: string
 	title: string
@@ -84,9 +93,7 @@ export type EventhubV1RadioPostBodyInput = {
 	mpn: string | null
 	media: EventhubMedia[]
 	plugins: EventhubPlugin[]
-}
 
-export type EventhubV1RadioPostBody = EventhubV1RadioPostBodyInput & {
 	name: string
 	creator: string
 	created: string

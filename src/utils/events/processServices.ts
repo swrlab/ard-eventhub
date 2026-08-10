@@ -1,4 +1,4 @@
-import type { EventhubService, UserTokenRequest } from '#types'
+import type { EventhubService, EventRequestContext } from '#types'
 import logger from '@frytg/logger'
 // @ts-expect-error - The package does not yet have types.
 import { createHashedId } from '@swrlab/utils/packages/ard/index.js'
@@ -10,7 +10,13 @@ const source = 'utils.events.processServices'
 const URN_PUBLISHER_PREFIX = coreIdPrefixes.Publisher
 const URN_PUBLISHER_REGEX = /(?=urn:ard:publisher:[a-z0-9]{16})/g
 
-export default async (service: EventhubService, req: UserTokenRequest) => {
+/**
+ * Enrich a service with topic ids and block unauthorized publishers.
+ * @param service - Service from the event body
+ * @param req - Event request context (user + body)
+ * @returns Updated service (possibly blocked)
+ */
+export default async (service: EventhubService, req: EventRequestContext) => {
 	// fetch prefix from configured list
 	const type = service.type as keyof typeof coreIdPrefixes
 	let urnPrefix = coreIdPrefixes[type]

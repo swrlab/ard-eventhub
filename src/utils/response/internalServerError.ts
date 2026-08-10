@@ -1,18 +1,21 @@
-/*
+import type { Context } from 'hono'
 
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-import type { Request, Response } from 'express'
-
-export default (req: Request, res: Response, error?: Error) => {
+/**
+ * Send an internal server error JSON response.
+ * @param c - Hono context
+ * @param error - Optional Error whose message is exposed
+ * @returns Hono response
+ */
+export default (c: Context, error?: Error) => {
 	try {
-		return res.status(500).json({
-			message: error?.message || 'Internal Server Error',
-			trace: req.headers['x-cloud-trace-context'] || null,
-		})
+		return c.json(
+			{
+				message: error?.message || 'Internal Server Error',
+				trace: c.req.header('x-cloud-trace-context') || null,
+			},
+			500
+		)
 	} catch {
-		return res.sendStatus(500)
+		return c.body(null, 500)
 	}
 }

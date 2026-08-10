@@ -1,6 +1,7 @@
 export type * from './ard.ts'
 export type * from './eventhub.ts'
 export type * from './external.ts'
+export type * from './hono.ts'
 
 /**
  * @see https://github.com/swrlab/ard-eventhub/blob/main/docs/STAGES.md
@@ -76,7 +77,7 @@ export type LiveRadioEvent = {
 	imageURL: string | null
 }
 
-// Express
+// HTTP error payload shared by response helpers
 export type RequestError = {
 	status?: number
 	message: string

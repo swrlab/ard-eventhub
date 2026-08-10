@@ -18,11 +18,15 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 
 Docs deploy via [`.github/workflows/docs-push.yml`](.github/workflows/docs-push.yml) to GitHub Pages. The repo Pages source must be set to **GitHub Actions** (not “Deploy from a branch”). `cookie@2` is pinned as a devDependency so Astro’s prerender can resolve ESM exports while Express keeps nested `cookie@0.7`.
 
+Regenerate OpenAPI for docs with `just openapi` (Zod schemas → `openapi.json` via `z.toJSONSchema`).
+
 ## Project Knowledge
 
-- **Tech Stack:** Bun, Node.js, TypeScript (strict mode), Express.js, Google Cloud Platform
+- **Tech Stack:** Bun, Node.js, TypeScript (strict mode), Hono, Zod, Google Cloud Platform
 - **File Structure:**
   - `src/ingest/` – Ingest service (receives events, manages subscriptions)
+  - `src/schemas/` – Zod request/response schemas (runtime validation + OpenAPI)
+  - `src/openapi/` – OpenAPI document assembly / `openapi.json` generator
   - `src/utils/` – Shared utilities (Pub/Sub, Datastore, Firebase, plugins)
   - `cli/` – Command-line utilities
   - `config/` – Configuration files

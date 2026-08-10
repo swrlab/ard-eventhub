@@ -19,6 +19,9 @@ lib-cov
 .blume/
 dist/
 
+# Local temporary exports (e.g. CLI dumps)
+tmp/
+
 # Optional npm cache directory
 .npm
 .licenses

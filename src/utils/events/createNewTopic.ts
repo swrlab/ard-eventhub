@@ -1,4 +1,4 @@
-import type { EventhubService, EventhubTopicDatastore, UserTokenRequest } from '#types'
+import type { EventhubService, EventhubTopicDatastore, EventRequestContext } from '#types'
 import { DateTime } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { getPublisherById } from '../ard-core.ts'
@@ -7,7 +7,13 @@ import pubsubCreateTopic from '../pubsub/createTopic.ts'
 
 const source = 'utils.events.createNewTopic'
 
-export default async (service: EventhubService, req: UserTokenRequest) => {
+/**
+ * Create a new Pub/Sub topic and datastore record for an unknown service.
+ * @param service - Service whose topic is missing
+ * @param req - Event request context (user)
+ * @returns Topic metadata attached to the service
+ */
+export default async (service: EventhubService, req: EventRequestContext) => {
 	// check if user is present
 	if (!req.user?.email) {
 		logger.log({
@@ -54,7 +60,7 @@ export default async (service: EventhubService, req: UserTokenRequest) => {
 		name: service.topic.name,
 
 		institution: {
-			id: req.user.institutionId,
+			id: req.user.institutionId as string,
 			title: publisher.institution.title,
 		},
 

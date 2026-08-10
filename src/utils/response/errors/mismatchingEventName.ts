@@ -1,23 +1,30 @@
-import type { Response, UserTokenRequest } from '#types'
+import type { Context } from 'hono'
+import type { AuthUser } from '#types'
 import logger from '@frytg/logger'
 import badRequest from '../badRequest.ts'
 
 const source = 'utils.response.errors.mismatchingEventName'
 
-export default (req: UserTokenRequest, res: Response) => {
+/**
+ * Respond when the event body name does not match the URL parameter.
+ * @param c - Hono context
+ * @param body - Request body used for logging
+ * @returns Hono bad-request response
+ */
+export default (c: Context, body: unknown) => {
+	const user = c.get('user') as AuthUser | undefined
 	logger.log({
 		level: 'warning',
 		message: 'User attempted event with mismatching names',
 		source,
 		data: {
-			email: req.user?.email,
-			body: req.body,
-			params: req.params,
+			email: user?.email,
+			body,
+			params: c.req.param(),
 		},
 	})
 
-	// return 400
-	return badRequest(req, res, {
+	return badRequest(c, {
 		message: 'request.body.event should match URL parameter',
 		errors: [
 			{

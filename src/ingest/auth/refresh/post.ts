@@ -1,11 +1,13 @@
-import type { Request, Response } from 'express'
+import type { Context } from 'hono'
 import type { JwtPayload } from 'jsonwebtoken'
+import type { AuthRefreshBody } from '../../../schemas/auth.ts'
 import { getNow } from '@frytg/dates'
 import logger from '@frytg/logger'
 import firebaseRefreshToken from '../../../utils/firebase/refreshToken.ts'
 import responseBadRequest from '../../../utils/response/badRequest.ts'
 import responseInternalServerError from '../../../utils/response/internalServerError.ts'
 import responseOk from '../../../utils/response/ok.ts'
+import { getValidatedBody } from '../../../utils/validation/zod-validate.ts'
 
 const source = 'ingest/auth/refresh'
 
@@ -15,7 +17,13 @@ type JwtLogin = {
 	refresh_token: string
 }
 
-export default async (req: Request, res: Response) => {
+/**
+ * Swap refresh token for a new id token.
+ * @param c - Hono context
+ * @returns Auth response
+ */
+export default async (c: Context) => {
+	const body = getValidatedBody<AuthRefreshBody>(c)
 	try {
 		let login: Awaited<{
 			user: JwtPayload | string | null
@@ -24,16 +32,16 @@ export default async (req: Request, res: Response) => {
 
 		// swap previously received refresh token for new id token
 		try {
-			login = await firebaseRefreshToken(req.body.refreshToken)
+			login = await firebaseRefreshToken(body.refreshToken as string)
 		} catch (error) {
-			return responseBadRequest(req, res, {
+			return responseBadRequest(c, {
 				status: 500,
 				message: `Could not refresh login > ${(error as Error)?.message ?? error}`,
 			})
 		}
 
 		const expiresIn = Number.parseInt(login.login.expires_in, 10)
-		return responseOk(req, res, {
+		return responseOk(c, {
 			expiresIn,
 			expires: getNow().plus({ seconds: expiresIn }).toISO(),
 
@@ -48,9 +56,9 @@ export default async (req: Request, res: Response) => {
 			message: 'failed to refresh token',
 			source,
 			error,
-			data: { headers: req.headers },
+			data: { headers: Object.fromEntries(c.req.raw.headers) },
 		})
 
-		return responseInternalServerError(req, res, error as Error)
+		return responseInternalServerError(c, error as Error)
 	}
 }

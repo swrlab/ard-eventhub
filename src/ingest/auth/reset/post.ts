@@ -1,40 +1,48 @@
-import type { Request, Response } from '#types'
+import type { Context } from 'hono'
+import type { AuthResetBody } from '../../../schemas/auth.ts'
 import logger from '@frytg/logger'
 import firebaseSendPasswordResetEmail from '../../../utils/firebase/sendPasswordResetEmail.ts'
 import responseBadRequest from '../../../utils/response/badRequest.ts'
 import responseInternalServerError from '../../../utils/response/internalServerError.ts'
 import responseOk from '../../../utils/response/ok.ts'
+import { getValidatedBody } from '../../../utils/validation/zod-validate.ts'
 
 const source = 'ingest/auth/reset'
 
-export default async (req: Request, res: Response) => {
+/**
+ * Request a password reset email.
+ * @param c - Hono context
+ * @returns Success payload
+ */
+export default async (c: Context) => {
+	const body = getValidatedBody<AuthResetBody>(c)
 	try {
 		// try to reset email (may fail if not found)
 		try {
-			await firebaseSendPasswordResetEmail(req.body.email)
+			await firebaseSendPasswordResetEmail(body.email as string)
 		} catch (error) {
 			logger.log({
 				level: 'notice',
 				message: 'failed resetting password',
 				source,
 				error,
-				data: { email: req.body.email },
+				data: { email: body.email },
 			})
 
-			return responseBadRequest(req, res, { status: 500, message: 'Could not reset auth' })
+			return responseBadRequest(c, { status: 500, message: 'Could not reset auth' })
 		}
 
 		// return ok
-		return responseOk(req, res, { valid: true })
+		return responseOk(c, { valid: true })
 	} catch (error) {
 		logger.log({
 			level: 'error',
 			message: 'failed to reset password',
 			source,
 			error,
-			data: { body: req.body, headers: req.headers },
+			data: { body, headers: Object.fromEntries(c.req.raw.headers) },
 		})
 
-		return responseInternalServerError(req, res, error as Error)
+		return responseInternalServerError(c, error as Error)
 	}
 }

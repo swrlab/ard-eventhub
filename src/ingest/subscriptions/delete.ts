@@ -1,5 +1,5 @@
-import type { Response } from 'express'
-import type { EventhubSubscriptionWithLabels, UserTokenRequestWithParams } from '#types'
+import type { Context } from 'hono'
+import type { AppVariables, AuthUser, EventhubSubscriptionWithLabels } from '#types'
 import logger from '@frytg/logger'
 import datastoreDelete from '../../utils/datastore/delete.ts'
 import deleteSubscription from '../../utils/pubsub/deleteSubscription.ts'
@@ -12,25 +12,31 @@ import responseOk from '../../utils/response/ok.ts'
 
 const source = 'ingest/subscriptions/delete'
 
-export default async (req: UserTokenRequestWithParams<{ subscriptionName?: string }>, res: Response) => {
+/**
+ * Delete a subscription owned by the authenticated user's institution.
+ * @param c - Hono context
+ * @returns Deletion confirmation
+ */
+export default async (c: Context<{ Variables: AppVariables }>) => {
 	try {
 		// preset vars
-		const { subscriptionName } = req.params
+		const subscriptionName = c.req.param('subscriptionName')
 
 		// check if subscription name is present
 		if (!subscriptionName) {
-			return responseBadRequest(req, res, { status: 400, message: 'Subscription name is required' })
+			return responseBadRequest(c, { status: 400, message: 'Subscription name is required' })
 		}
 
+		const user = c.get('user') as AuthUser | undefined
 		// check if user is present
-		if (!req.user) {
-			return responseBadRequest(req, res, { status: 401, message: 'User not found' })
+		if (!user) {
+			return responseBadRequest(c, { status: 401, message: 'User not found' })
 		}
 
 		// load single subscription to get owner
 		let fullSubscription: EventhubSubscriptionWithLabels
 		try {
-			const subscription = await getSubscription(subscriptionName as string)
+			const subscription = await getSubscription(subscriptionName)
 			fullSubscription = subscription.full
 		} catch (error) {
 			logger.log({
@@ -43,25 +49,25 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 
 			if (isCode5Error(error)) {
 				// pubsub error code 5 seems to be 'Resource not found'
-				return responseNotFound(req, res, {
+				return responseNotFound(c, {
 					status: 404,
 					message: `Subscription '${subscriptionName}' not found`,
 				})
 			}
 
 			// return generic error
-			return responseBadRequest(req, res, {
+			return responseBadRequest(c, {
 				status: 500,
 				message: 'Error while loading desired subscription',
 			})
 		}
 
 		// check subscription permission by user institution
-		if (fullSubscription.institutionId !== req.user.institutionId) {
-			const userInstitution = req.user.institutionId
+		if (fullSubscription.institutionId !== user.institutionId) {
+			const userInstitution = user.institutionId
 
 			// return 400 error
-			return responseBadRequest(req, res, {
+			return responseBadRequest(c, {
 				status: 400,
 				message: 'Mismatch of user and subscription institution',
 				errors: `Subscription of this institution cannot be deleted by user of institution '${userInstitution}'`,
@@ -84,23 +90,23 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 			message: 'removed subscription',
 			source,
 			data: {
-				email: req.user.email,
+				email: user.email,
 				subscriptionName,
 				subscriptionId,
 				fullSubscription,
 			},
 		})
 
-		return responseOk(req, res, { valid: true })
+		return responseOk(c, { valid: true })
 	} catch (error) {
 		logger.log({
 			level: 'error',
 			message: 'failed to delete subscription',
 			source,
 			error,
-			data: { params: req.params },
+			data: { params: c.req.param() },
 		})
 
-		return responseInternalServerError(req, res, error as Error)
+		return responseInternalServerError(c, error as Error)
 	}
 }
