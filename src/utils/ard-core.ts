@@ -1,7 +1,5 @@
-// load api feed (needed to get the file initialized)
-
 import type { ArdLivestream, ArdPublisher } from '#types'
-import { ardFeed } from '../data/index.ts'
+import { ardFeed } from './ard-feed.ts'
 
 /**
  * Temporary publisher mapping for the ARD feed during the migration period

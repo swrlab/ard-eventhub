@@ -3,7 +3,7 @@ import { Hono } from 'hono'
 import { compress } from 'hono/compress'
 import { serviceUrl, userAgent, version } from '#config'
 import { isLocal, port, serviceName } from '#env'
-import { getARDFeed } from '../data/index.ts'
+import { getARDFeed } from '../utils/ard-feed.ts'
 import { getSafeHeaders } from '../utils/get-safe-headers.ts'
 import { router } from './router.ts'
 

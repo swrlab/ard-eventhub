@@ -33,5 +33,5 @@ tmp/
 .idea/
 
 # livestreams that get downloaded
-/src/data/ard-core-livestreams.json
+/src/utils/ard-core-livestreams.json
 .blume-verify/
