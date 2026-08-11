@@ -33,10 +33,6 @@ Die Startseite liegt unter `/index.md`. Verschachtelte Pfade funktionieren genau
 
 Die `.md`-Variante wandelt eingebaute Komponenten in lesbares Markdown um — dieselbe Darstellung, die auch in `llms-full.txt` und bei **Als Markdown kopieren** verwendet wird. Für die Originalquelle nimm `.mdx`.
 
-### Content Negotiation
-
-Agenten müssen die `.md`-Konvention nicht kennen: Ein Request mit dem Header `Accept: text/markdown` auf die normale Seiten-URL liefert dieselbe Markdown-Variante zurück.
-
 ## Als Markdown kopieren
 
 Auf jeder Seite findest du unter dem Inhaltsverzeichnis die Aktion **Als Markdown kopieren**. Sie kopiert den Markdown-Inhalt der aktuellen Seite in die Zwischenablage — identisch mit der `.md`-URL. Praktisch zum Einfügen in einen Chat, ein Issue oder eigene Notizen.

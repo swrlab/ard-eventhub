@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - feat: add integration API testing with `hurl`
-- feat: use mise for dev setup
+- feat: add `mise` for local and CI setup
 
 ### Changed
 
@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - refactor: migrate express to hono; use zod for validation
 - refactor: lookup users in file not database
 - refactor: replace `bun:test` for more universal testing
-- feat: add `mise` for local and CI setup
+- chore: improved logging to debug failing events and requests
 
 ### Fixed
 
