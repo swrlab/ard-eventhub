@@ -60,6 +60,14 @@ decrypt-key file:
 [group('ENCRYPTION')]
 decrypt:
 	# just decrypt-key .env.sops.yaml
-	just decrypt-key src/config/users-test.sops.json
-	just decrypt-key src/config/users-prod.sops.json
+	just decrypt-key keys/users-test.sops.json
+	just decrypt-key keys/users-prod.sops.json
 	just decrypt-key keys/radioplayer-api-keys.sops.json
+
+# decrypt user keys for k8s secret
+[group('ENCRYPTION')]
+decrypt-to-k8s:
+	just decrypt-key keys/users-test.sops.json
+	kubectl create secret generic eventhub-ingest-users-test --from-file=users.json=./keys/users-test.json -n default --dry-run=client -o yaml
+	just decrypt-key keys/users-prod.sops.json
+	kubectl create secret generic eventhub-ingest-users-prod --from-file=users.json=./keys/users-prod.json -n default --dry-run=client -o yaml

@@ -49,7 +49,7 @@ jobs:
       - name: 🔐 Decrypt CI users allow-list
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_PRIVATE_KEY }}
-        run: sops decrypt src/config/users.ci.sops.json > src/config/users.json
+        run: sops decrypt keys/users.ci.sops.json > src/config/users.json
 
       - name: 📚 Lint Code
         run: bun x oxlint
