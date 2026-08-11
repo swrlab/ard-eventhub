@@ -7,9 +7,9 @@ sidebar:
 
 Diese Seite fasst die **Breaking Changes** der Eventhub-Version **3.0** (aktuell in Vorbereitung als Pre-Release `3.0.0-beta.x`) zusammen.
 
-Geplante neue Features und die weitere Roadmap für v3 sind in der Discussion [Eventhub v3 — Plan](https://github.com/swrlab/ard-eventhub/discussions/772) beschrieben.
+Geplante neue Features und die weitere Roadmap für v3 sind in der Discussion [Eventhub v3 — Plan](https://github.com/swrlab/ard-eventhub/discussions/771) beschrieben.
 
-Die vollständige Historie findest du im [Changelog](https://github.com/swrlab/ard-eventhub/blob/main/CHANGELOG.md). Details zu Event-Feldern stehen unter [Event-Types](./event-types) und [Track-Types](./track-types).
+Die vollständige Historie findest du im [Changelog](https://github.com/swrlab/ard-eventhub/blob/main/CHANGELOG.md).
 
 ## Überblick
 
