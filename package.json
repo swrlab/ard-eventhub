@@ -25,9 +25,9 @@
 		"ingest": "bun run --hot ./src/ingest/server.ts"
 	},
 	"dependencies": {
-		"@frytg/check-required-env": "npm:@jsr/frytg__check-required-env",
-		"@frytg/dates": "npm:@jsr/frytg__dates",
-		"@frytg/logger": "npm:@jsr/frytg__logger",
+		"@frytg/check-required-env": "npm:@jsr/frytg__check-required-env@0.2.0",
+		"@frytg/dates": "npm:@jsr/frytg__dates@0.3.0",
+		"@frytg/logger": "npm:@jsr/frytg__logger@0.0.3",
 		"@google-cloud/datastore": "^10.1.1",
 		"@google-cloud/pubsub": "^5.3.1",
 		"@swrlab/utils": "^2.2.0",
