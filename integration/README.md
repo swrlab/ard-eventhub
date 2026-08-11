@@ -57,9 +57,10 @@ hurl --test integration/ingest-api.hurl
 ## Coverage (mirrors `server.test.ts`)
 
 1. **Auth** — `POST /auth/login`, `POST /auth/refresh`
-2. **Events** — missing/invalid auth, publish, validation errors, media `isFallback`, blocked services / common plugin
-3. **Topics** — `GET /topics`
-4. **Subscriptions** — create, list, get, delete
+2. **Events** — missing (401) / invalid (403) auth, publish, validation errors, media `isFallback`, blocked services / common plugin
+3. **Pub/Sub** — `PUT /pubsub` missing (401) / invalid (403); `POST /pubsub` missing (401) / invalid (500, Google OIDC)
+4. **Topics** — `GET /topics` and `GET /topics/{name}` missing (401) / invalid (403), then list
+5. **Subscriptions** — create, list, get, delete each with missing (401) / invalid (403) auth
 
 `POST /auth/reset` is omitted on purpose (Firebase rate limit of ~150/day). Use the unit test with `TEST_USER_RESET=true` when you need it.
 

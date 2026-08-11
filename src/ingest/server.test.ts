@@ -523,6 +523,46 @@ test(`POST ${eventPath}`, async (t) => {
 })
 
 /*
+	PUBSUB - Authenticated plugin delivery endpoints
+*/
+
+const pubsubPath = '/pubsub'
+const pubsubBody = { message: { data: 'e30=', messageId: 'unit-test' }, subscription: 'unit-test' }
+
+test(`PUT ${pubsubPath}`, async (t) => {
+	await t.step(`test missing auth for PUT ${pubsubPath}`, async () => {
+		const res = await request('PUT', pubsubPath, { body: pubsubBody })
+		testMissingAuth(res)
+	})
+
+	await t.step(`test invalid auth for PUT ${pubsubPath}`, async () => {
+		const res = await request('PUT', pubsubPath, {
+			headers: { Authorization: `Bearer invalid${accessToken}` },
+			body: pubsubBody,
+		})
+		testFailedAuth(res)
+	})
+})
+
+test(`POST ${pubsubPath}`, async (t) => {
+	await t.step(`test missing auth for POST ${pubsubPath}`, async () => {
+		const res = await request('POST', pubsubPath, { body: pubsubBody })
+		assertStrictEquals(res.status, 401)
+		assertStrictEquals(res.body, null)
+	})
+
+	await t.step(`test invalid auth for POST ${pubsubPath}`, async () => {
+		const res = await request('POST', pubsubPath, {
+			headers: { Authorization: `Bearer invalid${accessToken}` },
+			body: pubsubBody,
+		})
+		// Google OIDC verify throws on a forged JWT → empty 500
+		assertStrictEquals(res.status, 500)
+		assertStrictEquals(res.body, null)
+	})
+})
+
+/*
 	TOPICS - Access to topics details
 */
 
@@ -548,7 +588,12 @@ function testTopicKeys(body: any) {
 }
 
 test(`GET ${topicPath}`, async (t) => {
-	await t.step(`test auth for GET ${topicPath}`, async () => {
+	await t.step(`test missing auth for GET ${topicPath}`, async () => {
+		const res = await request('GET', topicPath)
+		testMissingAuth(res)
+	})
+
+	await t.step(`test invalid auth for GET ${topicPath}`, async () => {
 		const res = await request('GET', topicPath, {
 			headers: { Authorization: `Bearer invalid${accessToken}` },
 		})
@@ -563,6 +608,31 @@ test(`GET ${topicPath}`, async (t) => {
 		assert(Array.isArray(res.body))
 		res.body.every((i: any) => testTopicKeys(i))
 		topicName = res.body[0].id
+	})
+})
+
+test(`GET ${topicPath}/{name}`, async (t) => {
+	const namedTopicPath = `${topicPath}/unit-test-topic`
+
+	await t.step(`test missing auth for GET ${topicPath}/{name}`, async () => {
+		const res = await request('GET', namedTopicPath)
+		testMissingAuth(res)
+	})
+
+	await t.step(`test invalid auth for GET ${topicPath}/{name}`, async () => {
+		const res = await request('GET', namedTopicPath, {
+			headers: { Authorization: `Bearer invalid${accessToken}` },
+		})
+		testFailedAuth(res)
+	})
+
+	await t.step('list topics via named path', async () => {
+		const res = await request('GET', namedTopicPath, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		})
+		testResponse(res, 200)
+		assert(Array.isArray(res.body))
+		res.body.every((i: any) => testTopicKeys(i))
 	})
 })
 
@@ -622,7 +692,12 @@ test(`POST ${subscriptPath}`, async (t) => {
 		topic: topicName,
 	}
 
-	await t.step(`test auth for POST ${subscriptPath}`, async () => {
+	await t.step(`test missing auth for POST ${subscriptPath}`, async () => {
+		const res = await request('POST', subscriptPath, { body: subscription })
+		testMissingAuth(res)
+	})
+
+	await t.step(`test invalid auth for POST ${subscriptPath}`, async () => {
 		const res = await request('POST', subscriptPath, {
 			headers: { Authorization: `Bearer invalid${accessToken}` },
 			body: subscription,
@@ -643,7 +718,12 @@ test(`POST ${subscriptPath}`, async (t) => {
 })
 
 test(`GET ${subscriptPath}`, async (t) => {
-	await t.step(`test auth for GET ${subscriptPath}`, async () => {
+	await t.step(`test missing auth for GET ${subscriptPath}`, async () => {
+		const res = await request('GET', subscriptPath)
+		testMissingAuth(res)
+	})
+
+	await t.step(`test invalid auth for GET ${subscriptPath}`, async () => {
 		const res = await request('GET', subscriptPath, {
 			headers: { Authorization: `Bearer invalid${accessToken}` },
 		})
@@ -660,7 +740,12 @@ test(`GET ${subscriptPath}`, async (t) => {
 })
 
 test(`GET ${subscriptPath}/{name}`, async (t) => {
-	await t.step(`test auth for GET ${subscriptPath}/{name}`, async () => {
+	await t.step(`test missing auth for GET ${subscriptPath}/{name}`, async () => {
+		const res = await request('GET', `${subscriptPath}/${subscriptionName}`)
+		testMissingAuth(res)
+	})
+
+	await t.step(`test invalid auth for GET ${subscriptPath}/{name}`, async () => {
 		const res = await request('GET', `${subscriptPath}/${subscriptionName}`, {
 			headers: { Authorization: `Bearer invalid${accessToken}` },
 		})
@@ -677,7 +762,12 @@ test(`GET ${subscriptPath}/{name}`, async (t) => {
 })
 
 test(`DELETE ${subscriptPath}/{name}`, async (t) => {
-	await t.step(`test auth for DELETE ${subscriptPath}/{name}`, async () => {
+	await t.step(`test missing auth for DELETE ${subscriptPath}/{name}`, async () => {
+		const res = await request('DELETE', `${subscriptPath}/${subscriptionName}`)
+		testMissingAuth(res)
+	})
+
+	await t.step(`test invalid auth for DELETE ${subscriptPath}/{name}`, async () => {
 		const res = await request('DELETE', `${subscriptPath}/${subscriptionName}`, {
 			headers: { Authorization: `Bearer invalid${accessToken}` },
 		})

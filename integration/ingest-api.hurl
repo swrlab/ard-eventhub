@@ -575,11 +575,99 @@ jsonpath "$.event.services[?(@.blocked)]" not exists
 jsonpath "$.plugins[?(@.type=='common')]" exists
 jsonpath "$.plugins[?(@.type=='common')].topic" exists
 
+# --- PUBSUB: missing auth on PUT → 401 ---
+PUT {{host}}/pubsub
+Content-Type: application/json
+[Options]
+output: res/05-pubsub-put-missing-auth.json
+```json
+{
+	"message": { "data": "e30=", "messageId": "unit-test" },
+	"subscription": "unit-test"
+}
+```
+HTTP 401
+[Asserts]
+jsonpath "$.message" isString
+jsonpath "$.errors" isCollection
+jsonpath "$.errors" count >= 1
+jsonpath "$.trace" == null
+
+# --- PUBSUB: invalid auth on PUT → 403 ---
+PUT {{host}}/pubsub
+Authorization: Bearer invalid{{access_token}}
+Content-Type: application/json
+[Options]
+output: res/05-pubsub-put-invalid-auth.json
+```json
+{
+	"message": { "data": "e30=", "messageId": "unit-test" },
+	"subscription": "unit-test"
+}
+```
+HTTP 403
+
+# --- PUBSUB: missing auth on POST → 401 ---
+POST {{host}}/pubsub
+Content-Type: application/json
+[Options]
+output: res/05-pubsub-post-missing-auth.json
+```json
+{
+	"message": { "data": "e30=", "messageId": "unit-test" },
+	"subscription": "unit-test"
+}
+```
+HTTP 401
+
+# --- PUBSUB: invalid auth on POST → 500 ---
+POST {{host}}/pubsub
+Authorization: Bearer invalid{{access_token}}
+Content-Type: application/json
+[Options]
+output: res/05-pubsub-post-invalid-auth.json
+```json
+{
+	"message": { "data": "e30=", "messageId": "unit-test" },
+	"subscription": "unit-test"
+}
+```
+HTTP 500
+
+# --- TOPICS: missing auth → 401 ---
+GET {{host}}/topics
+[Options]
+output: res/06-topics-missing-auth.json
+HTTP 401
+[Asserts]
+jsonpath "$.message" isString
+jsonpath "$.errors" isCollection
+jsonpath "$.errors" count >= 1
+jsonpath "$.trace" == null
+
 # --- TOPICS: invalid auth → 403 ---
 GET {{host}}/topics
 Authorization: Bearer invalid{{access_token}}
 [Options]
 output: res/06-topics-invalid-auth.json
+HTTP 403
+
+# --- TOPICS: missing auth on named path → 401 ---
+GET {{host}}/topics/unit-test-topic
+[Options]
+output: res/06-topics-named-missing-auth.json
+HTTP 401
+[Asserts]
+jsonpath "$.message" isString
+jsonpath "$.errors" isCollection
+jsonpath "$.errors" count >= 1
+jsonpath "$.trace" == null
+
+# --- TOPICS: invalid auth on named path → 403 ---
+GET {{host}}/topics/unit-test-topic
+Authorization: Bearer invalid{{access_token}}
+[Options]
+output: res/06-topics-named-invalid-auth.json
 HTTP 403
 
 # --- TOPICS: list → 200 ---
@@ -596,6 +684,39 @@ jsonpath "$[0].type" isString
 jsonpath "$[0].id" isString
 jsonpath "$[0].name" isString
 jsonpath "$[0].labels" exists
+
+# --- TOPICS: named path → 200 ---
+GET {{host}}/topics/unit-test-topic
+Authorization: Bearer {{access_token}}
+[Options]
+output: res/06-topics-named-list.json
+HTTP 200
+[Asserts]
+jsonpath "$" isCollection
+jsonpath "$[0].type" isString
+jsonpath "$[0].id" isString
+jsonpath "$[0].name" isString
+
+# --- SUBSCRIPTIONS: missing auth on create → 401 ---
+POST {{host}}/subscriptions
+Content-Type: application/json
+[Options]
+output: res/07-subscriptions-create-missing-auth.json
+```json
+{
+	"type": "PUBSUB",
+	"method": "PUSH",
+	"url": "https://ard.unit.test/eventhub/subscription",
+	"contact": "eventhub-unit-test@ard.de",
+	"topic": "{{topic_id}}"
+}
+```
+HTTP 401
+[Asserts]
+jsonpath "$.message" isString
+jsonpath "$.errors" isCollection
+jsonpath "$.errors" count >= 1
+jsonpath "$.trace" == null
 
 # --- SUBSCRIPTIONS: invalid auth on create → 403 ---
 POST {{host}}/subscriptions
@@ -647,6 +768,17 @@ jsonpath "$.url" isString
 jsonpath "$.contact" isString
 jsonpath "$.institutionId" isString
 
+# --- SUBSCRIPTIONS: missing auth on list → 401 ---
+GET {{host}}/subscriptions
+[Options]
+output: res/07-subscriptions-list-missing-auth.json
+HTTP 401
+[Asserts]
+jsonpath "$.message" isString
+jsonpath "$.errors" isCollection
+jsonpath "$.errors" count >= 1
+jsonpath "$.trace" == null
+
 # --- SUBSCRIPTIONS: invalid auth on list → 403 ---
 GET {{host}}/subscriptions
 Authorization: Bearer invalid{{access_token}}
@@ -673,6 +805,17 @@ jsonpath "$[0].url" isString
 jsonpath "$[0].contact" isString
 jsonpath "$[0].institutionId" isString
 
+# --- SUBSCRIPTIONS: missing auth on get → 401 ---
+GET {{host}}/subscriptions/{{subscription_name}}
+[Options]
+output: res/07-subscriptions-get-missing-auth.json
+HTTP 401
+[Asserts]
+jsonpath "$.message" isString
+jsonpath "$.errors" isCollection
+jsonpath "$.errors" count >= 1
+jsonpath "$.trace" == null
+
 # --- SUBSCRIPTIONS: invalid auth on get → 403 ---
 GET {{host}}/subscriptions/{{subscription_name}}
 Authorization: Bearer invalid{{access_token}}
@@ -697,6 +840,17 @@ jsonpath "$.serviceAccount" isString
 jsonpath "$.url" isString
 jsonpath "$.contact" isString
 jsonpath "$.institutionId" isString
+
+# --- SUBSCRIPTIONS: missing auth on delete → 401 ---
+DELETE {{host}}/subscriptions/{{subscription_name}}
+[Options]
+output: res/07-subscriptions-delete-missing-auth.json
+HTTP 401
+[Asserts]
+jsonpath "$.message" isString
+jsonpath "$.errors" isCollection
+jsonpath "$.errors" count >= 1
+jsonpath "$.trace" == null
 
 # --- SUBSCRIPTIONS: invalid auth on delete → 403 ---
 DELETE {{host}}/subscriptions/{{subscription_name}}
