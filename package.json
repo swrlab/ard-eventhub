@@ -22,7 +22,8 @@
 		"docker:run": "docker run --env-file .env -p 8080:8080 --name ard-eventhub swr/ard-eventhub",
 		"docker:scan": "bun docker:build && docker scout quickview",
 		"format:check": "oxfmt --check",
-		"ingest": "bun run --hot ./src/ingest/server.ts"
+		"ingest": "bun run --hot ./src/ingest/server.ts",
+		"start": "bun ./src/ingest/server.ts"
 	},
 	"dependencies": {
 		"@frytg/check-required-env": "npm:@jsr/frytg__check-required-env@0.2.0",

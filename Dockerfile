@@ -10,5 +10,5 @@ COPY . .
 # Expose port
 EXPOSE 80
 
-# Run app
-CMD [ "bun", "./src/ingest/server.ts" ]
+# Run via package script so Bun injects npm_package_version for @frytg/logger
+CMD [ "bun", "run", "start" ]
