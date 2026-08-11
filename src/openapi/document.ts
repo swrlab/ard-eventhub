@@ -9,6 +9,7 @@ import {
 	errorForbidden,
 	errorInternalServerError,
 	errorNotFound,
+	errorPayloadTooLarge,
 	errorUnauthorized,
 	eventV1PostBody,
 	eventV1ResBody,
@@ -31,6 +32,7 @@ const schemaById = {
 	errorForbidden,
 	errorNotFound,
 	errorInternalServerError,
+	errorPayloadTooLarge,
 	services,
 	reference,
 	eventV1PostBody,
@@ -97,6 +99,15 @@ const badRequestResponse = {
 	content: {
 		'application/json': {
 			schema: ref('errorBadRequest'),
+		},
+	},
+}
+
+const payloadTooLargeResponse = {
+	description: 'Payload Too Large (JSON body exceeds 400kb limit)',
+	content: {
+		'application/json': {
+			schema: ref('errorPayloadTooLarge'),
 		},
 	},
 }
@@ -221,6 +232,7 @@ export const buildOpenApiDocument = () => {
 							},
 						},
 						'400': badRequestResponse,
+						'413': payloadTooLargeResponse,
 						'500': authErrorResponses['500'],
 					},
 				},
@@ -247,6 +259,7 @@ export const buildOpenApiDocument = () => {
 							},
 						},
 						'400': badRequestResponse,
+						'413': payloadTooLargeResponse,
 						'500': authErrorResponses['500'],
 					},
 				},
@@ -269,6 +282,7 @@ export const buildOpenApiDocument = () => {
 							content: {},
 						},
 						'400': badRequestResponse,
+						'413': payloadTooLargeResponse,
 						'500': authErrorResponses['500'],
 					},
 				},
@@ -283,6 +297,7 @@ export const buildOpenApiDocument = () => {
 					responses: {
 						'201': eventTrackResponse,
 						'400': badRequestResponse,
+						'413': payloadTooLargeResponse,
 						...authErrorResponses,
 					},
 				},
@@ -297,6 +312,7 @@ export const buildOpenApiDocument = () => {
 					responses: {
 						'201': eventTrackResponse,
 						'400': badRequestResponse,
+						'413': payloadTooLargeResponse,
 						...authErrorResponses,
 					},
 				},
@@ -351,6 +367,7 @@ export const buildOpenApiDocument = () => {
 								},
 							},
 						},
+						'413': payloadTooLargeResponse,
 						...authErrorResponses,
 					},
 				},

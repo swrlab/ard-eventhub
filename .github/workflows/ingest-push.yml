@@ -91,20 +91,11 @@ jobs:
           cache: true
           github_token: ${{ github.token }}
 
-      - name: 🔐 Decrypt CI users allow-list
-        env:
-          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_PRIVATE_KEY }}
-        run: sops decrypt src/config/users.ci.sops.json > src/config/users.json
-
       - name: 🔑 Login to Registry
         run: 'gcloud auth configure-docker $REGISTRY_DOMAIN'
 
       - name: 🚧 Building docker image
         run: 'docker build ./ --file ./Dockerfile -t image'
-
-      - name: 🔖 Get Package Version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@main
 
       - name: 🏷 Tagging & Pushing docker
         id: push
@@ -116,7 +107,8 @@ jobs:
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && BRANCH=$(echo $BRANCH | sed -e 's/^v//')
 
           # Add custom wrapper syntax
-          VERSION=${{ steps.package-version.outputs.current-version }}-g${{ github.run_number }}
+          PACKAGE_VERSION=$(cat ./package.json | jq '.version' | tr -d '"')
+          VERSION=$PACKAGE_VERSION-g${{ github.run_number }}
 
           # Set registry
           IMAGE_URI=$REGISTRY_DOMAIN/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME:$VERSION

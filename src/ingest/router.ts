@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { authLoginBody, authRefreshBody, authResetBody } from '../schemas/auth.ts'
 import { subscriptionPost } from '../schemas/subscriptions.ts'
+import { jsonBodyLimit } from '../utils/validation/json-body-limit.ts'
 import { zodValidate } from '../utils/validation/zod-validate.ts'
 import { authLoginPost as login } from './auth/login.ts'
 import { authRefreshPost as refresh } from './auth/refresh.ts'
@@ -22,6 +23,9 @@ const DOCS_API_URL = 'https://swrlab.github.io/ard-eventhub/api'
 export const router = new Hono({
 	strict: false, // this prevents trailing slashes to be different
 })
+
+// Restore request-size guard that `express.json()` previously enforced
+router.use('*', jsonBodyLimit)
 
 // redirect former Swagger UI to the public docs API reference
 router.all('/openapi', (c) => c.redirect(DOCS_API_URL, 302))

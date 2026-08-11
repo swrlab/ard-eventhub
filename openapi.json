@@ -77,6 +77,16 @@
 							}
 						}
 					},
+					"413": {
+						"description": "Payload Too Large (JSON body exceeds 400kb limit)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/errorPayloadTooLarge"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "Internal server error",
 						"content": {
@@ -125,6 +135,16 @@
 							}
 						}
 					},
+					"413": {
+						"description": "Payload Too Large (JSON body exceeds 400kb limit)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/errorPayloadTooLarge"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "Internal server error",
 						"content": {
@@ -163,6 +183,16 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/errorBadRequest"
+								}
+							}
+						}
+					},
+					"413": {
+						"description": "Payload Too Large (JSON body exceeds 400kb limit)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/errorPayloadTooLarge"
 								}
 							}
 						}
@@ -242,6 +272,16 @@
 							}
 						}
 					},
+					"413": {
+						"description": "Payload Too Large (JSON body exceeds 400kb limit)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/errorPayloadTooLarge"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "Internal server error",
 						"content": {
@@ -313,6 +353,16 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/errorForbidden"
+								}
+							}
+						}
+					},
+					"413": {
+						"description": "Payload Too Large (JSON body exceeds 400kb limit)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/errorPayloadTooLarge"
 								}
 							}
 						}
@@ -450,6 +500,16 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/errorNotFound"
+								}
+							}
+						}
+					},
+					"413": {
+						"description": "Payload Too Large (JSON body exceeds 400kb limit)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/errorPayloadTooLarge"
 								}
 							}
 						}
@@ -901,6 +961,48 @@
 				},
 				"required": ["message", "trace"],
 				"additionalProperties": false
+			},
+			"errorPayloadTooLarge": {
+				"type": "object",
+				"properties": {
+					"message": {
+						"type": "string",
+						"examples": ["Payload Too Large"]
+					},
+					"errors": {
+						"type": "array",
+						"items": {
+							"$ref": "#/definitions/openApiErrorItem"
+						}
+					},
+					"trace": {
+						"nullable": true,
+						"deprecated": true,
+						"description": "Always null. Deprecated; may be removed in a future release.",
+						"examples": [null],
+						"type": "string"
+					}
+				},
+				"required": ["message", "errors", "trace"],
+				"additionalProperties": false,
+				"definitions": {
+					"openApiErrorItem": {
+						"type": "object",
+						"properties": {
+							"path": {
+								"type": "string"
+							},
+							"message": {
+								"type": "string"
+							},
+							"errorCode": {
+								"type": "string"
+							}
+						},
+						"required": ["path", "message", "errorCode"],
+						"additionalProperties": false
+					}
+				}
 			},
 			"services": {
 				"type": "object",

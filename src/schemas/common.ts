@@ -103,3 +103,15 @@ export const errorInternalServerError = z
 		trace: responseTrace,
 	})
 	.meta({ id: 'errorInternalServerError' })
+
+/**
+ * Payload too large error response schema for OpenAPI docs (HTTP 413).
+ * Returned when the JSON request body exceeds the 400kb limit.
+ */
+export const errorPayloadTooLarge = z
+	.object({
+		message: z.string().meta({ examples: ['Payload Too Large'] }),
+		errors: z.array(openApiErrorItem),
+		trace: responseTrace,
+	})
+	.meta({ id: 'errorPayloadTooLarge' })
