@@ -9,12 +9,16 @@ Die ARD Eventhub-APIs sind im [OpenAPI](https://swagger.io/specification/)-Forma
 
 ## API-Referenz in diesen Docs
 
-Die Spezifikation aus `openapi.yaml` wird in diesen Docs als [API-Referenz](/api) gerendert — eine Seite pro Operation, durchsuchbar und in `llms.txt` enthalten.
+Die Spezifikation aus `openapi.json` wird in diesen Docs als [API-Referenz](/api) gerendert — eine Seite pro Operation, durchsuchbar und in `llms.txt` enthalten.
 
 ## Spezifikation pflegen
 
-Alle Änderungen an der API sollten in `openapi.yaml` im Projektverzeichnis dokumentiert werden; dieses muss anschließend in JSON konvertiert werden.
+Request-/Response-Schemas leben als Zod-Schemas unter `src/schemas/`. Path-Metadaten und die Dokument-Assembly liegen in `src/openapi/document.ts`.
 
-### YAML nach JSON konvertieren
+Nach Schema- oder Path-Änderungen regenerieren:
 
-Nach dem Aktualisieren der OpenAPI-Konfiguration kopiere den Inhalt von `openapi.yaml` in den [Swagger Editor](https://editor.swagger.io/). Wähle `File` -> `Convert and save as JSON` und ersetze die `openapi.json` im Projektverzeichnis.
+```sh
+just openapi
+```
+
+Das schreibt `openapi.json` via `z.toJSONSchema(..., { target: 'openapi-3.0' })` und formatiert die Datei.

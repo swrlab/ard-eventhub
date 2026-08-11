@@ -1,10 +1,5 @@
-import type {
-	EventhubPluginMessage,
-	EventhubService,
-	LiveRadioEvent,
-	LiveradioCredential,
-	PermittedExcludedFields,
-} from '#types'
+import type { LiveRadioEvent, LiveradioCredential, PermittedExcludedFields } from '../../../schemas/config.ts'
+import type { EventhubPluginMessage, EventhubService } from '../../../schemas/events.ts'
 import logger from '@frytg/logger'
 import { defaultHeaders, version } from '#config'
 import { dtsKeys, serviceName, stage } from '#env'
@@ -35,13 +30,13 @@ const getUserForInstitution = (institutionId: string) => {
 	}
 }
 
-export default async (job: EventhubPluginMessage): Promise<void> => {
+export const dtsEvent = async (job: EventhubPluginMessage): Promise<void> => {
 	const { event, plugin, institutionId } = job
 
 	// only process now playing events
 	if (event.name !== 'de.ard.eventhub.v1.radio.track.playing') {
 		logger.warning({
-			message: `DTS skipping event (not playing) > ${event.name}`,
+			message: `dts skipping event not playing > ${event.name}`,
 			source,
 			data: { job },
 		})
@@ -111,8 +106,7 @@ export default async (job: EventhubPluginMessage): Promise<void> => {
 	// set event host and auth
 	const { token: liveradioToken, username } = getUserForInstitution(institutionId)
 	if (!(LIVERADIO_URL && liveradioToken)) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'failed loading DTS user for liveradio API',
 			source,
 			data: { job, ids: { coreIds } },
@@ -147,9 +141,10 @@ export default async (job: EventhubPluginMessage): Promise<void> => {
 
 	// log result
 	const message = [
-		`DTS event done (${event.services[0]?.publisherId})`,
+		'dts event done',
+		event.services[0]?.publisherId,
 		`status ${response?.status}`,
-		`${coreIds.length}x Core IDs`,
+		`${coreIds.length}x core ids`,
 	]
 	let json: object | undefined
 	try {

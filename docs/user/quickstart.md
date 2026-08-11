@@ -121,7 +121,7 @@ Beachte, dass der Typ der hier veröffentlichten Events in Zukunft erweitert wer
 
 Bei nächtlichen Sendungen solltest du eine permanente Subscription 24/7 betreiben. Der Filter basierend auf dem Programmplan sollte auf deiner Seite durchgeführt werden. **Pub/Sub sollte nicht zum wiederholten Erstellen/Löschen von Subscriptions genutzt werden.**
 
-Stelle sicher, dass dein Endpoint aus dem Internet erreichbar ist und ein gültiges SSL-Zertifikat installiert ist. Ist der Endpoint zeitweise nicht erreichbar, sammelt die Subscription vergangene Events und versucht die Zustellung erneut. Siehe dazu auch [`src/utils/pubsub/createSubscription.ts`](../src/utils/pubsub/createSubscription.ts) und [cloud.google.com/pubsub/docs/push](https://cloud.google.com/pubsub/docs/push#push_backoff).
+Stelle sicher, dass dein Endpoint aus dem Internet erreichbar ist und ein gültiges SSL-Zertifikat installiert ist. Ist der Endpoint zeitweise nicht erreichbar, sammelt die Subscription vergangene Events und versucht die Zustellung erneut. Siehe dazu auch [`src/utils/pubsub/create-subscription.ts`](../src/utils/pubsub/create-subscription.ts) und [cloud.google.com/pubsub/docs/push](https://cloud.google.com/pubsub/docs/push#push_backoff).
 
 Aktuell ist ein Pull-Workflow für Subscriptions nicht vorgesehen.
 

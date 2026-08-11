@@ -1,7 +1,7 @@
 import { stage } from '#env'
-import datastoreClient from './_client.ts'
+import { datastoreClient } from './_client.ts'
 
-export default async (kind: string, id: string | number) => {
+export const datastoreLoad = async (kind: string, id: string | number) => {
 	const key = datastoreClient.key({
 		namespace: stage,
 		path: id ? [kind, id] : [kind],

@@ -1,25 +1,35 @@
-import type { EventhubSubscriptionLimited, Response, UserTokenRequestWithParams } from '#types'
+import type { Context } from 'hono'
+import type { AuthUser } from '#types'
+import type { EventhubSubscriptionLimited } from '../../schemas/subscriptions.ts'
 import logger from '@frytg/logger'
-import getSubscription from '../../utils/pubsub/getSubscription.ts'
-import responseBadRequest from '../../utils/response/badRequest.ts'
-import responseInternalServerError from '../../utils/response/internalServerError.ts'
-import responseNotFound from '../../utils/response/notFound.ts'
+import { getSubscription } from '../../utils/pubsub/get-subscription.ts'
+import { badRequest as responseBadRequest } from '../../utils/response/bad-request.ts'
+import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
+import { responseNotFound } from '../../utils/response/not-found.ts'
 
 const source = 'ingest/subscriptions/get'
 
-export default async (req: UserTokenRequestWithParams<{ subscriptionName?: string }>, res: Response) => {
+/**
+ * Get a single subscription by name for the authenticated user.
+ * @param c - Hono context
+ * @returns Limited subscription object
+ */
+export const subscriptionsGet = async (c: Context) => {
 	try {
 		// preset vars
-		const { subscriptionName } = req.params
+		const subscriptionName = c.req.param('subscriptionName')
 
 		// check if subscription name is present
 		if (!subscriptionName) {
-			return responseBadRequest(req, res, { status: 400, message: 'Subscription name is required' })
+			logger.notice({ message: 'Subscription name is required', source, data: { params: c.req.param() } })
+			return responseBadRequest(c, { status: 400, message: 'Subscription name is required' })
 		}
 
+		const user = c.get('user') as AuthUser | undefined
 		// check if user is present
-		if (!req.user) {
-			return responseBadRequest(req, res, { status: 401, message: 'User not found' })
+		if (!user) {
+			logger.notice({ message: 'User not found', source, data: { subscriptionName } })
+			return responseBadRequest(c, { status: 401, message: 'User not found' })
 		}
 
 		// load single subscription
@@ -28,34 +38,49 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 			const subscription = await getSubscription(subscriptionName)
 			limitedSubscription = subscription.limited
 		} catch {
-			return responseNotFound(req, res, {
+			logger.notice({
+				message: `subscription not found > ${subscriptionName}`,
+				source,
+				data: { email: user.email, subscriptionName },
+			})
+			return responseNotFound(c, {
 				status: 404,
 				message: `Subscription '${subscriptionName}' not found`,
 			})
 		}
 
 		// verify if user is allowed to get subscription (same institution)
-		if (limitedSubscription.institutionId !== req.user.institutionId) {
-			const userInstitution = req.user.institutionId
+		if (limitedSubscription.institutionId !== user.institution.id) {
+			const userInstitution = user.institution.id
+
+			logger.warning({
+				message: 'Mismatch of user and subscription institution',
+				source,
+				data: {
+					email: user.email,
+					subscriptionName,
+					userInstitution,
+					subscriptionInstitution: limitedSubscription.institutionId,
+				},
+			})
 
 			// return 400 error
-			return responseBadRequest(req, res, {
+			return responseBadRequest(c, {
 				status: 400,
 				message: 'Mismatch of user and subscription institution',
 				errors: `Subscription of this institution is not visible for user of institution '${userInstitution}'`,
 			})
 		}
 
-		return res.status(200).json(limitedSubscription)
+		return c.json(limitedSubscription, 200)
 	} catch (error) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'failed to get subscription',
 			source,
 			error,
-			data: { params: req.params },
+			data: { params: c.req.param() },
 		})
 
-		return responseInternalServerError(req, res, error as Error)
+		return responseInternalServerError(c)
 	}
 }

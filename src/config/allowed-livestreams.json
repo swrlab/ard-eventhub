@@ -1,0 +1,30 @@
+{
+	"note": "Nightly shared ARD broadcasts from docs/ids/common-ids.md (COMMON_IDS). These topic URNs are not ARD livestream-feed entries; Eventhub still accepts publishes when publisherId matches the listed publisher, then validates the user institution via that publisher in the feed.",
+	"livestreams": [
+		{
+			"id": "urn:ard:event-livestream:22da95c49a047225",
+			"name": "ARD Hitnacht",
+			"publisherId": "urn:ard:publisher:f2b792614f2e6f87"
+		},
+		{
+			"id": "urn:ard:permanent-livestream:873b8349bf7db07e",
+			"name": "ARD Infonacht",
+			"publisherId": "urn:ard:publisher:a7c07cd7a995ed8c"
+		},
+		{
+			"id": "urn:ard:permanent-livestream:7c0dd5c9f90b67ab",
+			"name": "ARD Musikclub",
+			"publisherId": "urn:ard:publisher:a8aa147108ee961a"
+		},
+		{
+			"id": "urn:ard:permanent-livestream:885aa9c84e5374bd",
+			"name": "ARD Popnacht",
+			"publisherId": "urn:ard:publisher:73c0dd2d4e1e1514"
+		},
+		{
+			"id": "urn:ard:permanent-livestream:d22e908de85bfd44",
+			"name": "Die Junge Nacht der ARD",
+			"publisherId": "urn:ard:publisher:4560bc62a6bdc9ef"
+		}
+	]
+}

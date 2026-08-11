@@ -1,32 +1,68 @@
+import 'just/encryption.just'
+
 # run just in the CLI to see the list of shortcuts
 _default:
 	just --list
 
-# use a default sops file, or allow to be overridden by SOPS_ENV_FILE environment variable
-DEFAULT_SOPS_FILE := '.env.sops.yaml'
-SELECTED_SOPS_FILE := env('SOPS_ENV_FILE', DEFAULT_SOPS_FILE)
+# install toolchain (mise) + package dependencies (aube) (pass --env ci if needed)
+[group('DEV-SETUP')]
+install *args:
+	mise install {{ args }}  
+	mise lock {{ args }}
+	bun install --silent
 
-# run a command with the selected sops file (injecting environment variables)
-[group('ENCRYPTION')]
-env *args:
-	sops exec-env --same-process {{ SELECTED_SOPS_FILE }} "{{ args }}"
-
-## ---------------------------------
+# update package dependencies (pass --env ci if needed)
+[group('DEV-SETUP')]
+update *args:
+	mise upgrade --bump -y --local {{ args }}
+	mise outdated --quiet {{ args }}
+	mise lock {{ args }}
+	bun update
+	just format
 
 # run the ingest tests locally with injected environment variables
 [group('LOCAL')]
 test:
-	just env "bun run test"
+	just env "just test-with-env"
+
+# run testing (envs need to be provided)
+test-with-env:
+	bun test --timeout 120000
+
+# run hurl integration tests against a host (default: local ingest)
+[group('LOCAL')]
+integration host="http://localhost:8080":
+	just env "just integration-with-env {{host}}"
+
+# run hurl suite (envs need to be provided: TEST_USER, TEST_USER_PW)
+integration-with-env host:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	: "${TEST_USER:?TEST_USER is required}"
+	: "${TEST_USER_PW:?TEST_USER_PW is required}"
+	mkdir -p integration/res
+	start="$(bun -e 'console.log(new Date().toISOString())')"
+	start_expired="$(bun -e 'console.log(new Date(Date.now() - 20 * 60 * 1000).toISOString())')"
+	start_invalid="${start}00"
+	hurl \
+		--variable host="{{host}}" \
+		--variable email="$TEST_USER" \
+		--variable password="$TEST_USER_PW" \
+		--variable start="$start" \
+		--variable start_expired="$start_expired" \
+		--variable start_invalid="$start_invalid" \
+		--test \
+		integration/ingest-api.hurl
 
 # generate a coreId for a given text
 [group('LOCAL')]
 coreId text:
-	bun run coreId "{{ text }}"
+	bun run ./src/cli/core-id.ts "{{ text }}"
 
 # download the ARD feed
 [group('LOCAL')]
 feed:
-	bun run feed
+	bun run ./src/cli/feed.ts
 
 # start the ingest service in development mode
 [group('LOCAL')]
@@ -37,21 +73,41 @@ dev:
 [group('LOCAL')]
 lint:
 	bun x oxlint
+	bun x oxfmt --check
+	bun x knip
+	bun x tsc
 
-# format everything
+# fix and format everything
 [group('LOCAL')]
 format:
+	bun x oxlint --fix
 	bun x oxfmt
+
+# check dependency licenses
+[group('LOCAL')]
+license:
+	bun x license-compliance -f json -r detailed
+
+# regenerate openapi.json from Zod schemas
+[group('LOCAL')]
+openapi:
+	bun run ./src/openapi/generate.ts
+	bun x oxfmt openapi.json
 
 # serve the documentation (dev server with hot reload)
 [group('LOCAL')]
-docs:
-	bun run docs:dev
+docs: openapi
+	bun x blume dev
 
 # build the documentation to dist/
 [group('LOCAL')]
-docs-build:
-	bun run docs:build
+docs-build: openapi
+	bun x blume build
+
+# preview the built documentation
+[group('LOCAL')]
+docs-preview:
+	bun x blume preview
 
 # print the radioplayer api keys in base64 format for kubernetes secret
 [group('KUBERNETES')]
@@ -69,47 +125,3 @@ radioplayer-api-keys:
 [group('KUBERNETES')]
 apply-k8s-secrets:
 	sops decrypt keys/k8s-secrets.sops.yaml | kubectl apply -f -
-
-## ---------------------------------
-## ENCRYPTION shortcuts
-
-# add/ remove keys (if .sops.yaml setup was changed)
-[group('ENCRYPTION')]
-update-keys:
-	just _update-key .env.sops.yaml
-	just _update-key keys/radioplayer-api-keys.sops.json
-
-_update-key file:
-	sops updatekeys {{ file }}
-
-# rotate keys (refreshed internal encryption keys)
-[group('ENCRYPTION')]
-rotate-keys:
-	just _rotate-key .env.sops.yaml
-	just _rotate-key keys/radioplayer-api-keys.sops.json
-
-_rotate-key file:
-	sops rotate --in-place {{ file }}
-
-# list PGP keys and their fingerprints
-[group('ENCRYPTION')]
-list-pgp:
-	gpg --list-keys
-
-# make changes to a secret file
-[group('ENCRYPTION')]
-edit-key file:
-	EDITOR=nano sops edit {{ file }}
-
-# decrypt a secret file
-[confirm('This will overwrite any previously decrypted files, are you sure? (type `yes` to continue)')]
-[group('ENCRYPTION')]
-decrypt-key file:
-	sops --output $(echo {{ file }} | sed 's/\.sops//g') --decrypt {{ file }}
-
-# decrypt all secret files
-[confirm('This will overwrite all previously decrypted files, are you sure? (type `yes` to continue)')]
-[group('ENCRYPTION')]
-decrypt:
-	just decrypt-key .env.sops.yaml
-	just decrypt-key keys/radioplayer-api-keys.sops.json

@@ -1,67 +1,99 @@
-import type { Response } from 'express'
-import type { EventhubSubscriptionWithLabels, UserTokenRequestWithParams } from '#types'
+import type { Context } from 'hono'
+import type { AuthUser } from '#types'
+import type { EventhubSubscriptionWithLabels } from '../../schemas/subscriptions.ts'
 import logger from '@frytg/logger'
-import datastoreDelete from '../../utils/datastore/delete.ts'
-import deleteSubscription from '../../utils/pubsub/deleteSubscription.ts'
-import getSubscription from '../../utils/pubsub/getSubscription.ts'
-import { isCode5Error } from '../../utils/pubsub/publishMessage.ts'
-import responseBadRequest from '../../utils/response/badRequest.ts'
-import responseInternalServerError from '../../utils/response/internalServerError.ts'
-import responseNotFound from '../../utils/response/notFound.ts'
-import responseOk from '../../utils/response/ok.ts'
+import { datastoreDelete } from '../../utils/datastore/delete.ts'
+import { deleteSubscription } from '../../utils/pubsub/delete-subscription.ts'
+import { getSubscription } from '../../utils/pubsub/get-subscription.ts'
+import { isCode5Error } from '../../utils/pubsub/publish-message.ts'
+import { badRequest as responseBadRequest } from '../../utils/response/bad-request.ts'
+import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
+import { responseNotFound } from '../../utils/response/not-found.ts'
+import { responseOk } from '../../utils/response/ok.ts'
 
 const source = 'ingest/subscriptions/delete'
 
-export default async (req: UserTokenRequestWithParams<{ subscriptionName?: string }>, res: Response) => {
+/**
+ * Delete a subscription owned by the authenticated user's institution.
+ * @param c - Hono context
+ * @returns Deletion confirmation
+ */
+export const subscriptionsDelete = async (c: Context) => {
 	try {
 		// preset vars
-		const { subscriptionName } = req.params
+		const subscriptionName = c.req.param('subscriptionName')
 
 		// check if subscription name is present
 		if (!subscriptionName) {
-			return responseBadRequest(req, res, { status: 400, message: 'Subscription name is required' })
+			logger.notice({
+				message: 'Subscription name is required',
+				source,
+				data: { params: c.req.param() },
+			})
+			return responseBadRequest(c, { status: 400, message: 'Subscription name is required' })
 		}
 
+		const user = c.get('user') as AuthUser | undefined
 		// check if user is present
-		if (!req.user) {
-			return responseBadRequest(req, res, { status: 401, message: 'User not found' })
+		if (!user) {
+			logger.notice({
+				message: 'User not found',
+				source,
+				data: { subscriptionName },
+			})
+			return responseBadRequest(c, { status: 401, message: 'User not found' })
 		}
 
 		// load single subscription to get owner
 		let fullSubscription: EventhubSubscriptionWithLabels
 		try {
-			const subscription = await getSubscription(subscriptionName as string)
+			const subscription = await getSubscription(subscriptionName)
 			fullSubscription = subscription.full
 		} catch (error) {
-			logger.log({
-				level: 'error',
-				message: 'failed to find topic to be deleted',
-				source,
-				error,
-				data: { subscriptionName },
-			})
-
 			if (isCode5Error(error)) {
 				// pubsub error code 5 seems to be 'Resource not found'
-				return responseNotFound(req, res, {
+				logger.notice({
+					message: `subscription not found > ${subscriptionName}`,
+					source,
+					data: { email: user.email, subscriptionName },
+				})
+				return responseNotFound(c, {
 					status: 404,
 					message: `Subscription '${subscriptionName}' not found`,
 				})
 			}
 
+			logger.error({
+				message: 'failed to load subscription to be deleted',
+				source,
+				error,
+				data: { email: user.email, subscriptionName },
+			})
+
 			// return generic error
-			return responseBadRequest(req, res, {
+			return responseBadRequest(c, {
 				status: 500,
 				message: 'Error while loading desired subscription',
 			})
 		}
 
 		// check subscription permission by user institution
-		if (fullSubscription.institutionId !== req.user.institutionId) {
-			const userInstitution = req.user.institutionId
+		if (fullSubscription.institutionId !== user.institution.id) {
+			const userInstitution = user.institution.id
+
+			logger.warning({
+				message: 'Mismatch of user and subscription institution',
+				source,
+				data: {
+					email: user.email,
+					subscriptionName,
+					userInstitution,
+					subscriptionInstitution: fullSubscription.institutionId,
+				},
+			})
 
 			// return 400 error
-			return responseBadRequest(req, res, {
+			return responseBadRequest(c, {
 				status: 400,
 				message: 'Mismatch of user and subscription institution',
 				errors: `Subscription of this institution cannot be deleted by user of institution '${userInstitution}'`,
@@ -79,28 +111,26 @@ export default async (req: UserTokenRequestWithParams<{ subscriptionName?: strin
 		const subscriptionId = Number.parseInt(fullSubscription.labels.id, 10)
 		await datastoreDelete('subscriptions', subscriptionId.toString())
 
-		logger.log({
-			level: 'info',
+		logger.info({
 			message: 'removed subscription',
 			source,
 			data: {
-				email: req.user.email,
+				email: user.email,
 				subscriptionName,
 				subscriptionId,
 				fullSubscription,
 			},
 		})
 
-		return responseOk(req, res, { valid: true })
+		return responseOk(c, { valid: true })
 	} catch (error) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'failed to delete subscription',
 			source,
 			error,
-			data: { params: req.params },
+			data: { params: c.req.param() },
 		})
 
-		return responseInternalServerError(req, res, error as Error)
+		return responseInternalServerError(c)
 	}
 }

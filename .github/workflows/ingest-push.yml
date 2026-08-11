@@ -43,23 +43,25 @@ jobs:
           credentials_json: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
           create_credentials_file: true
 
+      - name: 🛠 Setup mise tools
+        uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+        with:
+          cache: true
+          github_token: ${{ github.token }}
+
+      - name: 🔐 Decrypt CI users allow-list
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_PRIVATE_KEY }}
+        run: sops decrypt keys/users.ci.sops.json > src/config/users.json
+
       - name: 📚 Lint Code
-        run: bun lint
+        run: bun x oxlint
 
       - name: 🧪 Run Ingest Tests
         env:
-          DD_TRACE_ENABLED: false
-          DTS_KEYS: ${{ secrets.TEST_DTS_KEYS }}
-          FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
-          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-          PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL: ${{ secrets.PUBSUB_SERVICE_ACCOUNT_EMAIL }}
-          SERVICE_NAME: ard-eventhub-ingest
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_PRIVATE_KEY }}
           STAGE: dev
-          TEST_USER: ${{ secrets.TEST_USER }}
-          TEST_USER_PW: ${{ secrets.TEST_USER_PW }}
-          ARD_FEED_URL: ${{ secrets.ARD_FEED_URL }}
-          RADIOPLAYER_API_KEYS: e30=
-        run: bun run test
+        run: sops exec-env --same-process .env.ci.sops.yaml "bun test --timeout 120000"
 
   docker:
     runs-on: ubuntu-latest
@@ -83,15 +85,17 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
 
+      - name: 🛠 Setup mise tools
+        uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+        with:
+          cache: true
+          github_token: ${{ github.token }}
+
       - name: 🔑 Login to Registry
         run: 'gcloud auth configure-docker $REGISTRY_DOMAIN'
 
       - name: 🚧 Building docker image
         run: 'docker build ./ --file ./Dockerfile -t image'
-
-      - name: 🔖 Get Package Version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@main
 
       - name: 🏷 Tagging & Pushing docker
         id: push
@@ -103,7 +107,8 @@ jobs:
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && BRANCH=$(echo $BRANCH | sed -e 's/^v//')
 
           # Add custom wrapper syntax
-          VERSION=${{ steps.package-version.outputs.current-version }}-g${{ github.run_number }}
+          PACKAGE_VERSION=$(cat ./package.json | jq '.version' | tr -d '"')
+          VERSION=$PACKAGE_VERSION-g${{ github.run_number }}
 
           # Set registry
           IMAGE_URI=$REGISTRY_DOMAIN/${{ secrets.GCP_PROJECT_ID }}/$IMAGE_NAME:$VERSION

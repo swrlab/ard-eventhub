@@ -1,63 +1,69 @@
-/*
-
-	ard-eventhub
-	by SWR Audio Lab
-
-*/
-
-import type { Request, Response } from 'express'
+import type { Context } from 'hono'
 import logger from '@frytg/logger'
-import dtsEvent from '../../utils/plugins/dts/event.ts'
-import radioplayerEvent from '../../utils/plugins/radioplayer/event.ts'
+import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
+import { dtsEvent } from '../../utils/plugins/dts/event.ts'
+import { radioplayerEvent } from '../../utils/plugins/radioplayer/event.ts'
 
 const source = 'ingest/pubsub'
 
-export default async (req: Request, res: Response) => {
+/**
+ * Handle Pub/Sub push (and task) deliveries for plugin actions.
+ * @param c - Hono context
+ * @returns Empty success/error status
+ */
+export const pubsubHandler = async (c: Context) => {
+	let body: Record<string, unknown> = {}
 	try {
+		body = await c.req.json()
+
 		// get metadata from pubsub body
-		const attributes = req.body?.message?.attributes
-		const messageId = req.body?.message?.messageId
-		const { subscription } = req.body
+		const message = body?.message as Record<string, unknown> | undefined
+		const attributes = message?.attributes
+		const messageId = message?.messageId
+		const { subscription } = body
 
 		// get message from pubsub or tasks
-		let job = req.body?.message?.data ? Buffer.from(req.body.message.data, 'base64').toString() : req.body
-		job = req.headers['x-skip-parsing'] ? job : JSON.parse(job)
+		let job: unknown = message?.data ? Buffer.from(String(message.data), 'base64').toString() : body
+		job = c.req.header('x-skip-parsing') ? job : JSON.parse(job as string)
+
+		const jobRecord = job as Record<string, unknown>
 
 		// insert data into job
-		job.messageId = messageId
-		job.attributes = attributes
-		job.subscription = subscription
+		jobRecord.messageId = messageId
+		jobRecord.attributes = attributes
+		jobRecord.subscription = subscription
 
 		// handle actions
-		if (job.action === 'plugins.dts.event') {
-			await dtsEvent(job)
-		} else if (job.action === 'plugins.radioplayer.event') {
-			await radioplayerEvent(job)
+		if (jobRecord.action === 'plugins.dts.event') {
+			// oxlint-disable-next-line typescript/no-explicit-any -- Pub/Sub job payload is dynamically shaped
+			await dtsEvent(jobRecord as any)
+		} else if (jobRecord.action === 'plugins.radioplayer.event') {
+			// oxlint-disable-next-line typescript/no-explicit-any -- Pub/Sub job payload is dynamically shaped
+			await radioplayerEvent(jobRecord as any)
 		} else {
-			logger.log({
-				level: 'warning',
+			logger.warning({
 				message: 'undetected PubSub message action',
 				source,
-				data: { messageId, job, headers: req.headers },
+				data: { messageId, job: jobRecord, headers: getSafeHeaders(c.req.raw.headers) },
 			})
 		}
 
 		// return ok
-		return res.sendStatus(201)
+		return c.body(null, 201)
 	} catch (error) {
-		const messageId = req.body?.message?.messageId
-		logger.log({
-			level: 'error',
+		const message = body?.message as Record<string, unknown> | undefined
+		const messageId = message?.messageId
+		logger.error({
 			message: 'error while processing PubSub message',
 			source,
 			error,
 			data: {
 				messageId,
-				body: req.body,
-				headers: req.headers,
+				body,
+				headers: getSafeHeaders(c.req.raw.headers),
 			},
 		})
 
-		return res.sendStatus(204)
+		return c.body(null, 204)
 	}
 }

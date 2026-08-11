@@ -1,4 +1,4 @@
-import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '#types'
+import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '../../../schemas/events.ts'
 import { getMs, getMsOffset } from '@frytg/dates'
 import logger from '@frytg/logger'
 import { defaultHeaders } from '#config'
@@ -74,7 +74,7 @@ const sendRadioplayerEvent = async (
 	return { url: url.toString(), posted: null, response: null, wasPosted: false }
 }
 
-export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> => {
+export const radioplayerEvent = async (job: EventhubPluginMessage): Promise<RadioplayerOutput> => {
 	// remap input
 	const { event, institutionId, plugin } = job
 	const output: RadioplayerOutput = []
@@ -82,7 +82,7 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 	// only process now playing events
 	if (event.name !== 'de.ard.eventhub.v1.radio.track.playing') {
 		logger.warning({
-			message: `Radioplayer skipping event (not playing) > ${event.name}`,
+			message: `radioplayer skipping event not playing > ${event.name}`,
 			source,
 			data: { job },
 		})
@@ -92,7 +92,7 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 	// only process music events
 	if (event.type !== 'music') {
 		logger.warning({
-			message: `Radioplayer skipping event (not music) > ${event.type} > ${event.services[0]?.publisherId}`,
+			message: `radioplayer skipping event not music > ${event.type} > ${event.services[0]?.publisherId}`,
 			source,
 			data: { job },
 		})
@@ -102,7 +102,7 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 	// reject if no artist or title is set
 	if (!(event.artist && event.title)) {
 		logger.warning({
-			message: `Radioplayer skipping event (no artist or title) > ${event.services[0]?.publisherId}`,
+			message: `radioplayer skipping event no artist or title > ${event.services[0]?.publisherId}`,
 			source,
 			data: { job },
 		})
@@ -113,7 +113,7 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 	const apiKey = radioplayerAPIKeys[institutionId]
 	if (!apiKey) {
 		logger.error({
-			message: `Radioplayer API key not found for institution > ${institutionId}`,
+			message: `radioplayer api key not found > ${institutionId}`,
 			source,
 			data: { job },
 		})
@@ -139,7 +139,7 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 		// only process PermanentLivestream services
 		if (service.type !== 'PermanentLivestream') {
 			logger.warning({
-				message: `Radioplayer skipping service (not PermanentLivestream) > ${service.type}`,
+				message: `radioplayer skipping service not PermanentLivestream > ${service.type}`,
 				source,
 				data: { service, job },
 			})
@@ -152,7 +152,7 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 		if (!rpUidsRaw || rpUidsRaw === false) {
 			if (rpUidsRaw !== false) {
 				logger.warning({
-					message: `Radioplayer skipping service (not in mapping) > ${livestreamId}`,
+					message: `radioplayer skipping service not in mapping > ${livestreamId}`,
 					source,
 					data: { service, job },
 				})
@@ -173,7 +173,7 @@ export default async (job: EventhubPluginMessage): Promise<RadioplayerOutput> =>
 
 			// log result
 			const message = [
-				`Radioplayer ${i + 1}/${rpUids.length} event done`,
+				`radioplayer event done ${i + 1}/${rpUids.length}`,
 				service.topic?.id || service.publisherId,
 				`status ${posted?.status}`,
 				`rpuid ${rpUid}`,

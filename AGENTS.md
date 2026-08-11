@@ -8,9 +8,11 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 
 ## Setup Commands
 
+- **Install tools:** [mise](https://mise.jdx.dev) → `mise install` (pins `just` + `sops` in [`mise.toml`](mise.toml))
 - **Install dependencies:** `bun install`
 - **Start ingest service:** `bun run ingest` (runs with hot reload)
 - **Run tests:** `just test`
+- **Hurl API suite:** `just integration` (needs running ingest + `hurl`)
 - **Lint code:** `just lint` (uses Oxlint)
 - **Format code:** Oxfmt handles formatting automatically
 - **Docs (dev):** `just docs` (Blume)
@@ -18,17 +20,22 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 
 Docs deploy via [`.github/workflows/docs-push.yml`](.github/workflows/docs-push.yml) to GitHub Pages. The repo Pages source must be set to **GitHub Actions** (not “Deploy from a branch”). `cookie@2` is pinned as a devDependency so Astro’s prerender can resolve ESM exports while Express keeps nested `cookie@0.7`.
 
+Regenerate OpenAPI for docs with `just openapi` (Zod schemas → `openapi.json` via `z.toJSONSchema`). **Always run `just openapi` after changing `package.json` version** (or any other field that feeds the OpenAPI `info` block) so `openapi.json` stays in sync.
+
 ## Project Knowledge
 
-- **Tech Stack:** Bun, Node.js, TypeScript (strict mode), Express.js, Google Cloud Platform
+- **Tech Stack:** Bun, Node.js, TypeScript (strict mode), Hono, Zod, Google Cloud Platform
 - **File Structure:**
-  - `src/ingest/` – Ingest service (receives events, manages subscriptions)
-  - `src/utils/` – Shared utilities (Pub/Sub, Datastore, Firebase, plugins)
-  - `cli/` – Command-line utilities
-  - `config/` – Configuration files
-  - `docs/` – Documentation (Markdown, built with Blume)
-  - `blume.config.ts` – Docs site configuration
-  - `tests/` – Test files (co-located with source files using `.test.ts`)
+	- `src/ingest/` – Ingest service (receives events, manages subscriptions)
+	- `src/schemas/` – Zod request/response schemas (runtime validation + OpenAPI)
+	- `src/openapi/` – OpenAPI document assembly / `openapi.json` generator
+	- `src/utils/` – Shared utilities (Pub/Sub, Datastore, Firebase, plugins)
+	- `cli/` – Command-line utilities
+	- `config/` – Configuration files
+	- `integration/` – Hurl HTTP suite (`ingest-api.hurl`) mirroring `src/ingest/server.test.ts` (run with `just integration`)
+	- `docs/` – Documentation (Markdown, built with Blume)
+	- `blume.config.ts` – Docs site configuration
+	- `tests/` – Test files (co-located with source files using `.test.ts`)
 
 ## Code Style
 
@@ -43,9 +50,9 @@ Follow SWR Audio Lab engineering principles:
 ## Testing
 
 - All code changes should include or update tests
-- Tests use Bun's built-in test runner
+- Tests use [`@cross/test`](https://jsr.io/@cross/test) with [`@std/assert`](https://jsr.io/@std/assert) (and [sinon](https://sinonjs.org/) for stubs/spies) so they run on Bun, Node, or Deno
 - Test files are co-located with source files (`.test.ts` extension)
-- Run `just test` before committing changes
+- Run with `just test` (Bun via sops env) or `bun test`; Node/Deno: `node --import tsx --test` / `deno test` against the same files
 - Tests must pass before merging PRs
 
 ## Git Workflow
@@ -57,7 +64,7 @@ Follow SWR Audio Lab engineering principles:
 
 ## Boundaries
 
-- ✅ **Always do:** Write tests for new code, run linter before committing, use English for code/docs, follow existing patterns
+- ✅ **Always do:** Write tests for new code, run linter before committing, use English for code/docs, follow existing patterns, run `just openapi` after changing `package.json` version (keeps `openapi.json` in sync)
 - ⚠️ **Ask first:** Modifying Google Cloud configuration, changing authentication flows, updating dependencies, major architectural changes
 - 🚫 **Never do:** Commit unencrypted secrets or API keys (use Secret Manager), modify `node_modules/` or `bun.lock`, remove failing tests without fixing them, use German in code/comments
 

@@ -34,6 +34,10 @@
 			{
 				"groupName": "bun",
 				"elementNamePattern": ["bun", "bun:test"]
+			},
+			{
+				"groupName": "cross-test",
+				"elementNamePattern": ["@cross/test", "@std/assert", "sinon"]
 			}
 		]
 	},

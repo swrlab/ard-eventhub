@@ -1,4 +1,4 @@
-import type { DTSKeys, RadioplayerApiKeys, Stage } from '#types'
+import type { DTSKeys, RadioplayerApiKeys, Stage } from './schemas/config.ts'
 import { getEnvBase64, getEnvBoolean, getEnvNumber, getEnvString } from './utils/env.ts'
 
 // NOTE: all environment keys in this files are required and cause an error if missing.

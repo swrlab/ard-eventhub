@@ -22,17 +22,11 @@ Secrets in GitHub sind standardmäßig für Benutzer write-only. Admins kannst d
   - Service Account zum Einloggen in Google Cloud, nötig u. a. zum Pushen von Containern und für Pull-Checks
   - In GitHub gespeichert, um im Registry-Workflow verwendet zu werden
 - `GCP_PROJECT_ID`
-  - Projekt-ID des Google Cloud-Projekts für Primärdienste wie Pub/Sub
-  - In GitHub gespeichert, um Test-Workflows zu ermöglichen
-- `GCP_SERVICE_ACCOUNT_INGEST`
-  - E‑Mail-Adresse des Service Accounts für Cloud Run
-  - In GitHub gespeichert, um neue Revisionskonfigurationen zu setzen
-- `TEST_FIREBASE_API_KEY`
-  - API-Key für Firebase, genutzt bei Pull-Checks
-- `TEST_USER`
-  - E‑Mail-Adresse des Testnutzers für `STAGE=dev` welche für Tests benutzt wird
-- `TEST_USER_PW`
-  - Passwort des Testnutzers
+  - Projekt-ID des Google Cloud-Projekts (u. a. Image-Push-Pfad)
+- `SOPS_AGE_PRIVATE_KEY`
+  - Age-Private-Key für `.ci.sops.*`-Dateien (`.env.ci.sops.yaml`, `users.ci.sops.json`)
+  - Wird in Workflows als `SOPS_AGE_KEY` an sops übergeben
+  - Test-Env-Vars kommen aus `.env.ci.sops.yaml` via `sops exec-env`
 
 ## Google Cloud
 

@@ -1,50 +1,54 @@
-import type { NextFunction, Response } from 'express'
-import type { UserTicketRequest } from '#types'
+import type { MiddlewareHandler } from 'hono'
 import logger from '@frytg/logger'
 import { OAuth2Client } from 'google-auth-library'
 import { serviceAccountEmail } from '#env'
+import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 
 const authClient = new OAuth2Client()
 
 const source = 'ingest/pubsub/verify'
 
-export default async (req: UserTicketRequest, res: Response, next: NextFunction) => {
+/**
+ * Verify Google OIDC bearer token for Pub/Sub push delivery.
+ * @returns Hono middleware
+ */
+export const pubsubAuthVerify: MiddlewareHandler = async (c, next) => {
 	try {
 		// read token from header
-		const bearer = req.header('Authorization')
+		const bearer = c.req.header('Authorization')
 		const bearerMatch = bearer?.match(/Bearer (.*)/)
 
 		// check token email vs. subscription email
 		if (!bearerMatch) {
 			// user failed to provide auth header
-			return res.sendStatus(401)
+			return c.body(null, 401)
 		}
 
 		const [_match, idToken] = bearerMatch
 		if (!idToken) throw Error('No ID token could be found.')
 
 		// verify token, throws error if invalid
-		req.user = await authClient.verifyIdToken({
+		const user = await authClient.verifyIdToken({
 			idToken,
 		})
 
 		// check token email vs. subscription email
-		if (req.user?.getPayload()?.email !== serviceAccountEmail) {
+		if (user?.getPayload()?.email !== serviceAccountEmail) {
 			// user provided valid token but failed email verification
-			return res.sendStatus(204)
+			return c.body(null, 204)
 		}
 
 		// continue with normal workflow, user is authenticated 🎉
-		return next()
+		await next()
+		return
 	} catch (error) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'failed to verify user',
 			source,
 			error,
-			data: { ...req.headers, authorization: 'hidden' },
+			data: getSafeHeaders(c.req.raw.headers),
 		})
 
-		return res.sendStatus(500)
+		return c.body(null, 500)
 	}
 }

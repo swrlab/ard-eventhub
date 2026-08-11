@@ -1,6 +1,6 @@
 {
 	"name": "ard-eventhub",
-	"version": "2.4.0",
+	"version": "3.0.0-beta.1",
 	"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
 	"keywords": [
 		"ard",
@@ -10,70 +10,54 @@
 	"license": "EUPL-1.2",
 	"author": "SWR Audio Lab <lab@swr.de>",
 	"type": "module",
-	"main": "./src/ingest/index.ts",
+	"main": "./src/ingest/server.ts",
 	"imports": {
 		"#config": "./src/config.ts",
 		"#env": "./src/env.ts",
 		"#types": "./src/types/index.ts"
 	},
 	"scripts": {
-		"check": "oxlint && oxfmt --check",
-		"check:fix": "oxlint --fix && oxfmt",
-		"checks": "bun --parallel check typecheck knip",
-		"coreId": "bun run ./src/cli/core-id.ts",
 		"docker:build": "docker build . -t swr/ard-eventhub",
 		"docker:clean": "docker rm ard-eventhub",
 		"docker:run": "docker run --env-file .env -p 8080:8080 --name ard-eventhub swr/ard-eventhub",
 		"docker:scan": "bun docker:build && docker scout quickview",
-		"docs:build": "blume build",
-		"docs:dev": "blume dev",
-		"docs:preview": "blume preview",
-		"feed": "bun run ./src/cli/feed.ts",
-		"format": "oxfmt",
 		"format:check": "oxfmt --check",
-		"ingest": "bun run --hot ./src/ingest/index.ts",
-		"knip": "knip",
-		"license": "bunx license-compliance -f json -r detailed",
-		"lint": "oxlint",
-		"lint:fix": "oxlint --fix",
-		"openapi:format": "oxfmt openapi.json openapi.yaml",
-		"test": "bun test --timeout 120000",
-		"typecheck": "tsgo"
+		"ingest": "bun run --hot ./src/ingest/server.ts",
+		"start": "bun ./src/ingest/server.ts"
 	},
 	"dependencies": {
-		"@frytg/check-required-env": "npm:@jsr/frytg__check-required-env",
-		"@frytg/dates": "npm:@jsr/frytg__dates",
-		"@frytg/logger": "npm:@jsr/frytg__logger",
-		"@google-cloud/datastore": "^10.1.0",
-		"@google-cloud/pubsub": "^5.3.0",
+		"@frytg/check-required-env": "npm:@jsr/frytg__check-required-env@0.2.0",
+		"@frytg/dates": "npm:@jsr/frytg__dates@0.3.0",
+		"@frytg/logger": "npm:@jsr/frytg__logger@0.0.3",
+		"@google-cloud/datastore": "^10.1.1",
+		"@google-cloud/pubsub": "^5.3.1",
 		"@swrlab/utils": "^2.2.0",
-		"compression": "^1.8.1",
-		"dd-trace": "^5.102.0",
-		"express": "^4.22.2",
-		"express-openapi-validator": "^5.6.2",
-		"firebase-admin": "^13.9.0",
-		"google-auth-library": "^10.6.2",
+		"dd-trace": "^5.121.0",
+		"firebase-admin": "^13.10.0",
+		"google-auth-library": "^10.9.1",
+		"hono": "^4.13.1",
 		"jsonwebtoken": "^9.0.3",
 		"slug": "^11.0.1",
-		"typescript": "^5.9.3",
-		"ulid": "^3.0.2"
+		"ulid": "^3.0.2",
+		"zod": "^4.4.3"
 	},
 	"devDependencies": {
-		"@types/bun": "^1.3.13",
-		"@types/compression": "^1.8.1",
+		"@cross/test": "npm:@jsr/cross__test",
+		"@std/assert": "npm:@jsr/std__assert",
+		"@types/bun": "^1.3.14",
 		"@types/dd-trace": "^0.9.3",
-		"@types/express": "^5.0.6",
-		"@types/node": "^25.3.2",
+		"@types/node": "^25.9.5",
+		"@types/sinon": "^22.0.0",
 		"@types/slug": "^5.0.9",
-		"@types/supertest": "^6.0.3",
-		"@typescript/native-preview": "^7.0.0-dev.20260227.1",
+		"@typescript/native-preview": "^7.0.0-dev.20260707.2",
 		"blume": "1.3.1",
 		"cookie": "2.0.1",
-		"knip": "^5.85.0",
+		"knip": "^5.88.1",
 		"license-compliance": "^3.0.1",
 		"oxfmt": "^0.61.0",
-		"oxlint": "^1.77.0",
-		"supertest": "^7.2.2"
+		"oxlint": "^1.78.0",
+		"sinon": "^22.1.0",
+		"typescript": "^5.9.3"
 	},
 	"resolutions": {
 		"@scalar/schemas": "0.8.0",
@@ -91,10 +75,14 @@
 	"packageManager": "bun@1.3.9",
 	"knip": {
 		"entry": [
-			"blume.config.ts!"
+			"blume.config.ts!",
+			"src/cli/*.ts",
+			"src/openapi/generate.ts",
+			"src/**/*.test.ts"
 		],
 		"ignoreDependencies": [
-			"cookie"
+			"cookie",
+			"@typescript/native-preview"
 		]
 	}
 }

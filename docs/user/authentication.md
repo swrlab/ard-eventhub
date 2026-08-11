@@ -33,6 +33,8 @@ Ergibt `200 OK`
 }
 ```
 
+Das Feld `trace` ist immer `null` und **deprecated** — es kann in einer zukünftigen Version entfernt werden. Verlasse dich nicht darauf.
+
 Dieser Endpunkt gibt einen `token` und einen `refreshToken` zusammen mit einer Ablaufdauer und einem Datum zurück. Der `token` kann innerhalb des zurückgegebenen Zeitraums verwendet werden.
 
 ## Refresh Token

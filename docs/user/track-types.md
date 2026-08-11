@@ -161,17 +161,3 @@ Verwenden Sie diese Option, um Auslöser für die Wiedergabe von Werbespots fest
 ## `jingle`
 
 Ungünstig, kann jedoch verwendet werden, um einen neues Event zu signalisieren, der das vorherige Element beendet. Sollte nur verwendet werden, wenn keine Informationen über den Inhalt verfügbar ist. Beispielsweise sollte ein Jingle, der die Nachrichten einleitet, nicht als `jingle`, sondern als `news` gesendet werden. Das Feld `title` muss einen Wert enthalten, der extern angezeigt werden kann, und darf nicht der Dateiname des Jingles sein.
-
-## `radio text`
-
-Dieser Typ wird verwendet, um den Live-Encoder-Text festzulegen.
-
-```json
-{
-  "event": "de.ard.eventhub.v1.radio.text",
-  "start": "2020-01-19T06:00:00+01:00",
-  "validUntil": "2026-01-19T06:00:00+01:00",
-  "text": "Catchy one Liner",
-  …
-}
-```

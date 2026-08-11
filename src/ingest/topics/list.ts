@@ -1,22 +1,26 @@
-import type { Request, Response } from '#types'
+import type { Context } from 'hono'
 import logger from '@frytg/logger'
-import pubsubGetTopics from '../../utils/pubsub/getTopics.ts'
-import responseInternalServerError from '../../utils/response/internalServerError.ts'
+import { pubsubGetTopics } from '../../utils/pubsub/get-topics.ts'
+import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
 
 const source = 'ingest/topics/list'
 
-export default async (req: Request, res: Response) => {
+/**
+ * List all available Pub/Sub topics.
+ * @param c - Hono context
+ * @returns Topics array
+ */
+export const topicsList = async (c: Context) => {
 	try {
 		const topics = await pubsubGetTopics()
-		return res.status(200).json(topics)
+		return c.json(topics, 200)
 	} catch (error) {
-		logger.log({
-			level: 'error',
+		logger.error({
 			message: 'failed to list topics',
 			source,
 			error,
 		})
 
-		return responseInternalServerError(req, res, error as Error)
+		return responseInternalServerError(c)
 	}
 }

@@ -34,7 +34,7 @@ export type ArdPublisher = {
 	homepageURL: string
 }
 
-export type ArdInstitution = {
+type ArdInstitution = {
 	id: string
 	coremediaId: string
 	title: string

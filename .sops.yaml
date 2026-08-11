@@ -2,14 +2,24 @@
 
 # creation rules are evaluated sequentially, the first match wins
 creation_rules:
+  # CI-only secrets (decrypt with SOPS_AGE_KEY / GitHub secret SOPS_AGE_PRIVATE_KEY)
+  - path_regex: \.ci\.sops\.
+    age: >-
+      age1lauv6ajwq87ysx7pyjv92pyghy29rcrm4grnlernpxfcrqrksd0qcafhdd,
+      age1srkgrtf2lqrp3v8nehn658cdp9w6pdgpptfey239wntvckks9emqlyewp7
+    pgp: >-
+      BAB9DADFB4B23DEE516EA46A519E2E308159C0E9,
+      EC400072D5EF8BEE57251ED3588FAABBFCD9F44B
+
+  # remaining other secrets
   - age: >-
       age1lauv6ajwq87ysx7pyjv92pyghy29rcrm4grnlernpxfcrqrksd0qcafhdd,
-      age12yfw7cg2kw5rlmh4fsdsqu0kaq26h0emqeykmlppth3s5q2zpymq53um3q
+      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEXWHAzftM4tVlwJQPJ4sNQLVArVkgMXBPMRfHu+/11D
     # see https://getsops.io/docs/#encrypting-using-age if you want to use this as your own main key
     # this first age public key is a backup key for Audio Lab, created and saved by @frytg
     # this second age public key is the key for GitHub Actions
     pgp: >-
-      F2DAECD05ED6ADB532E0B70B48B9BE2FA319FE58,
+      BAB9DADFB4B23DEE516EA46A519E2E308159C0E9,
       EC400072D5EF8BEE57251ED3588FAABBFCD9F44B
     # these fingerprints of PGP keys belong to the team
     # they need to be comma-separated (except the last one)
@@ -17,5 +27,5 @@ creation_rules:
     # make sure to update this list also in infra/justfile!
     #
     # this is the mapping of the keys to the team members:
-    # F2DAECD05ED6ADB532E0B70B48B9BE2FA319FE58 - rsa4096 daniel.freytag@swr.de
+    # BAB9DADFB4B23DEE516EA46A519E2E308159C0E9 - ed25519 daniel.freytag@swr.de
     # EC400072D5EF8BEE57251ED3588FAABBFCD9F44B - rsa4096 lab@swr.de
