@@ -54,7 +54,7 @@
 		"cookie": "2.0.1",
 		"knip": "^5.88.1",
 		"license-compliance": "^3.0.1",
-		"oxfmt": "^0.61.0",
+		"oxfmt": "^0.63.0",
 		"oxlint": "^1.78.0",
 		"sinon": "^22.1.0",
 		"typescript": "^5.9.3"
