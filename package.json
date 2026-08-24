@@ -32,7 +32,7 @@
 		"@google-cloud/datastore": "^10.1.1",
 		"@google-cloud/pubsub": "^5.3.1",
 		"@swrlab/utils": "^2.2.0",
-		"dd-trace": "^5.121.0",
+		"dd-trace": "^6.11.0",
 		"firebase-admin": "^13.10.0",
 		"google-auth-library": "^10.9.1",
 		"hono": "^4.13.1",
