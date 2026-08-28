@@ -111,7 +111,7 @@ export function getEnv<T = string>(key: string, config: EnvConfig<T> = {}): T {
 			try {
 				return JSON.parse(value) as T
 			} catch (error) {
-				throw new Error(`Failed to parse environment variable ${key} as JSON: ${error}`)
+				throw new Error(`Failed to parse environment variable ${key} as JSON: ${error}`, { cause: error })
 			}
 
 		default:
