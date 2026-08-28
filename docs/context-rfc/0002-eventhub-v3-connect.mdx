@@ -216,8 +216,8 @@ flowchart LR
   auth (Firebase JWT plus a user allow-list), **event-schema validation for synchronous publisher
   feedback** ([§5.4](#54-validation-runs-twice-on-purpose)), **identifier normalization** —
   CRID-to-URN and Core-ID-to-URN via `process-services.ts`, plus filling in `institutionId` from the
-  publisher it already resolves, so bridged events satisfy the URN-only rule
-  ([§12.4](#124-identifiers)) — and an MQTT publish of the event body.
+  publisher it already resolves, while **still emitting the deprecated `externalId` and `type`** that
+  Pub/Sub subscribers read ([§12.4](#124-identifiers)) — and an MQTT publish of the event body.
 - Stays **single-institution**: one Firebase user maps to one `user.institution.id`, and the
   multi-institution capability in [§7.4](#74-one-user-several-institutions) is deliberately not
   backported.
@@ -1058,7 +1058,7 @@ and password ([§7](#7-auth-and-acl)).
 - **Feedback.** Subscribe to `feedback/{institutionId}`, for each institution you publish for.
 - **Schema.** The payload is the same JSON the HTTPS API accepts today, except inside `services[]`:
   identifiers must be pre-encoded ARD URNs, `institutionId` is now required, and `externalId` and
-  `type` are gone ([§12.4](#124-identifiers)). Existing schemas otherwise apply to `track.playing` /
+  `type` are deprecated — omit them ([§12.4](#124-identifiers)). Existing schemas otherwise apply to `track.playing` /
   `track.next`; the two new classes are in [§13](#13-new-event-schemas).
 - **Idempotency.** QoS 1 is at-least-once by definition. A reconnecting publisher may re-send.
 
@@ -1089,25 +1089,36 @@ already resolved, and the sidecar performs no ID conversion.
 | `id`               | **required** — `urn:ard:permanent-livestream:{hash}` or `urn:ard:event-livestream:{hash}` | optional; minted by Eventhub when absent         |
 | `publisherId`      | **required** — `urn:ard:publisher:{hash}`                                                 | Core ID (`248000`) or URN; converted by Eventhub |
 | `institutionId`    | **required** — `urn:ard:institution:{hash}`                                               | not sent; ingest resolves it from the publisher  |
-| `externalId`       | **removed** — CRIDs are not accepted                                                      | required, `crid://…`                             |
-| `type`             | **removed** — implied by the `id` prefix                                                  | required; selects the prefix when hashing        |
+| `externalId`       | **deprecated** — optional, ignored, still emitted by ingest                               | required, `crid://…`                             |
+| `type`             | **deprecated** — optional, ignored, still emitted by ingest                               | required; selects the prefix when hashing        |
 
-**`services[].type` is removed because the publisher now supplies the `id` itself.** The two carry the
-same fact — `core-id-prefixes.json` maps them one-to-one — so keeping both means keeping a pair that
-can disagree, and a payload where `type: PermanentLivestream` meets
-`id: urn:ard:event-livestream:…` has no correct interpretation. With one field, the question does not
-arise; `permanent-livestream` versus `event-livestream` is read off the `id` namespace wherever it is
-needed.
+**`externalId` and `type` are deprecated, not deleted — the deletion is scheduled for step 19.** Both
+are redundant once the publisher supplies the `id`: `externalId` is the CRID the id was hashed from,
+and `type` carries the same fact as the `id` prefix, since `core-id-prefixes.json` maps them
+one-to-one. Keeping either means keeping a pair that can disagree, and a payload where
+`type: PermanentLivestream` meets `id: urn:ard:event-livestream:…` has no correct interpretation.
 
-It stays required on HTTPS, where it is load-bearing rather than redundant: legacy ingest has no `id`
-to read and uses `type` to pick the prefix it hashes the CRID onto
+**They survive the migration because `eventhub-ingest` emits one body to two places.** The normalized
+event goes to the GCP MQTT broker _and_ to Pub/Sub, and Pub/Sub subscribers read `services[]` as it
+stands today. Dropping the fields at step 3 would silently change the shape those consumers receive
+long before any of them has migrated — a breaking change to the legacy path, delivered by a step whose
+purpose is to prepare the new one. So through the migration they stay present and populated, and their
+removal is bound to the Pub/Sub shutdown at step 19, when the last consumer of that shape is gone.
+
+Deprecation here follows the same discipline as the route surface
+([§5.3](#53-the-ingest-api-surface-stays-until-it-is-deprecated)): marked in the schema with
+`.meta({ deprecated: true })` so OpenAPI and the generated docs say so, announced with a date, and
+removed only after measured zero usage ([§15](#15-observability)).
+
+`type` also stays **required** on HTTPS input, where it is load-bearing rather than redundant: legacy
+ingest has no `id` to read and uses `type` to pick the prefix it hashes the CRID onto
 (`coreIdPrefixes[type] + createHashedId(externalId)`). Removing it there would break the very
 conversion that keeps bridged events valid.
 
-One consequence worth noting: the `id` regex in the v3 schema becomes the single declaration of which
+One consequence of the eventual removal: the `id` regex becomes the single declaration of which
 livestream kinds exist, doing validation and kind-derivation at once. That is the point — one source
-instead of two that can drift — but it does mean adding a livestream kind is a schema change rather
-than an enum entry.
+instead of two that can drift — but it does mean adding a livestream kind becomes a schema change
+rather than an enum entry.
 
 Why URN-only:
 
@@ -1141,17 +1152,18 @@ numeric `publisherId`; ingest normalizes both before publishing to MQTT, so what
 `inbox.{institutionId}` through the bridge already satisfies the rule above. No house is forced to
 change its HTTPS payload, and `eventhub-bridge` stays a dumb relay.
 
-A removed field left in an otherwise valid v3 payload — `services[].externalId` or `services[].type` —
-is **ignored, not rejected.** `id` is required and therefore authoritative in both cases, so there is
-no ambiguity to protect against and no reason to fail an otherwise correct event. The sidecar counts
-them ([§15](#15-observability)) so we can see who is still sending them.
+A deprecated field is **ignored, not rejected.** `id` is required and therefore authoritative in both
+cases, so there is no ambiguity to protect against and no reason to fail an otherwise correct event.
+The sidecar reads neither. **A native MQTT publisher should simply omit them**; a bridged event will
+carry them for as long as ingest exists, and the counter in [§15](#15-observability) is what tells us
+when nobody sends them any more.
 
-**This rule covers `services[]` only, and both removed names exist elsewhere in the payload.** The
-event-level `externalId` and `references[].externalId` are content identifiers — the track's id in the
-publisher's system, the CRID of a show or episode — and the **event-level `type` is the event class**
+**This applies to `services[]` only, and both names exist elsewhere in the payload.** The event-level
+`externalId` and `references[].externalId` are content identifiers — the track's id in the publisher's
+system, the CRID of a show or episode — and the **event-level `type` is the event class**
 (`de.ard.eventhub.v1.radio.track.playing`), which is required and unchanged. Only the two fields
-inside `services[]` go away; nothing here asks houses to stop identifying content or to stop naming
-their events.
+inside `services[]` are affected; nothing here asks houses to stop identifying content or to stop
+naming their events.
 
 ### 12.5 Validation feedback
 
@@ -1175,8 +1187,8 @@ block on it and does not need to correlate every publish with a response.
   does ([§5.4](#54-validation-runs-twice-on-purpose)).
 - **Publishers ready to migrate.** Point the publisher config at `eventhub-connect` over MQTT; the
   username and password replace the static API token. **The payload changes if you send CRIDs or
-  numeric Core IDs today**: inside `services[]`, `id` and `publisherId` must be ARD URNs,
-  `institutionId` is added, and `externalId` and `type` are dropped
+  numeric Core IDs today**: inside `services[]`, `id` and `publisherId` must be ARD URNs and
+  `institutionId` is added. `externalId` and `type` are deprecated and ignored — stop sending them
   ([§12.4](#124-identifiers)). A publisher already sending URNs — as the
   quickstart documents — changes configuration only. If you do not hold the livestream URNs, read
   them off `services[].topic.id` in your current HTTPS responses, which already carries the resolved
@@ -1392,8 +1404,9 @@ state for every station without a history store or a replay.
   permitted at all".
 - **Sidecar rejections of bridged events, split by cause** — schema drift versus a failed
   normalization ([§5.4](#54-validation-runs-twice-on-purpose)).
-- Payloads still carrying `services[].externalId`, per publisher
-  ([§12.4](#124-identifiers)).
+- **Native publishers still sending the deprecated `services[].externalId` or `services[].type`**
+  ([§12.4](#124-identifiers)). Bridged events carry them legitimately, so the panel has to separate
+  the two or it reads as noise.
 - **Filterable to a single institution**, so a house diagnoses its own integration instead of opening
   a ticket. Publishers currently get `Bad request` with no detail, which is why that support load
   exists.
@@ -1553,9 +1566,10 @@ What to instrument, regardless of which tools win:
 - **Sidecar rejections of bridged events**, split by cause — schema drift versus an identifier that
   failed ingest's normalization ([§5.4](#54-validation-runs-twice-on-purpose)). Should be zero;
   anything else means the two passes disagree.
-- **Payloads still carrying a removed `services[]` field** — `externalId` or `type` — per publisher and
-  per field. Both are ignored rather than rejected ([§12.4](#124-identifiers)), so this counter is the
-  only way to see who has not finished migrating.
+- **Payloads still carrying a deprecated `services[]` field** — `externalId` or `type` — split by
+  publisher, by field, and by native versus bridged. Bridged events carry them by design until step
+  19; a _native_ publisher still sending them has not finished migrating. **This counter is what gates
+  the removal**, since deprecation ends on measured zero usage rather than on a date alone.
 - MQTT session counts, connect/disconnect churn, auth failures.
 - **Active connections per username**, so an unused credential is visibly safe to remove and a stale
   one visibly overdue.
@@ -1754,8 +1768,11 @@ step 5 is ordered by dependency.
    becomes the CN's source of real test data at step 8. **No persistence and no retained messages** —
    it is a hop, not a store, so events published while the bridge is down are lost by design and
    Pub/Sub remains the path of record until step 17.
-3. **Identifier normalization in ingest.** Emit URN-only `services[]` with `institutionId` filled in
-   ([§12.4](#124-identifiers)), so bridged events are valid on arrival.
+3. **Identifier normalization in ingest.** Add `institutionId` and guarantee `id` and `publisherId`
+   are URNs, so bridged events are valid on arrival. **Keep emitting `externalId` and `type`** — the
+   same normalized body goes to Pub/Sub, whose subscribers still read them, so removing them here
+   would break the legacy path. Mark both `deprecated` in the schema and regenerate OpenAPI
+   ([§12.4](#124-identifiers)).
 4. **Plugin publishing feature flag in ingest.** A per-target switch held in **Datastore, read at
    runtime with a short cache** — step 16 flips a target mid-migration and must not need a deploy to
    do it, or to undo it. Distinct from the existing per-event `plugins[].isDeactivated`, which is a
@@ -1809,7 +1826,9 @@ step 5 is ordered by dependency.
     ([§17](#17-reliability-and-broadcast-criticality)).
 19. **Decommission GCP.** Remove the GCP broker and `eventhub-bridge`, then `eventhub-ingest` and the
     last project resources. **Prerequisite: every route has completed its deprecation cycle with
-    measured zero traffic** — this is where the HTTPS API and the Firebase tenant go away.
+    measured zero traffic** — this is where the HTTPS API and the Firebase tenant go away. Also drop
+    the deprecated `services[].externalId` and `services[].type` from the schema
+    ([§12.4](#124-identifiers)); the last consumer of that shape leaves with Pub/Sub.
 
 ## 19. Open decisions
 
