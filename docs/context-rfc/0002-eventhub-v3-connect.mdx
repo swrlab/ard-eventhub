@@ -50,7 +50,8 @@ and it is observable.
   does not imply a `4.x`.
 - **`de.ard.eventhub.v1.*`** — the **event schema** version, which stays at `v1` throughout. Moving a
   publisher from HTTPS to MQTT is a transport change, not a schema change: the payload on
-  `inbox/{institutionId}` is the same JSON the HTTPS API accepts today, and the two new event types
+  `inbox/{institutionId}` is the same JSON the HTTPS API accepts today, tightened only in that
+  identifiers must arrive as ARD URNs ([§12.4](#124-identifiers)), and the two new event types
   (`radio.control`, `radio.data`) are additions to `v1`. **"Eventhub v3" never means
   `de.ard.eventhub.v3.*`.**
 
@@ -99,7 +100,7 @@ and writes to replicated JetStream KV, so K3S can schedule it in any zone.
 It is **not** primary in the data path. NATS and JetStream are symmetric across all three nodes; the
 RAFT leader is elected, not assigned, and can be any node at any time. Clients connect to whichever
 endpoint answers, and no event needs BAD to be up. Losing BAD costs exactly two things: legacy
-publishers stop being relayed (accepted — [§12.7](#127-legacy-is-not-first-class)) and host-level
+publishers stop being relayed (accepted — [§12.7](#128-legacy-is-not-first-class)) and host-level
 uptime monitoring goes dark. Native MQTT publishers, all subscribers, validation and plugin dispatch
 continue on the STG + MNZ quorum.
 
@@ -135,34 +136,50 @@ it.**
 During migration, GCP `eventhub-ingest` keeps accepting HTTPS posts and publishes raw events to
 `inbox/{institutionId}` on a minimal MQTT broker, which `eventhub-bridge` relays into the CN.
 
+**The broker is only reachable from inside the ARD CN, and the broadcasters are already there.** A
+publisher's playout system sits in the CN but in its own house's network, not in SWR's — SWR hosts the
+platform, it does not host the publishers. The only participants outside the CN are the legacy GCP
+project and the external plugin targets.
+
 ```mermaid
 flowchart LR
-    P1["broadcaster<br/>playout systems"]
-
     subgraph GCP["GCP — legacy, best-effort"]
         EI["eventhub-ingest<br/>HTTPS auth"]
         MQ["MQTT broker"]
-        PS["Cloud Pub/Sub<br/>until step 13"]
+        PS["Cloud Pub/Sub"]
         EI --> MQ
         EI -.-> PS
     end
 
-    subgraph CN["ARD CN — SWR · zones BAD, STG, MNZ"]
-        NATS["NATS + JetStream<br/>MQTT gateway<br/>RAFT across the three zones"]
-        EC["eventhub-connect<br/>validation · plugin routing · operator UI"]
-        BR["eventhub-bridge"]
-        NATS <-->|"validate · fan out"| EC
-        BR -->|"inbox/"| NATS
+    subgraph CN["ARD CN"]
+        P1["broadcaster<br/>playout systems<br/>each in its own house"]
+        S1["subscribers<br/>ARD Sounds · broadcaster apps · dashboards"]
+
+        subgraph SWR["SWR — hosts the platform"]
+            BR["eventhub-bridge"]
+
+            subgraph CL["NATS + JetStream · MQTT gateway"]
+                NB["zone BAD<br/>primary"]
+                NS["zone STG"]
+                NZ["zone MNZ"]
+                NB <-->|RAFT| NS
+                NS <-->|RAFT| NZ
+                NZ <-->|RAFT| NB
+            end
+
+            EC["eventhub-connect<br/>validation · plugin routing · operator UI"]
+        end
     end
 
     T1["plugin targets<br/>Radioplayer · Xperi DTS"]
-    S1["subscribers<br/>ARD Sounds · broadcaster apps · dashboards"]
 
-    P1 -->|MQTT| NATS
+    P1 -->|MQTT| CL
     P1 -.->|HTTPS| EI
     MQ --> BR
+    BR -->|"inbox/"| NB
+    CL <-->|"validate · fan out"| EC
     EC -->|outbound HTTPS| T1
-    NATS -->|MQTT| S1
+    CL -->|MQTT| S1
 ```
 
 ## 5. Services and code structure
@@ -196,8 +213,16 @@ flowchart LR
 **`eventhub-ingest`** — the GCP HTTPS shim, shrinking in behaviour but not in surface.
 
 - Owns: TLS termination, token issuance (`/auth/login`, `/auth/refresh`, `/auth/reset`), request
-  auth (Firebase JWT plus a user allow-list), and an MQTT publish of the raw event body.
-- Does not: validate event payload schemas, dispatch plugins, or run its own fan-out.
+  auth (Firebase JWT plus a user allow-list), **event-schema validation for synchronous publisher
+  feedback** ([§5.4](#54-validation-runs-twice-on-purpose)), **identifier normalization** —
+  CRID-to-URN and Core-ID-to-URN via `process-services.ts`, plus filling in `institutionId` from the
+  publisher it already resolves, so bridged events satisfy the URN-only rule
+  ([§12.4](#124-identifiers)) — and an MQTT publish of the event body.
+- Stays **single-institution**: one Firebase user maps to one `user.institution.id`, and the
+  multi-institution capability in [§7.4](#74-one-user-several-institutions) is deliberately not
+  backported.
+- Does not: dispatch plugins or run its own fan-out. Its validation pass is advisory — the sidecar
+  revalidates and is authoritative.
 - Keeps its **entire published route surface** until each route is formally deprecated
   ([§5.3](#53-the-ingest-api-surface-stays-until-it-is-deprecated)).
 
@@ -225,7 +250,7 @@ They retire on two different schedules:
 - **Short track — `/subscriptions`, `/topics`, `/pubsub`.** These only mean anything while Pub/Sub
   carries events; a subscription to a topic that receives nothing is a trap. Their deprecation is
   **coupled to the Pub/Sub shutdown**, not scheduled independently: notice while subscribers
-  migrate, then `410 Gone`, then removal. This is why step 13 cannot simply switch Pub/Sub off.
+  migrate, then `410 Gone`, then removal. This is why step 17 cannot simply switch Pub/Sub off.
 - **Long track — `/events/:eventName` and `/auth/*`.** The legacy publishing path, surviving until
   the last HTTPS publisher moves to MQTT. **`/auth/*` keeps the Firebase dependency alive for exactly
   as long as `/events` does**; dropping Firebase is gated on the last token consumer, not on the CN
@@ -233,17 +258,38 @@ They retire on two different schedules:
 
 The OpenAPI document keeps describing every live route accurately, including deprecation markers.
 
-### 5.4 What shrinking ingest costs
+### 5.4 Validation runs twice, on purpose
 
-`/events/:eventName` keeps its path, auth and documented request body, but stops enforcing the event
-schema. **Today a bad payload gets a synchronous `400` with zod error detail; after the change it
-gets a `202`, and the schema rejection happens later, in the CN.** Legacy publishers hold no MQTT
-connection, so there is nowhere to deliver that rejection to them.
+`/events/:eventName` **keeps enforcing the event schema exactly as it does today**, so a legacy
+publisher still gets a synchronous `400` with zod error detail. The sidecar then validates the event
+again once the bridge has relayed it into `inbox.{institutionId}`.
 
-Accepted as a migration incentive ([§12.7](#127-legacy-is-not-first-class)). Mitigations: the
-operator UI surfaces validation errors for bridged events with the publisher identity attached, and
-we chase houses directly. It also puts validation in exactly one place, so the two-zod-versions
-drift problem disappears rather than needing a detector.
+The two passes enforce **different schemas by design**: ingest accepts the legacy shape — `externalId`
+required, `publisherId` in either form — then normalizes the identifiers, while the sidecar enforces
+the stricter URN-only shape ([§12.4](#124-identifiers)). The sidecar therefore validates ingest's
+output, not its input, which is what makes the strict rule enforceable without breaking a single
+legacy publisher.
+
+Each pass exists for a different reason:
+
+- **Ingest validates for publisher feedback.** A legacy publisher holds no MQTT connection, so
+  `feedback/{institutionId}` cannot reach it and the HTTP response is the only diagnostic channel it
+  has. Dropping the check would degrade the legacy path with no benefit to the houses still on it.
+- **The sidecar validates because it is the trust boundary.** It validates everything arriving on
+  `inbox.>` regardless of origin, so there is no bridged-message bypass and no trusted-publisher
+  branch to get wrong. `eventhub-bridge` stays a dumb relay
+  ([§5.2](#52-one-responsibility-per-service)) and the sidecar needs no notion of where a message
+  came from.
+
+**The sidecar is authoritative.** If the two passes disagree, the sidecar wins and the event does not
+reach the `radio.` tree.
+
+The cost is that `src/schemas/events.ts` runs in two deployments, which can drift if the services
+ship from different commits, and that the strict shape is only reachable through ingest's
+normalization. A sidecar rejection of a bridged event therefore means one of two things — the schemas
+diverged, or normalization stopped producing URNs — and both are alarms, not tolerable states
+([§11.2](#112-legacy-path)). CI builds both from the same commit, and the strict schema is derived
+from the legacy one rather than written twice.
 
 ### 5.5 Repo layout
 
@@ -258,16 +304,18 @@ src/
   connect/     eventhub-connect  — sidecar, adapters, feed loader, UI backend
   ingest/      eventhub-ingest   — HTTPS auth + MQTT publish
   bridge/      eventhub-bridge   — GCP → CN relay
-deploy/        NATS + observability configs, K3S manifests, Nix flake
+infra/         NATS + observability configs, K3S manifests, Nix flake
 ```
 
 **`src/schemas/` is the single source of truth for the event contract**, imported rather than
 reimplemented, with three consumers: `eventhub-connect` at runtime for event validation,
-`src/openapi/` at build time for `openapi.json`, and `eventhub-ingest` for its own route schemas.
+`src/openapi/` at build time for `openapi.json`, and `eventhub-ingest` for both its own event
+validation and its route schemas.
 
-At step 13 **ingest drops event-body validation (`events.ts`) but keeps the request and response
-schemas for its surviving routes** (`auth.ts`, `subscriptions.ts`, `topics.ts`, `common.ts`). Nothing
-in `src/schemas/` can be deleted while a live route references it.
+**`eventhub-ingest` keeps importing all of it** — `events.ts` for its validation pass
+([§5.4](#54-validation-runs-twice-on-purpose)) and `auth.ts`, `subscriptions.ts`, `topics.ts` and
+`common.ts` for its surviving routes. Nothing in `src/schemas/` can be deleted while a live route
+references it.
 
 **`src/utils/` needs a deliberate split, not a wholesale move.** Most of it is ingest-specific by
 accident of history and becomes `eventhub-connect`'s: `ard-feed`, `ard-core`, `events/`, `plugins/`.
@@ -335,8 +383,8 @@ feed returns as `publisher.institution.id`, so the ownership check guarding ever
 string comparison between subject token and feed
 ([§8.2](#82-ownership-is-a-direct-comparison)) — no mapping table, no join key. The cost is topic
 length: a broadcaster configures `inbox/urn:ard:institution:a3004ff924ece1a2` rather than
-`inbox/swr`. It is the same `urn:ard:…` shape publishers already send today in
-`services[].publisherId`.
+`inbox/swr`. It is the same `urn:ard:…` shape publishers already send today in `services[].id`, and
+the shape v3 requires for every identifier ([§12.4](#124-identifiers)).
 
 **The livestream comes before the event class, at a fixed depth.** The dominant subscriber pattern is
 "everything for stream X" (encoders, broadcaster apps), and putting the ID last would make that
@@ -348,8 +396,10 @@ ACLs into a prefix match.
 because plugin eligibility is a per-event decision ([§10.3](#103-plugin-routing)).
 
 Publishers **publish only** to `inbox/{institutionId}` and **subscribe only** to
-`feedback/{institutionId}`. The `radio.`, `feedback.` and `plugin.` trees are written exclusively by
-the sidecar. `eventhub-bridge` is just another writer to `inbox/{institutionId}`.
+`feedback/{institutionId}` — to one such pair, or to several if the credential is permitted for
+several institutions ([§7.4](#74-one-user-several-institutions)). The `radio.`, `feedback.` and
+`plugin.` trees are written exclusively by the sidecar. `eventhub-bridge` is just another writer to
+`inbox/{institutionId}`.
 
 ### 6.3 Subscription patterns
 
@@ -397,8 +447,8 @@ all provisioned by one team.
 Publisher and subscriber credentials are separate user classes with separate naming rules.
 
 - **Publishers:** `pub-{label}-{issued}`, e.g. `pub-swr-2026-06-26`. The `pub-` prefix is mandatory
-  and reserved — anything carrying it publishes to exactly one `inbox.{institutionId}`, and nothing
-  else in the config may use it.
+  and reserved — anything carrying it publishes only to `inbox.{institutionId}` subjects, one or
+  several ([§7.4](#74-one-user-several-institutions)), and nothing else in the config may use it.
 - **Subscribers:** a descriptive role name plus issuance date, e.g. `sub-radioplayer-2026-06-26`,
   `sub-ard-sounds-2026-06-26`. Naming is looser, because subscriber scopes vary and new consumers
   appear more often than new publishers. The `sub-` prefix is a convention, not a rule the ACLs
@@ -408,8 +458,8 @@ Publisher and subscriber credentials are separate user classes with separate nam
 
 **The username is a label for humans; the institution URN in the subject is the contract.** The
 `swr` in `pub-swr-2026-06-26` is not parsed, matched or resolved by anything — the ACL binds that
-user to exactly one `inbox.urn:ard:institution:…`, and the sidecar reads the institution from the
-subject the message arrived on. The label exists because the operator UI groups connections by
+user to a set of `inbox.urn:ard:institution:…` subjects, and the sidecar reads the institution from
+the subject each message arrived on. The label exists because the operator UI groups connections by
 username, where a 16-hex-character hash would tell an operator nothing.
 
 The date suffix makes rotation additive rather than destructive:
@@ -436,7 +486,7 @@ dropped connections for anyone else.
 ```conf
 authorization {
   users: [
-    # publisher: one per organization, per issuance. publish-only into its own inbox.
+    # publisher, common case: one organization, per issuance. publish-only into its own inbox.
     # the subject carries the institution URN; the username is just a readable label.
     {
       user: "pub-swr-2026-06-26"
@@ -445,6 +495,28 @@ authorization {
       permissions: {
         publish:   { allow: ["inbox.urn:ard:institution:a3004ff924ece1a2"] }
         subscribe: { allow: ["feedback.urn:ard:institution:a3004ff924ece1a2"] }
+      }
+    }
+
+    # publisher acting for several institutions: one entry per permitted inbox.
+    # nats enforces the set; eventhub-connect never sees the username.
+    {
+      user: "pub-shared-playout-2026-06-26"
+      password: "$2a$11$..."
+      allowed_connection_types: ["MQTT"]
+      permissions: {
+        publish: {
+          allow: [
+            "inbox.urn:ard:institution:a3004ff924ece1a2"
+            "inbox.urn:ard:institution:b71c0e4d9a25f338"
+          ]
+        }
+        subscribe: {
+          allow: [
+            "feedback.urn:ard:institution:a3004ff924ece1a2"
+            "feedback.urn:ard:institution:b71c0e4d9a25f338"
+          ]
+        }
       }
     }
 
@@ -508,18 +580,62 @@ authorization {
 - **No MQTT credential has any permission on `plugin.>`.** It is reachable only by NATS-native
   service users, and each adapter sees only its own target's subtree.
 
-### 7.4 The ACL protects the subject, not the payload
+### 7.4 One user, several institutions
+
+**A single credential can be permitted for more than one institution**, by listing several
+`inbox.{institutionId}` subjects in its `publish.allow`. A shared playout system serving two houses,
+or an operator publishing on behalf of several, needs one credential rather than one per house.
+
+**`eventhub-connect` needs no new logic for this, and that is the point.** The multi-institution
+decision lives entirely in the ACL:
+
+- **NATS decides which institutions a user may act for.** A publish to an institution outside the
+  allowed set is refused at the broker, before the message exists.
+- **The subject says which institution this particular message is for.** One message carries exactly
+  one institution, whatever the credential's breadth.
+- **The sidecar verifies the livestream belongs to the institution in the subject**
+  ([§7.5](#75-the-acl-protects-the-subject-not-the-payload)) — the same single comparison it makes
+  for a single-institution publisher.
+
+Composed, those three give exactly the required property: **a livestream can only be published under
+an institution the user is permitted for.** The sidecar gets there without knowing who published, and
+the reason it must work this way is that **it cannot know.** A message read from JetStream carries its
+subject, headers, payload and sequence — not the identity of the NATS user that published it. Any
+design where the sidecar checks a livestream against _the user's_ permitted set would need that
+identity propagated into every message, which is precisely the mapping table
+[§8.2](#82-ownership-is-a-direct-comparison) exists to avoid.
+
+The practical cost falls on the publisher: **a multi-institution client must publish each event to
+the matching `inbox/{institutionId}`.** Sending an SWR livestream to the NDR inbox is rejected by the
+sidecar even though the credential holds both permissions, because the subject and the livestream
+disagree. The `services[].institutionId` field ([§12.4](#124-identifiers)) makes that mistake
+self-evident in the rejection rather than something to infer.
+
+**`svc-bridge` is already this pattern.** It holds `publish.allow: ["inbox.>"]` — every institution
+at once — and needs no institution logic of its own, because the subject it publishes on carries the
+institution and the sidecar checks it like any other message
+([§11.2](#112-legacy-path)). A multi-institution publisher is the same arrangement with an explicit
+list instead of a wildcard.
+
+**None of this applies to `eventhub-ingest`.** A Firebase user there has exactly one
+`user.institution.id`, checked directly against the resolved publisher's institution, and it stays
+that way for the remainder of the legacy path's life. Multi-institution is a v3-only capability;
+nothing in the legacy code needs to learn about it.
+
+### 7.5 The ACL protects the subject, not the payload
 
 `pub-swr-2026-06-26` can only write to `inbox.urn:ard:institution:a3004ff924ece1a2`, but nothing at
 the broker level stops it publishing a payload whose `services[]` array claims an NDR livestream.
 
 **The sidecar must therefore verify that every service in the payload belongs to the institution
-taken from the subject** — never from the payload. This is the same institution-ownership check
-`processEvent` does today (`blocked: "User unauthorized for service"`); it moves into the sidecar and
-takes its trusted input from the subject token. The data behind it is the ARD core feed
+taken from the subject** — never from the payload, and never from the credential's permitted set,
+which it cannot see. This is the same institution-ownership check `processEvent` does today
+(`blocked: "User unauthorized for service"`); it moves into the sidecar and takes its trusted input
+from the subject token. `services[].institutionId` is checked as part of it, as a claim that must
+agree rather than as the source of truth. The data behind it is the ARD core feed
 ([§8](#8-the-ard-core-feed)).
 
-### 7.5 Residual risk
+### 7.6 Residual risk
 
 Credentials do not expire on their own, so a leaked password is valid until someone rotates it — the
 accepted trade for removing refresh logic from ten houses' playout systems. Mitigations: TLS is
@@ -538,21 +654,42 @@ behaviour.
 
 - **Authorization.** `livestreamId` → `publisher` → `institution.id`, compared against the
   institution URN in the subject. The only security-relevant use.
-- **Validation.** Rejecting events for livestream URNs that do not exist at all.
+- **Validation.** Rejecting events for livestream URNs that do not exist at all, and checking that
+  the payload's `publisherId` is the publisher the feed actually lists for that livestream.
 - **Enrichment.** Publisher title, image and homepage for the operator UI and for adapters that need
   station names.
 
 ### 8.2 Ownership is a direct comparison
 
-Because the subject carries the institution URN, the check is string equality between two ids:
+Because the subject carries the institution URN, the check is string equality between ids:
 
 ```
 subject:  inbox.urn:ard:institution:a3004ff924ece1a2   ← trusted, enforced by the ACL
-feed:     livestreamId → publisher.institution.id      ← urn:ard:institution:a3004ff924ece1a2
+payload:  services[].institutionId                      ← a claim, must agree
+feed:     livestreamId → publisher.institution.id       ← the authority
 ```
 
-Equal means accept; different means `blocked`. **There is no mapping table and no join key** — no
-`slug → institution` config to maintain, drift, or get wrong. Two properties make this safe:
+**All three must agree.** The subject is trusted because the broker enforced it, the feed is the
+authority on what a livestream belongs to, and the payload is a claim that has to match both. Equal
+means accept; any disagreement means `blocked`, and which pair disagrees says what went wrong: subject
+against payload is a client routing its event to the wrong inbox — the likely mistake for a
+multi-institution credential ([§7.4](#74-one-user-several-institutions)) — while payload against feed
+is a stale or wrong id in the publisher's configuration.
+
+This holds unchanged when a credential is permitted for several institutions, because the comparison
+is per message and never consults the credential. **There is no mapping table and no join key** — no
+`slug → institution` config to maintain, drift, or get wrong.
+
+**This is stricter than today's check, and the URN-only rule is what allows it.** `process-services.ts`
+currently derives the livestream URN by hashing the CRID (`createHashedId(service.externalId)`) and
+never looks that URN up in the feed; the institution is resolved from the payload's `publisherId`
+instead, with `allowed-livestreams.json` covering COMMON_IDS topics. So a payload naming another
+house's livestream under its own publisher is only caught for allow-listed entries. When the
+livestream arrives as a URN rather than as a CRID to be hashed, it can be looked up directly, and the
+feed's publisher for that livestream becomes the authority — the payload's `publisherId` is then a
+cross-check rather than the join key.
+
+Two properties make the comparison safe:
 
 - **The ACL is the pinning.** The binding between a credential and an institution is expressed once,
   in the ACL, and reviewed in the same PR that creates the user.
@@ -867,7 +1004,7 @@ crosses the trust boundary, and the publisher is notified on `feedback/{institut
 2. `eventhub-ingest` authenticates the request and publishes the raw body to `inbox/{institutionId}`
    on the minimal GCP MQTT broker. It already resolves the publisher's institution today, so it
    already has the URN the subject needs. During the earlier steps it also still fans out to
-   Pub/Sub; that ends at step 13.
+   Pub/Sub; that ends at step 17.
 3. `eventhub-bridge` subscribes to `inbox/#` on the GCP broker and republishes each message to the
    same topic in the CN.
 4. From there, identical to [§11.1](#111-cn-path) with no special case anywhere.
@@ -875,9 +1012,10 @@ crosses the trust boundary, and the publisher is notified on `feedback/{institut
 **One validator, one eligibility implementation, one fan-out — all in the sidecar.** Two
 consequences:
 
-- **While `eventhub-ingest` still runs its own zod pass**, a sidecar rejection on a bridged event
-  means the two versions disagree and is an alert for us rather than feedback for the publisher. Once
-  ingest is reduced at step 13 that failure mode stops existing.
+- **`eventhub-ingest` runs its own zod pass for the whole life of the legacy path**
+  ([§5.4](#54-validation-runs-twice-on-purpose)), so a sidecar rejection of a bridged event means the
+  two copies of the schema disagree. That is a standing drift alarm for us rather than feedback for
+  the publisher, and it should alert rather than sit in a log.
 - **Plugin dispatch must not run on both sides.** While GCP-side Pub/Sub dispatch is still live, the
   sidecar's fan-out to `plugin.>` would double-deliver every bridged event to Radioplayer and DTS.
   This is why the bridge ships **before** the adapters move: during that window `plugin.>` messages
@@ -901,8 +1039,9 @@ and password ([§7](#7-auth-and-acl)).
 ### 12.2 Publishers
 
 - **Provisioning.** Request a credential from the Eventhub team. You receive a username of the form
-  `pub-{label}-{issued}`, a password, **your organization's institution URN**, and the current node
-  endpoints. No expiry, no refresh logic.
+  `pub-{label}-{issued}`, a password, **the institution URN or URNs your credential is permitted
+  for** ([§7.4](#74-one-user-several-institutions)), and the current node endpoints. No expiry, no
+  refresh logic.
 - **Connection.** Open a persistent connection with **all three node endpoints configured**, so the
   client reconnects to a surviving node on drop. Keep-alive on, ping every 30–60s.
 - **Auth.** MQTT `username` is the issued `pub-…` username; the date suffix is part of it, don't
@@ -912,9 +1051,15 @@ and password ([§7](#7-auth-and-acl)).
   username** — neither is derived from the other. QoS 1, clean-session false so QoS 1 messages queue
   across reconnects, and a **stable client ID** — a fresh one starts a new session and loses the
   queue, and keeping it stable is what makes credential rotation seamless.
-- **Feedback.** Subscribe to `feedback/{institutionId}`, the same URN as your publish topic.
-- **Schema.** The payload is the same JSON the HTTPS API accepts today. Existing schemas apply to
-  `track.playing` / `track.next`; the two new classes are in [§13](#13-new-event-schemas).
+- **If your credential covers several institutions**, route each event to the inbox of the
+  institution that owns the livestream, and set `services[].institutionId` to match. The broker
+  accepts any of your permitted inboxes, so a misrouted event is caught by the sidecar rather than at
+  publish time.
+- **Feedback.** Subscribe to `feedback/{institutionId}`, for each institution you publish for.
+- **Schema.** The payload is the same JSON the HTTPS API accepts today, except inside `services[]`:
+  identifiers must be pre-encoded ARD URNs, `institutionId` is now required, and `externalId` and
+  `type` are gone ([§12.4](#124-identifiers)). Existing schemas otherwise apply to `track.playing` /
+  `track.next`; the two new classes are in [§13](#13-new-event-schemas).
 - **Idempotency.** QoS 1 is at-least-once by definition. A reconnecting publisher may re-send.
 
 ### 12.3 Subscribers
@@ -934,7 +1079,81 @@ and password ([§7](#7-auth-and-acl)).
 - **Trust the sidecar.** Every event you receive has been zod-validated at the broker boundary.
   Re-validation is optional.
 
-### 12.4 Validation feedback
+### 12.4 Identifiers
+
+**New MQTT delivery accepts pre-encoded ARD URNs only.** Every identifier in `services[]` arrives
+already resolved, and the sidecar performs no ID conversion.
+
+| `services[]` field | v3 on MQTT                                                                                | Legacy on HTTPS                                  |
+| ------------------ | ----------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `id`               | **required** — `urn:ard:permanent-livestream:{hash}` or `urn:ard:event-livestream:{hash}` | optional; minted by Eventhub when absent         |
+| `publisherId`      | **required** — `urn:ard:publisher:{hash}`                                                 | Core ID (`248000`) or URN; converted by Eventhub |
+| `institutionId`    | **required** — `urn:ard:institution:{hash}`                                               | not sent; ingest resolves it from the publisher  |
+| `externalId`       | **removed** — CRIDs are not accepted                                                      | required, `crid://…`                             |
+| `type`             | **removed** — implied by the `id` prefix                                                  | required; selects the prefix when hashing        |
+
+**`services[].type` is removed because the publisher now supplies the `id` itself.** The two carry the
+same fact — `core-id-prefixes.json` maps them one-to-one — so keeping both means keeping a pair that
+can disagree, and a payload where `type: PermanentLivestream` meets
+`id: urn:ard:event-livestream:…` has no correct interpretation. With one field, the question does not
+arise; `permanent-livestream` versus `event-livestream` is read off the `id` namespace wherever it is
+needed.
+
+It stays required on HTTPS, where it is load-bearing rather than redundant: legacy ingest has no `id`
+to read and uses `type` to pick the prefix it hashes the CRID onto
+(`coreIdPrefixes[type] + createHashedId(externalId)`). Removing it there would break the very
+conversion that keeps bridged events valid.
+
+One consequence worth noting: the `id` regex in the v3 schema becomes the single declaration of which
+livestream kinds exist, doing validation and kind-derivation at once. That is the point — one source
+instead of two that can drift — but it does mean adding a livestream kind is a schema change rather
+than an enum entry.
+
+Why URN-only:
+
+- **The sidecar does no ID resolution.** Conversion today is a deterministic hash of the CRID plus a
+  type-to-prefix lookup (`process-services.ts`, `core-id-prefixes.json`) — it mints an id rather than
+  verifying one. Keeping it out of the CN path leaves the sidecar one feed dependency —
+  `livestreamId` → `institution.id` for the ownership check
+  ([§8.2](#82-ownership-is-a-direct-comparison)) — and no id minting on the write path.
+- **No ambiguity about which form was sent.** Today `publisherId` accepts either a Core ID or a URN
+  and Eventhub infers which; with one accepted form there is nothing to infer and nothing to get
+  wrong.
+- **`publisherId` becomes checkable.** As a URN it can be compared directly against the publisher the
+  feed resolves for that livestream, so a payload claiming the wrong publisher is caught rather than
+  normalized into something plausible.
+
+**`institutionId` is new in v3 and carries the owning house explicitly.** It exists for two reasons.
+Downstream, it makes an event self-describing: a subscriber on `radio/…` or a plugin adapter knows
+which house produced it without holding the feed, which is the last thing that forced feed knowledge
+onto consumers. Upstream, it turns the ownership check into a three-way agreement between the subject,
+the payload and the feed ([§8.2](#82-ownership-is-a-direct-comparison)), so a mismatch names which of
+the three is wrong instead of just failing.
+
+**It is a claim, not an input.** Nothing trusts `institutionId` — the subject remains the only trusted
+carrier of institution, and the feed remains the authority on what a livestream belongs to. A payload
+whose `institutionId` disagrees with either is rejected. Ingest fills it in during normalization from
+the publisher it already resolves, so bridged events satisfy the field without a house changing
+anything.
+
+**`eventhub-ingest` keeps the conversion.** Legacy HTTPS publishers keep sending `externalId` and a
+numeric `publisherId`; ingest normalizes both before publishing to MQTT, so what arrives on
+`inbox.{institutionId}` through the bridge already satisfies the rule above. No house is forced to
+change its HTTPS payload, and `eventhub-bridge` stays a dumb relay.
+
+A removed field left in an otherwise valid v3 payload — `services[].externalId` or `services[].type` —
+is **ignored, not rejected.** `id` is required and therefore authoritative in both cases, so there is
+no ambiguity to protect against and no reason to fail an otherwise correct event. The sidecar counts
+them ([§15](#15-observability)) so we can see who is still sending them.
+
+**This rule covers `services[]` only, and both removed names exist elsewhere in the payload.** The
+event-level `externalId` and `references[].externalId` are content identifiers — the track's id in the
+publisher's system, the CRID of a show or episode — and the **event-level `type` is the event class**
+(`de.ard.eventhub.v1.radio.track.playing`), which is required and unchanged. Only the two fields
+inside `services[]` go away; nothing here asks houses to stop identifying content or to stop naming
+their events.
+
+### 12.5 Validation feedback
 
 Feedback is a **diagnostic channel, not a transactional acknowledgement**. The publisher does not
 block on it and does not need to correlate every publish with a response.
@@ -945,27 +1164,32 @@ block on it and does not need to correlate every publish with a response.
   unique per item. `radio.control` and `radio.data` carry no `playlistItemId`; for those, feedback
   references the target subject plus the event's `time` / `start`.
 - Feedback messages are retained per institution, so a client that connects after the fact still
-  sees the most recent problem.
+  sees the most recent problem. A multi-institution client subscribes to each of its `feedback/`
+  topics and gets the rejection on the one the event was published under.
 - The authoritative record is the operator UI and the cluster logs.
 
-### 12.5 Migration path
+### 12.6 Migration path
 
-- **Publishers on HTTPS today.** Keep posting during the migration window; no code changes required.
-  **One behaviour change to plan for:** at step 13 the synchronous `400` with schema errors becomes a
-  `202` ([§5.4](#54-what-shrinking-ingest-costs)). If you rely on that response to catch your own
-  bugs, migrate to MQTT and read `feedback/{institutionId}` instead.
-- **Publishers ready to migrate.** Point the publisher config at `eventhub-connect` over MQTT. One
-  config change; the username and password replace the static API token, and the payload is
-  unchanged.
+- **Publishers on HTTPS today.** Keep posting during the migration window; no code changes required
+  and no behaviour change. The synchronous `400` with zod error detail stays for as long as the route
+  does ([§5.4](#54-validation-runs-twice-on-purpose)).
+- **Publishers ready to migrate.** Point the publisher config at `eventhub-connect` over MQTT; the
+  username and password replace the static API token. **The payload changes if you send CRIDs or
+  numeric Core IDs today**: inside `services[]`, `id` and `publisherId` must be ARD URNs,
+  `institutionId` is added, and `externalId` and `type` are dropped
+  ([§12.4](#124-identifiers)). A publisher already sending URNs — as the
+  quickstart documents — changes configuration only. If you do not hold the livestream URNs, read
+  them off `services[].topic.id` in your current HTTPS responses, which already carries the resolved
+  value, before switching.
 - **Plugin adapters on Pub/Sub today.** Keep running during the migration window, then point the
   adapter at `eventhub-connect` and decommission the GCP-side adapter.
-- **Subscribers on Pub/Sub today.** Move to MQTT around step 13, which stops the event fan-out to
+- **Subscribers on Pub/Sub today.** Move to MQTT around step 17, which stops the event fan-out to
   Pub/Sub — after that a Pub/Sub subscription still exists but receives nothing. The `/subscriptions`
   and `/topics` routes stay served through a deprecation cycle, but they stop being useful at the
   same moment. This is the migration item most likely to be forgotten, because these consumers are
   not publishers and will not notice the rest of the transition.
 
-### 12.6 Failover modes
+### 12.7 Failover modes
 
 - **Single-node outage.** Clients reconnect to one of the two survivors via their configured endpoint
   list. Quorum holds at 2 of 3, so JetStream stays writable and QoS 1 sessions, retained messages
@@ -981,7 +1205,7 @@ block on it and does not need to correlate every publish with a response.
 - **Credential revoked.** The user is removed from the config and the server reloaded. The connection
   drops and the next reconnect fails auth.
 
-### 12.7 Legacy is not first-class
+### 12.8 Legacy is not first-class
 
 `eventhub-bridge` runs as a single instance with no failover, and legacy publishers are not covered
 by the availability guarantees above. **This is intentional.** The HTTPS path exists to give houses
@@ -989,12 +1213,13 @@ time to migrate, not to be a permanent second-class transport.
 
 When the bridge is down or partitioned, legacy events do not reach CN subscribers, and **this
 exposure grows over the migration.** While `eventhub-ingest` still fans out to Pub/Sub, legacy events
-reach existing Pub/Sub subscribers regardless of bridge state; once that fan-out ends at step 13, the
+reach existing Pub/Sub subscribers regardless of bridge state; once that fan-out ends at step 17, the
 bridge becomes the only path out of GCP and a bridge outage means legacy events are lost.
 
 ## 13. New event schemas
 
-Both extend `de.ard.eventhub.v1.*` and reuse the existing `services[]` shape. Derived from the
+Both extend `de.ard.eventhub.v1.*` and reuse the `services[]` shape in its URN-only v3 form
+([§12.4](#124-identifiers)). Derived from the
 proposals in [discussion #771](https://github.com/swrlab/ard-eventhub/discussions/771).
 
 ### 13.1 `de.ard.eventhub.v1.radio.control`
@@ -1010,9 +1235,8 @@ Control bits — TA, Regio, and whatever comes next.
 	"state": true,
 	"services": [
 		{
-			"type": "PermanentLivestream",
-			"externalId": "crid://swr.de/123450",
-			"publisherId": "248000",
+			"publisherId": "urn:ard:publisher:75dbb3dace15f610",
+			"institutionId": "urn:ard:institution:a3004ff924ece1a2",
 			"id": "urn:ard:permanent-livestream:49267f7d67be180d"
 		}
 	]
@@ -1026,7 +1250,7 @@ Control bits — TA, Regio, and whatever comes next.
 | `validUntil` | ISO8601 | –        | backstop TTL. receivers drop the state when it passes. omit for states with no natural expiry                                 |
 | `name`       | string  | ✓        | control element identifier — `TA`, `TP`, `EON`, `Regio`, … **not an enum**, so future control functions need no schema change |
 | `state`      | boolean | ✓        | new state                                                                                                                     |
-| `services`   | array   | ✓        | as in track events                                                                                                            |
+| `services`   | array   | ✓        | as in track events, pre-encoded ARD URNs only ([§12.4](#124-identifiers))                                                     |
 
 `name` is unconstrained because the ZI schema's fixed element list is one of the limitations v3
 exists to remove. A typo costs one broken control bit for one publisher; an enum costs a release
@@ -1051,9 +1275,8 @@ Radiotext, dynamic label, and the RT+/DL+ plus services, bundled into one cyclic
 	],
 	"services": [
 		{
-			"type": "PermanentLivestream",
-			"externalId": "crid://swr.de/123450",
-			"publisherId": "248000",
+			"publisherId": "urn:ard:publisher:75dbb3dace15f610",
+			"institutionId": "urn:ard:institution:a3004ff924ece1a2",
 			"id": "urn:ard:permanent-livestream:49267f7d67be180d"
 		}
 	]
@@ -1070,7 +1293,7 @@ Radiotext, dynamic label, and the RT+/DL+ plus services, bundled into one cyclic
 | `data[].id`          | integer | ✓        | `0` for classic single-line radiotext / DL. for `rtdlplus`, the RT+ content type from the standard mapping table                                            |
 | `data[].description` | string  | –        | human-readable field name. redundant with `id` for routing; useful for debugging and for non-standard fields                                                |
 | `data[].value`       | string  | ✓        | the payload                                                                                                                                                 |
-| `services`           | array   | ✓        | as in track events                                                                                                                                          |
+| `services`           | array   | ✓        | as in track events, pre-encoded ARD URNs only ([§12.4](#124-identifiers))                                                                                   |
 
 **`cycle` and `id` are numbers, not strings** — the discussion draft quoted them but described them
 as integers.
@@ -1091,7 +1314,126 @@ Two jobs that want different transports: **stats**, always on screen and changin
 **The UI is a read-only observer and must never be in the data path.** If it dies, or if twenty
 people open it at once, events keep flowing.
 
-### 14.1 Stats over HTTP
+### 14.1 What it shows
+
+Ten panels. The first four gate step 11 ([§18.2](#182-steps)); the rest can land incrementally, and
+two only become useful later in the migration.
+
+**1. On-air state — every livestream at a glance.** Retained messages
+([§9.1](#91-per-event-class)) make this close to free: the UI subscribes once and has current
+state for every station without a history store or a replay.
+
+- Current `track.playing` per livestream — station, title, artist, publisher — and `track.next` where
+  it is sent.
+- **Active `radio.control` flags with a `validUntil` countdown.** Which stations currently have a
+  control bit asserted, and when it lapses. This is the panel the ZI Gateway replacement is judged
+  on.
+- Latest `radio.data` value per station with the age of its last cycle.
+- **Age of the last event per station, sorted worst-first.** "Which station went quiet" is the most
+  common operator question, and staleness-first ordering answers it without anyone typing a filter.
+
+**2. Connections and credentials.**
+
+- **Connected clients grouped by username** — how a rotation is confirmed complete before the old
+  user is removed ([§7.2](#72-username-convention-and-rotation)).
+- Per connection: client id, source address, connect time, subscribed subjects, QoS, persistent-session
+  state, last publish time.
+- **Every configured user, not only the connected ones**, with the issue date parsed out of the
+  username and its current connection count. A credential with zero connections is visibly safe to
+  delete; an old one still in use is visibly overdue.
+- **The institutions each credential is permitted for** ([§7.4](#74-one-user-several-institutions)).
+  With multi-institution users the ACL is the whole authorization model, so it has to be readable
+  without opening the NATS config.
+- Auth failures by username and source address.
+
+**3. Validation and rejections.**
+
+- Recent failures with the **full zod message**, not the sanitized public string.
+- What was published to `feedback/{institutionId}` ([§12.5](#125-validation-feedback)).
+- Ownership-check failures, **showing which of the three ids disagreed** — subject, payload
+  `institutionId`, or the feed ([§8.2](#82-ownership-is-a-direct-comparison)). For a
+  multi-institution credential this is the difference between "misrouted to the wrong inbox" and "not
+  permitted at all".
+- **Sidecar rejections of bridged events, split by cause** — schema drift versus a failed
+  normalization ([§5.4](#54-validation-runs-twice-on-purpose)).
+- Payloads still carrying `services[].externalId`, per publisher
+  ([§12.4](#124-identifiers)).
+- **Filterable to a single institution**, so a house diagnoses its own integration instead of opening
+  a ticket. Publishers currently get `Bad request` with no detail, which is why that support load
+  exists.
+
+**4. Cluster and broker health.**
+
+- Three nodes — BAD, STG, MNZ: reachable, version, uptime, and which one answered this request.
+- JetStream RAFT group state and leader per group, replica lag, stream and consumer counts, storage
+  headroom.
+- **Per-consumer lag, ack-pending, redelivery and `term` counts, for the sidecar and each plugin
+  target separately** ([§10.5](#105-what-scales-and-what-does-not)). A climbing ack-pending on one target is the
+  earliest degradation signal there is.
+- Slow-consumer events, connect/disconnect churn.
+
+**5. ARD feed health.**
+
+- Age, active revision, and per-node revision if per-node fetching is used
+  ([§8.4](#84-staleness-is-safe-silence-is-not)).
+- Last refresh outcome, and **which integrity rule fired** when a candidate was rejected
+  ([§8.5](#85-poison-feed-protection)).
+- Item count against its bounds, canary stations present or missing.
+- **Diff between the active revision and a rejected candidate.** A poison feed revokes a house's
+  ability to publish silently, so seeing which publishers would have disappeared is the difference
+  between catching it and hearing about it from the house.
+
+**6. Plugin adapters.**
+
+- Per target: success rate, latency, timeout counts, staleness drops.
+- **Outbound calls per target per minute** — the step 16 cutover check. Flat across the switch means
+  one path is live; doubled means both are.
+- Fan-out ratio, events on `radio.>` versus messages on `plugin.>`, per target.
+
+**7. Latency against the budget.**
+
+- p99 `inbox/`-to-`radio/` split per stage, against the 220 ms
+  ([§9.2](#92-the-220-ms-budget)), so a breach points at a hop rather than at the system.
+- Per-zone breakdown. Depends on the metrics store from step 13.
+
+**8. Identifier lookup.**
+
+- Station name to livestream URN, publisher URN and institution URN — and the reverse, paste a URN
+  and get the station.
+- **The exact topic strings** to publish to and subscribe to for that station, ready to copy.
+- Pure feed data with no state of its own, and it answers the most repeated onboarding question
+  without a human in the loop.
+
+**9. Migration progress.** Useful from step 8 onward, and retired with the GCP side.
+
+- Per house: publishing natively over MQTT, or still on HTTPS through the bridge.
+- **Bridge liveness, relay lag and GCP connection state.** It runs as a single instance
+  ([§10.5](#105-what-scales-and-what-does-not)), so its health has no redundancy to hide behind.
+- **Traffic per `eventhub-ingest` route.** [§5.3](#53-the-ingest-api-surface-stays-until-it-is-deprecated)
+  gates removal on _measured_ zero traffic; this is where that measurement lives. Without it,
+  deprecation is an argument instead of an observation.
+
+**10. Live tail.** Transport and limits in [§14.3](#143-live-tail-over-websocket) and
+[§14.4](#144-the-socket-must-not-become-a-monitoring-feed).
+
+- Subject filter, defaulting to something narrower than `radio.>`.
+- A **sampled badge** whenever the rate limit is dropping frames.
+- Pretty-printed payload, copy-as-JSON.
+- The close reason, displayed rather than swallowed.
+
+**Deep-linkable state, everywhere.** Filter, station and time range belong in the URL so an operator
+pastes a link into a chat instead of describing which boxes to tick. Cheap to build in from the
+start, tedious to retrofit.
+
+**Explicitly not features:**
+
+- **No historical event archive and no log search.** The UI reads live state and aggregated metrics.
+  An event history turns it into a data store with retention, backup and PII questions; logs and
+  history belong to the observability stack ([§15](#15-observability)).
+- **No replay, no re-publish, no send-test-event button**, and none of the credential or ACL editing
+  ruled out in [§14.5](#145-no-login-and-what-that-forces). Every one of them is a mutation.
+
+### 14.2 Stats over HTTP
 
 Stats are a snapshot, so they are a periodic `GET` on a 5–10s interval, served from the NATS
 monitoring endpoints (`/varz`, `/connz`, `/jsz`) and the metrics store. No socket, cacheable,
@@ -1099,19 +1441,14 @@ survives a reload, trivially rate-limited. Keeping stats off the socket is what 
 auto-disconnect policy viable: the always-visible part of the UI never needs a persistent
 connection, so the socket is open only while someone is deliberately watching a tail.
 
-The front page shows:
+Everything in [§14.1](#141-what-it-shows) except the live tail is served this way, including the
+on-air board — retained state is read once per poll rather than streamed, so a station's current
+track survives a page reload without a socket.
 
-- **Connected clients grouped by username** — required for confirming a credential rotation is
-  complete before removing the old user ([§7.2](#72-username-convention-and-rotation)).
-- **Per-publisher event rates**, split by event class.
-- **Validation errors with the actual zod message**, not the sanitized public one. Publishers
-  currently get "Bad request" and no way to self-diagnose.
-- **Feed age and active revision**, per node if per-node fetching is used
-  ([§8.4](#84-staleness-is-safe-silence-is-not)).
-- **JetStream health** — RAFT state, per-consumer lag, ack-pending, redeliveries.
-- **Plugin adapter status per target** — success rate, latency, staleness drops.
+One addition to the counters already listed: **per-publisher event rates split by event class**,
+which is the cheapest way to see a house ramping up during migration.
 
-### 14.2 Live tail over WebSocket
+### 14.3 Live tail over WebSocket
 
 The UI backend holds one NATS-native subscription and fans out to browser clients over a WebSocket it
 serves itself.
@@ -1126,7 +1463,7 @@ Rejected alternatives:
   aggressively and automatically, so a server-side close is immediately undone by the browser. SSE
   stays the fallback if WebSocket turns out painful through the CN proxy chain.
 
-### 14.3 The socket must not become a monitoring feed
+### 14.4 The socket must not become a monitoring feed
 
 **An always-open tail is not an allowed use.** Left unchecked it becomes an unversioned, unmonitored
 API that someone builds a health check against, and it holds a broker fan-out subscription open
@@ -1142,7 +1479,7 @@ indefinitely. So:
   `radio.data` volume will drop frames or grow without bound; the default filter should be narrower
   than everything, and sampling must be shown rather than hidden.
 
-### 14.4 No login, and what that forces
+### 14.5 No login, and what that forces
 
 Authorization is reachability from the ARD CN intranet. Consequences that are cheaper to accept now
 than to retrofit:
@@ -1177,6 +1514,12 @@ What to instrument, regardless of which tools win:
 
 - Per-publisher event counters, split by event class.
 - Validation error rate, with top failing publishers and error classes.
+- **Sidecar rejections of bridged events**, split by cause — schema drift versus an identifier that
+  failed ingest's normalization ([§5.4](#54-validation-runs-twice-on-purpose)). Should be zero;
+  anything else means the two passes disagree.
+- **Payloads still carrying a removed `services[]` field** — `externalId` or `type` — per publisher and
+  per field. Both are ignored rather than rejected ([§12.4](#124-identifiers)), so this counter is the
+  only way to see who has not finished migrating.
 - MQTT session counts, connect/disconnect churn, auth failures.
 - **Active connections per username**, so an unused credential is visibly safe to remove and a stale
   one visibly overdue.
@@ -1186,7 +1529,7 @@ What to instrument, regardless of which tools win:
   for each plugin target separately. A climbing ack-pending on one target is the earliest signal that
   it is degrading.
 - Plugin adapter success rate, latency and timeout counts per target.
-- **Outbound calls per target per minute** — proves the step 12 adapter cutover worked. Flat across
+- **Outbound calls per target per minute** — proves the step 16 adapter cutover worked. Flat across
   the cutover means one path is live; doubled means both are.
 - Events dropped for staleness, split by target.
 - **ARD feed age, active revision and refresh outcome** — success, network failure, or integrity-rule
@@ -1213,7 +1556,7 @@ in messages and a larger one in log bytes. **Estimate the volume before the pilo
   operate it at 03:00 under pressure, which is a training commitment on top of the build.
 - **K3S** as the workload orchestrator. NATS, the observability stack and one workload per
   `eventhub-connect` role — sidecar, adapters, operator UI, feed CronJob — all live as manifests in
-  `deploy/`. The `eventhub-connect` manifests differ only in the container command and replica count,
+  `infra/`. The `eventhub-connect` manifests differ only in the container command and replica count,
   since they share one image. Scaling is a PR. `eventhub-bridge` runs as a single instance on the
   primary node behind a feature flag.
 - **NATS is a standard container deployment, exactly like the observability tools** — official
@@ -1314,10 +1657,10 @@ the CN).
 
 ### 17.4 The diversity question
 
-**The last failure-independent path disappears in two stages.** Step 13 removes the Pub/Sub fan-out,
+**The last failure-independent path disappears in two stages.** Step 17 removes the Pub/Sub fan-out,
 at which point every event — native or legacy — must traverse the ARD CN to reach any subscriber.
-Step 15 then removes GCP entirely. After step 13 the CN is a single point of failure for the whole
-system; step 15 only removes the HTTPS front door.
+Step 19 then removes GCP entirely. After step 17 the CN is a single point of failure for the whole
+system; step 19 only removes the HTTPS front door.
 
 The argument for keeping a minimal GCP-hosted emergency path indefinitely is that it is the only
 mitigation for risk 1. Against it: sovereignty is a stated goal, two paths means two code paths
@@ -1332,23 +1675,25 @@ keeping a GCP deployment alive.
 
 ## 18. Integration steps
 
-Ordered by dependency; each is a discrete shippable.
+Each step is a discrete shippable. **The GCP-side work comes first**, because it depends on nothing we
+have to wait for — while the CN work is gated by two external requests with lead times we do not
+control ([§18.1](#181-external-requests-to-file-first)).
 
 ### 18.1 External requests to file first
 
 Two prerequisites are filed with other teams rather than built by us, so **their lead time, not
-their effort, is the schedule risk.** Raise both as soon as step 2 has assigned addresses and
-hostnames — they gate everything from step 3 onward.
+their effort, is the schedule risk.** Raise both as soon as step 5 has assigned addresses and
+hostnames — they gate everything from step 6 onward.
 
 - **Firewall rules for ARD CN clients.** Inbound `:8883` to all three nodes from every publisher and
   subscriber range in the CN. Each house connects outbound to the broker, so nothing is needed in
   the other direction. Two further rules are easy to forget and both block earlier than the client
   work does: **inter-node `:6222` across BAD ↔ STG ↔ MNZ**, without which the cluster cannot form a
-  RAFT group at all in step 3, and **outbound HTTPS egress** for the plugin adapters, whose targets
+  RAFT group at all in step 6, and **outbound HTTPS egress** for the plugin adapters, whose targets
   are on the public internet ([§10.4](#104-plugin-adapters)). The bridge additionally needs egress
-  to the GCP broker at step 11.
-- **ARD CN certificates.** The MQTT gateway will not serve TLS without them, so they gate step 3,
-  not step 8. Request **one certificate covering all three node hostnames**, matching the single
+  to the GCP broker at step 8.
+- **ARD CN certificates.** The MQTT gateway will not serve TLS without them, so they gate step 6,
+  not step 14. Request **one certificate covering all three node hostnames**, matching the single
   shared lifecycle assumed in [§17.2](#172-correlated-risk-losing-all-three-nodes), and get renewal
   automated in the same conversation.
 
@@ -1360,67 +1705,71 @@ twice.
 
 ### 18.2 Steps
 
-1. **New event schemas.** Define `radio.control` and `radio.data` in zod and ship them into the
-   **existing HTTPS API** with OpenAPI and docs. No broker required. Unblocks the ZI replacement
-   conversation and gets real payloads from real encoders in front of the schema before any of the
-   infrastructure exists.
-2. **NixOS + K3S base.** Three VMs — BAD, STG, MNZ. Flake in the repo, local ZOT registry, persistent
+**Steps 1–4 need no CN infrastructure at all**, so they run while the firewall and certificate
+requests in [§18.1](#181-external-requests-to-file-first) are still in a queue. Everything from
+step 5 is ordered by dependency.
+
+1. **New event schemas.** `radio.control` and `radio.data` in zod, shipped into the existing HTTPS
+   API with OpenAPI and docs. Gets real payloads from real encoders in front of the schema before any
+   infrastructure exists, and unblocks the ZI replacement conversation. Derive the URN-only variant
+   ([§12.4](#124-identifiers)) from the same definitions here.
+2. **MQTT in GCP.** A minimal broker, with `eventhub-ingest` publishing every event to
+   `inbox/{institutionId}` **alongside** its existing Pub/Sub fan-out. Nothing consumes it yet; it
+   becomes the CN's source of real test data at step 8.
+3. **Identifier normalization in ingest.** Emit URN-only `services[]` with `institutionId` filled in
+   ([§12.4](#124-identifiers)), so bridged events are valid on arrival.
+4. **Plugin publishing feature flag in ingest.** A per-target switch, built before it is needed, so
+   step 16 is a toggle rather than a deploy.
+5. **VM infrastructure.** Three VMs — BAD, STG, MNZ — on NixOS with K3S, a local ZOT registry and
    storage sized for JetStream. **Measure inter-zone RTT while the nodes are fresh**; it is the input
-   the [latency budget](#92-the-220-ms-budget) depends on. **As soon as addresses and hostnames are
-   assigned, file the firewall and certificate requests in
-   [§18.1](#181-external-requests-to-file-first)** — the `:6222` rules and the certificates both
-   block step 3.
-3. **NATS cluster.** Three nodes, JetStream at `R=3`, MQTT gateway on `:8883` with TLS, cluster sync
-   on `:6222`. Provision the `PLUGINS` stream (`plugin.>`, short `max_age`) alongside the
-   MQTT-internal streams — the adapters consume from it in step 12. **Blocked on both requests in
-   [§18.1](#181-external-requests-to-file-first):** no certificates means no TLS listener, and no
-   inter-zone `:6222` means three standalone nodes rather than a cluster.
-4. **Auth and ACLs.** Config users, bcrypt passwords, `allowed_connection_types`, per-institution
-   permissions bound to the institution URN, hot-reload procedure documented and tested.
-5. **ARD core feed loader.** Hourly CronJob that fetches, validates and writes to a JetStream KV
-   bucket; sidecar-side watcher with validate-then-swap, on-disk persistence and a bootstrap copy in
-   the image. Ships before the sidecar because the ownership check depends on it.
-6. **Validation sidecar.** Durable pull consumer on `inbox.>`, zod validation, subject-vs-payload
-   ownership check, MQTT publish with RETAIN to `radio/…`, eligibility fan-out to
-   `plugin.{target}.…`, rejections to `feedback/{institutionId}`. In `src/connect/`, importing
-   `src/schemas/` rather than copying it; the eligibility logic ports from `event-helpers.ts` (music
-   `track.playing` auto-enables, `track.next` never does). **Ship it multi-pod from day one** so the
-   once-only path is exercised before the pilot.
-7. **Cluster-internal observability** ([§15](#15-observability)). Must be in place before the pilot.
-8. **Client connection layer.** Three DNS names, one per node, all three configured in every client.
-   Wire up certificate renewal and expiry alerting; the certificates themselves arrived at step 2
-   ([§18.1](#181-external-requests-to-file-first)). Confirm the client firewall rules actually work
-   from a real house network before the pilot depends on them.
-9. **Pilot.** One broadcaster, one livestream, MQTT end to end alongside its existing HTTPS path. Run
-   both in parallel and diff the outputs before opening to anyone else.
-10. **Operator UI.** Stats over plain HTTP, live tail over an auto-disconnecting WebSocket, no login.
-    Must show **connections grouped by username**, since that is how a rotation is confirmed complete
-    before the old credential is removed.
-11. **Legacy bridge.** Ship the minimal MQTT broker in GCP (`eventhub-ingest` mirrors raw events to
-    `inbox/{institutionId}` alongside its Pub/Sub fan-out), deploy `eventhub-bridge` as a single
-    instance behind a feature flag, and verify round-trip with one legacy publisher. **Before the
-    adapters move**, so that when plugin dispatch switches sides it switches once, for everyone.
-12. **Plugin adapters.** Move Radioplayer and Xperi DTS from Pub/Sub-triggered GCP execution to
-    `eventhub-connect`. **One target at a time**, each a paired switch — CN adapter on, GCP dispatch
-    off for that target — verified by the target's outbound call volume staying flat. Native and
-    bridged publishers are covered by the same switch, since both already flow through the sidecar
-    ([§11.2](#112-legacy-path)).
-13. **Reduce `eventhub-ingest` to auth plus publish — behaviour only, no route removals.** Drop
-    event-body schema validation, plugin dispatch, and the event fan-out to Pub/Sub. **Every route
-    stays served**, including `/subscriptions`, `/topics` and `/pubsub`; deleting them here would
-    break external consumers mid-migration. Prerequisite: every plugin target moved. Those three
-    routes then enter their deprecation cycle in step with the Pub/Sub shutdown, while `/events` and
-    `/auth/*` keep running until the last HTTPS publisher migrates
-    ([§5.3](#53-the-ingest-api-surface-stays-until-it-is-deprecated)). Expect the `202`-instead-of-
-    `400` change to generate support questions.
-14. **Handoff to SOC.** 24/7 monitoring confirmed, runbooks and alerting wired into the SOC
-    escalation path. Confirm the Senderelevanz classification and what it implies for the
-    availability floor, using [§17](#17-reliability-and-broadcast-criticality) as the input.
-15. **Decommission GCP.** Once every broadcaster is on MQTT-in-CN, remove the GCP MQTT broker and
-    `eventhub-bridge`, then delete `eventhub-ingest` and the last GCP project resources.
-    **Prerequisite: every route has completed its deprecation cycle with measured zero traffic** —
-    this is where the HTTPS API and the Firebase tenant go away.
-16. **Docs and changelog.** Public docs, migration guide for broadcasters, changelog entry per step.
+   the [latency budget](#92-the-220-ms-budget) depends on. **File both requests in
+   [§18.1](#181-external-requests-to-file-first) as soon as hostnames are assigned** — they block
+   step 6.
+6. **NATS cluster.** JetStream at `R=3`, MQTT gateway on `:8883` with TLS, cluster sync on `:6222`,
+   plus the `PLUGINS` stream (`plugin.>`, short `max_age`) for step 16. **Blocked on both requests in
+   [§18.1](#181-external-requests-to-file-first):** no certificates means no TLS listener, no
+   inter-zone `:6222` means three standalone nodes.
+7. **Auth and ACLs.** Config users, bcrypt passwords, `allowed_connection_types`, permissions bound to
+   the institution URN, hot-reload tested. Include a **multi-institution publisher**
+   ([§7.4](#74-one-user-several-institutions)) and confirm a misrouted livestream is still rejected.
+8. **`eventhub-bridge`.** Single instance on BAD behind a feature flag, relaying GCP MQTT into
+   `inbox/{institutionId}`. **This is the step that puts real traffic in the CN**, which everything
+   after it is built and verified against.
+9. **ARD core feed loader.** Hourly CronJob writing to a JetStream KV bucket; watcher with
+   validate-then-swap, on-disk persistence and a bootstrap copy in the image. Before the sidecar,
+   which depends on it.
+10. **Validation sidecar.** Durable pull consumer on `inbox.>`, zod validation against the URN-only
+    schema, ownership check, RETAIN publish to `radio/…`, eligibility fan-out to `plugin.{target}.…`,
+    rejections to `feedback/{institutionId}`. In `src/connect/`, importing `src/schemas/`; eligibility
+    ports from `event-helpers.ts`. **Multi-pod from day one** so the once-only path is exercised early.
+11. **Operator UI.** Stats over HTTP, live tail over an auto-disconnecting WebSocket, no login. Panels
+    1–4 of [§14.1](#141-what-it-shows) are the gate. Lands here because steps 8–10 give it live
+    traffic to display, making it the primary tool for verifying every later step.
+12. **Docs and changelog.** Publisher migration guide, topic and ACL reference, changelog. Before the
+    pilot, so the pilot house reads documentation instead of asking, and its questions correct the
+    docs for everyone behind it.
+13. **Cluster-internal observability** ([§15](#15-observability)). Before the pilot.
+14. **Client connection layer.** Three DNS names, one per node, all three configured in every client.
+    Wire up certificate renewal and expiry alerting, and confirm the client firewall rules work from a
+    real house network.
+15. **Pilot.** One broadcaster, one livestream, MQTT end to end alongside its existing HTTPS path. Diff
+    the outputs before opening it to anyone else.
+16. **Plugin adapters.** Move Radioplayer and Xperi DTS to `eventhub-connect`, **one target at a
+    time**, each a paired switch — CN adapter on, GCP dispatch off via the step 4 flag — verified by
+    the target's outbound call volume staying flat. Native and bridged publishers move together, since
+    both already flow through the sidecar ([§11.2](#112-legacy-path)).
+17. **Reduce `eventhub-ingest` to auth, validate and publish — behaviour only, no route removals.**
+    Drop plugin dispatch and the Pub/Sub fan-out. **Keep the event-schema validation pass** so legacy
+    publishers keep their synchronous `400` ([§5.4](#54-validation-runs-twice-on-purpose)). **Every
+    route stays served**; those three then enter their deprecation cycle with the Pub/Sub shutdown,
+    while `/events` and `/auth/*` run until the last HTTPS publisher migrates
+    ([§5.3](#53-the-ingest-api-surface-stays-until-it-is-deprecated)).
+18. **Handoff to SOC.** 24/7 monitoring, runbooks and alerting in the SOC escalation path. Confirm the
+    Senderelevanz classification and the availability floor it implies
+    ([§17](#17-reliability-and-broadcast-criticality)).
+19. **Decommission GCP.** Remove the GCP broker and `eventhub-bridge`, then `eventhub-ingest` and the
+    last project resources. **Prerequisite: every route has completed its deprecation cycle with
+    measured zero traffic** — this is where the HTTPS API and the Firebase tenant go away.
 
 ## 19. Open decisions
 
@@ -1445,7 +1794,7 @@ pushing to them.
 - **If "some":** you need internet-facing MQTT with TLS and auth, or an outbound relay mirroring
   selected subjects to where those consumers are — the bridge pattern in reverse. That component does
   not exist in this document, and it would have to be built before
-  [step 15](#182-steps) removes GCP, because today those consumers are served from GCP.
+  [step 19](#182-steps) removes GCP, because today those consumers are served from GCP.
 
 **This partly invalidates an assumption elsewhere.** [Q3](#193-q3--does-eventhub-bridge-need-to-exist)
 argues that `eventhub-ingest` could publish straight into the CN because the gateway is
@@ -1463,7 +1812,7 @@ and an unauthenticated connect fails — so this is a deliberate reversal, not a
 **Now-playing metadata is already public by construction**: it goes out over RDS and DAB to anyone
 with a receiver. Charging a provisioning and rotation process for access to data we broadcast in the
 clear is friction without a security benefit, and subscriber credentials are the ones that churn
-most. Same reasoning as the operator UI ([§14.4](#144-no-login-and-what-that-forces)).
+most. Same reasoning as the operator UI ([§14.4](#145-no-login-and-what-that-forces)).
 
 What it costs:
 
@@ -1508,7 +1857,7 @@ catches up after a CN outage instead of failing the broadcaster's HTTP request. 
 identical either way, since both `svc-bridge` and a direct-publishing ingest need `inbox.>`.
 
 **Conditional on Q1** — direct publishing requires the CN gateway to accept connections from GCP.
-Decide before step 11 builds the bridge.
+Decide before step 8 builds the bridge.
 
 ### 19.4 Q4 — class token in the inbox subject
 
@@ -1526,7 +1875,7 @@ and the subscribe path.
 
 ### 19.6 Q6 — observability stack
 
-Vector / VictoriaLogs / VictoriaMetrics / Perses / Beszel are all provisional. Blocks step 7.
+Vector / VictoriaLogs / VictoriaMetrics / Perses / Beszel are all provisional. Blocks step 13.
 
 ### 19.7 Q7 — `TEMP_PUBLISHER_MAPPING`
 
@@ -1541,7 +1890,7 @@ Genuine unknowns, to be measured or inventoried rather than decided.
   therefore how much of the [latency budget](#92-the-220-ms-budget) the three-zone spread consumes.
   Blocks nothing, but the pilot cannot validate the budget without it.
 - **Subscriber inventory.** Every current Pub/Sub subscriber, what it is, who owns it, and which
-  network it runs on. Feeds Q1, and it is the list that has to be worked through before step 13 stops
+  network it runs on. Feeds Q1, and it is the list that has to be worked through before step 17 stops
   the Pub/Sub fan-out — and the same list that decides when `/subscriptions` and `/topics` can be
   retired.
 - **Route traffic per endpoint.** Which `eventhub-ingest` routes are still called, by whom, and how
@@ -1624,7 +1973,7 @@ is quorum, not throughput.
 ### 21.7 Decided in place
 
 Three more comparisons live next to the designs they belong to: the UI live-tail transport
-([§14.2](#142-live-tail-over-websocket)), feed distribution through JetStream KV
+([§14.2](#143-live-tail-over-websocket)), feed distribution through JetStream KV
 ([§8.3](#83-refresh-through-jetstream-kv)), and the institution URN in the subject instead of a short
 slug ([§6.2](#62-topic-tree)).
 
