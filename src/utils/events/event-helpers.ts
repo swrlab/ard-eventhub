@@ -54,7 +54,8 @@ export const buildEventMessage = (params: {
 }
 
 /**
- * Enable DTS / Radioplayer plugins by opt-out for music now-playing events.
+ * Enable DTS / Radioplayer plugins by opt-out for music `track.playing` events only.
+ * Does not auto-enable for `track.next`.
  * @param message - Event message (plugins array mutated)
  * @param body - Original event body
  */

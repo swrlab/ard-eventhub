@@ -59,6 +59,16 @@ test('ensureDefaultPlugins adds dts and radioplayer for music now-playing', () =
 	)
 })
 
+test('ensureDefaultPlugins does not auto-enable dts or radioplayer for track.next', () => {
+	const message = {
+		name: 'de.ard.eventhub.v1.radio.track.next',
+		plugins: [],
+	} as unknown as EventhubV1RadioPostBody
+
+	ensureDefaultPlugins(message, { type: 'music' })
+	assertEquals(message.plugins, [])
+})
+
 test('ensureDefaultPlugins does not duplicate existing plugins', () => {
 	const message = {
 		name: 'de.ard.eventhub.v1.radio.track.playing',
