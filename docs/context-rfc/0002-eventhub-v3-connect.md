@@ -23,44 +23,40 @@ operators. The existing **`eventhub-ingest`** in GCP keeps serving broadcasters 
 migrated, mirroring their events to a minimal MQTT broker that **`eventhub-bridge`** relays into the
 CN. Once every broadcaster is on MQTT-in-CN, the GCP side is decommissioned (expected by mid to end of 2027).
 
-_RFC 0001_ describes what runs today and why. This document does
-not repeat it; it states what changes, what it costs, and what is still undecided
-([§19](#19-open-decisions), [§20](#20-open-questions)).
+_RFC 0001_ describes what runs today. This document states what changes, what it costs, and what is
+still undecided ([§19](#19-open-decisions), [§20](#20-open-questions)).
 
-What v3 fixes, in the order the pain is felt:
+What v3 fixes:
 
 - **Every broadcaster needs a public HTTPS endpoint** to receive push subscriptions, which means
   firewall negotiation inside each broadcaster's own network. An outbound MQTT connection removes
-  that entirely.
+  that.
 - **There is no path for control bits or radiotext.** Now-playing is the only event class, so TA,
   Regio and RT/DL+ still ride the ZI gateway this is meant to replace.
 - **An ARD-internal workload depends on GCP** for its data plane.
 
-What today's system gets right and v3 must not lose: it is simple to deploy, the schema is
-genuinely enforced, and it is observable.
+What today's system gets right and v3 must not lose: it is simple to deploy, the schema is enforced,
+and it is observable.
 
 ## 2. Terminology
 
-"v3" is one effort in two phases, not two separate things — but the phases are easy to mistake for
-each other, and one version number genuinely does not move.
+"v3" is one effort in two phases. One version number does not move.
 
 - **Eventhub `3.x`** — the release line, currently `3.0.0-beta.1`. **Phase one, already shipped:**
   API cleanup, all of it breaking. Radiotext removed, `x-ard-eventhub-uid` dropped, `length`
   mandatory, `trace` deprecated. Documented for publishers in `docs/user/migration-v3.md`.
 - **`eventhub-connect`** — what this RFC proposes: **phase two of the same v3 effort**, moving the
-  transport and the data plane. It is a new deployment target, not a new version number, so shipping
-  it does not imply a `4.x`.
-- **`de.ard.eventhub.v1.*`** — the **event schema** version, and the one thing that does not move. It
-  stays at `v1` throughout. Moving a publisher from HTTPS to MQTT is a transport change, not a schema
-  change: the payload on `inbox/{institutionId}` is the same JSON the HTTPS API accepts today, and
-  the two new event types (`radio.control`, `radio.data`) are additions to `v1`. This is the
-  distinction most likely to trip someone up — **"Eventhub v3" never means `de.ard.eventhub.v3.*`.**
+  transport and the data plane. A new deployment target, not a new version number, so shipping it
+  does not imply a `4.x`.
+- **`de.ard.eventhub.v1.*`** — the **event schema** version, which stays at `v1` throughout. Moving a
+  publisher from HTTPS to MQTT is a transport change, not a schema change: the payload on
+  `inbox/{institutionId}` is the same JSON the HTTPS API accepts today, and the two new event types
+  (`radio.control`, `radio.data`) are additions to `v1`. **"Eventhub v3" never means
+  `de.ard.eventhub.v3.*`.**
 
-**The two phases are directly coupled**, which is the clearest evidence they are one effort rather
-than two. `3.0.0-beta.1` removed the `radio.text` event type outright, leaving no radiotext path at
-all, and this RFC reintroduces that capability as part of `radio.data`
-([§13.2](#132-deardeventhubv1radiodata)). The removal cleared the way for the replacement rather than
-being unrelated housekeeping.
+The two phases are coupled: `3.0.0-beta.1` removed the `radio.text` event type outright, leaving no
+radiotext path at all, and this RFC reintroduces that capability as part of `radio.data`
+([§13.2](#132-deardeventhubv1radiodata)).
 
 ## 3. North star
 
@@ -82,51 +78,58 @@ being unrelated housekeeping.
 **Three `eventhub-connect` nodes across three SWR zones inside the ARD CN**, on near-identical
 NixOS + K3S images, each running the same workloads.
 
-Three is a hard requirement, not a scaling choice. The NATS MQTT gateway is backed by JetStream,
-JetStream replication is RAFT, and RAFT quorum is `(R/2)+1`. At `R=3` quorum is 2, so the cluster
-survives the clean loss of any single node and stays writable on the majority side of any partition.
-At `R=2` quorum would be 2 of 2 — losing either node would take JetStream, and therefore MQTT, down
-on the survivor as well. Node count alternatives are in [§21](#21-alternatives-considered).
-
-The three zones are genuine failure domains — three separate SWR sites, not three racks in one
-building. A third node co-located with an existing one would buy replica count but no partition
-tolerance.
-
 - `connect-bad` — Baden-Baden. **Primary**, in the narrow sense below.
 - `connect-stg` — Stuttgart
 - `connect-mnz` — Mainz
 
+Three is a hard requirement, not a scaling choice. The NATS MQTT gateway is backed by JetStream,
+JetStream replication is RAFT, and RAFT quorum is `(R/2)+1`. At `R=3` quorum is 2, so the cluster
+survives the clean loss of any single node and stays writable on the majority side of any partition.
+At `R=2` quorum would be 2 of 2 — losing either node would take JetStream, and therefore MQTT, down
+on the survivor as well. Node count alternatives are in [§21.6](#216-node-count-three).
+
 ### 4.2 What "primary" means, and what it does not
 
-BAD is primary in one deliberately narrow sense: **it is where the workloads that can only run once
-are placed.** Currently `eventhub-bridge` and the Beszel hub.
+BAD is primary in one sense only: **it is where single-instance workloads that need a fixed home are
+placed** — currently `eventhub-bridge` and the Beszel hub. It is a placement convention, not a role.
 
-It is **not** primary in the data path, and the distinction matters. NATS and JetStream are
-symmetric across all three nodes; the RAFT leader is elected, not assigned, and can be any node at
-any time. Clients connect to whichever endpoint answers, and no event needs BAD to be up. Losing BAD
-costs exactly two things: legacy publishers stop being relayed (accepted —
-[§12.7](#127-legacy-is-not-first-class)) and host-level uptime monitoring goes dark. Native MQTT
-publishers, all subscribers, validation and plugin dispatch continue on the STG + MNZ quorum.
+The ARD feed CronJob is also one instance cluster-wide but is **not** pinned here: it is stateless
+and writes to replicated JetStream KV, so K3S can schedule it in any zone.
 
-**The Beszel hub on BAD is a known soft spot.** It is the one observability component that becomes
+It is **not** primary in the data path. NATS and JetStream are symmetric across all three nodes; the
+RAFT leader is elected, not assigned, and can be any node at any time. Clients connect to whichever
+endpoint answers, and no event needs BAD to be up. Losing BAD costs exactly two things: legacy
+publishers stop being relayed (accepted — [§12.7](#127-legacy-is-not-first-class)) and host-level
+uptime monitoring goes dark. Native MQTT publishers, all subscribers, validation and plugin dispatch
+continue on the STG + MNZ quorum.
+
+**The Beszel hub on BAD is a known soft spot** — the one observability component that becomes
 unavailable in the failure where it would be most useful. Tolerable because it is host and uptime
-monitoring rather than the metrics and logs path, and because losing it makes the cluster blind
-rather than broken — but the SOC alerting path must not depend on it.
+monitoring rather than the metrics and logs path, but **the SOC alerting path must not depend on
+it.**
 
-"Primary" is therefore a placement convention, not a role. It exists so single-instance workloads
-have an unambiguous home and do not end up scheduled somewhere surprising after a drain.
-
-### 4.3 What runs on each node
+### 4.3 What runs on the nodes
 
 - A **NATS server** with the built-in [MQTT gateway](https://docs.nats.io/learn/mqtt/) — the public
   protocol publishers and subscribers connect to, with NATS subjects internally.
   **JetStream enabled**; the MQTT gateway requires it for sessions, retained messages and QoS 1.
-- A **validation sidecar** — zod-validates every event at the broker boundary before fan-out
-  ([§10.2](#102-validation-sidecar)).
-- **`eventhub-bridge`** — relay from GCP into `inbox/{institutionId}`. Single instance, not HA.
-- An **operator UI** — read-only, no login, intranet-scoped ([§14](#14-operator-ui)).
-- The **ARD core feed loader** — hourly refresh of the mapping the ownership check depends on
-  ([§8](#8-the-ard-core-feed)).
+- **`eventhub-connect`** — **one service and one container image**, with the role selected at
+  startup. Each role is its own K3S workload, so they scale and fail independently while sharing one
+  codebase, one dependency graph and one `src/schemas/` import. Replica counts are in
+  [§10.5](#105-what-scales-and-what-does-not).
+  - **Validation sidecar** — zod-validates every event at the broker boundary before fan-out
+    ([§10.2](#102-validation-sidecar)). Any zone.
+  - **Plugin adapters** — one Deployment per target, delivering to external targets over outbound
+    HTTPS ([§10.4](#104-plugin-adapters)). Any zone.
+  - **Operator UI** — read-only, no login, intranet-scoped ([§14](#14-operator-ui)). Any zone.
+  - **ARD core feed loader** — hourly refresh of the mapping the ownership check depends on
+    ([§8](#8-the-ard-core-feed)). A CronJob, **exactly one instance cluster-wide**, not one per node.
+
+  The role is chosen by the container command, so adding a plugin target or a UI replica is a
+  manifest change, not a new image.
+
+- **`eventhub-bridge`** — relay from GCP into `inbox/{institutionId}`. A separate image, **exactly
+  one instance cluster-wide** on BAD, not HA.
 - The **cluster-internal observability stack** ([§15](#15-observability)).
 
 During migration, GCP `eventhub-ingest` keeps accepting HTTPS posts and publishes raw events to
@@ -149,17 +152,17 @@ flowchart TB
 
         subgraph BAD["zone: BAD — primary"]
             NB["NATS + JetStream<br/>MQTT gateway"]
-            CB["sidecar ×N · adapters ×N<br/>eventhub-bridge ×1 · beszel hub ×1"]
+            CB["eventhub-connect<br/>sidecar ×N · adapters ×N · UI ×N<br/>eventhub-bridge ×1 · beszel hub ×1"]
         end
 
         subgraph STG["zone: STG"]
             NS["NATS + JetStream<br/>MQTT gateway"]
-            CS["sidecar ×N · adapters ×N"]
+            CS["eventhub-connect<br/>sidecar ×N · adapters ×N · UI ×N"]
         end
 
         subgraph MNZ["zone: MNZ"]
             NZ["NATS + JetStream<br/>MQTT gateway"]
-            CZ["sidecar ×N · adapters ×N"]
+            CZ["eventhub-connect<br/>sidecar ×N · adapters ×N · UI ×N"]
         end
 
         NB <-->|RAFT R3| NS
@@ -199,23 +202,16 @@ flowchart TB
 
 ### 5.1 Built versus deployed
 
-The first structural rule is a hard line between software we build and software we deploy.
-
 - **Built** — three services, all TypeScript, all in this repo: `eventhub-connect`,
   `eventhub-bridge`, `eventhub-ingest`.
 - **Deployed** — NATS and the whole observability stack. Upstream container images, configured by
   file, never forked and never wrapped. **We write no broker code.** NATS is deployed exactly like
-  Vector or VictoriaMetrics: pull the official image, mount a config, run it. If something feels
-  like it needs a patched NATS, that is a signal the design is wrong, not that we should fork.
-
-Keeping that line sharp is what makes the system auditable: everything in the data path that we are
-responsible for is in one repo, in one language, with one test suite.
+  Vector or VictoriaMetrics: pull the official image, mount a config, run it.
 
 ### 5.2 One responsibility per service
 
-The "does not" lines matter as much as the "does".
-
-**`eventhub-connect`** — the CN platform. All NATS/MQTT handling, validation and plugin delivery.
+**`eventhub-connect`** — the CN platform. One codebase, one image, several roles
+([§4.3](#43-what-runs-on-the-nodes)).
 
 - Owns: the NATS/MQTT connection surface, zod validation, the subject-versus-payload ownership
   check, the ARD feed loader, plugin eligibility and fan-out, the adapters that call external
@@ -255,22 +251,20 @@ The current surface:
 - `GET /`, `GET /health` — health checks.
 
 **"Maintained" means maintained, not frozen.** These routes terminate TLS and verify tokens, so they
-stay on patched dependencies with their tests green for as long as they are reachable. A route kept
-alive but unmaintained is worse than one removed.
+stay on patched dependencies with their tests green for as long as they are reachable.
 
-They do not all die at the same time, and conflating them is how a migration breaks somebody:
+They retire on two different schedules:
 
 - **Short track — `/subscriptions`, `/topics`, `/pubsub`.** These only mean anything while Pub/Sub
   carries events; a subscription to a topic that receives nothing is a trap. Their deprecation is
   **coupled to the Pub/Sub shutdown**, not scheduled independently: notice while subscribers
   migrate, then `410 Gone`, then removal. This is why step 13 cannot simply switch Pub/Sub off.
-- **Long track — `/events/:eventName` and `/auth/*`.** The actual legacy publishing path, surviving
-  until the last HTTPS publisher moves to MQTT — the long tail of the whole migration. **`/auth/*`
-  keeps the Firebase dependency alive for exactly as long as `/events` does**; dropping Firebase is
-  gated on the last token consumer, not on the CN being ready.
+- **Long track — `/events/:eventName` and `/auth/*`.** The legacy publishing path, surviving until
+  the last HTTPS publisher moves to MQTT. **`/auth/*` keeps the Firebase dependency alive for exactly
+  as long as `/events` does**; dropping Firebase is gated on the last token consumer, not on the CN
+  being ready.
 
-The OpenAPI document keeps describing every live route accurately, including deprecation markers,
-for as long as the route exists.
+The OpenAPI document keeps describing every live route accurately, including deprecation markers.
 
 ### 5.4 What shrinking ingest costs
 
@@ -279,18 +273,14 @@ schema. **Today a bad payload gets a synchronous `400` with zod error detail; af
 gets a `202`, and the schema rejection happens later, in the CN.** Legacy publishers hold no MQTT
 connection, so there is nowhere to deliver that rejection to them.
 
-The trade is accepted for the same reason the rest of the legacy path is second-class: it is a
-migration incentive, not a supported mode ([§12.7](#127-legacy-is-not-first-class)). Mitigations are
-that the operator UI surfaces validation errors for bridged events with the publisher identity
-attached, and that we chase houses directly rather than waiting for them to notice.
-
-It also buys a real simplification: with validation in exactly one place, the two-zod-versions drift
-problem disappears entirely rather than needing a detector.
+Accepted as a migration incentive ([§12.7](#127-legacy-is-not-first-class)). Mitigations: the
+operator UI surfaces validation errors for bridged events with the publisher identity attached, and
+we chase houses directly. It also puts validation in exactly one place, so the two-zod-versions
+drift problem disappears rather than needing a detector.
 
 ### 5.5 Repo layout
 
-The repo is already laid out for this — `src/schemas/`, `src/utils/`, and `#config` / `#env` /
-`#types` aliases — so v3 adds service directories rather than restructuring:
+v3 adds service directories rather than restructuring:
 
 ```
 src/
@@ -308,16 +298,14 @@ deploy/        NATS + observability configs, K3S manifests, Nix flake
 reimplemented, with three consumers: `eventhub-connect` at runtime for event validation,
 `src/openapi/` at build time for `openapi.json`, and `eventhub-ingest` for its own route schemas.
 
-Be precise about what ingest stops importing at step 13: **it drops event-body validation
-(`events.ts`) but keeps the request and response schemas for its surviving routes** (`auth.ts`,
-`subscriptions.ts`, `topics.ts`, `common.ts`). Nothing in `src/schemas/` can be deleted while a live
-route references it.
+At step 13 **ingest drops event-body validation (`events.ts`) but keeps the request and response
+schemas for its surviving routes** (`auth.ts`, `subscriptions.ts`, `topics.ts`, `common.ts`). Nothing
+in `src/schemas/` can be deleted while a live route references it.
 
 **`src/utils/` needs a deliberate split, not a wholesale move.** Most of it is ingest-specific by
 accident of history and becomes `eventhub-connect`'s: `ard-feed`, `ard-core`, `events/`, `plugins/`.
 The Pub/Sub and Datastore helpers get deleted with the fan-out. Only what more than one service
-actually imports should stay in `utils/`, or it becomes the dumping ground that makes the service
-boundaries above meaningless.
+imports stays in `utils/`.
 
 One build per service, three container images, one shared dependency graph. No monorepo tooling:
 separate entry points in one package is enough at this size, and `package.json#main` already points
@@ -327,10 +315,9 @@ at a service entry point today.
 
 ### 6.1 MQTT to NATS translation
 
-**This is the single most important implementation detail in the document.** The NATS MQTT gateway
-does not pass topics through unchanged. It rewrites them, and getting this wrong produces
-subscriptions that connect successfully and then silently receive nothing. The conversion is
-implemented in `mqttToNATSSubjectConversion` (`server/mqtt.go`).
+The NATS MQTT gateway does not pass topics through unchanged. It rewrites them, and getting this
+wrong produces subscriptions that connect successfully and then silently receive nothing. The
+conversion is implemented in `mqttToNATSSubjectConversion` (`server/mqtt.go`).
 
 | On the wire (MQTT) | Internally (NATS subject) | Notes                                                                                     |
 | ------------------ | ------------------------- | ----------------------------------------------------------------------------------------- |
@@ -348,10 +335,9 @@ Practical consequences:
   `inbox/urn:ard:institution:a3004ff924ece1a2`. Publishing to `inbox.urn:…` over MQTT instead lands
   on subject `inbox//urn:…` — one token — which nothing is subscribed to.
 - **ACLs are written in NATS subject syntax.** The server config says `inbox.urn:…`; the wire says
-  `inbox/urn:…`. Same thing, two notations. Expect this to confuse people at least once.
+  `inbox/urn:…`.
 - **The URNs themselves are inert.** Neither institution nor livestream URNs contain a `.` or a `/`,
-  so each stays a single token in both notations and needs no escaping. This is the property that
-  lets the whole tree use raw URNs.
+  so each stays a single token in both notations and needs no escaping.
 - **NATS is MQTT v3.1.1 only.** A client requesting MQTT 5 is rejected at connect with CONNACK
   return code 1, "unacceptable protocol version" — so no correlation data, response topics, user
   properties, session expiry or shared subscriptions. QoS 0, 1 and 2 are all supported (2.10+). The
@@ -378,20 +364,18 @@ NATS subjects are the source of truth. Both notations are given.
 in the `radio.` tree (`track.playing`, `track.next`, `control`, `data`).
 
 **The whole tree is URNs, not human-readable names.** The institution URN is the string the ARD core
-feed returns as `publisher.institution.id`, so the ownership check guarding every event becomes a
-direct string comparison between subject token and feed
-([§8.2](#82-ownership-is-a-direct-comparison)) — no mapping table, no join key, nothing to keep in
-sync. The cost is topic length: a broadcaster configures
-`inbox/urn:ard:institution:a3004ff924ece1a2` rather than `inbox/swr`. That is a real ergonomic loss,
-paid once at provisioning, in exchange for deleting an authorization mapping table — and it is the
-same `urn:ard:…` shape publishers already send today in `services[].publisherId`.
+feed returns as `publisher.institution.id`, so the ownership check guarding every event is a direct
+string comparison between subject token and feed
+([§8.2](#82-ownership-is-a-direct-comparison)) — no mapping table, no join key. The cost is topic
+length: a broadcaster configures `inbox/urn:ard:institution:a3004ff924ece1a2` rather than
+`inbox/swr`. It is the same `urn:ard:…` shape publishers already send today in
+`services[].publisherId`.
 
-**The livestream comes before the event class, at a fixed depth.** This is deliberate. The dominant
-subscriber pattern is "everything for stream X" (encoders, broadcaster apps), and putting the ID
-last would make that impossible to express: `radio.*.{urn}` matches three-token subjects only, so it
-would catch `control` and `data` but never `track.playing`. ID-first keeps both access patterns
-available and turns per-stream ACLs into a prefix match, which is what NATS permissions express
-naturally.
+**The livestream comes before the event class, at a fixed depth.** The dominant subscriber pattern is
+"everything for stream X" (encoders, broadcaster apps), and putting the ID last would make that
+inexpressible: `radio.*.{urn}` matches three-token subjects only, so it would catch `control` and
+`data` but never `track.playing`. ID-first keeps both access patterns available and turns per-stream
+ACLs into a prefix match.
 
 **`plugin.>` is internal.** No MQTT user holds any permission on it, in either direction. It exists
 because plugin eligibility is a per-event decision ([§10.3](#103-plugin-routing)).
@@ -415,8 +399,7 @@ the sidecar. `eventhub-bridge` is just another writer to `inbox/{institutionId}`
 Today's Pub/Sub topic names percent-encode the URN —
 `de.ard.eventhub.prod.urn%3Aard%3Apermanent-livestream%3A49267f7d67be180d`. MQTT and NATS both
 accept a raw colon, so v3 drops the encoding entirely. This is a breaking change for every
-subscriber, and a good one: the topic becomes readable and the `pubsubBuildId` / `convert-id`
-encode-decode pair goes away.
+subscriber, and it removes the `pubsubBuildId` / `convert-id` encode-decode pair.
 
 ## 7. Auth and ACL
 
@@ -425,50 +408,44 @@ MQTT, over mandatory TLS.** Not operator/JWT mode.
 
 ### 7.1 Why not JWT
 
-NATS decentralized (operator) auth is the more powerful model and what you would reach for with many
-tenants managing their own users. It is the wrong fit here, for three reasons.
+NATS decentralized (operator) auth is the more powerful model, and the wrong fit here for three
+reasons.
 
 **MQTT can't do the NATS handshake.** NATS-native JWT auth verifies an NKEY signature over a
 server-issued nonce, and MQTT has no nonce exchange. `nats-server` works around this — `auth.go` has
 an explicit branch, _"MQTT can carry JWTs in the password field"_ — but the JWT must then be marked
 a **bearer token**, which tells the server to skip signature verification entirely. The client never
 signs anything and never needs the NKEY seed; the JWT alone is the credential, and anyone who
-captures it can impersonate that publisher until it expires. The security advantage largely
-evaporates at the MQTT edge.
+captures it can impersonate that publisher until it expires.
 
 **It puts token-refresh logic in every broadcaster's playout system.** Short-lived credentials mean
-each house implements refresh-before-expiry and reconnect — exactly the kind of code that gets
-implemented badly, or not at all, in systems we do not control and cannot debug. A static credential
-has no refresh path to get wrong.
+each house implements refresh-before-expiry and reconnect, in systems we do not control and cannot
+debug. A static credential has no refresh path to get wrong.
 
 **We don't need the scale it buys.** Roughly ten publisher orgs and a handful of subscriber roles,
-all provisioned by one team. That is the textbook case for centralized config auth, and the NATS
-docs say so directly.
+all provisioned by one team.
 
 ### 7.2 Username convention and rotation
 
-Publisher and subscriber credentials are separate user classes with separate naming rules. The split
-is what makes the config auditable at a glance.
+Publisher and subscriber credentials are separate user classes with separate naming rules.
 
 - **Publishers:** `pub-{label}-{issued}`, e.g. `pub-swr-2026-06-26`. The `pub-` prefix is mandatory
   and reserved — anything carrying it publishes to exactly one `inbox.{institutionId}`, and nothing
   else in the config may use it.
 - **Subscribers:** a descriptive role name plus issuance date, e.g. `sub-radioplayer-2026-06-26`,
-  `sub-ard-sounds-2026-06-26`. Naming is deliberately looser, because subscriber scopes vary and new
-  consumers appear more often than new publishers. The `sub-` prefix is a convention, not a rule the
-  ACLs depend on.
+  `sub-ard-sounds-2026-06-26`. Naming is looser, because subscriber scopes vary and new consumers
+  appear more often than new publishers. The `sub-` prefix is a convention, not a rule the ACLs
+  depend on.
 - **Services:** `svc-sidecar`, `svc-adapter-{target}`, `svc-bridge`. NATS-native, not MQTT, and not
   rotated on the same cadence.
 
 **The username is a label for humans; the institution URN in the subject is the contract.** The
 `swr` in `pub-swr-2026-06-26` is not parsed, matched or resolved by anything — the ACL binds that
 user to exactly one `inbox.urn:ard:institution:…`, and the sidecar reads the institution from the
-subject the message arrived on. Keeping a readable label is deliberate: the operator UI groups
-connections by username, and `pub-swr-2026-06-26` tells an operator what a 16-hex-character hash
-does not.
+subject the message arrived on. The label exists because the operator UI groups connections by
+username, where a 16-hex-character hash would tell an operator nothing.
 
-The date suffix is what turns "no expiry" from a weakness into a workable process, because rotation
-becomes additive rather than destructive:
+The date suffix makes rotation additive rather than destructive:
 
 1. Add `pub-swr-2027-01-15` alongside `pub-swr-2026-06-26`, identical permissions, new password.
 2. Reload the config. Both credentials now work.
@@ -478,12 +455,10 @@ becomes additive rather than destructive:
 No coordinated cutover, no downtime window, and no window during which a slow house is locked out.
 **The switch is seamless for the client**, because MQTT session state is keyed by client ID within
 an account, not by user: a publisher reconnecting with the same client ID and a new username resumes
-its existing persistent session, queued QoS 1 messages and all. This is one of the reasons the
-design uses a single account. The date never appears in a topic, so rotating changes nothing for the
-publisher's topic configuration and nothing for any subscriber.
-
-It also makes credential age visible. A `pub-*` user with a 2026 date still in the config in 2028 is
-an obvious audit finding, in a way that a bare `pub-swr` never would be.
+its existing persistent session, queued QoS 1 messages and all. This is one reason the design uses a
+single account. The date never appears in a topic, so rotating changes nothing for the publisher's
+topic configuration and nothing for any subscriber. It also makes credential age an audit finding — a
+`pub-*` user dated 2026 still in the config in 2028 is visible as such.
 
 ### 7.3 The config
 
@@ -552,27 +527,24 @@ authorization {
 
 - **Passwords are bcrypt hashes**, generated with `nats server passwd`. The config in git holds the
   hash; the client still sends the plaintext, so bcrypt protects the config at rest, not the wire.
-  TLS does the wire.
 - **`allowed_connection_types: ["MQTT"]`** pins publisher and subscriber credentials to the MQTT
   listener, so a leaked publisher password cannot open a NATS-native connection.
 - **Permissions are NATS subject patterns** — dots, `*`, `>`. See
   [§6.1](#61-mqtt-to-nats-translation).
 - **Publishers never subscribe to `radio.>` and subscribers never publish anything.** A publisher
-  that also wants to consume gets a second, `sub-` prefixed credential. Keeping the classes disjoint
-  means a compromised publisher credential cannot read the whole event stream, and a compromised
-  subscriber credential cannot inject anything.
+  that also wants to consume gets a second, `sub-` prefixed credential, so a compromised publisher
+  credential cannot read the whole event stream and a compromised subscriber credential cannot
+  inject anything.
 - **`no_auth_user` is not set**, so an unauthenticated connect fails. This is the specific line
   [Q2](#192-q2--can-subscriber-paths-be-made-freely-available-with-no-user-auth) proposes reversing
   for read-only subscribers.
 - **No MQTT credential has any permission on `plugin.>`.** It is reachable only by NATS-native
-  service users, and each adapter sees only its own target's subtree, so a compromised adapter
-  credential cannot read another target's queue.
+  service users, and each adapter sees only its own target's subtree.
 
 ### 7.4 The ACL protects the subject, not the payload
 
-This is the gap a subject-scoped ACL cannot close on its own. `pub-swr-2026-06-26` can only write to
-`inbox.urn:ard:institution:a3004ff924ece1a2`, but nothing at the broker level stops it publishing a
-payload whose `services[]` array claims an NDR livestream.
+`pub-swr-2026-06-26` can only write to `inbox.urn:ard:institution:a3004ff924ece1a2`, but nothing at
+the broker level stops it publishing a payload whose `services[]` array claims an NDR livestream.
 
 **The sidecar must therefore verify that every service in the payload belongs to the institution
 taken from the subject** — never from the payload. This is the same institution-ownership check
@@ -582,9 +554,9 @@ takes its trusted input from the subject token. The data behind it is the ARD co
 
 ### 7.5 Residual risk
 
-Credentials do not expire on their own, so a leaked password is valid until someone rotates it. That
-is the accepted trade for removing refresh logic from ten houses' playout systems. Mitigations: TLS
-is mandatory, the blast radius of any single leak is one publisher's inbox or one subscriber's read
+Credentials do not expire on their own, so a leaked password is valid until someone rotates it — the
+accepted trade for removing refresh logic from ten houses' playout systems. Mitigations: TLS is
+mandatory, the blast radius of any single leak is one publisher's inbox or one subscriber's read
 scope, the issuance date makes stale credentials visible, and revocation is one config reload away.
 
 ## 8. The ARD core feed
@@ -593,13 +565,12 @@ The ownership check needs to resolve a livestream URN to the organization that o
 comes from the ARD core livestream feed — one JSON document containing every livestream, each with
 its `publisher`, each publisher with its `institution`. `eventhub-ingest` already consumes it
 (`src/utils/ard-feed.ts`, `just feed`); the v3 loader keeps the same shape but changes the failure
-behaviour substantially.
+behaviour.
 
 ### 8.1 What it is used for
 
 - **Authorization.** `livestreamId` → `publisher` → `institution.id`, compared against the
-  institution URN in the subject. This is the only security-relevant use, and the reason the rest of
-  this section is as defensive as it is.
+  institution URN in the subject. The only security-relevant use.
 - **Validation.** Rejecting events for livestream URNs that do not exist at all.
 - **Enrichment.** Publisher title, image and homepage for the operator UI and for adapters that need
   station names.
@@ -614,19 +585,17 @@ feed:     livestreamId → publisher.institution.id      ← urn:ard:institution
 ```
 
 Equal means accept; different means `blocked`. **There is no mapping table and no join key** — no
-`slug → institution` config to maintain, drift, or get wrong, and no place where a rename silently
-widens access. Two properties make this safe:
+`slug → institution` config to maintain, drift, or get wrong. Two properties make this safe:
 
 - **The ACL is the pinning.** The binding between a credential and an institution is expressed once,
-  in the ACL, and reviewed in the same PR that creates the user. The review gate did not disappear
-  with the mapping table; it moved to where it belongs.
+  in the ACL, and reviewed in the same PR that creates the user.
 - **Nothing authorization-relevant reads a mutable upstream string.** `institution.acronym` and
   `institution.title` are display fields and must never be used as join keys — an acronym change
   upstream would break a house's publishing, and a collision or blanked field could widen access.
   Ids only, on both sides.
 
-The feed still has to be trusted for `livestreamId → institution.id`, which is why the integrity
-rules below exist.
+The feed still has to be trusted for `livestreamId → institution.id`, hence the integrity rules
+below.
 
 ### 8.3 Refresh through JetStream KV
 
@@ -643,15 +612,14 @@ bucket**. Every sidecar watches that key. Preferred over each node fetching inde
 - **A KV watch means no polling.**
 
 If KV turns out awkward, the fallback is a per-node fetch to a local file with the same
-validate-then-swap discipline, and the version skew then has to be visible in the UI. **One fetcher,
-many watchers** is the preferred shape either way — upstream should see one request per hour, not one
-per pod per hour.
+validate-then-swap discipline, with the version skew visible in the UI. **One fetcher, many
+watchers** either way — upstream should see one request per hour, not one per pod per hour.
 
 ### 8.4 Staleness is safe, silence is not
 
-This is where the current implementation is wrong and must not be carried over. `getARDFeed` calls
-`process.exit(1)` on any failure — non-200, malformed JSON, timeout, or a failed integrity rule. On
-a node restart during an internet outage, the service does not come up at all.
+The current implementation must not be carried over: `getARDFeed` calls `process.exit(1)` on any
+failure — non-200, malformed JSON, timeout, or a failed integrity rule. On a node restart during an
+internet outage, the service does not come up at all.
 
 The v3 rules:
 
@@ -662,29 +630,25 @@ The v3 rules:
    valid events because an upstream CMS is unreachable would be a self-inflicted outage, and the
    feed's contents change on the order of weeks while an outage lasts hours.
 3. **Persist the last good copy** to disk or KV so a cold start with no network still comes up
-   working. This is the specific case the current design fails hardest.
+   working.
 4. **Ship a bootstrap copy in the image.** A brand-new node with no network and no persisted state
    must still start; the Nix store gives this for free.
-5. **Make the age loud.** Serving stale is safe; not knowing you are is not. Warn at 3 hours (three
-   missed refreshes), alert at 12, page at 48, and show feed age and active revision on the UI front
-   page. A silently stale feed is the failure mode this design trades for, so it is the one that has
-   to be visible.
+5. **Make the age loud.** Warn at 3 hours (three missed refreshes), alert at 12, page at 48, and
+   show feed age and active revision on the UI front page.
 
 ### 8.5 Poison-feed protection
 
 The feed is an authorization input, so a truncated or half-populated upstream response could
-silently revoke a house's ability to publish. The existing integrity rules stay and get extended. A
-candidate is rejected — keeping the previous version — if any of these fail:
+silently revoke a house's ability to publish. A candidate is rejected — keeping the previous
+version — if any of these fail:
 
-- **Item count outside bounds.** Currently `minItems: 190`, `maxItems: 251`. Cheap guard against a
-  truncated or paginated response.
+- **Item count outside bounds.** Currently `minItems: 190`, `maxItems: 251`.
 - **Pagination present.** `totalPageCount > 1` means we are seeing a partial feed.
 - **Required stations missing.** The existing hardcoded canary list (`WDR 2`, `1LIVE`, `SWR3`,
   `hr3`, …).
 - **Institution count dropped** relative to the active version.
-- **Any publisher with a live connection disappeared.** This is the rule that catches the case that
-  actually hurts: an upstream edit that would break a publisher mid-broadcast. Connection state is
-  already known from the broker, so the check is local.
+- **Any publisher with a live connection disappeared.** Catches an upstream edit that would break a
+  publisher mid-broadcast. Connection state is already known from the broker, so the check is local.
 - **`generated` is not newer** than the active version. Rejects replays and clock-confused upstream
   responses.
 
@@ -694,35 +658,30 @@ candidate is rejected — keeping the previous version — if any of these fail:
   their own name. Either the upstream ids get fixed or this becomes explicit config with an owner
   and a review date ([Q7](#197-q7--temp_publisher_mapping)).
 - **`allowed-livestreams.json`** — the overlay for COMMON_IDS livestreams absent from the feed. It
-  survives into v3 as an explicit overlay applied after the feed loads, under the same rule as
-  everything else here: the institution comes from pinned config, not from the overlay's own claims.
-- **Index on load.** `publisherLookup.getById` does a linear scan over ~200 items per lookup.
-  Irrelevant at today's 0.3 msg/s and still cheap at cyclic `radio.data` volume, but there is no
-  reason not to build a `Map` when the feed is swapped in.
+  survives into v3 as an explicit overlay applied after the feed loads, under the same rule: the
+  institution comes from pinned config, not from the overlay's own claims.
+- **Index on load.** `publisherLookup.getById` does a linear scan over ~200 items per lookup. Cheap
+  even at cyclic `radio.data` volume, but build a `Map` when the feed is swapped in.
 
 ## 9. Delivery semantics and latency
 
 ### 9.1 Per event class
 
-Not all events want the same reliability, and one policy across all of them gets control events
-wrong.
-
 - **`radio.control` — durable.** A dropped `{"name": "TA", "state": false}` leaves the
-  traffic-announcement bit stuck on, which is a broadcast fault, not a cosmetic one. Three nodes with
-  JetStream give genuine at-least-once delivery: QoS 1 with a persistent session survives a
-  subscriber reconnect, and RAFT quorum survives a node loss. **`validUntil` is a backstop, not the
-  mechanism** — receivers drop the state when the TTL passes, so a lost off-event self-corrects
-  instead of persisting indefinitely, but the explicit `state: false` event remains the primary path.
-  No cyclic re-assertion.
+  traffic-announcement bit stuck on, which is a broadcast fault. Three nodes with JetStream give
+  at-least-once delivery: QoS 1 with a persistent session survives a subscriber reconnect, and RAFT
+  quorum survives a node loss. **`validUntil` is a backstop, not the mechanism** — receivers drop the
+  state when the TTL passes, so a lost off-event self-corrects, but the explicit `state: false` event
+  remains the primary path. No cyclic re-assertion.
 - **`radio.data` — cyclic from the source.** The `cycle` field carries the source's own repeat
   interval, so a missed message self-heals within one cycle without any broker-side guarantee. This
-  is how RT/DL+ already behaves and it keeps the non-goal of not rebuilding UECP intact.
+  is how RT/DL+ already behaves.
 - **`radio.track.playing` / `.next` — last value wins.** Stale-by-one is cosmetic.
 
 **Retained messages are the late-joiner fix.** An encoder that reboots mid-song has, with no
 retention, nothing to show until the next event — minutes for track events, potentially hours for
-control. MQTT retained messages solve this and are stored in JetStream (`$MQTT_rmsgs`), which is
-another reason JetStream is not optional.
+control. Retained messages are stored in JetStream (`$MQTT_rmsgs`), another reason JetStream is not
+optional.
 
 ### 9.2 The 220 ms budget
 
@@ -731,61 +690,55 @@ CN transit.** That leaves **220 ms for everything Eventhub does** between a publ
 and a subscriber receiving the validated event.
 
 The budget binds `radio.control`: a now-playing event arriving 400 ms late is invisible, a TA bit
-arriving late is a missed announcement. Since all classes share one path, meeting it for control
-means meeting it for everything.
+arriving late is a missed announcement. All classes share one path, so meeting it for control means
+meeting it for everything.
 
 Where the 220 ms goes:
 
 1. **JetStream write to the `inbox` stream at `R=3`** — a RAFT quorum commit, so roughly one
    inter-zone round trip plus fsync.
 2. **Sidecar consumer delivery** — see [§9.3](#93-the-pull-consumer-latency-trap).
-3. **Zod validation, feed lookup, plugin eligibility** — in-memory, sub-millisecond, not worth
-   optimising.
+3. **Zod validation, feed lookup, plugin eligibility** — in-memory, sub-millisecond.
 4. **MQTT publish with RETAIN to `radio.…`** — a second quorum commit, plus the retained-message
    write.
 5. **Fan-out to subscribers** — core NATS, negligible.
 
 **The two RAFT commits dominate, and the three-zone spread is what makes them cost anything.** A
 single-zone cluster would commit in well under a millisecond; BAD ↔ STG ↔ MNZ makes each commit an
-inter-zone round trip. That is the price of partition tolerance and worth paying at this budget — but
-it means **the inter-zone RTT is the number that decides whether the design fits**, which is why it
-is an open question rather than an assumption ([§20](#20-open-questions)).
+inter-zone round trip. **The inter-zone RTT is therefore the number that decides whether the design
+fits**, and it is an open question rather than an assumption ([§20](#20-open-questions)).
 
-Measurement: the end-to-end latency metric in [§15](#15-observability) becomes a **p99 SLO against
-the 220 ms**, instrumented per stage so a regression points at a hop rather than at the system.
-Without the per-stage split, a budget breach is unactionable.
+The end-to-end latency metric in [§15](#15-observability) becomes a **p99 SLO against the 220 ms**,
+instrumented per stage so a regression points at a hop rather than at the system.
 
 ### 9.3 The pull-consumer latency trap
 
-This is the one place where a correct-looking implementation blows the budget. **A JetStream pull
-consumer only delivers while a fetch is outstanding.** The naive loop — fetch a batch, process it,
-fetch again — means a message arriving just after a fetch returns waits for the next fetch. Broker
-latency silently becomes poll latency, and at 220 ms that is fatal. So:
+**A JetStream pull consumer only delivers while a fetch is outstanding.** The naive loop — fetch a
+batch, process it, fetch again — means a message arriving just after a fetch returns waits for the
+next fetch, so broker latency silently becomes poll latency. At 220 ms that is fatal.
 
 - **Always keep a fetch parked at the server.** Issue the next long-poll fetch _before_ processing
   the current batch, so there is never a window with no outstanding request. The server then
-  delivers the instant a message lands and the pull-versus-push latency gap effectively vanishes.
+  delivers the instant a message lands.
 - **Small `batch`, long `expires`.** A large batch encourages the server to wait for it to fill;
   long expiry keeps the parked fetch alive without churn.
 - **Never sleep between fetches.** Any backoff belongs on error paths only.
 
 ### 9.4 Control events can be head-of-line blocked
 
-A genuine structural limit rather than a tuning detail. **`inbox.{institutionId}` does not encode the
-event class** — the class lives in the payload's `type` field — so a JetStream consumer on `inbox.>`
-cannot filter or prioritise by class. Every event for an organization goes through one durable
-consumer in arrival order.
+**`inbox.{institutionId}` does not encode the event class** — the class lives in the payload's `type`
+field — so a JetStream consumer on `inbox.>` cannot filter or prioritise by class. Every event for an
+organization goes through one durable consumer in arrival order.
 
-That matters because `radio.data` is about to become the dominant volume: cyclic data at `cycle: 8`
-across ~60 livestreams is roughly 7.5 msg/s against today's ~0.3 msg/s. A TA event arriving behind a
-burst of cyclic data waits for it. `max_ack_pending` and multiple sidecar pods reduce the exposure
-but cannot remove it, because the ordering is in the stream, not the consumer.
+`radio.data` is about to become the dominant volume: cyclic data at `cycle: 8` across ~60 livestreams
+is roughly 7.5 msg/s against today's ~0.3 msg/s. A TA event arriving behind a burst of cyclic data
+waits for it. `max_ack_pending` and multiple sidecar pods reduce the exposure but cannot remove it,
+because the ordering is in the stream, not the consumer.
 
-The fix, if wanted, is a **class token in the inbox subject** — `inbox/{institutionId}/{class}` —
-allowing a dedicated, separately-tuned consumer for `inbox.*.control`. It costs a slightly wider
-client contract and requires validating the payload's `type` against the subject token (one more
-subject-versus-payload check, exactly like the ownership check). It also buys **per-class publish
-ACLs**, so a house can be granted now-playing without being granted the authority to assert TA.
+The fix is a **class token in the inbox subject** — `inbox/{institutionId}/{class}` — allowing a
+dedicated, separately-tuned consumer for `inbox.*.control`. It costs a slightly wider client contract
+and requires validating the payload's `type` against the subject token, and it buys **per-class
+publish ACLs**, so a house can be granted now-playing without the authority to assert TA.
 Recommended; see [Q4](#194-q4--class-token-in-the-inbox-subject).
 
 ## 10. Internal topology and scaling
@@ -793,9 +746,9 @@ Recommended; see [Q4](#194-q4--class-token-in-the-inbox-subject).
 ### 10.1 Work that scales consumes NATS-side
 
 **MQTT 3.1.1 has no shared subscriptions.** Every MQTT subscriber on a topic receives every message,
-so no MQTT-consuming workload can run more than one instance without doing the work twice. That
-single fact decides the internal topology: every consumer that needs to scale consumes on the
-**NATS** side, and touches MQTT only where it needs an MQTT-specific feature.
+so no MQTT-consuming workload can run more than one instance without doing the work twice. Every
+consumer that needs to scale therefore consumes on the **NATS** side, and touches MQTT only where it
+needs an MQTT-specific feature.
 
 NATS offers two once-only mechanisms:
 
@@ -804,32 +757,30 @@ NATS offers two once-only mechanisms:
 - **JetStream durable consumers** — each message goes to exactly one puller, with explicit ack and
   redelivery on timeout. Costs one extra round trip; survives a pod dying mid-work.
 
-**Both internal tiers use JetStream consumers.** Core queue groups are named here because they are
-the obvious first reach and the wrong call in both places.
+**Both internal tiers use JetStream consumers.**
 
 ### 10.2 Validation sidecar
 
 **JetStream pull consumer**, durable `sidecar`, filter `inbox.>`, `ack_policy: explicit`. Ack after
 the validated event has been republished, not on receipt.
 
-A core queue group would also stop multiple pods republishing the same event, and would be a little
-faster — but the publisher has already received its QoS 1 PUBACK by then, so a pod dying between
-receipt and republish loses the event silently and nobody finds out. That quietly breaks the
-durability promise for `radio.control` and makes every rolling restart lossy. The extra round trip is
-low single-digit ms inside the CN; paying it makes the guarantee real.
+A core queue group would also prevent duplicate republishing and would be slightly faster, but the
+publisher has already received its QoS 1 PUBACK by then, so a pod dying between receipt and
+republish loses the event silently. That breaks the durability promise for `radio.control` and makes
+every rolling restart lossy. The extra round trip is low single-digit ms inside the CN.
 
 - `max_ack_pending` sized to pod count × desired concurrency.
 - `max_deliver: 3` with a short `ack_wait`. A message that fails validation is not retried — it is
   `term`ed and reported on `feedback/{institutionId}`. Redelivery exists for crashes, not bad data.
-- **A fetch is always outstanding** ([§9.3](#93-the-pull-consumer-latency-trap)). This is a hard
-  requirement, not a tuning preference.
+- **A fetch is always outstanding** ([§9.3](#93-the-pull-consumer-latency-trap)). A hard requirement,
+  not a tuning preference.
 - **Each pod needs a distinct MQTT client ID** on its publish connection, derived from the pod name.
   Two pods sharing a client ID means the broker evicts one on every connect and they fight in a
   reconnect loop.
 
-Each pod holds two connections, because the two publish paths need different protocols: **MQTT** to
-publish `radio/…` with the **RETAIN** flag, which has no documented NATS-side equivalent, and
-**NATS-native** to pull `inbox.>` and publish the `plugin.{target}.…` fan-out.
+Each pod holds two connections: **MQTT** to publish `radio/…` with the **RETAIN** flag, which has no
+documented NATS-side equivalent, and **NATS-native** to pull `inbox.>` and publish the
+`plugin.{target}.…` fan-out.
 
 ### 10.3 Plugin routing
 
@@ -837,23 +788,19 @@ publish `radio/…` with the **RETAIN** flag, which has no documented NATS-side 
 `plugins[]` on the event, and the auto-enable rule only covers music `track.playing` — `track.next`
 never auto-enables. So two `radio.{id}.track.playing` events on the same subject can have completely
 different plugin targets, and an adapter cannot decide what to deliver by filtering `radio.>`.
-Subject-filtering the public tree would push every track event at every target, ignoring what the
-publisher asked for.
 
-So the sidecar resolves eligibility and **fans out to a dedicated per-target subject**. It already
-holds the payload and the plugin config at that point, and it is the same thing `processEvent` does
-today when it publishes one Pub/Sub message per enabled plugin. For each validated event the sidecar
-publishes:
+The sidecar resolves eligibility and **fans out to a dedicated per-target subject**, which is what
+`processEvent` does today when it publishes one Pub/Sub message per enabled plugin. For each
+validated event the sidecar publishes:
 
 1. **`radio.{livestreamId}.{class}`** over MQTT with RETAIN — the public tree, unconditional, every
    subscriber sees it.
 2. **`plugin.{target}.{livestreamId}.{class}`** NATS-native, **once per enabled target, and only for
    enabled targets.** No plugins on the event means nothing is published here at all.
 
-The public tree stays clean — no plugin metadata leaks into what subscribers see — and adapters carry
-no eligibility logic whatsoever. The subject _is_ the routing decision. Plugin subjects are **not
-retained**: a work queue should not have a last-value, and an adapter coming back after a restart
-wants its consumer backlog, not the last event replayed at it.
+No plugin metadata leaks into the public tree, and adapters carry no eligibility logic. Plugin
+subjects are **not retained**: an adapter coming back after a restart wants its consumer backlog, not
+the last event replayed at it.
 
 ### 10.4 Plugin adapters
 
@@ -863,70 +810,66 @@ to its target over outbound HTTPS.
 - **One JetStream stream, `PLUGINS`, capturing `plugin.>`**, with a short `max_age`.
 - **One durable pull consumer per target**, filtered on `plugin.{target}.>` — `adapter-radioplayer`
   on `plugin.radioplayer.>`, `adapter-dts` on `plugin.dts.>`. **Not one shared consumer with
-  dispatch on a field.** Per-target consumers give independent failure domains: if
-  Radioplayer is timing out, its ack-pending backs up and its lag climbs while DTS is untouched. A
-  shared consumer lets one slow target eat everyone's capacity.
+  dispatch on a field**: per-target consumers give independent failure domains, so if Radioplayer is
+  timing out its ack-pending backs up and its lag climbs while DTS is untouched. A shared consumer
+  lets one slow target eat everyone's capacity.
 - **All pods for a target pull from that target's durable consumer.** Each message is delivered once;
   adding a pod adds concurrency with no config change and no coordination.
 - **`max_ack_pending` is the concurrency limit and the backpressure knob** — it caps in-flight HTTPS
-  requests per target. This, not a refusal to retry, is what keeps a slow target from wedging the
-  pipeline.
+  requests per target, and it is what keeps a slow target from wedging the pipeline.
 - On HTTP failure: `nak` with a short delay, or `term` to drop immediately. `max_deliver` caps total
   attempts.
 - **Adding a target is a sidecar config change plus a consumer and a Deployment.** No change to the
   `radio.` tree, no change for any publisher or subscriber.
 
-**Retries have a freshness ceiling.** Redelivering a now-playing event after the song has ended is
-worse than not delivering it at all, so retry is bounded by usefulness, not just attempt count: the
-`PLUGINS` stream carries a short `max_age` in minutes, `max_deliver` stays at 2 or 3, and **adapters
-check the event's own `start` / `time` before dispatch and `term` anything already stale.** The goal
-is unchanged from the HTTPS-era behaviour — never wedge the pipeline waiting on a slow target — but
-bounded in-flight work per target is a better mechanism than a refusal to retry.
+**Retries have a freshness ceiling**, because redelivering a now-playing event after the song has
+ended is worse than not delivering it: the `PLUGINS` stream carries a short `max_age` in minutes,
+`max_deliver` stays at 2 or 3, and **adapters check the event's own `start` / `time` before dispatch
+and `term` anything already stale.**
 
-One behavioural note to settle during implementation: today the DTS plugin receives one HTTP call
+One behavioural change to settle during implementation: today the DTS plugin receives one HTTP call
 carrying an array of services, because a single Pub/Sub message covers all non-blocked services on
-the event. Per-livestream plugin subjects make that one call per livestream instead. At this volume
-it barely registers, and it only differs at all for the handful of shared nightly broadcasts that
-carry multiple services. If batching turns out to matter for a target, the adapter can window on its
-own side rather than the subject shape changing.
+the event. Per-livestream plugin subjects make that one call per livestream instead. It only differs
+for the handful of shared nightly broadcasts that carry multiple services. If batching turns out to
+matter for a target, the adapter can window on its own side.
 
 ### 10.5 What scales and what does not
 
+The four `eventhub-connect` roles share one image but scale independently, each as its own workload
+([§4.3](#43-what-runs-on-the-nodes)).
+
 - **NATS server — fixed at one pod per zone.** The one workload that is _not_ horizontally scalable:
   adding a pod changes cluster and JetStream meta-group membership, and the quorum math wants an odd
-  count. Scale up (CPU, RAM) or add zones in odd numbers. Neither will be needed at this volume.
+  count. Scale up (CPU, RAM) or add zones in odd numbers.
 - **Validation sidecar — N pods, any zone.** The JetStream pull consumer gives once-only handling
   regardless of count.
 - **Plugin adapters — N pods per target.** Same mechanism, one durable consumer per target.
 - **`eventhub-bridge` — exactly one instance cluster-wide**, not one per zone. It holds an MQTT
   subscription to the GCP broker, and with no shared subscriptions a second instance would relay
   every legacy event twice.
-- **Operator UI — N pods, free.** Read-only. The stats endpoints are stateless, and the live tail
-  holds one core NATS subscription per pod plus its browser WebSockets — no durable consumer, so
-  nothing to coordinate and nothing lost when a pod dies. Session affinity is not required; a dropped
-  tail is reopened by the user.
+- **Operator UI — N pods.** Read-only. The stats endpoints are stateless, and the live tail holds one
+  core NATS subscription per pod plus its browser WebSockets — no durable consumer, so nothing to
+  coordinate. Session affinity is not required.
 - **ARD feed CronJob — exactly one instance cluster-wide.** Hourly.
 
-**Capacity reality.** Peak throughput is roughly **10 msg/s** — about 7.5 from cyclic `radio.data`
-plus a fraction of that for track changes. Core NATS handles millions of messages per second and
-JetStream at `R=3` tens of thousands, on modest hardware, so the broker is four orders of magnitude
+**Capacity.** Peak throughput is roughly **10 msg/s** — about 7.5 from cyclic `radio.data` plus a
+fraction of that for track changes. Core NATS handles millions of messages per second and JetStream
+at `R=3` tens of thousands on modest hardware, so the broker is four orders of magnitude
 over-provisioned on day one. **Run two pods per scalable workload for availability during rolling
-updates, not for throughput.** The only place capacity could realistically bite is adapter
-concurrency, because each event becomes one outbound HTTPS request with a multi-second timeout — a
-top-of-the-hour burst across all stations is the shape to size for. Tune `max_ack_pending` first and
-measure before adding pods.
+updates, not for throughput.** The only place capacity could bite is adapter concurrency, since each
+event becomes one outbound HTTPS request with a multi-second timeout — a top-of-the-hour burst across
+all stations is the shape to size for. Tune `max_ack_pending` first and measure before adding pods.
 
 ### 10.6 Ordering
 
 With more than one pod in any tier, per-livestream ordering is not guaranteed: two events for the
-same stream can be processed concurrently and arrive out of order. This is already true on Pub/Sub
-today, so it is not a regression — but it has to be written down, because a `track.next` overtaking a
-`track.playing` sticks the wrong song.
+same stream can be processed concurrently and arrive out of order. Already true on Pub/Sub today, and
+it matters because a `track.next` overtaking a `track.playing` sticks the wrong song.
 
 **Subscribers apply last-write-wins on the event's own timestamp** (`start` for track and data
-events, `time` for control), never on arrival order. If strict per-stream ordering ever becomes a
-hard requirement, the escape hatch is partitioning the inbox by livestream and running one consumer
-per partition — a larger change, not worth making until something demands it.
+events, `time` for control), never on arrival order. If strict per-stream ordering becomes a hard
+requirement, the escape hatch is partitioning the inbox by livestream and running one consumer per
+partition.
 
 ## 11. Event flow
 
@@ -951,9 +894,6 @@ per partition — a larger change, not worth making until something demands it.
 On invalid: zod rejection produces a structured error to the cluster observability stack, no event
 crosses the trust boundary, and the publisher is notified on `feedback/{institutionId}`.
 
-The round-trip through the broker is the price of a clean read API: in exchange for a few ms of
-intra-CN hop, every consumer sees verified data and never has to re-validate.
-
 ### 11.2 Legacy path
 
 1. Legacy broadcaster posts to `eventhub-ingest` over HTTPS as today.
@@ -965,19 +905,16 @@ intra-CN hop, every consumer sees verified data and never has to re-validate.
    same topic in the CN.
 4. From there, identical to [§11.1](#111-cn-path) with no special case anywhere.
 
-**One validator, one eligibility implementation, one fan-out — all in the sidecar.** That is why the
-bridge is a relay and not a second ingest, and why it needs no updating when schemas change.
-
-Two consequences worth stating:
+**One validator, one eligibility implementation, one fan-out — all in the sidecar.** Two
+consequences:
 
 - **While `eventhub-ingest` still runs its own zod pass**, a sidecar rejection on a bridged event
   means the two versions disagree and is an alert for us rather than feedback for the publisher. Once
-  ingest is reduced at step 13 that failure mode stops existing, which is most of the reason for
-  reducing it.
+  ingest is reduced at step 13 that failure mode stops existing.
 - **Plugin dispatch must not run on both sides.** While GCP-side Pub/Sub dispatch is still live, the
   sidecar's fan-out to `plugin.>` would double-deliver every bridged event to Radioplayer and DTS.
   This is why the bridge ships **before** the adapters move: during that window `plugin.>` messages
-  simply expire unconsumed (short `max_age`), or the fan-out stays behind a feature flag. The adapter
+  expire unconsumed (short `max_age`), or the fan-out stays behind a feature flag. The adapter
   cutover then flips one switch per target on the GCP side, covering native and bridged publishers
   identically because both already flow through the sidecar.
 
@@ -990,8 +927,7 @@ and password ([§7](#7-auth-and-acl)).
 
 - **MQTT v3.1.1.** A client requesting v5 is rejected at connect. Set the protocol version
   explicitly if your library defaults to v5.
-- **TLS required**, port `8883`. Plaintext `1883` is not exposed, inside the CN or otherwise —
-  bcrypt protects the stored password, not the one on the wire.
+- **TLS required**, port `8883`. Plaintext `1883` is not exposed, inside the CN or otherwise.
 - **Topics use `/`, never a `.`.** Wildcards are `#` and `+`
   ([§6.1](#61-mqtt-to-nats-translation)).
 
@@ -1006,10 +942,9 @@ and password ([§7](#7-auth-and-acl)).
   strip it.
 - **Publish.** Publish to `inbox/{institutionId}`, e.g.
   `inbox/urn:ard:institution:a3004ff924ece1a2`. **The topic uses the institution URN, not the
-  username** — the two look different on purpose and neither is derived from the other. QoS 1,
-  clean-session false so QoS 1 messages queue across reconnects, and a **stable client ID** — a fresh
-  one starts a new session and loses the queue, and keeping it stable is what makes credential
-  rotation seamless.
+  username** — neither is derived from the other. QoS 1, clean-session false so QoS 1 messages queue
+  across reconnects, and a **stable client ID** — a fresh one starts a new session and loses the
+  queue, and keeping it stable is what makes credential rotation seamless.
 - **Feedback.** Subscribe to `feedback/{institutionId}`, the same URN as your publish topic.
 - **Schema.** The payload is the same JSON the HTTPS API accepts today. Existing schemas apply to
   `track.playing` / `track.next`; the two new classes are in [§13](#13-new-event-schemas).
@@ -1026,11 +961,11 @@ and password ([§7](#7-auth-and-acl)).
 - **Subscribe.** See [§6.3](#63-subscription-patterns). QoS 1, clean-session false.
 - **Retained messages.** On connect you receive the last retained message for each matching topic,
   then live events. Treat the retained message as current state, not as a new event.
-- **Order by timestamp, not arrival** ([§10.6](#106-ordering)). Discarding an event older than the
-  one you already hold is the only safe rule.
+- **Order by timestamp, not arrival** ([§10.6](#106-ordering)). Discard any event older than the one
+  you already hold.
 - **Tolerate duplicates.** A redelivery after a pod restart is normal; handling must be idempotent.
 - **Trust the sidecar.** Every event you receive has been zod-validated at the broker boundary.
-  Re-validation is optional; do it only for defence-in-depth.
+  Re-validation is optional.
 
 ### 12.4 Validation feedback
 
@@ -1044,8 +979,7 @@ block on it and does not need to correlate every publish with a response.
   references the target subject plus the event's `time` / `start`.
 - Feedback messages are retained per institution, so a client that connects after the fact still
   sees the most recent problem.
-- The authoritative record is the operator UI and the cluster logs. `feedback/{institutionId}` exists
-  so a publisher can self-diagnose without asking us, not so it can build a distributed transaction.
+- The authoritative record is the operator UI and the cluster logs.
 
 ### 12.5 Migration path
 
@@ -1060,9 +994,9 @@ block on it and does not need to correlate every publish with a response.
   adapter at `eventhub-connect` and decommission the GCP-side adapter.
 - **Subscribers on Pub/Sub today.** Move to MQTT around step 13, which stops the event fan-out to
   Pub/Sub — after that a Pub/Sub subscription still exists but receives nothing. The `/subscriptions`
-  and `/topics` routes stay served through a deprecation cycle so nothing breaks abruptly, but they
-  stop being useful at the same moment. This is the migration item most likely to be forgotten,
-  because these consumers are not publishers and will not notice the rest of the transition.
+  and `/topics` routes stay served through a deprecation cycle, but they stop being useful at the
+  same moment. This is the migration item most likely to be forgotten, because these consumers are
+  not publishers and will not notice the rest of the transition.
 
 ### 12.6 Failover modes
 
@@ -1072,7 +1006,7 @@ block on it and does not need to correlate every publish with a response.
 - **Network partition.** The majority side keeps quorum and serves normally. The minority side loses
   JetStream and stops accepting MQTT connections; its clients reconnect across. No split-brain
   divergence — the minority side refuses to serve rather than serving stale state.
-- **Two-node loss.** No quorum, no MQTT. This is the accepted limit of a three-node cluster.
+- **Two-node loss.** No quorum, no MQTT. The accepted limit of a three-node cluster.
 - **Plugin API timeout.** Adapters have a hard per-request timeout, configurable per adapter. Current
   values in `eventhub-ingest` are 10s (DTS) and 7s (Radioplayer); keep those unless measured p99s say
   otherwise. Because each target has its own consumer with its own `max_ack_pending`, one unreachable
@@ -1084,14 +1018,12 @@ block on it and does not need to correlate every publish with a response.
 
 `eventhub-bridge` runs as a single instance with no failover, and legacy publishers are not covered
 by the availability guarantees above. **This is intentional.** The HTTPS path exists to give houses
-time to migrate, not to be a permanent second-class transport, and treating it as HA would remove the
-incentive to move.
+time to migrate, not to be a permanent second-class transport.
 
 When the bridge is down or partitioned, legacy events do not reach CN subscribers, and **this
 exposure grows over the migration.** While `eventhub-ingest` still fans out to Pub/Sub, legacy events
 reach existing Pub/Sub subscribers regardless of bridge state; once that fan-out ends at step 13, the
-bridge becomes the only path out of GCP and a bridge outage means legacy events are simply lost. That
-is the point at which pressure to migrate should be explicit rather than implied.
+bridge becomes the only path out of GCP and a bridge outage means legacy events are lost.
 
 ## 13. New event schemas
 
@@ -1129,9 +1061,9 @@ Control bits — TA, Regio, and whatever comes next.
 | `state`      | boolean | ✓        | new state                                                                                                                     |
 | `services`   | array   | ✓        | as in track events                                                                                                            |
 
-`name` is deliberately unconstrained. The ZI schema's fixed element list is one of the limitations v3
-exists to remove; a typo costs one broken control bit for one publisher, while an enum costs a
-release cycle every time someone needs a new element.
+`name` is unconstrained because the ZI schema's fixed element list is one of the limitations v3
+exists to remove. A typo costs one broken control bit for one publisher; an enum costs a release
+cycle every time someone needs a new element.
 
 ### 13.2 `de.ard.eventhub.v1.radio.data`
 
@@ -1177,39 +1109,36 @@ Radiotext, dynamic label, and the RT+/DL+ plus services, bundled into one cyclic
 as integers.
 
 **`id` is validated against a curated allowlist** in the zod schema, derived from the RT+ content
-type table. The point is to reject typos and unmapped content types before they reach receivers that
-route on the numeric value — not to prevent any collision, since track events carry no numeric
-identifier to collide with.
+type table, to reject typos and unmapped content types before they reach receivers that route on the
+numeric value.
 
-Receivers walk `data[]` and filter on `id`, taking what they can render and ignoring the rest. This
-deliberately mirrors how UECP consumers already behave, minus the fields (CT and similar) that only
-existed because of source configuration.
+Receivers walk `data[]` and filter on `id`, taking what they can render and ignoring the rest — as
+UECP consumers already behave, minus the fields (CT and similar) that only existed because of source
+configuration.
 
 ## 14. Operator UI
 
 Two jobs that want different transports: **stats**, always on screen and changing slowly, and a
-**live event tail**, which is what someone opens when they are actually debugging a publisher.
+**live event tail** for debugging a publisher.
 
-The governing constraint is the same one that applies to observability: **the UI is a read-only
-observer and must never be in the data path.** If it dies, or if twenty people open it at once,
-events keep flowing.
+**The UI is a read-only observer and must never be in the data path.** If it dies, or if twenty
+people open it at once, events keep flowing.
 
 ### 14.1 Stats over HTTP
 
 Stats are a snapshot, so they are a periodic `GET` on a 5–10s interval, served from the NATS
 monitoring endpoints (`/varz`, `/connz`, `/jsz`) and the metrics store. No socket, cacheable,
 survives a reload, trivially rate-limited. Keeping stats off the socket is what makes the
-auto-disconnect policy below viable at all: the always-visible part of the UI never needs a
-persistent connection, so the socket is open only while someone is deliberately watching a tail.
+auto-disconnect policy viable: the always-visible part of the UI never needs a persistent
+connection, so the socket is open only while someone is deliberately watching a tail.
 
 The front page shows:
 
 - **Connected clients grouped by username** — required for confirming a credential rotation is
   complete before removing the old user ([§7.2](#72-username-convention-and-rotation)).
 - **Per-publisher event rates**, split by event class.
-- **Validation errors with the actual zod message**, not the sanitized public one. This is the single
-  most useful thing the UI can offer, and the reason it needs to exist at all — publishers currently
-  get "Bad request" and no way to self-diagnose.
+- **Validation errors with the actual zod message**, not the sanitized public one. Publishers
+  currently get "Bad request" and no way to self-diagnose.
 - **Feed age and active revision**, per node if per-node fetching is used
   ([§8.4](#84-staleness-is-safe-silence-is-not)).
 - **JetStream health** — RAFT state, per-consumer lag, ack-pending, redeliveries.
@@ -1220,32 +1149,27 @@ The front page shows:
 The UI backend holds one NATS-native subscription and fans out to browser clients over a WebSocket it
 serves itself.
 
-The alternative worth naming is **connecting the browser straight to the NATS WebSocket gateway**
-with `nats.ws`. It is less code and one hop shorter, and still wrong here: it needs a broker
-credential in a JS bundle and — decisively — leaves nowhere to enforce the disconnect policy below.
-NATS has connection limits, but not "close this when the human stops looking at it". Hosting the
-socket ourselves puts policy, filtering, redaction and rate limiting in one place, and keeps broker
-credentials server-side.
+Rejected alternatives:
 
-**SSE was the closer call.** The tail is strictly one-directional, `EventSource` reconnects for free,
-and it passes through proxies without an upgrade handshake. It loses on exactly the requirement that
-matters: `EventSource` reconnects _aggressively and automatically_, so a server-side close is
-immediately undone by the browser. WebSocket close stays closed until the user acts. SSE stays the
-fallback if WebSocket turns out painful through the CN proxy chain.
+- **Browser straight to the NATS WebSocket gateway** with `nats.ws` — less code and one hop shorter,
+  but it needs a broker credential in a JS bundle and leaves nowhere to enforce the disconnect policy
+  below. NATS has connection limits, but not "close this when the human stops looking at it".
+- **SSE** — the closer call. Strictly one-directional, `EventSource` reconnects for free, passes
+  through proxies without an upgrade handshake. It loses because `EventSource` reconnects
+  aggressively and automatically, so a server-side close is immediately undone by the browser. SSE
+  stays the fallback if WebSocket turns out painful through the CN proxy chain.
 
 ### 14.3 The socket must not become a monitoring feed
 
 **An always-open tail is not an allowed use.** Left unchecked it becomes an unversioned, unmonitored
 API that someone builds a health check against, and it holds a broker fan-out subscription open
-indefinitely. Metrics belong in the metrics store; alerts belong in the SOC path. So:
+indefinitely. So:
 
 - **Idle disconnect on human presence, not on traffic.** The page heartbeats from real interaction
   and the Page Visibility API, so a hidden tab stops heartbeating. **A timer-driven keepalive would
-  defeat the entire point**, so the heartbeat must not be one.
-- **Absolute cap** regardless of activity, around 30 minutes. Reopening is one click and has to be
-  deliberate.
-- **A close frame with a reason the UI displays** — "live tail stopped after 30 minutes, resume" — so
-  it reads as policy rather than a bug.
+  defeat the entire point.**
+- **Absolute cap** regardless of activity, around 30 minutes. Reopening is one deliberate click.
+- **A close frame with a reason the UI displays** — "live tail stopped after 30 minutes, resume".
 - **A cluster-wide cap on concurrent tails**, so the UI cannot amplify fan-out.
 - **Per-connection rate limit with a visible "sampled" badge.** A tab tailing `radio.>` at cyclic
   `radio.data` volume will drop frames or grow without bound; the default filter should be narrower
@@ -1253,29 +1177,27 @@ indefinitely. Metrics belong in the metrics store; alerts belong in the SOC path
 
 ### 14.4 No login, and what that forces
 
-Authorization is reachability from the ARD CN intranet. A reasonable call for a read-only internal
-dashboard, with consequences that are cheaper to accept now than to retrofit:
+Authorization is reachability from the ARD CN intranet. Consequences that are cheaper to accept now
+than to retrofit:
 
 - **The UI stays strictly read-only.** No credential management, no user CRUD, no publishing test
   events, no ACL editing. The first genuinely mutating feature is the point where login stops being
-  optional — worth saying out loud now, because "just add a resend button" is how that decision gets
-  made by accident.
+  optional.
 - **Network position is not the only control.** Bind the listener to the CN-facing interface and put
-  an explicit source-CIDR allow-list in front of it. "It is internal" plus one routing mistake is the
-  standard way internal dashboards end up reachable.
+  an explicit source-CIDR allow-list in front of it.
 - **No credential material on screen, ever.** Usernames and connection counts yes; passwords, bcrypt
-  hashes and full tokens never. The rotation workflow needs usernames only.
+  hashes and full tokens never.
 - **Everyone on the CN can read every house's events**, including control bits and validation errors
   containing payload fragments ([Q5](#195-q5--cross-house-visibility)).
 - **No login means no record of who looked.** Log source IP and filter per tail session so an unusual
-  tail can at least be traced after the fact.
+  tail can be traced after the fact.
 
 ## 15. Observability
 
 **Cluster-internal only. No Datadog, no external SaaS, nothing in the observability path that
-requires internet access.** This follows from the sovereignty and offline-capability goals: an
-observability stack that stops working during an internet outage stops working exactly when it is
-needed. Nothing in the event flow may depend on a metrics or log write succeeding.
+requires internet access** — an observability stack that stops working during an internet outage
+stops working exactly when it is needed. Nothing in the event flow may depend on a metrics or log
+write succeeding.
 
 The stack is **TBD** ([Q6](#196-q6--observability-stack)). Current candidates: [Vector](https://vector.dev)
 shipping to [VictoriaLogs](https://docs.victoriametrics.com/victorialogs/) for logs;
@@ -1297,20 +1219,20 @@ What to instrument, regardless of which tools win:
   for each plugin target separately. A climbing ack-pending on one target is the earliest signal that
   it is degrading.
 - Plugin adapter success rate, latency and timeout counts per target.
-- **Outbound calls per target per minute** — the signal that proves the step 12 adapter cutover
-  worked. Flat across the cutover means one path is live; doubled means both are.
+- **Outbound calls per target per minute** — proves the step 12 adapter cutover worked. Flat across
+  the cutover means one path is live; doubled means both are.
 - Events dropped for staleness, split by target.
 - **ARD feed age, active revision and refresh outcome** — success, network failure, or integrity-rule
   rejection with the rule that fired. Age is the alerting signal; the rejection counter tells you
   _why_ the age is climbing.
 - **Operator UI tail sessions** — concurrent count, duration distribution, and disconnect reason
-  split by idle / absolute-cap / client-initiated. A duration distribution piling up at the 30-minute
-  cap means someone is treating the tail as a monitoring feed.
+  split by idle / absolute-cap / client-initiated. A distribution piling up at the 30-minute cap
+  means someone is treating the tail as a monitoring feed.
 - Fan-out ratio: events published to `radio.>` versus messages published to `plugin.>`, per target. A
   sudden jump means the eligibility logic changed behaviour.
 - **End-to-end latency from `inbox/` publish to `radio/` availability, as a p99 SLO against the
   220 ms** ([§9.2](#92-the-220-ms-budget)) — split per stage so a breach points at a hop. Alert on
-  the p99, not the mean; the mean will look fine while control events miss.
+  the p99, not the mean.
 
 One carry-over to fix: `processEvent` currently logs the full event payload and the raw request body
 on every event. Affordable at today's volume but not once `radio.data` is cycling — a 20x step change
@@ -1320,40 +1242,37 @@ in messages and a larger one in log bytes. **Estimate the volume before the pilo
 
 - **Three nodes across three SWR zones** in the ARD CN, each on a near-identical NixOS
   configuration, with one source of truth for the OS image (Nix flake in this repo). Rebuilds are
-  reproducible; rollbacks are atomic. The honest cost is that **NixOS is a real learning curve** and
-  the team must be able to operate it at 03:00 under pressure — a training commitment, not a
-  technical detail.
-- **K3S** as the workload orchestrator. NATS, the sidecar, operator UI, observability stack and
-  plugin adapters all live as manifests in `deploy/`. Replica counts are in the manifests, so scaling
-  is a PR like anything else. `eventhub-bridge` runs as a single instance on the primary node behind
-  a feature flag; the ARD feed refresh is an hourly CronJob writing to JetStream KV.
+  reproducible; rollbacks are atomic. **NixOS carries a learning curve** and the team must be able to
+  operate it at 03:00 under pressure, which is a training commitment on top of the build.
+- **K3S** as the workload orchestrator. NATS, the observability stack and one workload per
+  `eventhub-connect` role — sidecar, adapters, operator UI, feed CronJob — all live as manifests in
+  `deploy/`. The `eventhub-connect` manifests differ only in the container command and replica count,
+  since they share one image. Scaling is a PR. `eventhub-bridge` runs as a single instance on the
+  primary node behind a feature flag.
 - **NATS is a standard container deployment, exactly like the observability tools** — official
   upstream image, a config file, a persistent volume. One instance per node, with a stable identity
-  and its own volume because JetStream needs both. It is configuration, not code, and it is reviewed
-  as configuration.
+  and its own volume because JetStream needs both. It is configuration, not code.
 - **We build three images and pull the rest.** CI builds `eventhub-connect`, `eventhub-bridge` and
   `eventhub-ingest`, and pushes them to the local registry. NATS and the observability stack are
   mirrored upstream images, pinned by digest.
 - **Local container registry ([ZOT](https://zotregistry.dev/)) on each VM.** K3S pulls from there:
-  no Docker Hub traffic, no rate limits, no public dependency, no surprise supply-chain events at
-  runtime.
+  no Docker Hub traffic, no rate limits, no runtime supply-chain exposure.
 - **Offline runtime.** Every package, config and image lives in the Nix store or the local registry,
   so the cluster keeps validating, routing, serving and observing events with zero internet access.
   **Plugin adapters are the one internet-dependent workload** — their targets are on the public
-  internet, so they cannot be offline-capable, and their failure must never affect broker
-  availability. Per-target `max_ack_pending` is what enforces that
-  ([§10.4](#104-plugin-adapters)).
+  internet, so their failure must never affect broker availability. Per-target `max_ack_pending`
+  enforces that ([§10.4](#104-plugin-adapters)).
 - **Persistent storage for JetStream.** Each node needs a durable volume for the `store_dir`, sized
-  for MQTT session state, retained messages and QoS 1 in-flight tracking. Not a large volume, but not
-  optional, and it needs a backup and restore story.
+  for MQTT session state, retained messages and QoS 1 in-flight tracking. Not large, not optional,
+  and it needs a backup and restore story.
 - **Infra as code.** Every change to a node or workload goes through a PR; CI deploys; no manual prod
-  edits. This removes the largest single cause of self-inflicted outages.
+  edits.
 - **Rolling updates.** Drain one node (cordon, evict pods), update NixOS + K3S, restart, wait for
   JetStream to report the RAFT group healthy, then move on. Quorum holds throughout at 2 of 3, so no
   maintenance window is needed. **Never drain two nodes at once.**
-- **Staged config reloads.** An `authorization` change is hot-reloaded one node at a time, same
-  discipline as a rolling deploy, so a mistaken ACL costs one node while clients fail over instead of
-  locking every publisher out at once. The config is also parsed and validated in CI before merge.
+- **Staged config reloads.** An `authorization` change is hot-reloaded one node at a time, so a
+  mistaken ACL costs one node while clients fail over instead of locking every publisher out at once.
+  The config is parsed and validated in CI before merge.
 - **24/7 monitoring** handed off to the SOC, with runbooks and alerting wired into the existing
   escalation path.
 - **Client failover.** Clients are configured with all three endpoints and reconnect to a survivor on
@@ -1362,54 +1281,48 @@ in messages and a larger one in log bytes. **Estimate the volume before the pilo
 ## 17. Reliability and broadcast-criticality
 
 `radio.control` carries TA and Regio bits, which makes this **senderelevant** (broadcast-relevant)
-infrastructure and raises the availability bar well above what now-playing metadata alone would
-justify. This section states what the design does about that and — more usefully — what it cannot do.
+infrastructure and raises the availability bar above what now-playing metadata alone would justify.
 
-**First, the bound on the blast radius: no Eventhub outage takes anyone off air.** This system
-carries metadata and control signalling, not audio. A total failure degrades what listeners see on a
-display and stops TA from being signalled; it does not interrupt a broadcast. The ZI gateway this
-replaces has the same property. That is the correct frame for the Senderelevanz conversation, and it
-is why three nodes inside a single network domain are a defensible answer rather than an obviously
-inadequate one.
+**The bound on the blast radius: no Eventhub outage takes anyone off air.** This system carries
+metadata and control signalling, not audio. A total failure degrades what listeners see on a display
+and stops TA from being signalled; it does not interrupt a broadcast. The ZI gateway this replaces
+has the same property.
 
-What the design does is described in place rather than repeated here: three nodes with quorum at 2 of
-3 ([§4.1](#41-three-nodes-three-zones)), no privileged node in the data path
+What the design does is described in place: three nodes with quorum at 2 of 3
+([§4.1](#41-three-nodes-three-zones)), no privileged node in the data path
 ([§4.2](#42-what-primary-means-and-what-it-does-not)), durable control events and retained messages
 ([§9.1](#91-per-event-class)), rolling updates that never drain two nodes and staged config reloads
 ([§16](#16-hosting-and-operations)), an offline-capable data path, and cluster-internal observability
-that still works during exactly the outage where an external SaaS would be unreachable
 ([§15](#15-observability)).
 
 ### 17.1 Fail-safe by construction
 
-The `validUntil` TTL plays two different roles. In **normal operation** it is a backstop, with the
-explicit `state: false` event as the primary path ([§9.1](#91-per-event-class)). In a **total
-outage** it becomes the only thing still working, and that is what makes the failure mode safe.
+The `validUntil` TTL plays two roles. In **normal operation** it is a backstop, with the explicit
+`state: false` event as the primary path ([§9.1](#91-per-event-class)). In a **total outage** it is
+the only thing still working.
 
 If the cluster stops delivering, control events stop arriving, TTLs expire, and receivers **drop**
 the state they hold. A traffic-announcement bit fails to _off_, not stuck _on_. The worst outcome of
-a total outage is then that a traffic announcement cannot be signalled — a lost feature. What it
-prevents is a TA bit stuck on indefinitely, with receivers switching to a station that has nothing to
-announce, which would be an actual broadcast fault.
+a total outage is that a traffic announcement cannot be signalled; what it prevents is a TA bit stuck
+on indefinitely, with receivers switching to a station that has nothing to announce.
 
-So the TTL is not optional garnish. The schema marks it optional for states with no natural expiry,
-but **for anything safety-relevant it should be treated as required**, and the pilot should verify
-that receivers actually honour it rather than holding last-known state forever.
+The schema marks `validUntil` optional for states with no natural expiry, but **for anything
+safety-relevant it should be treated as required**, and the pilot should verify that receivers
+actually honour it rather than holding last-known state forever.
 
 ### 17.2 Correlated risk: losing all three nodes
 
-Three zones protect against zone failure. They do not protect against anything common to all three.
-The real risks, roughly in order of expected impact:
+Three zones protect against zone failure, not against anything common to all three. Roughly in order
+of expected impact:
 
 1. **ARD CN outage.** All three nodes sit inside the ARD CN at SWR. If the CN itself fails, or the
    SWR portion of it, all three go unreachable simultaneously and quorum is irrelevant. **There is no
    in-design mitigation, and adding zones does not help** — they are all in the same network domain.
-   This is the single largest correlated risk in the architecture and it is accepted rather than
-   solved ([§17.4](#174-the-diversity-question)).
+   Accepted rather than solved ([§17.4](#174-the-diversity-question)).
 2. **TLS certificate expiry.** All three nodes share one certificate lifecycle, so an expiry drops
-   every client connection everywhere at the same instant. In practice this is the most common cause
-   of a simultaneous total outage in systems of this shape. Automated renewal plus expiry alerting at
-   30 / 14 / 7 days, and the alert goes to the SOC, not to an inbox.
+   every client connection everywhere at the same instant — the most common cause of a simultaneous
+   total outage in systems of this shape. Automated renewal plus expiry alerting at 30 / 14 / 7 days,
+   and the alert goes to the SOC, not to an inbox.
 3. **Bad deploy or correlated software failure.** Identical images on all three nodes means a NATS
    bug or a broken sidecar release can take all three in sequence. Canary one node, roll with an
    automatic abort on health regression rather than a human watching a dashboard, and rely on atomic
@@ -1423,14 +1336,14 @@ The real risks, roughly in order of expected impact:
 6. **Clock skew.** Ordering is last-write-wins on the event's own timestamp and control state expires
    on a TTL, so both correctness properties depend on time. NTP on all three nodes is mandatory; a
    publisher with a badly skewed clock can have its events discarded as stale or its TA expire early.
-   Worth validating at the pilot and worth an alert on node-to-node skew.
+   Validate at the pilot and alert on node-to-node skew.
 
 ### 17.3 Deliberately not redundant
 
-Three things are single-instance on purpose, and none of them sit in the critical path:
-`eventhub-bridge` (legacy only, and legacy is explicitly not first-class), the observability stack
-(single-writer stores; losing it makes the system blind, not broken), and the plugin adapter targets
-themselves (on the public internet and unreachable for reasons entirely outside the CN).
+Three things are single-instance on purpose, none in the critical path: `eventhub-bridge` (legacy
+only), the observability stack (single-writer stores; losing it makes the system blind, not broken),
+and the plugin adapter targets themselves (on the public internet, unreachable for reasons outside
+the CN).
 
 ### 17.4 The diversity question
 
@@ -1439,17 +1352,16 @@ at which point every event — native or legacy — must traverse the ARD CN to 
 Step 15 then removes GCP entirely. After step 13 the CN is a single point of failure for the whole
 system; step 15 only removes the HTTPS front door.
 
-The argument for keeping a minimal GCP-hosted emergency path indefinitely is straightforward: it is
-the only mitigation for risk 1 above. The argument against is stronger than it first looks.
-Sovereignty is a stated goal, two paths means two code paths forever, and — the decisive point — **the
-consumer that matters most is inside the CN.** The central encoding docks directly into the CN, so a
-CN outage takes the encoders out regardless of where events are published from. A GCP fallback would
-serve internet-side consumers such as broadcaster apps while failing the broadcast-relevant ones,
-which is close to the inverse of what a fallback is for.
+The argument for keeping a minimal GCP-hosted emergency path indefinitely is that it is the only
+mitigation for risk 1. Against it: sovereignty is a stated goal, two paths means two code paths
+forever, and **the encoders are inside the CN.** The central encoding docks directly into the CN, so
+a CN outage takes the encoders out regardless of where events are published from. A GCP fallback
+would serve internet-side consumers such as broadcaster apps while failing the broadcast-relevant
+ones.
 
-Recommendation: decommission as planned, and treat the CN as the availability floor for this system.
-If the SOC's Senderelevanz classification demands better, the honest answer is that it needs to be
-solved at the network layer, not by keeping a GCP deployment alive.
+Recommendation: decommission as planned, and treat the CN as the availability floor. If the SOC's
+Senderelevanz classification demands better, that has to be solved at the network layer, not by
+keeping a GCP deployment alive.
 
 ## 18. Integration steps
 
@@ -1471,8 +1383,7 @@ hostnames — they gate everything from step 3 onward.
 - **ARD CN certificates.** The MQTT gateway will not serve TLS without them, so they gate step 3,
   not step 8. Request **one certificate covering all three node hostnames**, matching the single
   shared lifecycle assumed in [§17.2](#172-correlated-risk-losing-all-three-nodes), and get renewal
-  automated in the same conversation — a manually renewed certificate shared across all three nodes
-  is that section's risk 2 waiting to happen.
+  automated in the same conversation.
 
 **The firewall scope depends on
 [Q1](#191-q1--are-there-potential-subscribers-who-cannot-connect-within-the-ard-cn).** A
@@ -1483,7 +1394,7 @@ twice.
 ### 18.2 Steps
 
 1. **New event schemas.** Define `radio.control` and `radio.data` in zod and ship them into the
-   **existing HTTPS API** with OpenAPI and docs. No broker required. This unblocks the ZI replacement
+   **existing HTTPS API** with OpenAPI and docs. No broker required. Unblocks the ZI replacement
    conversation and gets real payloads from real encoders in front of the schema before any of the
    infrastructure exists.
 2. **NixOS + K3S base.** Three VMs — BAD, STG, MNZ. Flake in the repo, local ZOT registry, persistent
@@ -1491,7 +1402,7 @@ twice.
    the [latency budget](#92-the-220-ms-budget) depends on. **As soon as addresses and hostnames are
    assigned, file the firewall and certificate requests in
    [§18.1](#181-external-requests-to-file-first)** — the `:6222` rules and the certificates both
-   block step 3, and neither is on our own timeline.
+   block step 3.
 3. **NATS cluster.** Three nodes, JetStream at `R=3`, MQTT gateway on `:8883` with TLS, cluster sync
    on `:6222`. Provision the `PLUGINS` stream (`plugin.>`, short `max_age`) alongside the
    MQTT-internal streams — the adapters consume from it in step 12. **Blocked on both requests in
@@ -1507,9 +1418,8 @@ twice.
    `plugin.{target}.…`, rejections to `feedback/{institutionId}`. In `src/connect/`, importing
    `src/schemas/` rather than copying it; the eligibility logic ports from `event-helpers.ts` (music
    `track.playing` auto-enables, `track.next` never does). **Ship it multi-pod from day one** so the
-   once-only path is exercised before the pilot, not after.
-7. **Cluster-internal observability** ([§15](#15-observability)). Must be in place before the pilot,
-   or the pilot teaches us nothing.
+   once-only path is exercised before the pilot.
+7. **Cluster-internal observability** ([§15](#15-observability)). Must be in place before the pilot.
 8. **Client connection layer.** Three DNS names, one per node, all three configured in every client.
    Wire up certificate renewal and expiry alerting; the certificates themselves arrived at step 2
    ([§18.1](#181-external-requests-to-file-first)). Confirm the client firewall rules actually work
@@ -1535,15 +1445,14 @@ twice.
     routes then enter their deprecation cycle in step with the Pub/Sub shutdown, while `/events` and
     `/auth/*` keep running until the last HTTPS publisher migrates
     ([§5.3](#53-the-ingest-api-surface-stays-until-it-is-deprecated)). Expect the `202`-instead-of-
-    `400` change to generate support questions; have the operator UI ready to answer them.
+    `400` change to generate support questions.
 14. **Handoff to SOC.** 24/7 monitoring confirmed, runbooks and alerting wired into the SOC
     escalation path. Confirm the Senderelevanz classification and what it implies for the
     availability floor, using [§17](#17-reliability-and-broadcast-criticality) as the input.
 15. **Decommission GCP.** Once every broadcaster is on MQTT-in-CN, remove the GCP MQTT broker and
     `eventhub-bridge`, then delete `eventhub-ingest` and the last GCP project resources.
     **Prerequisite: every route has completed its deprecation cycle with measured zero traffic** —
-    this is where the HTTPS API and the Firebase tenant finally go away, and it cannot be reached by
-    declaration.
+    this is where the HTTPS API and the Firebase tenant go away.
 16. **Docs and changelog.** Public docs, migration guide for broadcasters, changelog entry per step.
 
 ## 19. Open decisions
@@ -1554,30 +1463,27 @@ it is not.
 
 ### 19.1 Q1 — are there potential subscribers who cannot connect within the ARD CN?
 
-**This is the question the network exposure model hangs on, and it is currently assumed rather than
-answered.** The design places the broker inside the CN and has publishers and subscribers connect to
-it there. Plugin targets are already handled — adapters reach Radioplayer and DTS with _outbound_
-HTTPS, so those partners never connect inward. The open part is subscribers.
+The design places the broker inside the CN and has publishers and subscribers connect to it there.
+Plugin targets are already handled — adapters reach Radioplayer and DTS with _outbound_ HTTPS, so
+those partners never connect inward. The open part is subscribers, and it is currently assumed rather
+than answered.
 
 Candidates that may not sit on the CN: **ARD Sounds / Nucleus / POC**, if any run in a public cloud;
 **broadcaster app backends**, frequently cloud-hosted even when the broadcaster is on the CN; and
 **third-party metadata consumers**, if they are ever to be served by subscription rather than by us
 pushing to them.
 
-Why the answer changes the design:
-
 - **If "none":** the MQTT gateway never needs internet exposure. It binds to CN-facing interfaces
   only, the attack surface collapses to the CN population, and Q2 becomes easy.
 - **If "some":** you need internet-facing MQTT with TLS and auth, or an outbound relay mirroring
   selected subjects to where those consumers are — the bridge pattern in reverse. That component does
   not exist in this document, and it would have to be built before
-  [step 15](#18-integration-steps) removes GCP, because today those consumers are served from GCP.
+  [step 15](#182-steps) removes GCP, because today those consumers are served from GCP.
 
 **This partly invalidates an assumption elsewhere.** [Q3](#193-q3--does-eventhub-bridge-need-to-exist)
 argues that `eventhub-ingest` could publish straight into the CN because the gateway is
-"internet-reachable by definition". That only holds if the gateway is in fact internet-facing — which
-is exactly what Q1 decides. If the CN stays closed, ingest cannot publish directly and the bridge is
-load-bearing rather than optional.
+"internet-reachable by definition". That only holds if the gateway is in fact internet-facing. If the
+CN stays closed, ingest cannot publish directly and the bridge is load-bearing rather than optional.
 
 Next step: an inventory of every current Pub/Sub subscriber and where it runs. That list exists in
 Datastore today.
@@ -1587,13 +1493,12 @@ Datastore today.
 Read-only, unauthenticated subscribe. Today's design says the opposite — `no_auth_user` is not set
 and an unauthenticated connect fails — so this is a deliberate reversal, not a gap.
 
-The case for it is strong. **Now-playing metadata is already public by construction**: it goes out
-over RDS and DAB to anyone with a receiver. Charging a provisioning and rotation process for access
-to data we broadcast in the clear is friction without a security benefit, and subscriber credentials
-are the ones that churn most. It is also the same reasoning already accepted for the operator UI
-([§14.4](#144-no-login-and-what-that-forces)).
+**Now-playing metadata is already public by construction**: it goes out over RDS and DAB to anyone
+with a receiver. Charging a provisioning and rotation process for access to data we broadcast in the
+clear is friction without a security benefit, and subscriber credentials are the ones that churn
+most. Same reasoning as the operator UI ([§14.4](#144-no-login-and-what-that-forces)).
 
-What it costs, and these are real:
+What it costs:
 
 - **Per-subscriber visibility disappears.** The design leans on connections grouped by username for
   rotation confirmation and per-consumer metrics. Anonymous subscribers are one undifferentiated
@@ -1601,19 +1506,17 @@ What it costs, and these are real:
   anyone before making one.
 - **Revocation becomes all-or-nothing.** With no identity, the only lever against one abusive
   consumer is an IP block or switching anonymous access off for everybody.
-- **Abandoned sessions accumulate broker state.** The concrete resource risk rather than a
-  theoretical one: MQTT sessions are keyed by client ID, an anonymous client picks its own, and a
-  persistent session with QoS 1 makes the broker retain a queue in JetStream for a client that may
-  never return. Anonymous plus persistent plus QoS 1 is unbounded state growth with nobody to
-  attribute it to.
+- **Abandoned sessions accumulate broker state.** MQTT sessions are keyed by client ID, an anonymous
+  client picks its own, and a persistent session with QoS 1 makes the broker retain a queue in
+  JetStream for a client that may never return. Anonymous plus persistent plus QoS 1 is unbounded
+  state growth with nobody to attribute it to.
 
 Recommendation: **yes, but split by event class and forbid persistent sessions.**
 
-- **Open `radio.*.track.*` and `radio.*.data`** to an unauthenticated, subscribe-only user. This is
-  the high-demand, low-sensitivity, already-public traffic.
-- **Keep `radio.*.control` authenticated.** The audience is small and known — encoders — and a
-  broadcast-critical control feed is a different conversation. It is also the class where knowing
-  every consumer actually matters.
+- **Open `radio.*.track.*` and `radio.*.data`** to an unauthenticated, subscribe-only user — the
+  high-demand, low-sensitivity, already-public traffic.
+- **Keep `radio.*.control` authenticated.** The audience is small and known — encoders — and it is
+  the class where knowing every consumer matters.
 - **Force clean sessions and cap subscriptions and connections** for the anonymous user, so no
   JetStream session state accrues. Retained messages still work on subscribe, so a late joiner is
   unaffected.
@@ -1621,14 +1524,13 @@ Recommendation: **yes, but split by event class and forbid persistent sessions.*
   advance warning of changes should be identifiable by choice.
 
 Implementable directly in the NATS config: `no_auth_user` pointing at a subscribe-only user whose
-permissions allow the two open subtrees and deny everything else. It does mean the ACL config becomes
-the only thing standing between anonymous users and `control`, so that user's permission block
-deserves an explicit test rather than a review.
+permissions allow the two open subtrees and deny everything else. The ACL config then becomes the
+only thing standing between anonymous users and `control`, so that user's permission block needs an
+explicit test rather than a review.
 
 **The answer depends on Q1.** CN-only makes this a low-risk change to a trusted population.
-Internet-facing makes it a public data feed with public-feed operational consequences — abuse
-handling, capacity planning for an unbounded audience, and a much stronger case for keeping
-`radio.*.data` closed as well.
+Internet-facing makes it a public data feed with public-feed consequences — abuse handling, capacity
+planning for an unbounded audience, and a stronger case for keeping `radio.*.data` closed as well.
 
 ### 19.3 Q3 — does `eventhub-bridge` need to exist?
 
@@ -1645,9 +1547,8 @@ Decide before step 11 builds the bridge.
 
 `inbox/{institutionId}/{class}` instead of `inbox/{institutionId}`, to stop control events being
 head-of-line blocked behind cyclic `radio.data` and to enable per-class publish ACLs
-([§9.4](#94-control-events-can-be-head-of-line-blocked)). The volume math says the risk is real, the
-broadcast-criticality says the consequence is real, and per-class ACLs are likely to be asked for
-regardless. Recommended: adopt it. Cheap now and a breaking change later — decide before the pilot.
+([§9.4](#94-control-events-can-be-head-of-line-blocked)). Recommended: adopt it. Cheap now and a
+breaking change later — decide before the pilot.
 
 ### 19.5 Q5 — cross-house visibility
 
@@ -1679,8 +1580,7 @@ Genuine unknowns, to be measured or inventoried rather than decided.
 - **Route traffic per endpoint.** Which `eventhub-ingest` routes are still called, by whom, and how
   often. **No route is removed without this**, and it is not instrumented today.
 - **Latency of the path we are replacing.** The 250 ms budget is the specified limit; what the ZI
-  gateway actually delivers today for a TA bit is unmeasured. Useful for knowing whether 220 ms is
-  comfortable or tight.
+  gateway actually delivers today for a TA bit is unmeasured.
 
 ## 21. Alternatives considered
 
@@ -1688,54 +1588,50 @@ Genuine unknowns, to be measured or inventoried rather than decided.
 
 The decisive property is that **one binary serves both the MQTT edge and the internal fabric.** The
 design needs an MQTT front door for external clients _and_ durable work queues for the validation
-sidecar and per-target plugin adapters. NATS with JetStream is both. Every dedicated MQTT broker is
-only the front door, so it would have to be paired with Kafka, Redis or NATS anyway for the internal
-queues — three nodes, two distributed systems, two failure models, two sets of runbooks. Subject-based
-ACLs, cluster replication and the queue substrate all being one hot-reloadable config is the second
-reason; the third is that the team already runs NATS elsewhere.
+sidecar and per-target plugin adapters. Every dedicated MQTT broker is only the front door, so it
+would have to be paired with Kafka, Redis or NATS anyway — two distributed systems, two failure
+models, two sets of runbooks. Secondary reasons: subject-based ACLs, cluster replication and the
+queue substrate are all one hot-reloadable config, and the team already runs NATS elsewhere.
 
-The costs are real: **MQTT 3.1.1 only, no MQTT 5** — no shared subscriptions, no per-message expiry,
-no reason codes on failure, which is what pushes plugin fan-out onto NATS-native subjects. JetStream
-becomes mandatory rather than optional. And the MQTT gateway is a smaller feature surface than a
+The costs: **MQTT 3.1.1 only, no MQTT 5** — no shared subscriptions, no per-message expiry, no reason
+codes on failure, which is what pushes plugin fan-out onto NATS-native subjects. JetStream becomes
+mandatory rather than optional. And the MQTT gateway is a smaller feature surface than a
 purpose-built broker's implementation.
 
 - **EMQX** — the strongest counter-candidate: MQTT 5, shared subscriptions, a good dashboard,
-  clustering without RAFT quorum arithmetic. Rejected because it solves only the edge, leaving the
-  internal queues unsolved, and because it adds Erlang/OTP operational knowledge plus
-  open-source-versus-enterprise feature gating to a three-person operation.
+  clustering without RAFT quorum arithmetic. Rejected because it solves only the edge, and because it
+  adds Erlang/OTP operational knowledge plus open-source-versus-enterprise feature gating to a
+  three-person operation.
 - **HiveMQ** — excellent MQTT and clustering, but the features that matter are commercial, and it
   brings JVM operations.
-- **Mosquitto** — smallest and simplest, genuinely fine as a single node. Rejected on redundancy:
-  bridging is not clustering, and there is no work-queue story at all.
+- **Mosquitto** — smallest and simplest, fine as a single node. Rejected on redundancy: bridging is
+  not clustering, and there is no work-queue story at all.
 - **Keep Pub/Sub, reach it over a VPN** — retains the GCP dependency sovereignty is meant to remove,
-  still requires every broadcaster to run a push endpoint or hold pull credentials, and leaves
-  broadcast-relevant control bits on a SaaS. It also does not fix the firewall problem nearly as well
-  as an outbound MQTT connection does.
+  still requires every broadcaster to run a push endpoint or hold pull credentials, leaves
+  broadcast-relevant control bits on a SaaS, and does not fix the firewall problem as well as an
+  outbound MQTT connection.
 
 ### 21.2 Transport: MQTT at the edge, NATS-native internally
 
-The obvious question is why external clients do not simply speak NATS, which is the better protocol,
-needs no gateway translation, makes the MQTT 5 gap moot, and supports proper nonce-signed JWT
-authentication rather than bearer tokens.
-
-The answer is the client population, not the technology. **Playout systems, encoders and vendor
-appliances speak MQTT** — it is what integrators already have, and in the embedded corner of that
-market it is the only realistic option. "MQTT is an open standard, pick any client library" is also a
-materially easier conversation to have across nine broadcasters than "install our broker's client".
+NATS is the better protocol — no gateway translation, no MQTT 5 gap, and proper nonce-signed JWT
+authentication rather than bearer tokens. The reason external clients speak MQTT is the client
+population: **playout systems, encoders and vendor appliances speak MQTT**, and in the embedded
+corner of that market it is the only realistic option. "MQTT is an open standard, pick any client
+library" is also an easier conversation across nine broadcasters than "install our broker's client".
 NATS-native access stays available for anyone who wants it, and every internal component uses it.
 
 ### 21.3 Validation: zod, not valibot
 
-Valibot was raised on #824 and the case for it is real — it is substantially smaller and tree-shakes
-better. **[Standard Schema](https://standardschema.dev) means the Hono validation middleware accepts
-either**, so this is a reversible decision rather than a lock-in.
+Valibot was raised on #824 and is substantially smaller with better tree-shaking.
+**[Standard Schema](https://standardschema.dev) means the Hono validation middleware accepts
+either**, so this is reversible rather than a lock-in.
 
-Zod stays, for two reasons. **Richer history and solid operational experience with it**: the edge
-cases are known, the failure modes are familiar, and that is worth more on broadcast-relevant
-infrastructure than a dependency-size win. And zod 4 is already load-bearing here — `z.toJSONSchema`
-generates `openapi.json`, which is what the published docs and the client contract are built from.
-Bundle size, valibot's main advantage, is close to irrelevant for a server-side workload in a
-container. Revisit only if a concrete zod limitation shows up, not on size grounds.
+Zod stays for two reasons. **Richer history and solid operational experience with it** — the edge
+cases and failure modes are known, which is worth more on broadcast-relevant infrastructure than a
+dependency-size win. And zod 4 is already load-bearing: `z.toJSONSchema` generates `openapi.json`,
+which is what the published docs and the client contract are built from. Bundle size, valibot's main
+advantage, is irrelevant for a server-side workload in a container. Revisit only on a concrete zod
+limitation, not on size grounds.
 
 ### 21.4 Auth: static credentials, not the JWT/operator model
 
@@ -1743,12 +1639,11 @@ Covered in [§7.1](#71-why-not-jwt).
 
 ### 21.5 Hosting: NixOS + K3S
 
-Alternatives were plain Debian with docker compose, or full Kubernetes. NixOS earns its place through
-reproducible images and atomic rollback, which is what makes offline operation and "no manual prod
-edits" true rather than aspirational. K3S is the smallest thing that still provides declarative
-workloads, rolling updates with drain semantics, and manifests reviewed in the repo. Full Kubernetes
-is unjustifiable overhead on three nodes; compose would work but loses the drain and rolling-update
-semantics that make the maintenance story window-free.
+Alternatives were plain Debian with docker compose, or full Kubernetes. NixOS gives reproducible
+images and atomic rollback, which is what makes offline operation and "no manual prod edits"
+enforceable. K3S is the smallest thing that still provides declarative workloads, rolling updates
+with drain semantics, and manifests reviewed in the repo. Full Kubernetes is overhead on three nodes;
+compose loses the drain and rolling-update semantics that make maintenance window-free.
 
 ### 21.6 Node count: three
 
@@ -1756,8 +1651,8 @@ Two was the original proposal and is rejected outright — JetStream quorum is `
 cluster tolerates _zero_ failures for anything JetStream-backed, making it strictly less available
 than a single node while costing twice as much. Five survives two simultaneous losses, but needs two
 more genuine failure domains and doubles the operational surface for a workload running four orders
-of magnitude below capacity. Three is the smallest count that tolerates one failure; the constraint is
-quorum, not throughput.
+of magnitude below capacity. Three is the smallest count that tolerates one failure; the constraint
+is quorum, not throughput.
 
 ### 21.7 Decided in place
 
