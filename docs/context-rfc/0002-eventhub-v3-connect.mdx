@@ -136,66 +136,33 @@ During migration, GCP `eventhub-ingest` keeps accepting HTTPS posts and publishe
 `inbox/{institutionId}` on a minimal MQTT broker, which `eventhub-bridge` relays into the CN.
 
 ```mermaid
-flowchart TB
-    subgraph GCP["GCP — legacy (best-effort)"]
-        EI["eventhub-ingest<br/>HTTPS auth + publish"]
-        MQ["minimal MQTT broker<br/>inbox/{institutionId}"]
-        PS["Cloud Pub/Sub<br/>fan-out ends at step 13"]
+flowchart LR
+    P1["broadcaster<br/>playout systems"]
+
+    subgraph GCP["GCP — legacy, best-effort"]
+        EI["eventhub-ingest<br/>HTTPS auth"]
+        MQ["MQTT broker"]
+        PS["Cloud Pub/Sub<br/>until step 13"]
         EI --> MQ
         EI -.-> PS
     end
 
-    subgraph CN["ARD CN — SWR"]
-        subgraph Publishers
-            P1[broadcaster playout systems]
-        end
-
-        subgraph BAD["zone: BAD — primary"]
-            NB["NATS + JetStream<br/>MQTT gateway"]
-            CB["eventhub-connect<br/>sidecar ×N · adapters ×N · UI ×N<br/>eventhub-bridge ×1 · beszel hub ×1"]
-        end
-
-        subgraph STG["zone: STG"]
-            NS["NATS + JetStream<br/>MQTT gateway"]
-            CS["eventhub-connect<br/>sidecar ×N · adapters ×N · UI ×N"]
-        end
-
-        subgraph MNZ["zone: MNZ"]
-            NZ["NATS + JetStream<br/>MQTT gateway"]
-            CZ["eventhub-connect<br/>sidecar ×N · adapters ×N · UI ×N"]
-        end
-
-        NB <-->|RAFT R3| NS
-        NS <-->|RAFT R3| NZ
-        NZ <-->|RAFT R3| NB
+    subgraph CN["ARD CN — SWR · zones BAD, STG, MNZ"]
+        NATS["NATS + JetStream<br/>MQTT gateway<br/>RAFT across the three zones"]
+        EC["eventhub-connect<br/>validation · plugin routing · operator UI"]
+        BR["eventhub-bridge"]
+        NATS <-->|"validate · fan out"| EC
+        BR -->|"inbox/"| NATS
     end
 
-    subgraph EXT["external targets — outbound HTTPS"]
-        T1["Radioplayer · Xperi DTS<br/>hr encoding"]
-    end
+    T1["plugin targets<br/>Radioplayer · Xperi DTS"]
+    S1["subscribers<br/>ARD Sounds · broadcaster apps · dashboards"]
 
-    subgraph SUB["external subscribers — MQTT"]
-        S1["ARD Sounds / POC<br/>broadcaster apps · dashboards"]
-    end
-
-    P1 -- MQTT --> NB
-    P1 -- MQTT --> NS
-    P1 -- MQTT --> NZ
-    P1 -. HTTPS .-> EI
-
-    NB <-->|validate · consume| CB
-    NS <-->|validate · consume| CS
-    NZ <-->|validate · consume| CZ
-
-    MQ -->|relay to inbox/| CB
-
-    CB --> T1
-    CS --> T1
-    CZ --> T1
-
-    NB -- MQTT --> S1
-    NS -- MQTT --> S1
-    NZ -- MQTT --> S1
+    P1 -->|MQTT| NATS
+    P1 -.->|HTTPS| EI
+    MQ --> BR
+    EC -->|outbound HTTPS| T1
+    NATS -->|MQTT| S1
 ```
 
 ## 5. Services and code structure
