@@ -20,7 +20,7 @@ sidebar:
 v3 ships **`eventhub-connect`** as a redundant MQTT ingest, validation and plugin-publishing
 platform inside the ARD CN, deployed as **three nodes across three SWR zones**, with a UI for
 operators. The existing **`eventhub-ingest`** in GCP keeps serving broadcasters who have not
-migrated, mirroring their events to a minimal MQTT broker that **`eventhub-bridge`** relays into the
+migrated, mirroring their events to a minimal NanoMQ broker that **`eventhub-bridge`** relays into the
 CN. Once every broadcaster is on MQTT-in-CN, the GCP side is decommissioned (expected by mid to end of 2027).
 
 _RFC 0001_ describes what runs today. This document states what changes, what it costs, and what is
@@ -134,7 +134,7 @@ it.**
 - The **cluster-internal observability stack** ([§15](#15-observability)).
 
 During migration, GCP `eventhub-ingest` keeps accepting HTTPS posts and publishes raw events to
-`inbox/{institutionId}` on a minimal MQTT broker, which `eventhub-bridge` relays into the CN.
+`inbox/{institutionId}` on a **NanoMQ** container, which `eventhub-bridge` relays into the CN.
 
 **The broker is only reachable from inside the ARD CN, and the broadcasters are already there.** A
 publisher's playout system sits in the CN but in its own house's network, not in SWR's — SWR hosts the
@@ -145,7 +145,7 @@ project and the external plugin targets.
 flowchart LR
     subgraph GCP["GCP — legacy, best-effort"]
         EI["eventhub-ingest<br/>HTTPS auth"]
-        MQ["MQTT broker"]
+        MQ["NanoMQ<br/>MQTT broker"]
         PS["Cloud Pub/Sub"]
         EI --> MQ
         EI -.-> PS
@@ -188,9 +188,9 @@ flowchart LR
 
 - **Built** — three services, all TypeScript, all in this repo: `eventhub-connect`,
   `eventhub-bridge`, `eventhub-ingest`.
-- **Deployed** — NATS and the whole observability stack. Upstream container images, configured by
-  file, never forked and never wrapped. **We write no broker code.** NATS is deployed exactly like
-  Vector or VictoriaMetrics: pull the official image, mount a config, run it.
+- **Deployed** — NATS, the GCP-side NanoMQ, and the whole observability stack. Upstream container
+  images, configured by file, never forked and never wrapped. **We write no broker code.** NATS is
+  deployed exactly like Vector or VictoriaMetrics: pull the official image, mount a config, run it.
 
 ### 5.2 One responsibility per service
 
@@ -1162,7 +1162,7 @@ block on it and does not need to correlate every publish with a response.
   enough identity to locate the offending event.
 - **Correlation is by `playlistItemId`** for track events, which publishers already send and which is
   unique per item. `radio.control` and `radio.data` carry no `playlistItemId`; for those, feedback
-  references the target subject plus the event's `time` / `start`.
+  references the target subject plus the event's `start`.
 - Feedback messages are retained per institution, so a client that connects after the fact still
   sees the most recent problem. A multi-institution client subscribes to each of its `feedback/`
   topics and gets the rejection on the one the event was published under.
@@ -1229,7 +1229,7 @@ Control bits — TA, Regio, and whatever comes next.
 ```json
 {
 	"event": "de.ard.eventhub.v1.radio.control",
-	"time": "2026-05-27T16:03:00+01:00",
+	"start": "2026-05-27T16:03:00+01:00",
 	"validUntil": "2026-05-27T16:18:00+01:00",
 	"name": "TA",
 	"state": true,
@@ -1246,7 +1246,7 @@ Control bits — TA, Regio, and whatever comes next.
 | Field        | Type    | Required | Notes                                                                                                                         |
 | ------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | `event`      | string  | –        | must match the target event type if set                                                                                       |
-| `time`       | ISO8601 | ✓        | when the source changed the state                                                                                             |
+| `start`      | ISO8601 | ✓        | when the source changed the state.                                                                                            |
 | `validUntil` | ISO8601 | –        | backstop TTL. receivers drop the state when it passes. omit for states with no natural expiry                                 |
 | `name`       | string  | ✓        | control element identifier — `TA`, `TP`, `EON`, `Regio`, … **not an enum**, so future control functions need no schema change |
 | `state`      | boolean | ✓        | new state                                                                                                                     |
@@ -1298,13 +1298,49 @@ Radiotext, dynamic label, and the RT+/DL+ plus services, bundled into one cyclic
 **`cycle` and `id` are numbers, not strings** — the discussion draft quoted them but described them
 as integers.
 
-**`id` is validated against a curated allowlist** in the zod schema, derived from the RT+ content
-type table, to reject typos and unmapped content types before they reach receivers that route on the
-numeric value.
+**`id` is validated against an allowlist** in the zod schema ([§13.3](#133-rt-content-types)), to
+reject typos and unmapped content types before they reach receivers that route on the numeric value.
+**The allowlist applies only when `type` is `rtdlplus`** — for `radiotext` and `dynlabel` the `id` is
+always `0` and is not an RT+ code, so validation is conditional on `type` rather than a flat check on
+the field.
 
 Receivers walk `data[]` and filter on `id`, taking what they can render and ignoring the rest — as
 UECP consumers already behave, minus the fields (CT and similar) that only existed because of source
 configuration.
+
+### 13.3 RT+ content types
+
+The `rtdlplus` allowlist. 64 six-bit codes, so **anything outside 0–63 is invalid by construction**.
+Normative source: IEC 62106-6 Table A.2; this reproduction agrees with the
+[RDS Forum class list](https://pira.cz/rds/rtpclass.pdf).
+
+- **Dummy** — `0` DUMMY_CLASS
+- **Item** — `1` ITEM.TITLE, `2` ITEM.ALBUM, `3` ITEM.TRACKNUMBER, `4` ITEM.ARTIST,
+  `5` ITEM.COMPOSITION, `6` ITEM.MOVEMENT, `7` ITEM.CONDUCTOR, `8` ITEM.COMPOSER, `9` ITEM.BAND,
+  `10` ITEM.COMMENT, `11` ITEM.GENRE
+- **Info** — `12` INFO.NEWS, `13` INFO.NEWS.LOCAL, `14` INFO.STOCKMARKET, `15` INFO.SPORT,
+  `16` INFO.LOTTERY, `17` INFO.HOROSCOPE, `18` INFO.DAILY_DIVERSION, `19` INFO.HEALTH,
+  `20` INFO.EVENT, `21` INFO.SZENE, `22` INFO.CINEMA, `23` INFO.TV, `24` INFO.DATE_TIME,
+  `25` INFO.WEATHER, `26` INFO.TRAFFIC, `27` INFO.ALARM, `28` INFO.ADVERTISEMENT, `29` INFO.URL,
+  `30` INFO.OTHER
+- **Programme** — `31` STATIONNAME.SHORT, `32` STATIONNAME.LONG, `33` PROGRAMME.NOW,
+  `34` PROGRAMME.NEXT, `35` PROGRAMME.PART, `36` PROGRAMME.HOST, `37` PROGRAMME.EDITORIAL_STAFF,
+  `38` PROGRAMME.FREQUENCY, `39` PROGRAMME.HOMEPAGE, `40` PROGRAMME.SUBCHANNEL
+- **Interactivity** — `41` PHONE.HOTLINE, `42` PHONE.STUDIO, `43` PHONE.OTHER, `44` SMS.STUDIO,
+  `45` SMS.OTHER, `46` EMAIL.HOTLINE, `47` EMAIL.STUDIO, `48` EMAIL.OTHER, `49` MMS.OTHER, `50` CHAT,
+  `51` CHAT.CENTER, `52` VOTE.QUESTION, `53` VOTE.CENTER
+- **Reserved** — `54`, `55`. **Rejected.** Undefined in the standard, so a value here is a bug.
+- **Private** — `56`, `57`, `58`. **Accepted.** Provider-defined by design, so we cannot judge them;
+  they carry no portable meaning, and a receiver without a template for the sending house will
+  ignore them.
+- **Descriptor** — `59` PLACE, `60` APPOINTMENT, `61` IDENTIFIER, `62` PURCHASE, `63` GET_DATA
+
+`INFO.SZENE` and the `CENTER` spellings are the standard's own, kept verbatim so the constant names
+match the source table rather than being quietly Anglicized.
+
+Practically: **accept `0`–`53` and `56`–`63`, reject `54` and `55`.** The rejected pair is the whole
+mechanism — it is not much of a gate, but the alternative is that a typo'd code reaches receivers
+that route on the number and renders as the wrong field.
 
 ## 14. Operator UI
 
@@ -1713,13 +1749,17 @@ step 5 is ordered by dependency.
    API with OpenAPI and docs. Gets real payloads from real encoders in front of the schema before any
    infrastructure exists, and unblocks the ZI replacement conversation. Derive the URN-only variant
    ([§12.4](#124-identifiers)) from the same definitions here.
-2. **MQTT in GCP.** A minimal broker, with `eventhub-ingest` publishing every event to
-   `inbox/{institutionId}` **alongside** its existing Pub/Sub fan-out. Nothing consumes it yet; it
-   becomes the CN's source of real test data at step 8.
+2. **MQTT in GCP.** **NanoMQ in a Docker container**, with `eventhub-ingest` publishing every event
+   to `inbox/{institutionId}` **alongside** its existing Pub/Sub fan-out. Nothing consumes it yet; it
+   becomes the CN's source of real test data at step 8. **No persistence and no retained messages** —
+   it is a hop, not a store, so events published while the bridge is down are lost by design and
+   Pub/Sub remains the path of record until step 17.
 3. **Identifier normalization in ingest.** Emit URN-only `services[]` with `institutionId` filled in
    ([§12.4](#124-identifiers)), so bridged events are valid on arrival.
-4. **Plugin publishing feature flag in ingest.** A per-target switch, built before it is needed, so
-   step 16 is a toggle rather than a deploy.
+4. **Plugin publishing feature flag in ingest.** A per-target switch held in **Datastore, read at
+   runtime with a short cache** — step 16 flips a target mid-migration and must not need a deploy to
+   do it, or to undo it. Distinct from the existing per-event `plugins[].isDeactivated`, which is a
+   publisher's choice about one event; this one decides whether GCP dispatches that target at all.
 5. **VM infrastructure.** Three VMs — BAD, STG, MNZ — on NixOS with K3S, a local ZOT registry and
    storage sized for JetStream. **Measure inter-zone RTT while the nodes are fresh**; it is the input
    the [latency budget](#92-the-220-ms-budget) depends on. **File both requests in
@@ -1960,6 +2000,31 @@ images and atomic rollback, which is what makes offline operation and "no manual
 enforceable. K3S is the smallest thing that still provides declarative workloads, rolling updates
 with drain semantics, and manifests reviewed in the repo. Full Kubernetes is overhead on three nodes;
 compose loses the drain and rolling-update semantics that make maintenance window-free.
+
+**Talos Linux with Pulumi, provided by SWR, is the strongest alternative and the one most likely to
+be revisited.** Talos would enforce the same goals harder — no shell, no SSH, no package manager and
+A/B image upgrades turn "no manual prod edits" from a policy into a property — and Pulumi in
+TypeScript fits this repo better than a second language almost nobody here writes. The real draw is
+organizational rather than technical: if SWR operates the platform, OS patching and control-plane
+upgrades leave this team, and the SOC handoff at step 18 inherits infrastructure the organization
+already supports, which is an easier case to make for a broadcast-relevant system than a flake
+maintained in this repo.
+
+**Decision: NixOS + K3S, because the team has more hands-on experience with it**, and operator
+familiarity is the specific risk [§16](#16-hosting-and-operations) names — the stack has to be
+debuggable at 03:00, and the one we already know beats the one that is theoretically stricter. The
+learning-curve caveat in §16 is NixOS measured against a conventional distribution, not against
+Talos; against Talos, NixOS is the known quantity.
+
+Three questions would need answers before switching, in order of severity: whether SWR's Talos
+offering can place nodes in three genuine zones, since single-site placement would break the premise
+of this RFC rather than its implementation; whether JetStream can get node-local disk instead of
+network-attached volumes, given the RAFT commits inside the
+[latency budget](#92-the-220-ms-budget) and the correlated-storage risk that shared backing would add
+to [§17.2](#172-correlated-risk-losing-all-three-nodes); and where a host-level metrics agent runs on
+a container-only OS ([§15](#15-observability), still open under
+[Q6](#196-q6--observability-stack)). If "provided" turns out to mean a handed-over template rather
+than an operated platform, the organizational argument disappears and this stays settled.
 
 ### 21.6 Node count: three
 
