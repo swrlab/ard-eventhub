@@ -90,9 +90,15 @@ license:
 
 # regenerate openapi.json from Zod schemas
 [group('LOCAL')]
-openapi:
+openapi: asyncapi
 	bun run ./src/openapi/generate.ts
 	bun x oxfmt openapi.json
+
+# regenerate asyncapi.json from Zod schemas (Eventhub Connect / MQTT)
+[group('LOCAL')]
+asyncapi:
+	bun run ./src/asyncapi/generate.ts
+	bun x oxfmt asyncapi.json
 
 # serve the documentation (dev server with hot reload)
 [group('LOCAL')]

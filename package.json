@@ -78,6 +78,7 @@
 			"blume.config.ts!",
 			"src/cli/*.ts",
 			"src/openapi/generate.ts",
+			"src/asyncapi/generate.ts",
 			"src/**/*.test.ts"
 		],
 		"ignoreDependencies": [

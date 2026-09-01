@@ -1,0 +1,479 @@
+{
+	"asyncapi": "3.0.0",
+	"info": {
+		"title": "ARD Eventhub Connect",
+		"description": "MQTT event contract for Eventhub Connect. Publishers send to `inbox/{institutionId}`; subscribers read validated events on `radio/{livestreamId}/…`. These types are **not** accepted on the HTTPS `POST /events` API. The broker is not deployed yet — host and credentials are placeholders.",
+		"termsOfService": "https://www.ard.de",
+		"contact": {
+			"email": "lab@swr.de"
+		},
+		"license": {
+			"name": "European Union Public License 1.2",
+			"url": "https://spdx.org/licenses/EUPL-1.2.html"
+		},
+		"version": "3.0.0-beta.1",
+		"externalDocs": {
+			"description": "Eventhub v3 Connect RFC §13",
+			"url": "https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#13-new-event-schemas"
+		}
+	},
+	"defaultContentType": "application/json",
+	"servers": {
+		"connect": {
+			"host": "connect.eventhub.invalid",
+			"protocol": "mqtt",
+			"protocolVersion": "5.0",
+			"description": "Placeholder MQTT endpoint. Eventhub Connect is not deployed; do not point clients here yet.",
+			"security": [
+				{
+					"mqttUserPassword": []
+				}
+			]
+		}
+	},
+	"channels": {
+		"inboxInstitution": {
+			"address": "inbox/{institutionId}",
+			"title": "Institution inbox",
+			"description": "Publisher write path. Send `radio.control` and `radio.data` here. The sidecar validates the payload and republishes onto `radio/{livestreamId}/…`.",
+			"parameters": {
+				"institutionId": {
+					"description": "Owning institution URN (`urn:ard:institution:…`). Must match the livestream.",
+					"examples": ["urn:ard:institution:a3004ff924ece1a2"]
+				}
+			},
+			"messages": {
+				"radioControl": {
+					"$ref": "#/components/messages/radioControl"
+				},
+				"radioData": {
+					"$ref": "#/components/messages/radioData"
+				}
+			}
+		},
+		"radioLivestreamControl": {
+			"address": "radio/{livestreamId}/control",
+			"title": "Validated radio.control",
+			"description": "Sidecar output. Retained so a late joiner sees the current control bits. QoS 1, durable.",
+			"parameters": {
+				"livestreamId": {
+					"description": "Livestream URN (`urn:ard:permanent-livestream:…` or `urn:ard:event-livestream:…`)",
+					"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"]
+				}
+			},
+			"messages": {
+				"radioControl": {
+					"$ref": "#/components/messages/radioControl"
+				}
+			}
+		},
+		"radioLivestreamData": {
+			"address": "radio/{livestreamId}/data",
+			"title": "Validated radio.data",
+			"description": "Sidecar output. Cyclic radiotext / dynamic label / RT+. Retained as the latest cycle. QoS 1.",
+			"parameters": {
+				"livestreamId": {
+					"description": "Livestream URN (`urn:ard:permanent-livestream:…` or `urn:ard:event-livestream:…`)",
+					"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"]
+				}
+			},
+			"messages": {
+				"radioData": {
+					"$ref": "#/components/messages/radioData"
+				}
+			}
+		}
+	},
+	"operations": {
+		"sendRadioControl": {
+			"action": "send",
+			"title": "Publish radio.control",
+			"description": "Publish a control-bit change to the institution inbox. Not accepted on HTTPS `POST /events`.",
+			"channel": {
+				"$ref": "#/channels/inboxInstitution"
+			},
+			"messages": [
+				{
+					"$ref": "#/channels/inboxInstitution/messages/radioControl"
+				}
+			],
+			"tags": [
+				{
+					"name": "publish"
+				}
+			],
+			"bindings": {
+				"mqtt": {
+					"qos": 1,
+					"retain": false
+				}
+			}
+		},
+		"sendRadioData": {
+			"action": "send",
+			"title": "Publish radio.data",
+			"description": "Publish a cyclic radiotext / RT+ bundle to the institution inbox. Not accepted on HTTPS `POST /events`.",
+			"channel": {
+				"$ref": "#/channels/inboxInstitution"
+			},
+			"messages": [
+				{
+					"$ref": "#/channels/inboxInstitution/messages/radioData"
+				}
+			],
+			"tags": [
+				{
+					"name": "publish"
+				}
+			],
+			"bindings": {
+				"mqtt": {
+					"qos": 1,
+					"retain": false
+				}
+			}
+		},
+		"receiveRadioControl": {
+			"action": "receive",
+			"title": "Subscribe radio.control",
+			"description": "Validated control bits for one livestream. Retained; QoS 1.",
+			"channel": {
+				"$ref": "#/channels/radioLivestreamControl"
+			},
+			"messages": [
+				{
+					"$ref": "#/channels/radioLivestreamControl/messages/radioControl"
+				}
+			],
+			"tags": [
+				{
+					"name": "subscribe"
+				}
+			],
+			"bindings": {
+				"mqtt": {
+					"qos": 1,
+					"retain": true
+				}
+			}
+		},
+		"receiveRadioData": {
+			"action": "receive",
+			"title": "Subscribe radio.data",
+			"description": "Validated radiotext / dynamic label / RT+ for one livestream. Retained latest cycle; QoS 1.",
+			"channel": {
+				"$ref": "#/channels/radioLivestreamData"
+			},
+			"messages": [
+				{
+					"$ref": "#/channels/radioLivestreamData/messages/radioData"
+				}
+			],
+			"tags": [
+				{
+					"name": "subscribe"
+				}
+			],
+			"bindings": {
+				"mqtt": {
+					"qos": 1,
+					"retain": true
+				}
+			}
+		}
+	},
+	"components": {
+		"securitySchemes": {
+			"mqttUserPassword": {
+				"type": "userPassword",
+				"description": "MQTT username and password issued for Eventhub Connect. Replaces the HTTPS Bearer token."
+			}
+		},
+		"messages": {
+			"radioControl": {
+				"name": "de.ard.eventhub.v1.radio.control",
+				"title": "radio.control",
+				"summary": "Control bits (TA, TP, EON, Regio, …). `name` is a free string, not an enum.",
+				"contentType": "application/json",
+				"payload": {
+					"$ref": "#/components/schemas/eventV1RadioControlPostBody"
+				}
+			},
+			"radioData": {
+				"name": "de.ard.eventhub.v1.radio.data",
+				"title": "radio.data",
+				"summary": "Cyclic radiotext, dynamic label, and RT+/DL+ bundle.",
+				"contentType": "application/json",
+				"payload": {
+					"$ref": "#/components/schemas/eventV1RadioDataPostBody"
+				}
+			}
+		},
+		"schemas": {
+			"servicesUrn": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"pattern": "^urn:ard:(permanent-livestream|event-livestream):[a-z0-9]+$",
+						"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+						"description": "Pre-encoded ARD livestream URN"
+					},
+					"publisherId": {
+						"type": "string",
+						"pattern": "^urn:ard:publisher:[a-z0-9]+$",
+						"examples": ["urn:ard:publisher:75dbb3dace15f610"],
+						"description": "Pre-encoded ARD publisher URN"
+					},
+					"institutionId": {
+						"type": "string",
+						"pattern": "^urn:ard:institution:[a-z0-9]+$",
+						"examples": ["urn:ard:institution:a3004ff924ece1a2"],
+						"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+					},
+					"externalId": {
+						"deprecated": true,
+						"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+						"examples": ["crid://swr.de/123450"],
+						"type": "string"
+					},
+					"type": {
+						"deprecated": true,
+						"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+						"examples": ["PermanentLivestream"],
+						"type": "string",
+						"enum": ["EventLivestream", "PermanentLivestream"]
+					}
+				},
+				"required": ["id", "publisherId", "institutionId"],
+				"additionalProperties": false
+			},
+			"eventV1RadioControlPostBody": {
+				"type": "object",
+				"properties": {
+					"event": {
+						"description": "If set, it needs to match the published event class",
+						"examples": ["de.ard.eventhub.v1.radio.control"],
+						"type": "string",
+						"const": "de.ard.eventhub.v1.radio.control"
+					},
+					"start": {
+						"type": "string",
+						"description": "ISO8601 compliant timestamp",
+						"examples": ["2020-01-19T06:00:00+01:00"]
+					},
+					"validUntil": {
+						"description": "Backstop TTL. Receivers drop the state when it passes. Omit for states with no natural expiry.",
+						"type": "string",
+						"examples": ["2020-01-19T06:00:00+01:00"]
+					},
+					"name": {
+						"type": "string",
+						"description": "Control element identifier (TA, TP, EON, Regio, …). Not an enum — new functions need no release.",
+						"examples": ["TA"]
+					},
+					"state": {
+						"type": "boolean",
+						"description": "New control state",
+						"examples": [true]
+					},
+					"services": {
+						"type": "array",
+						"items": {
+							"$ref": "#/definitions/servicesUrn"
+						},
+						"description": "URN-only service identifiers (Connect / MQTT)"
+					}
+				},
+				"required": ["start", "name", "state", "services"],
+				"additionalProperties": false,
+				"description": "Eventhub Connect radio.control event. Not accepted on the HTTPS POST /events API.",
+				"definitions": {
+					"servicesUrn": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string",
+								"pattern": "^urn:ard:(permanent-livestream|event-livestream):[a-z0-9]+$",
+								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"description": "Pre-encoded ARD livestream URN"
+							},
+							"publisherId": {
+								"type": "string",
+								"pattern": "^urn:ard:publisher:[a-z0-9]+$",
+								"examples": ["urn:ard:publisher:75dbb3dace15f610"],
+								"description": "Pre-encoded ARD publisher URN"
+							},
+							"institutionId": {
+								"type": "string",
+								"pattern": "^urn:ard:institution:[a-z0-9]+$",
+								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
+								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+							},
+							"externalId": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["crid://swr.de/123450"],
+								"type": "string"
+							},
+							"type": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["PermanentLivestream"],
+								"type": "string",
+								"enum": ["EventLivestream", "PermanentLivestream"]
+							}
+						},
+						"required": ["id", "publisherId", "institutionId"],
+						"additionalProperties": false
+					}
+				}
+			},
+			"eventV1RadioDataPostBody": {
+				"type": "object",
+				"properties": {
+					"event": {
+						"description": "If set, it needs to match the published event class",
+						"examples": ["de.ard.eventhub.v1.radio.data"],
+						"type": "string",
+						"const": "de.ard.eventhub.v1.radio.data"
+					},
+					"start": {
+						"type": "string",
+						"description": "ISO8601 compliant timestamp",
+						"examples": ["2020-01-19T06:00:00+01:00"]
+					},
+					"cycle": {
+						"type": "integer",
+						"exclusiveMinimum": 0,
+						"maximum": 9007199254740991,
+						"description": "Seconds between repeats from the source",
+						"examples": [8]
+					},
+					"data": {
+						"type": "array",
+						"items": {
+							"oneOf": [
+								{
+									"type": "object",
+									"properties": {
+										"type": {
+											"type": "string",
+											"const": "radiotext"
+										},
+										"id": {
+											"type": "number",
+											"const": 0
+										},
+										"value": {
+											"type": "string"
+										},
+										"description": {
+											"type": "string"
+										}
+									},
+									"required": ["type", "id", "value"],
+									"additionalProperties": false
+								},
+								{
+									"type": "object",
+									"properties": {
+										"type": {
+											"type": "string",
+											"const": "dynlabel"
+										},
+										"id": {
+											"type": "number",
+											"const": 0
+										},
+										"value": {
+											"type": "string"
+										},
+										"description": {
+											"type": "string"
+										}
+									},
+									"required": ["type", "id", "value"],
+									"additionalProperties": false
+								},
+								{
+									"type": "object",
+									"properties": {
+										"type": {
+											"type": "string",
+											"const": "rtdlplus"
+										},
+										"id": {
+											"type": "integer",
+											"minimum": 0,
+											"maximum": 63
+										},
+										"value": {
+											"type": "string"
+										},
+										"description": {
+											"type": "string"
+										}
+									},
+									"required": ["type", "id", "value"],
+									"additionalProperties": false
+								}
+							]
+						},
+						"description": "Radiotext, dynamic label, and RT+/DL+ fields. Any combination, any length."
+					},
+					"services": {
+						"type": "array",
+						"items": {
+							"$ref": "#/definitions/servicesUrn"
+						},
+						"description": "URN-only service identifiers (Connect / MQTT)"
+					}
+				},
+				"required": ["start", "cycle", "data", "services"],
+				"additionalProperties": false,
+				"description": "Eventhub Connect radio.data event. Not accepted on the HTTPS POST /events API.",
+				"definitions": {
+					"servicesUrn": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string",
+								"pattern": "^urn:ard:(permanent-livestream|event-livestream):[a-z0-9]+$",
+								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"description": "Pre-encoded ARD livestream URN"
+							},
+							"publisherId": {
+								"type": "string",
+								"pattern": "^urn:ard:publisher:[a-z0-9]+$",
+								"examples": ["urn:ard:publisher:75dbb3dace15f610"],
+								"description": "Pre-encoded ARD publisher URN"
+							},
+							"institutionId": {
+								"type": "string",
+								"pattern": "^urn:ard:institution:[a-z0-9]+$",
+								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
+								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+							},
+							"externalId": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["crid://swr.de/123450"],
+								"type": "string"
+							},
+							"type": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["PermanentLivestream"],
+								"type": "string",
+								"enum": ["EventLivestream", "PermanentLivestream"]
+							}
+						},
+						"required": ["id", "publisherId", "institutionId"],
+						"additionalProperties": false
+					}
+				}
+			}
+		}
+	}
+}

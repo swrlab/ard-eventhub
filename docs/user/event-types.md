@@ -21,7 +21,7 @@ Ein Paar aus `next` und `playing` Events sollte eine Referenz zueinander haben (
 
 Die folgenden Event-Klassen sind für **Eventhub Connect** vorgesehen und werden **nicht** über `POST /events/{eventName}` angenommen. Ein Request mit diesen Namen antwortet mit HTTP 400. Sie gelten erst auf dem künftigen MQTT-Pfad, mit URN-only `services[]` (`id`, `publisherId` und `institutionId` als `urn:ard:…`). Beide Klassen nutzen `start` (ISO8601), nicht `time`.
 
-Die vollständige Spezifikation steht im [Eventhub v3 Connect RFC](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#13-new-event-schemas).
+Die vollständige Spezifikation steht im [Eventhub v3 Connect RFC](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#13-new-event-schemas). MQTT-Kanäle werden in der [Events-Referenz](/events) (AsyncAPI) dargestellt.
 
 ## `de.ard.eventhub.v1.radio.control`
 

@@ -21,4 +21,4 @@ Nach Schema- oder Path-Änderungen regenerieren:
 just openapi
 ```
 
-Das schreibt `openapi.json` via `z.toJSONSchema(..., { target: 'openapi-3.0' })` und formatiert die Datei.
+Das schreibt `openapi.json` via `z.toJSONSchema(..., { target: 'openapi-3.0' })` und formatiert die Datei. Derselbe Befehl regeneriert auch `asyncapi.json` (siehe [AsyncAPI](./asyncapi)).
