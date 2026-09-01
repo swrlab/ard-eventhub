@@ -38,6 +38,10 @@ export const mqttClient = mqtt.connect(mqttBrokerUrl.trim(), {
 	...loadMqttTlsConnectOptions(),
 })
 
+mqttClient.on('connect', () => {
+	logger.info({ message: 'mqtt connected', source })
+})
+
 mqttClient.on('error', (error) => {
 	logger.warning({ message: 'mqtt error', source, error })
 })
