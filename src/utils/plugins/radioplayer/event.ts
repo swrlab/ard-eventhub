@@ -1,6 +1,6 @@
 import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '../../../schemas/events.ts'
 import { getMs, getMsOffset } from '@frytg/dates'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { defaultHeaders } from '#config'
 import { radioplayerAPIKeys, stage } from '#env'
 // NOTE: Node.js does not support importing .json5 files.

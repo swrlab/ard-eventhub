@@ -7,8 +7,10 @@ on:
     paths:
       - docs/**
       - openapi.json
+      - asyncapi.json
       - src/schemas/**
       - src/openapi/**
+      - src/asyncapi/**
       - blume.config.ts
       - public/**
       - package.json

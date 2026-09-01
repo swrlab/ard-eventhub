@@ -1,6 +1,6 @@
 import type { Context } from 'hono'
 import type { AuthResetBody } from '../../schemas/auth.ts'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { firebaseSendPasswordResetEmail } from '../../utils/firebase/send-password-reset-email.ts'
 import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 import { badRequest as responseBadRequest } from '../../utils/response/bad-request.ts'

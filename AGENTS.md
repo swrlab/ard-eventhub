@@ -20,7 +20,7 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 
 Docs deploy via [`.github/workflows/docs-push.yml`](.github/workflows/docs-push.yml) to GitHub Pages. The repo Pages source must be set to **GitHub Actions** (not “Deploy from a branch”). `cookie@2` is pinned as a devDependency so Astro’s prerender can resolve ESM exports while Express keeps nested `cookie@0.7`.
 
-Regenerate OpenAPI for docs with `just openapi` (Zod schemas → `openapi.json` via `z.toJSONSchema`). **Always run `just openapi` after changing `package.json` version** (or any other field that feeds the OpenAPI `info` block) so `openapi.json` stays in sync.
+Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `openapi.json` via `z.toJSONSchema`; also writes `asyncapi.json`). **Always run `just openapi` after changing `package.json` version** (or any other field that feeds the OpenAPI / AsyncAPI `info` block) so both specs stay in sync. AsyncAPI only: `just asyncapi`.
 
 ## Project Knowledge
 
@@ -29,6 +29,7 @@ Regenerate OpenAPI for docs with `just openapi` (Zod schemas → `openapi.json` 
   - `src/ingest/` – Ingest service (receives events, manages subscriptions)
   - `src/schemas/` – Zod request/response schemas (runtime validation + OpenAPI)
   - `src/openapi/` – OpenAPI document assembly / `openapi.json` generator
+  - `src/asyncapi/` – AsyncAPI document assembly / `asyncapi.json` generator (Eventhub Connect / MQTT)
   - `src/utils/` – Shared utilities (Pub/Sub, Datastore, Firebase, plugins)
   - `cli/` – Command-line utilities
   - `config/` – Configuration files
@@ -64,7 +65,7 @@ Follow SWR Audio Lab engineering principles:
 
 ## Boundaries
 
-- ✅ **Always do:** Write tests for new code, run linter before committing, use English for code/docs, follow existing patterns, run `just openapi` after changing `package.json` version (keeps `openapi.json` in sync)
+- ✅ **Always do:** Write tests for new code, run linter before committing, use English for code/docs, follow existing patterns, run `just openapi` after changing `package.json` version (keeps `openapi.json` and `asyncapi.json` in sync)
 - ⚠️ **Ask first:** Modifying Google Cloud configuration, changing authentication flows, updating dependencies, major architectural changes
 - 🚫 **Never do:** Commit unencrypted secrets or API keys (use Secret Manager), modify `node_modules/` or `bun.lock`, remove failing tests without fixing them, use German in code/comments
 

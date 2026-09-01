@@ -724,104 +724,127 @@
 		},
 		"schemas": {
 			"authLoginBody": {
-				"type": "object",
-				"properties": {
-					"email": {
-						"type": "string",
-						"examples": ["my-email@example.com"]
-					},
-					"password": {
-						"type": "string",
-						"examples": ["my-password"]
+				"$ref": "#/definitions/authLoginBody",
+				"definitions": {
+					"authLoginBody": {
+						"type": "object",
+						"properties": {
+							"email": {
+								"type": "string",
+								"examples": ["my-email@example.com"]
+							},
+							"password": {
+								"type": "string",
+								"examples": ["my-password"]
+							}
+						},
+						"additionalProperties": false
 					}
-				},
-				"additionalProperties": false
+				}
 			},
 			"authRefreshBody": {
-				"type": "object",
-				"properties": {
-					"refreshToken": {
-						"type": "string",
-						"examples": ["abcXYZ..."]
+				"$ref": "#/definitions/authRefreshBody",
+				"definitions": {
+					"authRefreshBody": {
+						"type": "object",
+						"properties": {
+							"refreshToken": {
+								"type": "string",
+								"examples": ["abcXYZ..."]
+							}
+						},
+						"additionalProperties": false
 					}
-				},
-				"additionalProperties": false
+				}
 			},
 			"authResetBody": {
-				"type": "object",
-				"properties": {
-					"email": {
-						"type": "string",
-						"examples": ["my-email@example.com"]
+				"$ref": "#/definitions/authResetBody",
+				"definitions": {
+					"authResetBody": {
+						"type": "object",
+						"properties": {
+							"email": {
+								"type": "string",
+								"examples": ["my-email@example.com"]
+							}
+						},
+						"additionalProperties": false
 					}
-				},
-				"additionalProperties": false
+				}
 			},
 			"authResponse": {
-				"type": "object",
-				"properties": {
-					"expiresIn": {
-						"type": "number",
-						"description": "TTL for the token in seconds",
-						"examples": [3600]
-					},
-					"expires": {
-						"type": "string",
-						"description": "ISO8601 compliant timestamp for the token expiry",
-						"examples": ["2020-01-19T06:00:00+01:00"]
-					},
-					"token": {
-						"type": "string",
-						"description": "ready to use token for API queries",
-						"examples": ["ey..."]
-					},
-					"refreshToken": {
-						"type": "string",
-						"description": "refresh token to be used with `/auth/refresh`/ endpoint",
-						"examples": ["A0..."]
-					},
-					"user": {
+				"$ref": "#/definitions/authResponse",
+				"definitions": {
+					"authResponse": {
 						"type": "object",
-						"properties": {},
-						"additionalProperties": {},
-						"description": "Firebase-type user object obtained by decoding the JWT token"
-					},
-					"trace": {
-						"nullable": true,
-						"deprecated": true,
-						"description": "Always null. Deprecated; may be removed in a future release.",
-						"examples": [null],
-						"type": "string"
+						"properties": {
+							"expiresIn": {
+								"type": "number",
+								"description": "TTL for the token in seconds",
+								"examples": [3600]
+							},
+							"expires": {
+								"type": "string",
+								"description": "ISO8601 compliant timestamp for the token expiry",
+								"examples": ["2020-01-19T06:00:00+01:00"]
+							},
+							"token": {
+								"type": "string",
+								"description": "ready to use token for API queries",
+								"examples": ["ey..."]
+							},
+							"refreshToken": {
+								"type": "string",
+								"description": "refresh token to be used with `/auth/refresh`/ endpoint",
+								"examples": ["A0..."]
+							},
+							"user": {
+								"type": "object",
+								"properties": {},
+								"additionalProperties": {},
+								"description": "Firebase-type user object obtained by decoding the JWT token"
+							},
+							"trace": {
+								"nullable": true,
+								"deprecated": true,
+								"description": "Always null. Deprecated; may be removed in a future release.",
+								"examples": [null],
+								"type": "string"
+							}
+						},
+						"required": ["expiresIn", "expires", "token", "refreshToken", "user", "trace"],
+						"additionalProperties": false
 					}
-				},
-				"required": ["expiresIn", "expires", "token", "refreshToken", "user", "trace"],
-				"additionalProperties": false
+				}
 			},
 			"errorBadRequest": {
-				"type": "object",
-				"properties": {
-					"message": {
-						"type": "string",
-						"examples": ["request.body should have required property 'XYZ'"]
-					},
-					"errors": {
-						"minItems": 1,
-						"type": "array",
-						"items": {
-							"$ref": "#/definitions/openApiErrorItem"
-						}
-					},
-					"trace": {
-						"nullable": true,
-						"deprecated": true,
-						"description": "Always null. Deprecated; may be removed in a future release.",
-						"examples": [null],
-						"type": "string"
-					}
-				},
-				"required": ["message", "errors", "trace"],
-				"additionalProperties": false,
+				"$ref": "#/definitions/errorBadRequest",
 				"definitions": {
+					"errorBadRequest": {
+						"type": "object",
+						"properties": {
+							"message": {
+								"type": "string",
+								"examples": ["request.body should have required property 'XYZ'"]
+							},
+							"errors": {
+								"minItems": 1,
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/openApiErrorItem"
+								}
+							},
+							"trace": {
+								"nullable": true,
+								"deprecated": true,
+								"description": "Always null. Deprecated; may be removed in a future release.",
+								"examples": [null],
+								"type": "string"
+							}
+						},
+						"required": ["message", "errors", "trace"],
+						"additionalProperties": false
+					},
 					"openApiErrorItem": {
 						"type": "object",
 						"properties": {
@@ -841,30 +864,33 @@
 				}
 			},
 			"errorUnauthorized": {
-				"type": "object",
-				"properties": {
-					"message": {
-						"type": "string",
-						"examples": ["request.headers should have required property 'Authorization'"]
-					},
-					"errors": {
-						"minItems": 1,
-						"type": "array",
-						"items": {
-							"$ref": "#/definitions/openApiErrorItem"
-						}
-					},
-					"trace": {
-						"nullable": true,
-						"deprecated": true,
-						"description": "Always null. Deprecated; may be removed in a future release.",
-						"examples": [null],
-						"type": "string"
-					}
-				},
-				"required": ["message", "errors", "trace"],
-				"additionalProperties": false,
+				"$ref": "#/definitions/errorUnauthorized",
 				"definitions": {
+					"errorUnauthorized": {
+						"type": "object",
+						"properties": {
+							"message": {
+								"type": "string",
+								"examples": ["request.headers should have required property 'Authorization'"]
+							},
+							"errors": {
+								"minItems": 1,
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/openApiErrorItem"
+								}
+							},
+							"trace": {
+								"nullable": true,
+								"deprecated": true,
+								"description": "Always null. Deprecated; may be removed in a future release.",
+								"examples": [null],
+								"type": "string"
+							}
+						},
+						"required": ["message", "errors", "trace"],
+						"additionalProperties": false
+					},
 					"openApiErrorItem": {
 						"type": "object",
 						"properties": {
@@ -884,30 +910,33 @@
 				}
 			},
 			"errorForbidden": {
-				"type": "object",
-				"properties": {
-					"message": {
-						"type": "string",
-						"examples": ["user is missing required permission"]
-					},
-					"errors": {
-						"minItems": 1,
-						"type": "array",
-						"items": {
-							"$ref": "#/definitions/openApiErrorItem"
-						}
-					},
-					"trace": {
-						"nullable": true,
-						"deprecated": true,
-						"description": "Always null. Deprecated; may be removed in a future release.",
-						"examples": [null],
-						"type": "string"
-					}
-				},
-				"required": ["message", "errors", "trace"],
-				"additionalProperties": false,
+				"$ref": "#/definitions/errorForbidden",
 				"definitions": {
+					"errorForbidden": {
+						"type": "object",
+						"properties": {
+							"message": {
+								"type": "string",
+								"examples": ["user is missing required permission"]
+							},
+							"errors": {
+								"minItems": 1,
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/openApiErrorItem"
+								}
+							},
+							"trace": {
+								"nullable": true,
+								"deprecated": true,
+								"description": "Always null. Deprecated; may be removed in a future release.",
+								"examples": [null],
+								"type": "string"
+							}
+						},
+						"required": ["message", "errors", "trace"],
+						"additionalProperties": false
+					},
 					"openApiErrorItem": {
 						"type": "object",
 						"properties": {
@@ -927,65 +956,78 @@
 				}
 			},
 			"errorNotFound": {
-				"type": "object",
-				"properties": {
-					"message": {
-						"type": "string",
-						"examples": ["object 'object.name' not found"]
-					},
-					"trace": {
-						"nullable": true,
-						"deprecated": true,
-						"description": "Always null. Deprecated; may be removed in a future release.",
-						"examples": [null],
-						"type": "string"
+				"$ref": "#/definitions/errorNotFound",
+				"definitions": {
+					"errorNotFound": {
+						"type": "object",
+						"properties": {
+							"message": {
+								"type": "string",
+								"examples": ["object 'object.name' not found"]
+							},
+							"trace": {
+								"nullable": true,
+								"deprecated": true,
+								"description": "Always null. Deprecated; may be removed in a future release.",
+								"examples": [null],
+								"type": "string"
+							}
+						},
+						"required": ["message", "trace"],
+						"additionalProperties": false
 					}
-				},
-				"required": ["message", "trace"],
-				"additionalProperties": false
+				}
 			},
 			"errorInternalServerError": {
-				"type": "object",
-				"properties": {
-					"message": {
-						"type": "string",
-						"examples": ["Internal Server Error"]
-					},
-					"trace": {
-						"nullable": true,
-						"deprecated": true,
-						"description": "Always null. Deprecated; may be removed in a future release.",
-						"examples": [null],
-						"type": "string"
+				"$ref": "#/definitions/errorInternalServerError",
+				"definitions": {
+					"errorInternalServerError": {
+						"type": "object",
+						"properties": {
+							"message": {
+								"type": "string",
+								"examples": ["Internal Server Error"]
+							},
+							"trace": {
+								"nullable": true,
+								"deprecated": true,
+								"description": "Always null. Deprecated; may be removed in a future release.",
+								"examples": [null],
+								"type": "string"
+							}
+						},
+						"required": ["message", "trace"],
+						"additionalProperties": false
 					}
-				},
-				"required": ["message", "trace"],
-				"additionalProperties": false
+				}
 			},
 			"errorPayloadTooLarge": {
-				"type": "object",
-				"properties": {
-					"message": {
-						"type": "string",
-						"examples": ["Payload Too Large"]
-					},
-					"errors": {
-						"type": "array",
-						"items": {
-							"$ref": "#/definitions/openApiErrorItem"
-						}
-					},
-					"trace": {
-						"nullable": true,
-						"deprecated": true,
-						"description": "Always null. Deprecated; may be removed in a future release.",
-						"examples": [null],
-						"type": "string"
-					}
-				},
-				"required": ["message", "errors", "trace"],
-				"additionalProperties": false,
+				"$ref": "#/definitions/errorPayloadTooLarge",
 				"definitions": {
+					"errorPayloadTooLarge": {
+						"type": "object",
+						"properties": {
+							"message": {
+								"type": "string",
+								"examples": ["Payload Too Large"]
+							},
+							"errors": {
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/openApiErrorItem"
+								}
+							},
+							"trace": {
+								"nullable": true,
+								"deprecated": true,
+								"description": "Always null. Deprecated; may be removed in a future release.",
+								"examples": [null],
+								"type": "string"
+							}
+						},
+						"required": ["message", "errors", "trace"],
+						"additionalProperties": false
+					},
 					"openApiErrorItem": {
 						"type": "object",
 						"properties": {
@@ -1005,245 +1047,8 @@
 				}
 			},
 			"services": {
-				"type": "object",
-				"properties": {
-					"type": {
-						"examples": ["PermanentLivestream"],
-						"type": "string",
-						"enum": ["EventLivestream", "PermanentLivestream"]
-					},
-					"externalId": {
-						"type": "string",
-						"examples": ["crid://swr.de/123450"]
-					},
-					"publisherId": {
-						"type": "string",
-						"description": "External ID or globally unique identifier (Core ID) for the associated publisher. When no Core ID is provided, the External ID will be converted by Eventhub.",
-						"examples": ["248000"]
-					},
-					"id": {
-						"description": "Globally unique identifier, created by Eventhub",
-						"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
-						"type": "string"
-					}
-				},
-				"required": ["type", "externalId", "publisherId"],
-				"additionalProperties": false
-			},
-			"reference": {
-				"type": "object",
-				"properties": {
-					"type": {
-						"type": "string",
-						"enum": ["Episode", "Section", "Publication", "Broadcast", "Show", "Season", "Article"]
-					},
-					"id": {
-						"examples": ["urn:ard:show:49267f7d67be180d"],
-						"type": "string",
-						"pattern": "^urn:ard:[a-z0-9-]+:[a-z0-9-]+$"
-					},
-					"externalId": {
-						"type": "string",
-						"pattern": "^(c|b)rid:\\/\\/.+$",
-						"examples": ["crid://swr.de/123450"]
-					},
-					"title": {
-						"type": "string"
-					},
-					"url": {
-						"type": "string",
-						"format": "uri"
-					},
-					"alternateIds": {
-						"examples": [["https://normdb.ivz.cn.ard.de/sendereihe/427"]],
-						"type": "array",
-						"items": {
-							"type": "string"
-						}
-					}
-				},
-				"required": ["type", "externalId"],
-				"additionalProperties": false
-			},
-			"eventV1PostBody": {
-				"type": "object",
-				"properties": {
-					"event": {
-						"description": "If set, it needs to match the URL event parameter",
-						"examples": ["de.ard.eventhub.v1.radio.track.playing"],
-						"type": "string",
-						"enum": ["de.ard.eventhub.v1.radio.track.playing", "de.ard.eventhub.v1.radio.track.next"]
-					},
-					"type": {
-						"description": "The type of the element that triggered this event. See additional file in docs for details.",
-						"examples": ["music"],
-						"type": "string",
-						"enum": ["audio", "commercial", "jingle", "live", "music", "news", "traffic", "weather"]
-					},
-					"start": {
-						"type": "string",
-						"description": "ISO8601 compliant timestamp",
-						"examples": ["2020-01-19T06:00:00+01:00"]
-					},
-					"length": {
-						"type": "number",
-						"minimum": 0,
-						"exclusiveMinimum": true,
-						"description": "Estimated length of the element in seconds. Must be set to a positive number (not 0 or null). The end of the current element is defined by the start of the next element.",
-						"examples": [240]
-					},
-					"title": {
-						"type": "string",
-						"description": "Representative title for external use",
-						"examples": ["Song name"]
-					},
-					"artist": {
-						"description": "Pre-formatted artist information",
-						"examples": ["Sam Feldt feat. Someone Else"],
-						"nullable": true,
-						"type": "string"
-					},
-					"contributors": {
-						"description": "Full details about involved artists if available",
-						"nullable": true,
-						"type": "array",
-						"items": {
-							"$ref": "#/definitions/contributor"
-						}
-					},
-					"services": {
-						"type": "array",
-						"items": {
-							"$ref": "#/definitions/services"
-						},
-						"description": "The playing stations unique Service-IDs. Do not include the Service-Type suffix."
-					},
-					"references": {
-						"description": "related external entities",
-						"nullable": true,
-						"type": "array",
-						"items": {
-							"$ref": "#/definitions/reference"
-						}
-					},
-					"playlistItemId": {
-						"type": "string",
-						"description": "Unique identifier (within a publisher) to connect next and playing items if needed",
-						"examples": ["swr3-5678"]
-					},
-					"hfdbIds": {
-						"description": "Can reference all available tracks in ARD HFDB instances. Should ideally at least include the common ZSK instance.",
-						"examples": [["swrhfdb1.KONF.12345", "zskhfdb1.KONF.12345"]],
-						"nullable": true,
-						"type": "array",
-						"items": {
-							"type": "string"
-						}
-					},
-					"externalId": {
-						"description": "Can reference the original ID in the publisher's system",
-						"examples": ["M012345.001"],
-						"nullable": true,
-						"type": "string"
-					},
-					"isrc": {
-						"description": "Appropriate ISRC code if track is a music element",
-						"examples": ["DE012345678"],
-						"nullable": true,
-						"type": "string"
-					},
-					"upc": {
-						"description": "Corresponding reference to an album where such ISRC was published",
-						"nullable": true,
-						"type": "string"
-					},
-					"mpn": {
-						"description": "If available the reference to the original delivery from MPN",
-						"nullable": true,
-						"type": "string"
-					},
-					"media": {
-						"description": "Can contain an array of media files like cover, artist, etc.",
-						"nullable": true,
-						"type": "array",
-						"items": {
-							"$ref": "#/definitions/mediaItem"
-						}
-					},
-					"plugins": {
-						"description": "Highly optional field for future third-party metadata distribution or other connected services",
-						"nullable": true,
-						"type": "array",
-						"items": {
-							"$ref": "#/definitions/eventPlugin"
-						}
-					},
-					"id": {
-						"description": "ID gets inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!",
-						"examples": ["1234567890"],
-						"type": "string"
-					}
-				},
-				"required": ["type", "start", "length", "title", "services", "playlistItemId"],
-				"additionalProperties": false,
-				"description": "**Please also note the details in the `POST /events/v1` endpoint above!**",
+				"$ref": "#/definitions/services",
 				"definitions": {
-					"contributor": {
-						"type": "object",
-						"properties": {
-							"name": {
-								"type": "string",
-								"examples": ["Sam Feldt"]
-							},
-							"role": {
-								"examples": ["artist"],
-								"type": "string",
-								"enum": [
-									"artist",
-									"author",
-									"composer",
-									"performer",
-									"conductor",
-									"choir",
-									"leader",
-									"ensemble",
-									"orchestra",
-									"soloist",
-									"producer",
-									"engineer"
-								]
-							},
-							"normDb": {
-								"description": "Reference to an entity in ARD's Norm-DB catalog",
-								"nullable": true,
-								"type": "object",
-								"properties": {
-									"type": {
-										"type": "string",
-										"examples": ["Person"]
-									},
-									"id": {
-										"type": "string",
-										"examples": ["1641010"]
-									}
-								},
-								"required": ["type", "id"],
-								"additionalProperties": false
-							},
-							"isni": {
-								"description": "ISNI ID if available",
-								"nullable": true,
-								"type": "string"
-							},
-							"url": {
-								"description": "Can link to external reference",
-								"nullable": true,
-								"type": "string"
-							}
-						},
-						"required": ["name", "role"],
-						"additionalProperties": false
-					},
 					"services": {
 						"type": "object",
 						"properties": {
@@ -1269,7 +1074,55 @@
 						},
 						"required": ["type", "externalId", "publisherId"],
 						"additionalProperties": false
-					},
+					}
+				}
+			},
+			"servicesUrn": {
+				"$ref": "#/definitions/servicesUrn",
+				"definitions": {
+					"servicesUrn": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string",
+								"pattern": "^urn:ard:(permanent-livestream|event-livestream):[a-z0-9]+$",
+								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"description": "Pre-encoded ARD livestream URN"
+							},
+							"publisherId": {
+								"type": "string",
+								"pattern": "^urn:ard:publisher:[a-z0-9]+$",
+								"examples": ["urn:ard:publisher:75dbb3dace15f610"],
+								"description": "Pre-encoded ARD publisher URN"
+							},
+							"institutionId": {
+								"type": "string",
+								"pattern": "^urn:ard:institution:[a-z0-9]+$",
+								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
+								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+							},
+							"externalId": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["crid://swr.de/123450"],
+								"type": "string"
+							},
+							"type": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["PermanentLivestream"],
+								"type": "string",
+								"enum": ["EventLivestream", "PermanentLivestream"]
+							}
+						},
+						"required": ["id", "publisherId", "institutionId"],
+						"additionalProperties": false
+					}
+				}
+			},
+			"reference": {
+				"$ref": "#/definitions/reference",
+				"definitions": {
 					"reference": {
 						"type": "object",
 						"properties": {
@@ -1304,95 +1157,11 @@
 						},
 						"required": ["type", "externalId"],
 						"additionalProperties": false
-					},
-					"mediaItem": {
-						"type": "object",
-						"properties": {
-							"type": {
-								"examples": ["cover"],
-								"type": "string",
-								"enum": ["cover", "artist", "anchor", "audio", "video"]
-							},
-							"url": {
-								"type": "string",
-								"examples": ["https://example.com/cover.jpg"]
-							},
-							"templateUrl": {
-								"examples": ["https://example.com/cover.jpg?width={width}"],
-								"nullable": true,
-								"type": "string"
-							},
-							"description": {
-								"type": "string",
-								"examples": ["Cover Demo Artist"]
-							},
-							"attribution": {
-								"examples": ["Photographer XYZ"],
-								"nullable": true,
-								"type": "string"
-							},
-							"isFallback": {
-								"description": "Optional flag to mark media as fallback data that subscribers can filter out",
-								"examples": [false],
-								"type": "boolean"
-							}
-						},
-						"required": ["type", "url", "description"],
-						"additionalProperties": false
-					},
-					"eventPlugin": {
-						"type": "object",
-						"properties": {
-							"type": {
-								"examples": ["postToThirdPartyPlatformXYZ"],
-								"type": "string"
-							}
-						},
-						"additionalProperties": {}
 					}
 				}
 			},
-			"eventV1ResBody": {
-				"type": "object",
-				"properties": {
-					"statuses": {
-						"type": "object",
-						"properties": {
-							"published": {
-								"type": "integer",
-								"minimum": -9007199254740991,
-								"maximum": 9007199254740991,
-								"examples": [1]
-							},
-							"blocked": {
-								"type": "integer",
-								"minimum": -9007199254740991,
-								"maximum": 9007199254740991,
-								"examples": [0]
-							},
-							"failed": {
-								"type": "integer",
-								"minimum": -9007199254740991,
-								"maximum": 9007199254740991,
-								"examples": [0]
-							}
-						},
-						"required": ["published", "blocked", "failed"],
-						"additionalProperties": false
-					},
-					"event": {
-						"$ref": "#/definitions/eventV1PostBody"
-					},
-					"trace": {
-						"nullable": true,
-						"deprecated": true,
-						"description": "Always null. Deprecated; may be removed in a future release.",
-						"examples": [null],
-						"type": "string"
-					}
-				},
-				"required": ["statuses", "event", "trace"],
-				"additionalProperties": false,
+			"eventV1PostBody": {
+				"$ref": "#/definitions/eventV1PostBody",
 				"definitions": {
 					"eventV1PostBody": {
 						"type": "object",
@@ -1681,130 +1450,610 @@
 					}
 				}
 			},
-			"subscriptionPost": {
-				"type": "object",
-				"properties": {
-					"type": {
-						"examples": ["PUBSUB"],
-						"type": "string",
-						"enum": ["PUBSUB"]
+			"eventV1RadioControlPostBody": {
+				"$ref": "#/definitions/eventV1RadioControlPostBody",
+				"definitions": {
+					"eventV1RadioControlPostBody": {
+						"type": "object",
+						"properties": {
+							"event": {
+								"description": "If set, it needs to match the published event class",
+								"examples": ["de.ard.eventhub.v1.radio.control"],
+								"type": "string",
+								"enum": ["de.ard.eventhub.v1.radio.control"]
+							},
+							"start": {
+								"type": "string",
+								"description": "ISO8601 compliant timestamp",
+								"examples": ["2020-01-19T06:00:00+01:00"]
+							},
+							"validUntil": {
+								"description": "Backstop TTL. Receivers drop the state when it passes. Omit for states with no natural expiry.",
+								"type": "string",
+								"examples": ["2020-01-19T06:00:00+01:00"]
+							},
+							"name": {
+								"type": "string",
+								"description": "Control element identifier (TA, TP, EON, Regio, …). Not an enum — new functions need no release.",
+								"examples": ["TA"]
+							},
+							"state": {
+								"type": "boolean",
+								"description": "New control state",
+								"examples": [true]
+							},
+							"services": {
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/servicesUrn"
+								},
+								"description": "URN-only service identifiers (Connect / MQTT)"
+							}
+						},
+						"required": ["start", "name", "state", "services"],
+						"additionalProperties": false,
+						"description": "Eventhub Connect radio.control event. Not accepted on the HTTPS POST /events API."
 					},
-					"method": {
-						"examples": ["PUSH"],
-						"type": "string",
-						"enum": ["PUSH"]
-					},
-					"url": {
-						"type": "string",
-						"description": "Publicly accessible URL that should receive the events",
-						"examples": ["https://example.com/my/webhook/for/this/subscription"]
-					},
-					"contact": {
-						"type": "string",
-						"description": "Email address to be contacted in case of problems with this subscription",
-						"examples": ["my-emergency-and-notifications-contact@ard.de"]
-					},
-					"topic": {
-						"type": "string",
-						"description": "ID of the topic to subscribe to",
-						"examples": ["topic-id-to-subscribe-to"]
-					}
-				},
-				"required": ["type", "method", "url", "contact", "topic"],
-				"additionalProperties": false
-			},
-			"subscriptionResponse": {
-				"type": "object",
-				"properties": {
-					"type": {
-						"type": "string",
-						"enum": ["PUBSUB"],
-						"examples": ["PUBSUB"]
-					},
-					"method": {
-						"type": "string",
-						"enum": ["PUSH"],
-						"examples": ["PUSH"]
-					},
-					"name": {
-						"type": "string",
-						"description": "ID of the subscription to be referenced in API calls",
-						"examples": ["de.ard.eventhub.subscription.subscription-id"]
-					},
-					"path": {
-						"type": "string",
-						"description": "Path of subscription in project",
-						"examples": ["projects/ard-eventhub/subscriptions/subscription-name"]
-					},
-					"topic": {
+					"servicesUrn": {
 						"type": "object",
 						"properties": {
 							"id": {
 								"type": "string",
-								"examples": ["urn:ard:permanent-livestream:topic-id"]
+								"pattern": "^urn:ard:(permanent-livestream|event-livestream):[a-z0-9]+$",
+								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"description": "Pre-encoded ARD livestream URN"
 							},
-							"name": {
+							"publisherId": {
 								"type": "string",
-								"examples": ["de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3Atopic-id"]
+								"pattern": "^urn:ard:publisher:[a-z0-9]+$",
+								"examples": ["urn:ard:publisher:75dbb3dace15f610"],
+								"description": "Pre-encoded ARD publisher URN"
 							},
-							"path": {
+							"institutionId": {
 								"type": "string",
-								"examples": ["projects/ard-eventhub/topics/topic-name"]
+								"pattern": "^urn:ard:institution:[a-z0-9]+$",
+								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
+								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+							},
+							"externalId": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["crid://swr.de/123450"],
+								"type": "string"
+							},
+							"type": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["PermanentLivestream"],
+								"type": "string",
+								"enum": ["EventLivestream", "PermanentLivestream"]
 							}
 						},
-						"required": ["id", "name", "path"],
+						"required": ["id", "publisherId", "institutionId"],
+						"additionalProperties": false
+					}
+				}
+			},
+			"eventV1RadioDataPostBody": {
+				"$ref": "#/definitions/eventV1RadioDataPostBody",
+				"definitions": {
+					"eventV1RadioDataPostBody": {
+						"type": "object",
+						"properties": {
+							"event": {
+								"description": "If set, it needs to match the published event class",
+								"examples": ["de.ard.eventhub.v1.radio.data"],
+								"type": "string",
+								"enum": ["de.ard.eventhub.v1.radio.data"]
+							},
+							"start": {
+								"type": "string",
+								"description": "ISO8601 compliant timestamp",
+								"examples": ["2020-01-19T06:00:00+01:00"]
+							},
+							"cycle": {
+								"type": "integer",
+								"minimum": 0,
+								"exclusiveMinimum": true,
+								"maximum": 9007199254740991,
+								"description": "Seconds between repeats from the source",
+								"examples": [8]
+							},
+							"data": {
+								"type": "array",
+								"items": {
+									"oneOf": [
+										{
+											"type": "object",
+											"properties": {
+												"type": {
+													"type": "string",
+													"enum": ["radiotext"]
+												},
+												"id": {
+													"type": "number",
+													"enum": [0]
+												},
+												"value": {
+													"type": "string"
+												},
+												"description": {
+													"type": "string"
+												}
+											},
+											"required": ["type", "id", "value"],
+											"additionalProperties": false
+										},
+										{
+											"type": "object",
+											"properties": {
+												"type": {
+													"type": "string",
+													"enum": ["dynlabel"]
+												},
+												"id": {
+													"type": "number",
+													"enum": [0]
+												},
+												"value": {
+													"type": "string"
+												},
+												"description": {
+													"type": "string"
+												}
+											},
+											"required": ["type", "id", "value"],
+											"additionalProperties": false
+										},
+										{
+											"type": "object",
+											"properties": {
+												"type": {
+													"type": "string",
+													"enum": ["rtdlplus"]
+												},
+												"id": {
+													"type": "integer",
+													"minimum": 0,
+													"maximum": 63
+												},
+												"value": {
+													"type": "string"
+												},
+												"description": {
+													"type": "string"
+												}
+											},
+											"required": ["type", "id", "value"],
+											"additionalProperties": false
+										}
+									]
+								},
+								"description": "Radiotext, dynamic label, and RT+/DL+ fields. Any combination, any length."
+							},
+							"services": {
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/servicesUrn"
+								},
+								"description": "URN-only service identifiers (Connect / MQTT)"
+							}
+						},
+						"required": ["start", "cycle", "data", "services"],
+						"additionalProperties": false,
+						"description": "Eventhub Connect radio.data event. Not accepted on the HTTPS POST /events API."
+					},
+					"servicesUrn": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string",
+								"pattern": "^urn:ard:(permanent-livestream|event-livestream):[a-z0-9]+$",
+								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"description": "Pre-encoded ARD livestream URN"
+							},
+							"publisherId": {
+								"type": "string",
+								"pattern": "^urn:ard:publisher:[a-z0-9]+$",
+								"examples": ["urn:ard:publisher:75dbb3dace15f610"],
+								"description": "Pre-encoded ARD publisher URN"
+							},
+							"institutionId": {
+								"type": "string",
+								"pattern": "^urn:ard:institution:[a-z0-9]+$",
+								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
+								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+							},
+							"externalId": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["crid://swr.de/123450"],
+								"type": "string"
+							},
+							"type": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["PermanentLivestream"],
+								"type": "string",
+								"enum": ["EventLivestream", "PermanentLivestream"]
+							}
+						},
+						"required": ["id", "publisherId", "institutionId"],
+						"additionalProperties": false
+					}
+				}
+			},
+			"eventV1ResBody": {
+				"$ref": "#/definitions/eventV1ResBody",
+				"definitions": {
+					"eventV1ResBody": {
+						"type": "object",
+						"properties": {
+							"statuses": {
+								"type": "object",
+								"properties": {
+									"published": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991,
+										"examples": [1]
+									},
+									"blocked": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991,
+										"examples": [0]
+									},
+									"failed": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991,
+										"examples": [0]
+									}
+								},
+								"required": ["published", "blocked", "failed"],
+								"additionalProperties": false
+							},
+							"event": {
+								"$ref": "#/definitions/eventV1PostBody"
+							},
+							"trace": {
+								"nullable": true,
+								"deprecated": true,
+								"description": "Always null. Deprecated; may be removed in a future release.",
+								"examples": [null],
+								"type": "string"
+							}
+						},
+						"required": ["statuses", "event", "trace"],
 						"additionalProperties": false
 					},
-					"ackDeadlineSeconds": {
-						"type": "integer",
-						"minimum": -9007199254740991,
-						"maximum": 9007199254740991,
-						"examples": [20]
+					"eventV1PostBody": {
+						"type": "object",
+						"properties": {
+							"event": {
+								"description": "If set, it needs to match the URL event parameter",
+								"examples": ["de.ard.eventhub.v1.radio.track.playing"],
+								"type": "string",
+								"enum": ["de.ard.eventhub.v1.radio.track.playing", "de.ard.eventhub.v1.radio.track.next"]
+							},
+							"type": {
+								"description": "The type of the element that triggered this event. See additional file in docs for details.",
+								"examples": ["music"],
+								"type": "string",
+								"enum": ["audio", "commercial", "jingle", "live", "music", "news", "traffic", "weather"]
+							},
+							"start": {
+								"type": "string",
+								"description": "ISO8601 compliant timestamp",
+								"examples": ["2020-01-19T06:00:00+01:00"]
+							},
+							"length": {
+								"type": "number",
+								"minimum": 0,
+								"exclusiveMinimum": true,
+								"description": "Estimated length of the element in seconds. Must be set to a positive number (not 0 or null). The end of the current element is defined by the start of the next element.",
+								"examples": [240]
+							},
+							"title": {
+								"type": "string",
+								"description": "Representative title for external use",
+								"examples": ["Song name"]
+							},
+							"artist": {
+								"description": "Pre-formatted artist information",
+								"examples": ["Sam Feldt feat. Someone Else"],
+								"nullable": true,
+								"type": "string"
+							},
+							"contributors": {
+								"description": "Full details about involved artists if available",
+								"nullable": true,
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/contributor"
+								}
+							},
+							"services": {
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/services"
+								},
+								"description": "The playing stations unique Service-IDs. Do not include the Service-Type suffix."
+							},
+							"references": {
+								"description": "related external entities",
+								"nullable": true,
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/reference"
+								}
+							},
+							"playlistItemId": {
+								"type": "string",
+								"description": "Unique identifier (within a publisher) to connect next and playing items if needed",
+								"examples": ["swr3-5678"]
+							},
+							"hfdbIds": {
+								"description": "Can reference all available tracks in ARD HFDB instances. Should ideally at least include the common ZSK instance.",
+								"examples": [["swrhfdb1.KONF.12345", "zskhfdb1.KONF.12345"]],
+								"nullable": true,
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"externalId": {
+								"description": "Can reference the original ID in the publisher's system",
+								"examples": ["M012345.001"],
+								"nullable": true,
+								"type": "string"
+							},
+							"isrc": {
+								"description": "Appropriate ISRC code if track is a music element",
+								"examples": ["DE012345678"],
+								"nullable": true,
+								"type": "string"
+							},
+							"upc": {
+								"description": "Corresponding reference to an album where such ISRC was published",
+								"nullable": true,
+								"type": "string"
+							},
+							"mpn": {
+								"description": "If available the reference to the original delivery from MPN",
+								"nullable": true,
+								"type": "string"
+							},
+							"media": {
+								"description": "Can contain an array of media files like cover, artist, etc.",
+								"nullable": true,
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/mediaItem"
+								}
+							},
+							"plugins": {
+								"description": "Highly optional field for future third-party metadata distribution or other connected services",
+								"nullable": true,
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/eventPlugin"
+								}
+							},
+							"id": {
+								"description": "ID gets inserted by Eventhub as string-formatted number, but might be a true string in the future, do not expect this string to remain numbers only!",
+								"examples": ["1234567890"],
+								"type": "string"
+							}
+						},
+						"required": ["type", "start", "length", "title", "services", "playlistItemId"],
+						"additionalProperties": false,
+						"description": "**Please also note the details in the `POST /events/v1` endpoint above!**"
 					},
-					"retryPolicy": {
-						"examples": [null],
-						"nullable": true,
-						"type": "string"
+					"contributor": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string",
+								"examples": ["Sam Feldt"]
+							},
+							"role": {
+								"examples": ["artist"],
+								"type": "string",
+								"enum": [
+									"artist",
+									"author",
+									"composer",
+									"performer",
+									"conductor",
+									"choir",
+									"leader",
+									"ensemble",
+									"orchestra",
+									"soloist",
+									"producer",
+									"engineer"
+								]
+							},
+							"normDb": {
+								"description": "Reference to an entity in ARD's Norm-DB catalog",
+								"nullable": true,
+								"type": "object",
+								"properties": {
+									"type": {
+										"type": "string",
+										"examples": ["Person"]
+									},
+									"id": {
+										"type": "string",
+										"examples": ["1641010"]
+									}
+								},
+								"required": ["type", "id"],
+								"additionalProperties": false
+							},
+							"isni": {
+								"description": "ISNI ID if available",
+								"nullable": true,
+								"type": "string"
+							},
+							"url": {
+								"description": "Can link to external reference",
+								"nullable": true,
+								"type": "string"
+							}
+						},
+						"required": ["name", "role"],
+						"additionalProperties": false
 					},
-					"serviceAccount": {
-						"type": "string",
-						"examples": ["name-of-service-account"]
+					"services": {
+						"type": "object",
+						"properties": {
+							"type": {
+								"examples": ["PermanentLivestream"],
+								"type": "string",
+								"enum": ["EventLivestream", "PermanentLivestream"]
+							},
+							"externalId": {
+								"type": "string",
+								"examples": ["crid://swr.de/123450"]
+							},
+							"publisherId": {
+								"type": "string",
+								"description": "External ID or globally unique identifier (Core ID) for the associated publisher. When no Core ID is provided, the External ID will be converted by Eventhub.",
+								"examples": ["248000"]
+							},
+							"id": {
+								"description": "Globally unique identifier, created by Eventhub",
+								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"type": "string"
+							}
+						},
+						"required": ["type", "externalId", "publisherId"],
+						"additionalProperties": false
 					},
-					"url": {
-						"type": "string",
-						"description": "Publicly accessible URL that should receive the events",
-						"examples": ["https://example.com/my/webhook/for/this/subscription"]
+					"reference": {
+						"type": "object",
+						"properties": {
+							"type": {
+								"type": "string",
+								"enum": ["Episode", "Section", "Publication", "Broadcast", "Show", "Season", "Article"]
+							},
+							"id": {
+								"examples": ["urn:ard:show:49267f7d67be180d"],
+								"type": "string",
+								"pattern": "^urn:ard:[a-z0-9-]+:[a-z0-9-]+$"
+							},
+							"externalId": {
+								"type": "string",
+								"pattern": "^(c|b)rid:\\/\\/.+$",
+								"examples": ["crid://swr.de/123450"]
+							},
+							"title": {
+								"type": "string"
+							},
+							"url": {
+								"type": "string",
+								"format": "uri"
+							},
+							"alternateIds": {
+								"examples": [["https://normdb.ivz.cn.ard.de/sendereihe/427"]],
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							}
+						},
+						"required": ["type", "externalId"],
+						"additionalProperties": false
 					},
-					"contact": {
-						"type": "string",
-						"description": "Email address to be contacted in case of problems with this subscription",
-						"examples": ["my-emergency-and-notifications-contact@ard.de"]
+					"mediaItem": {
+						"type": "object",
+						"properties": {
+							"type": {
+								"examples": ["cover"],
+								"type": "string",
+								"enum": ["cover", "artist", "anchor", "audio", "video"]
+							},
+							"url": {
+								"type": "string",
+								"examples": ["https://example.com/cover.jpg"]
+							},
+							"templateUrl": {
+								"examples": ["https://example.com/cover.jpg?width={width}"],
+								"nullable": true,
+								"type": "string"
+							},
+							"description": {
+								"type": "string",
+								"examples": ["Cover Demo Artist"]
+							},
+							"attribution": {
+								"examples": ["Photographer XYZ"],
+								"nullable": true,
+								"type": "string"
+							},
+							"isFallback": {
+								"description": "Optional flag to mark media as fallback data that subscribers can filter out",
+								"examples": [false],
+								"type": "boolean"
+							}
+						},
+						"required": ["type", "url", "description"],
+						"additionalProperties": false
 					},
-					"institutionId": {
-						"type": "string",
-						"description": "ID of the institution the current user belongs to",
-						"examples": ["urn:ard:institution:institution-id"]
+					"eventPlugin": {
+						"type": "object",
+						"properties": {
+							"type": {
+								"examples": ["postToThirdPartyPlatformXYZ"],
+								"type": "string"
+							}
+						},
+						"additionalProperties": {}
 					}
-				},
-				"required": [
-					"type",
-					"method",
-					"name",
-					"path",
-					"topic",
-					"ackDeadlineSeconds",
-					"serviceAccount",
-					"url",
-					"contact",
-					"institutionId"
-				],
-				"additionalProperties": false
+				}
 			},
-			"subscriptionsList": {
-				"type": "array",
-				"items": {
-					"$ref": "#/definitions/subscriptionResponse"
-				},
+			"subscriptionPost": {
+				"$ref": "#/definitions/subscriptionPost",
+				"definitions": {
+					"subscriptionPost": {
+						"type": "object",
+						"properties": {
+							"type": {
+								"examples": ["PUBSUB"],
+								"type": "string",
+								"enum": ["PUBSUB"]
+							},
+							"method": {
+								"examples": ["PUSH"],
+								"type": "string",
+								"enum": ["PUSH"]
+							},
+							"url": {
+								"type": "string",
+								"description": "Publicly accessible URL that should receive the events",
+								"examples": ["https://example.com/my/webhook/for/this/subscription"]
+							},
+							"contact": {
+								"type": "string",
+								"description": "Email address to be contacted in case of problems with this subscription",
+								"examples": ["my-emergency-and-notifications-contact@ard.de"]
+							},
+							"topic": {
+								"type": "string",
+								"description": "ID of the topic to subscribe to",
+								"examples": ["topic-id-to-subscribe-to"]
+							}
+						},
+						"required": ["type", "method", "url", "contact", "topic"],
+						"additionalProperties": false
+					}
+				}
+			},
+			"subscriptionResponse": {
+				"$ref": "#/definitions/subscriptionResponse",
 				"definitions": {
 					"subscriptionResponse": {
 						"type": "object",
@@ -1895,80 +2144,188 @@
 					}
 				}
 			},
-			"subscriptionDeleted": {
-				"type": "object",
-				"properties": {
-					"valid": {
-						"type": "boolean",
-						"examples": [true]
-					},
-					"trace": {
-						"nullable": true,
-						"deprecated": true,
-						"description": "Always null. Deprecated; may be removed in a future release.",
-						"examples": [null],
-						"type": "string"
-					}
-				},
-				"required": ["valid", "trace"],
-				"additionalProperties": false
-			},
-			"topicResponse": {
-				"type": "array",
-				"items": {
-					"type": "object",
-					"properties": {
-						"type": {
-							"type": "string",
-							"enum": ["PUBSUB"],
-							"examples": ["PUBSUB"]
-						},
-						"id": {
-							"type": "string",
-							"examples": ["urn:ard:permanent-livestream:topic-id"]
-						},
-						"name": {
-							"type": "string",
-							"examples": ["de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3Atopic-id"]
-						},
-						"path": {
-							"type": "string",
-							"examples": ["projects/ard-eventhub/topics/topic-name"]
-						},
-						"labels": {
-							"type": "object",
-							"properties": {
-								"id": {
-									"type": "string",
-									"examples": ["1234567890"]
-								},
-								"creator-slug": {
-									"type": "string",
-									"examples": ["ard-eventhub-swr"]
-								},
-								"publisher-slug": {
-									"type": "string",
-									"examples": ["swr-rheinland-pfalz"]
-								},
-								"stage": {
-									"type": "string",
-									"examples": ["prod"]
-								},
-								"created": {
-									"type": "string",
-									"examples": ["2021-03-25"]
-								},
-								"institution-slug": {
-									"type": "string",
-									"examples": ["sudwestrundfunk"]
-								}
-							},
-							"required": ["id", "creator-slug", "publisher-slug", "stage", "created", "institution-slug"],
-							"additionalProperties": {}
+			"subscriptionsList": {
+				"$ref": "#/definitions/subscriptionsList",
+				"definitions": {
+					"subscriptionsList": {
+						"type": "array",
+						"items": {
+							"$ref": "#/definitions/subscriptionResponse"
 						}
 					},
-					"required": ["type", "id", "name", "path"],
-					"additionalProperties": false
+					"subscriptionResponse": {
+						"type": "object",
+						"properties": {
+							"type": {
+								"type": "string",
+								"enum": ["PUBSUB"],
+								"examples": ["PUBSUB"]
+							},
+							"method": {
+								"type": "string",
+								"enum": ["PUSH"],
+								"examples": ["PUSH"]
+							},
+							"name": {
+								"type": "string",
+								"description": "ID of the subscription to be referenced in API calls",
+								"examples": ["de.ard.eventhub.subscription.subscription-id"]
+							},
+							"path": {
+								"type": "string",
+								"description": "Path of subscription in project",
+								"examples": ["projects/ard-eventhub/subscriptions/subscription-name"]
+							},
+							"topic": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "string",
+										"examples": ["urn:ard:permanent-livestream:topic-id"]
+									},
+									"name": {
+										"type": "string",
+										"examples": ["de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3Atopic-id"]
+									},
+									"path": {
+										"type": "string",
+										"examples": ["projects/ard-eventhub/topics/topic-name"]
+									}
+								},
+								"required": ["id", "name", "path"],
+								"additionalProperties": false
+							},
+							"ackDeadlineSeconds": {
+								"type": "integer",
+								"minimum": -9007199254740991,
+								"maximum": 9007199254740991,
+								"examples": [20]
+							},
+							"retryPolicy": {
+								"examples": [null],
+								"nullable": true,
+								"type": "string"
+							},
+							"serviceAccount": {
+								"type": "string",
+								"examples": ["name-of-service-account"]
+							},
+							"url": {
+								"type": "string",
+								"description": "Publicly accessible URL that should receive the events",
+								"examples": ["https://example.com/my/webhook/for/this/subscription"]
+							},
+							"contact": {
+								"type": "string",
+								"description": "Email address to be contacted in case of problems with this subscription",
+								"examples": ["my-emergency-and-notifications-contact@ard.de"]
+							},
+							"institutionId": {
+								"type": "string",
+								"description": "ID of the institution the current user belongs to",
+								"examples": ["urn:ard:institution:institution-id"]
+							}
+						},
+						"required": [
+							"type",
+							"method",
+							"name",
+							"path",
+							"topic",
+							"ackDeadlineSeconds",
+							"serviceAccount",
+							"url",
+							"contact",
+							"institutionId"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"subscriptionDeleted": {
+				"$ref": "#/definitions/subscriptionDeleted",
+				"definitions": {
+					"subscriptionDeleted": {
+						"type": "object",
+						"properties": {
+							"valid": {
+								"type": "boolean",
+								"examples": [true]
+							},
+							"trace": {
+								"nullable": true,
+								"deprecated": true,
+								"description": "Always null. Deprecated; may be removed in a future release.",
+								"examples": [null],
+								"type": "string"
+							}
+						},
+						"required": ["valid", "trace"],
+						"additionalProperties": false
+					}
+				}
+			},
+			"topicResponse": {
+				"$ref": "#/definitions/topicResponse",
+				"definitions": {
+					"topicResponse": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"type": {
+									"type": "string",
+									"enum": ["PUBSUB"],
+									"examples": ["PUBSUB"]
+								},
+								"id": {
+									"type": "string",
+									"examples": ["urn:ard:permanent-livestream:topic-id"]
+								},
+								"name": {
+									"type": "string",
+									"examples": ["de.ard.eventhub.dev.urn%3Aard%3Apermanent-livestream%3Atopic-id"]
+								},
+								"path": {
+									"type": "string",
+									"examples": ["projects/ard-eventhub/topics/topic-name"]
+								},
+								"labels": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"examples": ["1234567890"]
+										},
+										"creator-slug": {
+											"type": "string",
+											"examples": ["ard-eventhub-swr"]
+										},
+										"publisher-slug": {
+											"type": "string",
+											"examples": ["swr-rheinland-pfalz"]
+										},
+										"stage": {
+											"type": "string",
+											"examples": ["prod"]
+										},
+										"created": {
+											"type": "string",
+											"examples": ["2021-03-25"]
+										},
+										"institution-slug": {
+											"type": "string",
+											"examples": ["sudwestrundfunk"]
+										}
+									},
+									"required": ["id", "creator-slug", "publisher-slug", "stage", "created", "institution-slug"],
+									"additionalProperties": {}
+								}
+							},
+							"required": ["type", "id", "name", "path"],
+							"additionalProperties": false
+						}
+					}
 				}
 			}
 		}

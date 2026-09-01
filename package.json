@@ -32,14 +32,14 @@
 		"@google-cloud/datastore": "^10.1.1",
 		"@google-cloud/pubsub": "^5.3.1",
 		"@swrlab/utils": "^2.2.0",
-		"dd-trace": "^5.123.0",
+		"dd-trace": "^5.124.0",
 		"firebase-admin": "^13.10.0",
 		"google-auth-library": "^10.9.1",
 		"hono": "^4.13.5",
 		"jsonwebtoken": "^9.0.3",
 		"slug": "^11.0.1",
 		"ulid": "^3.0.2",
-		"zod": "^4.4.3"
+		"zod": "^4.5.4"
 	},
 	"devDependencies": {
 		"@cross/test": "npm:@jsr/cross__test",
@@ -78,6 +78,7 @@
 			"blume.config.ts!",
 			"src/cli/*.ts",
 			"src/openapi/generate.ts",
+			"src/asyncapi/generate.ts",
 			"src/**/*.test.ts"
 		],
 		"ignoreDependencies": [

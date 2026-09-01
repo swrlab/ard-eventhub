@@ -1,7 +1,7 @@
 import process from 'node:process'
 import { test } from '@cross/test'
 import { DateTime } from '@frytg/dates'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { assert, assertExists, assertGreater, assertStrictEquals } from '@std/assert'
 import { app } from './server.ts'
 
@@ -519,6 +519,53 @@ test(`POST ${eventPath}`, async (t) => {
 		assertExists(commonPlugin)
 		assertStrictEquals(commonPlugin.type, 'common')
 		assertExists(commonPlugin.topic)
+	})
+})
+
+const connectControlName = 'de.ard.eventhub.v1.radio.control'
+const connectDataName = 'de.ard.eventhub.v1.radio.data'
+
+test('POST Connect event names are rejected on HTTPS', async (t) => {
+	await t.step('reject radio.control', async () => {
+		const res = await request('POST', `/events/${connectControlName}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: {
+				event: connectControlName,
+				start: DateTime.now().toISO(),
+				name: 'TA',
+				state: true,
+				services: [
+					{
+						id: 'urn:ard:permanent-livestream:49267f7d67be180d',
+						publisherId: 'urn:ard:publisher:75dbb3dace15f610',
+						institutionId: 'urn:ard:institution:a3004ff924ece1a2',
+					},
+				],
+			},
+		})
+		testResponse(res, 400)
+		assertStrictEquals(res.body.message, 'event type is not accepted on the HTTPS API')
+	})
+
+	await t.step('reject radio.data', async () => {
+		const res = await request('POST', `/events/${connectDataName}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: {
+				event: connectDataName,
+				start: DateTime.now().toISO(),
+				cycle: 8,
+				data: [{ type: 'radiotext', id: 0, value: 'Sie hören die ARD Popnacht' }],
+				services: [
+					{
+						id: 'urn:ard:permanent-livestream:49267f7d67be180d',
+						publisherId: 'urn:ard:publisher:75dbb3dace15f610',
+						institutionId: 'urn:ard:institution:a3004ff924ece1a2',
+					},
+				],
+			},
+		})
+		testResponse(res, 400)
+		assertStrictEquals(res.body.message, 'event type is not accepted on the HTTPS API')
 	})
 })
 

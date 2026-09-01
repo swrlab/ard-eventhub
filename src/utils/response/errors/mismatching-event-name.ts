@@ -1,6 +1,6 @@
 import type { Context } from 'hono'
 import type { AuthUser } from '#types'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { badRequest } from '../bad-request.ts'
 
 const source = 'utils.response.errors.mismatchingEventName'

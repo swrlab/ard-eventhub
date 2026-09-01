@@ -45,10 +45,25 @@ export default defineConfig({
 		codeSamples: ['curl', 'js'],
 		route: '/api',
 	},
+	asyncapi: {
+		enabled: true,
+		spec: './asyncapi.json',
+		route: '/events',
+		scalar: {
+			agent: {
+				disabled: true,
+			},
+			mcp: {
+				disabled: true,
+			},
+			telemetry: false,
+		},
+	},
 	navigation: {
 		tabs: [
 			{ label: 'Docs', path: '/', href: '/' },
 			{ label: 'OpenAPI', path: '/api', href: '/api' },
+			{ label: 'Events (v3 Connect Beta)', path: '/events', href: '/events' },
 		],
 		featured: [
 			{

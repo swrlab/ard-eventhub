@@ -1,7 +1,7 @@
 import type { Context } from 'hono'
 import type { AuthUser } from '#types'
 import type { EventhubSubscriptionWithLabels } from '../../schemas/subscriptions.ts'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { datastoreDelete } from '../../utils/datastore/delete.ts'
 import { deleteSubscription } from '../../utils/pubsub/delete-subscription.ts'
 import { getSubscription } from '../../utils/pubsub/get-subscription.ts'
