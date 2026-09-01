@@ -9,15 +9,24 @@ test('buildAsyncApiDocument is AsyncAPI 3 with Connect send and receive operatio
 	assertEquals(document.info.title, 'ARD Eventhub Connect')
 	assertExists(document.info.version)
 
-	assertExists(document.channels.inboxInstitution)
-	assertEquals(document.channels.inboxInstitution.address, 'inbox/{institutionId}')
-	assertEquals(document.channels.radioLivestreamControl.address, 'radio/{livestreamId}/control')
-	assertEquals(document.channels.radioLivestreamData.address, 'radio/{livestreamId}/data')
+	const inbox = document.channels.inboxInstitution
+	const radioControl = document.channels.radioLivestreamControl
+	const radioData = document.channels.radioLivestreamData
+	assertExists(inbox)
+	assertEquals(inbox.address, 'inbox/{institutionId}')
+	assertEquals(inbox.title, 'inbox/{institutionId}')
+	assertEquals(radioControl.address, 'radio/{livestreamId}/control')
+	assertEquals(radioControl.title, 'radio/{livestreamId}/control')
+	assertEquals(radioData.address, 'radio/{livestreamId}/data')
+	assertEquals(radioData.title, 'radio/{livestreamId}/data')
 
 	assertEquals(document.operations.sendRadioControl.action, 'send')
+	assertEquals(document.operations.sendRadioControl.channel.$ref, '#/channels/inboxInstitution')
 	assertEquals(document.operations.sendRadioData.action, 'send')
 	assertEquals(document.operations.receiveRadioControl.action, 'receive')
+	assertEquals(document.operations.receiveRadioControl.channel.$ref, '#/channels/radioLivestreamControl')
 	assertEquals(document.operations.receiveRadioData.action, 'receive')
+	assertEquals(document.operations.sendRadioControl.title, 'Publish radio.control on inbox/{institutionId}')
 
 	assertEquals(document.components.messages.radioControl.payload, {
 		$ref: '#/components/schemas/eventV1RadioControlPostBody',

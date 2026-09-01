@@ -61,9 +61,20 @@ const schemaRef = (id: keyof typeof schemaById) => ({ $ref: `#/components/schema
  */
 const messageRef = (id: 'radioControl' | 'radioData') => ({ $ref: `#/components/messages/${id}` })
 
+const inboxTopic = 'inbox/{institutionId}'
+const radioControlTopic = 'radio/{livestreamId}/control'
+const radioDataTopic = 'radio/{livestreamId}/data'
+
+/**
+ * Build a `$ref` pointer into `channels`.
+ * @param channelId - Stable camelCase channel id (not the MQTT path)
+ * @returns AsyncAPI `$ref` object
+ */
+const channelRef = (channelId: string) => ({ $ref: `#/channels/${channelId}` })
+
 /**
  * Build a `$ref` pointer into a channel's message map.
- * @param channelId - Channel component id
+ * @param channelId - Stable camelCase channel id
  * @param messageId - Message name on that channel
  * @returns AsyncAPI `$ref` object
  */
@@ -131,8 +142,8 @@ export const buildAsyncApiDocument = () => {
 		},
 		channels: {
 			inboxInstitution: {
-				address: 'inbox/{institutionId}',
-				title: 'Institution inbox',
+				address: inboxTopic,
+				title: inboxTopic,
 				description:
 					'Publisher write path. Send `radio.control` and `radio.data` here. ' +
 					'The sidecar validates the payload and republishes onto `radio/{livestreamId}/…`.',
@@ -148,8 +159,8 @@ export const buildAsyncApiDocument = () => {
 				},
 			},
 			radioLivestreamControl: {
-				address: 'radio/{livestreamId}/control',
-				title: 'Validated radio.control',
+				address: radioControlTopic,
+				title: radioControlTopic,
 				description: 'Sidecar output. Retained so a late joiner sees the current control bits. QoS 1, durable.',
 				parameters: {
 					livestreamId: {
@@ -162,8 +173,8 @@ export const buildAsyncApiDocument = () => {
 				},
 			},
 			radioLivestreamData: {
-				address: 'radio/{livestreamId}/data',
-				title: 'Validated radio.data',
+				address: radioDataTopic,
+				title: radioDataTopic,
 				description: 'Sidecar output. Cyclic radiotext / dynamic label / RT+. Retained as the latest cycle. QoS 1.',
 				parameters: {
 					livestreamId: {
@@ -179,42 +190,43 @@ export const buildAsyncApiDocument = () => {
 		operations: {
 			sendRadioControl: {
 				action: 'send',
-				title: 'Publish radio.control',
+				title: `Publish radio.control on ${inboxTopic}`,
 				description: 'Publish a control-bit change to the institution inbox. Not accepted on HTTPS `POST /events`.',
-				channel: { $ref: '#/channels/inboxInstitution' },
+				channel: channelRef('inboxInstitution'),
 				messages: [channelMessageRef('inboxInstitution', 'radioControl')],
 				tags: [{ name: 'publish' }],
 				bindings: mqttSendBinding,
 			},
 			sendRadioData: {
 				action: 'send',
-				title: 'Publish radio.data',
+				title: `Publish radio.data on ${inboxTopic}`,
 				description:
 					'Publish a cyclic radiotext / RT+ bundle to the institution inbox. Not accepted on HTTPS `POST /events`.',
-				channel: { $ref: '#/channels/inboxInstitution' },
+				channel: channelRef('inboxInstitution'),
 				messages: [channelMessageRef('inboxInstitution', 'radioData')],
 				tags: [{ name: 'publish' }],
 				bindings: mqttSendBinding,
 			},
 			receiveRadioControl: {
 				action: 'receive',
-				title: 'Subscribe radio.control',
+				title: `Subscribe ${radioControlTopic}`,
 				description: 'Validated control bits for one livestream. Retained; QoS 1.',
-				channel: { $ref: '#/channels/radioLivestreamControl' },
+				channel: channelRef('radioLivestreamControl'),
 				messages: [channelMessageRef('radioLivestreamControl', 'radioControl')],
 				tags: [{ name: 'subscribe' }],
 				bindings: mqttRetainBinding,
 			},
 			receiveRadioData: {
 				action: 'receive',
-				title: 'Subscribe radio.data',
+				title: `Subscribe ${radioDataTopic}`,
 				description: 'Validated radiotext / dynamic label / RT+ for one livestream. Retained latest cycle; QoS 1.',
-				channel: { $ref: '#/channels/radioLivestreamData' },
+				channel: channelRef('radioLivestreamData'),
 				messages: [channelMessageRef('radioLivestreamData', 'radioData')],
 				tags: [{ name: 'subscribe' }],
 				bindings: mqttRetainBinding,
 			},
 		},
+
 		components: {
 			securitySchemes: {
 				mqttUserPassword: {

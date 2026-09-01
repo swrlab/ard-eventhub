@@ -32,7 +32,7 @@ test-with-env:
 # run hurl integration tests against a host (default: local ingest)
 [group('LOCAL')]
 integration host="http://localhost:8080":
-	just env "just integration-with-env {{host}}"
+	just env "just integration-with-env {{ host }}"
 
 # run hurl suite (envs need to be provided: TEST_USER, TEST_USER_PW)
 integration-with-env host:
@@ -45,7 +45,7 @@ integration-with-env host:
 	start_expired="$(bun -e 'console.log(new Date(Date.now() - 20 * 60 * 1000).toISOString())')"
 	start_invalid="${start}00"
 	hurl \
-		--variable host="{{host}}" \
+		--variable host="{{ host }}" \
 		--variable email="$TEST_USER" \
 		--variable password="$TEST_USER_PW" \
 		--variable start="$start" \
@@ -89,29 +89,29 @@ license:
 	bun x license-compliance -f json -r detailed
 
 # regenerate openapi.json from Zod schemas
-[group('LOCAL')]
+[group('DOCS')]
 openapi: asyncapi
 	bun run ./src/openapi/generate.ts
 	bun x oxfmt openapi.json
 
 # regenerate asyncapi.json from Zod schemas (Eventhub Connect / MQTT)
-[group('LOCAL')]
+[group('DOCS')]
 asyncapi:
 	bun run ./src/asyncapi/generate.ts
 	bun x oxfmt asyncapi.json
 
 # serve the documentation (dev server with hot reload)
-[group('LOCAL')]
+[group('DOCS')]
 docs: openapi
 	bun x blume dev
 
 # build the documentation to dist/
-[group('LOCAL')]
+[group('DOCS')]
 docs-build: openapi
 	bun x blume build
 
 # preview the built documentation
-[group('LOCAL')]
+[group('DOCS')]
 docs-preview:
 	bun x blume preview
 

@@ -34,7 +34,7 @@
 	"channels": {
 		"inboxInstitution": {
 			"address": "inbox/{institutionId}",
-			"title": "Institution inbox",
+			"title": "inbox/{institutionId}",
 			"description": "Publisher write path. Send `radio.control` and `radio.data` here. The sidecar validates the payload and republishes onto `radio/{livestreamId}/…`.",
 			"parameters": {
 				"institutionId": {
@@ -53,7 +53,7 @@
 		},
 		"radioLivestreamControl": {
 			"address": "radio/{livestreamId}/control",
-			"title": "Validated radio.control",
+			"title": "radio/{livestreamId}/control",
 			"description": "Sidecar output. Retained so a late joiner sees the current control bits. QoS 1, durable.",
 			"parameters": {
 				"livestreamId": {
@@ -69,7 +69,7 @@
 		},
 		"radioLivestreamData": {
 			"address": "radio/{livestreamId}/data",
-			"title": "Validated radio.data",
+			"title": "radio/{livestreamId}/data",
 			"description": "Sidecar output. Cyclic radiotext / dynamic label / RT+. Retained as the latest cycle. QoS 1.",
 			"parameters": {
 				"livestreamId": {
@@ -87,7 +87,7 @@
 	"operations": {
 		"sendRadioControl": {
 			"action": "send",
-			"title": "Publish radio.control",
+			"title": "Publish radio.control on inbox/{institutionId}",
 			"description": "Publish a control-bit change to the institution inbox. Not accepted on HTTPS `POST /events`.",
 			"channel": {
 				"$ref": "#/channels/inboxInstitution"
@@ -111,7 +111,7 @@
 		},
 		"sendRadioData": {
 			"action": "send",
-			"title": "Publish radio.data",
+			"title": "Publish radio.data on inbox/{institutionId}",
 			"description": "Publish a cyclic radiotext / RT+ bundle to the institution inbox. Not accepted on HTTPS `POST /events`.",
 			"channel": {
 				"$ref": "#/channels/inboxInstitution"
@@ -135,7 +135,7 @@
 		},
 		"receiveRadioControl": {
 			"action": "receive",
-			"title": "Subscribe radio.control",
+			"title": "Subscribe radio/{livestreamId}/control",
 			"description": "Validated control bits for one livestream. Retained; QoS 1.",
 			"channel": {
 				"$ref": "#/channels/radioLivestreamControl"
@@ -159,7 +159,7 @@
 		},
 		"receiveRadioData": {
 			"action": "receive",
-			"title": "Subscribe radio.data",
+			"title": "Subscribe radio/{livestreamId}/data",
 			"description": "Validated radiotext / dynamic label / RT+ for one livestream. Retained latest cycle; QoS 1.",
 			"channel": {
 				"$ref": "#/channels/radioLivestreamData"
