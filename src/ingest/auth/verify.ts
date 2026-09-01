@@ -1,7 +1,7 @@
 import type { MiddlewareHandler } from 'hono'
 import type { AuthUser } from '#types'
-import logger from '@frytg/logger'
 import type { RequestError } from '../../schemas/common.ts'
+import logger from '@frytg/logger'
 import { firebaseVerifyToken } from '../../utils/firebase/verify-token.ts'
 import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 import { badRequest } from '../../utils/response/bad-request.ts'

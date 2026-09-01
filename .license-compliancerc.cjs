@@ -103,6 +103,8 @@ module.exports = {
 		'CC0-1.0',
 	],
 	exclude: [
+		'@cross/test',
+		'@std/assert',
 		'@std/ulid',
 		'doctrine',
 		'hdr-histogram-js',

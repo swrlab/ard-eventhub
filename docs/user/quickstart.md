@@ -57,7 +57,7 @@ Wenn du Eventhub benutzt, um Events aus einer anderen Anstalt zu empfangen (z.B.
 
 Das ist essentiell, da deine Abonnenten alle Events deines Senders erhalten müssen – inklusive der von anderen Sendern erneut gesendeten Events. Sie wissen möglicherweise nicht, dass du das Programm von einer anderen Station weiterverbreitest und nutzen lediglich ein Abonnement für deinen Sender, um alle Events zu empfangen.
 
-Für Dienste wie die ARD Audiothek ist dies wichtig, andernfalls verfügt dein Sender möglicherweise über unvollständige Live-Metadaten, wenn du andere Sender erneut ausstrahlst.
+Für Dienste wie ARD Sounds ist dies wichtig, andernfalls verfügt dein Sender möglicherweise über unvollständige Live-Metadaten, wenn du andere Sender erneut ausstrahlst.
 
 In diesem Fall ist es wichtig, sicherzustellen, dass deine interne Filterung korrekt funktioniert, wenn du Events von anderen Sendern empfängst, und diese nur zu veröffentlichen, wenn der Sender tatsächlich auf Sendung ist. Andernfalls könnte es zu einer Schleife kommen.
 

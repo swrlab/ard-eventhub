@@ -26,16 +26,16 @@ Regenerate OpenAPI for docs with `just openapi` (Zod schemas → `openapi.json` 
 
 - **Tech Stack:** Bun, Node.js, TypeScript (strict mode), Hono, Zod, Google Cloud Platform
 - **File Structure:**
-	- `src/ingest/` – Ingest service (receives events, manages subscriptions)
-	- `src/schemas/` – Zod request/response schemas (runtime validation + OpenAPI)
-	- `src/openapi/` – OpenAPI document assembly / `openapi.json` generator
-	- `src/utils/` – Shared utilities (Pub/Sub, Datastore, Firebase, plugins)
-	- `cli/` – Command-line utilities
-	- `config/` – Configuration files
-	- `integration/` – Hurl HTTP suite (`ingest-api.hurl`) mirroring `src/ingest/server.test.ts` (run with `just integration`)
-	- `docs/` – Documentation (Markdown, built with Blume)
-	- `blume.config.ts` – Docs site configuration
-	- `tests/` – Test files (co-located with source files using `.test.ts`)
+  - `src/ingest/` – Ingest service (receives events, manages subscriptions)
+  - `src/schemas/` – Zod request/response schemas (runtime validation + OpenAPI)
+  - `src/openapi/` – OpenAPI document assembly / `openapi.json` generator
+  - `src/utils/` – Shared utilities (Pub/Sub, Datastore, Firebase, plugins)
+  - `cli/` – Command-line utilities
+  - `config/` – Configuration files
+  - `integration/` – Hurl HTTP suite (`ingest-api.hurl`) mirroring `src/ingest/server.test.ts` (run with `just integration`)
+  - `docs/` – Documentation (Markdown, built with Blume)
+  - `blume.config.ts` – Docs site configuration
+  - `tests/` – Test files (co-located with source files using `.test.ts`)
 
 ## Code Style
 

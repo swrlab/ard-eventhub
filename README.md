@@ -23,6 +23,10 @@ just docs-build  # static build to dist/
 - Open an [issue](https://github.com/swrlab/ard-eventhub/issues) for problems, that you might experience
 - Join [ard-eventhub/discussions](https://github.com/swrlab/ard-eventhub/discussions) for ongoing topics about formats, etc.
 
+## Service
+
+The Ingest service is responsible for receiving and publishing events and managing subscriptions. You'll find the core code in [`./src/ingest/`](./src/ingest/), with shared utilities in [`./src/utils/`](./src/utils/).
+
 ## Modules
 
 This project will include two modules: Ingest and API. The first development step is to only supply the Ingest service. Each module uses their own endpoints and checks, while some parts are shared across both (`utils`). They also both have their own Dockerfiles to start the appropriate service.
