@@ -5,6 +5,7 @@
 
 import { Buffer } from 'node:buffer'
 import process from 'node:process'
+import { getRequiredEnv } from '@frytg/check-required-env/get'
 
 /**
  * Encode the given string into its base64 representation.
@@ -40,48 +41,21 @@ interface EnvConfig<T> {
 }
 
 /**
- * Error thrown when a required environment variable is missing
- */
-export class MissingEnvVarError extends Error {
-	constructor(key: string) {
-		super(`Missing required environment variable: ${key}`)
-		this.name = 'MissingEnvVarError'
-	}
-}
-
-/**
- * Env lookup source. Tests stub `get` with sinon instead of touching `process.env`.
- */
-export const envLookup = {
-	/**
-	 * Read a raw environment variable value.
-	 * @param key - Environment variable name
-	 * @returns The raw string value, or `undefined` if unset
-	 */
-	get(key: string): string | undefined {
-		return process.env[key]
-	},
-}
-
-/**
  * Get an environment variable with proper typing
  *
  * @param key - The name of the environment variable
  * @param config - Configuration options
  * @returns The value of the environment variable with proper typing
- * @throws {MissingEnvVarError} When a required environment variable is missing
+ * @throws {Error} When a required environment variable is missing
  * @throws {Error} When JSON parsing fails
  */
 export function getEnv<T = string>(key: string, config: EnvConfig<T> = {}): T {
 	const { defaultValue, required = false, type = 'string' } = config
 
-	const value = envLookup.get(key)
+	const value = required ? getRequiredEnv(key) : process.env[key]
 
 	if (value === undefined) {
-		if (required) {
-			throw new MissingEnvVarError(key)
-		}
-		if (!required && defaultValue === undefined) {
+		if (defaultValue === undefined) {
 			console.info('There is no defaultValue for optional env key', key)
 		}
 		return defaultValue as T
@@ -120,27 +94,12 @@ export function getEnv<T = string>(key: string, config: EnvConfig<T> = {}): T {
 }
 
 /**
- * Get a string environment variable
- *
- * @param key - The name of the environment variable
- * @param defaultValue - Default value if the environment variable is not set
- * @param required - Whether the environment variable is required
- * @returns The string value of the environment variable
- */
-export function getEnvString(key: string, defaultValue?: string, required = true): string | never {
-	if (required === false && defaultValue === undefined) {
-		throw new Error('Missing default value for optional env string.')
-	}
-	return getEnv<string>(key, { defaultValue, required, type: 'string' })
-}
-
-/**
  * Get a JSON object from a base64 environment variable string.
  *
  * @param key - The name of the environment variable
  * @param defaultValue - Default value if the environment variable is not set
  * @param required - Whether the environment variable is required
- * @throws {MissingEnvVarError} When a required environment variable is missing
+ * @throws {Error} When a required environment variable is missing
  * @returns The string value of the environment variable
  */
 export function getEnvBase64<T>(key: string, defaultValue?: T, required = true): T {

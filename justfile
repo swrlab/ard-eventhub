@@ -1,4 +1,5 @@
 import 'just/encryption.just'
+import 'just/mqtt.just'
 
 # run just in the CLI to see the list of shortcuts
 _default:

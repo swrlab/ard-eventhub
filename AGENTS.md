@@ -30,13 +30,15 @@ Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `o
   - `src/schemas/` – Zod request/response schemas (runtime validation + OpenAPI)
   - `src/openapi/` – OpenAPI document assembly / `openapi.json` generator
   - `src/asyncapi/` – AsyncAPI document assembly / `asyncapi.json` generator (Eventhub Connect / MQTT)
-  - `src/utils/` – Shared utilities (Pub/Sub, Datastore, Firebase, plugins)
+  - `src/utils/` – Shared utilities (Pub/Sub, MQTT inbox hop, Datastore, Firebase, plugins)
   - `cli/` – Command-line utilities
-  - `config/` – Configuration files
+  - `config/` – Application configuration (ARD prefixes, allow-lists)
+  - `infra/` – Deployed-upstream config (NanoMQ hop)
+  - `just/` – Split just recipes (`encryption.just`, `mqtt.just`)
   - `integration/` – Hurl HTTP suite (`ingest-api.hurl`) mirroring `src/ingest/server.test.ts` (run with `just integration`)
   - `docs/` – Documentation (Markdown, built with Blume)
   - `blume.config.ts` – Docs site configuration
-  - `tests/` – Test files (co-located with source files using `.test.ts`)
+  - `tests/` – Test files (co-located with source files using `.test.ts` extension)
 
 ## Code Style
 

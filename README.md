@@ -25,7 +25,7 @@ just docs-build  # static build to dist/
 
 ## Service
 
-The Ingest service is responsible for receiving and publishing events and managing subscriptions. You'll find the core code in [`./src/ingest/`](./src/ingest/), with shared utilities in [`./src/utils/`](./src/utils/).
+The Ingest service is responsible for receiving and publishing events and managing subscriptions. You'll find the core code in [`./src/ingest/`](./src/ingest/), with shared utilities in [`./src/utils/`](./src/utils/). NanoMQ hop files live in [`infra/nanomq/`](infra/nanomq/). Start a local broker with `just mqtt-up` (Apple `container` CLI).
 
 ## Modules
 
@@ -85,6 +85,7 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `google-auth-library`          | [Apache License 2.0](https://github.com/googleapis/google-auth-library-nodejs/blob/master/LICENSE) |
 | NPM     | `jsonwebtoken`                 | [MIT](https://github.com/auth0/node-jsonwebtoken/blob/master/LICENSE)                              |
 | NPM     | `luxon`                        | [MIT](https://github.com/moment/luxon/blob/master/LICENSE.md)                                      |
+| NPM     | `mqtt`                         | [MIT](https://github.com/mqttjs/MQTT.js/blob/main/LICENSE.md)                                      |
 | NPM     | `slug`                         | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                           |
 | NPM     | `ulid`                         | [MIT](https://github.com/ulid/javascript/blob/master/LICENSE)                                      |
 | NPM DEV | `oxfmt`                        | [MIT](https://github.com/oxc-project/oxc/blob/main/crates/oxfmt/LICENSE)                           |

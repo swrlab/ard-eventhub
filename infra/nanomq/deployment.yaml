@@ -1,0 +1,79 @@
+# Hand-apply sketch for the GCP NanoMQ hop. Rollout stays outside GitHub Actions,
+# same as ingest. Create the ConfigMap, TLS secret, and password secret before apply.
+#
+#   kubectl create configmap nanomq --from-file=nanomq.conf=infra/nanomq/nanomq.gcp.conf
+#   kubectl create secret generic nanomq-tls \
+#     --from-file=tls.crt=... --from-file=tls.key=... --from-file=ca.crt=...
+#   kubectl create secret generic nanomq-users \
+#     --from-file=nanomq_pwd.conf=<(printf '"ingest": "%s"\n"bridge": "%s"\n' "$INGEST_PW" "$BRIDGE_PW")
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nanomq
+  labels:
+    app: nanomq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nanomq
+  template:
+    metadata:
+      labels:
+        app: nanomq
+    spec:
+      containers:
+        - name: nanomq
+          image: emqx/nanomq:0.24.14-slim
+          args: ['--conf', '/etc/nanomq/nanomq.conf']
+          ports:
+            - name: mqtts
+              containerPort: 8883
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nanomq/nanomq.conf
+              subPath: nanomq.conf
+              readOnly: true
+            - name: users
+              mountPath: /etc/nanomq/nanomq_pwd.conf
+              subPath: nanomq_pwd.conf
+              readOnly: true
+            - name: tls
+              mountPath: /etc/nanomq/certs
+              readOnly: true
+          readinessProbe:
+            tcpSocket:
+              port: mqtts
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: mqtts
+            periodSeconds: 15
+      volumes:
+        - name: config
+          configMap:
+            name: nanomq
+        - name: users
+          secret:
+            secretName: nanomq-users
+        - name: tls
+          secret:
+            secretName: nanomq-tls
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nanomq
+  labels:
+    app: nanomq
+spec:
+  selector:
+    app: nanomq
+  ports:
+    - name: mqtts
+      port: 8883
+      targetPort: mqtts
+      protocol: TCP

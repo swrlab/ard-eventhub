@@ -1,29 +1,12 @@
 import process from 'node:process'
 import { test } from '@cross/test'
+import { getRequiredEnv } from '@frytg/check-required-env/get'
 import { DateTime } from '@frytg/dates'
-import { logger } from '@frytg/logger'
 import { assert, assertExists, assertGreater, assertStrictEquals } from '@std/assert'
 import { app } from './server.ts'
 
-/**
- * Log an error and exit the process when required test env is missing.
- * @param message - Error message to log
- */
-const exitWithError = (message: string) => {
-	logger.error({
-		message,
-		source: 'config',
-	})
-	process.exit(1)
-}
-
-// check required env vars
-if (!process.env.TEST_USER) exitWithError('TEST_USER not found')
-if (!process.env.TEST_USER_PW) exitWithError('TEST_USER_PW not found')
-
-// set test-user env vars
-const testUser = process.env.TEST_USER
-const testUserPass = process.env.TEST_USER_PW
+const testUser = getRequiredEnv('TEST_USER')
+const testUserPass = getRequiredEnv('TEST_USER_PW')
 const testUserReset = process.env.TEST_USER_RESET
 
 /** Parsed HTTP response for ingest tests. */
@@ -290,7 +273,7 @@ test(`POST ${eventPath}`, async (t) => {
 		})
 		testResponse(res, 400)
 		// restore for later shared-event steps
-		event.references[1].externalId = 'crid://dlf.de/article/1234567'
+		event.references[1]!.externalId = 'crid://dlf.de/article/1234567'
 	})
 
 	await t.step('publish a new event with length 0', async () => {
