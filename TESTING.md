@@ -11,6 +11,7 @@ In addition to the [ingest-env](../src/ingest/README.md#Environments), following
 
 - REQUIRED `TEST_USER` - test user email
 - REQUIRED `TEST_USER_PW` - test user password
+- REQUIRED `MQTT_BROKER_URL` - local NanoMQ hop (`mqtt://127.0.0.1:1883`). Start it with `just mqtt-up`.
 - OPTIONAL `TEST_USER_RESET` - set true for email reset (request limit)
 
 Locally these usually come from `.env.sops.yaml` via `just test`. CI injects them from `.env.ci.sops.yaml` with `sops exec-env`.

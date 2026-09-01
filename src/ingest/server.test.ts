@@ -290,7 +290,7 @@ test(`POST ${eventPath}`, async (t) => {
 		})
 		testResponse(res, 400)
 		// restore for later shared-event steps
-		event.references[1].externalId = 'crid://dlf.de/article/1234567'
+		event.references[1]!.externalId = 'crid://dlf.de/article/1234567'
 	})
 
 	await t.step('publish a new event with length 0', async () => {

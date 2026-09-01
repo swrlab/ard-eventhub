@@ -1,0 +1,55 @@
+import process from 'node:process'
+import mqtt from 'mqtt'
+import { MQTT_SUB_USAGE, parseMqttSubArgs } from './mqtt-sub-args.ts'
+
+const MQTT_V311 = 4
+
+const argv = process.argv.slice(2)
+if (argv.includes('--help') || argv.includes('-h')) {
+	console.error(MQTT_SUB_USAGE)
+	process.exit(0)
+}
+
+let target: ReturnType<typeof parseMqttSubArgs>
+try {
+	target = parseMqttSubArgs(argv)
+} catch (error) {
+	console.error(error instanceof Error ? error.message : error)
+	process.exit(1)
+}
+
+const brokerUrl = process.env.MQTT_BROKER_URL?.trim()
+if (!brokerUrl) {
+	console.error('MQTT_BROKER_URL is required')
+	process.exit(1)
+}
+const { topic } = target
+const printTopic = target.kind === 'all'
+
+const client = mqtt.connect(brokerUrl, {
+	protocolVersion: MQTT_V311,
+	clientId: `eventhub-mqtt-sub-${process.pid}`,
+	clean: true,
+})
+
+client.on('connect', () => {
+	client.subscribe(topic, { qos: 1 }, (error) => {
+		if (error) {
+			console.error(error)
+			process.exit(1)
+		}
+		console.error(`subscribed ${topic} on ${brokerUrl}`)
+	})
+})
+
+client.on('message', (messageTopic, payload) => {
+	if (printTopic) {
+		console.log(messageTopic)
+	}
+	console.log(payload.toString())
+})
+
+client.on('error', (error) => {
+	console.error(error)
+	process.exit(1)
+})

@@ -1,7 +1,7 @@
 import type { DTSKeys, RadioplayerApiKeys, Stage } from './schemas/config.ts'
 import { getEnvBase64, getEnvBoolean, getEnvNumber, getEnvString } from './utils/env.ts'
 
-// NOTE: all environment keys in this files are required and cause an error if missing.
+// NOTE: keys without a default are required and cause an error if missing.
 
 export const stage: Stage = getEnvString('STAGE') as Stage
 export const isLocal = getEnvBoolean('IS_LOCAL', false)
@@ -30,3 +30,9 @@ export const port = getEnvNumber('PORT', DEFAULT_HTTP_PORT)
  * `false` by default.
  */
 export const tracerEnabled = getEnvBoolean('DD_TRACER_ENABLED', false)
+
+/**
+ * MQTT broker connection string for the inbox dual-write hop.
+ * `mqtt://` or `mqtts://`, with optional `user:pass@` in the URL.
+ */
+export const mqttBrokerUrl = getEnvString('MQTT_BROKER_URL')
