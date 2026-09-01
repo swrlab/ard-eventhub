@@ -27,6 +27,7 @@ Der Event-Typ **`de.ard.eventhub.v1.radio.text`** (Radiotext / Live-Encoder-Text
 
 - Requests an den früheren Endpoint für Radiotext schlagen fehl bzw. sind nicht mehr in der OpenAPI spezifiziert.
 - Nutze weiterhin die Track-Events `de.ard.eventhub.v1.radio.track.playing` und `de.ard.eventhub.v1.radio.track.next`.
+- Der Nachfolger ist `de.ard.eventhub.v1.radio.data` (Radiotext, Dynamic Label, RT+). Dieser Typ ist **nur für Eventhub Connect / MQTT** vorgesehen und wird auf dem heutigen HTTPS-Ingest (`POST /events/…`) mit HTTP 400 abgelehnt. Siehe _Event-Types_.
 
 ## Response-Header `x-ard-eventhub-uid` entfernt
 

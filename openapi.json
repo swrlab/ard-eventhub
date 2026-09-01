@@ -1030,6 +1030,44 @@
 				"required": ["type", "externalId", "publisherId"],
 				"additionalProperties": false
 			},
+			"servicesUrn": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"pattern": "^urn:ard:(permanent-livestream|event-livestream):[a-z0-9]+$",
+						"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+						"description": "Pre-encoded ARD livestream URN"
+					},
+					"publisherId": {
+						"type": "string",
+						"pattern": "^urn:ard:publisher:[a-z0-9]+$",
+						"examples": ["urn:ard:publisher:75dbb3dace15f610"],
+						"description": "Pre-encoded ARD publisher URN"
+					},
+					"institutionId": {
+						"type": "string",
+						"pattern": "^urn:ard:institution:[a-z0-9]+$",
+						"examples": ["urn:ard:institution:a3004ff924ece1a2"],
+						"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+					},
+					"externalId": {
+						"deprecated": true,
+						"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+						"examples": ["crid://swr.de/123450"],
+						"type": "string"
+					},
+					"type": {
+						"deprecated": true,
+						"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+						"examples": ["PermanentLivestream"],
+						"type": "string",
+						"enum": ["EventLivestream", "PermanentLivestream"]
+					}
+				},
+				"required": ["id", "publisherId", "institutionId"],
+				"additionalProperties": false
+			},
 			"reference": {
 				"type": "object",
 				"properties": {
@@ -1349,6 +1387,233 @@
 							}
 						},
 						"additionalProperties": {}
+					}
+				}
+			},
+			"eventV1RadioControlPostBody": {
+				"type": "object",
+				"properties": {
+					"event": {
+						"description": "If set, it needs to match the published event class",
+						"examples": ["de.ard.eventhub.v1.radio.control"],
+						"type": "string",
+						"enum": ["de.ard.eventhub.v1.radio.control"]
+					},
+					"start": {
+						"type": "string",
+						"description": "ISO8601 compliant timestamp",
+						"examples": ["2020-01-19T06:00:00+01:00"]
+					},
+					"validUntil": {
+						"description": "Backstop TTL. Receivers drop the state when it passes. Omit for states with no natural expiry.",
+						"type": "string",
+						"examples": ["2020-01-19T06:00:00+01:00"]
+					},
+					"name": {
+						"type": "string",
+						"description": "Control element identifier (TA, TP, EON, Regio, …). Not an enum — new functions need no release.",
+						"examples": ["TA"]
+					},
+					"state": {
+						"type": "boolean",
+						"description": "New control state",
+						"examples": [true]
+					},
+					"services": {
+						"type": "array",
+						"items": {
+							"$ref": "#/definitions/servicesUrn"
+						},
+						"description": "URN-only service identifiers (Connect / MQTT)"
+					}
+				},
+				"required": ["start", "name", "state", "services"],
+				"additionalProperties": false,
+				"description": "Eventhub Connect radio.control event. Not accepted on the HTTPS POST /events API.",
+				"definitions": {
+					"servicesUrn": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string",
+								"pattern": "^urn:ard:(permanent-livestream|event-livestream):[a-z0-9]+$",
+								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"description": "Pre-encoded ARD livestream URN"
+							},
+							"publisherId": {
+								"type": "string",
+								"pattern": "^urn:ard:publisher:[a-z0-9]+$",
+								"examples": ["urn:ard:publisher:75dbb3dace15f610"],
+								"description": "Pre-encoded ARD publisher URN"
+							},
+							"institutionId": {
+								"type": "string",
+								"pattern": "^urn:ard:institution:[a-z0-9]+$",
+								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
+								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+							},
+							"externalId": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["crid://swr.de/123450"],
+								"type": "string"
+							},
+							"type": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["PermanentLivestream"],
+								"type": "string",
+								"enum": ["EventLivestream", "PermanentLivestream"]
+							}
+						},
+						"required": ["id", "publisherId", "institutionId"],
+						"additionalProperties": false
+					}
+				}
+			},
+			"eventV1RadioDataPostBody": {
+				"type": "object",
+				"properties": {
+					"event": {
+						"description": "If set, it needs to match the published event class",
+						"examples": ["de.ard.eventhub.v1.radio.data"],
+						"type": "string",
+						"enum": ["de.ard.eventhub.v1.radio.data"]
+					},
+					"start": {
+						"type": "string",
+						"description": "ISO8601 compliant timestamp",
+						"examples": ["2020-01-19T06:00:00+01:00"]
+					},
+					"cycle": {
+						"type": "integer",
+						"minimum": 0,
+						"exclusiveMinimum": true,
+						"maximum": 9007199254740991,
+						"description": "Seconds between repeats from the source",
+						"examples": [8]
+					},
+					"data": {
+						"type": "array",
+						"items": {
+							"oneOf": [
+								{
+									"type": "object",
+									"properties": {
+										"type": {
+											"type": "string",
+											"enum": ["radiotext"]
+										},
+										"id": {
+											"type": "number",
+											"enum": [0]
+										},
+										"value": {
+											"type": "string"
+										},
+										"description": {
+											"type": "string"
+										}
+									},
+									"required": ["type", "id", "value"],
+									"additionalProperties": false
+								},
+								{
+									"type": "object",
+									"properties": {
+										"type": {
+											"type": "string",
+											"enum": ["dynlabel"]
+										},
+										"id": {
+											"type": "number",
+											"enum": [0]
+										},
+										"value": {
+											"type": "string"
+										},
+										"description": {
+											"type": "string"
+										}
+									},
+									"required": ["type", "id", "value"],
+									"additionalProperties": false
+								},
+								{
+									"type": "object",
+									"properties": {
+										"type": {
+											"type": "string",
+											"enum": ["rtdlplus"]
+										},
+										"id": {
+											"type": "integer",
+											"minimum": 0,
+											"maximum": 63
+										},
+										"value": {
+											"type": "string"
+										},
+										"description": {
+											"type": "string"
+										}
+									},
+									"required": ["type", "id", "value"],
+									"additionalProperties": false
+								}
+							]
+						},
+						"description": "Radiotext, dynamic label, and RT+/DL+ fields. Any combination, any length."
+					},
+					"services": {
+						"type": "array",
+						"items": {
+							"$ref": "#/definitions/servicesUrn"
+						},
+						"description": "URN-only service identifiers (Connect / MQTT)"
+					}
+				},
+				"required": ["start", "cycle", "data", "services"],
+				"additionalProperties": false,
+				"description": "Eventhub Connect radio.data event. Not accepted on the HTTPS POST /events API.",
+				"definitions": {
+					"servicesUrn": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string",
+								"pattern": "^urn:ard:(permanent-livestream|event-livestream):[a-z0-9]+$",
+								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"description": "Pre-encoded ARD livestream URN"
+							},
+							"publisherId": {
+								"type": "string",
+								"pattern": "^urn:ard:publisher:[a-z0-9]+$",
+								"examples": ["urn:ard:publisher:75dbb3dace15f610"],
+								"description": "Pre-encoded ARD publisher URN"
+							},
+							"institutionId": {
+								"type": "string",
+								"pattern": "^urn:ard:institution:[a-z0-9]+$",
+								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
+								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+							},
+							"externalId": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["crid://swr.de/123450"],
+								"type": "string"
+							},
+							"type": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["PermanentLivestream"],
+								"type": "string",
+								"enum": ["EventLivestream", "PermanentLivestream"]
+							}
+						},
+						"required": ["id", "publisherId", "institutionId"],
+						"additionalProperties": false
 					}
 				}
 			},
