@@ -67,8 +67,14 @@ test('processEvent publishes the enriched event to the MQTT inbox', async () => 
 
 		assertEquals(publishInbox.calledOnce, true)
 		assertEquals(publishInbox.firstCall.args[0], INSTITUTION_ID)
-		const payload = publishInbox.firstCall.args[1] as { id: string }
+		const payload = publishInbox.firstCall.args[1] as {
+			id: string
+			services: Array<{ topic?: { messageId?: string | null } }>
+		}
 		assertMatch(payload.id, new RegExp(`^${INSTITUTION_ID}-`))
+		assertEquals(payload === result.event, false)
+		assertEquals(payload.services[0]?.topic?.messageId, undefined)
+		assertEquals(result.event.services[0]?.topic?.messageId, 'pub-1')
 		assertEquals(result.statuses.published, 1)
 		assertEquals(result.statuses.failed, 0)
 	} finally {

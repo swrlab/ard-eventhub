@@ -179,7 +179,7 @@ export const processEvent = async (params: {
 	// generate unique Id from the institution id and a random ULID
 	message.id = `${user.institution.id}-${ulid()}`
 
-	void mqttInbox.publish(user.institution.id, message).catch((error: unknown) => {
+	void mqttInbox.publish(user.institution.id, structuredClone(message)).catch((error: unknown) => {
 		logger.warning({
 			message: 'mqtt inbox publish failed',
 			source,

@@ -1,4 +1,5 @@
 import process from 'node:process'
+import { getRequiredEnv } from '@frytg/check-required-env/get'
 import mqtt from 'mqtt'
 import { MQTT_SUB_USAGE, parseMqttSubArgs } from './mqtt-sub-args.ts'
 
@@ -18,11 +19,7 @@ try {
 	process.exit(1)
 }
 
-const brokerUrl = process.env.MQTT_BROKER_URL?.trim()
-if (!brokerUrl) {
-	console.error('MQTT_BROKER_URL is required')
-	process.exit(1)
-}
+const brokerUrl = getRequiredEnv('MQTT_BROKER_URL').trim()
 const { topic } = target
 const printTopic = target.kind === 'all'
 

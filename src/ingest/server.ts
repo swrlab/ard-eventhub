@@ -5,6 +5,7 @@ import { serviceUrl, userAgent, version } from '#config'
 import { isLocal, port, serviceName } from '#env'
 import { getARDFeed } from '../utils/ard-feed.ts'
 import { getSafeHeaders } from '../utils/get-safe-headers.ts'
+import { startMqttClient } from '../utils/mqtt/_client.ts'
 import { router } from './router.ts'
 
 await getARDFeed()
@@ -32,6 +33,7 @@ app.route('/', router)
 
 // Run the server if this file is invoked directly
 if (import.meta.main) {
+	await startMqttClient()
 	Bun.serve({
 		fetch: app.fetch,
 		port: port ?? 8080,

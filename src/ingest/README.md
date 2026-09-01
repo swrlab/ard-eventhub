@@ -62,7 +62,7 @@ GitHub Actions builds and pushes the Docker image to the container registry. Dep
 
 ## Local MQTT hop
 
-Ingest dual-writes each accepted event to `inbox/{institutionId}` on NanoMQ. `MQTT_BROKER_URL` is required, including for `just test` (local hop). Pub/Sub stays the path of record. Use Apple's `container` CLI, not `docker`.
+Ingest dual-writes each accepted event to `inbox/{institutionId}` on NanoMQ. `MQTT_BROKER_URL` is required, including for `just test` (local hop). Pub/Sub stays the path of record. Locally use Apple's `container` CLI (`just mqtt-up`), not `docker`. CI starts the same image with `just mqtt-up-docker`.
 
 ```sh
 container system start   # once, if `container` says the apiserver is not running
