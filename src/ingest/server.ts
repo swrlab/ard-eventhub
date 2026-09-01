@@ -1,4 +1,4 @@
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { Hono } from 'hono'
 import { compress } from 'hono/compress'
 import { serviceUrl, userAgent, version } from '#config'

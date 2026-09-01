@@ -1,6 +1,6 @@
 import type { Context } from 'hono'
 import type { AuthUser } from '#types'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 import { getSubscriptions } from '../../utils/pubsub/get-subscriptions.ts'
 import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'

@@ -1,7 +1,7 @@
 import process from 'node:process'
 import { test } from '@cross/test'
 import { DateTime } from '@frytg/dates'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { assert, assertExists, assertGreater, assertStrictEquals } from '@std/assert'
 import { app } from './server.ts'
 

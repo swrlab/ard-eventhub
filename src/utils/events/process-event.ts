@@ -6,7 +6,7 @@ import type {
 	EventPluginResult,
 	EventProcessResult,
 } from '../../schemas/events.ts'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { ulid } from 'ulid'
 import { pubSubTopicSelf } from '#config'
 import { pubsubBuildId } from '../pubsub/build-id.ts'

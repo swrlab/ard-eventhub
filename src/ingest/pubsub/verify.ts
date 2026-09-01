@@ -1,5 +1,5 @@
 import type { MiddlewareHandler } from 'hono'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { OAuth2Client } from 'google-auth-library'
 import { serviceAccountEmail } from '#env'
 import { getSafeHeaders } from '../../utils/get-safe-headers.ts'

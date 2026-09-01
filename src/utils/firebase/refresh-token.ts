@@ -1,4 +1,4 @@
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { decode } from 'jsonwebtoken'
 import { defaultHeaders } from '#config'
 import { firebaseAPIKey } from '#env'

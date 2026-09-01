@@ -1,6 +1,6 @@
 import type { MiddlewareHandler } from 'hono'
 import type { AuthUser } from '#types'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { eventV1PostBody, isConnectEventName } from '../../schemas/events.ts'
 import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 import { badRequest as responseBadRequest } from '../../utils/response/bad-request.ts'

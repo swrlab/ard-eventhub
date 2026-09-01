@@ -1,5 +1,5 @@
 import { test } from '@cross/test'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { assertEquals, assertStrictEquals } from '@std/assert'
 import { Hono } from 'hono'
 import { createSandbox } from 'sinon'

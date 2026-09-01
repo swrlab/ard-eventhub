@@ -2,7 +2,7 @@ import type { ArdFeed, ArdLivestream } from '#types'
 import fs from 'node:fs'
 import process from 'node:process'
 import { getMs, getMsOffset } from '@frytg/dates'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { ardFeedUrl } from '#env'
 
 const DOWNLOAD_TO_FILE = false
