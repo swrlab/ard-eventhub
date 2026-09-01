@@ -1,6 +1,6 @@
 import type { DTSKeys, RadioplayerApiKeys, Stage } from './schemas/config.ts'
 import { getRequiredEnv } from '@frytg/check-required-env/get'
-import { getEnvBase64, getEnvBoolean, getEnvNumber } from './utils/env.ts'
+import { getEnv, getEnvBase64, getEnvBoolean, getEnvNumber } from './utils/env.ts'
 
 // NOTE: keys without a default are required and cause an error if missing.
 
@@ -37,3 +37,8 @@ export const tracerEnabled = getEnvBoolean('DD_TRACER_ENABLED', false)
  * `mqtt://` or `mqtts://`, with optional `user:pass@` in the URL.
  */
 export const mqttBrokerUrl = getRequiredEnv('MQTT_BROKER_URL')
+/**
+ * Optional hop CA for mqtts://. PEM text, or a path to a PEM file.
+ * Unset for local `mqtt://`. GKE mounts `eventhub-nanomq-tls` `ca.crt` and points here.
+ */
+export const mqttTlsCa = getEnv<string>('MQTT_TLS_CA', { defaultValue: '' })

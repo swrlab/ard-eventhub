@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat: add `radio.control` and `radio.data` Zod schemas (Eventhub Connect / MQTT; rejected on HTTPS POST)
 - feat: generate AsyncAPI 3 spec from those Zod schemas (`just asyncapi`, Blume `/events`)
 - feat: dual-write accepted HTTPS events to MQTT `inbox/{institutionId}` (NanoMQ hop; Pub/Sub unchanged)
+- feat: trust optional `MQTT_TLS_CA` (PEM or file path) when connecting to a private mqtts:// hop
 - ci: start NanoMQ in ingest test jobs so `MQTT_BROKER_URL` round-trips against a live hop
 
 ## [3.0.0-beta.1] - 2026-08-10

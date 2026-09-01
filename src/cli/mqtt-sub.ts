@@ -1,6 +1,7 @@
 import process from 'node:process'
 import { getRequiredEnv } from '@frytg/check-required-env/get'
 import mqtt from 'mqtt'
+import { mqttTlsConnectOptions } from '../utils/mqtt/tls-ca.ts'
 import { MQTT_SUB_USAGE, parseMqttSubArgs } from './mqtt-sub-args.ts'
 
 const MQTT_V311 = 4
@@ -27,6 +28,7 @@ const client = mqtt.connect(brokerUrl, {
 	protocolVersion: MQTT_V311,
 	clientId: `eventhub-mqtt-sub-${process.pid}`,
 	clean: true,
+	...mqttTlsConnectOptions(process.env.MQTT_TLS_CA ?? ''),
 })
 
 client.on('connect', () => {
