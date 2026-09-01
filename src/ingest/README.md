@@ -15,6 +15,7 @@ Several environment variables need to be set in `.env` config in order to run th
 - REQUIRED `STAGE` - can be one of the Stages below to switch several settings
 - REQUIRED `MQTT_BROKER_URL` - MQTT hop connection string (`mqtt://127.0.0.1:1883` locally). Put credentials in the URL when the broker needs them (`mqtts://user:pass@host:8883`). A failed publish never fails the HTTP response.
 - OPTIONAL `MQTT_TLS_CA` - PEM of the hop CA, or a path to that PEM. Needed for `mqtts://` against a private CA (GKE NanoMQ). Omit for local `mqtt://`.
+- OPTIONAL `INGEST_PUBLISH_PLUGINS` - must be the exact string `true` to publish DTS / Radioplayer jobs to the internal Pub/Sub topic. Unset or any other value (`1`, `TRUE`, `false`) leaves dispatch off. Independent of per-event `plugins[].isDeactivated`. Restart the process after changing it. The flag is logged on boot and on every processed event as `ingestPublishPlugins`.
 - OPTIONAL `PORT` - override server port setting, default is 8080
 - OPTIONAL `DEBUG` - set true to enable more detailed logging
 

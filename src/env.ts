@@ -33,6 +33,16 @@ export const port = getEnvNumber('PORT', DEFAULT_HTTP_PORT)
 export const tracerEnabled = getEnvBoolean('DD_TRACER_ENABLED', false)
 
 /**
+ * Whether ingest publishes plugin jobs to the internal Pub/Sub topic.
+ * Only the exact string `true` enables it. Unset, `1`, `TRUE`, and `false` all leave it off.
+ * Read at call time so a process restart (or a test) can flip it without re-importing this module.
+ * Independent of per-event `plugins[].isDeactivated`.
+ * @returns True when plugin job dispatch is on
+ */
+export const isIngestPublishPluginsEnabled = (): boolean =>
+	getEnv<string>('INGEST_PUBLISH_PLUGINS', { defaultValue: '' }) === 'true'
+
+/**
  * MQTT broker connection string for the inbox dual-write hop.
  * `mqtt://` or `mqtts://`, with optional `user:pass@` in the URL.
  */

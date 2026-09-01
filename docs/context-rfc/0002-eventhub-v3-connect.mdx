@@ -1773,10 +1773,12 @@ step 5 is ordered by dependency.
    same normalized body goes to Pub/Sub, whose subscribers still read them, so removing them here
    would break the legacy path. Mark both `deprecated` in the schema and regenerate OpenAPI
    ([§12.4](#124-identifiers)).
-4. **Plugin publishing feature flag in ingest.** A per-target switch held in **Datastore, read at
-   runtime with a short cache** — step 16 flips a target mid-migration and must not need a deploy to
-   do it, or to undo it. Distinct from the existing per-event `plugins[].isDeactivated`, which is a
-   publisher's choice about one event; this one decides whether GCP dispatches that target at all.
+4. **Plugin publishing feature flag in ingest.** `INGEST_PUBLISH_PLUGINS` must be the exact string
+   `true` to dispatch DTS / Radioplayer jobs to the internal Pub/Sub topic. Anything else (unset,
+   `1`, `TRUE`, `false`) leaves dispatch off. Distinct from the existing per-event
+   `plugins[].isDeactivated`, which is a publisher's choice about one event; this one decides
+   whether GCP dispatches plugin targets at all. A process restart picks up a change. Step 16 flips
+   this when the CN adapters take over.
 5. **VM infrastructure.** Three VMs — BAD, STG, MNZ — on NixOS with K3S, a local ZOT registry and
    storage sized for JetStream. **Measure inter-zone RTT while the nodes are fresh**; it is the input
    the [latency budget](#92-the-220-ms-budget) depends on. **File both requests in

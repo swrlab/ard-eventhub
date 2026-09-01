@@ -1,4 +1,6 @@
 import type { ArdPublisher, AuthUser } from '#types'
+import type { EventhubV1RadioPostBody } from '../../schemas/events.ts'
+import process from 'node:process'
 import { test } from '@cross/test'
 import { DateTime } from '@frytg/dates'
 import { logger } from '@frytg/logger'
@@ -6,7 +8,7 @@ import { assertEquals, assertExists, assertMatch } from '@std/assert'
 import { createSandbox } from 'sinon'
 import { publisherLookup } from '../ard-core.ts'
 import { mqttInbox } from '../mqtt/publish-inbox.ts'
-import { processEvent, pubsubFanout } from './process-event.ts'
+import { processEvent, publishEventPlugins, pubsubFanout } from './process-event.ts'
 
 const INSTITUTION_ID = 'urn:ard:institution:swr'
 const PUBLISHER_URN = 'urn:ard:publisher:abcdef0123456789'
@@ -99,6 +101,41 @@ test('processEvent still returns Pub/Sub statuses when MQTT publish rejects', as
 		assertExists(result.event.id)
 		assertEquals(publishMessage.called, true)
 	} finally {
+		sandbox.restore()
+	}
+})
+
+test('publishEventPlugins only dispatches when INGEST_PUBLISH_PLUGINS is true', async () => {
+	const sandbox = createSandbox()
+	const publishMessage = sandbox.stub(pubsubFanout, 'publishMessage').resolves('pub-1')
+	const previous = process.env.INGEST_PUBLISH_PLUGINS
+	const params = {
+		message: {
+			plugins: [
+				{ type: 'dts', isDeactivated: false },
+				{ type: 'radioplayer', isDeactivated: true },
+			],
+			services: [],
+		} as unknown as EventhubV1RadioPostBody,
+		user,
+		attributes: { event: 'de.ard.eventhub.v1.radio.track.playing' },
+		nonBlockedServices: [],
+	}
+
+	try {
+		delete process.env.INGEST_PUBLISH_PLUGINS
+		assertEquals(await publishEventPlugins(params), [])
+		assertEquals(publishMessage.called, false)
+
+		process.env.INGEST_PUBLISH_PLUGINS = 'true'
+		assertEquals(await publishEventPlugins(params), [{ type: 'dts', messageId: 'pub-1' }])
+		assertEquals(publishMessage.calledOnce, true)
+	} finally {
+		if (previous === undefined) {
+			delete process.env.INGEST_PUBLISH_PLUGINS
+		} else {
+			process.env.INGEST_PUBLISH_PLUGINS = previous
+		}
 		sandbox.restore()
 	}
 })
