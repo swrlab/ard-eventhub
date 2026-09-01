@@ -54,6 +54,9 @@ jobs:
       - name: 📚 Lint Code
         run: bun x oxlint
 
+      - name: 🐳 Start NanoMQ
+        run: just mqtt-up-docker
+
       - name: 🧪 Run Ingest Tests
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_PRIVATE_KEY }}

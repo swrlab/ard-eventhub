@@ -14,10 +14,37 @@ mqtt-up:
 		--env NANOMQ_ALLOW_ANONYMOUS=true \
 		{{ NANOMQ_IMAGE }}
 
+# start NanoMQ with docker (GitHub Actions / Linux)
+[group('MQTT')]
+mqtt-up-docker:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	docker run \
+		--detach \
+		--rm \
+		--name {{ NANOMQ_NAME }} \
+		--publish 1883:1883 \
+		--volume "{{ NANOMQ_CONF }}:/etc/nanomq.conf" \
+		--env NANOMQ_ALLOW_ANONYMOUS=true \
+		{{ NANOMQ_IMAGE }}
+	for _ in $(seq 1 30); do
+		if bash -c 'echo > /dev/tcp/127.0.0.1/1883' 2>/dev/null; then
+			exit 0
+		fi
+		sleep 1
+	done
+	echo 'NanoMQ did not listen on 1883' >&2
+	exit 1
+
 # stop the local NanoMQ hop
 [group('MQTT')]
 mqtt-down:
 	-container stop {{ NANOMQ_NAME }}
+
+# stop the docker NanoMQ hop
+[group('MQTT')]
+mqtt-down-docker:
+	-docker stop {{ NANOMQ_NAME }}
 
 # restart the hop so retained state is gone
 [group('MQTT')]
