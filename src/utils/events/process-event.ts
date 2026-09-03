@@ -9,6 +9,7 @@ import type {
 import { logger } from '@frytg/logger'
 import { ulid } from 'ulid'
 import { pubSubTopicSelf } from '#config'
+import { isIngestPublishPluginsEnabled } from '#env'
 import { mqttInbox } from '../mqtt/publish-inbox.ts'
 import { pubsubBuildId } from '../pubsub/build-id.ts'
 import { publishPubSubMessage } from '../pubsub/publish-message.ts'
@@ -119,6 +120,8 @@ export const publishEventToCommonTopic = async (params: {
 
 /**
  * Publish active plugin jobs to the internal Pub/Sub topic.
+ * No-op unless `INGEST_PUBLISH_PLUGINS` is the exact string `true`.
+ * Per-event `plugins[].isDeactivated` is still honoured when the flag is on.
  * @param params - Message, user, attributes, and non-blocked services
  * @returns Plugin publish results
  */
@@ -130,6 +133,10 @@ export const publishEventPlugins = async (params: {
 }): Promise<EventPluginResult[]> => {
 	const { message, user, attributes, nonBlockedServices } = params
 	const pluginMessages: EventPluginResult[] = []
+
+	if (!isIngestPublishPluginsEnabled()) {
+		return pluginMessages
+	}
 
 	if (!(message.plugins?.length > 0)) {
 		return pluginMessages
@@ -225,7 +232,7 @@ export const processEvent = async (params: {
 		level: data.statuses.blocked > 0 ? 'warning' : 'info',
 		message: `event processed > ${eventName} > ${message.services.length}x services > ${message.services[0]?.publisherId}`,
 		source,
-		data: { ...data, body },
+		data: { ...data, body, ingestPublishPlugins: isIngestPublishPluginsEnabled() },
 	})
 
 	return data

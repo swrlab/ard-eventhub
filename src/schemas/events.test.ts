@@ -1,5 +1,6 @@
 import { test } from '@cross/test'
 import { assertEquals, assertStrictEquals } from '@std/assert'
+import { z } from 'zod'
 import {
 	connectEventNames,
 	eventNames,
@@ -7,6 +8,7 @@ import {
 	eventV1RadioDataPostBody,
 	httpsEventNames,
 	isConnectEventName,
+	services,
 	servicesUrn,
 } from './events.ts'
 
@@ -83,6 +85,42 @@ test('servicesUrn rejects a Core-ID publisherId', () => {
 test('servicesUrn rejects a CRID-only legacy entry', () => {
 	const result = servicesUrn.safeParse(legacyService)
 	assertStrictEquals(result.success, false)
+})
+
+test('services requires id, or externalId plus type, on HTTPS input', () => {
+	const validLegacy = services.safeParse(legacyService)
+	assertStrictEquals(validLegacy.success, true)
+
+	const validIdOnly = services.safeParse({
+		id: urnService.id,
+		publisherId: legacyService.publisherId,
+	})
+	assertStrictEquals(validIdOnly.success, true)
+
+	const validBoth = services.safeParse({
+		...legacyService,
+		id: urnService.id,
+	})
+	assertStrictEquals(validBoth.success, true)
+
+	const cridWithoutType = services.safeParse({
+		externalId: legacyService.externalId,
+		publisherId: legacyService.publisherId,
+	})
+	const typeWithoutCrid = services.safeParse({
+		type: legacyService.type,
+		publisherId: legacyService.publisherId,
+	})
+	assertStrictEquals(cridWithoutType.success, false)
+	assertStrictEquals(typeWithoutCrid.success, false)
+})
+
+test('services accepts a payload without institutionId and keeps it optional', () => {
+	const result = services.safeParse(legacyService)
+	assertStrictEquals(result.success, true)
+	if (result.success) {
+		assertEquals(result.data.institutionId, undefined)
+	}
 })
 
 test('eventV1RadioControlPostBody accepts a valid control event', () => {

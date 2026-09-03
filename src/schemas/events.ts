@@ -53,26 +53,56 @@ const institutionUrn = z
 	.meta({ examples: ['urn:ard:institution:a3004ff924ece1a2'] })
 
 /**
+ * Whether a HTTPS service has enough identifiers to resolve a livestream URN.
+ * `id` is enough on its own. A CRID still needs `type` so ingest can pick the prefix.
+ * @param service - Candidate service entry
+ * @returns True when `id` is set, or both `externalId` and `type` are set
+ */
+const hasLivestreamIdentifier = (service: {
+	id?: string | undefined
+	externalId?: string | undefined
+	type?: string | undefined
+}): boolean => Boolean(service.id || (service.externalId && service.type))
+
+/**
  * Service entry attached to an event (legacy HTTPS shape).
+ * Either `id` (preferred) or `externalId` + `type` must be set. `type` and `externalId` are
+ * deprecated; ingest still sends them when provided.
  */
 export const services = z
 	.object({
-		type: serviceType,
-		externalId: serviceExternalId,
+		id: livestreamUrn.optional().meta({
+			description: 'Preferred. Livestream URN. When absent, Eventhub creates it from `type` + `externalId`.',
+			examples: ['urn:ard:permanent-livestream:49267f7d67be180d'],
+		}),
 		publisherId: z.string().meta({
-			description:
-				'External ID or globally unique identifier (Core ID) for the associated publisher. When no Core ID is provided, the External ID will be converted by Eventhub.',
+			description: 'Publisher Core ID or URN. Ingest normalizes this to `urn:ard:publisher:{hash}`.',
 			examples: ['248000'],
 		}),
-		id: z
-			.string()
-			.optional()
-			.meta({
-				description: 'Globally unique identifier, created by Eventhub',
-				examples: ['urn:ard:permanent-livestream:49267f7d67be180d'],
-			}),
+		institutionId: institutionUrn.optional().meta({
+			description: 'Owning institution URN. Filled in by ingest from the resolved publisher.',
+			examples: ['urn:ard:institution:a3004ff924ece1a2'],
+		}),
+		type: serviceType.optional().meta({
+			deprecated: true,
+			description:
+				'Selects the livestream URN prefix when Eventhub creates `id` from `externalId`. Deprecated; ingest still sends it when provided.',
+			examples: ['PermanentLivestream'],
+		}),
+		externalId: serviceExternalId.optional().meta({
+			deprecated: true,
+			description: 'CRID hashed into `id` when `id` is absent. Deprecated; ingest still sends it when provided.',
+			examples: ['crid://swr.de/123450'],
+		}),
 	})
-	.meta({ id: 'services' })
+	.refine(hasLivestreamIdentifier, {
+		path: ['id'],
+		message: "should have required property 'id'",
+	})
+	.meta({
+		id: 'services',
+		description: 'Either `id` (preferred) or `externalId` and `type` must be set.',
+	})
 
 /**
  * URN-only service entry for Eventhub Connect (MQTT). Not accepted on HTTPS ingest.
@@ -221,10 +251,11 @@ const eventhubTopic = z.object({
  */
 export const eventhubService = z
 	.object({
-		type: z.string(),
-		externalId: z.string(),
+		type: z.string().optional(),
+		externalId: z.string().optional(),
 		publisherId: z.string(),
 		id: z.string().optional(),
+		institutionId: z.string().optional(),
 		blocked: z.string().optional(),
 		topic: eventhubTopic.optional(),
 	})

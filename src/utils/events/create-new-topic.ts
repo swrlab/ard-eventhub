@@ -42,7 +42,7 @@ export const createNewTopic = async (service: EventhubService, user: AuthUser) =
 		creator: user.email,
 
 		coreId: service.topic.id,
-		externalId: service.externalId,
+		externalId: service.externalId ?? service.id ?? service.topic.id,
 		name: service.topic.name,
 
 		institution: {

@@ -145,11 +145,12 @@ data to car dashboards is worse than dropping it.
 
 **Service resolution** (`src/utils/events/process-services.ts`). For each entry in `services[]`:
 
-1. The topic URN is derived, not supplied: `coreIdPrefixes[type] + createHashedId(externalId)`.
+1. The topic URN is `services[].id` when that is already a livestream URN. Otherwise it is derived: `coreIdPrefixes[type] + createHashedId(externalId)`. The same value is written to `services[].id`.
 2. `publisherId` is normalized to `urn:ard:publisher:{hash}` if a legacy numeric ID was sent.
-3. Nightly nationwide broadcasts are checked against `src/config/allowed-livestreams.json`.
-4. The publisher is looked up in the cached ARD feed; unknown publishers are blocked.
-5. The publisher's institution must equal the authenticated user's institution.
+3. The publisher is looked up in the cached ARD feed. `institutionId` is filled from that publisher, or from the authenticated user's institution when the publisher is unknown.
+4. Nightly nationwide broadcasts are checked against `src/config/allowed-livestreams.json`.
+5. Unknown publishers are blocked.
+6. The publisher's institution must equal the authenticated user's institution.
 
 Failures here set `service.blocked` to a reason string. Blocked services stay in the array — the
 publisher gets a per-service verdict rather than a single opaque rejection, which matters when one
