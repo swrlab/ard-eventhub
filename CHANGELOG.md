@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat: trust optional `MQTT_TLS_CA` (PEM or file path) when connecting to a private mqtts:// hop
 - feat: gate plugins Pub/Sub dispatch with `INGEST_PUBLISH_PLUGINS` (exact string `true`; off otherwise)
 - ci: start NanoMQ in ingest test jobs so `MQTT_BROKER_URL` round-trips against a live hop
+- feat: NATS-native access layer for eventhub-connect (`src/utils/nats/`, `just connect`) with local JetStream + MQTT gateway
+- ci: separate NATS job (`just nats-up-docker`) so MQTT→NATS inbox translation is required, without colliding with NanoMQ on `:1883`
 
 ## [3.0.0-beta.1] - 2026-08-10
 

@@ -26,6 +26,9 @@ dist/
 # Local temporary exports (e.g. CLI dumps)
 tmp/
 
+# Local NATS JetStream store and nats-server pid/log
+.local/
+
 # Optional npm cache directory
 .npm
 .licenses

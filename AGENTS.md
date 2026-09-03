@@ -11,6 +11,7 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 - **Install tools:** [mise](https://mise.jdx.dev) → `mise install` (pins `just` + `sops` in [`mise.toml`](mise.toml))
 - **Install dependencies:** `bun install`
 - **Start ingest service:** `bun run ingest` (runs with hot reload)
+- **Start connect (NATS access):** `just connect` (needs local NATS: `just nats-up` or `just nats-up-docker`)
 - **Run tests:** `just test`
 - **Hurl API suite:** `just integration` (needs running ingest + `hurl`)
 - **Lint code:** `just lint` (uses Oxlint)
@@ -27,14 +28,15 @@ Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `o
 - **Tech Stack:** Bun, Node.js, TypeScript (strict mode), Hono, Zod, Google Cloud Platform
 - **File Structure:**
   - `src/ingest/` – Ingest service (receives events, manages subscriptions)
+  - `src/connect/` – Eventhub Connect NATS access layer (no validation sidecar yet)
   - `src/schemas/` – Zod request/response schemas (runtime validation + OpenAPI)
   - `src/openapi/` – OpenAPI document assembly / `openapi.json` generator
   - `src/asyncapi/` – AsyncAPI document assembly / `asyncapi.json` generator (Eventhub Connect / MQTT)
-  - `src/utils/` – Shared utilities (Pub/Sub, MQTT inbox hop, Datastore, Firebase, plugins)
+  - `src/utils/` – Shared utilities (Pub/Sub, MQTT inbox hop, NATS client, Datastore, Firebase, plugins)
   - `cli/` – Command-line utilities
   - `config/` – Application configuration (ARD prefixes, allow-lists)
-  - `infra/` – Deployed-upstream config (NanoMQ hop)
-  - `just/` – Split just recipes (`encryption.just`, `mqtt.just`)
+  - `infra/` – Deployed-upstream config (NanoMQ hop) and local NATS dev config
+  - `just/` – Split just recipes (`encryption.just`, `mqtt.just`, `nats.just`)
   - `integration/` – Hurl HTTP suite (`ingest-api.hurl`) mirroring `src/ingest/server.test.ts` (run with `just integration`)
   - `docs/` – Documentation (Markdown, built with Blume)
   - `blume.config.ts` – Docs site configuration

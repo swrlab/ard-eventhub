@@ -77,3 +77,5 @@ just mqtt-down
 ```
 
 GCP apply for the hop is out of band. Manifests live in [`infra/nanomq/`](../../infra/nanomq/).
+
+Eventhub Connect’s local NATS also binds MQTT `:1883`. Stop this hop (`just mqtt-down`) before `just nats-up`. See [`src/connect/README.md`](../connect/README.md).

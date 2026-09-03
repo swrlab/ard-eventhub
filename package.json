@@ -31,6 +31,8 @@
 		"@frytg/logger": "npm:@jsr/frytg__logger@0.0.3",
 		"@google-cloud/datastore": "^10.1.1",
 		"@google-cloud/pubsub": "^5.3.1",
+		"@nats-io/jetstream": "^3.4.0",
+		"@nats-io/transport-node": "^3.4.0",
 		"@swrlab/utils": "^2.2.0",
 		"dd-trace": "^5.124.0",
 		"firebase-admin": "^13.10.0",
@@ -78,6 +80,7 @@
 		"entry": [
 			"blume.config.ts!",
 			"src/cli/*.ts",
+			"src/connect/index.ts",
 			"src/openapi/generate.ts",
 			"src/asyncapi/generate.ts",
 			"src/**/*.test.ts"
