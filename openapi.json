@@ -1052,28 +1052,40 @@
 					"services": {
 						"type": "object",
 						"properties": {
+							"id": {
+								"description": "Preferred. Livestream URN. When absent, Eventhub creates it from `type` + `externalId`.",
+								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"type": "string",
+								"pattern": "^urn:ard:(permanent-livestream|event-livestream):[a-z0-9]+$"
+							},
+							"publisherId": {
+								"type": "string",
+								"description": "Publisher Core ID or URN. Ingest normalizes this to `urn:ard:publisher:{hash}`.",
+								"examples": ["248000"]
+							},
+							"institutionId": {
+								"description": "Owning institution URN. Filled in by ingest from the resolved publisher.",
+								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
+								"type": "string",
+								"pattern": "^urn:ard:institution:[a-z0-9]+$"
+							},
 							"type": {
+								"deprecated": true,
+								"description": "Selects the livestream URN prefix when Eventhub creates `id` from `externalId`. Deprecated; ingest still sends it when provided.",
 								"examples": ["PermanentLivestream"],
 								"type": "string",
 								"enum": ["EventLivestream", "PermanentLivestream"]
 							},
 							"externalId": {
-								"type": "string",
-								"examples": ["crid://swr.de/123450"]
-							},
-							"publisherId": {
-								"type": "string",
-								"description": "External ID or globally unique identifier (Core ID) for the associated publisher. When no Core ID is provided, the External ID will be converted by Eventhub.",
-								"examples": ["248000"]
-							},
-							"id": {
-								"description": "Globally unique identifier, created by Eventhub",
-								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"deprecated": true,
+								"description": "CRID hashed into `id` when `id` is absent. Deprecated; ingest still sends it when provided.",
+								"examples": ["crid://swr.de/123450"],
 								"type": "string"
 							}
 						},
-						"required": ["type", "externalId", "publisherId"],
-						"additionalProperties": false
+						"required": ["publisherId"],
+						"additionalProperties": false,
+						"description": "Either `id` (preferred) or `externalId` and `type` must be set."
 					}
 				}
 			},
@@ -1345,28 +1357,40 @@
 					"services": {
 						"type": "object",
 						"properties": {
+							"id": {
+								"description": "Preferred. Livestream URN. When absent, Eventhub creates it from `type` + `externalId`.",
+								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"type": "string",
+								"pattern": "^urn:ard:(permanent-livestream|event-livestream):[a-z0-9]+$"
+							},
+							"publisherId": {
+								"type": "string",
+								"description": "Publisher Core ID or URN. Ingest normalizes this to `urn:ard:publisher:{hash}`.",
+								"examples": ["248000"]
+							},
+							"institutionId": {
+								"description": "Owning institution URN. Filled in by ingest from the resolved publisher.",
+								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
+								"type": "string",
+								"pattern": "^urn:ard:institution:[a-z0-9]+$"
+							},
 							"type": {
+								"deprecated": true,
+								"description": "Selects the livestream URN prefix when Eventhub creates `id` from `externalId`. Deprecated; ingest still sends it when provided.",
 								"examples": ["PermanentLivestream"],
 								"type": "string",
 								"enum": ["EventLivestream", "PermanentLivestream"]
 							},
 							"externalId": {
-								"type": "string",
-								"examples": ["crid://swr.de/123450"]
-							},
-							"publisherId": {
-								"type": "string",
-								"description": "External ID or globally unique identifier (Core ID) for the associated publisher. When no Core ID is provided, the External ID will be converted by Eventhub.",
-								"examples": ["248000"]
-							},
-							"id": {
-								"description": "Globally unique identifier, created by Eventhub",
-								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"deprecated": true,
+								"description": "CRID hashed into `id` when `id` is absent. Deprecated; ingest still sends it when provided.",
+								"examples": ["crid://swr.de/123450"],
 								"type": "string"
 							}
 						},
-						"required": ["type", "externalId", "publisherId"],
-						"additionalProperties": false
+						"required": ["publisherId"],
+						"additionalProperties": false,
+						"description": "Either `id` (preferred) or `externalId` and `type` must be set."
 					},
 					"reference": {
 						"type": "object",
@@ -1910,28 +1934,40 @@
 					"services": {
 						"type": "object",
 						"properties": {
+							"id": {
+								"description": "Preferred. Livestream URN. When absent, Eventhub creates it from `type` + `externalId`.",
+								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"type": "string",
+								"pattern": "^urn:ard:(permanent-livestream|event-livestream):[a-z0-9]+$"
+							},
+							"publisherId": {
+								"type": "string",
+								"description": "Publisher Core ID or URN. Ingest normalizes this to `urn:ard:publisher:{hash}`.",
+								"examples": ["248000"]
+							},
+							"institutionId": {
+								"description": "Owning institution URN. Filled in by ingest from the resolved publisher.",
+								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
+								"type": "string",
+								"pattern": "^urn:ard:institution:[a-z0-9]+$"
+							},
 							"type": {
+								"deprecated": true,
+								"description": "Selects the livestream URN prefix when Eventhub creates `id` from `externalId`. Deprecated; ingest still sends it when provided.",
 								"examples": ["PermanentLivestream"],
 								"type": "string",
 								"enum": ["EventLivestream", "PermanentLivestream"]
 							},
 							"externalId": {
-								"type": "string",
-								"examples": ["crid://swr.de/123450"]
-							},
-							"publisherId": {
-								"type": "string",
-								"description": "External ID or globally unique identifier (Core ID) for the associated publisher. When no Core ID is provided, the External ID will be converted by Eventhub.",
-								"examples": ["248000"]
-							},
-							"id": {
-								"description": "Globally unique identifier, created by Eventhub",
-								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"deprecated": true,
+								"description": "CRID hashed into `id` when `id` is absent. Deprecated; ingest still sends it when provided.",
+								"examples": ["crid://swr.de/123450"],
 								"type": "string"
 							}
 						},
-						"required": ["type", "externalId", "publisherId"],
-						"additionalProperties": false
+						"required": ["publisherId"],
+						"additionalProperties": false,
+						"description": "Either `id` (preferred) or `externalId` and `type` must be set."
 					},
 					"reference": {
 						"type": "object",

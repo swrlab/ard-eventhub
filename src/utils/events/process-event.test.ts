@@ -71,14 +71,60 @@ test('processEvent publishes the enriched event to the MQTT inbox', async () => 
 		assertEquals(publishInbox.firstCall.args[0], INSTITUTION_ID)
 		const payload = publishInbox.firstCall.args[1] as {
 			id: string
-			services: Array<{ topic?: { messageId?: string | null } }>
+			services: Array<{
+				id?: string
+				publisherId?: string
+				institutionId?: string
+				externalId?: string
+				type?: string
+				topic?: { messageId?: string | null }
+			}>
 		}
 		assertMatch(payload.id, new RegExp(`^${INSTITUTION_ID}-`))
 		assertEquals(payload === result.event, false)
 		assertEquals(payload.services[0]?.topic?.messageId, undefined)
+		assertMatch(payload.services[0]?.id ?? '', /^urn:ard:permanent-livestream:[a-z0-9]+$/)
+		assertEquals(payload.services[0]?.publisherId, PUBLISHER_URN)
+		assertEquals(payload.services[0]?.institutionId, INSTITUTION_ID)
+		assertEquals(payload.services[0]?.externalId, 'ext-process-event')
+		assertEquals(payload.services[0]?.type, 'PermanentLivestream')
 		assertEquals(result.event.services[0]?.topic?.messageId, 'pub-1')
 		assertEquals(result.statuses.published, 1)
 		assertEquals(result.statuses.failed, 0)
+	} finally {
+		sandbox.restore()
+	}
+})
+
+test('processEvent normalizes a numeric publisherId before the MQTT inbox hop', async () => {
+	const { sandbox } = stubFanout()
+	const publishInbox = sandbox.stub(mqttInbox, 'publish').resolves()
+
+	try {
+		const result = await processEvent({
+			eventName: 'de.ard.eventhub.v1.radio.track.playing',
+			user,
+			body: {
+				...makeBody(),
+				services: [
+					{
+						type: 'PermanentLivestream',
+						externalId: 'crid://swr.de/123450',
+						publisherId: '248000',
+					},
+				],
+			},
+		})
+
+		const payload = publishInbox.firstCall.args[1] as {
+			services: Array<{ id?: string; publisherId?: string; institutionId?: string; externalId?: string; type?: string }>
+		}
+		assertMatch(payload.services[0]?.id ?? '', /^urn:ard:permanent-livestream:[a-z0-9]+$/)
+		assertMatch(payload.services[0]?.publisherId ?? '', /^urn:ard:publisher:[a-z0-9]+$/)
+		assertEquals(payload.services[0]?.institutionId, INSTITUTION_ID)
+		assertEquals(payload.services[0]?.externalId, 'crid://swr.de/123450')
+		assertEquals(payload.services[0]?.type, 'PermanentLivestream')
+		assertEquals(result.event.services[0]?.publisherId, payload.services[0]?.publisherId)
 	} finally {
 		sandbox.restore()
 	}

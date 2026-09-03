@@ -76,8 +76,40 @@ test('processServices sets topic id and pubsub name for an authorized publisher'
 		const expectedTopicId = `${coreIdPrefixes.PermanentLivestream}${createHashedId('ext-1')}`
 		assertEquals(result.blocked, undefined)
 		assertEquals(result.publisherId, PUBLISHER_URN)
+		assertEquals(result.id, expectedTopicId)
+		assertEquals(result.institutionId, INSTITUTION_ID)
 		assertEquals(result.topic?.id, expectedTopicId)
 		assertEquals(result.topic?.name, `${pubSubPrefix}${encodeURIComponent(expectedTopicId)}`)
+	} finally {
+		sandbox.restore()
+	}
+})
+
+test('processServices writes a livestream URN to id from a CRID externalId', async () => {
+	const sandbox = stubPublisher()
+	const externalId = 'crid://swr.de/123450'
+	try {
+		const result = await processServices(makeService({ externalId }), { user })
+
+		const expectedId = `${coreIdPrefixes.PermanentLivestream}${createHashedId(externalId)}`
+		assertEquals(result.id, expectedId)
+		assertEquals(result.topic?.id, expectedId)
+		assertEquals(result.externalId, externalId)
+		assertEquals(result.type, 'PermanentLivestream')
+		assertEquals(result.blocked, undefined)
+	} finally {
+		sandbox.restore()
+	}
+})
+
+test('processServices hashes a numeric publisherId into a publisher URN', async () => {
+	const sandbox = stubPublisher()
+	try {
+		const result = await processServices(makeService({ publisherId: '248000' }), { user })
+
+		assertEquals(result.publisherId, `${coreIdPrefixes.Publisher}${createHashedId('248000')}`)
+		assertEquals(result.institutionId, INSTITUTION_ID)
+		assertEquals(result.blocked, undefined)
 	} finally {
 		sandbox.restore()
 	}
@@ -95,6 +127,89 @@ test('processServices hashes legacy publisher ids into ARD URNs', async () => {
 	}
 })
 
+test('processServices keeps an already-URN publisherId', async () => {
+	const sandbox = stubPublisher()
+	try {
+		const result = await processServices(makeService({ publisherId: PUBLISHER_URN }), { user })
+
+		assertEquals(result.publisherId, PUBLISHER_URN)
+		assertEquals(result.blocked, undefined)
+	} finally {
+		sandbox.restore()
+	}
+})
+
+test('processServices replaces a non-URN incoming id with the livestream URN', async () => {
+	const sandbox = stubPublisher()
+	try {
+		const result = await processServices(makeService({ id: 'crid://swr.de/not-a-urn' }), { user })
+
+		assertEquals(result.id, `${coreIdPrefixes.PermanentLivestream}${createHashedId('ext-1')}`)
+		assertEquals(result.blocked, undefined)
+	} finally {
+		sandbox.restore()
+	}
+})
+
+test('processServices keeps a supplied livestream URN id', async () => {
+	const sandbox = stubPublisher()
+	const suppliedId = 'urn:ard:permanent-livestream:49267f7d67be180d'
+	try {
+		const result = await processServices(makeService({ id: suppliedId, externalId: 'ext-other' }), { user })
+
+		assertEquals(result.id, suppliedId)
+		assertEquals(result.topic?.id, suppliedId)
+		assertEquals(result.blocked, undefined)
+	} finally {
+		sandbox.restore()
+	}
+})
+
+test('processServices uses a supplied livestream URN without type or externalId', async () => {
+	const sandbox = stubPublisher()
+	const suppliedId = 'urn:ard:permanent-livestream:49267f7d67be180d'
+	try {
+		const result = await processServices(makeService({ id: suppliedId, type: undefined, externalId: undefined }), {
+			user,
+		})
+
+		assertEquals(result.id, suppliedId)
+		assertEquals(result.topic?.id, suppliedId)
+		assertEquals(result.type, undefined)
+		assertEquals(result.externalId, undefined)
+		assertEquals(result.blocked, undefined)
+	} finally {
+		sandbox.restore()
+	}
+})
+
+test('processServices uses a supplied livestream URN when externalId is absent', async () => {
+	const sandbox = stubPublisher()
+	const suppliedId = 'urn:ard:event-livestream:abcdef0123456789'
+	try {
+		const result = await processServices(makeService({ id: suppliedId, externalId: undefined }), { user })
+
+		assertEquals(result.id, suppliedId)
+		assertEquals(result.topic?.id, suppliedId)
+		assertEquals(result.externalId, undefined)
+		assertEquals(result.blocked, undefined)
+	} finally {
+		sandbox.restore()
+	}
+})
+
+test('processServices uses an EventLivestream prefix when type is EventLivestream', async () => {
+	const sandbox = stubPublisher()
+	try {
+		const result = await processServices(makeService({ type: 'EventLivestream' }), { user })
+
+		assertEquals(result.id, `${coreIdPrefixes.EventLivestream}${createHashedId('ext-1')}`)
+		assertEquals(result.blocked, undefined)
+	} finally {
+		sandbox.restore()
+	}
+})
+
 test('processServices blocks when the publisher is unknown', async () => {
 	const sandbox = createSandbox()
 	sandbox.stub(publisherLookup, 'getById').returns(undefined)
@@ -104,17 +219,21 @@ test('processServices blocks when the publisher is unknown', async () => {
 
 		assertEquals(result.blocked, `Publisher not found > ${PUBLISHER_URN}`)
 		assertExists(result.topic)
+		assertEquals(result.id, result.topic?.id)
+		assertEquals(result.institutionId, INSTITUTION_ID)
 	} finally {
 		sandbox.restore()
 	}
 })
 
 test('processServices blocks when the user institution does not match the publisher', async () => {
-	const sandbox = stubPublisher('urn:ard:institution:other')
+	const otherInstitution = 'urn:ard:institution:other'
+	const sandbox = stubPublisher(otherInstitution)
 	try {
 		const result = await processServices(makeService(), { user })
 
 		assertEquals(result.blocked, 'User unauthorized for service')
+		assertEquals(result.institutionId, otherInstitution)
 	} finally {
 		sandbox.restore()
 	}
@@ -135,7 +254,9 @@ test('processServices allows COMMON_IDS livestream under its designated publishe
 
 		assertEquals(result.blocked, undefined)
 		assertEquals(result.topic?.id, ALLOWED_TOPIC_ID)
+		assertEquals(result.id, ALLOWED_TOPIC_ID)
 		assertEquals(result.publisherId, ALLOWED_PUBLISHER_ID)
+		assertEquals(result.institutionId, INSTITUTION_ID)
 	} finally {
 		sandbox.restore()
 	}
