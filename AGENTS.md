@@ -11,7 +11,7 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 - **Install tools:** [mise](https://mise.jdx.dev) → `mise install` (pins `just` + `sops` in [`mise.toml`](mise.toml))
 - **Install dependencies:** `bun install`
 - **Start ingest service:** `bun run ingest` (runs with hot reload)
-- **Start connect (NATS access):** `just connect` (needs local NATS: `just nats-up` or `just nats-up-docker`)
+- **Start connect (NATS access):** `just connect` (needs local NATS: `just nats-up` or `just nats-up-docker`; local user `svc-sidecar` / `local`)
 - **Run tests:** `just test`
 - **Hurl API suite:** `just integration` (needs running ingest + `hurl`)
 - **Lint code:** `just lint` (uses Oxlint)

@@ -19,7 +19,9 @@ just nats-sub --all
 just connect
 ```
 
-Lokale Config: [`infra/nats/nats-dev.conf`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nats/nats-dev.conf) — ein Knoten, JetStream, MQTT `:1883`, ohne TLS und ohne Auth.
+Lokale Config: [`infra/nats/nats-dev.conf`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nats/nats-dev.conf) — ein Knoten, JetStream, MQTT `:1883`, ohne TLS. User und bcrypt-Hashes (Klartext `local`) stehen in `nats-users.conf`. Anonyme Connects schlagen fehl. Produktions-Klartext gehört in sops.
+
+Vor einem Reload: `just nats-check`. User hinzufügen, dann `just nats-reload` (kein Restart).
 
 ## MQTT nach NATS
 

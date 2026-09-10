@@ -1,4 +1,5 @@
 import { getEnv } from '../utils/env.ts'
+import { LOCAL_NATS_PASSWORD, LOCAL_NATS_USERS } from './dev-users.ts'
 
 export const DEFAULT_NATS_URL = 'nats://127.0.0.1:4222'
 
@@ -8,11 +9,11 @@ export const DEFAULT_NATS_URL = 'nats://127.0.0.1:4222'
 export const natsUrl = getEnv<string>('NATS_URL', { defaultValue: DEFAULT_NATS_URL })
 
 /**
- * Optional NATS user (later `svc-sidecar`). Empty means anonymous local access.
+ * NATS user. Defaults to local `svc-sidecar`. Override in production via sops.
  */
-export const natsUser = getEnv<string>('NATS_USER', { defaultValue: '' })
+export const natsUser = getEnv<string>('NATS_USER', { defaultValue: LOCAL_NATS_USERS.svcSidecar })
 
 /**
- * Optional NATS password. Empty means anonymous local access.
+ * NATS password. Defaults to the well-known local password. Override in production via sops.
  */
-export const natsPassword = getEnv<string>('NATS_PASSWORD', { defaultValue: '' })
+export const natsPassword = getEnv<string>('NATS_PASSWORD', { defaultValue: LOCAL_NATS_PASSWORD })

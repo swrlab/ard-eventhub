@@ -1,12 +1,25 @@
 NATS_IMAGE := 'nats:2.14.6'
 NATS_NAME := 'eventhub-nats'
 NATS_CONF := source_directory() / '../infra/nats/nats-dev.conf'
+NATS_USERS := source_directory() / '../infra/nats/nats-users.conf'
+NATS_INVALID := source_directory() / '../infra/nats/nats-invalid.conf'
 NATS_STORE := source_directory() / '../.local/nats'
+NATS_RUNTIME_CONF := NATS_STORE / 'nats.conf'
+NATS_RUNTIME_USERS := NATS_STORE / 'nats-users.conf'
 NATS_DEFAULT_INSTITUTION := 'urn:ard:institution:a3004ff924ece1a2'
+
+# copy committed NATS config into the writable runtime dir (hot-reload edits this copy)
+[group('NATS')]
+_nats-stage-conf:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	mkdir -p "{{ NATS_STORE }}"
+	cp "{{ NATS_CONF }}" "{{ NATS_RUNTIME_CONF }}"
+	cp "{{ NATS_USERS }}" "{{ NATS_RUNTIME_USERS }}"
 
 # start a local nats-server (Homebrew / PATH binary). Stop NanoMQ first — both bind :1883.
 [group('NATS')]
-nats-up:
+nats-up: _nats-stage-conf
 	#!/usr/bin/env bash
 	set -euo pipefail
 	if bash -c 'echo > /dev/tcp/127.0.0.1/4222' 2>/dev/null; then
@@ -21,9 +34,8 @@ nats-up:
 		echo 'port 1883 is in use — stop NanoMQ with `just mqtt-down` so NATS MQTT can bind' >&2
 		exit 1
 	fi
-	mkdir -p "{{ NATS_STORE }}"
 	export NATS_JS_STORE="{{ NATS_STORE }}"
-	nats-server -c "{{ NATS_CONF }}" >> "{{ NATS_STORE }}/nats-server.log" 2>&1 &
+	nats-server -c "{{ NATS_RUNTIME_CONF }}" >> "{{ NATS_STORE }}/nats-server.log" 2>&1 &
 	echo $! > "{{ NATS_STORE }}/nats-server.pid"
 	for _ in $(seq 1 30); do
 		if bash -c 'echo > /dev/tcp/127.0.0.1/4222' 2>/dev/null; then
@@ -37,7 +49,7 @@ nats-up:
 
 # start NATS with docker (Cursor Cloud / Linux / CI). Stop NanoMQ first — both bind :1883.
 [group('NATS')]
-nats-up-docker:
+nats-up-docker: _nats-stage-conf
 	#!/usr/bin/env bash
 	set -euo pipefail
 	if bash -c 'echo > /dev/tcp/127.0.0.1/4222' 2>/dev/null; then
@@ -48,7 +60,6 @@ nats-up-docker:
 		echo 'port 1883 is in use — stop NanoMQ with `just mqtt-down-docker` so NATS MQTT can bind' >&2
 		exit 1
 	fi
-	mkdir -p "{{ NATS_STORE }}"
 	docker run \
 		--detach \
 		--rm \
@@ -56,9 +67,10 @@ nats-up-docker:
 		--publish 4222:4222 \
 		--publish 1883:1883 \
 		--publish 8222:8222 \
-		--volume "{{ NATS_CONF }}:/etc/nats/nats-dev.conf:ro" \
-		--volume "{{ NATS_STORE }}:/data" \
+		--volume "{{ NATS_RUNTIME_CONF }}:/etc/nats/nats-dev.conf" \
+		--volume "{{ NATS_RUNTIME_USERS }}:/etc/nats/nats-users.conf" \
 		--env NATS_JS_STORE=/data \
+		--volume "{{ NATS_STORE }}:/data" \
 		{{ NATS_IMAGE }} \
 		-c /etc/nats/nats-dev.conf
 	for _ in $(seq 1 30); do
@@ -85,6 +97,84 @@ nats-down:
 [group('NATS')]
 nats-down-docker:
 	-docker stop {{ NATS_NAME }}
+
+# validate the committed NATS config (`nats-server -t`); does not touch a running server
+[group('NATS')]
+nats-check:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	export NATS_JS_STORE="{{ NATS_STORE }}"
+	mkdir -p "{{ NATS_STORE }}"
+	if command -v nats-server >/dev/null; then
+		nats-server -t -c "{{ NATS_CONF }}"
+		exit 0
+	fi
+	docker run \
+		--rm \
+		--volume "{{ NATS_CONF }}:/etc/nats/nats-dev.conf:ro" \
+		--volume "{{ NATS_USERS }}:/etc/nats/nats-users.conf:ro" \
+		--env NATS_JS_STORE=/tmp \
+		{{ NATS_IMAGE }} \
+		-t -c /etc/nats/nats-dev.conf
+
+# confirm a broken config is rejected (must fail). Safe to run while NATS is up.
+[group('NATS')]
+nats-check-invalid:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	if command -v nats-server >/dev/null; then
+		if nats-server -t -c "{{ NATS_INVALID }}" >/tmp/nats-invalid.out 2>&1; then
+			echo 'nats-check-invalid: broken config was accepted' >&2
+			exit 1
+		fi
+		echo 'broken config rejected (expected)'
+		exit 0
+	fi
+	if docker run \
+		--rm \
+		--volume "{{ NATS_INVALID }}:/etc/nats/nats-invalid.conf:ro" \
+		{{ NATS_IMAGE }} \
+		-t -c /etc/nats/nats-invalid.conf >/tmp/nats-invalid.out 2>&1; then
+		echo 'nats-check-invalid: broken config was accepted' >&2
+		exit 1
+	fi
+	echo 'broken config rejected (expected)'
+
+# hot-reload the runtime config (edit .local/nats/nats-users.conf, then this). Does not restart.
+[group('NATS')]
+nats-reload:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	pid_file="{{ NATS_STORE }}/nats-server.pid"
+	if [[ -f "$pid_file" ]]; then
+		kill -HUP "$(cat "$pid_file")"
+		echo 'sent HUP to local nats-server'
+		exit 0
+	fi
+	if docker kill --signal HUP {{ NATS_NAME }} >/dev/null 2>&1; then
+		echo 'sent HUP to docker NATS'
+		exit 0
+	fi
+	echo 'no local nats-server pid and no docker container eventhub-nats' >&2
+	exit 1
+
+# print a bcrypt hash for nats-users.conf (`nats server passwd`, else Apache `htpasswd -B`)
+[group('NATS')]
+nats-passwd password='local':
+	#!/usr/bin/env bash
+	set -euo pipefail
+	if command -v nats >/dev/null && nats server passwd -p "{{ password }}"; then
+		exit 0
+	fi
+	if command -v htpasswd >/dev/null; then
+		# `nats server passwd` refuses passwords shorter than 10 characters (`local` is 5).
+		# Apache emits `$2y$`; rewrite to `$2a$` so nats-server always treats it as bcrypt.
+		htpasswd -nbB -C 11 dummy "{{ password }}" | cut -d: -f2 | sed 's/^\$2y\$/$2a$/'
+		exit 0
+	fi
+	echo 'need the nats CLI (brew install nats-io) or htpasswd' >&2
+	exit 1
+
 
 # stream local nats-server logs
 [group('NATS')]
