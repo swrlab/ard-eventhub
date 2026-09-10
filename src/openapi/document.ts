@@ -44,6 +44,76 @@ const schemaById = {
 	topicResponse,
 } as const
 
+const jsonSchemaDefRef = /^#\/(?:definitions|\$defs)\//
+
+/**
+ * Rewrite a JSON Schema `$ref` that points at local `definitions`/`$defs` to an OpenAPI component.
+ * @param ref - JSON Schema or OpenAPI `$ref` string
+ * @returns OpenAPI `#/components/schemas/...` pointer when the ref was a local definition
+ */
+const toComponentRef = (ref: string): string => ref.replace(jsonSchemaDefRef, '#/components/schemas/')
+
+/**
+ * Unwrap a Zod named JSON Schema (`$ref` + `definitions`/`$defs`) into the resolved object.
+ * @param jsonSchema - Output of `z.toJSONSchema` without `$schema`
+ * @returns Resolved schema object, keeping leftover nested definitions on the result
+ */
+const unwrapNamedJsonSchema = (jsonSchema: Record<string, unknown>): Record<string, unknown> => {
+	const ref = jsonSchema.$ref
+	const definitions = (jsonSchema.definitions ?? jsonSchema.$defs) as Record<string, unknown> | undefined
+	if (typeof ref !== 'string' || !definitions) return jsonSchema
+
+	const name = ref.replace(jsonSchemaDefRef, '')
+	const resolved = definitions[name]
+	if (!resolved || typeof resolved !== 'object' || Array.isArray(resolved)) return jsonSchema
+
+	const restDefs = { ...definitions }
+	delete restDefs[name]
+	const unwrapped = { ...(resolved as Record<string, unknown>) }
+	if (Object.keys(restDefs).length > 0) {
+		if ('$defs' in jsonSchema && !('definitions' in jsonSchema)) unwrapped.$defs = restDefs
+		else unwrapped.definitions = restDefs
+	}
+	return unwrapped
+}
+
+/**
+ * Lift Zod `definitions`/`$defs` bags onto OpenAPI `components.schemas` and rewrite `$ref`s.
+ *
+ * `z.toJSONSchema` emits `#/definitions/{id}` as if the schema were the document root. OpenAPI
+ * (and Blume/Scalar) only resolve `#/components/schemas/{id}` at the document root, so nested
+ * types like `mediaItem` otherwise render as a name with no fields.
+ * @param node - JSON Schema fragment from `z.toJSONSchema`
+ * @param collected - Accumulator for hoisted named schemas
+ * @returns The same fragment without `definitions`/`$defs`, with OpenAPI `$ref`s
+ */
+const hoistJsonSchemaDefinitions = (node: unknown, collected: Record<string, unknown>): unknown => {
+	if (Array.isArray(node)) {
+		return node.map((item) => hoistJsonSchemaDefinitions(item, collected))
+	}
+	if (!node || typeof node !== 'object') return node
+
+	const obj = { ...(node as Record<string, unknown>) }
+	const defs = (obj.definitions ?? obj.$defs) as Record<string, unknown> | undefined
+	delete obj.definitions
+	delete obj.$defs
+
+	if (defs) {
+		for (const [name, def] of Object.entries(defs)) {
+			const processed = hoistJsonSchemaDefinitions(def, collected)
+			if (!(name in collected)) collected[name] = processed
+		}
+	}
+
+	if (typeof obj.$ref === 'string') obj.$ref = toComponentRef(obj.$ref)
+
+	for (const [key, value] of Object.entries(obj)) {
+		if (key === '$ref') continue
+		obj[key] = hoistJsonSchemaDefinitions(value, collected)
+	}
+	return obj
+}
+
 /**
  * Convert a Zod schema to an OpenAPI 3.0 Schema Object.
  * @param schema - Zod schema with metadata id
@@ -170,12 +240,13 @@ If the request returns the status \`blocked: 1\`, it indicates that you are not 
  * @returns OpenAPI document object
  */
 export const buildOpenApiDocument = () => {
+	const hoisted: Record<string, unknown> = {}
 	const schemas: Record<string, unknown> = {}
 	for (const [id, schema] of Object.entries(schemaById)) {
 		const jsonSchema = toOpenApiSchema(schema)
 		// Drop $schema keyword — OpenAPI component schemas do not use it
 		const { $schema: _schema, ...rest } = jsonSchema as Record<string, unknown>
-		schemas[id] = rest
+		schemas[id] = hoistJsonSchemaDefinitions(unwrapNamedJsonSchema(rest), hoisted)
 	}
 
 	return {
@@ -474,7 +545,7 @@ export const buildOpenApiDocument = () => {
 					bearerFormat: 'JWT',
 				},
 			},
-			schemas,
+			schemas: { ...hoisted, ...schemas },
 		},
 	}
 }

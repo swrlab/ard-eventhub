@@ -22,3 +22,5 @@ just openapi
 ```
 
 Das schreibt `openapi.json` via `z.toJSONSchema(..., { target: 'openapi-3.0' })` und formatiert die Datei.
+
+Named Zod-Schemas (`.meta({ id })`) werden nach `components.schemas` gehoben und als `#/components/schemas/{id}` referenziert. Ohne diesen Schritt bleiben Untertypen wie `mediaItem` in der API-Referenz nur ein Name ohne Felder.
