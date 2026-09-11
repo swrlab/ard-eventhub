@@ -24,7 +24,7 @@ Secrets in GitHub sind standardmäßig für Benutzer write-only. Admins kannst d
 - `GCP_PROJECT_ID`
   - Projekt-ID des Google Cloud-Projekts (u. a. Image-Push-Pfad)
 - `SOPS_AGE_PRIVATE_KEY`
-  - Age-Private-Key für `.ci.sops.*`-Dateien (`.env.ci.sops.yaml`, `users.ci.sops.json`)
+  - Age-Private-Key für `.ci.sops.*`-Dateien (`.env.ci.sops.yaml`, `users.ci.sops.json`, `keys/gcp-ard-common.ci.sops.json`)
   - Wird in Workflows als `SOPS_AGE_KEY` an sops übergeben
   - Test-Env-Vars kommen aus `.env.ci.sops.yaml` via `sops exec-env`
 
@@ -34,5 +34,9 @@ Bei Deployments in Google Cloud werden Umgebungsvariablen und Keys üblicherweis
 
 ### Docker Image
 
-Kubernetes muss Images aus einem Registry ziehen. Für bewöhnlich gibt es dafür ein spezifisches Repository. Für Eventhub verwenden wir ein internes Projekt-Registry, um diesen Key nicht im Repo zu speichern zu müssen. Stattdessen speichern wir Container in unserem Eventhub-Projekt und gewähren den SA Zugriff.
-Öffne dazu die Console, navigiere zum Eventhub-Projekt, wähle storage und dann das artifact bucket. Füge in der Info-Ansicht die E‑Mail des Service Accounts mit der Berechtigung "_Storage Object Viewer_" hinzu.
+Kubernetes muss Images aus einem Registry ziehen. Eventhub pusht dasselbe Image in zwei Artifact-Registry-Repos:
+
+- Eventhub-Projekt (`ard-eventhub-europe-west3/ingest`) über `GCP_GITHUB_SERVICE_ACCOUNT_KEY`
+- `ard-common` / `voice-feeds-playout-search/ard-eventhub/ingest` über `keys/gcp-ard-common.ci.sops.json` (`voice-feeds-gar-writer`)
+
+Für das Eventhub-Registry: Console → Eventhub-Projekt → Artifact Registry → SA mit "_Storage Object Viewer_" für den Pull aus Kubernetes.

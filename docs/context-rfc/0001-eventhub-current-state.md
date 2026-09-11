@@ -111,8 +111,9 @@ a separate concept — `beta` is a deployment that runs with `STAGE=prod`.
 
 Deployments: `dev` on Cloud Run for internal work, `test` / `beta` / `prod` on Kubernetes behind
 `eventhub-ingest-test.ard.de`, `eventhub-ingest-beta.ard.de`, and `eventhub-ingest.ard.de`.
-GitHub Actions builds and pushes images to Artifact Registry in `europe-west3`; the actual
-Kubernetes rollout happens outside GitHub Actions.
+GitHub Actions builds and pushes images to Artifact Registry in `europe-west3` (Eventhub project
+and `ard-common` / `voice-feeds-playout-search`); the actual Kubernetes rollout happens outside
+GitHub Actions.
 
 ## 5. The event path
 

@@ -11,7 +11,9 @@ on:
 
 env:
   IMAGE_NAME: ard-eventhub-europe-west3/ingest
+  IMAGE_NAME_ARD_COMMON: voice-feeds-playout-search/ard-eventhub/ingest
   REGISTRY_DOMAIN: europe-west3-docker.pkg.dev
+  GCP_ARD_COMMON_PROJECT_ID: ard-common
 
 jobs:
   security:
@@ -139,5 +141,55 @@ jobs:
             ${{ steps.push.outputs.VERSION }}
             ```
 
+      - name: 🔓 Decrypt ARD Common service account key
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_PRIVATE_KEY }}
+        run: sops --output keys/gcp-ard-common.json --decrypt keys/gcp-ard-common.ci.sops.json
+
+      - name: 🔑 Login to Registry (ard-common)
+        run: |
+          # uses the decrypted service account key (gar writer in ard-common)
+          # instead of the Eventhub SA, since that project sits outside this one
+          KEY="${GITHUB_WORKSPACE}/keys/gcp-ard-common.json"
+
+          # google-github-actions/auth exports credential-file overrides via
+          # GITHUB_ENV; those beat activate-service-account and
+          # docker-credential-gcloud, so docker would keep pushing as the
+          # Eventhub SA. Retarget current + later steps.
+          {
+            echo "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE=${KEY}"
+            echo "GOOGLE_APPLICATION_CREDENTIALS=${KEY}"
+            echo "GOOGLE_GHA_CREDS_PATH=${KEY}"
+            echo "CLOUDSDK_CORE_PROJECT=${GCP_ARD_COMMON_PROJECT_ID}"
+            echo "CLOUDSDK_PROJECT=${GCP_ARD_COMMON_PROJECT_ID}"
+            echo "GCLOUD_PROJECT=${GCP_ARD_COMMON_PROJECT_ID}"
+            echo "GCP_PROJECT=${GCP_ARD_COMMON_PROJECT_ID}"
+            echo "GOOGLE_CLOUD_PROJECT=${GCP_ARD_COMMON_PROJECT_ID}"
+          } >> "$GITHUB_ENV"
+
+          export CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE="${KEY}"
+          export GOOGLE_APPLICATION_CREDENTIALS="${KEY}"
+          export GOOGLE_GHA_CREDS_PATH="${KEY}"
+          export CLOUDSDK_CORE_PROJECT="${GCP_ARD_COMMON_PROJECT_ID}"
+
+          gcloud auth activate-service-account --key-file "${KEY}" --quiet
+          gcloud auth configure-docker "$REGISTRY_DOMAIN" --quiet
+
+      - name: 🏷 Tagging & Pushing docker (ard-common)
+        id: push-ard-common
+        run: |
+          TAG=$REGISTRY_DOMAIN/$GCP_ARD_COMMON_PROJECT_ID/${{ env.IMAGE_NAME_ARD_COMMON }}:${{ steps.push.outputs.VERSION }}
+          docker tag image $TAG
+          docker push $TAG --quiet
+
+          echo "## Docker Version Tag (ard-common)" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "$TAG" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
       - name: 👋 Logout
-        run: 'docker logout'
+        if: always()
+        run: |
+          gcloud auth revoke --all --quiet || true
+          docker logout || true
+          rm -f keys/gcp-ard-common.json
