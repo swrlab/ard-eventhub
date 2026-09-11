@@ -8,6 +8,8 @@ export type NatsAccessOptions = {
 	servers: string
 	user?: string
 	password?: string
+	/** Client name shown in nats-server monitoring. Defaults to `eventhub-connect`. */
+	name?: string
 }
 
 /**
@@ -20,7 +22,7 @@ const connectNats = (options: NatsAccessOptions): Promise<NatsConnection> => {
 		servers: options.servers,
 		timeout: CONNECT_TIMEOUT_MS,
 		reconnect: true,
-		name: 'eventhub-connect',
+		name: options.name ?? 'eventhub-connect',
 	}
 	if (options.user) {
 		opts.user = options.user

@@ -115,7 +115,15 @@ test('MQTT credential is rejected on the NATS port; STANDARD credential is rejec
 		})
 	)
 
-	await assertRejects(() => connectMqttUser(LOCAL_NATS_USERS.svcBridge, LOCAL_NATS_PASSWORD))
+	await assertRejects(() =>
+		natsAccess.connect({
+			servers: NATS_SERVERS,
+			user: LOCAL_NATS_USERS.svcBridge,
+			password: LOCAL_NATS_PASSWORD,
+		})
+	)
+
+	await assertRejects(() => connectMqttUser(LOCAL_NATS_USERS.svcAdapterRadioplayer, LOCAL_NATS_PASSWORD))
 })
 
 test('multi-institution publisher can MQTT-publish to each allowed inbox', async () => {

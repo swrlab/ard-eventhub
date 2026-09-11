@@ -195,3 +195,8 @@ nats-sub *args:
 [group('LOCAL')]
 connect:
 	bun run --hot ./src/connect/index.ts
+
+# start eventhub-bridge (GCP MQTT → CN inbox)
+[group('LOCAL')]
+bridge:
+	bun run --hot ./src/bridge/index.ts

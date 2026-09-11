@@ -15,7 +15,7 @@ In addition to the [ingest-env](../src/ingest/README.md#Environments), following
 - OPTIONAL `MQTT_TLS_CA` - hop CA PEM or path. Omit for local `mqtt://`; GKE mqtts:// needs the private CA.
 - OPTIONAL `NATS_URL` - Eventhub Connect NATS client (`nats://127.0.0.1:4222`). Not required for ingest tests. Start a local broker with `just nats-up` (Homebrew) or `just nats-up-docker` (Cursor Cloud / CI). Do not run NATS and NanoMQ together — both bind `:1883`.
 - OPTIONAL `NATS_USER` / `NATS_PASSWORD` - defaults `svc-sidecar` / `local` (bcrypt hashes in `infra/nats/nats-users.conf`). Production plaintext via sops.
-- OPTIONAL `NATS_REQUIRE` - exact string `true` makes NATS access and ACL tests fail instead of skip when `:4222` is down. The separate CI NATS job sets this. That job also runs `just nats-check` and `just nats-check-invalid`.
+- OPTIONAL `NATS_REQUIRE` - exact string `true` makes NATS access, ACL, and bridge live tests fail instead of skip when `:4222` is down. The separate CI NATS job sets this. That job also runs `just nats-check` and `just nats-check-invalid`. Live bridge tests need NATS MQTT (`svc-bridge` / `local`).
 - OPTIONAL `TEST_USER_RESET` - set true for email reset (request limit)
 
 Locally these usually come from `.env.sops.yaml` via `just test`. CI injects them from `.env.ci.sops.yaml` with `sops exec-env`.

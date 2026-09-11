@@ -55,7 +55,7 @@ If docker is also missing, download a pinned `nats-server` binary from [nats-io/
 2. In another terminal, publish MQTT QoS 1 as `pub-swr-2026-06-26` / `local` to `inbox/urn:ard:institution:a3004ff924ece1a2` on `mqtt://127.0.0.1:1883`
 3. The NATS subscriber prints the payload
 
-Optional: run ingest with the existing `MQTT_BROKER_URL=mqtt://127.0.0.1:1883` so HTTPS posts land on NATS subjects for `just connect` / `just nats-sub` to see.
+Optional: run ingest with the existing `MQTT_BROKER_URL=mqtt://127.0.0.1:1883` so HTTPS posts land on NATS subjects for `just connect` / `just nats-sub` to see. The GCP→CN hop is `just bridge` ([`../bridge/README.md`](../bridge/README.md)) — it needs the NanoMQ hop and NATS on **different** hosts because both default to `:1883`.
 
 ```sh
 just nats-down

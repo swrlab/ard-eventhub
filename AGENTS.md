@@ -12,6 +12,7 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 - **Install dependencies:** `bun install`
 - **Start ingest service:** `bun run ingest` (runs with hot reload)
 - **Start connect (NATS access):** `just connect` (needs local NATS: `just nats-up` or `just nats-up-docker`; local user `svc-sidecar` / `local`)
+- **Start bridge (GCP MQTT → CN MQTT):** `just bridge` (hop `MQTT_BROKER_URL` + CN `CN_MQTT_URL` as `svc-bridge` / `local`. Do not run NanoMQ and NATS MQTT on the same host)
 - **Run tests:** `just test`
 - **Hurl API suite:** `just integration` (needs running ingest + `hurl`)
 - **Lint code:** `just lint` (uses Oxlint)
@@ -29,6 +30,7 @@ Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `o
 - **File Structure:**
   - `src/ingest/` – Ingest service (receives events, manages subscriptions)
   - `src/connect/` – Eventhub Connect NATS access layer (no validation sidecar yet)
+  - `src/bridge/` – Eventhub Bridge (GCP MQTT → CN inbox; dumb relay)
   - `src/schemas/` – Zod request/response schemas (runtime validation + OpenAPI)
   - `src/openapi/` – OpenAPI document assembly / `openapi.json` generator
   - `src/asyncapi/` – AsyncAPI document assembly / `asyncapi.json` generator (Eventhub Connect / MQTT)
