@@ -60,7 +60,7 @@ spec:
               containerPort: 8222
               protocol: TCP
             - name: websocket
-              containerPort: 8080
+              containerPort: 9222
               protocol: TCP
           startupProbe:
             httpGet:

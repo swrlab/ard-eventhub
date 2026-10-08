@@ -289,12 +289,14 @@ onUnmounted(stop)
 				{{ preset.label }}
 			</button>
 		</div>
-		<p v-if="wide" class="mb-3 font-mono text-sm text-warning">
+		<p v-if="wide && !closeMessage" class="mb-3 font-mono text-sm text-warning">
 			wide filter. frames over 20/s are dropped and marked sampled.
 		</p>
 		<p v-if="closeMessage" class="mb-3 font-mono text-sm text-warning">{{ closeMessage }}</p>
 		<p v-if="tailPhase === 'sampled'" class="mb-3 font-mono text-sm text-warning">sampled · dropped {{ dropped }}</p>
-		<p v-if="!events.length && !closeMessage" class="font-mono text-sm text-muted">not watching</p>
+		<p v-if="!events.length && !closeMessage && !live" class="font-mono text-sm text-muted">
+			{{ connecting ? 'connecting' : 'not watching' }}
+		</p>
 		<ol class="min-h-0 flex-1 space-y-4 overflow-auto">
 			<li v-for="(item, index) in events" :key="`${item.at}-${index}`" class="border-b border-border pb-3">
 				<div class="mb-1 flex items-baseline justify-between gap-3">

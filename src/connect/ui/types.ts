@@ -1,6 +1,7 @@
 /** JSON shapes the operator UI polls. The live tail is a separate socket. */
 
 export type { FeedReport } from '../ard-feed.ts'
+export type { FeedCatalogEntry, FeedCatalogReport } from './feed-catalog.ts'
 
 export type MetaReport = {
 	pollMs: number

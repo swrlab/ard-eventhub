@@ -16,6 +16,7 @@ provide('now', now)
 
 const nav = [
 	{ to: '/on-air', label: 'on-air' },
+	{ to: '/feed', label: 'feed' },
 	{ to: '/connections', label: 'connections' },
 	{ to: '/rejections', label: 'rejections' },
 	{ to: '/cluster', label: 'cluster' },
@@ -143,9 +144,13 @@ onUnmounted(() => {
 					>
 						{{ clusterLine }}
 					</p>
-					<p class="max-w-full min-w-0 truncate font-mono text-sm tabular-nums" :class="feedTone">
+					<RouterLink
+						to="/feed"
+						class="max-w-full min-w-0 truncate font-mono text-sm tabular-nums hover:text-link"
+						:class="feedTone"
+					>
 						{{ feedLine }}
-					</p>
+					</RouterLink>
 				</div>
 			</div>
 			<nav class="mt-3 flex flex-wrap gap-1 font-mono text-sm" aria-label="Boards">

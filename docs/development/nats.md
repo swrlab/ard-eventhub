@@ -21,15 +21,11 @@ just dev            # streams plus the operator UI, http://127.0.0.1:4173
 
 ## Operator UI
 
-`just dev` serves the boards after `just ui-build`. On-air, connections, rejections, and cluster health poll HTTP every 8 seconds. The live tail is a NATS WebSocket on port 8080, username `sub-ui`, no password, subscribe `radio.>` only. It closes after 2 minutes without a click, key, or scroll, and after 30 minutes regardless. A hidden tab does not keep it open. Dev cluster:
+`just dev` serves the boards after `just ui-build`. On-air, connections, rejections, and cluster health poll HTTP every 8 seconds. The live tail is a NATS WebSocket on port 9222, username `sub-ui`, no password, subscribe `radio.>` only. It closes after 2 minutes without a click, key, or scroll, and after 30 minutes regardless. A hidden tab does not keep it open.
 
-```sh
-NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just dev
-```
+The boards use the connect login (`NATS_USER`, default `svc-sidecar`). The tail uses `sub-ui` with no password. Set `NATS_WS_URL` when the WebSocket listener is not `ws://` plus the NATS host on port 9222. Passwords are not shown. Vite hot reload is `USE_HMR=true just dev` plus `just ui`. The header links to the feed board: the serving snapshot, plus `allowed-livestreams.json` rows that add a publish permission for topics absent from the core feed. It also shows feed age and the KV revision. Connect pulls `ARD_FEED_URL` into `KV_ARD_FEED` hourly. A bad fetch keeps the previous snapshot, including the gzip copy at `src/connect/bootstrap/ard-feed.json.gz`.
 
-The boards use the connect login (`NATS_USER`, default `svc-sidecar`). The tail uses `sub-ui` with no password. Set `NATS_WS_URL` when the WebSocket listener is not `ws://` plus the NATS host on port 8080. Passwords are not shown. Vite hot reload is `USE_HMR=true just dev` plus `just ui`. The header shows ARD core feed age and the KV revision. Connect pulls `ARD_FEED_URL` into `KV_ARD_FEED` hourly. A bad fetch keeps the previous snapshot, including the gzip copy at `src/connect/bootstrap/ard-feed.json.gz`.
-
-Lokale Config: [`infra/nats/nats-dev.conf`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nats/nats-dev.conf) — ein Knoten, JetStream, MQTT `:1883`, WebSocket `:8080` ohne TLS. User und bcrypt-Hashes (Klartext `local`) stehen in [`components/users/nats-users.conf`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/components/users/nats-users.conf). `sub-ui` hat kein Passwort. `infra/nats/nats-users.conf` ist ein Symlink darauf. Anonyme Connects schlagen fehl.
+Lokale Config: [`infra/nats/nats-dev.conf`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nats/nats-dev.conf) — ein Knoten, JetStream, MQTT `:1883`, WebSocket `:9222` ohne TLS. User und bcrypt-Hashes (Klartext `local`) stehen in [`components/users/nats-users.conf`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/components/users/nats-users.conf). `sub-ui` hat kein Passwort. `infra/nats/nats-users.conf` ist ein Symlink darauf. Anonyme Connects schlagen fehl.
 
 Vor einem Reload: `just nats-check`. User hinzufügen, dann `just nats-reload` (kein Restart).
 

@@ -5,6 +5,7 @@ import { feedReport, feedState } from '../ard-feed.ts'
 import { natsUrl, natsUser } from '../env.ts'
 import { sampleMonitor } from './cluster.ts'
 import { natsMonitorUrl, natsWsUrl, usersConfPath } from './env.ts'
+import { buildFeedCatalog } from './feed-catalog.ts'
 import { errorMessage } from './json.ts'
 import { foldOnAir } from './on-air.ts'
 import { DEFAULT_TAIL_FILTER, STATS_POLL_MS, TAIL_CAP_MS, TAIL_IDLE_MS, TAIL_MAX_PER_SECOND } from './policy.ts'
@@ -61,6 +62,11 @@ const loadMonitor = async (): Promise<{ cluster: ClusterReport; connections: Liv
 api.get('/meta', (c) => c.json(meta()))
 
 api.get('/feed', (c) => c.json(feedReport(feedState)))
+
+api.get('/feed/catalog', (c) => {
+	const catalog = buildFeedCatalog(feedState.feed)
+	return c.json({ ...feedReport(feedState), note: catalog.note, entries: catalog.entries })
+})
 
 api.get('/cluster', async (c) => c.json((await loadMonitor()).cluster))
 

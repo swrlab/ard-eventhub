@@ -35,7 +35,7 @@ Monitor: `http://127.0.0.1:8222`. Optional CLI: `nats stream ls`, `nats sub 'inb
 
 ## Operator UI
 
-The same process serves the boards. Stats are plain HTTP, polled every 8 seconds. The live tail is not that process: the page opens a NATS WebSocket (`ws://` port 8080, or `NATS_WS_URL`) as `sub-ui` with no password and subscribes to `radio.>`. Publishing still requires a username and password. Vite writes `static/dist` (manifest plus hashed assets), and connect serves that the way a built frontend is served: `/static/*` from the repo root, and every other GET returns the HTML shell.
+The same process serves the boards. Stats are plain HTTP, polled every 8 seconds. The live tail is not that process: the page opens a NATS WebSocket (`ws://` port 9222, or `NATS_WS_URL`) as `sub-ui` with no password and subscribes to `radio.>`. Publishing still requires a username and password. Vite writes `static/dist` (manifest plus hashed assets), and connect serves that the way a built frontend is served: `/static/*` from the repo root, and every other GET returns the HTML shell.
 
 ```sh
 just ui-build
@@ -45,17 +45,12 @@ just dev
 
 Hot reload: `USE_HMR=true just dev` in one terminal and `just ui` in another. The page stays on `:4173`. Its script tag points at the Vite server on `:5173`. `USE_HMR=dev` is only for the Vite `base` when you want absolute dev-server URLs inside the build.
 
-Dev cluster (three pods behind one monitor URL):
-
-```sh
-NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just dev
-```
-
 The process connects as `NATS_USER` (default `svc-sidecar`), the same login that ensures streams. Cluster and connection stats use the HTTP monitor. The tail does not use that login. The page connects as `sub-ui` with no password, WebSocket only, and may subscribe to `radio.>` only. A cluster that is already running needs the users file and the `websocket` listener reapplied before that works. The UI never sends a password to the browser.
 
 Panels:
 
 - **On-air.** Last retained message per `radio.{livestream}`, oldest last-event first.
+- **Feed.** The snapshot this process is authorizing with, plus the `allowed-livestreams.json` overlay. Those rows are not in the ARD core feed. They add a publish permission: `publisherId` must match, and the institution is still that publisher's house in the feed.
 - **Connections.** Users from `NATS_USERS_CONF` (default `infra/kubernetes/components/users/nats-users.conf`) plus `/connz`. Usernames and allow-lists only.
 - **Rejections.** Retained `feedback.>` plus what arrived while this process was up. `?institution=` filters one house.
 - **Cluster.** `/varz`, `/connz`, `/jsz`, sampled until each node behind the monitor URL has answered.

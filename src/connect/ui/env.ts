@@ -2,8 +2,8 @@ import { join } from 'node:path'
 import { getEnv } from '../../utils/env.ts'
 import { natsUrl } from '../env.ts'
 
-/** Browser tail listener. Same host as `NATS_URL`, port 8080, unless `NATS_WS_URL` is set. */
-const NATS_WS_PORT = 8080
+/** Browser tail listener. Same host as `NATS_URL`, port 9222, unless `NATS_WS_URL` is set. */
+const NATS_WS_PORT = 9222
 
 /**
  * Default WebSocket URL for the operator tail.
@@ -28,8 +28,7 @@ export const uiPort = getEnv<number>('UI_PORT', { defaultValue: 4173, type: 'num
 export const uiHost = getEnv<string>('UI_HOST', { defaultValue: '0.0.0.0' })
 
 /**
- * NATS monitoring origin. The dev cluster is `http://leno0:8222`.
- * Local `just nats-up` is `http://127.0.0.1:8222`.
+ * NATS monitoring origin. Local `just nats-up` is `http://127.0.0.1:8222`.
  */
 export const natsMonitorUrl = getEnv<string>('NATS_MONITOR_URL', { defaultValue: 'http://127.0.0.1:8222' })
 

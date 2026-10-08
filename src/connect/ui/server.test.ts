@@ -17,6 +17,14 @@ test('stats routes answer without a websocket', async () => {
 	const feedBody = await feedRes.json()
 	assertEquals(feedBody.staleness, 'never')
 	assertEquals(JSON.stringify(feedBody).includes('password'), false)
+	const catalogRes = await app.request('http://ui.test/api/feed/catalog')
+	assertEquals(catalogRes.status, 200)
+	const catalog = await catalogRes.json()
+	assertEquals(
+		catalog.entries.some((entry: { overlay: boolean }) => entry.overlay),
+		true
+	)
+	assertEquals(JSON.stringify(catalog).includes('password'), false)
 	const rejections = await filtered.json()
 	assertEquals(rejections.institution, 'urn:ard:institution:abc')
 	assertEquals(missing.status, 404)

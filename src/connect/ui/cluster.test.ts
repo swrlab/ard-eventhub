@@ -109,7 +109,7 @@ const rotatingFetch = (): MonitorFetch => {
 }
 
 test('monitor sampling joins three load-balanced nodes without tripling jetstream', async () => {
-	const sampled = await sampleMonitor('http://leno0:8222', rotatingFetch())
+	const sampled = await sampleMonitor('http://127.0.0.1:8222', rotatingFetch())
 	assertEquals(
 		sampled.cluster.nodes.map((node) => node.name),
 		['nats-0', 'nats-1', 'nats-2']

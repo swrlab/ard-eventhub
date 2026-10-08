@@ -21,6 +21,6 @@ spec:
       targetPort: monitor
       protocol: TCP
     - name: websocket
-      port: 8080
+      port: 9222
       targetPort: websocket
       protocol: TCP
