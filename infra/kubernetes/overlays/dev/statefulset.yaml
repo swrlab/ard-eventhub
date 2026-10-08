@@ -43,6 +43,9 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+            # Kubelet expands $(SERVER_NAME). NATS cannot splice $SERVER_NAME into a longer string.
+            - name: CLUSTER_ADVERTISE
+              value: "$(SERVER_NAME).nats-headless.eventhub-dev.svc.cluster.local:6222"
           ports:
             - name: nats
               containerPort: 4222

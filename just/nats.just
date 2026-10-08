@@ -176,7 +176,6 @@ nats-passwd password='local':
 	echo 'need the nats CLI (brew install nats-io) or htpasswd' >&2
 	exit 1
 
-
 # stream local nats-server logs
 [group('NATS')]
 nats-logs:

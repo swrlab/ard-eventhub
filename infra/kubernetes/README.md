@@ -6,7 +6,7 @@ Image pin matches `just nats-up-docker`: `nats:2.14.6`.
 
 ## Dev
 
-Three pods (`nats-0`, `nats-1`, `nats-2`) in `eventhub-dev`. They cluster over pod DNS. There is no hostname anti-affinity, so a single node can run all three. MQTT is plaintext `:1883`. Users are the committed file (password `local`). JetStream data is an `emptyDir` and dies with the pod.
+Three pods (`nats-0`, `nats-1`, `nats-2`) in `eventhub-dev`. They cluster on `nats-<n>.nats-headless.eventhub-dev.svc.cluster.local:6222`. That record exists only because `nats-headless` is headless. Each pod advertises the same name: the kubelet builds `CLUSTER_ADVERTISE` from the pod name, because NATS will not expand `$SERVER_NAME` inside a longer string. There is no hostname anti-affinity, so a single node can run all three. MQTT is plaintext `:1883`. Users are the committed file (password `local`). JetStream data is an `emptyDir` and dies with the pod.
 
 ```sh
 just nats-k8s-dev

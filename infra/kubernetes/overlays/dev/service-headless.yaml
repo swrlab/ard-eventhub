@@ -1,5 +1,7 @@
-# Pod DNS for cluster routes. publishNotReadyAddresses lets the three pods find
-# each other before readiness, which is what forms the JetStream quorum.
+# Governing headless Service. Pod A records exist only when clusterIP is None:
+# nats-0.nats-headless.eventhub-dev.svc.cluster.local
+# publishNotReadyAddresses keeps those records while the pods are still unready,
+# which is what lets them find each other and form the JetStream quorum.
 apiVersion: v1
 kind: Service
 metadata:
@@ -9,7 +11,8 @@ metadata:
     app.kubernetes.io/part-of: eventhub
     app.kubernetes.io/component: broker
 spec:
-  type: LoadBalancer
+  clusterIP: None
+  publishNotReadyAddresses: true
   selector:
     app.kubernetes.io/name: nats
   ports:

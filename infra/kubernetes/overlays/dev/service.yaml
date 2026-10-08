@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/part-of: eventhub
     app.kubernetes.io/component: broker
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app.kubernetes.io/name: nats
   ports:
