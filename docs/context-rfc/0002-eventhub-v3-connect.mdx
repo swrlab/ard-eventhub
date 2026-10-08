@@ -7,7 +7,7 @@ sidebar:
 
 - **Status:** Draft — proposes change
 - **Proposes:** `eventhub-connect`, a new deployment target inside the ARD CN
-- **Last reviewed:** 2026-08-28
+- **Last reviewed:** 2026-10-08
 - **Tracking:** [issue #824](https://github.com/swrlab/ard-eventhub/issues/824),
   [discussion #771](https://github.com/swrlab/ard-eventhub/discussions/771)
 
@@ -20,8 +20,10 @@ sidebar:
 v3 ships **`eventhub-connect`** as a redundant MQTT ingest, validation and plugin-publishing
 platform inside the ARD CN, deployed as **three nodes across three SWR zones**, with a UI for
 operators. The existing **`eventhub-ingest`** in GCP keeps serving broadcasters who have not
-migrated, mirroring their events to a minimal NanoMQ broker that **`eventhub-bridge`** relays into the
-CN. Once every broadcaster is on MQTT-in-CN, the GCP side is decommissioned (expected by mid to end of 2027).
+migrated. It can reach the CN's internal endpoints, so it publishes their events over MQTT straight
+into `inbox/{institutionId}`, the same publish a native publisher makes. There is no NanoMQ hop and
+no **`eventhub-bridge`**. Once every broadcaster is on MQTT-in-CN, the GCP side is decommissioned
+(expected by mid to end of 2027).
 
 _RFC 0001_ describes what runs today. This document states what changes, what it costs, and what is
 still undecided ([§19](#19-open-decisions), [§20](#20-open-questions)).
@@ -91,18 +93,18 @@ on the survivor as well. Node count alternatives are in [§21.6](#216-node-count
 
 ### 4.2 What "primary" means, and what it does not
 
-BAD is primary in one sense only: **it is where single-instance workloads that need a fixed home are
-placed** — currently `eventhub-bridge` and the Beszel hub. It is a placement convention, not a role.
+BAD is primary in one sense only: **it is where the Beszel hub is placed.** It is a placement
+convention, not a role.
 
 The ARD feed CronJob is also one instance cluster-wide but is **not** pinned here: it is stateless
 and writes to replicated JetStream KV, so K3S can schedule it in any zone.
 
 It is **not** primary in the data path. NATS and JetStream are symmetric across all three nodes; the
 RAFT leader is elected, not assigned, and can be any node at any time. Clients connect to whichever
-endpoint answers, and no event needs BAD to be up. Losing BAD costs exactly two things: legacy
-publishers stop being relayed (accepted — [§12.7](#128-legacy-is-not-first-class)) and host-level
-uptime monitoring goes dark. Native MQTT publishers, all subscribers, validation and plugin dispatch
-continue on the STG + MNZ quorum.
+endpoint answers, and no event needs BAD to be up. Losing BAD costs host-level uptime monitoring.
+Native MQTT publishers, legacy publishes from GCP, subscribers, validation and plugin dispatch
+continue on the STG + MNZ quorum. Ingest is configured with all three endpoints, same as any other
+client ([§12.8](#128-legacy-shares-the-cluster)).
 
 **The Beszel hub on BAD is a known soft spot** — the one observability component that becomes
 unavailable in the failure where it would be most useful. Tolerable because it is host and uptime
@@ -129,25 +131,22 @@ it.**
   The role is chosen by the container command, so adding a plugin target or a UI replica is a
   manifest change, not a new image.
 
-- **`eventhub-bridge`** — relay from GCP into `inbox/{institutionId}`. A separate image, **exactly
-  one instance cluster-wide** on BAD, not HA.
 - The **cluster-internal observability stack** ([§15](#15-observability)).
 
-During migration, GCP `eventhub-ingest` keeps accepting HTTPS posts and publishes raw events to
-`inbox/{institutionId}` on a **NanoMQ** container, which `eventhub-bridge` relays into the CN.
+During migration, GCP `eventhub-ingest` keeps accepting HTTPS posts and publishes the normalized
+event over MQTT to `inbox/{institutionId}` on the CN gateway. The sidecar consumes it on `inbox.>`
+with no separate path ([§11.2](#112-legacy-path)).
 
-**The broker is only reachable from inside the ARD CN, and the broadcasters are already there.** A
-publisher's playout system sits in the CN but in its own house's network, not in SWR's — SWR hosts the
-platform, it does not host the publishers. The only participants outside the CN are the legacy GCP
-project and the external plugin targets.
+**The broker is only reachable from inside the ARD CN, plus one exception: the legacy GCP project.**
+A publisher's playout system sits in the CN but in its own house's network, not in SWR's. SWR hosts
+the platform, it does not host the publishers. The gateway is not internet-facing. `eventhub-ingest`
+connects in to `:8883` like a client, and the external plugin targets are reached by outbound HTTPS.
 
 ```mermaid
 flowchart LR
     subgraph GCP["GCP — legacy, best-effort"]
         EI["eventhub-ingest<br/>HTTPS auth"]
-        MQ["NanoMQ<br/>MQTT broker"]
         PS["Cloud Pub/Sub"]
-        EI --> MQ
         EI -.-> PS
     end
 
@@ -156,8 +155,6 @@ flowchart LR
         S1["subscribers<br/>ARD Sounds · broadcaster apps · dashboards"]
 
         subgraph SWR["SWR — hosts the platform"]
-            BR["eventhub-bridge"]
-
             subgraph CL["NATS + JetStream · MQTT gateway"]
                 NB["zone BAD<br/>primary"]
                 NS["zone STG"]
@@ -175,8 +172,7 @@ flowchart LR
 
     P1 -->|MQTT| CL
     P1 -.->|HTTPS| EI
-    MQ --> BR
-    BR -->|"inbox/"| NB
+    EI -->|"MQTT inbox/"| CL
     CL <-->|"validate · fan out"| EC
     EC -->|outbound HTTPS| T1
     CL -->|MQTT| S1
@@ -186,11 +182,11 @@ flowchart LR
 
 ### 5.1 Built versus deployed
 
-- **Built** — three services, all TypeScript, all in this repo: `eventhub-connect`,
-  `eventhub-bridge`, `eventhub-ingest`.
-- **Deployed** — NATS, the GCP-side NanoMQ, and the whole observability stack. Upstream container
-  images, configured by file, never forked and never wrapped. **We write no broker code.** NATS is
-  deployed exactly like Vector or VictoriaMetrics: pull the official image, mount a config, run it.
+- **Built** — two services, both TypeScript, both in this repo: `eventhub-connect` and
+  `eventhub-ingest`.
+- **Deployed** — NATS and the whole observability stack. Upstream container images, configured by
+  file, never forked and never wrapped. **We write no broker code.** NATS is deployed exactly like
+  Vector or VictoriaMetrics: pull the official image, mount a config, run it.
 
 ### 5.2 One responsibility per service
 
@@ -202,14 +198,6 @@ flowchart LR
   targets, and the operator UI.
 - Does not: accept HTTPS event submissions, know anything about GCP, or talk to Pub/Sub.
 
-**`eventhub-bridge`** — the GCP-to-CN relay, and nothing else.
-
-- Owns: one MQTT subscription against the GCP broker, one MQTT publish into the CN's
-  `inbox/{institutionId}`.
-- Does not: validate, map topics, resolve institutions, or know that plugins exist. **If a code
-  change to the bridge is ever needed because a schema changed, something has been put in the wrong
-  place.**
-
 **`eventhub-ingest`** — the GCP HTTPS shim, shrinking in behaviour but not in surface.
 
 - Owns: TLS termination, token issuance (`/auth/login`, `/auth/refresh`, `/auth/reset`), request
@@ -217,7 +205,9 @@ flowchart LR
   feedback** ([§5.4](#54-validation-runs-twice-on-purpose)), **identifier normalization** —
   CRID-to-URN and Core-ID-to-URN via `process-services.ts`, plus filling in `institutionId` from the
   publisher it already resolves, while **still emitting the deprecated `externalId` and `type`** that
-  Pub/Sub subscribers read ([§12.4](#124-identifiers)) — and an MQTT publish of the event body.
+  Pub/Sub subscribers read ([§12.4](#124-identifiers)) — and an MQTT publish of that normalized body
+  to the CN gateway's `inbox/{institutionId}`, as `svc-ingest`, the same topic a native publisher
+  uses.
 - Stays **single-institution**: one Firebase user maps to one `user.institution.id`, and the
   multi-institution capability in [§7.4](#74-one-user-several-institutions) is deliberately not
   backported.
@@ -262,7 +252,7 @@ The OpenAPI document keeps describing every live route accurately, including dep
 
 `/events/:eventName` **keeps enforcing the event schema exactly as it does today**, so a legacy
 publisher still gets a synchronous `400` with zod error detail. The sidecar then validates the event
-again once the bridge has relayed it into `inbox.{institutionId}`.
+again once ingest has published it to `inbox.{institutionId}`.
 
 The two passes enforce **different schemas by design**: ingest accepts the legacy shape — `externalId`
 required, `publisherId` in either form — then normalizes the identifiers, while the sidecar enforces
@@ -276,8 +266,8 @@ Each pass exists for a different reason:
   `feedback/{institutionId}` cannot reach it and the HTTP response is the only diagnostic channel it
   has. Dropping the check would degrade the legacy path with no benefit to the houses still on it.
 - **The sidecar validates because it is the trust boundary.** It validates everything arriving on
-  `inbox.>` regardless of origin, so there is no bridged-message bypass and no trusted-publisher
-  branch to get wrong. `eventhub-bridge` stays a dumb relay
+  `inbox.>` regardless of origin, so there is no legacy-message bypass and no trusted-publisher
+  branch to get wrong. Ingest publishes like any other MQTT client
   ([§5.2](#52-one-responsibility-per-service)) and the sidecar needs no notion of where a message
   came from.
 
@@ -286,8 +276,8 @@ reach the `radio.` tree.
 
 The cost is that `src/schemas/events.ts` runs in two deployments, which can drift if the services
 ship from different commits, and that the strict shape is only reachable through ingest's
-normalization. A sidecar rejection of a bridged event therefore means one of two things — the schemas
-diverged, or normalization stopped producing URNs — and both are alarms, not tolerable states
+normalization. A sidecar rejection of a legacy event therefore means one of two things: the schemas
+diverged, or normalization stopped producing URNs. Both are alarms, not tolerable states
 ([§11.2](#112-legacy-path)). CI builds both from the same commit, and the strict schema is derived
 from the legacy one rather than written twice.
 
@@ -302,8 +292,7 @@ src/
   types/       shared types (#types)
   utils/       genuinely shared helpers only
   connect/     eventhub-connect  — sidecar, adapters, feed loader, UI backend
-  ingest/      eventhub-ingest   — HTTPS auth + MQTT publish
-  bridge/      eventhub-bridge   — GCP → CN relay
+  ingest/      eventhub-ingest   — HTTPS auth + MQTT publish into the CN
 infra/         NATS + observability configs, K3S manifests, Nix flake
 ```
 
@@ -322,7 +311,7 @@ accident of history and becomes `eventhub-connect`'s: `ard-feed`, `ard-core`, `e
 The Pub/Sub and Datastore helpers get deleted with the fan-out. Only what more than one service
 imports stays in `utils/`.
 
-One build per service, three container images, one shared dependency graph. No monorepo tooling:
+One build per service, two container images, one shared dependency graph. No monorepo tooling:
 separate entry points in one package is enough at this size, and `package.json#main` already points
 at a service entry point today.
 
@@ -398,7 +387,7 @@ because plugin eligibility is a per-event decision ([§10.3](#103-plugin-routing
 Publishers **publish only** to `inbox/{institutionId}` and **subscribe only** to
 `feedback/{institutionId}` — to one such pair, or to several if the credential is permitted for
 several institutions ([§7.4](#74-one-user-several-institutions)). The `radio.`, `feedback.` and
-`plugin.` trees are written exclusively by the sidecar. `eventhub-bridge` is just another writer to
+`plugin.` trees are written exclusively by the sidecar. `eventhub-ingest` is just another writer to
 `inbox/{institutionId}`.
 
 ### 6.3 Subscription patterns
@@ -453,8 +442,8 @@ Publisher and subscriber credentials are separate user classes with separate nam
   `sub-ard-sounds-2026-06-26`. Naming is looser, because subscriber scopes vary and new consumers
   appear more often than new publishers. The `sub-` prefix is a convention, not a rule the ACLs
   depend on.
-- **Services:** `svc-sidecar`, `svc-adapter-{target}`, `svc-bridge`. NATS-native, not MQTT, and not
-  rotated on the same cadence.
+- **Services:** `svc-sidecar` and `svc-adapter-{target}` are NATS-native. `svc-ingest` is MQTT,
+  publish-only, and not rotated on the publisher cadence.
 
 **The username is a label for humans; the institution URN in the subject is the contract.** The
 `swr` in `pub-swr-2026-06-26` is not parsed, matched or resolved by anything — the ACL binds that
@@ -551,10 +540,11 @@ authorization {
       }
     }
 
-    # service: the legacy relay. writes only to inbox, like any other publisher.
+    # service: legacy HTTPS ingest. MQTT, like a publisher. writes every institution's inbox.
     {
-      user: "svc-bridge"
+      user: "svc-ingest"
       password: "$2a$11$..."
+      allowed_connection_types: ["MQTT"]
       permissions: {
         publish:   { allow: ["inbox.>"] }
         subscribe: { deny:  [">"] }
@@ -611,16 +601,17 @@ sidecar even though the credential holds both permissions, because the subject a
 disagree. The `services[].institutionId` field ([§12.4](#124-identifiers)) makes that mistake
 self-evident in the rejection rather than something to infer.
 
-**`svc-bridge` is already this pattern.** It holds `publish.allow: ["inbox.>"]` — every institution
-at once — and needs no institution logic of its own, because the subject it publishes on carries the
+**`svc-ingest` is already this pattern.** It holds `publish.allow: ["inbox.>"]`, every institution
+at once, and needs no institution logic of its own, because the subject it publishes on carries the
 institution and the sidecar checks it like any other message
 ([§11.2](#112-legacy-path)). A multi-institution publisher is the same arrangement with an explicit
-list instead of a wildcard.
+list instead of a wildcard. The difference from a `pub-*` user is scope, not protocol: ingest is one
+MQTT client for every house still on HTTPS.
 
-**None of this applies to `eventhub-ingest`.** A Firebase user there has exactly one
+**None of this applies to Firebase auth on `eventhub-ingest`.** A Firebase user there has exactly one
 `user.institution.id`, checked directly against the resolved publisher's institution, and it stays
-that way for the remainder of the legacy path's life. Multi-institution is a v3-only capability;
-nothing in the legacy code needs to learn about it.
+that way for the remainder of the legacy path's life. Multi-institution on the HTTPS API is a
+v3-only capability; the MQTT credential above is how one process publishes for every house.
 
 ### 7.5 The ACL protects the subject, not the payload
 
@@ -948,9 +939,6 @@ The four `eventhub-connect` roles share one image but scale independently, each 
 - **Validation sidecar — N pods, any zone.** The JetStream pull consumer gives once-only handling
   regardless of count.
 - **Plugin adapters — N pods per target.** Same mechanism, one durable consumer per target.
-- **`eventhub-bridge` — exactly one instance cluster-wide**, not one per zone. It holds an MQTT
-  subscription to the GCP broker, and with no shared subscriptions a second instance would relay
-  every legacy event twice.
 - **Operator UI — N pods.** Read-only. The stats endpoints are stateless, and the live tail holds one
   core NATS subscription per pod plus its browser WebSockets — no durable consumer, so nothing to
   coordinate. Session affinity is not required.
@@ -1001,27 +989,32 @@ crosses the trust boundary, and the publisher is notified on `feedback/{institut
 ### 11.2 Legacy path
 
 1. Legacy broadcaster posts to `eventhub-ingest` over HTTPS as today.
-2. `eventhub-ingest` authenticates the request and publishes the raw body to `inbox/{institutionId}`
-   on the minimal GCP MQTT broker. It already resolves the publisher's institution today, so it
+2. `eventhub-ingest` authenticates the request, validates, normalizes identifiers, and publishes the
+   normalized body over MQTT to `inbox/{institutionId}` on the CN gateway, as `svc-ingest`. Same
+   topic a native publisher uses. It already resolves the publisher's institution today, so it
    already has the URN the subject needs. During the earlier steps it also still fans out to
    Pub/Sub; that ends at step 17.
-3. `eventhub-bridge` subscribes to `inbox/#` on the GCP broker and republishes each message to the
-   same topic in the CN.
-4. From there, identical to [§11.1](#111-cn-path) with no special case anywhere.
+3. From there, identical to [§11.1](#111-cn-path) with no special case anywhere. The sidecar does
+   not know the message came from GCP.
 
-**One validator, one eligibility implementation, one fan-out — all in the sidecar.** Two
+**No store-and-forward.** There is no broker in GCP and no catch-up relay. A publish that cannot
+reach the gateway is not queued. Until step 17, Pub/Sub still delivers that event to existing
+subscribers, and the HTTP response follows the Pub/Sub result. After step 17 the MQTT publish is the
+only distribution, so a failed publish fails the request.
+
+**One validator, one eligibility implementation, one fan-out, all in the sidecar.** Two
 consequences:
 
 - **`eventhub-ingest` runs its own zod pass for the whole life of the legacy path**
-  ([§5.4](#54-validation-runs-twice-on-purpose)), so a sidecar rejection of a bridged event means the
+  ([§5.4](#54-validation-runs-twice-on-purpose)), so a sidecar rejection of a legacy event means the
   two copies of the schema disagree. That is a standing drift alarm for us rather than feedback for
   the publisher, and it should alert rather than sit in a log.
 - **Plugin dispatch must not run on both sides.** While GCP-side Pub/Sub dispatch is still live, the
-  sidecar's fan-out to `plugin.>` would double-deliver every bridged event to Radioplayer and DTS.
-  This is why the bridge ships **before** the adapters move: during that window `plugin.>` messages
-  expire unconsumed (short `max_age`), or the fan-out stays behind a feature flag. The adapter
-  cutover then flips one switch per target on the GCP side, covering native and bridged publishers
-  identically because both already flow through the sidecar.
+  sidecar's fan-out to `plugin.>` would double-deliver every legacy event to Radioplayer and DTS.
+  This is why ingest's direct publish ships **before** the adapters move: during that window
+  `plugin.>` messages expire unconsumed (short `max_age`), or the fan-out stays behind a feature
+  flag. The adapter cutover then flips one switch per target on the GCP side, covering native and
+  legacy publishers identically because both already flow through the sidecar.
 
 ## 12. The client contract
 
@@ -1099,7 +1092,7 @@ one-to-one. Keeping either means keeping a pair that can disagree, and a payload
 `type: PermanentLivestream` meets `id: urn:ard:event-livestream:…` has no correct interpretation.
 
 **They survive the migration because `eventhub-ingest` emits one body to two places.** The normalized
-event goes to the GCP MQTT broker _and_ to Pub/Sub, and Pub/Sub subscribers read `services[]` as it
+event goes to the CN over MQTT _and_ to Pub/Sub, and Pub/Sub subscribers read `services[]` as it
 stands today. Dropping the fields at step 3 would silently change the shape those consumers receive
 long before any of them has migrated — a breaking change to the legacy path, delivered by a step whose
 purpose is to prepare the new one. So through the migration they stay present and populated, and their
@@ -1113,7 +1106,7 @@ removed only after measured zero usage ([§15](#15-observability)).
 `type` also stays **required** on HTTPS input, where it is load-bearing rather than redundant: legacy
 ingest has no `id` to read and uses `type` to pick the prefix it hashes the CRID onto
 (`coreIdPrefixes[type] + createHashedId(externalId)`). Removing it there would break the very
-conversion that keeps bridged events valid.
+conversion that keeps legacy events valid.
 
 One consequence of the eventual removal: the `id` regex becomes the single declaration of which
 livestream kinds exist, doing validation and kind-derivation at once. That is the point — one source
@@ -1144,17 +1137,17 @@ the three is wrong instead of just failing.
 **It is a claim, not an input.** Nothing trusts `institutionId` — the subject remains the only trusted
 carrier of institution, and the feed remains the authority on what a livestream belongs to. A payload
 whose `institutionId` disagrees with either is rejected. Ingest fills it in during normalization from
-the publisher it already resolves, so bridged events satisfy the field without a house changing
+the publisher it already resolves, so legacy events satisfy the field without a house changing
 anything.
 
 **`eventhub-ingest` keeps the conversion.** Legacy HTTPS publishers keep sending `externalId` and a
 numeric `publisherId`; ingest normalizes both before publishing to MQTT, so what arrives on
-`inbox.{institutionId}` through the bridge already satisfies the rule above. No house is forced to
-change its HTTPS payload, and `eventhub-bridge` stays a dumb relay.
+`inbox.{institutionId}` already satisfies the rule above. No house is forced to change its HTTPS
+payload.
 
 A deprecated field is **ignored, not rejected.** `id` is required and therefore authoritative in both
 cases, so there is no ambiguity to protect against and no reason to fail an otherwise correct event.
-The sidecar reads neither. **A native MQTT publisher should simply omit them**; a bridged event will
+The sidecar reads neither. **A native MQTT publisher should simply omit them**; a legacy event will
 carry them for as long as ingest exists, and the counter in [§15](#15-observability) is what tells us
 when nobody sends them any more.
 
@@ -1217,16 +1210,17 @@ block on it and does not need to correlate every publish with a response.
 - **Credential revoked.** The user is removed from the config and the server reloaded. The connection
   drops and the next reconnect fails auth.
 
-### 12.8 Legacy is not first-class
+### 12.8 Legacy shares the cluster
 
-`eventhub-bridge` runs as a single instance with no failover, and legacy publishers are not covered
-by the availability guarantees above. **This is intentional.** The HTTPS path exists to give houses
-time to migrate, not to be a permanent second-class transport.
+Legacy publishers reach the CN as MQTT publishes from `eventhub-ingest`. Same gateway, same
+`inbox/{institutionId}` topic, same sidecar. Distribution availability is the cluster's
+([§12.7](#127-failover-modes)), not a separate relay's.
 
-When the bridge is down or partitioned, legacy events do not reach CN subscribers, and **this
-exposure grows over the migration.** While `eventhub-ingest` still fans out to Pub/Sub, legacy events
-reach existing Pub/Sub subscribers regardless of bridge state; once that fan-out ends at step 17, the
-bridge becomes the only path out of GCP and a bridge outage means legacy events are lost.
+There is no local broker and no catch-up. Events accepted while the gateway is unreachable are not
+replayed later. Until step 17, Pub/Sub still delivers those events to existing subscribers. After
+step 17, a CN outage drops legacy events the same way it drops native publishes.
+
+The HTTPS front door stays temporary. It exists so houses can migrate, and it goes away at step 19.
 
 ## 13. New event schemas
 
@@ -1402,10 +1396,10 @@ state for every station without a history store or a replay.
   `institutionId`, or the feed ([§8.2](#82-ownership-is-a-direct-comparison)). For a
   multi-institution credential this is the difference between "misrouted to the wrong inbox" and "not
   permitted at all".
-- **Sidecar rejections of bridged events, split by cause** — schema drift versus a failed
+- **Sidecar rejections of legacy events, split by cause** — schema drift versus a failed
   normalization ([§5.4](#54-validation-runs-twice-on-purpose)).
 - **Native publishers still sending the deprecated `services[].externalId` or `services[].type`**
-  ([§12.4](#124-identifiers)). Bridged events carry them legitimately, so the panel has to separate
+  ([§12.4](#124-identifiers)). Legacy events carry them legitimately, so the panel has to separate
   the two or it reads as noise.
 - **Filterable to a single institution**, so a house diagnoses its own integration instead of opening
   a ticket. Publishers currently get `Bad request` with no detail, which is why that support load
@@ -1455,9 +1449,10 @@ state for every station without a history store or a replay.
 
 **9. Migration progress.** Useful from step 8 onward, and retired with the GCP side.
 
-- Per house: publishing natively over MQTT, or still on HTTPS through the bridge.
-- **Bridge liveness, relay lag and GCP connection state.** It runs as a single instance
-  ([§10.5](#105-what-scales-and-what-does-not)), so its health has no redundancy to hide behind.
+- Per house: publishing natively over MQTT, or still on HTTPS via `eventhub-ingest`.
+- **Ingest MQTT publish failures.** There is no relay to hide a CN outage
+  ([§12.8](#128-legacy-shares-the-cluster)). Until step 17 those events still reach Pub/Sub
+  subscribers; the counter is what shows the CN path dropping them.
 - **Traffic per `eventhub-ingest` route.** [§5.3](#53-the-ingest-api-surface-stays-until-it-is-deprecated)
   gates removal on _measured_ zero traffic; this is where that measurement lives. Without it,
   deprecation is an argument instead of an observation.
@@ -1563,11 +1558,11 @@ What to instrument, regardless of which tools win:
 
 - Per-publisher event counters, split by event class.
 - Validation error rate, with top failing publishers and error classes.
-- **Sidecar rejections of bridged events**, split by cause — schema drift versus an identifier that
+- **Sidecar rejections of legacy events**, split by cause — schema drift versus an identifier that
   failed ingest's normalization ([§5.4](#54-validation-runs-twice-on-purpose)). Should be zero;
   anything else means the two passes disagree.
 - **Payloads still carrying a deprecated `services[]` field** — `externalId` or `type` — split by
-  publisher, by field, and by native versus bridged. Bridged events carry them by design until step
+  publisher, by field, and by native versus legacy. Legacy events carry them by design until step
   19; a _native_ publisher still sending them has not finished migrating. **This counter is what gates
   the removal**, since deprecation ends on measured zero usage rather than on a date alone.
 - MQTT session counts, connect/disconnect churn, auth failures.
@@ -1607,13 +1602,13 @@ in messages and a larger one in log bytes. **Estimate the volume before the pilo
 - **K3S** as the workload orchestrator. NATS, the observability stack and one workload per
   `eventhub-connect` role — sidecar, adapters, operator UI, feed CronJob — all live as manifests in
   `infra/`. The `eventhub-connect` manifests differ only in the container command and replica count,
-  since they share one image. Scaling is a PR. `eventhub-bridge` runs as a single instance on the
-  primary node behind a feature flag.
+  since they share one image. Scaling is a PR. `eventhub-ingest` stays in GCP and is not a CN
+  workload.
 - **NATS is a standard container deployment, exactly like the observability tools** — official
   upstream image, a config file, a persistent volume. One instance per node, with a stable identity
   and its own volume because JetStream needs both. It is configuration, not code.
-- **We build three images and pull the rest.** CI builds `eventhub-connect`, `eventhub-bridge` and
-  `eventhub-ingest`, and pushes them to the local registry. NATS and the observability stack are
+- **We build two images and pull the rest.** CI builds `eventhub-connect` and pushes it to the
+  local registry. `eventhub-ingest` keeps its GCP image path. NATS and the observability stack are
   mirrored upstream images, pinned by digest.
 - **Local container registry ([ZOT](https://zotregistry.dev/)) on each VM.** K3S pulls from there:
   no Docker Hub traffic, no rate limits, no runtime supply-chain exposure.
@@ -1700,10 +1695,9 @@ of expected impact:
 
 ### 17.3 Deliberately not redundant
 
-Three things are single-instance on purpose, none in the critical path: `eventhub-bridge` (legacy
-only), the observability stack (single-writer stores; losing it makes the system blind, not broken),
-and the plugin adapter targets themselves (on the public internet, unreachable for reasons outside
-the CN).
+Two things are single-instance on purpose, neither in the critical path: the observability stack
+(single-writer stores; losing it makes the system blind, not broken), and the plugin adapter targets
+themselves (on the public internet, unreachable for reasons outside the CN).
 
 ### 17.4 The diversity question
 
@@ -1740,8 +1734,9 @@ hostnames — they gate everything from step 6 onward.
   the other direction. Two further rules are easy to forget and both block earlier than the client
   work does: **inter-node `:6222` across BAD ↔ STG ↔ MNZ**, without which the cluster cannot form a
   RAFT group at all in step 6, and **outbound HTTPS egress** for the plugin adapters, whose targets
-  are on the public internet ([§10.4](#104-plugin-adapters)). The bridge additionally needs egress
-  to the GCP broker at step 8.
+  are on the public internet ([§10.4](#104-plugin-adapters)). **`eventhub-ingest` needs inbound
+  `:8883` from the legacy GCP project to all three nodes**, so it can publish once the gateway is
+  up. That path is not internet exposure of the gateway.
 - **ARD CN certificates.** The MQTT gateway will not serve TLS without them, so they gate step 6,
   not step 14. Request **one certificate covering all three node hostnames**, matching the single
   shared lifecycle assumed in [§17.2](#172-correlated-risk-losing-all-three-nodes), and get renewal
@@ -1763,13 +1758,12 @@ step 5 is ordered by dependency.
    API with OpenAPI and docs. Gets real payloads from real encoders in front of the schema before any
    infrastructure exists, and unblocks the ZI replacement conversation. Derive the URN-only variant
    ([§12.4](#124-identifiers)) from the same definitions here.
-2. **MQTT in GCP.** **NanoMQ in a Docker container**, with `eventhub-ingest` publishing every event
-   to `inbox/{institutionId}` **alongside** its existing Pub/Sub fan-out. Nothing consumes it yet; it
-   becomes the CN's source of real test data at step 8. **No persistence and no retained messages** —
-   it is a hop, not a store, so events published while the bridge is down are lost by design and
-   Pub/Sub remains the path of record until step 17.
+2. **MQTT publish in ingest.** `eventhub-ingest` gains an MQTT client that publishes every accepted
+   event to `inbox/{institutionId}` **alongside** its existing Pub/Sub fan-out, QoS 1, as
+   `svc-ingest` once credentials exist. The broker URL stays unset until step 8, so nothing is
+   published yet and Pub/Sub remains the path of record. No GCP broker.
 3. **Identifier normalization in ingest.** Add `institutionId` and guarantee `id` and `publisherId`
-   are URNs, so bridged events are valid on arrival. **Keep emitting `externalId` and `type`** — the
+   are URNs, so legacy events are valid on arrival. **Keep emitting `externalId` and `type`** — the
    same normalized body goes to Pub/Sub, whose subscribers still read them, so removing them here
    would break the legacy path. Mark both `deprecated` in the schema and regenerate OpenAPI
    ([§12.4](#124-identifiers)).
@@ -1791,9 +1785,10 @@ step 5 is ordered by dependency.
 7. **Auth and ACLs.** Config users, bcrypt passwords, `allowed_connection_types`, permissions bound to
    the institution URN, hot-reload tested. Include a **multi-institution publisher**
    ([§7.4](#74-one-user-several-institutions)) and confirm a misrouted livestream is still rejected.
-8. **`eventhub-bridge`.** Single instance on BAD behind a feature flag, relaying GCP MQTT into
-   `inbox/{institutionId}`. **This is the step that puts real traffic in the CN**, which everything
-   after it is built and verified against.
+8. **Point ingest at the CN.** Set the broker URL so `eventhub-ingest` publishes MQTT QoS 1 to the
+   gateway as `svc-ingest`, with all three node endpoints configured. Unset, the publish stays off.
+   **This is the step that puts real traffic in the CN**, which everything after it is built and
+   verified against.
 9. **ARD core feed loader.** Hourly CronJob writing to a JetStream KV bucket; watcher with
    validate-then-swap, on-disk persistence and a bootstrap copy in the image. Before the sidecar,
    which depends on it.
@@ -1815,7 +1810,7 @@ step 5 is ordered by dependency.
     the outputs before opening it to anyone else.
 16. **Plugin adapters.** Move Radioplayer and Xperi DTS to `eventhub-connect`, **one target at a
     time**, each a paired switch — CN adapter on, GCP dispatch off via the step 4 flag — verified by
-    the target's outbound call volume staying flat. Native and bridged publishers move together, since
+    the target's outbound call volume staying flat. Native and legacy publishers move together, since
     both already flow through the sidecar ([§11.2](#112-legacy-path)).
 17. **Reduce `eventhub-ingest` to auth, validate and publish — behaviour only, no route removals.**
     Drop plugin dispatch and the Pub/Sub fan-out. **Keep the event-schema validation pass** so legacy
@@ -1826,15 +1821,16 @@ step 5 is ordered by dependency.
 18. **Handoff to SOC.** 24/7 monitoring, runbooks and alerting in the SOC escalation path. Confirm the
     Senderelevanz classification and the availability floor it implies
     ([§17](#17-reliability-and-broadcast-criticality)).
-19. **Decommission GCP.** Remove the GCP broker and `eventhub-bridge`, then `eventhub-ingest` and the
-    last project resources. **Prerequisite: every route has completed its deprecation cycle with
-    measured zero traffic** — this is where the HTTPS API and the Firebase tenant go away. Also drop
-    the deprecated `services[].externalId` and `services[].type` from the schema
-    ([§12.4](#124-identifiers)); the last consumer of that shape leaves with Pub/Sub.
+19. **Decommission GCP.** Remove `eventhub-ingest` and the last project resources. **Prerequisite:
+    every route has completed its deprecation cycle with measured zero traffic** — this is where the
+    HTTPS API and the Firebase tenant go away. Also drop the deprecated `services[].externalId` and
+    `services[].type` from the schema ([§12.4](#124-identifiers)); the last consumer of that shape
+    leaves with Pub/Sub.
 
 ## 19. Open decisions
 
-These need someone to choose, not something to be measured. **Q1 and Q2 are coupled and should be
+These need someone to choose, not something to be measured. **Q3 is decided**
+([§19.3](#193-q3--does-eventhub-bridge-need-to-exist)). **Q1 and Q2 are coupled and should be
 answered in that order** — the second is cheap if the answer to the first is "none", and expensive if
 it is not.
 
@@ -1853,14 +1849,14 @@ pushing to them.
 - **If "none":** the MQTT gateway never needs internet exposure. It binds to CN-facing interfaces
   only, the attack surface collapses to the CN population, and Q2 becomes easy.
 - **If "some":** you need internet-facing MQTT with TLS and auth, or an outbound relay mirroring
-  selected subjects to where those consumers are — the bridge pattern in reverse. That component does
-  not exist in this document, and it would have to be built before
-  [step 19](#182-steps) removes GCP, because today those consumers are served from GCP.
+  selected subjects to where those consumers are. That component does not exist in this document,
+  and it would have to be built before [step 19](#182-steps) removes GCP, because today those
+  consumers are served from GCP.
 
-**This partly invalidates an assumption elsewhere.** [Q3](#193-q3--does-eventhub-bridge-need-to-exist)
-argues that `eventhub-ingest` could publish straight into the CN because the gateway is
-"internet-reachable by definition". That only holds if the gateway is in fact internet-facing. If the
-CN stays closed, ingest cannot publish directly and the bridge is load-bearing rather than optional.
+**Direct publish from GCP does not require an internet-facing gateway.** `eventhub-ingest` can reach
+the internal endpoints, so a firewall path from the legacy project to `:8883` is enough
+([Q3](#193-q3--does-eventhub-bridge-need-to-exist)). Q1 is only about subscribers that are neither on
+the CN nor that GCP project.
 
 Next step: an inventory of every current Pub/Sub subscriber and where it runs. That list exists in
 Datastore today.
@@ -1911,14 +1907,18 @@ planning for an unbounded audience, and a stronger case for keeping `radio.*.dat
 
 ### 19.3 Q3 — does `eventhub-bridge` need to exist?
 
-Now that `eventhub-ingest` is an MQTT publisher, ingest could publish straight into
-`inbox/{institutionId}` in the CN, deleting both the GCP broker and the bridge. What the two-hop
-design buys is **store-and-forward**: ingest publishes locally and always succeeds, and the bridge
-catches up after a CN outage instead of failing the broadcaster's HTTP request. Credential scope is
-identical either way, since both `svc-bridge` and a direct-publishing ingest need `inbox.>`.
+**Decided (2026-10-08): no.** GCP `eventhub-ingest` can reach internal CN endpoints, so it publishes
+MQTT to `inbox/{institutionId}` the same way a native publisher does. The sidecar consumes those
+messages on `inbox.>` with no separate path ([§11.2](#112-legacy-path)). There is no NanoMQ hop and
+no relay service.
 
-**Conditional on Q1** — direct publishing requires the CN gateway to accept connections from GCP.
-Decide before step 8 builds the bridge.
+What that gives up is **store-and-forward**. A local broker would let ingest publish and always
+succeed, with a relay catching up after a CN outage. Direct publish does not queue. Until step 17,
+Pub/Sub still carries the event for existing subscribers. After step 17, a CN outage drops the legacy
+event the same way it drops a native publish ([§12.8](#128-legacy-shares-the-cluster)).
+
+The credential is `svc-ingest`: MQTT, `publish.allow: ["inbox.>"]`. Firebase auth on the HTTPS
+request stays single-institution ([§7.4](#74-one-user-several-institutions)).
 
 ### 19.4 Q4 — class token in the inbox subject
 
