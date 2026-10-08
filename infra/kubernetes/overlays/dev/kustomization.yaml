@@ -1,10 +1,12 @@
 # Three NATS pods in one cluster. No hostname anti-affinity, so one node can run all three.
-# nats-users.conf is a copy of infra/nats/nats-users.conf. Kustomize will not
-# read a file outside this directory. `just nats-k8s-build` fails if they differ.
+# Users come from components/users, the same file as test and prod.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 namespace: eventhub-dev
+
+components:
+  - ../../components/users
 
 resources:
   - namespace.yaml
@@ -18,7 +20,6 @@ configMapGenerator:
   - name: nats
     files:
       - nats.conf
-      - nats-users.conf
 
 labels:
   - pairs:

@@ -4,6 +4,7 @@ kind: Kustomization
 
 components:
   - ../../components/zone
+  - ../../components/users
 
 patches:
   - path: zone-patch.yaml

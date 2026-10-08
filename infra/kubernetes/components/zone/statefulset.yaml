@@ -86,11 +86,7 @@ spec:
               drop: ['ALL']
           volumeMounts:
             - name: config
-              mountPath: /etc/nats/nats.conf
-              subPath: nats.conf
-              readOnly: true
-            - name: users
-              mountPath: /etc/nats/users
+              mountPath: /etc/nats
               readOnly: true
             - name: tls
               mountPath: /etc/nats/tls
@@ -105,10 +101,6 @@ spec:
         - name: config
           configMap:
             name: nats
-            defaultMode: 0444
-        - name: users
-          secret:
-            secretName: nats-users
             defaultMode: 0444
         - name: tls
           secret:

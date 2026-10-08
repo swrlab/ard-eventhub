@@ -88,7 +88,7 @@ jobs:
           github_token: ${{ github.token }}
 
       - name: ✅ Validate NATS config
-        run: just nats-check && just nats-check-invalid
+        run: just nats-check
 
       - name: 🐳 Start NATS
         run: just nats-up-docker

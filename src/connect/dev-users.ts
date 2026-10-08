@@ -5,8 +5,8 @@ export const SWR_INSTITUTION_ID = 'urn:ard:institution:a3004ff924ece1a2'
 export const SHARED_INSTITUTION_ID = 'urn:ard:institution:b71c0e4d9a25f338'
 
 /**
- * Well-known local password for every user in `infra/nats/nats-users.conf`.
- * Not a secret. Production plaintext lives in sops; the NATS config holds bcrypt only.
+ * Well-known password for every user in `infra/kubernetes/components/users/nats-users.conf`.
+ * Not a secret. The NATS config holds the bcrypt hash only.
  */
 export const LOCAL_NATS_PASSWORD = 'local'
 
@@ -16,6 +16,7 @@ export const LOCAL_NATS_USERS = {
 	pubShared: 'pub-shared-playout-2026-06-26',
 	subArdSounds: 'sub-ard-sounds-2026-06-26',
 	svcSidecar: 'svc-sidecar',
+	svcOperator: 'svc-operator',
 	svcAdapterRadioplayer: 'svc-adapter-radioplayer',
 	svcIngest: 'svc-ingest',
 } as const

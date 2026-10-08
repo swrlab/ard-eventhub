@@ -15,15 +15,12 @@ spec:
     - name: nats
       port: 4222
       targetPort: nats
-      nodePort: 30422
       protocol: TCP
     - name: mqtt
       port: 1883
       targetPort: mqtt
-      nodePort: 30183
       protocol: TCP
     - name: monitor
       port: 8222
       targetPort: monitor
-      nodePort: 30822
       protocol: TCP
