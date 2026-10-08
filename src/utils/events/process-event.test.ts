@@ -6,7 +6,7 @@ import { DateTime } from '@frytg/dates'
 import { logger } from '@frytg/logger'
 import { assertEquals, assertExists, assertMatch } from '@std/assert'
 import { createSandbox } from 'sinon'
-import { publisherLookup } from '../ard-core.ts'
+import { publisherLookup } from '../feed/ard-core.ts'
 import { mqttInbox } from '../mqtt/publish-inbox.ts'
 import { processEvent, publishEventPlugins, pubsubFanout } from './process-event.ts'
 

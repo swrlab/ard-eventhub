@@ -5,7 +5,6 @@ import type { MetaReport } from '../../../src/connect/ui/types.ts'
 import { wsconnect } from '@nats-io/nats-core'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { LOCAL_NATS_USERS } from '../../../src/connect/dev-users.ts'
 import { admitTailEvent, evaluateTail, parseTailFilter, tailCloseMessage } from '../../../src/connect/ui/policy.ts'
 import { formatClock } from '../format'
 import { tailPhase } from '../tail-state'
@@ -17,8 +16,8 @@ type TailEvent = {
 	sampled: boolean
 }
 
-/** Read-only browser user. Publish still requires a username and password. */
-const UI_NATS_USER = LOCAL_NATS_USERS.subUi
+/** Read-only browser user from nats-users.conf. No password. Publish still requires both. */
+const UI_NATS_USER = 'sub-ui'
 
 const presets = [
 	{ label: 'track.playing', filter: 'radio.*.track.playing' },

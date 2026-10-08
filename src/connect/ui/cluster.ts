@@ -50,6 +50,25 @@ const nodeNameFromUrl = (url: string): string => {
 	return host.split('.')[0] ?? host
 }
 
+const CONNECTION_TYPE_LABELS: Record<string, string> = {
+	mqtt: 'MQTT',
+	websocket: 'WEBSOCKET',
+	nats: 'STANDARD',
+}
+
+/**
+ * Map a `/connz` `type` onto the names in `allowed_connection_types`.
+ * An MQTT client id is enough when an older monitor omits `type`.
+ * @param type - connz `type` (`mqtt`, `websocket`, `nats`), or null
+ * @param mqttClient - connz `mqtt_client`, or null
+ * @returns `MQTT`, `WEBSOCKET`, `STANDARD`, or null when the monitor did not say
+ */
+const connectionType = (type: string | null, mqttClient: string | null): string | null => {
+	if (type) return CONNECTION_TYPE_LABELS[type.toLowerCase()] ?? type.toUpperCase()
+	if (mqttClient) return 'MQTT'
+	return null
+}
+
 /**
  * Read a connz connection object. Username prefers `authorized_user`.
  * NATS omits that field unless the request sets `auth=1`. The JWT field is ignored.
@@ -61,6 +80,7 @@ const readConnection = (row: Record<string, unknown>, server: string): LiveConne
 	const cid = numberField(row, 'cid')
 	if (cid === null) return null
 	const subscriptions = stringList(row.subscriptions_list ?? row.subscriptions)
+	const mqttClient = stringField(row, 'mqtt_client')
 	return {
 		server,
 		cid,
@@ -70,7 +90,8 @@ const readConnection = (row: Record<string, unknown>, server: string): LiveConne
 		connectedAt: stringField(row, 'start'),
 		lastActivity: stringField(row, 'last_activity'),
 		subscriptions,
-		mqttClient: stringField(row, 'mqtt_client'),
+		type: connectionType(stringField(row, 'type'), mqttClient),
+		mqttClient,
 	}
 }
 

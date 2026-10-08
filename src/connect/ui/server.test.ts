@@ -12,6 +12,7 @@ test('stats routes answer without a websocket', async () => {
 	assertEquals(metaRes.headers.get('cache-control'), 'no-store')
 	const metaBody = await metaRes.json()
 	assertEquals(metaBody.user, natsUser)
+	assertEquals(String(metaBody.natsUrl).includes('@'), false)
 	assertEquals(JSON.stringify(metaBody).includes('password'), false)
 	assertEquals(feedRes.status, 200)
 	const feedBody = await feedRes.json()

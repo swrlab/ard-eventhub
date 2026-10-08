@@ -1,8 +1,8 @@
 /** JSON shapes the operator UI polls. The live tail is a separate socket. */
 
-export type { FeedReport } from '../ard-feed.ts'
-export type { KnownLivestream } from '../../utils/known-livestreams.ts'
-export type { FeedCatalogReport } from './feed-catalog.ts'
+export type { FeedReport } from '../feed/ard-feed.ts'
+export type { KnownLivestream } from '../../utils/feed/known-livestreams.ts'
+export type { FeedCatalogReport } from '../feed/feed-catalog.ts'
 
 export type MetaReport = {
 	pollMs: number
@@ -73,6 +73,8 @@ export type LiveConnection = {
 	connectedAt: string | null
 	lastActivity: string | null
 	subscriptions: string[]
+	/** `MQTT`, `WEBSOCKET`, or `STANDARD`, matching `allowed_connection_types`. Null when `/connz` omitted `type`. */
+	type: string | null
 	mqttClient: string | null
 }
 

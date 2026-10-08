@@ -1,6 +1,16 @@
 import { test } from '@cross/test'
 import { assertEquals } from '@std/assert'
-import { feedbackSubject, inboxMqttTopic, inboxSubject, pluginSubject, radioSubject } from './subjects.ts'
+import {
+	eventClassToken,
+	feedbackMqttTopic,
+	feedbackSubject,
+	inboxMqttTopic,
+	inboxSubject,
+	institutionFromInboxSubject,
+	pluginSubject,
+	radioMqttTopic,
+	radioSubject,
+} from './subjects.ts'
 
 const INSTITUTION_ID = 'urn:ard:institution:a3004ff924ece1a2'
 const LIVESTREAM_ID = 'urn:ard:permanent-livestream:49267f7d67be180d'
@@ -15,4 +25,11 @@ test('topic-tree helpers use NATS subject syntax', () => {
 		pluginSubject('radioplayer', LIVESTREAM_ID, 'track.playing'),
 		`plugin.radioplayer.${LIVESTREAM_ID}.track.playing`
 	)
+	assertEquals(radioMqttTopic(LIVESTREAM_ID, 'track.playing'), `radio/${LIVESTREAM_ID}/track/playing`)
+	assertEquals(radioMqttTopic(LIVESTREAM_ID, 'control'), `radio/${LIVESTREAM_ID}/control`)
+	assertEquals(feedbackMqttTopic(INSTITUTION_ID), `feedback/${INSTITUTION_ID}`)
+	assertEquals(institutionFromInboxSubject(inboxSubject(INSTITUTION_ID)), INSTITUTION_ID)
+	assertEquals(institutionFromInboxSubject('inbox.not-a-urn'), null)
+	assertEquals(eventClassToken('de.ard.eventhub.v1.radio.track.playing'), 'track.playing')
+	assertEquals(eventClassToken('de.ard.eventhub.v1.radio.control'), 'control')
 })

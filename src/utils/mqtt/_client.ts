@@ -37,12 +37,14 @@ const loadMqttTlsConnectOptions = (): ReturnType<typeof mqttTlsConnectOptions> =
 
 /**
  * One mqtt.js client for the process when a broker URL is set. Undefined otherwise.
- * Authenticates as `svc-ingest` and publishes like any other MQTT publisher.
+ * Authenticates with the userinfo on `MQTT_BROKER_URL`.
  * Reconnects on its own; do not call `connect` again.
  */
 export const mqttClient: MqttClient | undefined = isMqttBrokerConfigured(mqttBrokerUrl)
-	? mqtt.connect(mqttBrokerUrl.trim(), {
-			...ingestMqttConnectOptions(`eventhub-ingest-${hostname()}-${process.pid}`, mqttUsername, mqttPassword),
+	? mqtt.connect(mqttBrokerUrl, {
+			...ingestMqttConnectOptions(`eventhub-ingest-${hostname()}-${process.pid}`),
+			...(mqttUsername ? { username: mqttUsername } : {}),
+			...(mqttPassword ? { password: mqttPassword } : {}),
 			...loadMqttTlsConnectOptions(),
 		})
 	: undefined

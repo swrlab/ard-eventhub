@@ -1,7 +1,7 @@
 import type { DTSKeys, RadioplayerApiKeys, Stage } from './schemas/config.ts'
 import { getRequiredEnv } from '@frytg/check-required-env/get'
-import { LOCAL_NATS_PASSWORD, LOCAL_NATS_USERS } from './connect/dev-users.ts'
 import { getEnv, getEnvBase64, getEnvBoolean, getEnvNumber } from './utils/env.ts'
+import { parseUserinfoUrl } from './utils/url-auth.ts'
 
 // NOTE: keys without a default are required and cause an error if missing.
 
@@ -39,19 +39,22 @@ export const isIngestPublishPluginsEnabled = (): boolean =>
 
 /**
  * CN MQTT gateway for the inbox dual-write.
- * `mqtt://` or `mqtts://`. Empty when unset so ingest stays on Pub/Sub.
+ * `mqtt://user:password@host:1883`. Empty when unset so ingest stays on Pub/Sub.
+ * The exported value has userinfo removed.
  */
-export const mqttBrokerUrl = getEnv<string>('MQTT_BROKER_URL', { defaultValue: '' })
+const mqttEndpoint = parseUserinfoUrl(getEnv<string>('MQTT_BROKER_URL', { defaultValue: '' }))
+
+/** MQTT server URL with userinfo removed. */
+export const mqttBrokerUrl = mqttEndpoint.url
+
 /**
  * Optional gateway CA for mqtts://. PEM text, or a path to a PEM file.
  * Unset for local `mqtt://`.
  */
 export const mqttTlsCa = getEnv<string>('MQTT_TLS_CA', { defaultValue: '' })
-/**
- * MQTT username. Local default is `svc-ingest` (publish `inbox.>`, MQTT only).
- */
-export const mqttUsername = getEnv<string>('MQTT_USERNAME', { defaultValue: LOCAL_NATS_USERS.svcIngest })
-/**
- * MQTT password. Local default matches `infra/kubernetes/components/users/nats-users.conf`. Override via sops.
- */
-export const mqttPassword = getEnv<string>('MQTT_PASSWORD', { defaultValue: LOCAL_NATS_PASSWORD })
+
+/** Username from `MQTT_BROKER_URL` userinfo. Empty when the URL has none. */
+export const mqttUsername = mqttEndpoint.user
+
+/** Password from `MQTT_BROKER_URL` userinfo. Empty when the URL has none. */
+export const mqttPassword = mqttEndpoint.password

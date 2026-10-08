@@ -3,8 +3,9 @@ import process from 'node:process'
 import { logger } from '@frytg/logger'
 import { natsAccess } from '../utils/nats/_client.ts'
 import { ensureStreams } from '../utils/nats/ensure-streams.ts'
-import { startArdFeed, stopArdFeed } from './ard-feed-loader.ts'
 import { natsPassword, natsUrl, natsUser } from './env.ts'
+import { startArdFeed, stopArdFeed } from './feed/ard-feed-loader.ts'
+import { startSidecar, stopSidecar } from './sidecar/index.ts'
 import { natsMonitorUrl, uiHost, uiPort, useHmr } from './ui/env.ts'
 import { app } from './ui/server.ts'
 import { bindConnection, unbindConnection } from './ui/session.ts'
@@ -34,7 +35,7 @@ export default {
 }
 
 /**
- * Keep a NATS connection that ensures JetStream assets.
+ * Keep a NATS connection that ensures JetStream assets and runs the validation sidecar.
  * The HTTP server stays up while this reconnects. It does not listen itself.
  * @returns Never resolves unless the process is signalled
  */
@@ -51,10 +52,19 @@ const keepBroker = async (): Promise<void> => {
 	const shutdown = (): void => {
 		if (stopped) return
 		stopped = true
-		unbindConnection()
-		stopArdFeed()
-		if (nc) void natsAccess.drain(nc)
-		process.exit(0)
+		void (async () => {
+			await stopSidecar()
+			unbindConnection()
+			stopArdFeed()
+			if (nc) {
+				try {
+					await natsAccess.drain(nc)
+				} catch {
+					// The connection is already gone.
+				}
+			}
+			process.exit(0)
+		})()
 	}
 	process.on('SIGINT', shutdown)
 	process.on('SIGTERM', shutdown)
@@ -71,6 +81,7 @@ const keepBroker = async (): Promise<void> => {
 			const streams = await ensureStreams(next)
 			bindConnection(next)
 			await startArdFeed(next)
+			await startSidecar(next)
 			logger.info({
 				message: 'nats ready',
 				source,
@@ -85,6 +96,7 @@ const keepBroker = async (): Promise<void> => {
 				data: { natsUrl },
 			})
 		}
+		await stopSidecar()
 		stopArdFeed()
 		unbindConnection()
 		if (nc) {

@@ -92,8 +92,9 @@ jobs:
 
       - name: 🧪 Run NATS access tests
         env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_PRIVATE_KEY }}
           NATS_REQUIRE: 'true'
-        run: bun test --timeout 30000 src/utils/nats src/cli/nats-sub-args.test.ts
+        run: sops exec-env --same-process .env.ci.sops.yaml "bun test --timeout 30000 src/utils/nats src/cli/nats-sub-args.test.ts"
 
   license:
     needs: security

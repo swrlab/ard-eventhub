@@ -83,6 +83,7 @@ const toggleUser = (username: string): void => {
 					<thead>
 						<tr>
 							<th>user</th>
+							<th>type</th>
 							<th>server</th>
 							<th>address</th>
 							<th>since</th>
@@ -94,6 +95,7 @@ const toggleUser = (username: string): void => {
 					<tbody>
 						<tr v-for="row in connections" :key="`${row.server}-${row.cid}`">
 							<td>{{ row.user || '—' }}</td>
+							<td>{{ row.type ?? '—' }}</td>
 							<td>{{ row.server }}</td>
 							<td>{{ row.ip || '—' }}</td>
 							<td>{{ formatAge(row.connectedAt, now) }}</td>

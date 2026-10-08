@@ -1,23 +1,29 @@
 import process from 'node:process'
 import mqtt from 'mqtt'
-import { LOCAL_NATS_PASSWORD, LOCAL_NATS_USERS } from '../../connect/dev-users.ts'
+import { mqttUrlForNats, parseUserinfoUrl } from '../url-auth.ts'
 import { natsAccess } from './_client.ts'
 
-export const NATS_SERVERS = process.env.NATS_URL?.trim() || 'nats://127.0.0.1:4222'
-export const MQTT_URL = process.env.NATS_MQTT_URL?.trim() || 'mqtt://127.0.0.1:1883'
+const rawNatsUrl = process.env.NATS_URL?.trim() || 'nats://127.0.0.1:4222'
+const natsEndpoint = parseUserinfoUrl(rawNatsUrl)
+
+/** Host URL with userinfo removed, so ACL tests can pass a different username. */
+export const NATS_SERVERS = natsEndpoint.url
+
+/** Password from `NATS_URL`. Local users in nats-users.conf share this secret. */
+export const BROKER_PASSWORD = natsEndpoint.password
+
+export const MQTT_URL = process.env.NATS_MQTT_URL?.trim() || mqttUrlForNats(NATS_SERVERS)
 export const REQUIRE_NATS = process.env.NATS_REQUIRE === 'true'
 const MQTT_V311 = 4
 
 /**
- * Connect as local `svc-sidecar`, or return null when the broker is down / auth fails.
+ * Connect with the credentials in `NATS_URL`, or return null when the broker is down / auth fails.
  * @returns Sidecar connection, or null
  */
 export const tryConnectSidecar = async () => {
 	try {
 		return await natsAccess.connect({
-			servers: NATS_SERVERS,
-			user: LOCAL_NATS_USERS.svcSidecar,
-			password: LOCAL_NATS_PASSWORD,
+			servers: rawNatsUrl,
 		})
 	} catch {
 		return null
@@ -33,7 +39,7 @@ export const skipUnlessNats = (nc: Awaited<ReturnType<typeof tryConnectSidecar>>
 	if (nc) {
 		return false
 	}
-	const message = 'nats not listening on 4222 with local users — `just nats-up` or `just nats-up-docker`'
+	const message = 'nats not listening on 4222 with NATS_URL credentials — `just nats-up` or `just nats-up-docker`'
 	if (REQUIRE_NATS) {
 		throw new Error(message)
 	}

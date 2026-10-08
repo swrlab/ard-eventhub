@@ -1,22 +1,31 @@
 import { getEnv } from '../utils/env.ts'
-import { LOCAL_NATS_PASSWORD, LOCAL_NATS_USERS } from './dev-users.ts'
+import { mqttUrlForNats, parseUserinfoUrl } from '../utils/url-auth.ts'
 
 export const DEFAULT_NATS_URL = 'nats://127.0.0.1:4222'
 
-/**
- * NATS client URL for eventhub-connect. Defaults to the local single-node broker.
- */
-export const natsUrl = getEnv<string>('NATS_URL', { defaultValue: DEFAULT_NATS_URL })
+const natsEndpoint = parseUserinfoUrl(getEnv<string>('NATS_URL', { defaultValue: DEFAULT_NATS_URL }))
 
 /**
- * NATS user. Defaults to local `svc-sidecar`. Override in production via sops.
+ * NATS server URL with userinfo removed. Safe to log and to send to the operator UI.
+ * Set credentials on `NATS_URL` as `nats://user:password@host:4222`.
  */
-export const natsUser = getEnv<string>('NATS_USER', { defaultValue: LOCAL_NATS_USERS.svcSidecar })
+export const natsUrl = natsEndpoint.url
 
 /**
- * NATS password. Defaults to the well-known local password. Override in production via sops.
+ * Username from `NATS_URL` userinfo. Empty when the URL has none.
  */
-export const natsPassword = getEnv<string>('NATS_PASSWORD', { defaultValue: LOCAL_NATS_PASSWORD })
+export const natsUser = natsEndpoint.user
+
+/**
+ * Password from `NATS_URL` userinfo. Empty when the URL has none.
+ */
+export const natsPassword = natsEndpoint.password
+
+/**
+ * MQTT gateway the sidecar uses for RETAIN. NATS core has no retain flag.
+ * Default is the `NATS_URL` host on port 1883. Credentials stay on `NATS_URL`.
+ */
+export const natsMqttUrl = getEnv<string>('NATS_MQTT_URL', { defaultValue: mqttUrlForNats(natsUrl) })
 
 /**
  * ARD core livestream feed. Empty skips the pull and keeps the KV or disk copy.

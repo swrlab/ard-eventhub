@@ -4,15 +4,24 @@ import { join } from 'node:path'
 import process from 'node:process'
 import { test } from '@cross/test'
 import { assert, assertEquals, assertRejects } from '@std/assert'
-import {
-	LOCAL_NATS_PASSWORD,
-	LOCAL_NATS_USERS,
-	SHARED_INSTITUTION_ID,
-	SWR_INSTITUTION_ID,
-} from '../../connect/dev-users.ts'
 import { natsAccess } from './_client.ts'
 import { inboxMqttTopic, inboxSubject } from './subjects.ts'
-import { MQTT_URL, NATS_SERVERS, connectMqttUser, skipUnlessNats, tryConnectSidecar } from './test-broker.ts'
+import {
+	BROKER_PASSWORD,
+	MQTT_URL,
+	NATS_SERVERS,
+	connectMqttUser,
+	skipUnlessNats,
+	tryConnectSidecar,
+} from './test-broker.ts'
+
+const SWR_INSTITUTION_ID = 'urn:ard:institution:a3004ff924ece1a2'
+const SHARED_INSTITUTION_ID = 'urn:ard:institution:b71c0e4d9a25f338'
+const PUB_SWR = 'pub-swr-2026-06-26'
+const PUB_SHARED = 'pub-shared-playout-2026-06-26'
+const SUB_ARD_SOUNDS = 'sub-ard-sounds-2026-06-26'
+const SVC_INGEST = 'svc-ingest'
+const SVC_ADAPTER = 'svc-adapter-radioplayer'
 
 const MQTT_V311 = 4
 const USERS_FILE = join(import.meta.dir, '../../../.local/nats/nats-users.conf')
@@ -24,7 +33,7 @@ const USERS_FILE = join(import.meta.dir, '../../../.local/nats/nats-users.conf')
  * @returns Resolves when publish completes
  */
 const mqttPublishInbox = async (username: string, institutionId: string): Promise<void> => {
-	const client = await connectMqttUser(username, LOCAL_NATS_PASSWORD)
+	const client = await connectMqttUser(username, BROKER_PASSWORD)
 	try {
 		await Promise.race([
 			client.publishAsync(inboxMqttTopic(institutionId), JSON.stringify({ from: username }), {
@@ -75,11 +84,11 @@ test('publisher can MQTT-publish to its inbox and not to another institution', a
 	}
 	try {
 		const allowed = inboxSawMessage(nc, SWR_INSTITUTION_ID)
-		await mqttPublishInbox(LOCAL_NATS_USERS.pubSwr, SWR_INSTITUTION_ID)
+		await mqttPublishInbox(PUB_SWR, SWR_INSTITUTION_ID)
 		assertEquals(await allowed, true)
 
 		const leaked = inboxSawMessage(nc, SHARED_INSTITUTION_ID)
-		await mqttPublishInbox(LOCAL_NATS_USERS.pubSwr, SHARED_INSTITUTION_ID).catch(() => undefined)
+		await mqttPublishInbox(PUB_SWR, SHARED_INSTITUTION_ID).catch(() => undefined)
 		assertEquals(await leaked, false)
 	} finally {
 		await natsAccess.drain(nc)
@@ -94,7 +103,7 @@ test('svc-ingest can MQTT-publish to every institution inbox', async () => {
 	try {
 		for (const institutionId of [SWR_INSTITUTION_ID, SHARED_INSTITUTION_ID]) {
 			const seen = inboxSawMessage(nc, institutionId)
-			await mqttPublishInbox(LOCAL_NATS_USERS.svcIngest, institutionId)
+			await mqttPublishInbox(SVC_INGEST, institutionId)
 			assertEquals(await seen, true)
 		}
 	} finally {
@@ -109,7 +118,7 @@ test('sub- user cannot publish', async () => {
 	}
 	try {
 		const leaked = inboxSawMessage(nc, SWR_INSTITUTION_ID)
-		await mqttPublishInbox(LOCAL_NATS_USERS.subArdSounds, SWR_INSTITUTION_ID).catch(() => undefined)
+		await mqttPublishInbox(SUB_ARD_SOUNDS, SWR_INSTITUTION_ID).catch(() => undefined)
 		assertEquals(await leaked, false)
 	} finally {
 		await natsAccess.drain(nc)
@@ -126,20 +135,20 @@ test('MQTT credential is rejected on the NATS port; STANDARD credential is rejec
 	await assertRejects(() =>
 		natsAccess.connect({
 			servers: NATS_SERVERS,
-			user: LOCAL_NATS_USERS.pubSwr,
-			password: LOCAL_NATS_PASSWORD,
+			user: PUB_SWR,
+			password: BROKER_PASSWORD,
 		})
 	)
 
 	await assertRejects(() =>
 		natsAccess.connect({
 			servers: NATS_SERVERS,
-			user: LOCAL_NATS_USERS.svcIngest,
-			password: LOCAL_NATS_PASSWORD,
+			user: SVC_INGEST,
+			password: BROKER_PASSWORD,
 		})
 	)
 
-	await assertRejects(() => connectMqttUser(LOCAL_NATS_USERS.svcAdapterRadioplayer, LOCAL_NATS_PASSWORD))
+	await assertRejects(() => connectMqttUser(SVC_ADAPTER, BROKER_PASSWORD))
 })
 
 test('multi-institution publisher can MQTT-publish to each allowed inbox', async () => {
@@ -150,7 +159,7 @@ test('multi-institution publisher can MQTT-publish to each allowed inbox', async
 	try {
 		for (const institutionId of [SWR_INSTITUTION_ID, SHARED_INSTITUTION_ID]) {
 			const seen = inboxSawMessage(nc, institutionId)
-			await mqttPublishInbox(LOCAL_NATS_USERS.pubShared, institutionId)
+			await mqttPublishInbox(PUB_SHARED, institutionId)
 			assertEquals(await seen, true)
 		}
 	} finally {
@@ -178,7 +187,7 @@ test('ACL does not inspect payload — shared publisher can misroute a livestrea
 				}
 			})()
 		})
-		const client = await connectMqttUser(LOCAL_NATS_USERS.pubShared, LOCAL_NATS_PASSWORD)
+		const client = await connectMqttUser(PUB_SHARED, BROKER_PASSWORD)
 		try {
 			await client.publishAsync(inboxMqttTopic(SHARED_INSTITUTION_ID), JSON.stringify(payload), {
 				qos: 1,
@@ -209,7 +218,7 @@ test('hot-reload keeps the sidecar connection and picks up a new MQTT user', asy
 	}
 
 	const reloadUser = `pub-reload-test-${process.pid}`
-	const insertion = `\t\t{ user: "${reloadUser}", password: "local", allowed_connection_types: ["MQTT"], permissions: { publish: { allow: ["inbox.${SWR_INSTITUTION_ID}"] }, subscribe: { allow: ["feedback.${SWR_INSTITUTION_ID}"] } } }\n`
+	const insertion = `\t\t{ user: "${reloadUser}", password: "${BROKER_PASSWORD}", allowed_connection_types: ["MQTT"], permissions: { publish: { allow: ["inbox.${SWR_INSTITUTION_ID}"] }, subscribe: { allow: ["feedback.${SWR_INSTITUTION_ID}"] } } }\n`
 	const updated = original.replace('users: [', `users: [\n${insertion}`)
 	const repoRoot = join(import.meta.dir, '../../..')
 
@@ -220,7 +229,7 @@ test('hot-reload keeps the sidecar connection and picks up a new MQTT user', asy
 		assert(nc.isClosed() === false)
 
 		const seen = inboxSawMessage(nc, SWR_INSTITUTION_ID)
-		const client = await connectMqttUser(reloadUser, LOCAL_NATS_PASSWORD)
+		const client = await connectMqttUser(reloadUser, BROKER_PASSWORD)
 		try {
 			await client.publishAsync(inboxMqttTopic(SWR_INSTITUTION_ID), JSON.stringify({ reload: true }), {
 				qos: 1,

@@ -59,6 +59,7 @@ const rotatingFetch = (): MonitorFetch => {
 								start: '2026-10-08T10:00:00Z',
 								last_activity: '2026-10-08T10:05:00Z',
 								subscriptions_list: ['inbox.urn:ard:institution:a3004ff924ece1a2'],
+								type: 'mqtt',
 								mqtt_client: 'swr',
 							},
 						]
@@ -128,6 +129,7 @@ test('monitor sampling joins three load-balanced nodes without tripling jetstrea
 	assertEquals(sampled.cluster.nodes[1]?.slowConsumers, 2)
 	assertEquals(sampled.connections.length, 1)
 	assertEquals(sampled.connections[0]?.user, 'pub-swr-2026-06-26')
+	assertEquals(sampled.connections[0]?.type, 'MQTT')
 	assertEquals(sampled.connections[0]?.server, 'nats-0')
 	assertEquals(sampled.cluster.error, null)
 })
@@ -199,7 +201,54 @@ test('raft replicas fill in when the first jetstream sample omits them', async (
 	const sampled = await sampleMonitor('http://127.0.0.1:8222', fetchImpl, 4, 1)
 	assertEquals(sampled.cluster.streams, 2)
 	assertEquals(sampled.cluster.storageBytes, 10)
-	assertEquals(sampled.cluster.replicas.map((replica) => replica.name), ['nats-1'])
+	assertEquals(
+		sampled.cluster.replicas.map((replica) => replica.name),
+		['nats-1']
+	)
+})
+
+/**
+ * One node reporting mqtt, websocket, nats, and an MQTT client id with no type.
+ * @param input - Request URL
+ * @returns JSON response
+ */
+const typedConnzFetch: MonitorFetch = async (input) => {
+	if (input.includes('/varz')) {
+		return json({
+			server_id: 'id-0',
+			server_name: 'nats-0',
+			version: '2.14.6',
+			uptime: '1m',
+			connections: 4,
+			slow_consumers: 0,
+			stale_connections: 0,
+			subscriptions: 0,
+			mem: 1,
+			routes: 0,
+			cluster: { urls: ['nats-0.nats.svc:6222'] },
+		})
+	}
+	if (input.includes('/connz')) {
+		return json({
+			server_id: 'id-0',
+			num_connections: 4,
+			connections: [
+				{ cid: 1, type: 'mqtt', mqtt_client: 'swr', authorized_user: 'a' },
+				{ cid: 2, type: 'websocket', authorized_user: 'b' },
+				{ cid: 3, type: 'nats', authorized_user: 'c' },
+				{ cid: 4, mqtt_client: 'legacy', authorized_user: 'd' },
+			],
+		})
+	}
+	return json({ server_id: 'id-0', streams: 0, consumers: 0, storage: 0, memory: 0, config: {} })
+}
+
+test('connz type uses the same names as allowed_connection_types', async () => {
+	const sampled = await sampleMonitor('http://127.0.0.1:8222', typedConnzFetch, 1, 1)
+	assertEquals(
+		sampled.connections.map((row) => `${row.user}:${row.type}`),
+		['a:MQTT', 'b:WEBSOCKET', 'c:STANDARD', 'd:MQTT']
+	)
 })
 
 test('a node that never answers is listed unreachable', async () => {

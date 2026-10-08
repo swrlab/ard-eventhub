@@ -56,6 +56,7 @@ test('a connected user missing from the file is still listed, oldest issue date 
 				connectedAt: null,
 				lastActivity: null,
 				subscriptions: [],
+				type: null,
 				mqttClient: null,
 			},
 			{
@@ -67,7 +68,8 @@ test('a connected user missing from the file is still listed, oldest issue date 
 				connectedAt: null,
 				lastActivity: null,
 				subscriptions: [],
-				mqttClient: null,
+				type: 'MQTT',
+				mqttClient: 'extra',
 			},
 		]
 	)

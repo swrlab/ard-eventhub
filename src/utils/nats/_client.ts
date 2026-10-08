@@ -1,5 +1,6 @@
 import type { NatsConnection } from '@nats-io/transport-node'
 import { connect } from '@nats-io/transport-node'
+import { parseUserinfoUrl } from '../url-auth.ts'
 
 const CONNECT_TIMEOUT_MS = 5_000
 
@@ -14,21 +15,26 @@ export type NatsAccessOptions = {
 
 /**
  * Open a NATS-native TCP connection.
+ * Userinfo on `servers` (`nats://user:password@host:4222`) is applied as `user` / `pass`.
+ * Explicit `user` and `password` win when set.
  * @param options - Server URL and optional user/password
  * @returns Connected NATS client
  */
 const connectNats = (options: NatsAccessOptions): Promise<NatsConnection> => {
+	const parsed = parseUserinfoUrl(options.servers)
+	const user = options.user || parsed.user
+	const password = options.password || parsed.password
 	const opts: Parameters<typeof connect>[0] = {
-		servers: options.servers,
+		servers: parsed.url,
 		timeout: CONNECT_TIMEOUT_MS,
 		reconnect: true,
 		name: options.name ?? 'eventhub-connect',
 	}
-	if (options.user) {
-		opts.user = options.user
+	if (user) {
+		opts.user = user
 	}
-	if (options.password) {
-		opts.pass = options.password
+	if (password) {
+		opts.pass = password
 	}
 	return connect(opts)
 }

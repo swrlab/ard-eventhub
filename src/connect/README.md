@@ -6,17 +6,17 @@ NATS-native access layer for Eventhub Connect. This process talks to NATS on `:4
 
 Do not put `NATS_URL` on the ingest env module. Connect reads its own vars from [`env.ts`](env.ts).
 
-Users live in [`components/users/nats-users.conf`](../../infra/kubernetes/components/users/nats-users.conf) (RFC §7). [`infra/nats/nats-users.conf`](../../infra/nats/nats-users.conf) is a symlink to that file. Publishers and services share one bcrypt hash (`$DEV_PW`) of the well-known password `local` (not a secret). `sub-ui` has no password. Rotate a publisher by issuing a new `pub-{label}-{date}` user, then `just nats-reload`. Hash a password with `just nats-passwd`.
+Users live in [`components/users/nats-users.conf`](../../infra/kubernetes/components/users/nats-users.conf) (RFC §7). [`infra/nats/nats-users.conf`](../../infra/nats/nats-users.conf) is a symlink to that file. Publishers and services share one bcrypt hash (`$DEV_PW`). The plaintext password is only in sops. `sub-ui` has no password. Rotate a publisher by issuing a new `pub-{label}-{date}` user, then `just nats-reload`. Hash a password with `just nats-passwd`.
 
 ## Environment
 
-- OPTIONAL `NATS_URL` — default `nats://127.0.0.1:4222` with no credentials. Put the user and password in the URL: `nats://svc-sidecar:local@127.0.0.1:4222`. The JS client does not read userinfo itself; connect splits it into `user` / `pass` and logs only the host. There is no `NATS_USER` or `NATS_PASSWORD`.
+- OPTIONAL `NATS_URL` — default `nats://127.0.0.1:4222` with no credentials. Put the user and password in the URL (`nats://user:password@host:4222`). `just env` injects it from sops. The JS client does not read userinfo itself; connect splits it into `user` / `pass` and logs only the host. There is no `NATS_USER` or `NATS_PASSWORD`.
 - OPTIONAL `NATS_MQTT_URL` — MQTT gateway for retained `radio/` and `feedback/` publishes. Default is the `NATS_URL` host on port `1883`. The sidecar authenticates with the same userinfo as `NATS_URL`. Set `POD_NAME` when more than one sidecar runs, so each MQTT client id stays unique.
 - OPTIONAL `ARD_FEED_URL` — ARD core livestream feed. `just env` injects it from sops. Connect fetches it on startup and then hourly, validates it, and writes the document to the JetStream bucket `KV_ARD_FEED` (subject `$KV.ARD_FEED.livestreams`). A failed fetch, a malformed body, a dropped institution count, or a `generatedAt` that is not newer leaves the previous revision serving. `/api/feed` reports the age of the last successful fetch (`warn` at 3h, `alert` at 12h, `page` at 48h). The feed page shows when the snapshot was built and when it was last fetched. Unset, the process still starts and serves the last KV or disk copy.
 
 `svc-sidecar` publishes `$KV.ARD_FEED.>`. A cluster that is already running needs that users file reapplied (`just nats-reload` locally, or a config reload on the dev cluster) before the first write succeeds. Run one connect process as the fetcher. The RFC CronJob replaces this loop later.
 
-Ingest dual-writes only when `MQTT_BROKER_URL` is set. Put the user and password in that URL (`mqtt://svc-ingest:local@127.0.0.1:1883`). Unset, ingest stays on Pub/Sub. The local broker's MQTT listener is `:1883`. Anonymous connects are rejected (`no_auth_user` is unset).
+Ingest dual-writes only when `MQTT_BROKER_URL` is set. Put the user and password in that URL (`mqtt://user:password@host:1883`). The plaintext is only in sops. Unset, ingest stays on Pub/Sub. The local broker's MQTT listener is `:1883`. Anonymous connects are rejected (`no_auth_user` is unset).
 
 ## Local NATS (Mac / Homebrew)
 
@@ -82,7 +82,7 @@ If docker is also missing, download a pinned `nats-server` binary from [nats-io/
 ## Verify both protocols
 
 1. `just nats-sub --all` — NATS-native subscribe on `inbox.>`
-2. In another terminal, publish MQTT QoS 1 as `pub-swr-2026-06-26` / `local` to `inbox/urn:ard:institution:a3004ff924ece1a2` on `mqtt://127.0.0.1:1883`
+2. In another terminal, publish MQTT QoS 1 as `pub-swr-2026-06-26` and the sops password to `inbox/urn:ard:institution:a3004ff924ece1a2` on `mqtt://127.0.0.1:1883`
 3. The NATS subscriber prints the payload
 
 Optional: run ingest with `MQTT_BROKER_URL=mqtt://127.0.0.1:1883` and NATS up so HTTPS posts land on NATS subjects for `just dev` / `just nats-sub` to see. Ingest publishes as `svc-ingest`.

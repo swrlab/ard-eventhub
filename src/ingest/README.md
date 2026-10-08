@@ -13,9 +13,7 @@ Several environment variables need to be set in `.env` config in order to run th
 - REQUIRED `GOOGLE_APPLICATION_CREDENTIALS` - where the Google Cloud Service Account Key can be found (usually a path to a .json file)
 - REQUIRED `PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL` - for verification of internal publisher service account
 - REQUIRED `STAGE` - can be one of the Stages below to switch several settings
-- OPTIONAL `MQTT_BROKER_URL` - CN MQTT gateway (`mqtt://127.0.0.1:1883` with local NATS). Unset skips the inbox dual-write so ingest stays on Pub/Sub. A failed publish never fails the HTTP response.
-- OPTIONAL `MQTT_USERNAME` - default `svc-ingest` (publish `inbox.>`, MQTT only)
-- OPTIONAL `MQTT_PASSWORD` - default `local` for the local NATS config. Override via sops against a real gateway.
+- OPTIONAL `MQTT_BROKER_URL` - CN MQTT gateway. Credentials go in the URL (`mqtt://user:password@host:1883`). The plaintext is only in sops. Unset skips the inbox dual-write so ingest stays on Pub/Sub. A failed publish never fails the HTTP response.
 - OPTIONAL `MQTT_TLS_CA` - PEM of the gateway CA, or a path to that PEM. Needed for `mqtts://` against a private CA. Omit for local `mqtt://`.
 - OPTIONAL `INGEST_PUBLISH_PLUGINS` - must be the exact string `true` to publish DTS / Radioplayer jobs to the internal Pub/Sub topic. Unset or any other value (`1`, `TRUE`, `false`) leaves dispatch off. Independent of per-event `plugins[].isDeactivated`. Restart the process after changing it. The flag is logged on boot and on every processed event as `ingestPublishPlugins`.
 - OPTIONAL `PORT` - override server port setting, default is 8080

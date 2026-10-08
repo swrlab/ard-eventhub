@@ -634,6 +634,68 @@ export const eventProcessResult = z
 	})
 	.meta({ id: 'eventProcessResult' })
 
+const connectServices = z.array(servicesUrn).min(1)
+
+/**
+ * URN-only track event the sidecar accepts.
+ * Derived from {@link eventV1PostBody}: `services` is the URN shape, and `event` is required
+ * because `track.playing` and `track.next` share a body.
+ */
+export const connectInboxTrackEvent = eventV1PostBody
+	.omit({ services: true, event: true })
+	.extend({
+		event: z.enum(['de.ard.eventhub.v1.radio.track.playing', 'de.ard.eventhub.v1.radio.track.next']),
+		services: connectServices,
+	})
+	.strict()
+
+/**
+ * URN-only radio.control event the sidecar accepts. `event` is required so the class is explicit.
+ */
+export const connectInboxControlEvent = eventV1RadioControlPostBody
+	.omit({ event: true, services: true })
+	.extend({
+		event: z.literal('de.ard.eventhub.v1.radio.control'),
+		services: connectServices,
+	})
+	.strict()
+
+/**
+ * URN-only radio.data event the sidecar accepts. `event` is required so the class is explicit.
+ */
+export const connectInboxDataEvent = eventV1RadioDataPostBody
+	.omit({ event: true, services: true })
+	.extend({
+		event: z.literal('de.ard.eventhub.v1.radio.data'),
+		services: connectServices,
+	})
+	.strict()
+
+const connectInboxSchemaByEvent = {
+	'de.ard.eventhub.v1.radio.track.playing': connectInboxTrackEvent,
+	'de.ard.eventhub.v1.radio.track.next': connectInboxTrackEvent,
+	'de.ard.eventhub.v1.radio.control': connectInboxControlEvent,
+	'de.ard.eventhub.v1.radio.data': connectInboxDataEvent,
+} as const
+
+/** Inbox payload after the sidecar's URN-only parse. */
+export type ConnectInboxEvent =
+	| z.infer<typeof connectInboxTrackEvent>
+	| z.infer<typeof connectInboxControlEvent>
+	| z.infer<typeof connectInboxDataEvent>
+
+/**
+ * Parse an inbox payload against the URN-only schema for its `event` class.
+ * A missing or unknown `event` fails before the class schema runs.
+ * @param value - Decoded JSON value
+ * @returns Zod safe-parse result
+ */
+export const parseConnectInboxEvent = (value: unknown) => {
+	const named = z.object({ event: z.enum(eventNames) }).safeParse(value)
+	if (!named.success) return named
+	return connectInboxSchemaByEvent[named.data.event].safeParse(value)
+}
+
 export type EventhubService = z.infer<typeof eventhubService>
 export type EventhubPlugin = z.infer<typeof eventhubPlugin>
 export type EventhubV1RadioPostBody = z.infer<typeof eventhubV1RadioPostBody>

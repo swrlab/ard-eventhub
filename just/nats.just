@@ -137,14 +137,14 @@ nats-reload:
 
 # print a bcrypt hash for nats-users.conf (`nats server passwd`, else Apache `htpasswd -B`)
 [group('NATS')]
-nats-passwd password='local':
+nats-passwd password:
 	#!/usr/bin/env bash
 	set -euo pipefail
 	if command -v nats >/dev/null && nats server passwd -p "{{ password }}"; then
 		exit 0
 	fi
 	if command -v htpasswd >/dev/null; then
-		# `nats server passwd` refuses passwords shorter than 10 characters (`local` is 5).
+		# `nats server passwd` refuses passwords shorter than 10 characters.
 		# Apache emits `$2y$`; rewrite to `$2a$` so nats-server always treats it as bcrypt.
 		htpasswd -nbB -C 11 dummy "{{ password }}" | cut -d: -f2 | sed 's/^\$2y\$/$2a$/'
 		exit 0

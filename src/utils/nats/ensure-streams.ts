@@ -17,6 +17,15 @@ export const SIDECAR_CONSUMER = 'sidecar'
 /** Plugin work-queue TTL (RFC §10.4: short max_age in minutes). */
 const PLUGINS_MAX_AGE_NS = 10 * 60 * 1_000_000_000
 
+/** Redeliver an unacked inbox message after this long. Nanoseconds. Short on purpose (RFC §10.2). */
+export const SIDECAR_ACK_WAIT_NS = 5_000_000_000
+
+/** In-flight inbox messages across the pods pulling `sidecar`. */
+const SIDECAR_MAX_ACK_PENDING = 64
+
+/** Crash retries. Validation failures are `term`ed and do not use this budget. */
+const SIDECAR_MAX_DELIVER = 3
+
 /** Stream names ensured for eventhub-connect. */
 export type EnsuredStreams = {
 	inbox: string
@@ -87,8 +96,14 @@ const ensurePluginsStream = async (jsm: JetStreamManager): Promise<string> => {
  * @returns Consumer name
  */
 const ensureSidecarConsumer = async (jsm: JetStreamManager): Promise<string> => {
+	const tuning = {
+		ack_wait: SIDECAR_ACK_WAIT_NS,
+		max_ack_pending: SIDECAR_MAX_ACK_PENDING,
+		max_deliver: SIDECAR_MAX_DELIVER,
+	}
 	try {
 		await jsm.consumers.info(INBOX_STREAM, SIDECAR_CONSUMER)
+		await jsm.consumers.update(INBOX_STREAM, SIDECAR_CONSUMER, tuning)
 	} catch (error) {
 		if (!isJetStreamCode(error, JetStreamApiCodes.ConsumerNotFound)) {
 			throw error
@@ -99,7 +114,7 @@ const ensureSidecarConsumer = async (jsm: JetStreamManager): Promise<string> => 
 			deliver_policy: DeliverPolicy.All,
 			replay_policy: ReplayPolicy.Instant,
 			filter_subject: 'inbox.>',
-			max_deliver: 3,
+			...tuning,
 		})
 	}
 	return SIDECAR_CONSUMER

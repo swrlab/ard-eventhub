@@ -1,10 +1,12 @@
 import { test } from '@cross/test'
 import { assertEquals } from '@std/assert'
-import { LOCAL_NATS_PASSWORD, LOCAL_NATS_USERS, SWR_INSTITUTION_ID } from '../../connect/dev-users.ts'
 import { natsAccess } from './_client.ts'
 import { INBOX_STREAM, PLUGINS_STREAM, SIDECAR_CONSUMER, ensureStreams } from './ensure-streams.ts'
 import { inboxMqttTopic, inboxSubject } from './subjects.ts'
-import { connectMqttUser, skipUnlessNats, tryConnectSidecar } from './test-broker.ts'
+import { BROKER_PASSWORD, connectMqttUser, skipUnlessNats, tryConnectSidecar } from './test-broker.ts'
+
+const SWR_INSTITUTION_ID = 'urn:ard:institution:a3004ff924ece1a2'
+const PUB_SWR = 'pub-swr-2026-06-26'
 
 test('MQTT QoS 1 publish to inbox/{institutionId} arrives on inbox.{institutionId}', async () => {
 	const nc = await tryConnectSidecar()
@@ -32,7 +34,7 @@ test('MQTT QoS 1 publish to inbox/{institutionId} arrives on inbox.{institutionI
 			})()
 		})
 
-		const mqttClient = await connectMqttUser(LOCAL_NATS_USERS.pubSwr, LOCAL_NATS_PASSWORD)
+		const mqttClient = await connectMqttUser(PUB_SWR, BROKER_PASSWORD)
 		try {
 			await mqttClient.publishAsync(inboxMqttTopic(SWR_INSTITUTION_ID), JSON.stringify(payload), {
 				qos: 1,

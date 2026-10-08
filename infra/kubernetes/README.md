@@ -1,12 +1,12 @@
 # NATS on Kubernetes
 
-Dev runs all three NATS nodes in one cluster. Test and prod use one config per zone, applied on that zone. Every environment uses [`components/users/nats-users.conf`](components/users/nats-users.conf) (password `local`).
+Dev runs all three NATS nodes in one cluster. Test and prod use one config per zone, applied on that zone. Every environment uses [`components/users/nats-users.conf`](components/users/nats-users.conf). The password is only in sops.
 
 Image pin matches `just nats-up-docker`: `nats:2.14.6`.
 
 ## Dev
 
-Three pods (`nats-0`, `nats-1`, `nats-2`) in `eventhub-dev`. They cluster on `nats-<n>.nats-headless.eventhub-dev.svc.cluster.local:6222`. That record exists only because `nats-headless` is headless. Each pod advertises the same name: the kubelet builds `CLUSTER_ADVERTISE` from the pod name, because NATS will not expand `$SERVER_NAME` inside a longer string. There is no hostname anti-affinity, so a single node can run all three. MQTT is plaintext `:1883`. Users are the committed file (password `local`). JetStream data is an `emptyDir` and dies with the pod.
+Three pods (`nats-0`, `nats-1`, `nats-2`) in `eventhub-dev`. They cluster on `nats-<n>.nats-headless.eventhub-dev.svc.cluster.local:6222`. That record exists only because `nats-headless` is headless. Each pod advertises the same name: the kubelet builds `CLUSTER_ADVERTISE` from the pod name, because NATS will not expand `$SERVER_NAME` inside a longer string. There is no hostname anti-affinity, so a single node can run all three. MQTT is plaintext `:1883`. Users are the committed file. The password is only in sops. JetStream data is an `emptyDir` and dies with the pod.
 
 ```sh
 just nats-k8s-dev
@@ -23,7 +23,7 @@ kubectl -n eventhub-dev rollout status statefulset/nats
 
 Docker Desktop and a local k3s publish NodePorts on the machine. The service spreads connections across the three pods.
 
-- NATS `nats://127.0.0.1:30422` (`svc-sidecar` / `local`)
+- NATS `nats://127.0.0.1:30422` (`svc-sidecar`, password from sops)
 - MQTT `mqtt://127.0.0.1:30183`
 - monitor `http://127.0.0.1:30822`
 

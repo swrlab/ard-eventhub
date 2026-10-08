@@ -11,7 +11,7 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 - **Install tools:** [mise](https://mise.jdx.dev) → `mise install` (pins `just` + `sops` in [`mise.toml`](mise.toml))
 - **Install dependencies:** `bun install`
 - **Start ingest service:** `just ingest` (hot reload, sops env)
-- **Start connect (NATS access + operator UI):** `just dev` (needs local NATS: `just nats-up` or `just nats-up-docker`; local user `svc-sidecar` / `local`). UI at http://127.0.0.1:4173 after `just ui-build`. Vite HMR: `USE_HMR=true just dev` and `just ui`. When `ARD_FEED_URL` is set, connect pulls it hourly into JetStream KV `KV_ARD_FEED`.
+- **Start connect (NATS access + operator UI):** `just dev` (needs local NATS: `just nats-up` or `just nats-up-docker`; `NATS_URL` userinfo comes from sops). UI at http://127.0.0.1:4173 after `just ui-build`. Vite HMR: `USE_HMR=true just dev` and `just ui`. When `ARD_FEED_URL` is set, connect pulls it hourly into JetStream KV `KV_ARD_FEED`.
 - **Run tests:** `just test`
 - **Hurl API suite:** `just integration` (needs running ingest + `hurl`)
 - **Lint code:** `just lint` (uses Oxlint)
@@ -28,7 +28,7 @@ Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `o
 - **Tech Stack:** Bun, Node.js, TypeScript (strict mode), Hono, Zod, Google Cloud Platform
 - **File Structure:**
   - `src/ingest/` – Ingest service (receives events, manages subscriptions)
-  - `src/connect/` – Eventhub Connect NATS access layer (no validation sidecar yet). `just dev` also serves the operator UI
+  - `src/connect/` – Eventhub Connect NATS access layer, including the validation sidecar (`src/connect/sidecar/`). `just dev` also serves the operator UI
   - `ui/` – Vue operator console (Vite, Tailwind). Built to `static/dist` and served by `just dev`
 - `src/schemas/` – Zod request/response schemas (runtime validation + OpenAPI)
 - `src/openapi/` – OpenAPI document assembly / `openapi.json` generator
