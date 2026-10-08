@@ -1,5 +1,4 @@
-import type { UserRow } from './types.ts'
-import type { LiveConnection } from './types.ts'
+import type { LiveConnection, UserRow } from '#types'
 
 export type ConfiguredUser = {
 	username: string

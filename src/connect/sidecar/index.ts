@@ -6,13 +6,18 @@ import { connectSidecarMqtt, createSidecarPublisher, sidecarClientId } from './p
 
 const source = 'connect.sidecar'
 
-let abort: AbortController | null = null
-let mqttClient: MqttClient | null = null
-let running: Promise<void> | null = null
+/** The running loop and the MQTT connection it publishes on. */
+type RunningSidecar = {
+	controller: AbortController
+	client: MqttClient
+	task: Promise<void>
+}
+
+let current: RunningSidecar | null = null
 
 /**
  * Pull the inbox and publish validated events. Safe to call again after a reconnect.
- * @param nc - Open NATS connection as `svc-sidecar`
+ * @param nc - Open NATS connection as `svc-eventhub-connect`
  * @returns Resolves once the MQTT publish connection is up and the loop is running
  */
 export const startSidecar = async (nc: NatsConnection): Promise<void> => {
@@ -20,14 +25,13 @@ export const startSidecar = async (nc: NatsConnection): Promise<void> => {
 	const clientId = sidecarClientId(1)
 	const client = await connectSidecarMqtt(clientId)
 	const controller = new AbortController()
-	abort = controller
-	mqttClient = client
-	running = runSidecarLoop(nc, {
+	const task = runSidecarLoop(nc, {
 		signal: controller.signal,
 		publisher: createSidecarPublisher(nc, client),
 	}).catch((error: unknown) => {
 		logger.error({ message: 'sidecar loop stopped', source, error })
 	})
+	current = { controller, client, task }
 	logger.info({
 		message: 'sidecar consuming',
 		source,
@@ -40,17 +44,13 @@ export const startSidecar = async (nc: NatsConnection): Promise<void> => {
  * @returns Resolves when both are closed
  */
 export const stopSidecar = async (): Promise<void> => {
-	const controller = abort
-	const task = running
-	const client = mqttClient
-	abort = null
-	running = null
-	mqttClient = null
-	controller?.abort()
-	if (task) await task
-	if (!client) return
+	const stopping = current
+	current = null
+	if (!stopping) return
+	stopping.controller.abort()
+	await stopping.task
 	try {
-		await client.endAsync()
+		await stopping.client.endAsync()
 	} catch {
 		// The broker already dropped the session.
 	}

@@ -11,12 +11,12 @@ Die Kennung beantragst du beim Eventhub-Team. Du bekommst den Benutzernamen, das
 
 ## Namen
 
-| Klasse         | Form                                  | Beispiel                          |
-| -------------- | ------------------------------------- | --------------------------------- |
-| Publisher      | `pub-{label}-{datum}`                 | `pub-swr-2026-06-26`              |
-| Subscriber     | `sub-{rolle}-{datum}`                 | `sub-ard-sounds-2026-06-26`       |
-| Dienst, MQTT   | `svc-ingest`                          | Legacy-HTTPS, schreibt jede Inbox |
-| Dienst, intern | `svc-sidecar`, `svc-adapter-{target}` | NATS, keine Publisher-Kennung     |
+| Klasse         | Form                   | Beispiel                          |
+| -------------- | ---------------------- | --------------------------------- |
+| Publisher      | `pub-{label}-{datum}`  | `pub-swr-2026-06-26`              |
+| Subscriber     | `sub-{rolle}-{datum}`  | `sub-ard-sounds-2026-06-26`       |
+| Dienst, MQTT   | `svc-ingest`           | Legacy-HTTPS, schreibt jede Inbox |
+| Dienst, intern | `svc-eventhub-connect` | NATS, keine Publisher-Kennung     |
 
 Das Präfix `pub-` ist reserviert: damit darf man nur in die eigenen Inboxes publizieren und das passende `feedback/` lesen. `sub-` ist Konvention. `svc-` ist für Prozesse von Eventhub, nicht für Häuser.
 

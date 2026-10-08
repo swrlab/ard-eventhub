@@ -39,3 +39,12 @@ test('stats routes answer without a websocket', async () => {
 	assertEquals(typeof metaBody.wsUrl, 'string')
 	assertEquals(String(metaBody.wsUrl).startsWith('ws'), true)
 })
+
+test('update-feed is POST only and reports 503 without a NATS connection', async () => {
+	const res = await app.request('http://ui.test/api/update-feed', { method: 'POST' })
+	assertEquals(res.status, 503)
+	assertEquals(res.headers.get('cache-control'), 'no-store')
+	const body = await res.json()
+	assertEquals(body.error, 'nats is unavailable')
+	assertEquals((await app.request('http://ui.test/api/update-feed')).status, 404)
+})

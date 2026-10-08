@@ -102,8 +102,8 @@ const ensureBucket = async (nc: NatsConnection): Promise<void> => {
 }
 
 /**
- * Open the JetStream bucket the hourly pull writes and the process watches.
- * @param nc - Open NATS connection. `svc-sidecar` must be allowed to publish `$KV.ARD_FEED.>`
+ * Open the JetStream bucket that `/api/update-feed` writes and every connect process watches.
+ * @param nc - Open NATS connection. `svc-eventhub-connect` must be allowed to publish `$KV.ARD_FEED.>`
  * @returns A store bound to that connection
  */
 export const openArdFeedStore = async (nc: NatsConnection): Promise<ArdFeedStore> => {
@@ -146,7 +146,8 @@ export const openArdFeedStore = async (nc: NatsConnection): Promise<ArdFeedStore
 		},
 
 		/**
-		 * Deliver new revisions. Failures are logged. The hourly pull still writes.
+		 * Deliver the current revision, then every new one, so a write between `read` and the watch start is not missed.
+		 * Failures are logged.
 		 * @param onSnapshot - Called with a validated revision
 		 * @returns Closes the consumer
 		 */
@@ -157,7 +158,7 @@ export const openArdFeedStore = async (nc: NatsConnection): Promise<ArdFeedStore
 				try {
 					const consumer = await js.consumers.get(ARD_FEED_STREAM, {
 						filter_subjects: ARD_FEED_SUBJECT,
-						deliver_policy: DeliverPolicy.New,
+						deliver_policy: DeliverPolicy.LastPerSubject,
 						inactive_threshold: WATCH_IDLE_NS,
 					})
 					const messages = await consumer.consume()

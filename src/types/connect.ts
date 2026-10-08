@@ -1,8 +1,55 @@
-/** JSON shapes the operator UI polls. The live tail is a separate socket. */
+/**
+ * @fileoverview Eventhub Connect types shared by the service and the operator UI.
+ * The polled JSON shapes live here. The live tail is a separate socket.
+ */
 
-export type { FeedReport } from '../feed/ard-feed.ts'
-export type { KnownLivestream } from '../../utils/feed/known-livestreams.ts'
-export type { FeedCatalogReport } from '../feed/feed-catalog.ts'
+/** Publisher or institution as the catalog and later validation see them. */
+type KnownLivestreamParty = {
+	id: string
+	title: string
+}
+
+/**
+ * One livestream this process knows about.
+ * Feed rows and `allowed-livestreams.json` share this shape.
+ */
+export type KnownLivestream = {
+	/** Livestream URN publishers send. Feed rows use `externalId`, not the fusion `id`. */
+	id: string
+	title: string
+	publisher: KnownLivestreamParty
+	/** Null when an overlay publisher is not in the loaded feed. */
+	institution: KnownLivestreamParty | null
+	/** Granted by `allowed-livestreams.json`, not by a row in the core feed. */
+	overlay: boolean
+}
+
+/** What the last download did. */
+export type FeedOutcome = 'stored' | 'unchanged' | 'rejected' | 'unavailable'
+
+/** How late the last successful fetch is. `never` means this process has not stored or confirmed one. */
+export type FeedStaleness = 'ok' | 'warn' | 'alert' | 'page' | 'never'
+
+/** JSON the operator UI polls for the feed this process is serving. */
+export type FeedReport = {
+	at: string
+	revision: number | null
+	generatedAt: string | null
+	itemCount: number | null
+	institutionCount: number | null
+	ageMs: number | null
+	lastSuccessAt: string | null
+	lastAttemptAt: string | null
+	lastError: string | null
+	staleness: FeedStaleness
+	outcome: FeedOutcome | null
+}
+
+/** Serving feed plus the overlay rows. */
+export type FeedCatalogReport = FeedReport & {
+	note: string
+	entries: KnownLivestream[]
+}
 
 export type MetaReport = {
 	pollMs: number

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ClusterReport, MetaReport } from '../types.ts'
+import type { ClusterReport, MetaReport } from '#types'
 import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { tailPhase } from './tail-state'
@@ -71,7 +71,7 @@ onMounted(() => {
 watch(
 	() => route.name,
 	(name) => {
-		document.title = `eventhub connect · ${String(name ?? 'on-air')}`
+		document.title = `ARD Eventhub Connect · ${String(name ?? 'on-air')}`
 	},
 	{ immediate: true }
 )
@@ -92,9 +92,34 @@ onUnmounted(() => {
 			Skip to content
 		</a>
 		<header class="shrink-0 border-b border-border px-4 pt-3 pb-0">
-			<div class="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
-				<div class="flex items-baseline gap-4">
-					<p class="font-mono text-sm whitespace-nowrap text-heading">eventhub connect</p>
+			<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+				<div class="flex min-w-0 items-center gap-4">
+					<RouterLink
+						to="/"
+						class="inline-flex min-w-0 items-center gap-2 text-base font-semibold whitespace-nowrap text-heading"
+					>
+						<span aria-hidden="true" class="inline-flex h-5 shrink-0 items-center">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								viewBox="0 0 512 512"
+								class="h-5 w-auto"
+								fill-rule="evenodd"
+								clip-rule="evenodd"
+								stroke-linejoin="round"
+								stroke-miterlimit="2"
+							>
+								<path
+									d="M255.971 0C115.547 0 .006 115.575.006 256c0 140.424 115.541 256 256 256 140.424 0 256-115.576 256-256 0-1.127-.035-2.287-.035-3.414C510.128 113.425 395.133 0 255.971 0Zm0 464.213h-.034c-114.21 0-208.213-94.003-208.213-208.213 0-1.127 0-2.287.034-3.414 0-114.21 94.003-208.213 208.213-208.213 1.127-.034 2.287-.034 3.414-.034 114.21 0 208.213 94.003 208.213 208.213v.034c0 116.088-95.54 211.627-211.627 211.627Z"
+									fill="#ffffff"
+								/>
+								<path
+									d="M337.891 331.093V119.466l-208.213 78.507v51.2l68.267-27.307v160.427l139.946-51.2Z"
+									fill="#ffffff"
+								/>
+							</svg>
+						</span>
+						<span class="truncate">ARD Eventhub Connect</span>
+					</RouterLink>
 					<a
 						class="font-mono text-sm text-muted hover:text-link"
 						href="https://github.com/swrlab/ard-eventhub"

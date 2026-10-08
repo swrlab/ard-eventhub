@@ -21,7 +21,6 @@ const PUB_SWR = 'pub-swr-2026-06-26'
 const PUB_SHARED = 'pub-shared-playout-2026-06-26'
 const SUB_ARD_SOUNDS = 'sub-ard-sounds-2026-06-26'
 const SVC_INGEST = 'svc-ingest'
-const SVC_ADAPTER = 'svc-adapter-radioplayer'
 
 const MQTT_V311 = 4
 const USERS_FILE = join(import.meta.dir, '../../../.local/nats/nats-users.conf')
@@ -125,7 +124,7 @@ test('sub- user cannot publish', async () => {
 	}
 })
 
-test('MQTT credential is rejected on the NATS port; STANDARD credential is rejected on MQTT', async () => {
+test('MQTT credential is rejected on the NATS port; a WebSocket-only user is rejected on MQTT', async () => {
 	const nc = await tryConnectSidecar()
 	if (skipUnlessNats(nc)) {
 		return
@@ -148,7 +147,7 @@ test('MQTT credential is rejected on the NATS port; STANDARD credential is rejec
 		})
 	)
 
-	await assertRejects(() => connectMqttUser(SVC_ADAPTER, BROKER_PASSWORD))
+	await assertRejects(() => connectMqttUser('sub-ui', BROKER_PASSWORD))
 })
 
 test('multi-institution publisher can MQTT-publish to each allowed inbox', async () => {

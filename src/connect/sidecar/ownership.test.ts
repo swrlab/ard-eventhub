@@ -1,6 +1,6 @@
 import { test } from '@cross/test'
 import { assertEquals } from '@std/assert'
-import { checkServiceOwnership } from './ownership.ts'
+import { checkEventOwnership, checkServiceOwnership } from './ownership.ts'
 
 const SUBJECT = 'urn:ard:institution:a3004ff924ece1a2'
 const OTHER = 'urn:ard:institution:b71c0e4d9a25f338'
@@ -43,4 +43,26 @@ test('ownership rejects a livestream the feed does not know', () => {
 	const problem = checkServiceOwnership({ subjectInstitutionId: SUBJECT, service, owner: null })
 	assertEquals(problem?.disagreed, ['feed'])
 	assertEquals(problem?.livestreamId, LIVESTREAM)
+})
+
+test('event ownership accepts when every service agrees', () => {
+	const owners = new Map([[LIVESTREAM, owner]])
+	assertEquals(checkEventOwnership({ subjectInstitutionId: SUBJECT, services: [service], owners }), null)
+})
+
+test('event ownership merges failures across services in party order', () => {
+	const unknown = 'urn:ard:permanent-livestream:0000000000000000'
+	const owners = new Map([[LIVESTREAM, owner]])
+	const problem = checkEventOwnership({
+		subjectInstitutionId: SUBJECT,
+		services: [
+			{ ...service, publisherId: 'urn:ard:publisher:0000000000000000' },
+			{ ...service, id: unknown },
+		],
+		owners,
+	})
+	assertEquals(problem?.livestreamId, LIVESTREAM)
+	assertEquals(problem?.disagreed, ['payload', 'feed'])
+	assertEquals(problem?.message.includes(unknown), true)
+	assertEquals(problem?.message.includes('publisherId'), true)
 })

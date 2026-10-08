@@ -7,6 +7,7 @@ test('buildAsyncApiDocument is AsyncAPI 3 with Connect send and receive operatio
 
 	assertStrictEquals(document.asyncapi, '3.0.0')
 	assertEquals(document.info.title, 'ARD Eventhub Connect')
+	assertEquals(document.servers.connect.protocolVersion, '3.1.1')
 	assertExists(document.info.version)
 
 	const inbox = document.channels.inboxInstitution

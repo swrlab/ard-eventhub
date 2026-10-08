@@ -1,4 +1,4 @@
-import type { ClusterNode, ClusterReport, ConsumerHealth, LiveConnection, ReplicaHealth } from './types.ts'
+import type { ClusterNode, ClusterReport, ConsumerHealth, LiveConnection, ReplicaHealth } from '#types'
 import { booleanField, isRecord, numberField, stringField, stringList } from './json.ts'
 
 type VarzView = {

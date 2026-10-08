@@ -1,4 +1,5 @@
 import type { NatsConnection } from '@nats-io/transport-node'
+import type { FeedOutcome } from '#types'
 import type { ArdFeedState, ArdFeedStore, FeedSnapshot } from './ard-feed.ts'
 import { readFileSync } from 'node:fs'
 import { logger } from '@frytg/logger'
@@ -7,21 +8,11 @@ import { sampleMonitor } from '../ui/cluster.ts'
 import { natsMonitorUrl, usersConfPath } from '../ui/env.ts'
 import { parseUsersConf } from '../ui/users-conf.ts'
 import { openArdFeedStore } from './ard-feed-kv.ts'
-import {
-	applyKvSnapshot,
-	connectedInstitutionIds,
-	decideUpstream,
-	defaultDiskPath,
-	feedState,
-	hydrateArdFeed,
-	writeFeedFile,
-} from './ard-feed.ts'
+import { applyKvSnapshot, connectedInstitutionIds, decideUpstream } from './ard-feed.ts'
+import { feedState } from './current-feed.ts'
 
 const source = 'connect.ard-feed'
 const FETCH_TIMEOUT_MS = 10_000
-
-/** One hour. The CronJob in the RFC is this interval inside the connect process until that job exists. */
-const ARD_FEED_INTERVAL_MS = 60 * 60 * 1000
 
 /**
  * Fetch side effect. Tests replace `fetch`.
@@ -79,19 +70,19 @@ const liveInstitutions = async (): Promise<Set<string> | null> => {
 export type RefreshInput = {
 	store: ArdFeedStore
 	url: string
-	diskPath: string
 	fetchFeed?: (url: string) => Promise<unknown>
 	connected?: ReadonlySet<string> | null
 	now?: () => Date
 }
 
 /**
- * Fetch once. A failure or a rejected candidate leaves `state.feed` as it was.
+ * Download once and write an accepted document to KV. A failure or a rejected candidate leaves KV as it was.
  * A valid document that is not newer counts as a successful fetch.
- * @param state - Serving feed
+ * @param state - Serving feed, compared against and updated with the written revision
  * @param input - Store, URL, and clock
+ * @returns What the download did
  */
-export const refreshArdFeed = async (state: ArdFeedState, input: RefreshInput): Promise<void> => {
+export const refreshArdFeed = async (state: ArdFeedState, input: RefreshInput): Promise<FeedOutcome> => {
 	const now = input.now ?? (() => new Date())
 	const fetchFeed = input.fetchFeed ?? fetchArdFeedDocument
 	state.lastAttemptAt = now().toISOString()
@@ -100,7 +91,7 @@ export const refreshArdFeed = async (state: ArdFeedState, input: RefreshInput): 
 		state.outcome = 'unavailable'
 		state.lastError = 'ARD_FEED_URL is unset'
 		logger.info({ message: 'ARD_FEED_URL is unset', source })
-		return
+		return state.outcome
 	}
 
 	let candidate: unknown
@@ -114,7 +105,7 @@ export const refreshArdFeed = async (state: ArdFeedState, input: RefreshInput): 
 			source,
 			data: { reason: state.lastError },
 		})
-		return
+		return state.outcome
 	}
 
 	const decision = decideUpstream(state.feed, candidate, input.connected)
@@ -128,7 +119,7 @@ export const refreshArdFeed = async (state: ArdFeedState, input: RefreshInput): 
 			source,
 			data: { reason: decision.reason },
 		})
-		return
+		return state.outcome
 	}
 
 	let snapshot: FeedSnapshot
@@ -142,108 +133,115 @@ export const refreshArdFeed = async (state: ArdFeedState, input: RefreshInput): 
 			source,
 			data: { reason: state.lastError },
 		})
-		return
+		return state.outcome
 	}
 
-	state.feed = snapshot.feed
-	state.revision = snapshot.revision
-	state.source = 'kv'
+	applyKvSnapshot(state, snapshot)
 	state.outcome = 'stored'
 	state.lastError = null
 	state.lastSuccessAt = now().toISOString()
-	try {
-		await writeFeedFile(input.diskPath, snapshot.feed)
-	} catch (error) {
-		logger.warning({
-			message: 'ard feed disk cache failed',
-			source,
-			data: { reason: errorText(error) },
-		})
-	}
 	logger.info({
 		message: 'ard feed stored',
 		source,
 		data: { revision: snapshot.revision, items: snapshot.feed.items.length },
 	})
+	return state.outcome
 }
 
-let stopCurrent: (() => void) | null = null
-let pulling = false
-
-/**
- * Stop the watch and the hourly timer.
- */
-export const stopArdFeed = (): void => {
-	const stop = stopCurrent
-	stopCurrent = null
-	stop?.()
+/** A followed feed: resolves once a KV revision is serving, and stops the watch. */
+export type FollowedArdFeed = {
+	/** Resolves once `state` serves a KV revision. Stays pending while KV is empty. */
+	kvReady: Promise<void>
+	unwatch: () => void
 }
 
 /**
- * Hydrate from KV or the disk copy, then pull and repeat hourly.
- * One process should run this. A second process would also fetch.
- * @param nc - Open NATS connection
+ * Watch KV into `state`, read the current revision, and download only when KV has none.
+ * @param state - Serving feed
+ * @param input - KV store, and the download to run when KV is empty
+ * @returns The KV readiness promise and the watch stop
  */
-export const startArdFeed = async (nc: NatsConnection): Promise<void> => {
-	stopArdFeed()
-	let store: ArdFeedStore
-	try {
-		store = await openArdFeedStore(nc)
-	} catch (error) {
-		await hydrateArdFeed(feedState, {
-			readKv: () => Promise.resolve(null),
-			diskPath: defaultDiskPath,
-		})
-		logger.error({ message: 'ard feed bucket failed', source, error })
-		throw error
-	}
-	await hydrateArdFeed(feedState, {
-		readKv: () => store.read(),
-		diskPath: defaultDiskPath,
-	})
-	if (!feedState.feed) {
-		logger.warning({ message: 'no ard feed cached', source })
-	} else {
-		logger.info({
-			message: 'ard feed loaded',
-			source,
-			data: { from: feedState.source, revision: feedState.revision, items: feedState.feed.items.length },
-		})
-	}
-
-	const unwatch = store.watch((snapshot) => {
-		const swapped = applyKvSnapshot(feedState, snapshot)
-		if (swapped) {
+export const followArdFeed = async (
+	state: ArdFeedState,
+	input: { store: ArdFeedStore; download: () => Promise<unknown> }
+): Promise<FollowedArdFeed> => {
+	const { store, download } = input
+	const { promise: kvReady, resolve } = Promise.withResolvers<void>()
+	const take = (snapshot: FeedSnapshot): void => {
+		if (applyKvSnapshot(state, snapshot)) {
 			logger.info({
 				message: 'ard feed swapped',
 				source,
 				data: { revision: snapshot.revision, items: snapshot.feed.items.length },
 			})
 		}
-	})
-
-	const pull = (): void => {
-		if (pulling) return
-		pulling = true
-		void (async () => {
-			try {
-				const connected = await liveInstitutions()
-				await refreshArdFeed(feedState, {
-					store,
-					url: ardFeedUrl,
-					diskPath: defaultDiskPath,
-					connected,
-				})
-			} finally {
-				pulling = false
-			}
-		})()
+		if (state.feed) resolve()
 	}
 
-	const timer = setInterval(pull, ARD_FEED_INTERVAL_MS)
-	stopCurrent = () => {
-		clearInterval(timer)
+	const unwatch = store.watch(take)
+	try {
+		const stored = await store.read()
+		if (stored) {
+			take(stored)
+		} else {
+			logger.info({ message: 'no ard feed in kv, downloading', source })
+			await download()
+		}
+	} catch (error) {
 		unwatch()
+		throw error
 	}
-	pull()
+	if (!state.feed) logger.warning({ message: 'waiting for ard feed in kv', source })
+	return { kvReady, unwatch }
+}
+
+let activeStore: ArdFeedStore | null = null
+let stopWatch: (() => void) | null = null
+let inflight: Promise<FeedOutcome> | null = null
+
+/**
+ * Download, validate, and write a newer feed to KV. Every connected process picks it up through its watch.
+ * Concurrent calls share one download.
+ * @returns What the download did, or null when no bucket is open (NATS is down)
+ */
+export const updateArdFeed = (): Promise<FeedOutcome | null> => {
+	const store = activeStore
+	if (!store) return Promise.resolve(null)
+	inflight ??= (async () => {
+		try {
+			return await refreshArdFeed(feedState, { store, url: ardFeedUrl, connected: await liveInstitutions() })
+		} finally {
+			inflight = null
+		}
+	})()
+	return inflight
+}
+
+/**
+ * Stop the watch and close the store for `updateArdFeed`.
+ */
+export const stopArdFeed = (): void => {
+	activeStore = null
+	stopWatch?.()
+	stopWatch = null
+}
+
+/**
+ * Open the bucket, follow it into `feedState`, and download once when KV is empty.
+ * @param nc - Open NATS connection
+ * @returns Resolves once the bucket is read. `kvReady` resolves once a KV revision is serving
+ */
+export const startArdFeed = async (nc: NatsConnection): Promise<{ kvReady: Promise<void> }> => {
+	stopArdFeed()
+	let store: ArdFeedStore
+	try {
+		store = await openArdFeedStore(nc)
+	} catch (error) {
+		logger.error({ message: 'ard feed bucket failed', source, error })
+		throw error
+	}
+	activeStore = store
+	const { kvReady, unwatch } = await followArdFeed(feedState, { store, download: updateArdFeed })
+	stopWatch = unwatch
+	return { kvReady }
 }

@@ -2,14 +2,14 @@ import { readFileSync } from 'node:fs'
 import { isRecord } from './json.ts'
 
 /** Vite input. The manifest and the dev server both key off this path. */
-export const VUE_ENTRY = 'ui/src/main.ts'
+export const VUE_ENTRY = 'src/connect/ui/client/main.ts'
 
 const VITE_DEV_ORIGIN = 'http://localhost:5173'
 
 const MISSING_HTML = `<!doctype html>
 <html lang="en">
 <meta charset="utf-8">
-<title>eventhub connect</title>
+<title>ARD Eventhub Connect</title>
 <body style="background:#000;color:#ededed;font-family:ui-monospace,monospace;margin:2rem">
 <p>operator ui is not built.</p>
 <p>just ui-build</p>
@@ -82,7 +82,7 @@ export const renderShell = (useHmr: boolean, manifest: Record<string, unknown> |
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>eventhub connect</title>
+<title>ARD Eventhub Connect</title>
 ${assets}
 </head>
 <body>

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- docs: publisher migration guide, MQTT topic tree, and ACL reference for Eventhub Connect
 - feat: add `radio.control` and `radio.data` Zod schemas (Eventhub Connect / MQTT; rejected on HTTPS POST)
 - feat: generate AsyncAPI 3 spec from those Zod schemas (`just asyncapi`, Blume `/events`)
 - feat: dual-write accepted HTTPS events to MQTT `inbox/{institutionId}` as `svc-ingest` on the CN gateway (Pub/Sub unchanged)
@@ -19,19 +20,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat: NATS-native access layer for eventhub-connect (`src/utils/nats/`, `just connect`) with local JetStream + MQTT gateway
 - ci: separate NATS job (`just nats-up-docker`) so MQTT→NATS inbox translation is required
 - feat: local NATS auth (RFC §7 users, bcrypt, `allowed_connection_types`, institution-bound ACLs; `just nats-check` / `just nats-reload`)
-- feat: pull the ARD core feed (`ARD_FEED_URL`) hourly into JetStream KV, keeping the last good snapshot when the fetch fails
+- feat: keep the ARD core feed in JetStream KV `KV_ARD_FEED`: every connect process reads it on boot (downloading `ARD_FEED_URL` only into an empty bucket), follows new revisions in memory, and `POST /api/update-feed` re-downloads it for the hourly CronJob, keeping the last good revision when the fetch fails
 
 ### Changed
 
+- feat: rename the connect NATS user to `svc-eventhub-connect`, drop unused `svc-operator` and `svc-adapter-radioplayer`, and let that user subscribe to `feedback.>` and `plugin.>`
 - chore: upgrade dependencies (Google clients, firebase-admin 14, TypeScript 7, Blume 2, Knip 6)
 
 ### Fixed
 
+- fix: connect starts the sidecar only once the ARD feed is in KV, so a cold start no longer drops valid events silently once `max_deliver` naks run out
+- fix: drop the AsyncAPI `scalar` options Blume 2.2 rejects, so the docs build runs
 - fix: start ingest when `MQTT_BROKER_URL` is unset (MQTT hop stays off; Pub/Sub unchanged)
 
 ### Removed
 
-- feat: drop the shipped gzip ARD feed fallback; cold start uses KV or `.local/ard-feed.json`
+- chore: remove the temporary publisher-id remap (`TEMP_PUBLISHER_MAPPING`); the old rbb/hr URNs are listed in the v3 migration guide
+- feat: drop the shipped gzip ARD feed fallback and the `.local/ard-feed.json` disk copy; cold start uses KV, else downloads
 - chore: remove Datadog `dd-trace` (`DD_TRACE_ENABLED` / `DD_TRACER_ENABLED`)
 - chore: remove NanoMQ (local broker, Kubernetes manifest, CI hop)
 

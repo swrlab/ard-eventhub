@@ -1,13 +1,10 @@
 import type { ArdFeed, ArdLivestream } from '#types'
 import type { ArdFeedStore, FeedSnapshot } from './ard-feed.ts'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
 import { test } from '@cross/test'
 import { assert, assertEquals } from '@std/assert'
 import { createSandbox } from 'sinon'
 import { ardFeedRules } from '../../utils/feed/ard-feed-rules.ts'
-import { refreshArdFeed } from './ard-feed-loader.ts'
+import { followArdFeed, refreshArdFeed } from './ard-feed-loader.ts'
 import {
 	FEED_STALE_ALERT_MS,
 	FEED_STALE_PAGE_MS,
@@ -18,7 +15,6 @@ import {
 	decideUpstream,
 	feedGeneratedAt,
 	feedReport,
-	hydrateArdFeed,
 	stalenessOf,
 } from './ard-feed.ts'
 
@@ -105,6 +101,7 @@ const memoryStore = (): { store: ArdFeedStore; writes: () => number } => {
 		},
 		watch: (onSnapshot) => {
 			listeners.push(onSnapshot)
+			if (current) onSnapshot(current)
 			return () => {
 				const index = listeners.indexOf(onSnapshot)
 				if (index >= 0) listeners.splice(index, 1)
@@ -164,9 +161,9 @@ test('connectedInstitutionIds uses the institutions on a connected username', ()
 	const ids = connectedInstitutionIds(
 		[
 			{ username: 'pub-house', institutions: ['urn:ard:institution:house'] },
-			{ username: 'svc-sidecar', institutions: [] },
+			{ username: 'svc-eventhub-connect', institutions: [] },
 		],
-		[{ user: 'pub-house' }, { user: 'svc-sidecar' }, { user: '' }]
+		[{ user: 'pub-house' }, { user: 'svc-eventhub-connect' }, { user: '' }]
 	)
 	assertEquals([...ids], ['urn:ard:institution:house'])
 })
@@ -182,130 +179,204 @@ test('staleness follows the last successful fetch', () => {
 
 test('refresh keeps the serving feed when the fetch fails or the candidate is rejected', async () => {
 	await withRules(async () => {
-		const dir = await mkdtemp(join(tmpdir(), 'ard-feed-'))
-		try {
-			const active = at(makeValidFeed(), '2026-06-02T00:00:00.000Z')
-			const state = createArdFeedState()
-			state.feed = active
-			state.lastSuccessAt = '2026-06-02T01:00:00.000Z'
-			const { store, writes } = memoryStore()
-			const diskPath = join(dir, 'feed.json')
+		const active = at(makeValidFeed(), '2026-06-02T00:00:00.000Z')
+		const state = createArdFeedState()
+		applyKvSnapshot(state, { feed: active, revision: 1 })
+		state.lastSuccessAt = '2026-06-02T01:00:00.000Z'
+		const { store, writes } = memoryStore()
 
-			await refreshArdFeed(state, {
-				store,
-				url: 'https://example.test/feed',
-				diskPath,
-				fetchFeed: () => Promise.reject(new Error('connect ECONNREFUSED')),
-				now: () => new Date('2026-06-02T02:00:00.000Z'),
-			})
-			assertEquals(state.feed, active)
-			assertEquals(state.lastSuccessAt, '2026-06-02T01:00:00.000Z')
-			assertEquals(state.outcome, 'unavailable')
-			assertEquals(writes(), 0)
+		const failed = await refreshArdFeed(state, {
+			store,
+			url: 'https://example.test/feed',
+			fetchFeed: () => Promise.reject(new Error('connect ECONNREFUSED')),
+			now: () => new Date('2026-06-02T02:00:00.000Z'),
+		})
+		assertEquals(failed, 'unavailable')
+		assertEquals(state.feed, active)
+		assertEquals(state.lastSuccessAt, '2026-06-02T01:00:00.000Z')
+		assertEquals(writes(), 0)
 
-			await refreshArdFeed(state, {
-				store,
-				url: 'https://example.test/feed',
-				diskPath,
-				fetchFeed: () => Promise.resolve({ items: [] }),
-				now: () => new Date('2026-06-02T02:00:00.000Z'),
-			})
-			assertEquals(state.feed, active)
-			assertEquals(state.outcome, 'rejected')
-			assertEquals(writes(), 0)
+		const rejected = await refreshArdFeed(state, {
+			store,
+			url: 'https://example.test/feed',
+			fetchFeed: () => Promise.resolve({ items: [] }),
+			now: () => new Date('2026-06-02T02:00:00.000Z'),
+		})
+		assertEquals(rejected, 'rejected')
+		assertEquals(state.feed, active)
+		assertEquals(writes(), 0)
 
-			await refreshArdFeed(state, {
-				store,
-				url: 'https://example.test/feed',
-				diskPath,
-				fetchFeed: () => Promise.resolve(at(makeValidFeed(), '2026-06-01T00:00:00.000Z')),
-				now: () => new Date('2026-06-02T03:00:00.000Z'),
-			})
-			assertEquals(state.feed, active)
-			assertEquals(state.outcome, 'unchanged')
-			assertEquals(state.lastSuccessAt, '2026-06-02T03:00:00.000Z')
-			assertEquals(state.lastError, null)
-			assertEquals(writes(), 0)
-		} finally {
-			await rm(dir, { recursive: true, force: true })
-		}
+		const unchanged = await refreshArdFeed(state, {
+			store,
+			url: 'https://example.test/feed',
+			fetchFeed: () => Promise.resolve(at(makeValidFeed(), '2026-06-01T00:00:00.000Z')),
+			now: () => new Date('2026-06-02T03:00:00.000Z'),
+		})
+		assertEquals(unchanged, 'unchanged')
+		assertEquals(state.feed, active)
+		assertEquals(state.lastSuccessAt, '2026-06-02T03:00:00.000Z')
+		assertEquals(state.lastError, null)
+		assertEquals(writes(), 0)
+
+		const unset = await refreshArdFeed(state, { store, url: '' })
+		assertEquals(unset, 'unavailable')
+		assertEquals(state.lastError, 'ARD_FEED_URL is unset')
 	})
 })
 
-test('refresh stores a newer feed and a KV failure leaves the previous one', async () => {
+test('refresh writes a newer feed to KV and a KV failure leaves the previous one', async () => {
 	await withRules(async () => {
-		const dir = await mkdtemp(join(tmpdir(), 'ard-feed-'))
-		try {
-			const state = createArdFeedState()
-			state.feed = at(makeValidFeed(), '2026-06-01T00:00:00.000Z')
-			const diskPath = join(dir, 'feed.json')
-			const failing: ArdFeedStore = {
-				read: () => Promise.resolve(null),
-				write: () => Promise.reject(new Error('permissions violation')),
-				watch: () => () => undefined,
-			}
-			await refreshArdFeed(state, {
-				store: failing,
-				url: 'https://example.test/feed',
-				diskPath,
-				fetchFeed: () => Promise.resolve(at(makeValidFeed(), '2026-06-02T00:00:00.000Z')),
-			})
-			assertEquals(feedGeneratedAt(state.feed!), '2026-06-01T00:00:00.000Z')
-			assertEquals(state.outcome, 'unavailable')
-			assertEquals(state.lastSuccessAt, null)
+		const state = createArdFeedState()
+		applyKvSnapshot(state, { feed: at(makeValidFeed(), '2026-06-01T00:00:00.000Z'), revision: 1 })
+		const failing: ArdFeedStore = {
+			read: () => Promise.resolve(null),
+			write: () => Promise.reject(new Error('permissions violation')),
+			watch: () => () => undefined,
+		}
+		const failed = await refreshArdFeed(state, {
+			store: failing,
+			url: 'https://example.test/feed',
+			fetchFeed: () => Promise.resolve(at(makeValidFeed(), '2026-06-02T00:00:00.000Z')),
+		})
+		assertEquals(failed, 'unavailable')
+		assertEquals(feedGeneratedAt(state.feed!), '2026-06-01T00:00:00.000Z')
+		assertEquals(state.lastSuccessAt, null)
 
-			const { store } = memoryStore()
-			await refreshArdFeed(state, {
-				store,
-				url: 'https://example.test/feed',
-				diskPath,
-				fetchFeed: () => Promise.resolve(at(makeValidFeed(), '2026-06-02T00:00:00.000Z')),
-				now: () => new Date('2026-06-02T04:00:00.000Z'),
-			})
-			assertEquals(state.outcome, 'stored')
-			assertEquals(state.source, 'kv')
+		const { store } = memoryStore()
+		await store.write(state.feed!)
+		const stored = await refreshArdFeed(state, {
+			store,
+			url: 'https://example.test/feed',
+			fetchFeed: () => Promise.resolve(at(makeValidFeed(), '2026-06-02T00:00:00.000Z')),
+			now: () => new Date('2026-06-02T04:00:00.000Z'),
+		})
+		assertEquals(stored, 'stored')
+		assertEquals(state.revision, 2)
+		assertEquals(feedGeneratedAt(state.feed!), '2026-06-02T00:00:00.000Z')
+		assertEquals(feedGeneratedAt((await store.read())!.feed), '2026-06-02T00:00:00.000Z')
+		assertEquals(state.lastSuccessAt, '2026-06-02T04:00:00.000Z')
+	})
+})
+
+test('a KV revision swaps the serving feed only when it is valid and newer', async () => {
+	await withRules(async () => {
+		const state = createArdFeedState()
+		const older = at(makeValidFeed(), '2026-05-01T00:00:00.000Z')
+		const newer = at(makeValidFeed(), '2026-06-01T00:00:00.000Z')
+		assertEquals(applyKvSnapshot(state, { feed: older, revision: 3 }), true)
+		assertEquals(applyKvSnapshot(state, { feed: { items: [] } as unknown as ArdFeed, revision: 4 }), false)
+		assertEquals(state.feed, older)
+		assertEquals(applyKvSnapshot(state, { feed: newer, revision: 4 }), true)
+		assertEquals(applyKvSnapshot(state, { feed: older, revision: 2 }), false)
+		assertEquals(state.revision, 4)
+
+		const report = feedReport(state, Date.parse('2026-06-01T01:00:00.000Z'))
+		assertEquals(report.revision, 4)
+		assertEquals(report.itemCount, newer.items.length)
+		assertEquals(report.staleness, 'never')
+		assert(report.ageMs === 60 * 60 * 1000)
+	})
+})
+
+/**
+ * Whether a promise has settled, without waiting for it.
+ * @param promise - Promise to inspect
+ * @returns True when it already resolved
+ */
+const isResolved = async (promise: Promise<void>): Promise<boolean> => {
+	const pending = Symbol('pending')
+	return (await Promise.race([promise, Promise.resolve(pending)])) !== pending
+}
+
+test('boot takes the KV revision and does not download', async () => {
+	await withRules(async () => {
+		const { store, writes } = memoryStore()
+		await store.write(at(makeValidFeed(), '2026-06-01T00:00:00.000Z'))
+		const state = createArdFeedState()
+		let downloads = 0
+		const followed = await followArdFeed(state, {
+			store,
+			download: () => {
+				downloads += 1
+				return Promise.resolve()
+			},
+		})
+		try {
+			await followed.kvReady
 			assertEquals(state.revision, 1)
-			assertEquals(feedGeneratedAt(state.feed!), '2026-06-02T00:00:00.000Z')
-			assertEquals(state.lastSuccessAt, '2026-06-02T04:00:00.000Z')
-			const cached = JSON.parse(await readFile(diskPath, 'utf8')) as { generatedAt: string }
-			assertEquals(cached.generatedAt, '2026-06-02T00:00:00.000Z')
+			assertEquals(downloads, 0)
+			assertEquals(writes(), 1)
 		} finally {
-			await rm(dir, { recursive: true, force: true })
+			followed.unwatch()
 		}
 	})
 })
 
-test('hydrate and a KV watch swap without a restart', async () => {
+test('boot downloads into an empty KV and serves the written revision', async () => {
 	await withRules(async () => {
-		const dir = await mkdtemp(join(tmpdir(), 'ard-feed-'))
+		const { store, writes } = memoryStore()
+		const state = createArdFeedState()
+		const followed = await followArdFeed(state, {
+			store,
+			download: () =>
+				refreshArdFeed(state, {
+					store,
+					url: 'https://example.test/feed',
+					fetchFeed: () => Promise.resolve(at(makeValidFeed(), '2026-06-01T00:00:00.000Z')),
+				}),
+		})
 		try {
-			const diskPath = join(dir, 'feed.json')
-			const cached = at(makeValidFeed(), '2026-05-01T00:00:00.000Z')
-			await writeFile(diskPath, JSON.stringify(cached))
-
-			const state = createArdFeedState()
-			await hydrateArdFeed(state, {
-				readKv: () => Promise.reject(new Error('no responders')),
-				diskPath,
-			})
-			assertEquals(state.source, 'disk')
-			assertEquals(feedGeneratedAt(state.feed!), '2026-05-01T00:00:00.000Z')
-
-			const newer = at(makeValidFeed(), '2026-06-01T00:00:00.000Z')
-			assertEquals(applyKvSnapshot(state, { feed: { items: [] } as unknown as ArdFeed, revision: 4 }), false)
-			assertEquals(state.source, 'disk')
-			assertEquals(applyKvSnapshot(state, { feed: newer, revision: 4 }), true)
-			assertEquals(state.revision, 4)
-			assertEquals(state.source, 'kv')
-			assertEquals(applyKvSnapshot(state, { feed: newer, revision: 4 }), false)
-
-			const report = feedReport(state, Date.parse('2026-06-01T01:00:00.000Z'))
-			assertEquals(report.revision, 4)
-			assertEquals(report.itemCount, newer.items.length)
-			assertEquals(report.staleness, 'never')
-			assert(report.ageMs === 60 * 60 * 1000)
+			await followed.kvReady
+			assertEquals(writes(), 1)
+			assertEquals(state.revision, 1)
+			assertEquals(state.outcome, 'stored')
 		} finally {
-			await rm(dir, { recursive: true, force: true })
+			followed.unwatch()
+		}
+	})
+})
+
+test('boot stays pending when KV is empty and the download fails, then takes the next KV revision', async () => {
+	await withRules(async () => {
+		const { store } = memoryStore()
+		const state = createArdFeedState()
+		const followed = await followArdFeed(state, {
+			store,
+			download: () =>
+				refreshArdFeed(state, {
+					store,
+					url: 'https://example.test/feed',
+					fetchFeed: () => Promise.reject(new Error('connect ECONNREFUSED')),
+				}),
+		})
+		try {
+			assertEquals(await isResolved(followed.kvReady), false)
+			assertEquals(state.feed, null)
+			await store.write(at(makeValidFeed(), '2026-06-01T00:00:00.000Z'))
+			await followed.kvReady
+			assertEquals(state.revision, 1)
+		} finally {
+			followed.unwatch()
+		}
+	})
+})
+
+test('every follower of the bucket swaps to a revision another process wrote', async () => {
+	await withRules(async () => {
+		const { store } = memoryStore()
+		await store.write(at(makeValidFeed(), '2026-06-01T00:00:00.000Z'))
+		const podA = createArdFeedState()
+		const podB = createArdFeedState()
+		const followedA = await followArdFeed(podA, { store, download: () => Promise.resolve() })
+		const followedB = await followArdFeed(podB, { store, download: () => Promise.resolve() })
+		try {
+			await store.write(at(makeValidFeed(), '2026-06-02T00:00:00.000Z'))
+			assertEquals(podA.revision, 2)
+			assertEquals(podB.revision, 2)
+			assertEquals(feedGeneratedAt(podB.feed!), '2026-06-02T00:00:00.000Z')
+		} finally {
+			followedA.unwatch()
+			followedB.unwatch()
 		}
 	})
 })

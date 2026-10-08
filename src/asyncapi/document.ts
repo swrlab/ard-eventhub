@@ -112,10 +112,11 @@ export const buildAsyncApiDocument = () => {
 		info: {
 			title: 'ARD Eventhub Connect',
 			description:
-				'MQTT event contract for Eventhub Connect. Publishers send to `inbox/{institutionId}`; ' +
+				'MQTT 3.1.1 event contract for Eventhub Connect. Publishers send to `inbox/{institutionId}`; ' +
 				'subscribers read validated events on `radio/{livestreamId}/…`. ' +
+				'TLS port 8883; configure `connect-bad`, `connect-stg`, and `connect-mnz` in the stage DNS. ' +
 				'These types are **not** accepted on the HTTPS `POST /events` API. ' +
-				'The broker is not deployed yet — host and credentials are placeholders.',
+				'The server host below is a placeholder; connection details are in the publisher migration guide.',
 			termsOfService: 'https://www.ard.de',
 			contact: {
 				email: 'lab@swr.de',
@@ -135,8 +136,9 @@ export const buildAsyncApiDocument = () => {
 			connect: {
 				host: 'connect.eventhub.invalid',
 				protocol: 'mqtt',
-				protocolVersion: '5.0',
-				description: 'Placeholder MQTT endpoint. Eventhub Connect is not deployed; do not point clients here yet.',
+				protocolVersion: '3.1.1',
+				description:
+					'Placeholder host. Clients use mqtts on port 8883 against connect-bad, connect-stg, and connect-mnz in the stage DNS. MQTT 5 is rejected.',
 				security: [{ mqttUserPassword: [] }],
 			},
 		},

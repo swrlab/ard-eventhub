@@ -98,6 +98,8 @@
 			"cookie",
 			"@typescript/native-preview"
 		],
-		"ignore": ["ui/**"]
+		"ignore": [
+			"src/connect/ui/client/**"
+		]
 	}
 }

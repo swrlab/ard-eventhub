@@ -1,5 +1,5 @@
 import type { NatsConnection, Subscription } from '@nats-io/transport-node'
-import type { Rejection } from './types.ts'
+import type { Rejection } from '#types'
 import { errorMessage, isRecord, stringField, stringList } from './json.ts'
 
 const MAX_REJECTIONS = 200

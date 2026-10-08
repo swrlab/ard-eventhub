@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { NatsConnection, Subscription } from '@nats-io/nats-core'
+import type { MetaReport } from '#types'
 import type { RateWindow } from '../../policy.ts'
-import type { MetaReport } from '../../types.ts'
 import { wsconnect } from '@nats-io/nats-core'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

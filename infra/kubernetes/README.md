@@ -23,7 +23,7 @@ kubectl -n eventhub-dev rollout status statefulset/nats
 
 Docker Desktop and a local k3s publish NodePorts on the machine. The service spreads connections across the three pods.
 
-- NATS `nats://127.0.0.1:30422` (`svc-sidecar`, password from sops)
+- NATS `nats://127.0.0.1:30422` (`svc-eventhub-connect`, password from sops)
 - MQTT `mqtt://127.0.0.1:30183`
 - monitor `http://127.0.0.1:30822`
 

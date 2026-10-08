@@ -1,3 +1,4 @@
+import type { SidecarAccept, SidecarPlan, SidecarReject } from './plan.ts'
 import { test } from '@cross/test'
 import { assertEquals } from '@std/assert'
 import { parseRejection } from '../ui/rejections.ts'
@@ -26,80 +27,119 @@ const track = {
  * Plan one JSON payload.
  * @param body - JSON value
  * @param subject - Inbox subject
- * @param feedOwners - Owner index, or null when no feed is loaded
  * @returns The plan
  */
-const plan = (body: unknown, subject = INBOX, feedOwners: typeof owners | null = owners) =>
+const plan = (body: unknown, subject = INBOX): SidecarPlan =>
 	planInboxMessage({
 		subject,
 		bytes: new TextEncoder().encode(JSON.stringify(body)),
-		owners: feedOwners,
+		owners,
 		at: AT,
 	})
 
+/**
+ * Narrow to an accepted plan.
+ * @param result - Plan
+ * @returns The plan as an accept
+ */
+const accepted = (result: SidecarPlan): SidecarAccept => {
+	if (result.action !== 'ack') throw new Error(`expected ack, got term: ${result.message}`)
+	return result
+}
+
+/**
+ * Narrow to a rejected plan.
+ * @param result - Plan
+ * @returns The plan as a reject
+ */
+const rejected = (result: SidecarPlan): SidecarReject => {
+	if (result.action !== 'term') throw new Error('expected term, got ack')
+	return result
+}
+
 test('a valid music now-playing event is retained and fanned out without an explicit plugin', () => {
-	const result = plan(track)
-	assertEquals(result.action, 'ack')
+	const result = accepted(plan(track))
 	assertEquals(
-		result.mqtt.map((item) => item.topic),
+		result.radio.map((item) => item.topic),
 		[`radio/${LIVESTREAM}/track/playing`]
 	)
-	assertEquals(result.mqtt[0]?.retain, true)
 	assertEquals(
-		result.nats.map((item) => item.subject),
+		result.plugins.map((item) => item.subject),
 		[`plugin.dts.${LIVESTREAM}.track.playing`, `plugin.radioplayer.${LIVESTREAM}.track.playing`]
 	)
 })
 
+test('a duplicated service is retained and fanned out once', () => {
+	const result = accepted(plan({ ...track, services: [...track.services, ...track.services] }))
+	assertEquals(result.radio.length, 1)
+	assertEquals(result.plugins.length, 2)
+})
+
 test('a schema failure is feedback the rejections board can read', () => {
-	const result = plan({ ...track, title: undefined })
-	assertEquals(result.action, 'term')
-	assertEquals(result.reason, 'schema')
-	assertEquals(result.nats, [])
-	const body = result.mqtt[0]?.body
-	const row = parseRejection(JSON.stringify(body), `feedback.${SUBJECT_INSTITUTION}`, AT)
+	const result = rejected(plan({ ...track, title: undefined }))
+	assertEquals(result.cause, 'schema')
+	assertEquals(result.feedback?.topic, `feedback/${SUBJECT_INSTITUTION}`)
+	const row = parseRejection(JSON.stringify(result.feedback?.body), `feedback.${SUBJECT_INSTITUTION}`, AT)
 	assertEquals(row.cause, 'schema')
 	assertEquals(row.playlistItemId, 'item-1')
 	assertEquals(row.institutionId, SUBJECT_INSTITUTION)
 	assertEquals(row.message.length > 0, true)
 })
 
+test('feedback leaves out fields the payload did not carry', () => {
+	const result = rejected(plan({ ...track, title: undefined, playlistItemId: undefined }))
+	const body = result.feedback?.body as Record<string, unknown>
+	assertEquals('playlistItemId' in body, false)
+	assertEquals('disagreed' in body, false)
+	assertEquals('deprecated' in body, false)
+})
+
+test('a payload that is not JSON is a json rejection', () => {
+	const result = rejected(
+		planInboxMessage({ subject: INBOX, bytes: new TextEncoder().encode('{nope'), owners, at: AT })
+	)
+	assertEquals(result.cause, 'json')
+	assertEquals(result.message, 'payload is not JSON')
+})
+
 test('a mismatched institution is rejected even when the subject itself is well formed', () => {
-	const result = plan({
-		...track,
-		services: [{ id: LIVESTREAM, publisherId: PUBLISHER, institutionId: OTHER }],
-	})
-	assertEquals(result.action, 'term')
-	assertEquals(result.reason, 'ownership')
-	const body = result.mqtt[0]?.body as { disagreed?: string[]; message?: string }
+	const result = rejected(
+		plan({
+			...track,
+			services: [{ id: LIVESTREAM, publisherId: PUBLISHER, institutionId: OTHER }],
+		})
+	)
+	assertEquals(result.cause, 'ownership')
+	const body = result.feedback?.body as { disagreed?: string[]; message?: string; livestreamId?: string }
 	assertEquals(body.disagreed, ['subject', 'payload', 'feed'])
 	assertEquals(body.message?.includes('inbox subject'), true)
+	assertEquals(body.livestreamId, LIVESTREAM)
 })
 
 test('an unknown livestream is an ownership rejection', () => {
 	const missing = 'urn:ard:permanent-livestream:0000000000000000'
-	const result = plan({
-		...track,
-		services: [{ id: missing, publisherId: PUBLISHER, institutionId: SUBJECT_INSTITUTION }],
-	})
-	assertEquals(result.reason, 'ownership')
-	const body = result.mqtt[0]?.body as { disagreed?: string[] }
+	const result = rejected(
+		plan({
+			...track,
+			services: [{ id: missing, publisherId: PUBLISHER, institutionId: SUBJECT_INSTITUTION }],
+		})
+	)
+	assertEquals(result.cause, 'ownership')
+	const body = result.feedback?.body as { disagreed?: string[] }
 	assertEquals(body.disagreed, ['feed'])
 })
 
-test('a missing feed nak waits instead of terming a valid event', () => {
-	const result = plan(track, INBOX, null)
-	assertEquals(result.action, 'nak')
-	assertEquals(result.reason, 'feed')
-	assertEquals(result.mqtt, [])
+test('a subject without an institution URN is termed with no feedback', () => {
+	const result = rejected(plan(track, 'inbox.not-an-institution'))
+	assertEquals(result.cause, 'ownership')
+	assertEquals(result.feedback, null)
 })
 
 test('track.next is retained and does not fan out when no plugin is set', () => {
-	const result = plan({ ...track, event: 'de.ard.eventhub.v1.radio.track.next' })
-	assertEquals(result.action, 'ack')
+	const result = accepted(plan({ ...track, event: 'de.ard.eventhub.v1.radio.track.next' }))
 	assertEquals(
-		result.mqtt.map((item) => item.topic),
+		result.radio.map((item) => item.topic),
 		[`radio/${LIVESTREAM}/track/next`]
 	)
-	assertEquals(result.nats, [])
+	assertEquals(result.plugins, [])
 })

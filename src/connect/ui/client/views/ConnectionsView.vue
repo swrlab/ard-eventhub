@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ConnectionsReport, UserRow } from '../../types.ts'
+import type { ConnectionsReport, UserRow } from '#types'
 import { computed } from 'vue'
 import { inject, ref, type Ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

@@ -1,6 +1,4 @@
-import type { ArdFeed } from '#types'
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import type { ArdFeed, FeedOutcome, FeedReport, FeedStaleness } from '#types'
 import { getArdFeedValidationError } from '../../utils/feed/ard-feed-rules.ts'
 
 /** JetStream stream that holds the feed. KV subjects live under `$KV.ARD_FEED.>`. */
@@ -9,7 +7,7 @@ export const ARD_FEED_STREAM = 'KV_ARD_FEED'
 /** One document per revision. History is `max_msgs_per_subject` on the stream. */
 export const ARD_FEED_SUBJECT = '$KV.ARD_FEED.livestreams'
 
-/** Missed refreshes. The pull interval is one hour. */
+/** Missed refreshes. `/api/update-feed` is triggered hourly. */
 export const FEED_STALE_WARN_MS = 3 * 60 * 60 * 1000
 
 /** Twelve missed refreshes. */
@@ -17,15 +15,6 @@ export const FEED_STALE_ALERT_MS = 12 * 60 * 60 * 1000
 
 /** Two days without a valid fetch. */
 export const FEED_STALE_PAGE_MS = 48 * 60 * 60 * 1000
-
-/** Where a loaded snapshot came from. */
-type FeedSource = 'kv' | 'disk'
-
-/** What the last pull did. */
-type FeedOutcome = 'stored' | 'unchanged' | 'rejected' | 'unavailable'
-
-/** How late the last successful fetch is. `never` means this process has not stored or confirmed one. */
-export type FeedStaleness = 'ok' | 'warn' | 'alert' | 'page' | 'never'
 
 /** One accepted document plus its JetStream sequence. */
 export type FeedSnapshot = {
@@ -48,7 +37,7 @@ export type ArdFeedStore = {
 	 */
 	write: (feed: ArdFeed) => Promise<FeedSnapshot>
 	/**
-	 * Call `onSnapshot` for revisions published after the watch starts.
+	 * Call `onSnapshot` for the current revision (when there is one) and every revision after it.
 	 * @param onSnapshot - Validated revision
 	 * @returns Stops the watch
 	 */
@@ -60,52 +49,28 @@ export type UpstreamDecision =
 	| { action: 'store'; feed: ArdFeed }
 	| { action: 'keep'; reason: string; successful: boolean }
 
-/** In-memory feed this process is serving. */
+/** In-memory feed this process is serving. `feed` and `revision` only ever come from KV. */
 export type ArdFeedState = {
 	feed: ArdFeed | null
 	revision: number | null
-	source: FeedSource | null
 	lastSuccessAt: string | null
 	lastAttemptAt: string | null
 	lastError: string | null
 	outcome: FeedOutcome | null
 }
-
-/** JSON the operator UI polls. */
-export type FeedReport = {
-	at: string
-	source: FeedSource | null
-	revision: number | null
-	generatedAt: string | null
-	itemCount: number | null
-	institutionCount: number | null
-	ageMs: number | null
-	lastSuccessAt: string | null
-	lastAttemptAt: string | null
-	lastError: string | null
-	staleness: FeedStaleness
-	outcome: FeedOutcome | null
-}
-
-/** Last good copy on disk. Gitignored via `.local/`. */
-export const defaultDiskPath = join(import.meta.dir, '../../../.local/ard-feed.json')
 
 /**
- * Empty state, before hydrate.
+ * Empty state, before the first KV revision.
  * @returns A state with no feed
  */
 export const createArdFeedState = (): ArdFeedState => ({
 	feed: null,
 	revision: null,
-	source: null,
 	lastSuccessAt: null,
 	lastAttemptAt: null,
 	lastError: null,
 	outcome: null,
 })
-
-/** Process-wide feed. The loader writes it. `/api/feed` reads it. */
-export const feedState: ArdFeedState = createArdFeedState()
 
 /**
  * `generatedAt` from the live API, or the older `generated` field.
@@ -241,7 +206,6 @@ export const feedReport = (state: ArdFeedState, now = Date.now()): FeedReport =>
 	const generated = generatedAt ? Date.parse(generatedAt) : Number.NaN
 	return {
 		at: new Date(now).toISOString(),
-		source: state.source,
 		revision: state.revision,
 		generatedAt,
 		itemCount: state.feed?.items.length ?? null,
@@ -256,21 +220,8 @@ export const feedReport = (state: ArdFeedState, now = Date.now()): FeedReport =>
 }
 
 /**
- * Replace the serving feed.
- * @param state - Process state
- * @param feed - Accepted document
- * @param revision - JetStream sequence, or null for a local file
- * @param source - Where it was read from
- */
-const applyFeed = (state: ArdFeedState, feed: ArdFeed, revision: number | null, source: FeedSource): void => {
-	state.feed = feed
-	state.revision = revision
-	state.source = source
-}
-
-/**
- * Take a KV revision if it passes the absolute rules and is not older than the one already serving.
- * A bad payload leaves the previous feed in place.
+ * Take a KV revision if it passes the absolute rules and is newer than the one already serving.
+ * The only writer of `state.feed`. A bad payload leaves the previous feed in place.
  * @param state - Process state
  * @param snapshot - Revision from the bucket
  * @returns True when the serving feed changed
@@ -278,59 +229,7 @@ const applyFeed = (state: ArdFeedState, feed: ArdFeed, revision: number | null, 
 export const applyKvSnapshot = (state: ArdFeedState, snapshot: FeedSnapshot): boolean => {
 	if (getArdFeedValidationError(snapshot.feed)) return false
 	if (state.revision !== null && snapshot.revision <= state.revision) return false
-	applyFeed(state, snapshot.feed, snapshot.revision, 'kv')
+	state.feed = snapshot.feed
+	state.revision = snapshot.revision
 	return true
-}
-
-/**
- * Read a JSON feed file. Missing, unreadable, or invalid files return null.
- * @param path - Filesystem path
- * @returns The feed, or null
- */
-const readFeedFile = async (path: string): Promise<ArdFeed | null> => {
-	try {
-		const text = await readFile(path, 'utf8')
-		const parsed: unknown = JSON.parse(text)
-		if (getArdFeedValidationError(parsed)) return null
-		return parsed as ArdFeed
-	} catch {
-		return null
-	}
-}
-
-/**
- * Atomically replace a JSON file with the feed.
- * @param path - Destination
- * @param feed - Accepted document
- */
-export const writeFeedFile = async (path: string, feed: ArdFeed): Promise<void> => {
-	await mkdir(dirname(path), { recursive: true })
-	const tmp = `${path}.tmp`
-	await writeFile(tmp, JSON.stringify(feed))
-	await rename(tmp, path)
-}
-
-/**
- * Load KV, then the disk copy. The first valid document wins.
- * @param state - Process state to fill
- * @param sources - Where to look
- */
-export const hydrateArdFeed = async (
-	state: ArdFeedState,
-	sources: {
-		readKv: () => Promise<FeedSnapshot | null>
-		diskPath: string
-	}
-): Promise<void> => {
-	try {
-		const kv = await sources.readKv()
-		if (kv) {
-			applyFeed(state, kv.feed, kv.revision, 'kv')
-			return
-		}
-	} catch {
-		// KV unread. The disk copy still counts.
-	}
-	const disk = await readFeedFile(sources.diskPath)
-	if (disk) applyFeed(state, disk, null, 'disk')
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { RejectionsReport } from '../../types.ts'
+import type { RejectionsReport } from '#types'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { formatClock } from '../format'
@@ -87,9 +87,7 @@ const clearFilter = (): void => {
 				</table>
 			</div>
 			<h2 class="mt-8 mb-2 text-base text-heading">deprecated fields</h2>
-			<p v-if="!deprecated.length" class="font-mono text-sm text-muted">
-				no deprecated-field report in this window
-			</p>
+			<p v-if="!deprecated.length" class="font-mono text-sm text-muted">no deprecated-field report in this window</p>
 			<ul v-else class="font-mono text-sm">
 				<li v-for="field in deprecated" :key="field">{{ field }}</li>
 			</ul>

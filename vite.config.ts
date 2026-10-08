@@ -21,7 +21,7 @@ export default defineConfig({
 		chunkSizeWarningLimit: 1000,
 		cssCodeSplit: false,
 		rolldownOptions: {
-			input: resolve(import.meta.dirname, './ui/src/main.ts'),
+			input: resolve(import.meta.dirname, './src/connect/ui/client/main.ts'),
 			output: {
 				assetFileNames: 'asset/[name]-[hash].[ext]',
 				chunkFileNames: 'chunks/[name]-[hash].js',

@@ -69,3 +69,27 @@ export const checkServiceOwnership = (params: {
 		message: `${service.id}: ${notes.join('; ')}`,
 	}
 }
+
+/**
+ * Check every service of one event and merge the failures into one problem for feedback.
+ * @param params - Subject institution, the event's services, and the feed owner index
+ * @returns The merged problem (first failing livestream, union of parties, joined messages), or null when all agree
+ */
+export const checkEventOwnership = (params: {
+	subjectInstitutionId: string
+	services: readonly { id: string; publisherId: string; institutionId: string }[]
+	owners: ReadonlyMap<string, LivestreamOwner>
+}): OwnershipProblem | null => {
+	const { subjectInstitutionId, services, owners } = params
+	const problems = services.flatMap((service) => {
+		const problem = checkServiceOwnership({ subjectInstitutionId, service, owner: owners.get(service.id) ?? null })
+		return problem ? [problem] : []
+	})
+	const first = problems[0]
+	if (!first) return null
+	return {
+		livestreamId: first.livestreamId,
+		disagreed: orderedParties(new Set(problems.flatMap((problem) => problem.disagreed))),
+		message: problems.map((problem) => problem.message).join('; '),
+	}
+}

@@ -30,15 +30,15 @@ export type SidecarPublisher = {
 /**
  * MQTT client id for this pod. Two pods must not share one, or the broker evicts them in a loop.
  * @param instance - Distinguishes clients inside one process (tests)
- * @returns `svc-sidecar-{pod}-{pid}-{instance}`
+ * @returns `svc-eventhub-connect-{pod}-{pid}-{instance}`
  */
 export const sidecarClientId = (instance: number): string => {
 	const pod = (process.env.POD_NAME?.trim() || hostname()).replace(/[^A-Za-z0-9_-]/g, '-')
-	return `svc-sidecar-${pod}-${process.pid}-${instance}`
+	return `svc-eventhub-connect-${pod}-${process.pid}-${instance}`
 }
 
 /**
- * MQTT connection as the sidecar user, for retained publishes only.
+ * MQTT connection as `svc-eventhub-connect`, for retained publishes only.
  * @param clientId - Unique per pod
  * @returns Connected mqtt.js client
  */

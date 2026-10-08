@@ -49,15 +49,6 @@ export default defineConfig({
 		asyncapi({
 			spec: './asyncapi.json',
 			route: '/events',
-			scalar: {
-				agent: {
-					disabled: true,
-				},
-				mcp: {
-					disabled: true,
-				},
-				telemetry: false,
-			},
 		}),
 	],
 	navigation: {

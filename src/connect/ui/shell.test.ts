@@ -6,6 +6,7 @@ test('hmr shell loads the vite dev server and skips the manifest', () => {
 	const html = renderShell(true, null)
 	assertEquals(html.includes(`http://localhost:5173/static/dist/${VUE_ENTRY}`), true)
 	assertEquals(html.includes('id="app"'), true)
+	assertEquals(html.includes('<title>ARD Eventhub Connect</title>'), true)
 	assertEquals(html.includes('just ui-build'), false)
 })
 
@@ -17,5 +18,6 @@ test('a build shell uses the manifest paths and a missing build says so', () => 
 	assertEquals(html.includes('/static/dist/entry/main-abc.js'), true)
 	assertEquals(html.includes('/static/dist/asset/style-def.css'), true)
 	assertEquals(renderShell(false, null).includes('just ui-build'), true)
+	assertEquals(renderShell(false, null).includes('<title>ARD Eventhub Connect</title>'), true)
 	assertEquals(renderShell(false, { [VUE_ENTRY]: { file: '../secret.js' } }).includes('just ui-build'), true)
 })

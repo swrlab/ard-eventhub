@@ -1,8 +1,9 @@
-import type { ClusterReport, ConnectionsReport, LiveConnection, MetaReport } from './types.ts'
+import type { ClusterReport, ConnectionsReport, LiveConnection, MetaReport } from '#types'
 import { readFileSync } from 'node:fs'
 import { Hono } from 'hono'
 import { natsUrl, natsUser } from '../env.ts'
-import { feedReport, feedState } from '../feed/ard-feed.ts'
+import { updateArdFeed } from '../feed/ard-feed-loader.ts'
+import { currentFeed, currentFeedReport } from '../feed/current-feed.ts'
 import { buildFeedCatalog } from '../feed/feed-catalog.ts'
 import { sampleMonitor } from './cluster.ts'
 import { natsMonitorUrl, natsWsUrl, usersConfPath } from './env.ts'
@@ -61,11 +62,23 @@ const loadMonitor = async (): Promise<{ cluster: ClusterReport; connections: Liv
 
 api.get('/meta', (c) => c.json(meta()))
 
-api.get('/feed', (c) => c.json(feedReport(feedState)))
+api.get('/feed', (c) => c.json(currentFeedReport()))
 
 api.get('/feed/catalog', (c) => {
-	const catalog = buildFeedCatalog(feedState.feed)
-	return c.json({ ...feedReport(feedState), note: catalog.note, entries: catalog.entries })
+	const catalog = buildFeedCatalog(currentFeed())
+	return c.json({ ...currentFeedReport(), note: catalog.note, entries: catalog.entries })
+})
+
+/**
+ * Re-download the feed and write a newer one to KV. Triggered hourly by the Kubernetes CronJob.
+ * No body: the URL is fixed and the document is validated, so this cannot inject a feed.
+ * 200 when stored or unchanged, 502 when the upstream failed or was rejected, 503 when NATS is down.
+ */
+api.post('/update-feed', async (c) => {
+	const outcome = await updateArdFeed()
+	if (outcome === null) return c.json({ ...currentFeedReport(), error: 'nats is unavailable' }, 503)
+	const ok = outcome === 'stored' || outcome === 'unchanged'
+	return c.json(currentFeedReport(), ok ? 200 : 502)
 })
 
 api.get('/cluster', async (c) => c.json((await loadMonitor()).cluster))

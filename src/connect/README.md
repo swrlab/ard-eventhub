@@ -2,7 +2,7 @@
 
 NATS-native access layer for Eventhub Connect. This process talks to NATS on `:4222`. Publishers still speak MQTT; the NATS MQTT gateway rewrites `inbox/{institutionId}` to `inbox.{institutionId}`.
 
-`just dev` opens a connection, ensures the `INBOX` and `PLUGINS` JetStream streams plus the durable `sidecar` consumer, and serves the operator UI on `:4173`. The same process runs the validation sidecar: a JetStream pull on `inbox.>`, URN-only zod validation, the subject/payload/feed ownership check, an MQTT RETAIN publish to `radio/{livestreamId}/track/playing` (slashes, because a dot on the MQTT wire becomes `//`), and a NATS fan-out to `plugin.{target}.{livestreamId}.{class}`. Rejections are retained on `feedback/{institutionId}`. A schema rejection is logged at error as `sidecar rejected` with `cause: schema`, which is the alert for a bridged event whose body is no longer the URN-only shape (ingest's enriched envelope, with `creator` / `name` / `id`, is that mismatch). A missing feed nak's the message instead of dropping it. `just connect` is the same recipe.
+`just dev` opens a connection, ensures the `INBOX` and `PLUGINS` JetStream streams plus the durable `sidecar` consumer, and serves the operator UI on `:4173`. The same process runs the validation sidecar: a JetStream pull on `inbox.>`, URN-only zod validation, the subject/payload/feed ownership check, an MQTT RETAIN publish to `radio/{livestreamId}/track/playing` (slashes, because a dot on the MQTT wire becomes `//`), and a NATS fan-out to `plugin.{target}.{livestreamId}.{class}`. Rejections are retained on `feedback/{institutionId}`. A schema rejection is logged at error as `sidecar rejected` with `cause: schema`, which is the alert for a bridged event whose body is no longer the URN-only shape (ingest's enriched envelope, with `creator` / `name` / `id`, is that mismatch). Boot is sequential: streams, UI binding, feed, and only once `KV_ARD_FEED` holds a revision the sidecar. Until then the log says `waiting for ard feed in kv` and inbox messages wait in the stream instead of spending the consumer's `max_deliver` budget. A failed publish is nak'd and logged as `sidecar publish failed` with the `deliveryCount`. `just connect` is the same recipe.
 
 Do not put `NATS_URL` on the ingest env module. Connect reads its own vars from [`env.ts`](env.ts).
 
@@ -12,9 +12,19 @@ Users live in [`components/users/nats-users.conf`](../../infra/kubernetes/compon
 
 - OPTIONAL `NATS_URL` — default `nats://127.0.0.1:4222` with no credentials. Put the user and password in the URL (`nats://user:password@host:4222`). `just env` injects it from sops. The JS client does not read userinfo itself; connect splits it into `user` / `pass` and logs only the host. There is no `NATS_USER` or `NATS_PASSWORD`.
 - OPTIONAL `NATS_MQTT_URL` — MQTT gateway for retained `radio/` and `feedback/` publishes. Default is the `NATS_URL` host on port `1883`. The sidecar authenticates with the same userinfo as `NATS_URL`. Set `POD_NAME` when more than one sidecar runs, so each MQTT client id stays unique.
-- OPTIONAL `ARD_FEED_URL` — ARD core livestream feed. `just env` injects it from sops. Connect fetches it on startup and then hourly, validates it, and writes the document to the JetStream bucket `KV_ARD_FEED` (subject `$KV.ARD_FEED.livestreams`). A failed fetch, a malformed body, a dropped institution count, or a `generatedAt` that is not newer leaves the previous revision serving. `/api/feed` reports the age of the last successful fetch (`warn` at 3h, `alert` at 12h, `page` at 48h). The feed page shows when the snapshot was built and when it was last fetched. Unset, the process still starts and serves the last KV or disk copy.
+- OPTIONAL `ARD_FEED_URL` — ARD core livestream feed. `just env` injects it from sops. Unset, the process never downloads and serves whatever another process wrote to KV. With an empty bucket too, the sidecar does not start.
 
-`svc-sidecar` publishes `$KV.ARD_FEED.>`. A cluster that is already running needs that users file reapplied (`just nats-reload` locally, or a config reload on the dev cluster) before the first write succeeds. Run one connect process as the fetcher. The RFC CronJob replaces this loop later.
+### ARD feed
+
+The JetStream bucket `KV_ARD_FEED` (subject `$KV.ARD_FEED.livestreams`) holds the latest feed. Every connect process watches it, so a write by any one of them reaches all of them.
+
+1. **Boot.** Read the latest revision from KV. Only when the bucket is empty, download `ARD_FEED_URL` and write it. The sidecar starts once a revision is serving.
+2. **Refresh.** `POST /api/update-feed` downloads again and writes a newer document to KV. A Kubernetes CronJob calls it hourly (manifest not in this tree yet). The endpoint takes no body. It answers with the `/api/feed` report: `200` when stored or unchanged, `502` when the fetch failed or the document was rejected, `503` without NATS. Concurrent calls share one download.
+3. **Read.** [`feed/current-feed.ts`](feed/current-feed.ts) holds the serving revision in memory. `currentFeed()`, `currentOwners()`, and `currentFeedReport()` are synchronous. Only KV revisions are written into it.
+
+A failed fetch, a malformed body, a dropped institution count, a missing connected institution, or a `generatedAt` that is not newer leaves the previous revision serving. `/api/feed` reports the age of this process's last successful fetch (`warn` at 3h, `alert` at 12h, `page` at 48h). The feed page shows when the snapshot was built and when it was last fetched.
+
+`svc-eventhub-connect` publishes `$KV.ARD_FEED.>` and subscribes to `feedback.>` for the rejection board. A cluster that is already running needs that users file reapplied (`just nats-reload` locally, or a config reload on the dev cluster) before the first write succeeds. Trigger a refresh locally with `curl -X POST http://127.0.0.1:4173/api/update-feed`.
 
 Ingest dual-writes only when `MQTT_BROKER_URL` is set. Put the user and password in that URL (`mqtt://user:password@host:1883`). The plaintext is only in sops. Unset, ingest stays on Pub/Sub. The local broker's MQTT listener is `:1883`. Anonymous connects are rejected (`no_auth_user` is unset).
 
@@ -44,7 +54,7 @@ just dev
 
 Hot reload: `USE_HMR=true just dev` in one terminal and `just ui` in another. The page stays on `:4173`. Its script tag points at the Vite server on `:5173`. `USE_HMR=dev` is only for the Vite `base` when you want absolute dev-server URLs inside the build.
 
-The process connects as the user in `NATS_URL` (local sops uses `svc-sidecar`), the same login that ensures streams. Cluster and connection stats use the HTTP monitor. The tail does not use that login. The page connects as `sub-ui` with no password, WebSocket only, and may subscribe to `radio.>` only. A cluster that is already running needs the users file and the `websocket` listener reapplied before that works. The UI never sends a password to the browser.
+The process connects as the user in `NATS_URL` (local sops uses `svc-eventhub-connect`), the same login that ensures streams. Cluster and connection stats use the HTTP monitor. The tail does not use that login. The page connects as `sub-ui` with no password, WebSocket only, and may subscribe to `radio.>` only. A cluster that is already running needs the users file and the `websocket` listener reapplied before that works. The UI never sends a password to the browser.
 
 Panels:
 

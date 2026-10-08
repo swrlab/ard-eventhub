@@ -442,8 +442,8 @@ Publisher and subscriber credentials are separate user classes with separate nam
   `sub-ard-sounds-2026-06-26`. Naming is looser, because subscriber scopes vary and new consumers
   appear more often than new publishers. The `sub-` prefix is a convention, not a rule the ACLs
   depend on.
-- **Services:** `svc-sidecar` and `svc-adapter-{target}` are NATS-native. `svc-ingest` is MQTT,
-  publish-only, and not rotated on the publisher cadence.
+- **Services:** `svc-eventhub-connect` is NATS-native and also publishes retained MQTT.
+  `svc-ingest` is MQTT, publish-only, and not rotated on the publisher cadence.
 
 **The username is a label for humans; the institution URN in the subject is the contract.** The
 `swr` in `pub-swr-2026-06-26` is not parsed, matched or resolved by anything — the ACL binds that
@@ -520,23 +520,15 @@ authorization {
       }
     }
 
-    # service: the validation sidecar. NATS-native, plus an MQTT connection for retained publishes.
+    # service: eventhub-connect. NATS-native, plus an MQTT connection for retained publishes.
+    # Subscribes to plugin.> for the in-process adapters. feedback.> is the rejection ring.
+    # The browser tail is sub-ui.
     {
-      user: "svc-sidecar"
+      user: "svc-eventhub-connect"
       password: "$2a$11$..."
       permissions: {
-        subscribe: { allow: ["inbox.>"] }
+        subscribe: { allow: ["inbox.>", "feedback.>", "plugin.>"] }
         publish:   { allow: ["radio.>", "feedback.>", "plugin.>"] }
-      }
-    }
-
-    # service: one per plugin adapter. reads only its own work queue, publishes nothing.
-    {
-      user: "svc-adapter-radioplayer"
-      password: "$2a$11$..."
-      permissions: {
-        subscribe: { allow: ["plugin.radioplayer.>"] }
-        publish:   { deny:  [">"] }
       }
     }
 
@@ -567,8 +559,8 @@ authorization {
 - **`no_auth_user` is not set**, so an unauthenticated connect fails. This is the specific line
   [Q2](#192-q2--can-subscriber-paths-be-made-freely-available-with-no-user-auth) proposes reversing
   for read-only subscribers.
-- **No MQTT credential has any permission on `plugin.>`.** It is reachable only by NATS-native
-  service users, and each adapter sees only its own target's subtree.
+- **No MQTT credential has any permission on `plugin.>`.** `svc-eventhub-connect` publishes and
+  subscribes to it. Plugin adapters run in that process, so there is no per-target user.
 
 ### 7.4 One user, several institutions
 

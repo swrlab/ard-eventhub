@@ -1,4 +1,4 @@
-import type { OnAirControl, OnAirData, OnAirStation, OnAirTrack } from './types.ts'
+import type { OnAirControl, OnAirData, OnAirStation, OnAirTrack } from '#types'
 import { booleanField, isRecord, stringField } from './json.ts'
 
 const EVENT_CLASSES = ['track.playing', 'track.next', 'control', 'data'] as const

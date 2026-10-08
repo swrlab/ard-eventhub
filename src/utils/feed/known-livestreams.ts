@@ -1,4 +1,4 @@
-import type { ArdFeed, ArdPublisher } from '#types'
+import type { ArdFeed, ArdPublisher, KnownLivestream } from '#types'
 import allowedLivestreamsJson from '../../config/allowed-livestreams.json' with { type: 'json' }
 import { allowedLivestreamsConfig } from '../../schemas/config.ts'
 
@@ -8,25 +8,7 @@ const overlayConfig = allowedLivestreamsConfig.parse(allowedLivestreamsJson)
 export const livestreamOverlayNote = overlayConfig.note
 
 /** Publisher or institution as the catalog and later validation see them. */
-type KnownLivestreamParty = {
-	id: string
-	title: string
-}
-
-/**
- * One livestream this process knows about.
- * Feed rows and `allowed-livestreams.json` share this shape.
- */
-export type KnownLivestream = {
-	/** Livestream URN publishers send. Feed rows use `externalId`, not the fusion `id`. */
-	id: string
-	title: string
-	publisher: KnownLivestreamParty
-	/** Null when an overlay publisher is not in the loaded feed. */
-	institution: KnownLivestreamParty | null
-	/** Granted by `allowed-livestreams.json`, not by a row in the core feed. */
-	overlay: boolean
-}
+type KnownLivestreamParty = KnownLivestream['publisher']
 
 /** Publisher and institution the ownership check compares. */
 export type LivestreamOwner = {

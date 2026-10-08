@@ -35,6 +35,27 @@ export default {
 }
 
 /**
+ * Boot one connection: streams, UI binding, feed, then the sidecar once KV holds a feed.
+ * @param nc - Open NATS connection
+ * @returns Resolves when the connection closes
+ */
+const serveConnection = async (nc: NatsConnection): Promise<void> => {
+	const closed = nc.closed()
+	const streams = await ensureStreams(nc)
+	bindConnection(nc)
+	const { kvReady } = await startArdFeed(nc)
+	const feedReady = await Promise.race([kvReady.then(() => true), closed.then(() => false)])
+	if (!feedReady) return
+	await startSidecar(nc)
+	logger.info({
+		message: 'nats ready',
+		source,
+		data: { natsUrl, streams },
+	})
+	await closed
+}
+
+/**
  * Keep a NATS connection that ensures JetStream assets and runs the validation sidecar.
  * The HTTP server stays up while this reconnects. It does not listen itself.
  * @returns Never resolves unless the process is signalled
@@ -78,16 +99,7 @@ const keepBroker = async (): Promise<void> => {
 				...(natsPassword ? { password: natsPassword } : {}),
 			})
 			nc = next
-			const streams = await ensureStreams(next)
-			bindConnection(next)
-			await startArdFeed(next)
-			await startSidecar(next)
-			logger.info({
-				message: 'nats ready',
-				source,
-				data: { natsUrl, streams },
-			})
-			await next.closed()
+			await serveConnection(next)
 		} catch (error) {
 			logger.error({
 				message: 'nats connect failed',
