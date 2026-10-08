@@ -16,18 +16,18 @@ just nats-up            # nats-server auf PATH (Homebrew)
 just nats-up-docker     # Cursor Cloud / Linux / CI
 just nats-sub --all
 just ui-build
-just connect            # streams plus the operator UI, http://127.0.0.1:4173
+just dev            # streams plus the operator UI, http://127.0.0.1:4173
 ```
 
 ## Operator UI
 
-`just connect` serves the boards after `just ui-build`. On-air, connections, rejections, and cluster health poll HTTP every 8 seconds. The live tail is a separate WebSocket: it closes after 2 minutes without a click, key, or scroll, and after 30 minutes regardless. A hidden tab does not keep it open. Dev cluster:
+`just dev` serves the boards after `just ui-build`. On-air, connections, rejections, and cluster health poll HTTP every 8 seconds. The live tail is a separate WebSocket: it closes after 2 minutes without a click, key, or scroll, and after 30 minutes regardless. A hidden tab does not keep it open. Dev cluster:
 
 ```sh
-NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just connect
+NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just dev
 ```
 
-The UI uses the connect login (`NATS_USER`, default `svc-sidecar`). `svc-operator` can subscribe to radio and feedback once that user is on the cluster. Passwords are not shown. Vite hot reload is `USE_HMR=true just connect` plus `just ui`.
+The UI uses the connect login (`NATS_USER`, default `svc-sidecar`). `svc-operator` can subscribe to radio and feedback once that user is on the cluster. Passwords are not shown. Vite hot reload is `USE_HMR=true just dev` plus `just ui`.
 
 Lokale Config: [`infra/nats/nats-dev.conf`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nats/nats-dev.conf) — ein Knoten, JetStream, MQTT `:1883`, ohne TLS. User und bcrypt-Hashes (Klartext `local`) stehen in [`components/users/nats-users.conf`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/components/users/nats-users.conf). `infra/nats/nats-users.conf` ist ein Symlink darauf. Anonyme Connects schlagen fehl.
 

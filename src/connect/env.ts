@@ -17,3 +17,9 @@ export const natsUser = getEnv<string>('NATS_USER', { defaultValue: LOCAL_NATS_U
  * NATS password. Defaults to the well-known local password. Override in production via sops.
  */
 export const natsPassword = getEnv<string>('NATS_PASSWORD', { defaultValue: LOCAL_NATS_PASSWORD })
+
+/**
+ * ARD core livestream feed. Empty skips the pull and keeps KV, disk, or the bootstrap copy.
+ * `just env` injects it from sops. The UI still starts when it is unset.
+ */
+export const ardFeedUrl = getEnv<string>('ARD_FEED_URL', { defaultValue: '' })

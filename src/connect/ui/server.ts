@@ -1,8 +1,8 @@
 import type { Context } from 'hono'
+import { getConnInfo, serveStatic, upgradeWebSocket, websocket as bunSocket } from '@hono/bun'
 import { Hono } from 'hono'
-import { getConnInfo, serveStatic, upgradeWebSocket, websocket } from 'hono/bun'
 import { api } from './api.ts'
-import { manifestPath, staticRoot, uiAllowCidr, uiHost, uiPort, useHmr } from './env.ts'
+import { manifestPath, staticRoot, uiAllowCidr, useHmr } from './env.ts'
 import { ipAllowed, parseAllowCidrs, parseTailFilter } from './policy.ts'
 import { tail } from './session.ts'
 import { readManifest, renderShell } from './shell.ts'
@@ -12,7 +12,7 @@ const cidrs = parseAllowCidrs(uiAllowCidr)
 const app = new Hono()
 
 /**
- * Socket peer, or an empty string when this fetch has no Bun server (unit tests).
+ * Socket peer, or an empty string when this fetch has no server (unit tests).
  * @param c - Request context
  * @returns Peer address
  */
@@ -98,15 +98,14 @@ app.notFound((c) => {
 	return c.html(renderShell(useHmr, readManifest(manifestPath)))
 })
 
-export { app }
-export default {
-	hostname: uiHost,
-	port: uiPort,
-	fetch: app.fetch,
+/**
+ * Live-tail socket handlers from `@hono/bun`.
+ * Protocol pings are not presence. The hub closes a quiet tail itself.
+ */
+export const websocket = {
+	...bunSocket,
 	idleTimeout: 255,
-	websocket: {
-		...websocket,
-		idleTimeout: 255,
-		sendPings: true,
-	},
+	sendPings: true,
 }
+
+export { app }

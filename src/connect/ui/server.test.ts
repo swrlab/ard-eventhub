@@ -21,3 +21,24 @@ test('stats routes answer without a websocket', async () => {
 	assertEquals(html.includes('id="app"') || html.includes('just ui-build'), true)
 	assertEquals((await app.request('http://ui.test/static/missing.js')).status, 404)
 })
+
+test('tail upgrade uses the server passed to fetch', async () => {
+	let upgraded = false
+	const ok = await app.request(
+		'http://ui.test/api/tail?filter=radio.*.track.playing',
+		{},
+		{
+			requestIP: () => ({ address: '10.1.2.3' }),
+			upgrade: () => {
+				upgraded = true
+				return true
+			},
+		}
+	)
+	assertEquals(ok.status, 200)
+	assertEquals(upgraded, true)
+	const refused = await app.request('http://ui.test/api/tail', {}, { upgrade: () => false })
+	assertEquals(refused.status, 400)
+	assertEquals((await app.request('http://ui.test/api/tail')).status, 400)
+	assertEquals((await app.request('http://ui.test/api/tail?filter=$SYS.>')).status, 400)
+})

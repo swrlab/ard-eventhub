@@ -45,8 +45,13 @@ feed:
 
 # start the ingest service in development mode
 [group('LOCAL')]
-dev:
+ingest:
 	just env "bun run ingest"
+
+# start eventhub-connect (NATS access + operator UI on :4173)
+[group('LOCAL')]
+dev:
+	bun run --hot ./src/connect/index.ts
 
 # lint the code
 [group('LOCAL')]

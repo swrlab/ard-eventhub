@@ -31,6 +31,7 @@
 		"@frytg/logger": "npm:@jsr/frytg__logger@0.0.3",
 		"@google-cloud/datastore": "^11.2.0",
 		"@google-cloud/pubsub": "^6.2.0",
+		"@hono/bun": "^1.0.1",
 		"@nats-io/jetstream": "^3.4.0",
 		"@nats-io/transport-node": "^3.4.0",
 		"@swrlab/utils": "^2.2.0",

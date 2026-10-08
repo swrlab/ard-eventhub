@@ -5,7 +5,7 @@ import { natsAccess } from '../utils/nats/_client.ts'
 import { ensureStreams } from '../utils/nats/ensure-streams.ts'
 import { natsPassword, natsUrl, natsUser } from './env.ts'
 import { natsMonitorUrl, uiHost, uiPort, useHmr } from './ui/env.ts'
-import uiServer from './ui/server.ts'
+import { app, websocket } from './ui/server.ts'
 import { bindConnection, stopTail, unbindConnection } from './ui/session.ts'
 
 const source = 'connect'
@@ -20,13 +20,26 @@ const sleep = (ms: number): Promise<void> =>
 		setTimeout(resolve, ms)
 	})
 
+export { app }
+
 /**
- * Serve the operator UI and keep a NATS connection that ensures JetStream assets.
- * The HTTP server stays up while NATS reconnects.
+ * HTTP server for this process. The runtime listens on this export.
+ * `fetch` is the Hono app, so the same app answers `app.request` in tests.
+ */
+export default {
+	hostname: uiHost,
+	port: uiPort,
+	fetch: app.fetch,
+	idleTimeout: 255,
+	websocket,
+}
+
+/**
+ * Keep a NATS connection that ensures JetStream assets.
+ * The HTTP server stays up while this reconnects. It does not listen itself.
  * @returns Never resolves unless the process is signalled
  */
-const main = async (): Promise<void> => {
-	const http = Bun.serve(uiServer)
+const keepBroker = async (): Promise<void> => {
 	logger.info({
 		message: 'operator ui listening',
 		source: 'connect.ui',
@@ -40,7 +53,6 @@ const main = async (): Promise<void> => {
 		if (stopped) return
 		stopped = true
 		stopTail()
-		http.stop()
 		if (nc) void natsAccess.drain(nc)
 		process.exit(0)
 	}
@@ -87,14 +99,14 @@ const main = async (): Promise<void> => {
 	}
 }
 
-try {
-	await main()
-} catch (error) {
-	logger.error({
-		message: 'connect failed',
-		source,
-		error,
-		data: { natsUrl },
+if (import.meta.main) {
+	void keepBroker().catch((error: unknown) => {
+		logger.error({
+			message: 'connect failed',
+			source,
+			error,
+			data: { natsUrl },
+		})
+		process.exit(1)
 	})
-	process.exit(1)
 }

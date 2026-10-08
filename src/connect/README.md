@@ -2,7 +2,7 @@
 
 NATS-native access layer for Eventhub Connect. This process talks to NATS on `:4222`. Publishers still speak MQTT; the NATS MQTT gateway rewrites `inbox/{institutionId}` to `inbox.{institutionId}`.
 
-There is no validation sidecar yet (RFC step 10). `just connect` opens a connection, ensures the `INBOX` and `PLUGINS` JetStream streams plus the durable `sidecar` consumer, and serves the operator UI on `:4173`.
+There is no validation sidecar yet (RFC step 10). `just dev` opens a connection, ensures the `INBOX` and `PLUGINS` JetStream streams plus the durable `sidecar` consumer, and serves the operator UI on `:4173`. `just connect` is the same recipe.
 
 Do not put `NATS_URL` on the ingest env module. Connect reads its own vars from [`env.ts`](env.ts).
 
@@ -25,7 +25,7 @@ just nats-up
 just nats-sub          # one institution (default SWR example URN)
 just nats-sub --all    # inbox.>
 just ui-build
-just connect           # ensure streams, serve the operator UI on :4173
+just dev               # ensure streams, serve the operator UI on :4173
 ```
 
 Monitor: `http://127.0.0.1:8222`. Optional CLI: `nats stream ls`, `nats sub 'inbox.>'`.
@@ -36,16 +36,16 @@ The same process serves the boards. Stats are plain HTTP, polled every 8 seconds
 
 ```sh
 just ui-build
-just connect
+just dev
 # http://127.0.0.1:4173
 ```
 
-Hot reload: `USE_HMR=true just connect` in one terminal and `just ui` in another. The page stays on `:4173`. Its script tag points at the Vite server on `:5173`. `USE_HMR=dev` is only for the Vite `base` when you want absolute dev-server URLs inside the build.
+Hot reload: `USE_HMR=true just dev` in one terminal and `just ui` in another. The page stays on `:4173`. Its script tag points at the Vite server on `:5173`. `USE_HMR=dev` is only for the Vite `base` when you want absolute dev-server URLs inside the build.
 
 Dev cluster (three pods behind one monitor URL):
 
 ```sh
-NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just connect
+NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just dev
 ```
 
 The process connects as `NATS_USER` (default `svc-sidecar`), the same login that ensures streams. `svc-operator` can subscribe to `radio.>` and `feedback.>`; it is in the repo users file, and a cluster that is already running needs that file reapplied before the user exists. Set `NATS_USER=svc-operator` when the tail should subscribe. Cluster and connection stats use the HTTP monitor and do not need that login. The UI never sends the password to the browser.
@@ -71,7 +71,7 @@ Homebrew and Apple `container` are usually missing. Use the official image (same
 ```sh
 just nats-up-docker
 just nats-sub --all
-just connect
+just dev
 ```
 
 Image: `nats:2.14.6` with [`infra/nats/nats-dev.conf`](../../infra/nats/nats-dev.conf) (JetStream + MQTT `:1883`, no TLS, users from `nats-users.conf`).
@@ -88,7 +88,7 @@ If docker is also missing, download a pinned `nats-server` binary from [nats-io/
 2. In another terminal, publish MQTT QoS 1 as `pub-swr-2026-06-26` / `local` to `inbox/urn:ard:institution:a3004ff924ece1a2` on `mqtt://127.0.0.1:1883`
 3. The NATS subscriber prints the payload
 
-Optional: run ingest with `MQTT_BROKER_URL=mqtt://127.0.0.1:1883` and NATS up so HTTPS posts land on NATS subjects for `just connect` / `just nats-sub` to see. Ingest publishes as `svc-ingest`.
+Optional: run ingest with `MQTT_BROKER_URL=mqtt://127.0.0.1:1883` and NATS up so HTTPS posts land on NATS subjects for `just dev` / `just nats-sub` to see. Ingest publishes as `svc-ingest`.
 
 ```sh
 just nats-down

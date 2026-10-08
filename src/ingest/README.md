@@ -71,7 +71,7 @@ Ingest dual-writes each accepted event to `inbox/{institutionId}` on the CN MQTT
 ```sh
 just nats-up
 just nats-sub --all
-just dev
+just ingest
 ```
 
 Against a private mqtts:// gateway, set `MQTT_TLS_CA` to the CA PEM or its file path so mqtt.js can verify the broker.
