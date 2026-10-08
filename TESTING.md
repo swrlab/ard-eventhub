@@ -13,7 +13,8 @@ In addition to the [ingest-env](../src/ingest/README.md#Environments), following
 - REQUIRED `TEST_USER_PW` - test user password
 - OPTIONAL `MQTT_BROKER_URL` - CN MQTT gateway. Credentials go in the URL (`mqtt://user:password@host:1883`). Ingest boots without it. The sops test env sets it so the inbox client can connect. For a live round-trip, start the broker with `just nats-up` (or `just nats-up-docker`). CI ingest jobs start that broker with `just nats-up-docker`. `svc-ingest` ACLs run in the separate NATS job.
 - OPTIONAL `MQTT_TLS_CA` - gateway CA PEM or path. Omit for local `mqtt://`.
-- OPTIONAL `NATS_URL` - Eventhub Connect NATS client. Credentials go in the URL (`nats://user:password@host:4222`) and only in sops. Not required for ingest tests. Broker ACL tests use that password for every local user, because they share one bcrypt hash in `nats-users.conf`. Start a local broker with `just nats-up` (Homebrew) or `just nats-up-docker` (Cursor Cloud / CI). MQTT on that process binds `:1883`.
+- OPTIONAL `NATS_URL` - Eventhub Connect NATS server (`nats://host:4222`, no user or password). Not required for ingest tests. Start a local broker with `just nats-up` (Homebrew) or `just nats-up-docker` (Cursor Cloud / CI). MQTT on that process binds `:1883`.
+- OPTIONAL `NATS_USER` / `NATS_PASSWORD` - login for `NATS_URL`. The plaintext is only in sops. Broker ACL tests use `NATS_PASSWORD` for every local user, because they share one bcrypt hash in `nats-users.conf`.
 - OPTIONAL `NATS_REQUIRE` - exact string `true` makes NATS access and ACL tests fail instead of skip when `:4222` is down. The separate CI NATS job sets this. That job also runs `just nats-check`. Live ACL tests include `svc-ingest` publishing `inbox.>`.
 - OPTIONAL `TEST_USER_RESET` - set true for email reset (request limit)
 

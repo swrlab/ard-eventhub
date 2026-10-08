@@ -84,6 +84,7 @@ test('a schema failure is feedback the rejections board can read', () => {
 	assertEquals(row.playlistItemId, 'item-1')
 	assertEquals(row.institutionId, SUBJECT_INSTITUTION)
 	assertEquals(row.message.length > 0, true)
+	assertEquals(row.event, result.payload)
 })
 
 test('feedback leaves out fields the payload did not carry', () => {
@@ -102,10 +103,13 @@ test('a payload that is not JSON is a json rejection', () => {
 	assertEquals(result.message, 'payload is not JSON')
 })
 
-test('a rejection carries the full decoded event for the log', () => {
+test('a rejection carries the full decoded event for the log and the feedback', () => {
 	const body = { ...track, title: undefined, extra: { nested: [1, 2] } }
 	const result = rejected(plan(body))
 	assertEquals(result.payload, JSON.parse(JSON.stringify(body)))
+	const feedback = result.feedback?.body as Record<string, unknown> | undefined
+	assertEquals(feedback?.event, result.payload)
+	assertEquals(feedback !== undefined && 'payload' in feedback, false)
 })
 
 test('a non-JSON or non-UTF-8 rejection carries the payload text', () => {

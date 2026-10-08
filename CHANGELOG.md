@@ -24,9 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- feat: read the NATS login from `NATS_USER` and `NATS_PASSWORD`; `NATS_URL` is the server address only
 - feat: rename the connect NATS user to `svc-eventhub-connect`, drop unused `svc-operator` and `svc-adapter-radioplayer`, and let that user subscribe to `feedback.>` and `plugin.>`
 - refactor: rename the connect sidecar to validation (`src/connect/validation/`, log source `connect.validation`, logs `validation accepted` / `validation rejected` / `validation publish failed`, metric `connect.validation.rejection`); the durable consumer keeps the name `sidecar`
 - feat: log the full inbox payload on every `validation rejected` line (prefix past 64 KiB)
+- feat: `feedback/{institutionId}` carries the full rejected event as `event` (previously only its type string); each rejections board row expands to it, and the board no longer lists deprecated fields
 - chore: upgrade dependencies (Google clients, firebase-admin 14, TypeScript 7, Blume 2, Knip 6)
 
 ### Fixed

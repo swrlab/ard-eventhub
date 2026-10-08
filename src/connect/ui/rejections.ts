@@ -69,7 +69,7 @@ export const parseRejection = (text: string, subject: string, at: string): Rejec
 		cause: stringField(record, 'cause'),
 		disagreed: stringList(record?.disagreed),
 		playlistItemId: stringField(record, 'playlistItemId'),
-		deprecated: stringList(record?.deprecated),
+		event: record?.event ?? null,
 	}
 }
 

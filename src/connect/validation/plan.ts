@@ -15,7 +15,7 @@ import { checkEventOwnership } from './ownership.ts'
 /** Why a delivery is termed. Also the `cause` on `feedback/` and in the `validation rejected` log. */
 type RejectCause = 'json' | 'schema' | 'ownership'
 
-/** Larger payloads are logged as a prefix. NATS allows 1 MiB, radio events are a few KiB. */
+/** Larger payloads are logged and fed back as a prefix. NATS allows 1 MiB, radio events are a few KiB. */
 const MAX_LOGGED_PAYLOAD_BYTES = 64 * 1024
 
 /** Retained MQTT publish (`radio/` or `feedback/`). */
@@ -43,7 +43,7 @@ export type ValidationReject = {
 	cause: RejectCause
 	message: string
 	feedback: MqttPublish | null
-	/** The full inbox payload for the rejection log: decoded JSON, else the text. */
+	/** The full inbox payload for the rejection log and the feedback body: decoded JSON, else the text. */
 	payload: unknown
 }
 
@@ -180,9 +180,9 @@ const reject = (params: {
 		disagreed: params.disagreed,
 		playlistItemId: stringField(value, 'playlistItemId'),
 		start: stringField(value, 'start'),
-		event: stringField(value, 'event'),
 		deprecated: deprecatedFields(value),
 		livestreamId: params.livestreamId,
+		event: payload,
 	})
 	return { action: 'term', cause, message, feedback: { topic: feedbackMqttTopic(institutionId), body }, payload }
 }

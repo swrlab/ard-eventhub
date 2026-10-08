@@ -9,7 +9,7 @@ test('a feedback payload keeps the full zod issues and the institution from the 
 			cause: 'schema',
 			disagreed: ['subject', 'feed'],
 			playlistItemId: 'swr3-1',
-			deprecated: ['services.externalId'],
+			event: { playlistItemId: 'swr3-1', services: [] },
 		}),
 		'feedback.urn:ard:institution:a3004ff924ece1a2',
 		'2026-10-08T10:00:00.000Z'
@@ -18,8 +18,13 @@ test('a feedback payload keeps the full zod issues and the institution from the 
 	assertEquals(row.message, '[{"path":["title"],"message":"required"}]')
 	assertEquals(row.cause, 'schema')
 	assertEquals(row.disagreed, ['subject', 'feed'])
-	assertEquals(row.deprecated, ['services.externalId'])
 	assertEquals(row.playlistItemId, 'swr3-1')
+	assertEquals(row.event, { playlistItemId: 'swr3-1', services: [] })
+})
+
+test('feedback without an event, or not JSON at all, has a null event', () => {
+	assertEquals(parseRejection('{"message":"old"}', 'feedback.x', '2026-10-08T08:00:00.000Z').event, null)
+	assertEquals(parseRejection('nope', 'feedback.x', '2026-10-08T08:00:00.000Z').event, null)
 })
 
 test('rejections merge newest first and filter to one institution', () => {

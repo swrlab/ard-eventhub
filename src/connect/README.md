@@ -10,8 +10,9 @@ Users live in [`components/users/nats-users.conf`](../../infra/kubernetes/compon
 
 ## Environment
 
-- OPTIONAL `NATS_URL` — default `nats://127.0.0.1:4222` with no credentials. Put the user and password in the URL (`nats://user:password@host:4222`). `just env` injects it from sops. The JS client does not read userinfo itself; connect splits it into `user` / `pass` and logs only the host. There is no `NATS_USER` or `NATS_PASSWORD`.
-- OPTIONAL `NATS_MQTT_URL` — MQTT gateway for retained `radio/` and `feedback/` publishes. Default is the `NATS_URL` host on port `1883`. Validation authenticates with the same userinfo as `NATS_URL`. Set `POD_NAME` when more than one connect process runs, so each MQTT client id stays unique.
+- OPTIONAL `NATS_URL` — default `nats://127.0.0.1:4222`. Server address only. A user or password in the URL is ignored and stripped before anything is logged. `just env` injects it from sops.
+- OPTIONAL `NATS_USER` / `NATS_PASSWORD` — login for that server and for the MQTT gateway. `just env` injects them from sops. Empty means no credentials. The JS client wants `user` / `pass` options, so connect passes these through and logs only the host.
+- OPTIONAL `NATS_MQTT_URL` — MQTT gateway for retained `radio/` and `feedback/` publishes. Default is the `NATS_URL` host on port `1883`. Validation authenticates with `NATS_USER` and `NATS_PASSWORD`. Set `POD_NAME` when more than one connect process runs, so each MQTT client id stays unique.
 - OPTIONAL `ARD_FEED_URL` — ARD core livestream feed. `just env` injects it from sops. Unset, the process never downloads and serves whatever another process wrote to KV. With an empty bucket too, validation does not start.
 
 ### ARD feed
@@ -54,14 +55,14 @@ just dev
 
 Hot reload: `USE_HMR=true just dev` in one terminal and `just ui` in another. The page stays on `:4173`. Its script tag points at the Vite server on `:5173`. `USE_HMR=dev` is only for the Vite `base` when you want absolute dev-server URLs inside the build.
 
-The process connects as the user in `NATS_URL` (local sops uses `svc-eventhub-connect`), the same login that ensures streams. Cluster and connection stats use the HTTP monitor. The tail does not use that login. The page connects as `sub-ui` with no password, WebSocket only, and may subscribe to `radio.>` only. A cluster that is already running needs the users file and the `websocket` listener reapplied before that works. The UI never sends a password to the browser.
+The process connects as `NATS_USER` (local sops uses `svc-eventhub-connect`) with `NATS_PASSWORD`, the same login that ensures streams. Cluster and connection stats use the HTTP monitor. The tail does not use that login. The page connects as `sub-ui` with no password, WebSocket only, and may subscribe to `radio.>` only. A cluster that is already running needs the users file and the `websocket` listener reapplied before that works. The UI never sends a password to the browser.
 
 Panels:
 
 - **On-air.** Last retained message per `radio.{livestream}`, oldest last-event first.
 - **Feed.** The snapshot this process is authorizing with, plus the `allowed-livestreams.json` overlay, as one list (`knownLivestreams`). A feed row's id is the item `externalId`, the livestream URN publishers send, not the fusion id. Overlay rows are topics absent from the core feed. They add a publish permission: `publisherId` must match, and the institution is still that publisher's house in the feed. The livestream title opens that station's tail.
 - **Connections.** Users from `NATS_USERS_CONF` (default `infra/kubernetes/components/users/nats-users.conf`) plus `/connz`. Usernames and allow-lists only.
-- **Rejections.** Retained `feedback.>` plus what arrived while this process was up. `?institution=` filters one house.
+- **Rejections.** Retained `feedback.>` plus what arrived while this process was up. `?institution=` filters one house. Each row expands to the rejected event as JSON.
 - **Cluster.** `/varz`, `/connz`, `/jsz`, sampled until each node behind the monitor URL has answered.
 - **Tail.** Default filter `radio.*.track.playing`. The browser opens NATS WebSocket as `sub-ui` (no password) and subscribes itself. Closes after 2 minutes with no click, key, or scroll, and after 30 minutes even if someone is still there. Over 20 frames/s the page drops frames and shows `sampled`. Reopening is a click.
 

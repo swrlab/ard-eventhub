@@ -130,10 +130,20 @@ Eine CRID plus numerische Core-ID, so wie der HTTPS-Body sie heute schickt, komm
 	],
 	"playlistItemId": "swr3-demo-1",
 	"start": "2026-10-08T12:00:00+02:00",
-	"event": "de.ard.eventhub.v1.radio.track.playing",
-	"deprecated": ["services.externalId", "services.type"]
+	"deprecated": ["services.externalId", "services.type"],
+	"event": {
+		"event": "de.ard.eventhub.v1.radio.track.playing",
+		"type": "music",
+		"start": "2026-10-08T12:00:00+02:00",
+		"length": 180,
+		"title": "Song name",
+		"playlistItemId": "swr3-demo-1",
+		"services": [{ "type": "PermanentLivestream", "externalId": "crid://swr.de/282310", "publisherId": "282310" }]
+	}
 }
 ```
+
+`event` ist das abgelehnte Event, so wie es ankam: JSON, sonst als Text. Über 64 KiB steht dort nur der Anfang (`truncated`, `bytes`, `head`).
 
 `cause` ist `schema`, `ownership` oder `json`. Bei `ownership` listet `disagreed` die Seiten, die auseinanderlaufen (`subject`, `payload`, `feed`): die Inbox passt nicht zu `institutionId`, oder der Livestream gehört laut Feed einer anderen Anstalt. Maßgeblich bleiben Operator-UI und Cluster-Logs.
 

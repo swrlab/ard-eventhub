@@ -9,21 +9,25 @@ const natsEndpoint = parseUserinfoUrl(rawNatsUrl)
 /** Host URL with userinfo removed, so ACL tests can pass a different username. */
 export const NATS_SERVERS = natsEndpoint.url
 
-/** Password from `NATS_URL`. Local users in nats-users.conf share this secret. */
-export const BROKER_PASSWORD = natsEndpoint.password
+/** Password from `NATS_PASSWORD`. Local users in nats-users.conf share this secret. */
+export const BROKER_PASSWORD = process.env.NATS_PASSWORD?.trim() || ''
+
+const NATS_USER = process.env.NATS_USER?.trim() || ''
 
 export const MQTT_URL = process.env.NATS_MQTT_URL?.trim() || mqttUrlForNats(NATS_SERVERS)
 export const REQUIRE_NATS = process.env.NATS_REQUIRE === 'true'
 const MQTT_V311 = 4
 
 /**
- * Connect with the credentials in `NATS_URL`, or return null when the broker is down / auth fails.
+ * Connect with `NATS_USER` and `NATS_PASSWORD`, or return null when the broker is down / auth fails.
  * @returns Service connection, or null
  */
 export const tryConnectService = async () => {
 	try {
 		return await natsAccess.connect({
-			servers: rawNatsUrl,
+			servers: NATS_SERVERS,
+			...(NATS_USER ? { user: NATS_USER } : {}),
+			...(BROKER_PASSWORD ? { password: BROKER_PASSWORD } : {}),
 		})
 	} catch {
 		return null
@@ -39,7 +43,7 @@ export const skipUnlessNats = (nc: Awaited<ReturnType<typeof tryConnectService>>
 	if (nc) {
 		return false
 	}
-	const message = 'nats not listening on 4222 with NATS_URL credentials — `just nats-up` or `just nats-up-docker`'
+	const message = 'nats not listening on 4222 with NATS_USER / NATS_PASSWORD — `just nats-up` or `just nats-up-docker`'
 	if (REQUIRE_NATS) {
 		throw new Error(message)
 	}

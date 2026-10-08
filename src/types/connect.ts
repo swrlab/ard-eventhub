@@ -187,7 +187,8 @@ export type Rejection = {
 	cause: string | null
 	disagreed: string[]
 	playlistItemId: string | null
-	deprecated: string[]
+	/** Rejected inbox event from the feedback body. Null when the feedback has none. */
+	event: unknown
 }
 
 export type RejectionsReport = {

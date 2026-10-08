@@ -1,7 +1,9 @@
 import { test } from '@cross/test'
 import { assertEquals } from '@std/assert'
 import { natsUser } from '../env.ts'
+import { parseRejection } from './rejections.ts'
 import { app } from './server.ts'
+import { rejectionLog } from './session.ts'
 
 test('stats routes answer without a websocket', async () => {
 	const metaRes = await app.request('http://ui.test/api/meta')
@@ -47,4 +49,17 @@ test('update-feed is POST only and reports 503 without a NATS connection', async
 	const body = await res.json()
 	assertEquals(body.error, 'nats is unavailable')
 	assertEquals((await app.request('http://ui.test/api/update-feed')).status, 404)
+})
+
+test('rejections carry the rejected event', async () => {
+	const institution = 'urn:ard:institution:events-test'
+	rejectionLog.push(
+		parseRejection(
+			JSON.stringify({ at: '2026-10-08T10:00:00.000Z', message: 'bad', event: { title: 'x' } }),
+			`feedback.${institution}`,
+			'2026-10-08T10:00:00.000Z'
+		)
+	)
+	const body = await (await app.request(`http://ui.test/api/rejections?institution=${institution}`)).json()
+	assertEquals(body.rejections[0].event, { title: 'x' })
 })

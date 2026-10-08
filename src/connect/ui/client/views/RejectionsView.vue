@@ -19,13 +19,12 @@ const { data, error, loading } = usePoll<RejectionsReport>(() => {
 	return value ? `/api/rejections?institution=${encodeURIComponent(value)}` : '/api/rejections'
 })
 
-const deprecated = computed(() => {
-	const found = new Set<string>()
-	for (const row of data.value?.rejections ?? []) {
-		for (const field of row.deprecated) found.add(field)
-	}
-	return [...found]
-})
+/**
+ * Event as the board shows it. Text events (not JSON) stay as they arrived.
+ * @param event - Rejected inbox event
+ * @returns Indented JSON, or the text
+ */
+const pretty = (event: unknown): string => (typeof event === 'string' ? event : JSON.stringify(event, null, 2))
 
 const apply = (): void => {
 	const value = draft.value.trim()
@@ -72,7 +71,7 @@ const clearFilter = (): void => {
 						</tr>
 					</thead>
 					<tbody>
-						<tr v-for="(row, index) in data.rejections" :key="`${row.at}-${index}`">
+						<tr v-for="row in data.rejections" :key="`${row.at}|${row.subject ?? ''}|${row.message}`">
 							<td class="whitespace-nowrap">{{ formatClock(row.at) }}</td>
 							<td class="max-w-xs break-all">{{ row.institutionId ?? '—' }}</td>
 							<td>{{ row.cause ?? '—' }}</td>
@@ -81,16 +80,17 @@ const clearFilter = (): void => {
 								<p v-if="row.disagreed.length" class="text-warning">disagreed {{ row.disagreed.join(', ') }}</p>
 								<p v-if="row.playlistItemId" class="text-muted/70">{{ row.playlistItemId }}</p>
 								<p v-if="row.subject" class="text-muted/70">{{ row.subject }}</p>
+								<details v-if="row.event !== null" class="mt-2">
+									<summary class="cursor-pointer text-link">event json</summary>
+									<pre class="mt-2 overflow-x-auto font-mono text-xs leading-5 break-normal whitespace-pre text-text">{{
+										pretty(row.event)
+									}}</pre>
+								</details>
 							</td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
-			<h2 class="mt-8 mb-2 text-base text-heading">deprecated fields</h2>
-			<p v-if="!deprecated.length" class="font-mono text-sm text-muted">no deprecated-field report in this window</p>
-			<ul v-else class="font-mono text-sm">
-				<li v-for="field in deprecated" :key="field">{{ field }}</li>
-			</ul>
 		</template>
 	</section>
 </template>

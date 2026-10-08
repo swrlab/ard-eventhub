@@ -15,26 +15,23 @@ export type NatsAccessOptions = {
 
 /**
  * Open a NATS-native TCP connection.
- * Userinfo on `servers` (`nats://user:password@host:4222`) is applied as `user` / `pass`.
- * Explicit `user` and `password` win when set.
+ * Credentials are `user` and `password`. Userinfo on `servers` is dropped and not used.
  * @param options - Server URL and optional user/password
  * @returns Connected NATS client
  */
 const connectNats = (options: NatsAccessOptions): Promise<NatsConnection> => {
 	const parsed = parseUserinfoUrl(options.servers)
-	const user = options.user || parsed.user
-	const password = options.password || parsed.password
 	const opts: Parameters<typeof connect>[0] = {
 		servers: parsed.url,
 		timeout: CONNECT_TIMEOUT_MS,
 		reconnect: true,
 		name: options.name ?? 'eventhub-connect',
 	}
-	if (user) {
-		opts.user = user
+	if (options.user) {
+		opts.user = options.user
 	}
-	if (password) {
-		opts.pass = password
+	if (options.password) {
+		opts.pass = options.password
 	}
 	return connect(opts)
 }
