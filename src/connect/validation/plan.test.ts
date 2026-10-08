@@ -34,7 +34,7 @@ const track = {
 const plan = (body: unknown, subject = INBOX): ValidationPlan => {
 	const restore = serveTestFeed(OWNERS)
 	try {
-		return planInboxMessage({ subject, bytes: new TextEncoder().encode(JSON.stringify(body)), at: AT })
+		return planInboxMessage({ subject, bytes: new TextEncoder().encode(JSON.stringify(body)), now: AT })
 	} finally {
 		restore()
 	}
@@ -46,7 +46,7 @@ const plan = (body: unknown, subject = INBOX): ValidationPlan => {
  * @returns The plan as an accept
  */
 const accepted = (result: ValidationPlan): ValidationAccept => {
-	if (result.action !== 'ack') throw new Error(`expected ack, got term: ${result.message}`)
+	if (result.action !== 'ack') throw new Error(`expected ack, got term: ${JSON.stringify(result.errors)}`)
 	return result
 }
 
@@ -84,8 +84,13 @@ test('the delivered event keeps the creator and carries the delivery time as cre
 test('an event without a creator is a schema rejection', () => {
 	const result = rejected(plan({ ...track, creator: undefined }))
 	assertEquals(result.cause, 'schema')
-	const body = result.feedback?.body as { issues: { path: string[] }[] } | undefined
-	assertEquals(body?.issues[0]?.path, ['creator'])
+	assertEquals(result.errors, [
+		{
+			path: '.body.creator',
+			message: "should have required property 'creator'",
+			errorCode: 'required.openapi.validation',
+		},
+	])
 })
 
 test('a duplicated service is retained and fanned out once', () => {
@@ -94,15 +99,21 @@ test('a duplicated service is retained and fanned out once', () => {
 	assertEquals(result.plugins.length, 2)
 })
 
-test('a schema failure is feedback the rejections board can read', () => {
+test('a schema failure is feedback in the HTTPS error shape the rejections board can read', () => {
 	const result = rejected(plan({ ...track, title: undefined }))
 	assertEquals(result.cause, 'schema')
 	assertEquals(result.feedback?.topic, `feedback/${SUBJECT_INSTITUTION}`)
-	const row = parseRejection(JSON.stringify(result.feedback?.body), `feedback.${SUBJECT_INSTITUTION}`, AT)
-	assertEquals(row.cause, 'schema')
+	const body = result.feedback?.body as Record<string, unknown>
+	assertEquals(Object.keys(body), ['created', 'institutionId', 'subject', 'errors', 'playlistItemId', 'start', 'event'])
+	assertEquals(body.created, AT)
+	assertEquals(body.errors, [
+		{ path: '.body.title', message: "should have required property 'title'", errorCode: 'required.openapi.validation' },
+	])
+	const row = parseRejection(JSON.stringify(body), `feedback.${SUBJECT_INSTITUTION}`, '2000-01-01T00:00:00.000Z')
+	assertEquals(row.created, AT)
+	assertEquals(row.errors, body.errors)
 	assertEquals(row.playlistItemId, 'item-1')
 	assertEquals(row.institutionId, SUBJECT_INSTITUTION)
-	assertEquals(row.message.length > 0, true)
 	assertEquals(row.event, result.payload)
 })
 
@@ -110,14 +121,13 @@ test('feedback leaves out fields the payload did not carry', () => {
 	const result = rejected(plan({ ...track, title: undefined, playlistItemId: undefined }))
 	const body = result.feedback?.body as Record<string, unknown>
 	assertEquals('playlistItemId' in body, false)
-	assertEquals('disagreed' in body, false)
 	assertEquals('deprecated' in body, false)
 })
 
-test('a payload that is not JSON is a json rejection', () => {
-	const result = rejected(planInboxMessage({ subject: INBOX, bytes: new TextEncoder().encode('{nope'), at: AT }))
+test('a payload that is not JSON is a json rejection on .body', () => {
+	const result = rejected(planInboxMessage({ subject: INBOX, bytes: new TextEncoder().encode('{nope'), now: AT }))
 	assertEquals(result.cause, 'json')
-	assertEquals(result.message, 'payload is not JSON')
+	assertEquals(result.errors, [{ path: '.body', message: 'should be JSON', errorCode: 'type.openapi.validation' }])
 })
 
 test('a rejection carries the full decoded event for the log and the feedback', () => {
@@ -130,16 +140,16 @@ test('a rejection carries the full decoded event for the log and the feedback', 
 })
 
 test('a non-JSON or non-UTF-8 rejection carries the payload text', () => {
-	const notJson = rejected(planInboxMessage({ subject: INBOX, bytes: new TextEncoder().encode('{nope'), at: AT }))
+	const notJson = rejected(planInboxMessage({ subject: INBOX, bytes: new TextEncoder().encode('{nope'), now: AT }))
 	assertEquals(notJson.payload, '{nope')
-	const notUtf8 = rejected(planInboxMessage({ subject: INBOX, bytes: new Uint8Array([0x7b, 0xff, 0x7d]), at: AT }))
+	const notUtf8 = rejected(planInboxMessage({ subject: INBOX, bytes: new Uint8Array([0x7b, 0xff, 0x7d]), now: AT }))
 	assertEquals(notUtf8.cause, 'json')
 	assertEquals(notUtf8.payload, '{\uFFFD}')
 })
 
 test('an oversized rejected payload is logged as a prefix with its size', () => {
 	const bytes = new TextEncoder().encode(`"${'x'.repeat(70 * 1024)}"`)
-	const result = rejected(planInboxMessage({ subject: 'inbox.not-an-institution', bytes, at: AT }))
+	const result = rejected(planInboxMessage({ subject: 'inbox.not-an-institution', bytes, now: AT }))
 	const payload = result.payload as { truncated: boolean; bytes: number; head: string }
 	assertEquals(payload.truncated, true)
 	assertEquals(payload.bytes, bytes.byteLength)
@@ -154,10 +164,11 @@ test('a mismatched institution is rejected even when the subject itself is well 
 		})
 	)
 	assertEquals(result.cause, 'ownership')
-	const body = result.feedback?.body as { disagreed?: string[]; message?: string; livestreamId?: string }
-	assertEquals(body.disagreed, ['subject', 'payload', 'feed'])
-	assertEquals(body.message?.includes('inbox subject'), true)
-	assertEquals(body.livestreamId, LIVESTREAM)
+	const body = result.feedback?.body as { errors?: { path: string }[] }
+	assertEquals(
+		body.errors?.map((error) => error.path),
+		['.body.services.0.institutionId']
+	)
 })
 
 test('an unknown livestream is an ownership rejection', () => {
@@ -169,8 +180,13 @@ test('an unknown livestream is an ownership rejection', () => {
 		})
 	)
 	assertEquals(result.cause, 'ownership')
-	const body = result.feedback?.body as { disagreed?: string[] }
-	assertEquals(body.disagreed, ['feed'])
+	assertEquals(result.errors, [
+		{
+			path: '.body.services.0.id',
+			message: `Livestream not found > ${missing}`,
+			errorCode: 'notFound.eventhub.validation',
+		},
+	])
 })
 
 test('a subject without an institution URN is termed with no feedback', () => {
@@ -182,7 +198,7 @@ test('a subject without an institution URN is termed with no feedback', () => {
 
 test('a valid event without a served feed throws so the loop naks instead of rejecting', () => {
 	assertThrows(
-		() => planInboxMessage({ subject: INBOX, bytes: new TextEncoder().encode(JSON.stringify(track)), at: AT }),
+		() => planInboxMessage({ subject: INBOX, bytes: new TextEncoder().encode(JSON.stringify(track)), now: AT }),
 		Error,
 		'ard feed is not loaded'
 	)

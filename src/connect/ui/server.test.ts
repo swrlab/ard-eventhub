@@ -55,7 +55,7 @@ test('rejections carry the rejected event', async () => {
 	const institution = 'urn:ard:institution:events-test'
 	rejectionLog.push(
 		parseRejection(
-			JSON.stringify({ at: '2026-10-08T10:00:00.000Z', message: 'bad', event: { title: 'x' } }),
+			JSON.stringify({ created: '2026-10-08T10:00:00.000Z', errors: [], event: { title: 'x' } }),
 			`feedback.${institution}`,
 			'2026-10-08T10:00:00.000Z'
 		)

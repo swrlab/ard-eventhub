@@ -112,23 +112,24 @@ Eine CRID plus numerische Core-ID, so wie der HTTPS-Body sie heute schickt, komm
 
 ```json
 {
-	"at": "2026-10-08T12:00:01.000Z",
+	"created": "2026-10-08T10:00:01.000Z",
 	"institutionId": "urn:ard:institution:a3004ff924ece1a2",
 	"subject": "inbox.urn:ard:institution:a3004ff924ece1a2",
-	"cause": "schema",
-	"message": "Invalid input: expected string, received undefined",
-	"issues": [
+	"errors": [
 		{
-			"path": ["services", "0", "id"],
-			"message": "Invalid input: expected string, received undefined"
+			"path": ".body.services.0.id",
+			"message": "should have required property 'id'",
+			"errorCode": "required.openapi.validation"
 		},
 		{
-			"path": ["services", "0", "publisherId"],
-			"message": "Invalid string: must match pattern /^urn:ard:publisher:[a-z0-9]+$/"
+			"path": ".body.services.0.publisherId",
+			"message": "should match format \"regex\"",
+			"errorCode": "format.openapi.validation"
 		},
 		{
-			"path": ["services", "0", "institutionId"],
-			"message": "Invalid input: expected string, received undefined"
+			"path": ".body.services.0.institutionId",
+			"message": "should have required property 'institutionId'",
+			"errorCode": "required.openapi.validation"
 		}
 	],
 	"playlistItemId": "swr3-demo-1",
@@ -149,6 +150,13 @@ Eine CRID plus numerische Core-ID, so wie der HTTPS-Body sie heute schickt, komm
 
 `event` ist das abgelehnte Event, so wie es ankam: JSON, sonst als Text. Über 64 KiB steht dort nur der Anfang (`truncated`, `bytes`, `head`).
 
-`cause` ist `schema`, `ownership` oder `json`. Bei `ownership` listet `disagreed` die Seiten, die auseinanderlaufen (`subject`, `payload`, `feed`): die Inbox passt nicht zu `institutionId`, oder der Livestream gehört laut Feed einer anderen Anstalt. Maßgeblich bleiben Operator-UI und Cluster-Logs.
+`created` ist der Zeitpunkt der Ablehnung. `errors` hat dieselbe Form wie `errors` in der 400-Antwort der HTTPS-API: `path`, `message`, `errorCode`, ein Eintrag pro Problem. Schema-Fehler tragen die bekannten `*.openapi.validation`-Codes. Passt ein Service nicht zur Inbox oder zum ARD-Feed, steht der Fehler am betroffenen Feld:
+
+- `.body.services.N.id`, `User unauthorized for service` (`unauthorized.eventhub.validation`): der Livestream gehört laut Feed nicht der Anstalt dieser Inbox.
+- `.body.services.N.id`, `Livestream not found > …` (`notFound.eventhub.validation`): der Livestream steht nicht im Feed.
+- `.body.services.N.institutionId`, `should match the inbox institution`: `institutionId` nennt eine andere Anstalt als die Inbox.
+- `.body.services.N.publisherId`, `should match the publisher of the livestream`: der Feed führt einen anderen Publisher für den Livestream.
+
+Ist der Body kein UTF-8 oder kein JSON, steht ein einzelner Fehler auf `.body`. Maßgeblich bleiben Operator-UI und Cluster-Logs.
 
 Eine Kennung für mehrere Anstalten publiziert jedes Event auf die Inbox der Anstalt, der der Livestream gehört. Der Broker nimmt jede erlaubte Inbox an; die falsche Inbox fällt erst in der Validierung auf.

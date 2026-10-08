@@ -1,5 +1,4 @@
-import type { ZodError } from 'zod'
-import type { FeedbackIssue, OwnershipParty, RejectCause, ValidationPlan, ValidationReject } from '#types'
+import type { RejectCause, ValidationErrorItem, ValidationPlan, ValidationReject } from '#types'
 import { parseConnectInboxEvent } from '../../schemas/events.ts'
 import {
 	eventClassToken,
@@ -8,6 +7,7 @@ import {
 	pluginSubject,
 	radioMqttTopic,
 } from '../../utils/nats/subjects.ts'
+import { zodToOpenApiError } from '../../utils/validation/zod-to-openapi-error.ts'
 import { enabledPluginTargets } from './eligibility.ts'
 import { checkEventOwnership } from './ownership.ts'
 
@@ -49,17 +49,6 @@ const deprecatedFields = (value: unknown): string[] => {
 	}
 	return [...found]
 }
-
-/**
- * Zod issues in the shape the operator UI already stores.
- * @param error - Parse error
- * @returns Path plus message
- */
-const zodIssues = (error: ZodError): FeedbackIssue[] =>
-	error.issues.map((issue) => ({
-		path: issue.path.map((part) => String(part)),
-		message: issue.message,
-	}))
 
 /**
  * Strict UTF-8 decode.
@@ -115,48 +104,50 @@ const withoutEmpty = (fields: Record<string, unknown>): Record<string, unknown> 
 	)
 
 /**
+ * Error for a body that never reached the schema.
+ * @param message - What is wrong with the bytes
+ * @returns One `.body` error
+ */
+const bodyError = (message: string): ValidationErrorItem[] => [
+	{ path: '.body', message, errorCode: 'type.openapi.validation' },
+]
+
+/**
  * Term plan with a retained `feedback/{institutionId}` body the publisher and the rejections board can read.
- * @param params - Delivery context, cause, message, and whatever of the payload could be decoded
+ * @param params - Delivery context, cause, errors, and whatever of the payload could be decoded
  * @returns A term plan
  */
 const reject = (params: {
-	at: string
+	now: string
 	subject: string
 	institutionId: string
 	cause: RejectCause
-	message: string
+	errors: ValidationErrorItem[]
 	payload: unknown
 	value?: unknown
-	issues?: FeedbackIssue[]
-	disagreed?: OwnershipParty[]
-	livestreamId?: string
 }): ValidationReject => {
-	const { at, subject, institutionId, cause, message, payload, value } = params
+	const { now, subject, institutionId, cause, errors, payload, value } = params
 	const body = withoutEmpty({
-		at,
+		created: now,
 		institutionId,
 		subject,
-		cause,
-		message,
-		issues: params.issues,
-		disagreed: params.disagreed,
+		errors,
 		playlistItemId: stringField(value, 'playlistItemId'),
 		start: stringField(value, 'start'),
 		deprecated: deprecatedFields(value),
-		livestreamId: params.livestreamId,
 		event: payload,
 	})
-	return { action: 'term', cause, message, feedback: { topic: feedbackMqttTopic(institutionId), body }, payload }
+	return { action: 'term', cause, errors, feedback: { topic: feedbackMqttTopic(institutionId), body }, payload }
 }
 
 /**
  * Decide ack or term for one inbox delivery. Does not publish.
  * The loop only calls this once a feed is loaded, so an unknown livestream is a real ownership failure.
- * @param params - Subject, payload bytes, and the delivery timestamp (feedback `at`, event `created`)
+ * @param params - Subject, payload bytes, and the delivery time (`created` on the event or the feedback)
  * @returns The plan
  */
-export const planInboxMessage = (params: { subject: string; bytes: Uint8Array; at: string }): ValidationPlan => {
-	const { subject, bytes, at } = params
+export const planInboxMessage = (params: { subject: string; bytes: Uint8Array; now: string }): ValidationPlan => {
+	const { subject, bytes, now } = params
 	const text = decodeUtf8(bytes)
 	const json = text === null ? null : parseJson(text)
 	const payload = loggablePayload(bytes, json)
@@ -166,41 +157,32 @@ export const planInboxMessage = (params: { subject: string; bytes: Uint8Array; a
 		return {
 			action: 'term',
 			cause: 'ownership',
-			message: 'inbox subject is not an institution URN',
+			errors: [
+				{
+					path: '.params.institutionId',
+					message: 'should match format "urn:ard:institution"',
+					errorCode: 'format.openapi.validation',
+				},
+			],
 			feedback: null,
 			payload,
 		}
 	}
-	const context = { at, subject, institutionId, payload }
+	const context = { now, subject, institutionId, payload }
 
-	if (text === null) return reject({ ...context, cause: 'json', message: 'payload is not UTF-8' })
-	if (!json) return reject({ ...context, cause: 'json', message: 'payload is not JSON', value: text })
+	if (text === null) return reject({ ...context, cause: 'json', errors: bodyError('should be UTF-8') })
+	if (!json) return reject({ ...context, cause: 'json', errors: bodyError('should be JSON'), value: text })
 
 	const { value } = json
-	const parsed = parseConnectInboxEvent(isRecord(value) ? { ...value, created: at } : value)
+	const parsed = parseConnectInboxEvent(isRecord(value) ? { ...value, created: now } : value)
 	if (!parsed.success) {
-		const issues = zodIssues(parsed.error)
-		return reject({
-			...context,
-			cause: 'schema',
-			message: issues[0]?.message ?? 'event body failed schema validation',
-			issues,
-			value,
-		})
+		const { errors } = zodToOpenApiError(parsed.error, 'body')
+		return reject({ ...context, cause: 'schema', errors, value })
 	}
 
 	const event = parsed.data
-	const problem = checkEventOwnership({ subjectInstitutionId: institutionId, services: event.services })
-	if (problem) {
-		return reject({
-			...context,
-			cause: 'ownership',
-			message: problem.message,
-			disagreed: problem.disagreed,
-			livestreamId: problem.livestreamId,
-			value,
-		})
-	}
+	const ownershipErrors = checkEventOwnership({ subjectInstitutionId: institutionId, services: event.services })
+	if (ownershipErrors.length > 0) return reject({ ...context, cause: 'ownership', errors: ownershipErrors, value })
 
 	const eventClass = eventClassToken(event.event)
 	const targets = enabledPluginTargets(event)

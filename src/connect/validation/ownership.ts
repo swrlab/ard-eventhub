@@ -1,88 +1,61 @@
-import type { LivestreamOwner, OwnershipParty, OwnershipProblem } from '#types'
+import type { LivestreamOwner, ValidationErrorItem } from '#types'
 import { currentOwners } from '../feed/current-feed.ts'
 
-const PARTY_ORDER: readonly OwnershipParty[] = ['subject', 'payload', 'feed']
-
-/**
- * Stable party list: subject, then payload, then feed.
- * @param parties - Parties that disagreed
- * @returns Parties in display order
- */
-const orderedParties = (parties: ReadonlySet<OwnershipParty>): OwnershipParty[] =>
-	PARTY_ORDER.filter((party) => parties.has(party))
+const UNAUTHORIZED = 'unauthorized.eventhub.validation'
+const NOT_FOUND = 'notFound.eventhub.validation'
 
 /**
  * Compare one service with the inbox subject and the feed row for its livestream.
- * All three institution ids must match, and `publisherId` must be the feed's publisher.
- * @param params - Subject institution, the service claim, and the feed row (null when unknown)
- * @returns A problem, or null when the three sides agree
+ * The inbox institution must own the livestream, `institutionId` must name the inbox, and `publisherId` must be the
+ * feed's publisher. Comparing the inbox with both sides covers a payload institution that only matches the feed.
+ * @param params - Subject institution, the service claim, its index in `services`, and the feed row (null when unknown)
+ * @returns Errors in the HTTPS API shape, empty when the service is allowed
  */
 export const checkServiceOwnership = (params: {
 	subjectInstitutionId: string
 	service: { id: string; publisherId: string; institutionId: string }
+	index: number
 	owner: LivestreamOwner | null
-}): OwnershipProblem | null => {
-	const { subjectInstitutionId, service, owner } = params
-	if (!owner) {
-		return {
-			livestreamId: service.id,
-			disagreed: ['feed'],
-			message: `livestream ${service.id} is not in the feed`,
-		}
-	}
+}): ValidationErrorItem[] => {
+	const { subjectInstitutionId, service, index, owner } = params
+	const path = `.body.services.${index}`
+	if (!owner) return [{ path: `${path}.id`, message: `Livestream not found > ${service.id}`, errorCode: NOT_FOUND }]
 
-	const disagreed = new Set<OwnershipParty>()
-	const notes: string[] = []
-	if (service.institutionId !== subjectInstitutionId) {
-		disagreed.add('subject')
-		disagreed.add('payload')
-		notes.push('payload institutionId does not match the inbox subject')
-	}
-	if (service.institutionId !== owner.institutionId) {
-		disagreed.add('payload')
-		disagreed.add('feed')
-		notes.push('payload institutionId does not match the feed')
-	}
+	const errors: ValidationErrorItem[] = []
 	if (subjectInstitutionId !== owner.institutionId) {
-		disagreed.add('subject')
-		disagreed.add('feed')
-		notes.push('inbox subject does not match the feed institution')
+		errors.push({ path: `${path}.id`, message: 'User unauthorized for service', errorCode: UNAUTHORIZED })
+	}
+	if (service.institutionId !== subjectInstitutionId) {
+		errors.push({
+			path: `${path}.institutionId`,
+			message: 'should match the inbox institution',
+			errorCode: UNAUTHORIZED,
+		})
 	}
 	if (service.publisherId !== owner.publisherId) {
-		disagreed.add('payload')
-		disagreed.add('feed')
-		notes.push('payload publisherId does not match the feed')
+		errors.push({
+			path: `${path}.publisherId`,
+			message: 'should match the publisher of the livestream',
+			errorCode: UNAUTHORIZED,
+		})
 	}
-	if (disagreed.size === 0) return null
-	return {
-		livestreamId: service.id,
-		disagreed: orderedParties(disagreed),
-		message: `${service.id}: ${notes.join('; ')}`,
-	}
+	return errors
 }
 
 /**
- * Check every service of one event against the serving feed and merge the failures into one problem for feedback.
+ * Check every service of one event against the serving feed.
  * Throws when no feed is loaded, so the loop naks instead of rejecting a valid event.
  * @param params - Subject institution and the event's services
- * @returns The merged problem (first failing livestream, union of parties, joined messages), or null when all agree
+ * @returns Errors for every failing service in `services` order, empty when all are allowed
  */
 export const checkEventOwnership = (params: {
 	subjectInstitutionId: string
 	services: readonly { id: string; publisherId: string; institutionId: string }[]
-}): OwnershipProblem | null => {
+}): ValidationErrorItem[] => {
 	const { subjectInstitutionId, services } = params
 	const owners = currentOwners()
 	if (!owners) throw new Error('ard feed is not loaded')
-	const problems = services.flatMap((service) => {
-		const problem = checkServiceOwnership({ subjectInstitutionId, service, owner: owners.get(service.id) ?? null })
-		return problem ? [problem] : []
-	})
-	const first = problems[0]
-	if (!first) return null
-	return {
-		livestreamId: first.livestreamId,
-		disagreed: orderedParties(new Set(problems.flatMap((problem) => problem.disagreed))),
-		message: problems.map((problem) => problem.message).join('; '),
-	}
+	return services.flatMap((service, index) =>
+		checkServiceOwnership({ subjectInstitutionId, service, index, owner: owners.get(service.id) ?? null })
+	)
 }

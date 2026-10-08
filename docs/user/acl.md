@@ -38,7 +38,7 @@ Ein Publisher darf nicht:
 
 Wer Events auch empfangen will, bekommt eine zweite Kennung mit `sub-`. Eine kompromittierte Publisher-Kennung kann damit den Eventstrom nicht mitlesen, eine kompromittierte Subscriber-Kennung kann nichts einspeisen. Subscriber publizieren nichts (`publish` deny auf `>`).
 
-Die Prüfung am Broker gilt dem **Topic**, nicht dem JSON. Eine SWR-Kennung kann ein Payload mit einem NDR-Livestream auf die SWR-Inbox legen; die Validierung weist das ab (`cause: ownership` auf `feedback/`). `services[].institutionId` muss zur Inbox und zum Livestream im ARD-Feed passen.
+Die Prüfung am Broker gilt dem **Topic**, nicht dem JSON. Eine SWR-Kennung kann ein Payload mit einem NDR-Livestream auf die SWR-Inbox legen; die Validierung weist das ab (`User unauthorized for service` in `errors` auf `feedback/`). `services[].institutionId` muss zur Inbox und zum Livestream im ARD-Feed passen.
 
 Mehrere Anstalten auf einer Kennung sind eine Liste von Inboxes, kein Wildcard. Jedes Event geht auf die Inbox der Anstalt, der der Livestream gehört. Der Broker nimmt jede gelistete Inbox an, die falsche Kombination fällt in der Validierung auf. Auf dem HTTPS-Ingest bleibt es bei einer Anstalt pro Firebase-Benutzer; mehrere Anstalten gibt es nur auf MQTT.
 

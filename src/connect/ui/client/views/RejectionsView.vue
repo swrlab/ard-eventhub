@@ -42,7 +42,7 @@ const clearFilter = (): void => {
 		<header class="mb-5 max-w-3xl">
 			<h1 class="text-xl text-heading">rejections</h1>
 			<p class="mt-1 text-sm text-muted/80">
-				Recent feedback, full zod text. Filter to one institution and the URL keeps the filter.
+				Recent feedback, one line per error. Filter to one institution and the URL keeps the filter.
 			</p>
 		</header>
 		<form class="mb-5 flex flex-wrap items-end gap-3" @submit.prevent="apply">
@@ -66,18 +66,22 @@ const clearFilter = (): void => {
 						<tr>
 							<th>time</th>
 							<th>institution</th>
-							<th>cause</th>
-							<th>message</th>
+							<th>errors</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr v-for="row in data.rejections" :key="`${row.at}|${row.subject ?? ''}|${row.message}`">
-							<td class="whitespace-nowrap">{{ formatClock(row.at) }}</td>
+						<tr
+							v-for="row in data.rejections"
+							:key="`${row.created}|${row.subject ?? ''}|${JSON.stringify(row.errors)}`"
+						>
+							<td class="whitespace-nowrap">{{ formatClock(row.created) }}</td>
 							<td class="max-w-xs break-all">{{ row.institutionId ?? '—' }}</td>
-							<td>{{ row.cause ?? '—' }}</td>
 							<td class="max-w-xl break-all">
-								<p>{{ row.message }}</p>
-								<p v-if="row.disagreed.length" class="text-warning">disagreed {{ row.disagreed.join(', ') }}</p>
+								<p v-if="!row.errors.length">—</p>
+								<p v-for="item in row.errors" :key="`${item.path}|${item.message}`">
+									<span class="text-warning">{{ item.path }}</span> {{ item.message }}
+									<span class="text-muted/60">{{ item.errorCode }}</span>
+								</p>
 								<p v-if="row.playlistItemId" class="text-muted/70">{{ row.playlistItemId }}</p>
 								<p v-if="row.subject" class="text-muted/70">{{ row.subject }}</p>
 								<details v-if="row.event !== null" class="mt-2">

@@ -53,7 +53,7 @@ const settle = (msg: JsMsg, plan: ValidationPlan): void => {
 			seq: msg.seq,
 			subject: msg.subject,
 			cause: plan.cause,
-			detail: plan.message,
+			errors: plan.errors,
 			payload: plan.payload,
 			metric: 'connect.validation.rejection',
 		},
@@ -93,7 +93,7 @@ export const runValidationLoop = async (
 			if (stopped()) return
 			let plan: ValidationPlan | null = null
 			try {
-				plan = planInboxMessage({ subject: msg.subject, bytes: msg.data, at: new Date().toISOString() })
+				plan = planInboxMessage({ subject: msg.subject, bytes: msg.data, now: new Date().toISOString() })
 				await publishPlan(publisher, plan)
 				if (beforeAck) await beforeAck()
 				if (stopped()) return

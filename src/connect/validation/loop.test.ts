@@ -222,10 +222,13 @@ test('validation retains a valid event, rejects a bad one, and processes each ev
 		})
 		await waitUntil('schema rejection', () => settlements.some((row) => row.action === 'term'))
 		const schemaFeedback = JSON.parse(await retainedText(PUB_SWR, FEEDBACK_TOPIC)) as {
-			cause?: string
+			errors?: { path: string }[]
 			playlistItemId?: string
 		}
-		assertEquals(schemaFeedback.cause, 'schema')
+		assertEquals(
+			schemaFeedback.errors?.map((error) => error.path),
+			['.body.title']
+		)
 		assertEquals(schemaFeedback.playlistItemId, 'bad-schema')
 		const stillValid = JSON.parse(await retainedText(SUB_ARD_SOUNDS, RADIO_TOPIC)) as {
 			playlistItemId?: string
@@ -243,13 +246,14 @@ test('validation retains a valid event, rejects a bad one, and processes each ev
 			() => settlements.filter((row) => row.action === 'term').length > termsBeforeOwner
 		)
 		const ownerFeedback = JSON.parse(await retainedText(PUB_SWR, FEEDBACK_TOPIC)) as {
-			cause?: string
-			disagreed?: string[]
+			errors?: { path: string }[]
 			playlistItemId?: string
 		}
-		assertEquals(ownerFeedback.cause, 'ownership')
 		assertEquals(ownerFeedback.playlistItemId, 'bad-owner')
-		assertEquals(ownerFeedback.disagreed?.includes('subject'), true)
+		assertEquals(
+			ownerFeedback.errors?.map((error) => error.path),
+			['.body.services.0.institutionId']
+		)
 		assertEquals(duplicates, 0)
 
 		for (const stop of stops.splice(0)) await stop()

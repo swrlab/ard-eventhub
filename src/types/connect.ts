@@ -183,12 +183,10 @@ export type OnAirReport = {
 }
 
 export type Rejection = {
-	at: string
+	created: string
 	institutionId: string | null
 	subject: string | null
-	message: string
-	cause: string | null
-	disagreed: string[]
+	errors: ValidationErrorItem[]
 	playlistItemId: string | null
 	/** Rejected inbox event from the feedback body. Null when the feedback has none. */
 	event: unknown
@@ -266,17 +264,14 @@ export type FollowedArdFeed = {
 	unwatch: () => void
 }
 
-/** Which of the three ownership inputs disagreed. */
-export type OwnershipParty = 'subject' | 'payload' | 'feed'
-
-/** One service that failed the three-way check. */
-export type OwnershipProblem = {
-	livestreamId: string
-	disagreed: OwnershipParty[]
+/** One problem with a rejected event, in the shape of the HTTPS API's 400 `errors[]` (`.body.services.0.id`). */
+export type ValidationErrorItem = {
+	path: string
 	message: string
+	errorCode: string
 }
 
-/** Why a delivery is termed. Also the `cause` on `feedback/` and in the `validation rejected` log. */
+/** Why a delivery is termed. The term reason and the `cause` in the `validation rejected` log; not sent on `feedback/`. */
 export type RejectCause = 'json' | 'schema' | 'ownership'
 
 /** Retained MQTT publish (`radio/` or `feedback/`). */
@@ -302,7 +297,7 @@ export type ValidationAccept = {
 export type ValidationReject = {
 	action: 'term'
 	cause: RejectCause
-	message: string
+	errors: ValidationErrorItem[]
 	feedback: MqttPublish | null
 	/** The full inbox payload for the rejection log and the feedback body: decoded JSON, else the text. */
 	payload: unknown
@@ -310,8 +305,6 @@ export type ValidationReject = {
 
 /** Work for one inbox message, before any publish or ack. */
 export type ValidationPlan = ValidationAccept | ValidationReject
-
-export type FeedbackIssue = { path: string[]; message: string }
 
 /** How the loop publishes. Tests can substitute an in-memory pair. */
 export type ValidationPublisher = {

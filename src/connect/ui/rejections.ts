@@ -1,9 +1,8 @@
 import type { NatsConnection, Subscription } from '@nats-io/transport-node'
-import type { Rejection, RejectionLog } from '#types'
-import { errorMessage, isRecord, stringField, stringList } from './json.ts'
+import type { Rejection, RejectionLog, ValidationErrorItem } from '#types'
+import { errorMessage, isRecord, stringField } from './json.ts'
 
 const MAX_REJECTIONS = 200
-const MAX_MESSAGE = 4_000
 
 /**
  * In-memory ring of feedback seen while this process is up. Not a history store.
@@ -26,26 +25,29 @@ export const createRejectionLog = (): RejectionLog => {
 }
 
 /**
- * Full zod detail when the payload carries `issues`, otherwise the message string.
- * @param record - Parsed object, or null
- * @param text - Raw payload
- * @returns Text the board can show
+ * `errors[]` items that have the HTTPS API shape. Anything else is dropped.
+ * @param value - `errors` from the feedback body
+ * @returns Error items
  */
-const zodMessage = (record: Record<string, unknown> | null, text: string): string => {
-	if (record && Array.isArray(record.issues)) return JSON.stringify(record.issues).slice(0, MAX_MESSAGE)
-	const message = stringField(record, 'message') ?? stringField(record, 'error')
-	if (message) return message.slice(0, MAX_MESSAGE)
-	return text.slice(0, MAX_MESSAGE)
+const feedbackErrors = (value: unknown): ValidationErrorItem[] => {
+	if (!Array.isArray(value)) return []
+	return value.flatMap((item) => {
+		if (!isRecord(item)) return []
+		const path = stringField(item, 'path')
+		const message = stringField(item, 'message')
+		const errorCode = stringField(item, 'errorCode')
+		return path && message && errorCode ? [{ path, message, errorCode }] : []
+	})
 }
 
 /**
  * Normalize one feedback payload. Institution falls back to the subject token.
  * @param text - Payload bytes decoded as UTF-8
  * @param subject - Subject the message arrived on
- * @param at - ISO time to use when the payload has none
+ * @param receivedAt - ISO time to use when the payload has no `created`
  * @returns A rejection row
  */
-export const parseRejection = (text: string, subject: string, at: string): Rejection => {
+export const parseRejection = (text: string, subject: string, receivedAt: string): Rejection => {
 	let parsed: unknown = null
 	try {
 		parsed = JSON.parse(text) as unknown
@@ -55,12 +57,10 @@ export const parseRejection = (text: string, subject: string, at: string): Rejec
 	const record = isRecord(parsed) ? parsed : null
 	const fromSubject = subject.startsWith('feedback.') ? subject.slice('feedback.'.length) : null
 	return {
-		at: stringField(record, 'at') ?? stringField(record, 'start') ?? at,
+		created: stringField(record, 'created') ?? receivedAt,
 		institutionId: stringField(record, 'institutionId') ?? fromSubject,
 		subject: stringField(record, 'subject') ?? subject,
-		message: zodMessage(record, text),
-		cause: stringField(record, 'cause'),
-		disagreed: stringList(record?.disagreed),
+		errors: feedbackErrors(record?.errors),
 		playlistItemId: stringField(record, 'playlistItemId'),
 		event: record?.event ?? null,
 	}
@@ -72,11 +72,11 @@ export const parseRejection = (text: string, subject: string, at: string): Rejec
  * @returns Rows for the board
  */
 export const mergeRejections = (rows: Rejection[]): Rejection[] => {
-	const sorted = rows.toSorted((a, b) => b.at.localeCompare(a.at))
+	const sorted = rows.toSorted((a, b) => b.created.localeCompare(a.created))
 	const seen = new Set<string>()
 	const merged: Rejection[] = []
 	for (const row of sorted) {
-		const key = `${row.at}|${row.subject ?? ''}|${row.message}`
+		const key = `${row.created}|${row.subject ?? ''}|${JSON.stringify(row.errors)}`
 		if (seen.has(key)) continue
 		seen.add(key)
 		merged.push(row)
