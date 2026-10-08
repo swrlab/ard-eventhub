@@ -749,9 +749,6 @@ version — if any of these fail:
 
 ### 8.6 Carry-overs
 
-- **`TEMP_PUBLISHER_MAPPING`** — eleven hardcoded publisher-id remaps in `ard-core.ts`, dated by
-  their own name. Either the upstream ids get fixed or this becomes explicit config with an owner
-  and a review date ([Q7](#197-q7--temp_publisher_mapping)).
 - **`allowed-livestreams.json`** — the overlay for COMMON_IDS livestreams absent from the feed. It
   survives into v3 as an explicit overlay applied after the feed loads, under the same rule: the
   institution comes from pinned config, not from the overlay's own claims.
@@ -1940,8 +1937,8 @@ Vector / VictoriaLogs / VictoriaMetrics / Perses / Beszel are all provisional. B
 
 ### 19.7 Q7 — `TEMP_PUBLISHER_MAPPING`
 
-Eleven hardcoded publisher-id remaps carried in `ard-core.ts`. Fix upstream or make it owned, dated
-config — it must not migrate into v3 unexamined.
+**Decided (2026-10-08): removed.** The eleven hardcoded publisher-id remaps in `ard-core.ts` are
+gone. Lookup matches the publisher id on the feed exactly.
 
 ## 20. Open questions
 
