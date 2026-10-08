@@ -3,7 +3,6 @@ import type { ArdFeedStore, FeedSnapshot } from './ard-feed.ts'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { gzipSync } from 'node:zlib'
 import { test } from '@cross/test'
 import { assert, assertEquals } from '@std/assert'
 import { createSandbox } from 'sinon'
@@ -17,11 +16,9 @@ import {
 	connectedInstitutionIds,
 	createArdFeedState,
 	decideUpstream,
-	defaultBootstrapPath,
 	feedGeneratedAt,
 	feedReport,
 	hydrateArdFeed,
-	readBootstrapFile,
 	stalenessOf,
 } from './ard-feed.ts'
 
@@ -282,23 +279,21 @@ test('hydrate and a KV watch swap without a restart', async () => {
 	await withRules(async () => {
 		const dir = await mkdtemp(join(tmpdir(), 'ard-feed-'))
 		try {
-			const diskPath = join(dir, 'missing.json')
-			const bootstrapPath = join(dir, 'boot.json.gz')
-			const bootstrap = at(makeValidFeed(), '2026-05-01T00:00:00.000Z')
-			await writeFile(bootstrapPath, gzipSync(JSON.stringify(bootstrap)))
+			const diskPath = join(dir, 'feed.json')
+			const cached = at(makeValidFeed(), '2026-05-01T00:00:00.000Z')
+			await writeFile(diskPath, JSON.stringify(cached))
 
 			const state = createArdFeedState()
 			await hydrateArdFeed(state, {
 				readKv: () => Promise.reject(new Error('no responders')),
 				diskPath,
-				bootstrapPath,
 			})
-			assertEquals(state.source, 'bootstrap')
+			assertEquals(state.source, 'disk')
 			assertEquals(feedGeneratedAt(state.feed!), '2026-05-01T00:00:00.000Z')
 
 			const newer = at(makeValidFeed(), '2026-06-01T00:00:00.000Z')
 			assertEquals(applyKvSnapshot(state, { feed: { items: [] } as unknown as ArdFeed, revision: 4 }), false)
-			assertEquals(state.source, 'bootstrap')
+			assertEquals(state.source, 'disk')
 			assertEquals(applyKvSnapshot(state, { feed: newer, revision: 4 }), true)
 			assertEquals(state.revision, 4)
 			assertEquals(state.source, 'kv')
@@ -313,11 +308,4 @@ test('hydrate and a KV watch swap without a restart', async () => {
 			await rm(dir, { recursive: true, force: true })
 		}
 	})
-})
-
-test('shipped bootstrap copy passes the integrity rules', async () => {
-	const feed = await readBootstrapFile(defaultBootstrapPath)
-	assert(feed !== null)
-	assert(feed.items.length >= ardFeedRules.minItems)
-	assert(feed.items.length < ardFeedRules.maxItems)
 })

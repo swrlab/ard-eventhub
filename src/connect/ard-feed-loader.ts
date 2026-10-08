@@ -7,7 +7,6 @@ import {
 	applyKvSnapshot,
 	connectedInstitutionIds,
 	decideUpstream,
-	defaultBootstrapPath,
 	defaultDiskPath,
 	feedState,
 	hydrateArdFeed,
@@ -181,7 +180,7 @@ export const stopArdFeed = (): void => {
 }
 
 /**
- * Hydrate from KV, disk, or the bootstrap copy, then pull and repeat hourly.
+ * Hydrate from KV or the disk copy, then pull and repeat hourly.
  * One process should run this. A second process would also fetch.
  * @param nc - Open NATS connection
  */
@@ -194,7 +193,6 @@ export const startArdFeed = async (nc: NatsConnection): Promise<void> => {
 		await hydrateArdFeed(feedState, {
 			readKv: () => Promise.resolve(null),
 			diskPath: defaultDiskPath,
-			bootstrapPath: defaultBootstrapPath,
 		})
 		logger.error({ message: 'ard feed bucket failed', source, error })
 		throw error
@@ -202,7 +200,6 @@ export const startArdFeed = async (nc: NatsConnection): Promise<void> => {
 	await hydrateArdFeed(feedState, {
 		readKv: () => store.read(),
 		diskPath: defaultDiskPath,
-		bootstrapPath: defaultBootstrapPath,
 	})
 	if (!feedState.feed) {
 		logger.warning({ message: 'no ard feed cached', source })

@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { FeedCatalogReport, KnownLivestream } from '../../../src/connect/ui/types.ts'
-import { computed, inject, ref, type Ref } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { formatAge } from '../format'
+import { formatStamp } from '../format'
 import { usePoll } from '../use-poll'
 
-const now = inject<Ref<number>>('now', ref(Date.now()))
 const query = ref('')
 const { data, error, loading } = usePoll<FeedCatalogReport>(() => '/api/feed/catalog')
 
@@ -57,14 +56,8 @@ const tailTo = (entry: KnownLivestream): { name: string; query: { filter: string
 	<section>
 		<header class="mb-5 max-w-3xl">
 			<h1 class="text-xl text-heading">feed</h1>
-			<p class="mt-1 text-sm text-muted/80">
-				The snapshot this process is authorizing with.
-				<span v-if="data">
-					{{ data.source ?? 'empty' }}
-					<span v-if="data.revision !== null">· rev {{ data.revision }}</span>
-					· {{ formatAge(data.generatedAt, now) }}
-					<span v-if="data.staleness !== 'ok' && data.staleness !== 'never'">· {{ data.staleness }}</span>
-				</span>
+			<p v-if="data" class="mt-1 font-mono text-sm text-muted">
+				built {{ formatStamp(data.generatedAt) }} · fetched {{ formatStamp(data.lastSuccessAt) }}
 			</p>
 			<p class="mt-2 text-sm text-muted/80">
 				The livestream title opens its tail. The id is the feed <code>externalId</code>, the URN publishers send. Rows

@@ -85,6 +85,24 @@ export const formatContact = (ns: number | null): string => {
 }
 
 /**
+ * Local date and clock for a feed stamp. Minutes, not a ticking duration.
+ * @param iso - ISO timestamp, or null
+ * @returns `8 Oct 14:17`, or an em dash
+ */
+export const formatStamp = (iso: string | null): string => {
+	if (!iso) return '—'
+	const date = new Date(iso)
+	if (Number.isNaN(date.getTime())) return '—'
+	return date.toLocaleString(undefined, {
+		day: 'numeric',
+		month: 'short',
+		hourCycle: 'h23',
+		hour: '2-digit',
+		minute: '2-digit',
+	})
+}
+
+/**
  * Clock time for a tail frame.
  * @param iso - ISO timestamp
  * @returns Local 24-hour time

@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- feat: drop the shipped gzip ARD feed fallback; cold start uses KV or `.local/ard-feed.json`
 - chore: remove Datadog `dd-trace` (`DD_TRACE_ENABLED` / `DD_TRACER_ENABLED`)
 - chore: remove NanoMQ (local broker, Kubernetes manifest, CI hop)
 

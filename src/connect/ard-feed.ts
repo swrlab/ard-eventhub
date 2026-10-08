@@ -1,7 +1,6 @@
 import type { ArdFeed } from '#types'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
-import { gunzipSync } from 'node:zlib'
 import { getArdFeedValidationError } from '../utils/ard-feed-rules.ts'
 
 /** JetStream stream that holds the feed. KV subjects live under `$KV.ARD_FEED.>`. */
@@ -20,7 +19,7 @@ export const FEED_STALE_ALERT_MS = 12 * 60 * 60 * 1000
 export const FEED_STALE_PAGE_MS = 48 * 60 * 60 * 1000
 
 /** Where a loaded snapshot came from. */
-type FeedSource = 'kv' | 'disk' | 'bootstrap'
+type FeedSource = 'kv' | 'disk'
 
 /** What the last pull did. */
 type FeedOutcome = 'stored' | 'unchanged' | 'rejected' | 'unavailable'
@@ -90,9 +89,6 @@ export type FeedReport = {
 
 /** Last good copy on disk. Gitignored via `.local/`. */
 export const defaultDiskPath = join(import.meta.dir, '../../.local/ard-feed.json')
-
-/** Gzip snapshot shipped with the process. Cold start uses it when KV and disk are empty. */
-export const defaultBootstrapPath = join(import.meta.dir, 'bootstrap/ard-feed.json.gz')
 
 /**
  * Empty state, before hydrate.
@@ -303,22 +299,6 @@ const readFeedFile = async (path: string): Promise<ArdFeed | null> => {
 }
 
 /**
- * Read the gzip bootstrap copy.
- * @param path - Path to `ard-feed.json.gz`
- * @returns The feed, or null when the file is missing or invalid
- */
-export const readBootstrapFile = async (path: string): Promise<ArdFeed | null> => {
-	try {
-		const bytes = gunzipSync(await readFile(path))
-		const parsed: unknown = JSON.parse(new TextDecoder().decode(bytes))
-		if (getArdFeedValidationError(parsed)) return null
-		return parsed as ArdFeed
-	} catch {
-		return null
-	}
-}
-
-/**
  * Atomically replace a JSON file with the feed.
  * @param path - Destination
  * @param feed - Accepted document
@@ -331,7 +311,7 @@ export const writeFeedFile = async (path: string, feed: ArdFeed): Promise<void> 
 }
 
 /**
- * Load KV, then disk, then the bootstrap copy. The first valid document wins.
+ * Load KV, then the disk copy. The first valid document wins.
  * @param state - Process state to fill
  * @param sources - Where to look
  */
@@ -340,7 +320,6 @@ export const hydrateArdFeed = async (
 	sources: {
 		readKv: () => Promise<FeedSnapshot | null>
 		diskPath: string
-		bootstrapPath: string
 	}
 ): Promise<void> => {
 	try {
@@ -350,13 +329,8 @@ export const hydrateArdFeed = async (
 			return
 		}
 	} catch {
-		// KV unread. Disk and the bootstrap copy still count.
+		// KV unread. The disk copy still counts.
 	}
 	const disk = await readFeedFile(sources.diskPath)
-	if (disk) {
-		applyFeed(state, disk, null, 'disk')
-		return
-	}
-	const bootstrap = await readBootstrapFile(sources.bootstrapPath)
-	if (bootstrap) applyFeed(state, bootstrap, null, 'bootstrap')
+	if (disk) applyFeed(state, disk, null, 'disk')
 }

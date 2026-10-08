@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import type { ClusterReport, FeedReport, MetaReport } from '../../src/connect/ui/types.ts'
+import type { ClusterReport, MetaReport } from '../../src/connect/ui/types.ts'
 import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import { formatAge } from './format'
 import { tailPhase } from './tail-state'
 
 const route = useRoute()
@@ -10,8 +9,6 @@ const now = ref(Date.now())
 const meta = ref<MetaReport | null>(null)
 const cluster = ref<ClusterReport | null>(null)
 const clusterError = ref<string | null>(null)
-const feed = ref<FeedReport | null>(null)
-
 provide('now', now)
 
 const nav = [
@@ -33,26 +30,6 @@ const clusterLine = computed(() => {
 	return `${name} · ${leader} · ${reachable}/${size}`
 })
 
-const feedLine = computed(() => {
-	const report = feed.value
-	if (!report || !report.source) return report?.lastError ? `feed ${report.lastError}` : 'feed empty'
-	const age = formatAge(report.generatedAt, now.value)
-	const rev = report.revision === null ? '' : ` · rev ${report.revision}`
-	const problem =
-		report.lastError && report.outcome !== 'stored' && report.outcome !== 'unchanged' ? ` · ${report.lastError}` : ''
-	if (report.staleness === 'never') return `feed ${report.source}${rev}${problem}`
-	if (report.staleness === 'ok') return `feed ${age}${rev}${problem}`
-	return `feed ${age}${rev} · ${report.staleness}${problem}`
-})
-
-const feedTone = computed(() => {
-	const report = feed.value
-	if (!report) return 'text-muted'
-	if (report.lastError && report.outcome !== 'stored' && report.outcome !== 'unchanged') return 'text-warning'
-	if (report.staleness === 'warn' || report.staleness === 'alert' || report.staleness === 'page') return 'text-warning'
-	return 'text-muted'
-})
-
 const load = async (): Promise<void> => {
 	if (document.hidden) return
 	try {
@@ -63,8 +40,6 @@ const load = async (): Promise<void> => {
 		}
 		cluster.value = (await response.json()) as ClusterReport
 		clusterError.value = cluster.value.error
-		const feedResponse = await fetch('/api/feed')
-		if (feedResponse.ok) feed.value = (await feedResponse.json()) as FeedReport
 	} catch (error) {
 		clusterError.value = error instanceof Error ? error.message : 'monitor unreachable'
 	}
@@ -137,21 +112,12 @@ onUnmounted(() => {
 						docs
 					</a>
 				</div>
-				<div class="flex min-w-0 flex-col gap-0.5 sm:items-end">
-					<p
-						class="max-w-full min-w-0 truncate font-mono text-sm tabular-nums"
-						:class="clusterError && !cluster?.nodes.length ? 'text-warning' : 'text-muted'"
-					>
-						{{ clusterLine }}
-					</p>
-					<RouterLink
-						to="/feed"
-						class="max-w-full min-w-0 truncate font-mono text-sm tabular-nums hover:text-link"
-						:class="feedTone"
-					>
-						{{ feedLine }}
-					</RouterLink>
-				</div>
+				<p
+					class="max-w-full min-w-0 truncate font-mono text-sm tabular-nums sm:text-right"
+					:class="clusterError && !cluster?.nodes.length ? 'text-warning' : 'text-muted'"
+				>
+					{{ clusterLine }}
+				</p>
 			</div>
 			<nav class="mt-3 flex flex-wrap gap-1 font-mono text-sm" aria-label="Boards">
 				<RouterLink
