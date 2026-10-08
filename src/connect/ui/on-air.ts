@@ -1,4 +1,12 @@
-import type { OnAirControl, OnAirData, OnAirStation, OnAirTrack, RadioEventClass, RadioObservation } from '#types'
+import type {
+	KnownLivestream,
+	OnAirControl,
+	OnAirData,
+	OnAirStation,
+	OnAirTrack,
+	RadioEventClass,
+	RadioObservation,
+} from '#types'
 import { booleanField, isRecord, stringField } from './json.ts'
 
 const EVENT_CLASSES = ['track.playing', 'track.next', 'control', 'data'] as const satisfies readonly RadioEventClass[]
@@ -97,6 +105,8 @@ const institutionOf = (payload: unknown): string | null => {
 const emptyStation = (livestreamId: string): OnAirStation => ({
 	livestreamId,
 	institutionId: null,
+	institutionTitle: null,
+	publisherTitle: null,
 	lastEventAt: null,
 	playing: null,
 	next: null,
@@ -156,5 +166,27 @@ export const foldOnAir = (observations: RadioObservation[]): OnAirStation[] => {
 		if (a.lastEventAt === null) return -1
 		if (b.lastEventAt === null) return 1
 		return a.lastEventAt.localeCompare(b.lastEventAt)
+	})
+}
+
+/**
+ * Copy publisher and institution titles from the feed onto each station.
+ * A livestream the feed does not list keeps null titles. An empty feed title stays null.
+ * @param stations - Rows from `foldOnAir`
+ * @param catalog - Feed plus overlay
+ * @returns Stations with titles filled in
+ */
+export const nameOnAirStations = (
+	stations: readonly OnAirStation[],
+	catalog: readonly KnownLivestream[]
+): OnAirStation[] => {
+	const byId = new Map(catalog.map((entry) => [entry.id, entry]))
+	return stations.map((station) => {
+		const entry = byId.get(station.livestreamId)
+		return {
+			...station,
+			institutionTitle: entry?.institution?.title || null,
+			publisherTitle: entry?.publisher.title || null,
+		}
 	})
 }

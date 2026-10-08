@@ -1,6 +1,6 @@
 import { test } from '@cross/test'
 import { assertEquals } from '@std/assert'
-import { foldOnAir, parseRadioSubject } from './on-air.ts'
+import { foldOnAir, nameOnAirStations, parseRadioSubject } from './on-air.ts'
 
 const LIVESTREAM = 'urn:ard:permanent-livestream:49267f7d67be180d'
 
@@ -62,4 +62,37 @@ test('on-air rows sort quietest first and keep the latest control and radiotext'
 	assertEquals(first?.lastEventAt, '2026-10-08T09:01:30.000Z')
 	assertEquals(stations[1]?.playing?.publisherId, 'urn:ard:publisher:1')
 	assertEquals(stations[1]?.institutionId, 'urn:ard:institution:house')
+	assertEquals(stations[1]?.publisherTitle, null)
+	assertEquals(stations[1]?.institutionTitle, null)
+})
+
+test('feed titles land on the matching livestream and stay empty otherwise', () => {
+	const known = 'urn:ard:permanent-livestream:aaaaaaaaaaaaaaaa'
+	const unknown = 'urn:ard:permanent-livestream:bbbbbbbbbbbbbbbb'
+	const named = nameOnAirStations(
+		foldOnAir([
+			{ subject: `radio.${known}.track.playing`, at: '2026-10-08T10:00:00.000Z', payload: { title: 'A' } },
+			{ subject: `radio.${unknown}.track.playing`, at: '2026-10-08T10:00:00.000Z', payload: { title: 'B' } },
+		]),
+		[
+			{
+				id: known,
+				title: 'SWR3',
+				publisher: { id: 'urn:ard:publisher:1', title: 'SWR3' },
+				institution: { id: 'urn:ard:institution:house', title: 'Südwestrundfunk' },
+				overlay: false,
+			},
+			{
+				id: 'urn:ard:permanent-livestream:cccccccccccccccc',
+				title: 'Overlay',
+				publisher: { id: 'urn:ard:publisher:2', title: '' },
+				institution: null,
+				overlay: true,
+			},
+		]
+	)
+	assertEquals(named[0]?.publisherTitle, 'SWR3')
+	assertEquals(named[0]?.institutionTitle, 'Südwestrundfunk')
+	assertEquals(named[1]?.publisherTitle, null)
+	assertEquals(named[1]?.institutionTitle, null)
 })

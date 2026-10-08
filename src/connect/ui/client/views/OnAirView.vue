@@ -44,9 +44,10 @@ const controlLine = (name: string | null, state: boolean | null, validUntil: str
 				</thead>
 				<tbody>
 					<tr v-for="station in data.stations" :key="station.livestreamId">
-						<td class="max-w-xs break-all">
-							{{ station.livestreamId }}
-							<span v-if="station.institutionId" class="mt-1 block text-muted/70">{{ station.institutionId }}</span>
+						<td class="max-w-xs">
+							<p class="break-all">{{ station.livestreamId }}</p>
+							<p v-if="station.institutionTitle" class="mt-1">{{ station.institutionTitle }}</p>
+							<p v-if="station.institutionId" class="mt-1 break-all text-muted/70">{{ station.institutionId }}</p>
 						</td>
 						<td :class="ageTone(station.lastEventAt, now)">{{ formatAge(station.lastEventAt, now) }}</td>
 						<td class="max-w-sm">
@@ -54,7 +55,12 @@ const controlLine = (name: string | null, state: boolean | null, validUntil: str
 							<p v-if="station.playing?.artist" class="text-muted/80">{{ station.playing.artist }}</p>
 							<p v-if="station.next?.title" class="text-muted/70">next · {{ station.next.title }}</p>
 						</td>
-						<td class="max-w-xs break-all">{{ station.playing?.publisherId ?? '—' }}</td>
+						<td class="max-w-xs">
+							<p v-if="station.publisherTitle">{{ station.publisherTitle }}</p>
+							<p class="break-all" :class="station.publisherTitle ? 'text-muted/70' : ''">
+								{{ station.playing?.publisherId ?? '—' }}
+							</p>
+						</td>
 						<td>
 							{{
 								station.control

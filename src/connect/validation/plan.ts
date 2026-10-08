@@ -77,7 +77,7 @@ const parseJson = (text: string): { value: unknown } | null => {
 }
 
 /**
- * The payload as the rejection log shows it. Oversized payloads become a prefix with the byte count.
+ * The payload as the validation log shows it. Oversized payloads become a prefix with the byte count.
  * @param bytes - Raw payload
  * @param json - Parsed JSON, or null when the payload is not JSON
  * @returns JSON value, else the text (lossy when not UTF-8), else a truncated prefix
@@ -189,6 +189,7 @@ export const planInboxMessage = (params: { subject: string; bytes: Uint8Array; n
 	const livestreamIds = [...new Set(event.services.map((service) => service.id))]
 	return {
 		action: 'ack',
+		payload: bytes.byteLength > MAX_LOGGED_PAYLOAD_BYTES ? payload : event,
 		radio: livestreamIds.map((id) => ({ topic: radioMqttTopic(id, eventClass), body: event })),
 		plugins: livestreamIds.flatMap((id) =>
 			targets.map((target) => ({ subject: pluginSubject(target, id, eventClass), body: event }))

@@ -79,6 +79,15 @@ test('the delivered event keeps the creator and carries the delivery time as cre
 		assertEquals(body.creator, 'example@swr.de')
 		assertEquals(body.created, AT)
 	}
+	assertEquals(result.payload, result.radio[0]?.body)
+})
+
+test('an oversized accepted event is logged as a prefix with its size', () => {
+	const result = accepted(plan({ ...track, title: 'x'.repeat(70 * 1024) }))
+	const payload = result.payload as { truncated: boolean; bytes: number; head: string }
+	assertEquals(payload.truncated, true)
+	assertEquals(payload.bytes > 70 * 1024, true)
+	assertEquals(payload.head.length, 64 * 1024)
 })
 
 test('an event without a creator is a schema rejection', () => {

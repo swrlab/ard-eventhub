@@ -2,6 +2,7 @@ import process from 'node:process'
 import { getRequiredEnv } from '@frytg/check-required-env/get'
 import { PubSub, type Message } from '@google-cloud/pubsub'
 import mqtt from 'mqtt'
+import { ulid } from 'ulid'
 import { mqttTlsConnectOptions } from '../utils/mqtt/tls-ca.ts'
 
 const MQTT_V311 = 4
@@ -47,7 +48,7 @@ const relay = async (subscriptionName: string): Promise<void> => {
 	const brokerUrl = getRequiredEnv('MQTT_BROKER_URL').trim()
 	const client = await mqtt.connectAsync(brokerUrl, {
 		protocolVersion: MQTT_V311,
-		clientId: `eventhub-pubsub-mqtt-${process.pid}`,
+		clientId: `eventhub-pubsub-mqtt-${process.pid}-${ulid()}`,
 		clean: true,
 		...mqttTlsConnectOptions(process.env.MQTT_TLS_CA ?? ''),
 	})

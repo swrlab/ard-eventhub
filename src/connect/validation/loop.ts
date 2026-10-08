@@ -40,7 +40,12 @@ const settle = (msg: JsMsg, plan: ValidationPlan): void => {
 		logger.info({
 			message: 'validation accepted',
 			source,
-			data: { seq: msg.seq, subject: msg.subject, plugins: plan.plugins.length },
+			data: {
+				seq: msg.seq,
+				subject: msg.subject,
+				plugins: plan.plugins.length,
+				payload: plan.payload,
+			},
 		})
 		return
 	}
@@ -111,6 +116,7 @@ export const runValidationLoop = async (
 						deliveryCount: msg.info.deliveryCount,
 						action: plan?.action ?? null,
 						cause: plan?.action === 'term' ? plan.cause : null,
+						payload: plan?.payload ?? null,
 					},
 				})
 				try {

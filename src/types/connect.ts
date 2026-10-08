@@ -166,7 +166,12 @@ export type OnAirData = {
 
 export type OnAirStation = {
 	livestreamId: string
+	/** Institution URN from the retained payload. */
 	institutionId: string | null
+	/** Institution title from the feed row for this livestream. Null when the feed has no row. */
+	institutionTitle: string | null
+	/** Publisher title from the feed row for this livestream. Null when the feed has no row. */
+	publisherTitle: string | null
 	lastEventAt: string | null
 	playing: OnAirTrack | null
 	next: OnAirTrack | null
@@ -291,6 +296,11 @@ export type ValidationAccept = {
 	action: 'ack'
 	radio: MqttPublish[]
 	plugins: NatsPublish[]
+	/**
+	 * The accepted event for the log: the body that was retained, with `created` set to the delivery time.
+	 * Oversized deliveries are a prefix (`truncated`, `bytes`, `head`) past 64 KiB, same as a rejection.
+	 */
+	payload: unknown
 }
 
 /** Rejected: retain the feedback (when the subject names an institution), then term. */
@@ -299,7 +309,7 @@ export type ValidationReject = {
 	cause: RejectCause
 	errors: ValidationErrorItem[]
 	feedback: MqttPublish | null
-	/** The full inbox payload for the rejection log and the feedback body: decoded JSON, else the text. */
+	/** The full inbox payload for the log and the feedback body: decoded JSON, else the text. */
 	payload: unknown
 }
 

@@ -1,6 +1,7 @@
 import type { ClusterReport, ConnectionsReport, LiveConnection, MetaReport } from '#types'
 import { readFileSync } from 'node:fs'
 import { Hono } from 'hono'
+import { knownLivestreams } from '../../utils/feed/known-livestreams.ts'
 import { natsUrl, natsUser } from '../env.ts'
 import { updateArdFeed } from '../feed/ard-feed-loader.ts'
 import { currentFeed, currentFeedReport } from '../feed/current-feed.ts'
@@ -8,7 +9,7 @@ import { buildFeedCatalog } from '../feed/feed-catalog.ts'
 import { sampleMonitor } from './cluster.ts'
 import { natsMonitorUrl, natsWsUrl, usersConfPath } from './env.ts'
 import { errorMessage } from './json.ts'
-import { foldOnAir } from './on-air.ts'
+import { foldOnAir, nameOnAirStations } from './on-air.ts'
 import { DEFAULT_TAIL_FILTER, STATS_POLL_MS, TAIL_CAP_MS, TAIL_IDLE_MS, TAIL_MAX_PER_SECOND } from './policy.ts'
 import { filterRejections, mergeRejections, parseRejection } from './rejections.ts'
 import { readRetained } from './retained.ts'
@@ -109,12 +110,15 @@ api.get('/on-air', async (c) => {
 		return c.json({ at, error: 'nats is unavailable', note: null, truncated: false, stations: [] })
 	}
 	const retained = await readRetained(nc, 'radio.>')
-	const stations = foldOnAir(
-		retained.messages.map((message) => ({
-			subject: message.subject,
-			at: message.at,
-			payload: parseJson(message.text),
-		}))
+	const stations = nameOnAirStations(
+		foldOnAir(
+			retained.messages.map((message) => ({
+				subject: message.subject,
+				at: message.at,
+				payload: parseJson(message.text),
+			}))
+		),
+		knownLivestreams(currentFeed())
 	)
 	const note = stations.length === 0 && !retained.error ? 'no retained radio subject on this cluster' : null
 	return c.json({ at, error: retained.error, note, truncated: retained.truncated, stations })

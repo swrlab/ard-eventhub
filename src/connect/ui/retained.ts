@@ -7,6 +7,12 @@ const SUBJECT_CAP = 200
 const READ_CONCURRENCY = 8
 
 /**
+ * JetStream prefix for one MQTT retained message.
+ * The public subject `radio.{livestream}.track.playing` is stored as `$MQTT.rmsgs.radio.{livestream}.track.playing`.
+ */
+const MQTT_RETAINED_PREFIX = '$MQTT.rmsgs.'
+
+/**
  * Whether a stream subject list can hold messages for a filter prefix (`radio.` / `feedback.`).
  * @param patterns - Stream subject patterns
  * @param prefix - Filter prefix, including the trailing dot when the filter was `radio.>`
@@ -18,6 +24,29 @@ export const streamCouldHold = (patterns: readonly string[], prefix: string): bo
 		const normalized = pattern.endsWith('.>') ? pattern.slice(0, -2) : pattern.replace(/>$/, '')
 		return prefix.startsWith(normalized) || normalized.startsWith(prefix) || pattern.includes('*')
 	})
+
+/**
+ * Subject filter to ask one stream for, given the public filter (`radio.>`, `feedback.>`).
+ * A stream that captures the public subject is asked for that filter.
+ * The MQTT retain stream is asked for `$MQTT.rmsgs.` plus the same filter.
+ * @param patterns - Stream subject patterns
+ * @param filter - Public subject filter
+ * @returns The filter for this stream, or null when it cannot hold the messages
+ */
+export const retainedFilterForStream = (patterns: readonly string[], filter: string): string | null => {
+	const prefix = filter.endsWith('>') ? filter.slice(0, -1) : filter
+	if (streamCouldHold(patterns, prefix)) return filter
+	if (streamCouldHold(patterns, MQTT_RETAINED_PREFIX)) return `${MQTT_RETAINED_PREFIX}${filter}`
+	return null
+}
+
+/**
+ * Public subject for a stored retained message.
+ * @param subject - Subject JetStream returned
+ * @returns Subject without the MQTT retain prefix
+ */
+export const publicRetainedSubject = (subject: string): string =>
+	subject.startsWith(MQTT_RETAINED_PREFIX) ? subject.slice(MQTT_RETAINED_PREFIX.length) : subject
 
 /**
  * Run async work over a list with a fixed number of workers.
@@ -46,46 +75,43 @@ const pool = async <T, R>(items: readonly T[], limit: number, fn: (item: T) => P
 }
 
 /**
- * Last message per subject for a filter, read from JetStream. Empty when no stream holds the filter.
+ * Last message per public subject for a filter.
+ * Radio and feedback retains are MQTT publishes, so they live in `$MQTT_rmsgs` under `$MQTT.rmsgs.`, not on `radio.>`.
  * Direct gets are request/reply on `$JS.API`, not a streaming subscription.
  * @param nc - Open NATS connection
- * @param filter - Subject filter ending in `>` (`radio.>`, `feedback.>`)
+ * @param filter - Public subject filter ending in `>` (`radio.>`, `feedback.>`)
  * @returns Messages, a truncation flag, and an error when the read failed outright
  */
 export const readRetained = async (nc: NatsConnection, filter: string): Promise<RetainedRead> => {
-	const prefix = filter.endsWith('>') ? filter.slice(0, -1) : filter
 	try {
 		const jsm = await jetstreamManager(nc)
-		const streams: { name: string; subjects: string[] }[] = []
+		const streams: { name: string; filter: string }[] = []
 		for await (const info of jsm.streams.list()) {
-			streams.push({ name: info.config.name, subjects: [...(info.config.subjects ?? [])] })
+			const streamFilter = retainedFilterForStream([...(info.config.subjects ?? [])], filter)
+			if (!streamFilter) continue
+			streams.push({ name: info.config.name, filter: streamFilter })
 		}
-		const subjects: string[] = []
+		const located: { stream: string; stored: string }[] = []
 		for (const stream of streams) {
-			if (!streamCouldHold(stream.subjects, prefix)) continue
-			const detail = await jsm.streams.info(stream.name, { subjects_filter: filter })
-			for (const subject of Object.keys(detail.state.subjects ?? {})) subjects.push(subject)
+			const detail = await jsm.streams.info(stream.name, { subjects_filter: stream.filter })
+			for (const stored of Object.keys(detail.state.subjects ?? {})) located.push({ stream: stream.name, stored })
 		}
-		const unique = [...new Set(subjects)]
+		const unique = [...new Map(located.map((item) => [`${item.stream}\0${item.stored}`, item])).values()]
 		const truncated = unique.length > SUBJECT_CAP
 		const chosen = unique.slice(0, SUBJECT_CAP)
 		const bySubject = new Map<string, RetainedMessage>()
-		const loaded = await pool(chosen, READ_CONCURRENCY, async (subject) => {
-			for (const stream of streams) {
-				if (!streamCouldHold(stream.subjects, prefix)) continue
-				try {
-					const msg = await jsm.streams.getMessage(stream.name, { last_by_subj: subject })
-					if (!msg) continue
-					return {
-						subject: msg.subject,
-						at: msg.timestamp,
-						text: new TextDecoder().decode(msg.data),
-					}
-				} catch {
-					continue
+		const loaded = await pool(chosen, READ_CONCURRENCY, async ({ stream, stored }) => {
+			try {
+				const msg = await jsm.streams.getMessage(stream, { last_by_subj: stored })
+				if (!msg) return null
+				return {
+					subject: publicRetainedSubject(msg.subject),
+					at: msg.timestamp,
+					text: new TextDecoder().decode(msg.data),
 				}
+			} catch {
+				return null
 			}
-			return null
 		})
 		for (const message of loaded) {
 			if (!message) continue
