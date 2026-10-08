@@ -11,7 +11,7 @@ In addition to the [ingest-env](../src/ingest/README.md#Environments), following
 
 - REQUIRED `TEST_USER` - test user email
 - REQUIRED `TEST_USER_PW` - test user password
-- REQUIRED `MQTT_BROKER_URL` - local NanoMQ hop (`mqtt://127.0.0.1:1883`). Start it with `just mqtt-up` before `just test`. CI starts the same image with `just mqtt-up-docker`.
+- OPTIONAL `MQTT_BROKER_URL` - local NanoMQ hop (`mqtt://127.0.0.1:1883`). Ingest boots without it. The sops test env sets it so the inbox client can connect. Start the hop with `just mqtt-up` before `just test`. CI starts the same image with `just mqtt-up-docker`.
 - OPTIONAL `MQTT_TLS_CA` - hop CA PEM or path. Omit for local `mqtt://`; GKE mqtts:// needs the private CA.
 - OPTIONAL `NATS_URL` - Eventhub Connect NATS client (`nats://127.0.0.1:4222`). Not required for ingest tests. Start a local broker with `just nats-up` (Homebrew) or `just nats-up-docker` (Cursor Cloud / CI). Do not run NATS and NanoMQ together — both bind `:1883`.
 - OPTIONAL `NATS_USER` / `NATS_PASSWORD` - defaults `svc-sidecar` / `local` (bcrypt hashes in `infra/nats/nats-users.conf`). Production plaintext via sops.

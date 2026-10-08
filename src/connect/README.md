@@ -14,7 +14,7 @@ Local users live in [`infra/nats/nats-users.conf`](../../infra/nats/nats-users.c
 - OPTIONAL `NATS_USER` — default `svc-sidecar`
 - OPTIONAL `NATS_PASSWORD` — default `local` (override via sops in deployed environments)
 
-Ingest still requires `MQTT_BROKER_URL` and is unchanged. NanoMQ and NATS both bind `:1883` — do not run them at the same time. Anonymous NATS/MQTT connects are rejected (`no_auth_user` is unset).
+Ingest dual-writes only when `MQTT_BROKER_URL` is set. Unset, ingest stays on Pub/Sub. NanoMQ and NATS both bind `:1883` — do not run them at the same time. Anonymous NATS/MQTT connects are rejected (`no_auth_user` is unset).
 
 ## Local NATS (Mac / Homebrew)
 

@@ -13,7 +13,7 @@ Several environment variables need to be set in `.env` config in order to run th
 - REQUIRED `GOOGLE_APPLICATION_CREDENTIALS` - where the Google Cloud Service Account Key can be found (usually a path to a .json file)
 - REQUIRED `PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL` - for verification of internal publisher service account
 - REQUIRED `STAGE` - can be one of the Stages below to switch several settings
-- REQUIRED `MQTT_BROKER_URL` - MQTT hop connection string (`mqtt://127.0.0.1:1883` locally). Put credentials in the URL when the broker needs them (`mqtts://user:pass@host:8883`). A failed publish never fails the HTTP response.
+- OPTIONAL `MQTT_BROKER_URL` - MQTT hop connection string (`mqtt://127.0.0.1:1883` locally). Unset skips the inbox dual-write so legacy ingest stays on Pub/Sub. Put credentials in the URL when the broker needs them (`mqtts://user:pass@host:8883`). A failed publish never fails the HTTP response.
 - OPTIONAL `MQTT_TLS_CA` - PEM of the hop CA, or a path to that PEM. Needed for `mqtts://` against a private CA (GKE NanoMQ). Omit for local `mqtt://`.
 - OPTIONAL `INGEST_PUBLISH_PLUGINS` - must be the exact string `true` to publish DTS / Radioplayer jobs to the internal Pub/Sub topic. Unset or any other value (`1`, `TRUE`, `false`) leaves dispatch off. Independent of per-event `plugins[].isDeactivated`. Restart the process after changing it. The flag is logged on boot and on every processed event as `ingestPublishPlugins`.
 - OPTIONAL `PORT` - override server port setting, default is 8080
@@ -64,7 +64,7 @@ GitHub Actions builds and pushes the Docker image to the container registry. Dep
 
 ## Local MQTT hop
 
-Ingest dual-writes each accepted event to `inbox/{institutionId}` on NanoMQ. `MQTT_BROKER_URL` is required, including for `just test` (local hop). Pub/Sub stays the path of record. Locally use Apple's `container` CLI (`just mqtt-up`), not `docker`. CI starts the same image with `just mqtt-up-docker`. Against a private mqtts:// hop (GKE), set `MQTT_TLS_CA` to the hop CA PEM or its file path so mqtt.js can verify the broker.
+Ingest dual-writes each accepted event to `inbox/{institutionId}` on NanoMQ when `MQTT_BROKER_URL` is set. Unset, the hop stays off and Pub/Sub stays the path of record. `just test` still injects the URL from sops. Locally use Apple's `container` CLI (`just mqtt-up`), not `docker`. CI starts the same image with `just mqtt-up-docker`. Against a private mqtts:// hop (GKE), set `MQTT_TLS_CA` to the hop CA PEM or its file path so mqtt.js can verify the broker.
 
 ```sh
 container system start   # once, if `container` says the apiserver is not running

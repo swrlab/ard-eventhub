@@ -27,12 +27,6 @@ const DEFAULT_HTTP_PORT = 8080
 export const port = getEnvNumber('PORT', DEFAULT_HTTP_PORT)
 
 /**
- * Datadog tracer enabled (`DD_TRACER_ENABLED === 'true'`).
- * `false` by default.
- */
-export const tracerEnabled = getEnvBoolean('DD_TRACER_ENABLED', false)
-
-/**
  * Whether ingest publishes plugin jobs to the internal Pub/Sub topic.
  * Only the exact string `true` enables it. Unset, `1`, `TRUE`, and `false` all leave it off.
  * Read at call time so a process restart (or a test) can flip it without re-importing this module.
@@ -45,8 +39,9 @@ export const isIngestPublishPluginsEnabled = (): boolean =>
 /**
  * MQTT broker connection string for the inbox dual-write hop.
  * `mqtt://` or `mqtts://`, with optional `user:pass@` in the URL.
+ * Empty when unset so legacy ingest stays on Pub/Sub without a hop.
  */
-export const mqttBrokerUrl = getRequiredEnv('MQTT_BROKER_URL')
+export const mqttBrokerUrl = getEnv<string>('MQTT_BROKER_URL', { defaultValue: '' })
 /**
  * Optional hop CA for mqtts://. PEM text, or a path to a PEM file.
  * Unset for local `mqtt://`. GKE mounts `eventhub-nanomq-tls` `ca.crt` and points here.
