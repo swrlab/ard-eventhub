@@ -1,7 +1,7 @@
 import type { ArdFeed, ArdLivestream } from '#types'
 import { test } from '@cross/test'
 import { assertEquals } from '@std/assert'
-import { knownLivestreams } from './known-livestreams.ts'
+import { knownLivestreams, livestreamOwners } from './known-livestreams.ts'
 
 /**
  * One feed item. `id` is the fusion URN. `externalId` is the livestream URN.
@@ -104,6 +104,28 @@ test('knownLivestreams skips a feed item with no externalId', () => {
 		rows.find((entry) => entry.publisher.id === 'urn:ard:publisher:a8aa147108ee961a')?.publisher.title,
 		'SWR1'
 	)
+})
+
+test('livestreamOwners indexes a loaded feed and is null when none is loaded', () => {
+	assertEquals(livestreamOwners(null), null)
+	const feed = {
+		items: [
+			item(
+				'urn:ard:permanent-livestream:aaa',
+				'Daytime',
+				'urn:ard:publisher:pub',
+				'SWR3',
+				'urn:ard:institution:house',
+				'SWR'
+			),
+		],
+	} as ArdFeed
+	const owners = livestreamOwners(feed)
+	assertEquals(owners?.get('urn:ard:permanent-livestream:aaa'), {
+		publisherId: 'urn:ard:publisher:pub',
+		institutionId: 'urn:ard:institution:house',
+	})
+	assertEquals(livestreamOwners(feed), owners)
 })
 
 test('knownLivestreams still lists the overlay when no feed is loaded', () => {

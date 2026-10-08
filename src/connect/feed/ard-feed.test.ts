@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { test } from '@cross/test'
 import { assert, assertEquals } from '@std/assert'
 import { createSandbox } from 'sinon'
-import { ardFeedRules } from '../utils/ard-feed-rules.ts'
+import { ardFeedRules } from '../../utils/feed/ard-feed-rules.ts'
 import { refreshArdFeed } from './ard-feed-loader.ts'
 import {
 	FEED_STALE_ALERT_MS,

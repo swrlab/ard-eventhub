@@ -13,7 +13,7 @@ import {
 	jetstreamManager,
 } from '@nats-io/jetstream'
 import { headers } from '@nats-io/transport-node'
-import { getArdFeedValidationError } from '../utils/ard-feed-rules.ts'
+import { getArdFeedValidationError } from '../../utils/feed/ard-feed-rules.ts'
 import { ARD_FEED_STREAM, ARD_FEED_SUBJECT } from './ard-feed.ts'
 
 const source = 'connect.ard-feed'

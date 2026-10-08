@@ -1,6 +1,6 @@
 import type { ArdFeed, ArdPublisher } from '#types'
-import allowedLivestreamsJson from '../config/allowed-livestreams.json' with { type: 'json' }
-import { allowedLivestreamsConfig } from '../schemas/config.ts'
+import allowedLivestreamsJson from '../../config/allowed-livestreams.json' with { type: 'json' }
+import { allowedLivestreamsConfig } from '../../schemas/config.ts'
 
 const overlayConfig = allowedLivestreamsConfig.parse(allowedLivestreamsJson)
 
@@ -26,6 +26,12 @@ export type KnownLivestream = {
 	institution: KnownLivestreamParty | null
 	/** Granted by `allowed-livestreams.json`, not by a row in the core feed. */
 	overlay: boolean
+}
+
+/** Publisher and institution the ownership check compares. */
+export type LivestreamOwner = {
+	publisherId: string
+	institutionId: string
 }
 
 type PublisherFace = {
@@ -106,4 +112,26 @@ export const knownLivestreams = (feed: ArdFeed | null): KnownLivestream[] => {
 
 	entries.sort(byName)
 	return entries
+}
+
+let indexedFeed: ArdFeed | null = null
+let indexedOwners = new Map<string, LivestreamOwner>()
+
+/**
+ * Livestream URN to publisher and institution, including the overlay.
+ * Rows with no institution are left out. The same feed object keeps the map built on the previous call.
+ * @param feed - Serving snapshot, or null when none is loaded
+ * @returns Owners, or null when no feed is loaded
+ */
+export const livestreamOwners = (feed: ArdFeed | null): Map<string, LivestreamOwner> | null => {
+	if (!feed) return null
+	if (feed === indexedFeed) return indexedOwners
+	const next = new Map<string, LivestreamOwner>()
+	for (const row of knownLivestreams(feed)) {
+		if (!row.institution?.id || !row.publisher.id) continue
+		next.set(row.id, { publisherId: row.publisher.id, institutionId: row.institution.id })
+	}
+	indexedFeed = feed
+	indexedOwners = next
+	return next
 }

@@ -1,7 +1,7 @@
 import type { ArdFeed } from '#types'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
-import { getArdFeedValidationError } from '../utils/ard-feed-rules.ts'
+import { getArdFeedValidationError } from '../../utils/feed/ard-feed-rules.ts'
 
 /** JetStream stream that holds the feed. KV subjects live under `$KV.ARD_FEED.>`. */
 export const ARD_FEED_STREAM = 'KV_ARD_FEED'
@@ -88,7 +88,7 @@ export type FeedReport = {
 }
 
 /** Last good copy on disk. Gitignored via `.local/`. */
-export const defaultDiskPath = join(import.meta.dir, '../../.local/ard-feed.json')
+export const defaultDiskPath = join(import.meta.dir, '../../../.local/ard-feed.json')
 
 /**
  * Empty state, before hydrate.

@@ -638,7 +638,7 @@ scope, the issuance date makes stale credentials visible, and revocation is one 
 The ownership check needs to resolve a livestream URN to the organization that owns it. That mapping
 comes from the ARD core livestream feed — one JSON document containing every livestream, each with
 its `publisher`, each publisher with its `institution`. `eventhub-ingest` already consumes it
-(`src/utils/ard-feed.ts`, `just feed`); the v3 loader keeps the same shape but changes the failure
+(`src/utils/feed/ard-feed.ts`, `just feed`); the v3 loader keeps the same shape but changes the failure
 behaviour.
 
 ### 8.1 What it is used for
