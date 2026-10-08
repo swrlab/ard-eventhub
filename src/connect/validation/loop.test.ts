@@ -5,14 +5,14 @@ import { natsAccess } from '../../utils/nats/_client.ts'
 import {
 	INBOX_STREAM,
 	PLUGINS_STREAM,
-	SIDECAR_ACK_WAIT_NS,
-	SIDECAR_CONSUMER,
+	VALIDATION_ACK_WAIT_NS,
+	VALIDATION_CONSUMER,
 	ensureStreams,
 } from '../../utils/nats/ensure-streams.ts'
 import { inboxMqttTopic, pluginSubject } from '../../utils/nats/subjects.ts'
-import { BROKER_PASSWORD, connectMqttUser, skipUnlessNats, tryConnectSidecar } from '../../utils/nats/test-broker.ts'
-import { runSidecarLoop } from './loop.ts'
-import { connectSidecarMqtt, createSidecarPublisher, sidecarClientId } from './publish.ts'
+import { BROKER_PASSWORD, connectMqttUser, skipUnlessNats, tryConnectService } from '../../utils/nats/test-broker.ts'
+import { runValidationLoop } from './loop.ts'
+import { connectValidationMqtt, createValidationPublisher, validationClientId } from './publish.ts'
 
 const SWR_INSTITUTION_ID = 'urn:ard:institution:a3004ff924ece1a2'
 const SHARED_INSTITUTION_ID = 'urn:ard:institution:b71c0e4d9a25f338'
@@ -54,7 +54,7 @@ const waitUntil = async (label: string, pred: () => boolean | Promise<boolean>):
 	const start = Date.now()
 	while (!(await pred())) {
 		if (Date.now() - start > 8_000) {
-			throw new Error(`timeout: ${label}. Stop \`just dev\` if it is also pulling the sidecar consumer.`)
+			throw new Error(`timeout: ${label}. Stop \`just dev\` if it is also pulling the validation consumer.`)
 		}
 		await new Promise((resolve) => {
 			setTimeout(resolve, 40)
@@ -86,8 +86,8 @@ const retainedText = async (username: string, topic: string): Promise<string> =>
 	}
 }
 
-test('sidecar retains a valid event, rejects a bad one, and processes each event once across two pods', async () => {
-	const admin = await tryConnectSidecar()
+test('validation retains a valid event, rejects a bad one, and processes each event once across two pods', async () => {
+	const admin = await tryConnectService()
 	if (skipUnlessNats(admin)) return
 
 	const acked = new Set<number>()
@@ -99,29 +99,30 @@ test('sidecar retains a valid event, rejects a bad one, and processes each event
 	try {
 		const jsm = await jetstreamManager(admin)
 		await ensureStreams(admin)
-		const waiting = (await jsm.consumers.info(INBOX_STREAM, SIDECAR_CONSUMER)).num_waiting
+		const waiting = (await jsm.consumers.info(INBOX_STREAM, VALIDATION_CONSUMER)).num_waiting
 		if (waiting > 0) {
-			throw new Error(`sidecar consumer already has ${waiting} pullers; stop just dev before this test`)
+			throw new Error(`validation consumer already has ${waiting} pullers; stop just dev before this test`)
 		}
 		await jsm.streams.purge(INBOX_STREAM)
 
-		const pullers = async (): Promise<number> => (await jsm.consumers.info(INBOX_STREAM, SIDECAR_CONSUMER)).num_waiting
+		const pullers = async (): Promise<number> =>
+			(await jsm.consumers.info(INBOX_STREAM, VALIDATION_CONSUMER)).num_waiting
 
 		/**
-		 * One sidecar pod: its own NATS connection and MQTT client id.
+		 * One validation pod: its own NATS connection and MQTT client id.
 		 * @param instance - Client-id suffix
 		 * @param beforeAck - Optional hook after publish and before ack. The crash pod closes its connection here.
 		 * @returns Stop function
 		 */
 		const startPod = async (instance: number, beforeAck?: () => Promise<void>): Promise<() => Promise<void>> => {
-			const nc = await tryConnectSidecar()
+			const nc = await tryConnectService()
 			if (!nc) throw new Error('nats disconnected')
-			const mqttClient = await connectSidecarMqtt(sidecarClientId(instance))
+			const mqttClient = await connectValidationMqtt(validationClientId(instance))
 			const controller = new AbortController()
-			const task = runSidecarLoop(nc, {
+			const task = runValidationLoop(nc, {
 				signal: controller.signal,
 				owners: () => owners,
-				publisher: createSidecarPublisher(nc, mqttClient),
+				publisher: createValidationPublisher(nc, mqttClient),
 				...(beforeAck ? { beforeAck } : {}),
 				onSettled: (settlement) => {
 					settlements.push(settlement)
@@ -141,15 +142,15 @@ test('sidecar retains a valid event, rejects a bad one, and processes each event
 		}
 
 		const crashLater = async (): Promise<void> => {
-			const nc = await tryConnectSidecar()
+			const nc = await tryConnectService()
 			if (!nc) throw new Error('nats disconnected')
-			const mqttClient = await connectSidecarMqtt(sidecarClientId(4))
+			const mqttClient = await connectValidationMqtt(validationClientId(4))
 			const controller = new AbortController()
 			let crashed = false
-			const task = runSidecarLoop(nc, {
+			const task = runValidationLoop(nc, {
 				signal: controller.signal,
 				owners: () => owners,
-				publisher: createSidecarPublisher(nc, mqttClient),
+				publisher: createValidationPublisher(nc, mqttClient),
 				beforeAck: async () => {
 					await nc.close()
 					crashed = true
@@ -254,7 +255,7 @@ test('sidecar retains a valid event, rejects a bad one, and processes each event
 		for (const stop of stops.splice(0)) await stop()
 		await waitUntil('pullers drained', async () => (await pullers()) === 0)
 
-		await jsm.consumers.update(INBOX_STREAM, SIDECAR_CONSUMER, { ack_wait: 1_000_000_000 })
+		await jsm.consumers.update(INBOX_STREAM, VALIDATION_CONSUMER, { ack_wait: 1_000_000_000 })
 		const acksBefore = settlements.filter((row) => row.action === 'ack').length
 		await crashLater()
 		await startPod(5)
@@ -273,7 +274,7 @@ test('sidecar retains a valid event, rejects a bad one, and processes each event
 		for (const stop of stops.splice(0)) await stop()
 		try {
 			const jsm = await jetstreamManager(admin)
-			await jsm.consumers.update(INBOX_STREAM, SIDECAR_CONSUMER, { ack_wait: SIDECAR_ACK_WAIT_NS })
+			await jsm.consumers.update(INBOX_STREAM, VALIDATION_CONSUMER, { ack_wait: VALIDATION_ACK_WAIT_NS })
 		} catch {
 			// The admin connection is already closed.
 		}

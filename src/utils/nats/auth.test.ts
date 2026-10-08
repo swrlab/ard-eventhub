@@ -12,7 +12,7 @@ import {
 	NATS_SERVERS,
 	connectMqttUser,
 	skipUnlessNats,
-	tryConnectSidecar,
+	tryConnectService,
 } from './test-broker.ts'
 
 const SWR_INSTITUTION_ID = 'urn:ard:institution:a3004ff924ece1a2'
@@ -48,12 +48,12 @@ const mqttPublishInbox = async (username: string, institutionId: string): Promis
 
 /**
  * Wait briefly for an inbox message that must not arrive.
- * @param nc - Sidecar connection
+ * @param nc - Service connection
  * @param institutionId - Inbox to watch
  * @returns True when a message arrived
  */
 const inboxSawMessage = async (
-	nc: NonNullable<Awaited<ReturnType<typeof tryConnectSidecar>>>,
+	nc: NonNullable<Awaited<ReturnType<typeof tryConnectService>>>,
 	institutionId: string
 ): Promise<boolean> => {
 	const sub = nc.subscribe(inboxSubject(institutionId), { max: 1 })
@@ -68,7 +68,7 @@ const inboxSawMessage = async (
 }
 
 test('anonymous NATS connect is rejected', async () => {
-	const nc = await tryConnectSidecar()
+	const nc = await tryConnectService()
 	if (skipUnlessNats(nc)) {
 		return
 	}
@@ -77,7 +77,7 @@ test('anonymous NATS connect is rejected', async () => {
 })
 
 test('publisher can MQTT-publish to its inbox and not to another institution', async () => {
-	const nc = await tryConnectSidecar()
+	const nc = await tryConnectService()
 	if (skipUnlessNats(nc)) {
 		return
 	}
@@ -95,7 +95,7 @@ test('publisher can MQTT-publish to its inbox and not to another institution', a
 })
 
 test('svc-ingest can MQTT-publish to every institution inbox', async () => {
-	const nc = await tryConnectSidecar()
+	const nc = await tryConnectService()
 	if (skipUnlessNats(nc)) {
 		return
 	}
@@ -111,7 +111,7 @@ test('svc-ingest can MQTT-publish to every institution inbox', async () => {
 })
 
 test('sub- user cannot publish', async () => {
-	const nc = await tryConnectSidecar()
+	const nc = await tryConnectService()
 	if (skipUnlessNats(nc)) {
 		return
 	}
@@ -125,7 +125,7 @@ test('sub- user cannot publish', async () => {
 })
 
 test('MQTT credential is rejected on the NATS port; a WebSocket-only user is rejected on MQTT', async () => {
-	const nc = await tryConnectSidecar()
+	const nc = await tryConnectService()
 	if (skipUnlessNats(nc)) {
 		return
 	}
@@ -151,7 +151,7 @@ test('MQTT credential is rejected on the NATS port; a WebSocket-only user is rej
 })
 
 test('multi-institution publisher can MQTT-publish to each allowed inbox', async () => {
-	const nc = await tryConnectSidecar()
+	const nc = await tryConnectService()
 	if (skipUnlessNats(nc)) {
 		return
 	}
@@ -166,8 +166,8 @@ test('multi-institution publisher can MQTT-publish to each allowed inbox', async
 	}
 })
 
-test('ACL does not inspect payload — shared publisher can misroute a livestream (sidecar step 10)', async () => {
-	const nc = await tryConnectSidecar()
+test('ACL does not inspect payload — shared publisher can misroute a livestream (validation step 10)', async () => {
+	const nc = await tryConnectService()
 	if (skipUnlessNats(nc)) {
 		return
 	}
@@ -201,8 +201,8 @@ test('ACL does not inspect payload — shared publisher can misroute a livestrea
 	}
 })
 
-test('hot-reload keeps the sidecar connection and picks up a new MQTT user', async () => {
-	const nc = await tryConnectSidecar()
+test('hot-reload keeps the service connection and picks up a new MQTT user', async () => {
+	const nc = await tryConnectService()
 	if (skipUnlessNats(nc)) {
 		return
 	}
@@ -248,7 +248,7 @@ test('hot-reload keeps the sidecar connection and picks up a new MQTT user', asy
 })
 
 test('MQTT URL without credentials cannot use the gateway', async () => {
-	const nc = await tryConnectSidecar()
+	const nc = await tryConnectService()
 	if (skipUnlessNats(nc)) {
 		return
 	}

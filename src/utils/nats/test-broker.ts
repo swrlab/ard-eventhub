@@ -18,9 +18,9 @@ const MQTT_V311 = 4
 
 /**
  * Connect with the credentials in `NATS_URL`, or return null when the broker is down / auth fails.
- * @returns Sidecar connection, or null
+ * @returns Service connection, or null
  */
-export const tryConnectSidecar = async () => {
+export const tryConnectService = async () => {
 	try {
 		return await natsAccess.connect({
 			servers: rawNatsUrl,
@@ -32,10 +32,10 @@ export const tryConnectSidecar = async () => {
 
 /**
  * Skip (or fail when `NATS_REQUIRE=true`) when NATS is not up with the local ACL config.
- * @param nc - Sidecar connection from `tryConnectSidecar`
+ * @param nc - Service connection from `tryConnectService`
  * @returns True when tests should return early
  */
-export const skipUnlessNats = (nc: Awaited<ReturnType<typeof tryConnectSidecar>>): nc is null => {
+export const skipUnlessNats = (nc: Awaited<ReturnType<typeof tryConnectService>>): nc is null => {
 	if (nc) {
 		return false
 	}

@@ -35,7 +35,7 @@
 		"inboxInstitution": {
 			"address": "inbox/{institutionId}",
 			"title": "inbox/{institutionId}",
-			"description": "Publisher write path. Send `radio.control` and `radio.data` here. The sidecar validates the payload and republishes onto `radio/{livestreamId}/…`.",
+			"description": "Publisher write path. Send `radio.control` and `radio.data` here. Eventhub validates the payload and republishes onto `radio/{livestreamId}/…`.",
 			"parameters": {
 				"institutionId": {
 					"description": "Owning institution URN (`urn:ard:institution:…`). Must match the livestream.",
@@ -54,7 +54,7 @@
 		"radioLivestreamControl": {
 			"address": "radio/{livestreamId}/control",
 			"title": "radio/{livestreamId}/control",
-			"description": "Sidecar output. Retained so a late joiner sees the current control bits. QoS 1, durable.",
+			"description": "Validation output. Retained so a late joiner sees the current control bits. QoS 1, durable.",
 			"parameters": {
 				"livestreamId": {
 					"description": "Livestream URN (`urn:ard:permanent-livestream:…` or `urn:ard:event-livestream:…`)",
@@ -70,7 +70,7 @@
 		"radioLivestreamData": {
 			"address": "radio/{livestreamId}/data",
 			"title": "radio/{livestreamId}/data",
-			"description": "Sidecar output. Cyclic radiotext / dynamic label / RT+. Retained as the latest cycle. QoS 1.",
+			"description": "Validation output. Cyclic radiotext / dynamic label / RT+. Retained as the latest cycle. QoS 1.",
 			"parameters": {
 				"livestreamId": {
 					"description": "Livestream URN (`urn:ard:permanent-livestream:…` or `urn:ard:event-livestream:…`)",
@@ -229,7 +229,7 @@
 						"type": "string",
 						"pattern": "^urn:ard:institution:[a-z0-9]+$",
 						"examples": ["urn:ard:institution:a3004ff924ece1a2"],
-						"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+						"description": "Owning institution URN (claim; validation checks it against the feed)"
 					},
 					"externalId": {
 						"deprecated": true,
@@ -308,7 +308,7 @@
 								"type": "string",
 								"pattern": "^urn:ard:institution:[a-z0-9]+$",
 								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
-								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+								"description": "Owning institution URN (claim; validation checks it against the feed)"
 							},
 							"externalId": {
 								"deprecated": true,
@@ -453,7 +453,7 @@
 								"type": "string",
 								"pattern": "^urn:ard:institution:[a-z0-9]+$",
 								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
-								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+								"description": "Owning institution URN (claim; validation checks it against the feed)"
 							},
 							"externalId": {
 								"deprecated": true,

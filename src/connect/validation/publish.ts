@@ -10,7 +10,7 @@ const MQTT_V311 = 4 as const
 const CONNECT_TIMEOUT_MS = 5_000
 
 /** How the loop publishes. Tests can substitute an in-memory pair. */
-export type SidecarPublisher = {
+export type ValidationPublisher = {
 	/**
 	 * MQTT publish with RETAIN. Used for `radio/` and `feedback/`.
 	 * @param topic - MQTT topic (`/` separators)
@@ -32,7 +32,7 @@ export type SidecarPublisher = {
  * @param instance - Distinguishes clients inside one process (tests)
  * @returns `svc-eventhub-connect-{pod}-{pid}-{instance}`
  */
-export const sidecarClientId = (instance: number): string => {
+export const validationClientId = (instance: number): string => {
 	const pod = (process.env.POD_NAME?.trim() || hostname()).replace(/[^A-Za-z0-9_-]/g, '-')
 	return `svc-eventhub-connect-${pod}-${process.pid}-${instance}`
 }
@@ -42,7 +42,7 @@ export const sidecarClientId = (instance: number): string => {
  * @param clientId - Unique per pod
  * @returns Connected mqtt.js client
  */
-export const connectSidecarMqtt = (clientId: string): Promise<MqttClient> =>
+export const connectValidationMqtt = (clientId: string): Promise<MqttClient> =>
 	mqtt.connectAsync(natsMqttUrl, {
 		protocolVersion: MQTT_V311,
 		clientId,
@@ -57,7 +57,7 @@ export const connectSidecarMqtt = (clientId: string): Promise<MqttClient> =>
  * @param client - MQTT connection with a pod-unique client id
  * @returns Publisher bound to those connections
  */
-export const createSidecarPublisher = (nc: NatsConnection, client: MqttClient): SidecarPublisher => {
+export const createValidationPublisher = (nc: NatsConnection, client: MqttClient): ValidationPublisher => {
 	const js = jetstream(nc)
 	return {
 		publishRetained: async (topic, body) => {

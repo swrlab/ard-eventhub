@@ -1,15 +1,15 @@
 import { test } from '@cross/test'
 import { assertEquals } from '@std/assert'
 import { natsAccess } from './_client.ts'
-import { INBOX_STREAM, PLUGINS_STREAM, SIDECAR_CONSUMER, ensureStreams } from './ensure-streams.ts'
+import { INBOX_STREAM, PLUGINS_STREAM, VALIDATION_CONSUMER, ensureStreams } from './ensure-streams.ts'
 import { inboxMqttTopic, inboxSubject } from './subjects.ts'
-import { BROKER_PASSWORD, connectMqttUser, skipUnlessNats, tryConnectSidecar } from './test-broker.ts'
+import { BROKER_PASSWORD, connectMqttUser, skipUnlessNats, tryConnectService } from './test-broker.ts'
 
 const SWR_INSTITUTION_ID = 'urn:ard:institution:a3004ff924ece1a2'
 const PUB_SWR = 'pub-swr-2026-06-26'
 
 test('MQTT QoS 1 publish to inbox/{institutionId} arrives on inbox.{institutionId}', async () => {
-	const nc = await tryConnectSidecar()
+	const nc = await tryConnectService()
 	if (skipUnlessNats(nc)) {
 		return
 	}
@@ -18,7 +18,7 @@ test('MQTT QoS 1 publish to inbox/{institutionId} arrives on inbox.{institutionI
 		const streams = await ensureStreams(nc)
 		assertEquals(streams.inbox, INBOX_STREAM)
 		assertEquals(streams.plugins, PLUGINS_STREAM)
-		assertEquals(streams.sidecar, SIDECAR_CONSUMER)
+		assertEquals(streams.validation, VALIDATION_CONSUMER)
 
 		const payload = { ping: 'nats-access', institutionId: SWR_INSTITUTION_ID }
 		const received = new Promise<string>((resolve, reject) => {

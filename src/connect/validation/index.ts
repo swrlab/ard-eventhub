@@ -1,41 +1,42 @@
 import type { NatsConnection } from '@nats-io/transport-node'
 import type { MqttClient } from 'mqtt'
 import { logger } from '@frytg/logger'
-import { runSidecarLoop } from './loop.ts'
-import { connectSidecarMqtt, createSidecarPublisher, sidecarClientId } from './publish.ts'
+import { VALIDATION_CONSUMER } from '../../utils/nats/ensure-streams.ts'
+import { runValidationLoop } from './loop.ts'
+import { connectValidationMqtt, createValidationPublisher, validationClientId } from './publish.ts'
 
-const source = 'connect.sidecar'
+const source = 'connect.validation'
 
 /** The running loop and the MQTT connection it publishes on. */
-type RunningSidecar = {
+type RunningValidation = {
 	controller: AbortController
 	client: MqttClient
 	task: Promise<void>
 }
 
-let current: RunningSidecar | null = null
+let current: RunningValidation | null = null
 
 /**
  * Pull the inbox and publish validated events. Safe to call again after a reconnect.
  * @param nc - Open NATS connection as `svc-eventhub-connect`
  * @returns Resolves once the MQTT publish connection is up and the loop is running
  */
-export const startSidecar = async (nc: NatsConnection): Promise<void> => {
-	await stopSidecar()
-	const clientId = sidecarClientId(1)
-	const client = await connectSidecarMqtt(clientId)
+export const startValidation = async (nc: NatsConnection): Promise<void> => {
+	await stopValidation()
+	const clientId = validationClientId(1)
+	const client = await connectValidationMqtt(clientId)
 	const controller = new AbortController()
-	const task = runSidecarLoop(nc, {
+	const task = runValidationLoop(nc, {
 		signal: controller.signal,
-		publisher: createSidecarPublisher(nc, client),
+		publisher: createValidationPublisher(nc, client),
 	}).catch((error: unknown) => {
-		logger.error({ message: 'sidecar loop stopped', source, error })
+		logger.error({ message: 'validation loop stopped', source, error })
 	})
 	current = { controller, client, task }
 	logger.info({
-		message: 'sidecar consuming',
+		message: 'validation consuming',
 		source,
-		data: { clientId, consumer: 'sidecar' },
+		data: { clientId, consumer: VALIDATION_CONSUMER },
 	})
 }
 
@@ -43,7 +44,7 @@ export const startSidecar = async (nc: NatsConnection): Promise<void> => {
  * Stop the pull loop and the MQTT connection. A second call is a no-op.
  * @returns Resolves when both are closed
  */
-export const stopSidecar = async (): Promise<void> => {
+export const stopValidation = async (): Promise<void> => {
 	const stopping = current
 	current = null
 	if (!stopping) return

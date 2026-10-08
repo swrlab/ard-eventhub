@@ -118,7 +118,7 @@ export const servicesUrn = z
 			examples: ['urn:ard:publisher:75dbb3dace15f610'],
 		}),
 		institutionId: institutionUrn.meta({
-			description: 'Owning institution URN (claim; sidecar checks it against the feed)',
+			description: 'Owning institution URN (claim; validation checks it against the feed)',
 			examples: ['urn:ard:institution:a3004ff924ece1a2'],
 		}),
 		externalId: serviceExternalId.optional().meta({
@@ -637,7 +637,7 @@ export const eventProcessResult = z
 const connectServices = z.array(servicesUrn).min(1)
 
 /**
- * URN-only track event the sidecar accepts.
+ * URN-only track event that validation accepts.
  * Derived from {@link eventV1PostBody}: `services` is the URN shape, and `event` is required
  * because `track.playing` and `track.next` share a body.
  */
@@ -650,7 +650,7 @@ export const connectInboxTrackEvent = eventV1PostBody
 	.strict()
 
 /**
- * URN-only radio.control event the sidecar accepts. `event` is required so the class is explicit.
+ * URN-only radio.control event that validation accepts. `event` is required so the class is explicit.
  */
 export const connectInboxControlEvent = eventV1RadioControlPostBody
 	.omit({ event: true, services: true })
@@ -661,7 +661,7 @@ export const connectInboxControlEvent = eventV1RadioControlPostBody
 	.strict()
 
 /**
- * URN-only radio.data event the sidecar accepts. `event` is required so the class is explicit.
+ * URN-only radio.data event that validation accepts. `event` is required so the class is explicit.
  */
 export const connectInboxDataEvent = eventV1RadioDataPostBody
 	.omit({ event: true, services: true })
@@ -678,7 +678,7 @@ const connectInboxSchemaByEvent = {
 	'de.ard.eventhub.v1.radio.data': connectInboxDataEvent,
 } as const
 
-/** Inbox payload after the sidecar's URN-only parse. */
+/** Inbox payload after the URN-only validation parse. */
 export type ConnectInboxEvent =
 	| z.infer<typeof connectInboxTrackEvent>
 	| z.infer<typeof connectInboxControlEvent>

@@ -1,15 +1,15 @@
 import type { JsMsg } from '@nats-io/jetstream'
 import type { NatsConnection } from '@nats-io/transport-node'
 import type { LivestreamOwner } from '../../utils/feed/known-livestreams.ts'
-import type { SidecarPlan } from './plan.ts'
-import type { SidecarPublisher } from './publish.ts'
+import type { ValidationPlan } from './plan.ts'
+import type { ValidationPublisher } from './publish.ts'
 import { logger } from '@frytg/logger'
 import { jetstream } from '@nats-io/jetstream'
-import { INBOX_STREAM, SIDECAR_CONSUMER } from '../../utils/nats/ensure-streams.ts'
+import { INBOX_STREAM, VALIDATION_CONSUMER } from '../../utils/nats/ensure-streams.ts'
 import { currentOwners } from '../feed/current-feed.ts'
 import { planInboxMessage } from './plan.ts'
 
-const source = 'connect.sidecar'
+const source = 'connect.validation'
 
 /** Prefetch kept under the consumer's `max_ack_pending`. `consume` leaves a pull outstanding. */
 const PREFETCH = 32
@@ -21,10 +21,10 @@ const PUBLISH_NAK_MS = 200
 export type OwnersReader = () => ReadonlyMap<string, LivestreamOwner> | null
 
 /** One settled inbox delivery, for tests and the duplicate counter. */
-export type SidecarSettlement = {
+export type ValidationSettlement = {
 	seq: number
 	redelivered: boolean
-	action: SidecarPlan['action']
+	action: ValidationPlan['action']
 }
 
 /**
@@ -33,7 +33,7 @@ export type SidecarSettlement = {
  * @param plan - Planned work
  * @returns Resolves after every publish was acknowledged
  */
-const publishPlan = async (publisher: SidecarPublisher, plan: SidecarPlan): Promise<void> => {
+const publishPlan = async (publisher: ValidationPublisher, plan: ValidationPlan): Promise<void> => {
 	if (plan.action === 'term') {
 		if (plan.feedback) await publisher.publishRetained(plan.feedback.topic, plan.feedback.body)
 		return
@@ -47,11 +47,11 @@ const publishPlan = async (publisher: SidecarPublisher, plan: SidecarPlan): Prom
  * @param msg - Inbox delivery
  * @param plan - Plan whose publishes already succeeded
  */
-const settle = (msg: JsMsg, plan: SidecarPlan): void => {
+const settle = (msg: JsMsg, plan: ValidationPlan): void => {
 	if (plan.action === 'ack') {
 		msg.ack()
 		logger.info({
-			message: 'sidecar accepted',
+			message: 'validation accepted',
 			source,
 			data: { seq: msg.seq, subject: msg.subject, plugins: plan.plugins.length },
 		})
@@ -60,14 +60,15 @@ const settle = (msg: JsMsg, plan: SidecarPlan): void => {
 	msg.term(plan.cause)
 	logger.log({
 		level: plan.cause === 'schema' ? 'error' : 'warning',
-		message: 'sidecar rejected',
+		message: 'validation rejected',
 		source,
 		data: {
 			seq: msg.seq,
 			subject: msg.subject,
 			cause: plan.cause,
 			detail: plan.message,
-			metric: 'connect.sidecar.rejection',
+			payload: plan.payload,
+			metric: 'connect.validation.rejection',
 		},
 	})
 }
@@ -79,24 +80,24 @@ const settle = (msg: JsMsg, plan: SidecarPlan): void => {
  * @param options - Catalog, publisher, and stop signal
  * @returns Resolves when the loop stops
  */
-export const runSidecarLoop = async (
+export const runValidationLoop = async (
 	nc: NatsConnection,
 	options: {
 		signal: AbortSignal
 		/** Defaults to the serving feed. Tests pass a fixed map. */
 		owners?: OwnersReader
-		publisher: SidecarPublisher
+		publisher: ValidationPublisher
 		/** Runs after a successful publish and before ack/term. Tests close the connection here. */
 		beforeAck?: () => Promise<void>
 		/** Called after ack or term. */
-		onSettled?: (settlement: SidecarSettlement) => void
+		onSettled?: (settlement: ValidationSettlement) => void
 	}
 ): Promise<void> => {
 	const { signal, publisher, beforeAck, onSettled } = options
 	const readOwners = options.owners ?? currentOwners
 	const stopped = (): boolean => signal.aborted || nc.isClosed()
 	const js = jetstream(nc)
-	const consumer = await js.consumers.get(INBOX_STREAM, SIDECAR_CONSUMER)
+	const consumer = await js.consumers.get(INBOX_STREAM, VALIDATION_CONSUMER)
 	const messages = await consumer.consume({ max_messages: PREFETCH })
 	const stop = (): void => {
 		void messages.close()
@@ -106,7 +107,7 @@ export const runSidecarLoop = async (
 	try {
 		for await (const msg of messages) {
 			if (stopped()) return
-			let plan: SidecarPlan | null = null
+			let plan: ValidationPlan | null = null
 			try {
 				const owners = readOwners()
 				if (!owners) throw new Error('ard feed is no longer loaded')
@@ -119,7 +120,7 @@ export const runSidecarLoop = async (
 			} catch (error) {
 				if (stopped()) return
 				logger.error({
-					message: 'sidecar publish failed',
+					message: 'validation publish failed',
 					source,
 					error,
 					data: {

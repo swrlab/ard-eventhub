@@ -148,7 +148,7 @@ export const buildAsyncApiDocument = () => {
 				title: inboxTopic,
 				description:
 					'Publisher write path. Send `radio.control` and `radio.data` here. ' +
-					'The sidecar validates the payload and republishes onto `radio/{livestreamId}/…`.',
+					'Eventhub validates the payload and republishes onto `radio/{livestreamId}/…`.',
 				parameters: {
 					institutionId: {
 						description: 'Owning institution URN (`urn:ard:institution:…`). Must match the livestream.',
@@ -163,7 +163,7 @@ export const buildAsyncApiDocument = () => {
 			radioLivestreamControl: {
 				address: radioControlTopic,
 				title: radioControlTopic,
-				description: 'Sidecar output. Retained so a late joiner sees the current control bits. QoS 1, durable.',
+				description: 'Validation output. Retained so a late joiner sees the current control bits. QoS 1, durable.',
 				parameters: {
 					livestreamId: {
 						description: 'Livestream URN (`urn:ard:permanent-livestream:…` or `urn:ard:event-livestream:…`)',
@@ -177,7 +177,7 @@ export const buildAsyncApiDocument = () => {
 			radioLivestreamData: {
 				address: radioDataTopic,
 				title: radioDataTopic,
-				description: 'Sidecar output. Cyclic radiotext / dynamic label / RT+. Retained as the latest cycle. QoS 1.',
+				description: 'Validation output. Cyclic radiotext / dynamic label / RT+. Retained as the latest cycle. QoS 1.',
 				parameters: {
 					livestreamId: {
 						description: 'Livestream URN (`urn:ard:permanent-livestream:…` or `urn:ard:event-livestream:…`)',

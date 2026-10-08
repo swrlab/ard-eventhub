@@ -28,7 +28,7 @@ Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `o
 - **Tech Stack:** Bun, Node.js, TypeScript (strict mode), Hono, Zod, Google Cloud Platform
 - **File Structure:**
   - `src/ingest/` – Ingest service (receives events, manages subscriptions)
-- `src/connect/` – Eventhub Connect NATS access layer, including the validation sidecar (`src/connect/sidecar/`). `just dev` also serves the operator UI
+- `src/connect/` – Eventhub Connect NATS access layer, including inbox validation (`src/connect/validation/`). `just dev` also serves the operator UI
 - `src/connect/ui/` – Operator console backend (Hono routes, reports). `src/connect/ui/client/` holds the Vue frontend (Vite, Tailwind), built to `static/dist`
 - `src/schemas/` – Zod request/response schemas (runtime validation + OpenAPI)
 - `src/openapi/` – OpenAPI document assembly / `openapi.json` generator

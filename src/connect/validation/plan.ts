@@ -12,8 +12,11 @@ import {
 import { enabledPluginTargets } from './eligibility.ts'
 import { checkEventOwnership } from './ownership.ts'
 
-/** Why a delivery is termed. Also the `cause` on `feedback/` and in the `sidecar rejected` log. */
+/** Why a delivery is termed. Also the `cause` on `feedback/` and in the `validation rejected` log. */
 type RejectCause = 'json' | 'schema' | 'ownership'
+
+/** Larger payloads are logged as a prefix. NATS allows 1 MiB, radio events are a few KiB. */
+const MAX_LOGGED_PAYLOAD_BYTES = 64 * 1024
 
 /** Retained MQTT publish (`radio/` or `feedback/`). */
 type MqttPublish = {
@@ -28,22 +31,24 @@ type NatsPublish = {
 }
 
 /** Accepted: retain on every `radio/` topic, fan out to every plugin subject, then ack. */
-export type SidecarAccept = {
+export type ValidationAccept = {
 	action: 'ack'
 	radio: MqttPublish[]
 	plugins: NatsPublish[]
 }
 
 /** Rejected: retain the feedback (when the subject names an institution), then term. */
-export type SidecarReject = {
+export type ValidationReject = {
 	action: 'term'
 	cause: RejectCause
 	message: string
 	feedback: MqttPublish | null
+	/** The full inbox payload for the rejection log: decoded JSON, else the text. */
+	payload: unknown
 }
 
 /** Work for one inbox message, before any publish or ack. */
-export type SidecarPlan = SidecarAccept | SidecarReject
+export type ValidationPlan = ValidationAccept | ValidationReject
 
 type FeedbackIssue = { path: string[]; message: string }
 
@@ -68,7 +73,7 @@ const stringField = (value: unknown, key: string): string | undefined => {
 }
 
 /**
- * Deprecated `services[]` fields the sidecar ignores. Present means "still being sent".
+ * Deprecated `services[]` fields validation ignores. Present means "still being sent".
  * @param value - Decoded JSON
  * @returns Field tokens for feedback
  */
@@ -95,6 +100,49 @@ const zodIssues = (error: ZodError): FeedbackIssue[] =>
 	}))
 
 /**
+ * Strict UTF-8 decode.
+ * @param bytes - Payload
+ * @returns Text, or null when the bytes are not UTF-8
+ */
+const decodeUtf8 = (bytes: Uint8Array): string | null => {
+	try {
+		return new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+	} catch {
+		return null
+	}
+}
+
+/**
+ * JSON parse that reports failure instead of throwing.
+ * @param text - Payload text
+ * @returns The parsed value, or null when the text is not JSON
+ */
+const parseJson = (text: string): { value: unknown } | null => {
+	try {
+		return { value: JSON.parse(text) as unknown }
+	} catch {
+		return null
+	}
+}
+
+/**
+ * The payload as the rejection log shows it. Oversized payloads become a prefix with the byte count.
+ * @param bytes - Raw payload
+ * @param json - Parsed JSON, or null when the payload is not JSON
+ * @returns JSON value, else the text (lossy when not UTF-8), else a truncated prefix
+ */
+const loggablePayload = (bytes: Uint8Array, json: { value: unknown } | null): unknown => {
+	if (bytes.byteLength > MAX_LOGGED_PAYLOAD_BYTES) {
+		return {
+			truncated: true,
+			bytes: bytes.byteLength,
+			head: new TextDecoder().decode(bytes.subarray(0, MAX_LOGGED_PAYLOAD_BYTES)),
+		}
+	}
+	return json ? json.value : new TextDecoder().decode(bytes)
+}
+
+/**
  * Drop undefined fields and empty lists so feedback only carries what is known.
  * @param fields - Candidate body
  * @returns Body without empty fields
@@ -115,12 +163,13 @@ const reject = (params: {
 	institutionId: string
 	cause: RejectCause
 	message: string
+	payload: unknown
 	value?: unknown
 	issues?: FeedbackIssue[]
 	disagreed?: OwnershipParty[]
 	livestreamId?: string
-}): SidecarReject => {
-	const { at, subject, institutionId, cause, message, value } = params
+}): ValidationReject => {
+	const { at, subject, institutionId, cause, message, payload, value } = params
 	const body = withoutEmpty({
 		at,
 		institutionId,
@@ -135,7 +184,7 @@ const reject = (params: {
 		deprecated: deprecatedFields(value),
 		livestreamId: params.livestreamId,
 	})
-	return { action: 'term', cause, message, feedback: { topic: feedbackMqttTopic(institutionId), body } }
+	return { action: 'term', cause, message, feedback: { topic: feedbackMqttTopic(institutionId), body }, payload }
 }
 
 /**
@@ -149,28 +198,28 @@ export const planInboxMessage = (params: {
 	bytes: Uint8Array
 	owners: ReadonlyMap<string, LivestreamOwner>
 	at: string
-}): SidecarPlan => {
+}): ValidationPlan => {
 	const { subject, bytes, owners, at } = params
+	const text = decodeUtf8(bytes)
+	const json = text === null ? null : parseJson(text)
+	const payload = loggablePayload(bytes, json)
+
 	const institutionId = institutionFromInboxSubject(subject)
 	if (!institutionId) {
-		return { action: 'term', cause: 'ownership', message: 'inbox subject is not an institution URN', feedback: null }
+		return {
+			action: 'term',
+			cause: 'ownership',
+			message: 'inbox subject is not an institution URN',
+			feedback: null,
+			payload,
+		}
 	}
-	const context = { at, subject, institutionId }
+	const context = { at, subject, institutionId, payload }
 
-	let text: string
-	try {
-		text = new TextDecoder('utf-8', { fatal: true }).decode(bytes)
-	} catch {
-		return reject({ ...context, cause: 'json', message: 'payload is not UTF-8' })
-	}
+	if (text === null) return reject({ ...context, cause: 'json', message: 'payload is not UTF-8' })
+	if (!json) return reject({ ...context, cause: 'json', message: 'payload is not JSON', value: text })
 
-	let value: unknown
-	try {
-		value = JSON.parse(text) as unknown
-	} catch {
-		return reject({ ...context, cause: 'json', message: 'payload is not JSON', value: text })
-	}
-
+	const { value } = json
 	const parsed = parseConnectInboxEvent(value)
 	if (!parsed.success) {
 		const issues = zodIssues(parsed.error)

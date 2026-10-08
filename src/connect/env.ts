@@ -22,7 +22,7 @@ export const natsUser = natsEndpoint.user
 export const natsPassword = natsEndpoint.password
 
 /**
- * MQTT gateway the sidecar uses for RETAIN. NATS core has no retain flag.
+ * MQTT gateway the validation loop uses for RETAIN. NATS core has no retain flag.
  * Default is the `NATS_URL` host on port 1883. Credentials stay on `NATS_URL`.
  */
 export const natsMqttUrl = getEnv<string>('NATS_MQTT_URL', { defaultValue: mqttUrlForNats(natsUrl) })

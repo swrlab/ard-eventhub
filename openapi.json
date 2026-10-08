@@ -1111,7 +1111,7 @@
 								"type": "string",
 								"pattern": "^urn:ard:institution:[a-z0-9]+$",
 								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
-								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+								"description": "Owning institution URN (claim; validation checks it against the feed)"
 							},
 							"externalId": {
 								"deprecated": true,
@@ -1537,7 +1537,7 @@
 								"type": "string",
 								"pattern": "^urn:ard:institution:[a-z0-9]+$",
 								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
-								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+								"description": "Owning institution URN (claim; validation checks it against the feed)"
 							},
 							"externalId": {
 								"deprecated": true,
@@ -1686,7 +1686,7 @@
 								"type": "string",
 								"pattern": "^urn:ard:institution:[a-z0-9]+$",
 								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
-								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+								"description": "Owning institution URN (claim; validation checks it against the feed)"
 							},
 							"externalId": {
 								"deprecated": true,

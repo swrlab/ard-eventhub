@@ -1,4 +1,4 @@
-import type { SidecarAccept, SidecarPlan, SidecarReject } from './plan.ts'
+import type { ValidationAccept, ValidationPlan, ValidationReject } from './plan.ts'
 import { test } from '@cross/test'
 import { assertEquals } from '@std/assert'
 import { parseRejection } from '../ui/rejections.ts'
@@ -29,7 +29,7 @@ const track = {
  * @param subject - Inbox subject
  * @returns The plan
  */
-const plan = (body: unknown, subject = INBOX): SidecarPlan =>
+const plan = (body: unknown, subject = INBOX): ValidationPlan =>
 	planInboxMessage({
 		subject,
 		bytes: new TextEncoder().encode(JSON.stringify(body)),
@@ -42,7 +42,7 @@ const plan = (body: unknown, subject = INBOX): SidecarPlan =>
  * @param result - Plan
  * @returns The plan as an accept
  */
-const accepted = (result: SidecarPlan): SidecarAccept => {
+const accepted = (result: ValidationPlan): ValidationAccept => {
 	if (result.action !== 'ack') throw new Error(`expected ack, got term: ${result.message}`)
 	return result
 }
@@ -52,7 +52,7 @@ const accepted = (result: SidecarPlan): SidecarAccept => {
  * @param result - Plan
  * @returns The plan as a reject
  */
-const rejected = (result: SidecarPlan): SidecarReject => {
+const rejected = (result: ValidationPlan): ValidationReject => {
 	if (result.action !== 'term') throw new Error('expected term, got ack')
 	return result
 }
@@ -102,6 +102,33 @@ test('a payload that is not JSON is a json rejection', () => {
 	assertEquals(result.message, 'payload is not JSON')
 })
 
+test('a rejection carries the full decoded event for the log', () => {
+	const body = { ...track, title: undefined, extra: { nested: [1, 2] } }
+	const result = rejected(plan(body))
+	assertEquals(result.payload, JSON.parse(JSON.stringify(body)))
+})
+
+test('a non-JSON or non-UTF-8 rejection carries the payload text', () => {
+	const notJson = rejected(
+		planInboxMessage({ subject: INBOX, bytes: new TextEncoder().encode('{nope'), owners, at: AT })
+	)
+	assertEquals(notJson.payload, '{nope')
+	const notUtf8 = rejected(
+		planInboxMessage({ subject: INBOX, bytes: new Uint8Array([0x7b, 0xff, 0x7d]), owners, at: AT })
+	)
+	assertEquals(notUtf8.cause, 'json')
+	assertEquals(notUtf8.payload, '{\uFFFD}')
+})
+
+test('an oversized rejected payload is logged as a prefix with its size', () => {
+	const bytes = new TextEncoder().encode(`"${'x'.repeat(70 * 1024)}"`)
+	const result = rejected(planInboxMessage({ subject: 'inbox.not-an-institution', bytes, owners, at: AT }))
+	const payload = result.payload as { truncated: boolean; bytes: number; head: string }
+	assertEquals(payload.truncated, true)
+	assertEquals(payload.bytes, bytes.byteLength)
+	assertEquals(payload.head.length, 64 * 1024)
+})
+
 test('a mismatched institution is rejected even when the subject itself is well formed', () => {
 	const result = rejected(
 		plan({
@@ -133,6 +160,7 @@ test('a subject without an institution URN is termed with no feedback', () => {
 	const result = rejected(plan(track, 'inbox.not-an-institution'))
 	assertEquals(result.cause, 'ownership')
 	assertEquals(result.feedback, null)
+	assertEquals(result.payload, track)
 })
 
 test('track.next is retained and does not fan out when no plugin is set', () => {

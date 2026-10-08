@@ -12,25 +12,29 @@ import {
 
 export const INBOX_STREAM = 'INBOX'
 export const PLUGINS_STREAM = 'PLUGINS'
-export const SIDECAR_CONSUMER = 'sidecar'
+/**
+ * Durable name of the validation consumer. Kept as `sidecar` on purpose: a new name creates a fresh
+ * `DeliverPolicy.All` consumer, which replays the whole INBOX stream into `radio/` and the plugins.
+ */
+export const VALIDATION_CONSUMER = 'sidecar'
 
 /** Plugin work-queue TTL (RFC §10.4: short max_age in minutes). */
 const PLUGINS_MAX_AGE_NS = 10 * 60 * 1_000_000_000
 
 /** Redeliver an unacked inbox message after this long. Nanoseconds. Short on purpose (RFC §10.2). */
-export const SIDECAR_ACK_WAIT_NS = 5_000_000_000
+export const VALIDATION_ACK_WAIT_NS = 5_000_000_000
 
-/** In-flight inbox messages across the pods pulling `sidecar`. */
-const SIDECAR_MAX_ACK_PENDING = 64
+/** In-flight inbox messages across the pods pulling the validation consumer. */
+const VALIDATION_MAX_ACK_PENDING = 64
 
 /** Crash retries. Validation failures are `term`ed and do not use this budget. */
-const SIDECAR_MAX_DELIVER = 3
+const VALIDATION_MAX_DELIVER = 3
 
 /** Stream names ensured for eventhub-connect. */
 export type EnsuredStreams = {
 	inbox: string
 	plugins: string
-	sidecar: string
+	validation: string
 }
 
 /**
@@ -91,25 +95,25 @@ const ensurePluginsStream = async (jsm: JetStreamManager): Promise<string> => {
 }
 
 /**
- * Create the durable `sidecar` pull consumer on INBOX when missing.
+ * Create the durable validation pull consumer on INBOX when missing.
  * @param jsm - JetStream manager
  * @returns Consumer name
  */
-const ensureSidecarConsumer = async (jsm: JetStreamManager): Promise<string> => {
+const ensureValidationConsumer = async (jsm: JetStreamManager): Promise<string> => {
 	const tuning = {
-		ack_wait: SIDECAR_ACK_WAIT_NS,
-		max_ack_pending: SIDECAR_MAX_ACK_PENDING,
-		max_deliver: SIDECAR_MAX_DELIVER,
+		ack_wait: VALIDATION_ACK_WAIT_NS,
+		max_ack_pending: VALIDATION_MAX_ACK_PENDING,
+		max_deliver: VALIDATION_MAX_DELIVER,
 	}
 	try {
-		await jsm.consumers.info(INBOX_STREAM, SIDECAR_CONSUMER)
-		await jsm.consumers.update(INBOX_STREAM, SIDECAR_CONSUMER, tuning)
+		await jsm.consumers.info(INBOX_STREAM, VALIDATION_CONSUMER)
+		await jsm.consumers.update(INBOX_STREAM, VALIDATION_CONSUMER, tuning)
 	} catch (error) {
 		if (!isJetStreamCode(error, JetStreamApiCodes.ConsumerNotFound)) {
 			throw error
 		}
 		await jsm.consumers.add(INBOX_STREAM, {
-			durable_name: SIDECAR_CONSUMER,
+			durable_name: VALIDATION_CONSUMER,
 			ack_policy: AckPolicy.Explicit,
 			deliver_policy: DeliverPolicy.All,
 			replay_policy: ReplayPolicy.Instant,
@@ -117,11 +121,11 @@ const ensureSidecarConsumer = async (jsm: JetStreamManager): Promise<string> => 
 			...tuning,
 		})
 	}
-	return SIDECAR_CONSUMER
+	return VALIDATION_CONSUMER
 }
 
 /**
- * Ensure INBOX, PLUGINS, and the durable sidecar consumer exist (idempotent).
+ * Ensure INBOX, PLUGINS, and the durable validation consumer exist (idempotent).
  * @param nc - Open NATS connection
  * @returns Names of the ensured assets
  */
@@ -129,6 +133,6 @@ export const ensureStreams = async (nc: NatsConnection): Promise<EnsuredStreams>
 	const jsm = await jetstreamManager(nc)
 	const inbox = await ensureInboxStream(jsm)
 	const plugins = await ensurePluginsStream(jsm)
-	const sidecar = await ensureSidecarConsumer(jsm)
-	return { inbox, plugins, sidecar }
+	const validation = await ensureValidationConsumer(jsm)
+	return { inbox, plugins, validation }
 }

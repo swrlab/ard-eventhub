@@ -5,10 +5,10 @@ import { natsAccess } from '../utils/nats/_client.ts'
 import { ensureStreams } from '../utils/nats/ensure-streams.ts'
 import { natsPassword, natsUrl, natsUser } from './env.ts'
 import { startArdFeed, stopArdFeed } from './feed/ard-feed-loader.ts'
-import { startSidecar, stopSidecar } from './sidecar/index.ts'
 import { natsMonitorUrl, uiHost, uiPort, useHmr } from './ui/env.ts'
 import { app } from './ui/server.ts'
 import { bindConnection, unbindConnection } from './ui/session.ts'
+import { startValidation, stopValidation } from './validation/index.ts'
 
 const source = 'connect'
 
@@ -35,7 +35,7 @@ export default {
 }
 
 /**
- * Boot one connection: streams, UI binding, feed, then the sidecar once KV holds a feed.
+ * Boot one connection: streams, UI binding, feed, then validation once KV holds a feed.
  * @param nc - Open NATS connection
  * @returns Resolves when the connection closes
  */
@@ -46,7 +46,7 @@ const serveConnection = async (nc: NatsConnection): Promise<void> => {
 	const { kvReady } = await startArdFeed(nc)
 	const feedReady = await Promise.race([kvReady.then(() => true), closed.then(() => false)])
 	if (!feedReady) return
-	await startSidecar(nc)
+	await startValidation(nc)
 	logger.info({
 		message: 'nats ready',
 		source,
@@ -56,7 +56,7 @@ const serveConnection = async (nc: NatsConnection): Promise<void> => {
 }
 
 /**
- * Keep a NATS connection that ensures JetStream assets and runs the validation sidecar.
+ * Keep a NATS connection that ensures JetStream assets and runs validation.
  * The HTTP server stays up while this reconnects. It does not listen itself.
  * @returns Never resolves unless the process is signalled
  */
@@ -74,7 +74,7 @@ const keepBroker = async (): Promise<void> => {
 		if (stopped) return
 		stopped = true
 		void (async () => {
-			await stopSidecar()
+			await stopValidation()
 			unbindConnection()
 			stopArdFeed()
 			if (nc) {
@@ -108,7 +108,7 @@ const keepBroker = async (): Promise<void> => {
 				data: { natsUrl },
 			})
 		}
-		await stopSidecar()
+		await stopValidation()
 		stopArdFeed()
 		unbindConnection()
 		if (nc) {

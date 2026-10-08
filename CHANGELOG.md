@@ -25,11 +25,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - feat: rename the connect NATS user to `svc-eventhub-connect`, drop unused `svc-operator` and `svc-adapter-radioplayer`, and let that user subscribe to `feedback.>` and `plugin.>`
+- refactor: rename the connect sidecar to validation (`src/connect/validation/`, log source `connect.validation`, logs `validation accepted` / `validation rejected` / `validation publish failed`, metric `connect.validation.rejection`); the durable consumer keeps the name `sidecar`
+- feat: log the full inbox payload on every `validation rejected` line (prefix past 64 KiB)
 - chore: upgrade dependencies (Google clients, firebase-admin 14, TypeScript 7, Blume 2, Knip 6)
 
 ### Fixed
 
-- fix: connect starts the sidecar only once the ARD feed is in KV, so a cold start no longer drops valid events silently once `max_deliver` naks run out
+- fix: connect starts validation only once the ARD feed is in KV, so a cold start no longer drops valid events silently once `max_deliver` naks run out
 - fix: drop the AsyncAPI `scalar` options Blume 2.2 rejects, so the docs build runs
 - fix: start ingest when `MQTT_BROKER_URL` is unset (MQTT hop stays off; Pub/Sub unchanged)
 
