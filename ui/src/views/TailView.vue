@@ -3,7 +3,7 @@ import type { NatsConnection, Subscription } from '@nats-io/nats-core'
 import type { RateWindow } from '../../../src/connect/ui/policy.ts'
 import type { MetaReport } from '../../../src/connect/ui/types.ts'
 import { wsconnect } from '@nats-io/nats-core'
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { LOCAL_NATS_USERS } from '../../../src/connect/dev-users.ts'
 import { admitTailEvent, evaluateTail, parseTailFilter, tailCloseMessage } from '../../../src/connect/ui/policy.ts'
@@ -254,6 +254,10 @@ const copyPayload = async (payload: unknown, index: number): Promise<void> => {
  * @returns Text for the row
  */
 const pretty = (payload: unknown): string => (typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2))
+
+onMounted(() => {
+	if (typeof route.query.filter === 'string') void watchTail()
+})
 
 onUnmounted(stop)
 </script>

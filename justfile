@@ -52,7 +52,7 @@ ingest:
 # loads ARD_FEED_URL from sops when the shell did not set it, without replacing NATS_URL
 [group('LOCAL')]
 dev:
-	exec bun run --hot ./src/connect/index.ts
+	just env "bun run --hot ./src/connect/index.ts"
 
 # lint the code
 [group('LOCAL')]
