@@ -1,4 +1,6 @@
 import { defineConfig } from 'blume'
+import { asyncapi, openapi } from 'blume/reference'
+import { filesystem } from 'blume/sources'
 
 // icons are documented in https://lucide.dev/icons/
 
@@ -15,7 +17,7 @@ export default defineConfig({
 		repo: 'ard-eventhub',
 	},
 	content: {
-		sources: [{ type: 'filesystem', root: 'docs' }],
+		sources: [filesystem({ root: 'docs' })],
 	},
 	export: {
 		pdf: true,
@@ -27,7 +29,6 @@ export default defineConfig({
 	deployment: {
 		site: 'https://swrlab.github.io',
 		base: '/ard-eventhub',
-		output: 'static',
 	},
 	theme: {
 		accent: 'rgb(29, 11, 64)', // a named preset or any CSS color
@@ -39,26 +40,26 @@ export default defineConfig({
 			mono: 'geist-mono',
 		},
 	},
-	openapi: {
-		enabled: true,
-		spec: './openapi.json',
-		codeSamples: ['curl', 'js'],
-		route: '/api',
-	},
-	asyncapi: {
-		enabled: true,
-		spec: './asyncapi.json',
-		route: '/events',
-		scalar: {
-			agent: {
-				disabled: true,
+	reference: [
+		openapi({
+			spec: './openapi.json',
+			codeSamples: ['curl', 'js'],
+			route: '/api',
+		}),
+		asyncapi({
+			spec: './asyncapi.json',
+			route: '/events',
+			scalar: {
+				agent: {
+					disabled: true,
+				},
+				mcp: {
+					disabled: true,
+				},
+				telemetry: false,
 			},
-			mcp: {
-				disabled: true,
-			},
-			telemetry: false,
-		},
-	},
+		}),
+	],
 	navigation: {
 		tabs: [
 			{ label: 'Docs', path: '/', href: '/' },
@@ -83,7 +84,7 @@ export default defineConfig({
 			},
 		],
 	},
-	ai: {
+	agents: {
 		llmsTxt: {
 			enabled: true,
 			openapi: true,

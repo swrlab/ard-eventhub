@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer'
 import { test } from '@cross/test'
 import { assertEquals } from '@std/assert'
 import { LOCAL_NATS_PASSWORD, LOCAL_NATS_USERS, SWR_INSTITUTION_ID } from '../connect/dev-users.ts'
@@ -30,7 +31,7 @@ test('GCP MQTT inbox payload arrives byte-identical on the CN MQTT inbox as svc-
 
 		assertEquals(
 			await relayInbox(inboxMqttTopic(SWR_INSTITUTION_ID), payload, async (topic, bytes) => {
-				await cn.publishAsync(topic, bytes, cnInboxPublish)
+				await cn.publishAsync(topic, Buffer.from(bytes), cnInboxPublish)
 			}),
 			'relayed'
 		)

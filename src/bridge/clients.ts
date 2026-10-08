@@ -40,7 +40,8 @@ const mqttReconnectOptions = (clientId: string, tlsCa: string): IClientOptions =
  * @param tlsCa - `MQTT_TLS_CA` value
  * @returns Options to pass to `mqtt.connect`
  */
-export const gcpMqttConnectOptions = (tlsCa: string): IClientOptions => mqttReconnectOptions(BRIDGE_GCP_CLIENT_ID, tlsCa)
+export const gcpMqttConnectOptions = (tlsCa: string): IClientOptions =>
+	mqttReconnectOptions(BRIDGE_GCP_CLIENT_ID, tlsCa)
 
 /**
  * mqtt.js connect options for the CN gateway as `svc-bridge`.

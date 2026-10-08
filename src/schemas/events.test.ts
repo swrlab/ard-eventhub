@@ -1,6 +1,5 @@
 import { test } from '@cross/test'
 import { assertEquals, assertStrictEquals } from '@std/assert'
-import { z } from 'zod'
 import {
 	connectEventNames,
 	eventNames,

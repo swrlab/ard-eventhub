@@ -1,7 +1,14 @@
+import { Buffer } from 'node:buffer'
 import process from 'node:process'
 import { logger } from '@frytg/logger'
 import mqtt from 'mqtt'
-import { GCP_INBOX_FILTER, cnInboxPublish, cnMqttConnectOptions, gcpInboxSubscribe, gcpMqttConnectOptions } from './clients.ts'
+import {
+	GCP_INBOX_FILTER,
+	cnInboxPublish,
+	cnMqttConnectOptions,
+	gcpInboxSubscribe,
+	gcpMqttConnectOptions,
+} from './clients.ts'
 import { cnMqttPassword, cnMqttTlsCa, cnMqttUrl, cnMqttUser, gcpMqttUrl, mqttTlsCa } from './env.ts'
 import { getBridgeLag, resetBridgeLag } from './lag.ts'
 import { relayInbox } from './relay.ts'
@@ -28,7 +35,7 @@ const main = async (): Promise<void> => {
 	})
 
 	const publish = async (topic: string, payload: Uint8Array): Promise<void> => {
-		await cn.publishAsync(topic, payload, cnInboxPublish)
+		await cn.publishAsync(topic, Buffer.from(payload), cnInboxPublish)
 	}
 
 	logger.info({

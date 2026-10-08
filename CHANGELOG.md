@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat: local NATS auth (RFC §7 users, bcrypt, `allowed_connection_types`, institution-bound ACLs; `just nats-check` / `just nats-reload`)
 - feat: eventhub-bridge (`src/bridge/`, `just bridge`) — GCP MQTT `inbox/#` to CN MQTT `inbox/{institutionId}` as `svc-bridge`; lag log
 
+### Changed
+
+- chore: upgrade dependencies (Google clients, firebase-admin 14, TypeScript 7, Blume 2, Knip 6)
+
 ### Fixed
 
 - fix: start ingest when `MQTT_BROKER_URL` is unset (MQTT hop stays off; Pub/Sub unchanged)
