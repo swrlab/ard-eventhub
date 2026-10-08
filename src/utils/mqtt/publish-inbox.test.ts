@@ -12,7 +12,7 @@ test('inboxTopic prefixes the institution URN', () => {
 	assertEquals(inboxTopic(INSTITUTION_ID), `inbox/${INSTITUTION_ID}`)
 })
 
-test('isMqttBrokerConfigured treats a blank URL as no hop', () => {
+test('isMqttBrokerConfigured treats a blank URL as Pub/Sub only', () => {
 	assertEquals(isMqttBrokerConfigured(''), false)
 	assertEquals(isMqttBrokerConfigured('   '), false)
 	assertEquals(isMqttBrokerConfigured('mqtt://127.0.0.1:1883'), true)

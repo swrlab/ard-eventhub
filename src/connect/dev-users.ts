@@ -17,5 +17,5 @@ export const LOCAL_NATS_USERS = {
 	subArdSounds: 'sub-ard-sounds-2026-06-26',
 	svcSidecar: 'svc-sidecar',
 	svcAdapterRadioplayer: 'svc-adapter-radioplayer',
-	svcBridge: 'svc-bridge',
+	svcIngest: 'svc-ingest',
 } as const

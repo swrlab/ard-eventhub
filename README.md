@@ -25,7 +25,7 @@ just docs-build  # static build to dist/
 
 ## Service
 
-The Ingest service is responsible for receiving and publishing events and managing subscriptions. You'll find the core code in [`./src/ingest/`](./src/ingest/), with shared utilities in [`./src/utils/`](./src/utils/). NanoMQ hop files live in [`infra/nanomq/`](infra/nanomq/). Start a local hop with `just mqtt-up` (Apple `container` CLI). Eventhub Connect talks NATS-native; local broker recipes are `just nats-up` / `just nats-up-docker` ([`src/connect/README.md`](src/connect/README.md)). `eventhub-bridge` (`just bridge`) relays hop MQTT `inbox/#` onto the CN MQTT gateway as `svc-bridge` ([`src/bridge/README.md`](src/bridge/README.md)). Do not run NanoMQ and NATS at the same time — both bind `:1883`.
+The Ingest service is responsible for receiving and publishing events and managing subscriptions. You'll find the core code in [`./src/ingest/`](./src/ingest/), with shared utilities in [`./src/utils/`](./src/utils/). When `MQTT_BROKER_URL` is set, ingest publishes accepted events over MQTT to `inbox/{institutionId}` on the CN gateway as `svc-ingest` (Pub/Sub unchanged). Eventhub Connect talks NATS-native; local broker recipes are `just nats-up` / `just nats-up-docker` ([`src/connect/README.md`](src/connect/README.md)). Do not run NanoMQ and NATS at the same time — both bind `:1883`. NanoMQ (`just mqtt-up`) is only a local anonymous broker for MQTT tooling, not the ingest path.
 
 ## Modules
 

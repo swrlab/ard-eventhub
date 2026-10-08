@@ -93,7 +93,7 @@ jobs:
       - name: 🧪 Run NATS access tests
         env:
           NATS_REQUIRE: 'true'
-        run: bun test --timeout 30000 src/utils/nats src/bridge src/cli/nats-sub-args.test.ts
+        run: bun test --timeout 30000 src/utils/nats src/cli/nats-sub-args.test.ts
 
   license:
     needs: security

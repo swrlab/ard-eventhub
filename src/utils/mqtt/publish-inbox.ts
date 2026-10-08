@@ -13,9 +13,9 @@ const QOS_AT_LEAST_ONCE = 1
 export const inboxTopic = (institutionId: string): string => `inbox/${institutionId}`
 
 /**
- * Best-effort publish onto an inbox client. A missing client is a no-op (legacy ingest).
+ * Best-effort publish onto the CN gateway. A missing client is a no-op (Pub/Sub only).
  * Failures are logged and never thrown.
- * @param client - Shared hop client, or undefined when `MQTT_BROKER_URL` is unset
+ * @param client - Shared gateway client, or undefined when `MQTT_BROKER_URL` is unset
  * @param institutionId - Authenticated user's institution URN
  * @param payload - Same enriched body published to Pub/Sub
  * @returns Always resolves

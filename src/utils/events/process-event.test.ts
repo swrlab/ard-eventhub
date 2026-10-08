@@ -96,7 +96,7 @@ test('processEvent publishes the enriched event to the MQTT inbox', async () => 
 	}
 })
 
-test('processEvent normalizes a numeric publisherId before the MQTT inbox hop', async () => {
+test('processEvent normalizes a numeric publisherId before the MQTT inbox publish', async () => {
 	const { sandbox } = stubFanout()
 	const publishInbox = sandbox.stub(mqttInbox, 'publish').resolves()
 

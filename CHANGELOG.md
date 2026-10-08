@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - feat: add `radio.control` and `radio.data` Zod schemas (Eventhub Connect / MQTT; rejected on HTTPS POST)
 - feat: generate AsyncAPI 3 spec from those Zod schemas (`just asyncapi`, Blume `/events`)
-- feat: dual-write accepted HTTPS events to MQTT `inbox/{institutionId}` (NanoMQ hop; Pub/Sub unchanged)
+- feat: dual-write accepted HTTPS events to MQTT `inbox/{institutionId}` as `svc-ingest` on the CN gateway (Pub/Sub unchanged)
 - feat: emit `services[].institutionId` and guarantee URN-shaped `id`/`publisherId` on ingest (`externalId`/`type` still populated, now deprecated; `id` or `externalId`+`type` is required)
 - feat: trust optional `MQTT_TLS_CA` (PEM or file path) when connecting to a private mqtts:// hop
 - feat: gate plugins Pub/Sub dispatch with `INGEST_PUBLISH_PLUGINS` (exact string `true`; off otherwise)
@@ -19,7 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat: NATS-native access layer for eventhub-connect (`src/utils/nats/`, `just connect`) with local JetStream + MQTT gateway
 - ci: separate NATS job (`just nats-up-docker`) so MQTT→NATS inbox translation is required, without colliding with NanoMQ on `:1883`
 - feat: local NATS auth (RFC §7 users, bcrypt, `allowed_connection_types`, institution-bound ACLs; `just nats-check` / `just nats-reload`)
-- feat: eventhub-bridge (`src/bridge/`, `just bridge`) — GCP MQTT `inbox/#` to CN MQTT `inbox/{institutionId}` as `svc-bridge`; lag log
 
 ### Changed
 

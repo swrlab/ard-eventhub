@@ -1,11 +1,11 @@
-# Hand-apply sketch for the GCP NanoMQ hop. Rollout stays outside GitHub Actions,
-# same as ingest. Create the ConfigMap, TLS secret, and password secret before apply.
+# Private MQTT listener. Ingest does not publish here; it connects to the CN
+# gateway as `svc-ingest`. Rollout stays outside GitHub Actions.
 #
 #   kubectl create configmap nanomq --from-file=nanomq.conf=infra/nanomq/nanomq.gcp.conf
 #   kubectl create secret generic nanomq-tls \
 #     --from-file=tls.crt=... --from-file=tls.key=... --from-file=ca.crt=...
 #   kubectl create secret generic nanomq-users \
-#     --from-file=nanomq_pwd.conf=<(printf '"ingest": "%s"\n"bridge": "%s"\n' "$INGEST_PW" "$BRIDGE_PW")
+#     --from-file=nanomq_pwd.conf=<(printf '"client": "%s"\n' "$MQTT_PW")
 #
 apiVersion: apps/v1
 kind: Deployment

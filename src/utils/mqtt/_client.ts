@@ -2,22 +2,22 @@ import { hostname } from 'node:os'
 import process from 'node:process'
 import { logger } from '@frytg/logger'
 import mqtt, { type MqttClient } from 'mqtt'
-import { mqttBrokerUrl, mqttTlsCa } from '#env'
+import { mqttBrokerUrl, mqttPassword, mqttTlsCa, mqttUsername } from '#env'
+import { ingestMqttConnectOptions } from './connect-options.ts'
 import { mqttTlsConnectOptions } from './tls-ca.ts'
 
 const source = 'utils.mqtt.client'
-const MQTT_V311 = 4
 const CONNECT_TIMEOUT_MS = 5_000
 
 /**
- * True when `MQTT_BROKER_URL` names a broker. Blank means legacy ingest with no hop.
+ * True when `MQTT_BROKER_URL` names a broker. Blank means ingest stays on Pub/Sub.
  * @param brokerUrl - Raw `MQTT_BROKER_URL`
- * @returns Whether the hop should start
+ * @returns Whether the CN gateway client should start
  */
 export const isMqttBrokerConfigured = (brokerUrl: string): boolean => brokerUrl.trim().length > 0
 
 /**
- * Extra hop CA for mqtts://. Missing `MQTT_TLS_CA` is fine (local mqtt://).
+ * Extra CA for mqtts://. Missing `MQTT_TLS_CA` is fine (local mqtt://).
  * An unreadable path is logged; the client still starts so HTTPS ingest stays up.
  * @returns mqtt.js `ca` option, or an empty object
  */
@@ -37,13 +37,12 @@ const loadMqttTlsConnectOptions = (): ReturnType<typeof mqttTlsConnectOptions> =
 
 /**
  * One mqtt.js client for the process when a broker URL is set. Undefined otherwise.
+ * Authenticates as `svc-ingest` and publishes like any other MQTT publisher.
  * Reconnects on its own; do not call `connect` again.
  */
 export const mqttClient: MqttClient | undefined = isMqttBrokerConfigured(mqttBrokerUrl)
 	? mqtt.connect(mqttBrokerUrl.trim(), {
-			clientId: `eventhub-ingest-${hostname()}-${process.pid}`,
-			protocolVersion: MQTT_V311,
-			connectTimeout: CONNECT_TIMEOUT_MS,
+			...ingestMqttConnectOptions(`eventhub-ingest-${hostname()}-${process.pid}`, mqttUsername, mqttPassword),
 			...loadMqttTlsConnectOptions(),
 		})
 	: undefined
@@ -59,7 +58,7 @@ if (mqttClient) {
 }
 
 /**
- * Wait until the shared client is connected. Missing `MQTT_BROKER_URL` skips the hop.
+ * Wait until the shared client is connected. Missing `MQTT_BROKER_URL` skips the publish.
  * A down broker is logged, not fatal.
  * @returns Resolves on connect, after the connect timeout, or immediately when MQTT is off
  */

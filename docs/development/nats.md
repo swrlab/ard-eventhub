@@ -34,4 +34,4 @@ Vor einem Reload: `just nats-check`. User hinzufügen, dann `just nats-reload` (
 
 Ein Publish auf `inbox.urn:…` über MQTT landet auf `inbox//urn:…` — ein Token, das niemand abonniert. Richtig ist `inbox/urn:…`.
 
-NanoMQ und NATS nicht parallel starten. Ingest-CI bleibt bei NanoMQ; NATS-Tests laufen in einem eigenen Job.
+NanoMQ und NATS nicht parallel starten. Ingest publiziert bei gesetztem `MQTT_BROKER_URL` direkt auf das Gateway als `svc-ingest`. Ingest-CI startet weiter NanoMQ (anonymer Connect); die `svc-ingest`-ACL prüft der eigene NATS-Job.

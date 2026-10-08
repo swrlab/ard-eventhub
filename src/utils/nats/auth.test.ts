@@ -86,6 +86,22 @@ test('publisher can MQTT-publish to its inbox and not to another institution', a
 	}
 })
 
+test('svc-ingest can MQTT-publish to every institution inbox', async () => {
+	const nc = await tryConnectSidecar()
+	if (skipUnlessNats(nc)) {
+		return
+	}
+	try {
+		for (const institutionId of [SWR_INSTITUTION_ID, SHARED_INSTITUTION_ID]) {
+			const seen = inboxSawMessage(nc, institutionId)
+			await mqttPublishInbox(LOCAL_NATS_USERS.svcIngest, institutionId)
+			assertEquals(await seen, true)
+		}
+	} finally {
+		await natsAccess.drain(nc)
+	}
+})
+
 test('sub- user cannot publish', async () => {
 	const nc = await tryConnectSidecar()
 	if (skipUnlessNats(nc)) {
@@ -118,7 +134,7 @@ test('MQTT credential is rejected on the NATS port; STANDARD credential is rejec
 	await assertRejects(() =>
 		natsAccess.connect({
 			servers: NATS_SERVERS,
-			user: LOCAL_NATS_USERS.svcBridge,
+			user: LOCAL_NATS_USERS.svcIngest,
 			password: LOCAL_NATS_PASSWORD,
 		})
 	)

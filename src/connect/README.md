@@ -14,7 +14,7 @@ Local users live in [`infra/nats/nats-users.conf`](../../infra/nats/nats-users.c
 - OPTIONAL `NATS_USER` — default `svc-sidecar`
 - OPTIONAL `NATS_PASSWORD` — default `local` (override via sops in deployed environments)
 
-Ingest dual-writes only when `MQTT_BROKER_URL` is set. Unset, ingest stays on Pub/Sub. NanoMQ and NATS both bind `:1883` — do not run them at the same time. Anonymous NATS/MQTT connects are rejected (`no_auth_user` is unset).
+Ingest dual-writes only when `MQTT_BROKER_URL` is set, as `svc-ingest` / `MQTT_PASSWORD` (default `local`). Unset, ingest stays on Pub/Sub. NanoMQ and NATS both bind `:1883`. Anonymous NATS/MQTT connects are rejected (`no_auth_user` is unset).
 
 ## Local NATS (Mac / Homebrew)
 
@@ -55,7 +55,7 @@ If docker is also missing, download a pinned `nats-server` binary from [nats-io/
 2. In another terminal, publish MQTT QoS 1 as `pub-swr-2026-06-26` / `local` to `inbox/urn:ard:institution:a3004ff924ece1a2` on `mqtt://127.0.0.1:1883`
 3. The NATS subscriber prints the payload
 
-Optional: run ingest with the existing `MQTT_BROKER_URL=mqtt://127.0.0.1:1883` so HTTPS posts land on NATS subjects for `just connect` / `just nats-sub` to see. The GCP→CN hop is `just bridge` ([`../bridge/README.md`](../bridge/README.md)) — it needs the NanoMQ hop and NATS on **different** hosts because both default to `:1883`.
+Optional: run ingest with `MQTT_BROKER_URL=mqtt://127.0.0.1:1883` (and NATS up, NanoMQ down) so HTTPS posts land on NATS subjects for `just connect` / `just nats-sub` to see. Ingest publishes as `svc-ingest`.
 
 ```sh
 just nats-down

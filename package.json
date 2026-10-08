@@ -79,7 +79,6 @@
 			"blume.config.ts!",
 			"src/cli/*.ts",
 			"src/connect/index.ts",
-			"src/bridge/index.ts",
 			"src/openapi/generate.ts",
 			"src/asyncapi/generate.ts",
 			"src/**/*.test.ts"

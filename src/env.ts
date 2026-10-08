@@ -1,5 +1,6 @@
 import type { DTSKeys, RadioplayerApiKeys, Stage } from './schemas/config.ts'
 import { getRequiredEnv } from '@frytg/check-required-env/get'
+import { LOCAL_NATS_PASSWORD, LOCAL_NATS_USERS } from './connect/dev-users.ts'
 import { getEnv, getEnvBase64, getEnvBoolean, getEnvNumber } from './utils/env.ts'
 
 // NOTE: keys without a default are required and cause an error if missing.
@@ -37,13 +38,20 @@ export const isIngestPublishPluginsEnabled = (): boolean =>
 	getEnv<string>('INGEST_PUBLISH_PLUGINS', { defaultValue: '' }) === 'true'
 
 /**
- * MQTT broker connection string for the inbox dual-write hop.
- * `mqtt://` or `mqtts://`, with optional `user:pass@` in the URL.
- * Empty when unset so legacy ingest stays on Pub/Sub without a hop.
+ * CN MQTT gateway for the inbox dual-write.
+ * `mqtt://` or `mqtts://`. Empty when unset so ingest stays on Pub/Sub.
  */
 export const mqttBrokerUrl = getEnv<string>('MQTT_BROKER_URL', { defaultValue: '' })
 /**
- * Optional hop CA for mqtts://. PEM text, or a path to a PEM file.
- * Unset for local `mqtt://`. GKE mounts `eventhub-nanomq-tls` `ca.crt` and points here.
+ * Optional gateway CA for mqtts://. PEM text, or a path to a PEM file.
+ * Unset for local `mqtt://`.
  */
 export const mqttTlsCa = getEnv<string>('MQTT_TLS_CA', { defaultValue: '' })
+/**
+ * MQTT username. Local default is `svc-ingest` (publish `inbox.>`, MQTT only).
+ */
+export const mqttUsername = getEnv<string>('MQTT_USERNAME', { defaultValue: LOCAL_NATS_USERS.svcIngest })
+/**
+ * MQTT password. Local default matches `infra/nats/nats-users.conf`. Override via sops.
+ */
+export const mqttPassword = getEnv<string>('MQTT_PASSWORD', { defaultValue: LOCAL_NATS_PASSWORD })
