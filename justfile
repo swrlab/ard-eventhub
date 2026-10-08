@@ -14,7 +14,6 @@ install *args:
 	mise install {{ args }}  
 	mise lock {{ args }}
 	bun install --silent
-	bun --cwd ui install --silent
 
 # update package dependencies (pass --env ci if needed)
 [group('DEV-SETUP')]

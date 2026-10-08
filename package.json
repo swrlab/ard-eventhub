@@ -45,12 +45,16 @@
 	},
 	"devDependencies": {
 		"@cross/test": "npm:@jsr/cross__test",
+		"@fontsource-variable/geist": "5.3.0",
+		"@fontsource-variable/geist-mono": "5.3.0",
 		"@std/assert": "npm:@jsr/std__assert",
+		"@tailwindcss/vite": "4.3.3",
 		"@types/bun": "^1.4.2",
 		"@types/node": "^25.9.9",
 		"@types/sinon": "^22.0.0",
 		"@types/slug": "^5.0.9",
 		"@typescript/native-preview": "^7.0.0-dev.20260707.2",
+		"@vitejs/plugin-vue": "6.0.9",
 		"blume": "2.2.1",
 		"cookie": "2.0.1",
 		"knip": "^6.40.0",
@@ -58,7 +62,11 @@
 		"oxfmt": "^0.72.0",
 		"oxlint": "^1.87.0",
 		"sinon": "^22.1.0",
-		"typescript": "^7.0.2"
+		"tailwindcss": "4.3.3",
+		"typescript": "^7.0.2",
+		"vite": "8.3.3",
+		"vue": "3.5.43",
+		"vue-router": "5.4.0"
 	},
 	"resolutions": {
 		"@scalar/schemas": "0.8.0",
@@ -79,7 +87,7 @@
 			"blume.config.ts!",
 			"src/cli/*.ts",
 			"src/connect/index.ts",
-			"src/connect/ui/index.ts",
+			"vite.config.ts",
 			"src/openapi/generate.ts",
 			"src/asyncapi/generate.ts",
 			"src/**/*.test.ts"

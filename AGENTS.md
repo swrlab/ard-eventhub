@@ -11,8 +11,7 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 - **Install tools:** [mise](https://mise.jdx.dev) → `mise install` (pins `just` + `sops` in [`mise.toml`](mise.toml))
 - **Install dependencies:** `bun install`
 - **Start ingest service:** `bun run ingest` (runs with hot reload)
-- **Start connect (NATS access):** `just connect` (needs local NATS: `just nats-up` or `just nats-up-docker`; local user `svc-sidecar` / `local`)
-- **Operator UI:** `just ui-build` then `just connect-ui` (http://127.0.0.1:4173). Vite dev: `just ui`. Dev cluster: `NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just connect-ui`
+- **Start connect (NATS access + operator UI):** `just connect` (needs local NATS: `just nats-up` or `just nats-up-docker`; local user `svc-sidecar` / `local`). UI at http://127.0.0.1:4173 after `just ui-build`. Vite HMR: `USE_HMR=true just connect` and `just ui`. Dev cluster: `NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just connect`
 - **Run tests:** `just test`
 - **Hurl API suite:** `just integration` (needs running ingest + `hurl`)
 - **Lint code:** `just lint` (uses Oxlint)
@@ -29,8 +28,8 @@ Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `o
 - **Tech Stack:** Bun, Node.js, TypeScript (strict mode), Hono, Zod, Google Cloud Platform
 - **File Structure:**
   - `src/ingest/` – Ingest service (receives events, manages subscriptions)
-  - `src/connect/` – Eventhub Connect NATS access layer (no validation sidecar yet). `src/connect/ui/` is the operator UI
-  - `ui/` – Vue operator console (Vite, Tailwind). Served by `just connect-ui`
+  - `src/connect/` – Eventhub Connect NATS access layer (no validation sidecar yet). `just connect` also serves the operator UI
+  - `ui/` – Vue operator console (Vite, Tailwind). Built to `static/dist` and served by `just connect`
 - `src/schemas/` – Zod request/response schemas (runtime validation + OpenAPI)
 - `src/openapi/` – OpenAPI document assembly / `openapi.json` generator
 - `src/asyncapi/` – AsyncAPI document assembly / `asyncapi.json` generator (Eventhub Connect / MQTT)

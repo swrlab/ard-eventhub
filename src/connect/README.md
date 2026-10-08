@@ -2,7 +2,7 @@
 
 NATS-native access layer for Eventhub Connect. This process talks to NATS on `:4222`. Publishers still speak MQTT; the NATS MQTT gateway rewrites `inbox/{institutionId}` to `inbox.{institutionId}`.
 
-There is no validation sidecar yet (RFC step 10). `just connect` opens a connection, ensures the `INBOX` and `PLUGINS` JetStream streams plus the durable `sidecar` consumer, and stays up.
+There is no validation sidecar yet (RFC step 10). `just connect` opens a connection, ensures the `INBOX` and `PLUGINS` JetStream streams plus the durable `sidecar` consumer, and serves the operator UI on `:4173`.
 
 Do not put `NATS_URL` on the ingest env module. Connect reads its own vars from [`env.ts`](env.ts).
 
@@ -24,30 +24,31 @@ brew install nats-io   # optional: `nats` CLI
 just nats-up
 just nats-sub          # one institution (default SWR example URN)
 just nats-sub --all    # inbox.>
-just connect           # ensure streams, log ready
+just ui-build
+just connect           # ensure streams, serve the operator UI on :4173
 ```
 
 Monitor: `http://127.0.0.1:8222`. Optional CLI: `nats stream ls`, `nats sub 'inbox.>'`.
 
 ## Operator UI
 
-Read-only boards for the broker. Stats are plain HTTP, polled every 8 seconds. The live tail is the only WebSocket, and it is not a monitoring feed.
+The same process serves the boards. Stats are plain HTTP, polled every 8 seconds. The live tail is the only WebSocket, and it is not a monitoring feed. Vite writes `static/dist` (manifest plus hashed assets), and connect serves that the way a built frontend is served: `/static/*` from the repo root, and every other GET returns the HTML shell.
 
 ```sh
 just ui-build
-just connect-ui
+just connect
 # http://127.0.0.1:4173
 ```
 
-`just ui` runs Vite on `:5173` and proxies `/api` to `:4173`.
+Hot reload: `USE_HMR=true just connect` in one terminal and `just ui` in another. The page stays on `:4173`. Its script tag points at the Vite server on `:5173`. `USE_HMR=dev` is only for the Vite `base` when you want absolute dev-server URLs inside the build.
 
 Dev cluster (three pods behind one monitor URL):
 
 ```sh
-NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just connect-ui
+NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just connect
 ```
 
-The process connects as `svc-operator` (subscribe `radio.>`, `feedback.>`, `inbox.>`, `plugin.>`; publish only `$JS.API` and `_INBOX`). `just nats-up` picks the user up from `infra/kubernetes/components/users/nats-users.conf`. A cluster that is already running needs that file reapplied before `svc-operator` exists. Until then set `NATS_USER=svc-sidecar`. Cluster and connection stats use the HTTP monitor and do not need this login. The UI never sends the password to the browser.
+The process connects as `NATS_USER` (default `svc-sidecar`), the same login that ensures streams. `svc-operator` can subscribe to `radio.>` and `feedback.>`; it is in the repo users file, and a cluster that is already running needs that file reapplied before the user exists. Set `NATS_USER=svc-operator` when the tail should subscribe. Cluster and connection stats use the HTTP monitor and do not need that login. The UI never sends the password to the browser.
 
 Panels:
 

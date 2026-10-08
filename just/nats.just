@@ -194,23 +194,19 @@ nats-k8s-dev:
 nats-k8s-dev-down:
 	kubectl delete -k "{{ NATS_K8S }}/overlays/dev"
 
-# start eventhub-connect (NATS access layer; no ingest env required)
+# start eventhub-connect. ensures streams and serves the operator UI on :4173
+# dev cluster: NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just connect
+# hot reload the vue app: USE_HMR=true just connect, and just ui in another terminal
 [group('LOCAL')]
 connect:
 	bun run --hot ./src/connect/index.ts
 
-# operator UI (stats over HTTP, live tail over WebSocket). http://127.0.0.1:4173
-# dev cluster: NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just connect-ui
-[group('LOCAL')]
-connect-ui:
-	bun run --hot ./src/connect/ui/index.ts
-
-# vite dev server for the operator UI. proxies /api to port 4173
+# vite dev server. the page is served by `just connect` when USE_HMR=true
 [group('LOCAL')]
 ui:
-	cd ui && bun x vite
+	bun x vite
 
-# build the operator UI into ui/dist, which connect-ui serves
+# build the operator UI into static/dist, which `just connect` serves
 [group('LOCAL')]
 ui-build:
-	cd ui && bun x vite build
+	bun x vite build

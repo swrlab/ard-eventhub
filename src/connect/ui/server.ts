@@ -1,112 +1,112 @@
-import type { ClusterReport, ConnectionsReport, MetaReport, OnAirReport, RejectionsReport } from './types.ts'
-import { extname, join, normalize, sep } from 'node:path'
+import type { Context } from 'hono'
 import { Hono } from 'hono'
+import { getConnInfo, serveStatic, upgradeWebSocket, websocket } from 'hono/bun'
+import { api } from './api.ts'
+import { manifestPath, staticRoot, uiAllowCidr, uiHost, uiPort, useHmr } from './env.ts'
+import { ipAllowed, parseAllowCidrs, parseTailFilter } from './policy.ts'
+import { tail } from './session.ts'
+import { readManifest, renderShell } from './shell.ts'
 
-const MISSING_HTML = `<!doctype html>
-<html lang="en">
-<meta charset="utf-8">
-<title>eventhub connect</title>
-<body style="background:#181D16;color:#DDD9C0;font-family:ui-monospace,monospace;margin:2rem">
-<p>operator ui is not built.</p>
-<p>just ui-build</p>
-</body>
-</html>`
+const cidrs = parseAllowCidrs(uiAllowCidr)
 
-const CONTENT_TYPES: Record<string, string> = {
-	'.html': 'text/html; charset=utf-8',
-	'.js': 'text/javascript; charset=utf-8',
-	'.css': 'text/css; charset=utf-8',
-	'.svg': 'image/svg+xml',
-	'.woff': 'font/woff',
-	'.woff2': 'font/woff2',
-	'.json': 'application/json',
-}
-
-export type UiDeps = {
-	meta: () => MetaReport
-	cluster: () => Promise<ClusterReport>
-	connections: () => Promise<ConnectionsReport>
-	onAir: () => Promise<OnAirReport>
-	rejections: (institution: string | null) => Promise<RejectionsReport>
-	distDir: string | null
-}
+const app = new Hono()
 
 /**
- * Resolve a URL path onto a file inside `distDir`, or null when it escapes the directory.
- * @param distDir - Built UI directory
- * @param pathname - Request path
- * @returns Absolute file path, or null
+ * Socket peer, or an empty string when this fetch has no Bun server (unit tests).
+ * @param c - Request context
+ * @returns Peer address
  */
-const resolveDistFile = (distDir: string, pathname: string): string | null => {
-	let decoded = pathname
+const peerAddress = (c: Context): string => {
 	try {
-		decoded = decodeURIComponent(pathname)
+		return getConnInfo(c).remote.address ?? ''
 	} catch {
-		return null
+		return ''
 	}
-	if (decoded.includes('\0')) return null
-	const rel = decoded === '/' ? 'index.html' : decoded.replace(/^\/+/, '')
-	const root = normalize(distDir)
-	const full = normalize(join(root, rel))
-	if (full !== root && !full.startsWith(root.endsWith(sep) ? root : root + sep)) return null
-	return full
 }
 
-/**
- * Serve one built file, or null when it is not there.
- * @param distDir - Built UI directory
- * @param pathname - Request path
- * @returns A response, or null so the caller can fall back to `index.html`
- */
-const serveFile = async (distDir: string, pathname: string): Promise<Response | null> => {
-	const full = resolveDistFile(distDir, pathname)
-	if (!full) return new Response('not found', { status: 404 })
-	const file = Bun.file(full)
-	if (!(await file.exists())) return null
-	const type = CONTENT_TYPES[extname(full)] ?? 'application/octet-stream'
-	const cache = extname(full) === '.html' ? 'no-cache' : 'public, max-age=31536000, immutable'
-	return new Response(file, { headers: { 'content-type': type, 'cache-control': cache } })
-}
+app.use('*', async (c, next) => {
+	if (cidrs.length > 0 && !ipAllowed(peerAddress(c), cidrs)) return c.text('forbidden', 403)
+	await next()
+	c.header('x-content-type-options', 'nosniff')
+	c.header('referrer-policy', 'no-referrer')
+	return c.res
+})
+app.use('/api/*', async (c, next) => {
+	await next()
+	c.header('cache-control', 'no-store')
+	return c.res
+})
 
-/**
- * Operator HTTP API plus the built UI. The live tail is not a route on this app.
- * @param deps - Snapshot loaders and the dist directory
- * @returns The Hono app
- */
-export const createApp = (deps: UiDeps): Hono => {
-	const app = new Hono()
+let nextId = 1
 
-	app.use('*', async (c, next) => {
-		await next()
-		c.header('x-content-type-options', 'nosniff')
-		c.header('referrer-policy', 'no-referrer')
-	})
-	app.use('/api/*', async (c, next) => {
-		await next()
-		c.header('cache-control', 'no-store')
-	})
+app.get('/api/tail', async (c) => {
+	const parsed = parseTailFilter(c.req.query('filter') ?? null)
+	if (!parsed.ok) return c.json({ error: parsed.error }, 400)
+	const id = nextId
+	nextId += 1
+	const filter = parsed.filter
+	const ip = peerAddress(c)
+	try {
+		return await upgradeWebSocket(c, {
+			onOpen(_event, ws) {
+				tail.open({
+					id,
+					filter,
+					ip,
+					send: (frame) => {
+						ws.send(frame)
+					},
+					close: (code, reason) => {
+						ws.close(code, reason)
+					},
+				})
+			},
+			onMessage(event) {
+				const data = event.data
+				const text =
+					typeof data === 'string'
+						? data
+						: data instanceof ArrayBuffer || ArrayBuffer.isView(data)
+							? new TextDecoder().decode(data)
+							: ''
+				let body: unknown
+				try {
+					body = JSON.parse(text) as unknown
+				} catch {
+					return
+				}
+				if (typeof body === 'object' && body !== null && 'type' in body && body.type === 'beat') {
+					tail.beat(id, Date.now())
+				}
+			},
+			onClose() {
+				tail.closed(id)
+			},
+		})
+	} catch {
+		return c.text('upgrade failed', 400)
+	}
+})
 
-	app.get('/api/meta', (c) => c.json(deps.meta()))
-	app.get('/api/cluster', async (c) => c.json(await deps.cluster()))
-	app.get('/api/connections', async (c) => c.json(await deps.connections()))
-	app.get('/api/on-air', async (c) => c.json(await deps.onAir()))
-	app.get('/api/rejections', async (c) => {
-		const institution = c.req.query('institution')?.trim() || null
-		return c.json(await deps.rejections(institution))
-	})
-	app.all('/api/*', (c) => c.json({ error: 'not found' }, 404))
+app.route('/api', api)
 
-	app.get('*', async (c) => {
-		if (!deps.distDir) {
-			return c.html(MISSING_HTML)
-		}
-		const url = new URL(c.req.url)
-		const file = await serveFile(deps.distDir, url.pathname)
-		if (file) return file
-		const fallback = await serveFile(deps.distDir, '/index.html')
-		if (fallback) return fallback
-		return c.html(MISSING_HTML)
-	})
+app.use('/static/*', serveStatic({ root: staticRoot }))
+app.all('/static/*', (c) => c.text('not found', 404))
 
-	return app
+app.notFound((c) => {
+	if (c.req.method !== 'GET' && c.req.method !== 'HEAD') return c.text('not found', 404)
+	return c.html(renderShell(useHmr, readManifest(manifestPath)))
+})
+
+export { app }
+export default {
+	hostname: uiHost,
+	port: uiPort,
+	fetch: app.fetch,
+	idleTimeout: 255,
+	websocket: {
+		...websocket,
+		idleTimeout: 255,
+		sendPings: true,
+	},
 }
