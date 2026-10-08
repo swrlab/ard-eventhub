@@ -52,6 +52,23 @@ const institutionUrn = z
 	.regex(/^urn:ard:institution:[a-z0-9]+$/)
 	.meta({ examples: ['urn:ard:institution:a3004ff924ece1a2'] })
 
+/** Connect events only. HTTPS ingest fills `creator` from the token. */
+const eventCreator = z
+	.string()
+	.min(1)
+	.meta({
+		description:
+			'Person or system that created the event, set by the publisher (for example an email address or the playout system)',
+		examples: ['playout@swr.de'],
+	})
+
+/** Connect events only. Validation overwrites it before the schema check, so subscribers always get the delivery time. */
+const eventCreated = iso8601Timestamp.meta({
+	readOnly: true,
+	description: 'Set by Eventhub validation to the time of delivery. A value sent by the publisher is replaced.',
+	examples: ['2026-10-08T10:00:01.000Z'],
+})
+
 /**
  * Whether a HTTPS service has enough identifiers to resolve a livestream URN.
  * `id` is enough on its own. A CRID still needs `type` so ingest can pick the prefix.
@@ -449,6 +466,8 @@ export const eventV1RadioControlPostBody = z
 		services: z.array(servicesUrn).meta({
 			description: 'URN-only service identifiers (Connect / MQTT)',
 		}),
+		creator: eventCreator,
+		created: eventCreated,
 	})
 	.strict()
 	.meta({
@@ -483,6 +502,8 @@ export const eventV1RadioDataPostBody = z
 		services: z.array(servicesUrn).meta({
 			description: 'URN-only service identifiers (Connect / MQTT)',
 		}),
+		creator: eventCreator,
+		created: eventCreated,
 	})
 	.strict()
 	.meta({
@@ -638,14 +659,16 @@ const connectServices = z.array(servicesUrn).min(1)
 
 /**
  * URN-only track event that validation accepts.
- * Derived from {@link eventV1PostBody}: `services` is the URN shape, and `event` is required
- * because `track.playing` and `track.next` share a body.
+ * Derived from {@link eventV1PostBody}: `services` is the URN shape, `event` is required
+ * because `track.playing` and `track.next` share a body, and `creator` / `created` are Connect-only.
  */
 export const connectInboxTrackEvent = eventV1PostBody
 	.omit({ services: true, event: true })
 	.extend({
 		event: z.enum(['de.ard.eventhub.v1.radio.track.playing', 'de.ard.eventhub.v1.radio.track.next']),
 		services: connectServices,
+		creator: eventCreator,
+		created: eventCreated,
 	})
 	.strict()
 

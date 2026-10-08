@@ -30,6 +30,8 @@ const controlBody = {
 	name: 'TA',
 	state: true,
 	services: [urnService],
+	creator: 'playout@swr.de',
+	created: '2026-05-27T15:03:01.000Z',
 }
 
 const dataBody = {
@@ -42,6 +44,8 @@ const dataBody = {
 		{ type: 'rtdlplus' as const, id: 32, description: 'PROGRAM.Stationname long', value: 'SWR 3' },
 	],
 	services: [urnService],
+	creator: 'playout@swr.de',
+	created: '2020-01-19T05:00:01.000Z',
 }
 
 test('eventNames lists HTTPS and Connect classes', () => {
@@ -266,6 +270,8 @@ const trackBody = {
 	title: 'Song',
 	playlistItemId: 'item-1',
 	services: [urnService],
+	creator: 'playout@swr.de',
+	created: '2026-10-08T10:00:01.000Z',
 }
 
 test('parseConnectInboxEvent accepts a URN-only track and keeps a deprecated service field', () => {
@@ -286,11 +292,21 @@ test('parseConnectInboxEvent rejects a Core ID and an ingest envelope field', ()
 		...trackBody,
 		services: [{ ...urnService, publisherId: '248000' }],
 	})
-	const envelope = parseConnectInboxEvent({ ...trackBody, creator: 'lab@swr.de' })
+	const envelope = parseConnectInboxEvent({ ...trackBody, name: 'de.ard.eventhub.v1.radio.track.playing' })
 	const missingEvent = parseConnectInboxEvent({ ...trackBody, event: undefined })
 	assertStrictEquals(coreId.success, false)
 	assertStrictEquals(envelope.success, false)
 	assertStrictEquals(missingEvent.success, false)
+})
+
+test('every Connect event class requires a non-empty creator and a created timestamp', () => {
+	for (const body of [trackBody, controlBody, dataBody]) {
+		assertStrictEquals(parseConnectInboxEvent(body).success, true)
+		assertStrictEquals(parseConnectInboxEvent({ ...body, creator: undefined }).success, false)
+		assertStrictEquals(parseConnectInboxEvent({ ...body, creator: '' }).success, false)
+		assertStrictEquals(parseConnectInboxEvent({ ...body, created: undefined }).success, false)
+		assertStrictEquals(parseConnectInboxEvent({ ...body, created: 'yesterday' }).success, false)
+	}
 })
 
 test('rtdlplus id 0 (DUMMY_CLASS) is accepted', () => {
