@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { NatsConnection, Subscription } from '@nats-io/nats-core'
-import type { RateWindow } from '../../../src/connect/ui/policy.ts'
-import type { MetaReport } from '../../../src/connect/ui/types.ts'
+import type { RateWindow } from '../../policy.ts'
+import type { MetaReport } from '../../types.ts'
 import { wsconnect } from '@nats-io/nats-core'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { admitTailEvent, evaluateTail, parseTailFilter, tailCloseMessage } from '../../../src/connect/ui/policy.ts'
+import { admitTailEvent, evaluateTail, parseTailFilter, tailCloseMessage } from '../../policy.ts'
 import { formatClock } from '../format'
 import { tailPhase } from '../tail-state'
 

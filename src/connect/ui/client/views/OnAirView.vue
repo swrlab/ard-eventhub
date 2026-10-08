@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { OnAirReport } from '../../../src/connect/ui/types.ts'
+import type { OnAirReport } from '../../types.ts'
 import { inject, ref, type Ref } from 'vue'
 import { ageTone, formatAge, formatRemain } from '../format'
 import { usePoll } from '../use-poll'

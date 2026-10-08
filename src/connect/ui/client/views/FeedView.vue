@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FeedCatalogReport, KnownLivestream } from '../../../src/connect/ui/types.ts'
+import type { FeedCatalogReport, KnownLivestream } from '../../types.ts'
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { formatStamp } from '../format'

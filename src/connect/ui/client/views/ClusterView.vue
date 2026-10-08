@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ClusterReport } from '../../../src/connect/ui/types.ts'
+import type { ClusterReport } from '../../types.ts'
 import { computed } from 'vue'
 import { formatBytes, formatContact } from '../format'
 import { usePoll } from '../use-poll'

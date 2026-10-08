@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { RejectionsReport } from '../../../src/connect/ui/types.ts'
+import type { RejectionsReport } from '../../types.ts'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { formatClock } from '../format'

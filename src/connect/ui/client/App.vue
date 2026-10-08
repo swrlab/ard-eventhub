@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ClusterReport, MetaReport } from '../../src/connect/ui/types.ts'
+import type { ClusterReport, MetaReport } from '../types.ts'
 import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { tailPhase } from './tail-state'
