@@ -52,6 +52,6 @@ export const mqttTlsCa = getEnv<string>('MQTT_TLS_CA', { defaultValue: '' })
  */
 export const mqttUsername = getEnv<string>('MQTT_USERNAME', { defaultValue: LOCAL_NATS_USERS.svcIngest })
 /**
- * MQTT password. Local default matches `infra/nats/nats-users.conf`. Override via sops.
+ * MQTT password. Local default matches `infra/kubernetes/components/users/nats-users.conf`. Override via sops.
  */
 export const mqttPassword = getEnv<string>('MQTT_PASSWORD', { defaultValue: LOCAL_NATS_PASSWORD })

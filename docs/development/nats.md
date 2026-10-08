@@ -16,9 +16,20 @@ just nats-up            # nats-server auf PATH (Homebrew)
 just nats-up-docker     # Cursor Cloud / Linux / CI
 just nats-sub --all
 just connect
+just connect-ui         # operator UI, http://127.0.0.1:4173
 ```
 
-Lokale Config: [`infra/nats/nats-dev.conf`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nats/nats-dev.conf) — ein Knoten, JetStream, MQTT `:1883`, ohne TLS. User und bcrypt-Hashes (Klartext `local`) stehen in `nats-users.conf`. Anonyme Connects schlagen fehl. Produktions-Klartext gehört in sops.
+## Operator UI
+
+`just ui-build` then `just connect-ui`. Boards for on-air, connections, rejections, and cluster health poll HTTP every 8 seconds. The live tail is a separate WebSocket: it closes after 2 minutes without a click, key, or scroll, and after 30 minutes regardless. A hidden tab does not keep it open. Dev cluster:
+
+```sh
+NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just connect-ui
+```
+
+The UI connects as `svc-operator`. That user is in the repo NATS config; a cluster already running needs the config reapplied before the tail can subscribe. Until then, `NATS_USER=svc-sidecar` still serves the monitor boards. Passwords are not shown.
+
+Lokale Config: [`infra/nats/nats-dev.conf`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nats/nats-dev.conf) — ein Knoten, JetStream, MQTT `:1883`, ohne TLS. User und bcrypt-Hashes (Klartext `local`) stehen in [`components/users/nats-users.conf`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/components/users/nats-users.conf). `infra/nats/nats-users.conf` ist ein Symlink darauf. Anonyme Connects schlagen fehl.
 
 Vor einem Reload: `just nats-check`. User hinzufügen, dann `just nats-reload` (kein Restart).
 

@@ -1,8 +1,7 @@
 NATS_IMAGE := 'nats:2.14.6'
 NATS_NAME := 'eventhub-nats'
 NATS_CONF := source_directory() / '../infra/nats/nats-dev.conf'
-NATS_USERS := source_directory() / '../infra/nats/nats-users.conf'
-NATS_INVALID := source_directory() / '../infra/nats/nats-invalid.conf'
+NATS_USERS := source_directory() / '../infra/kubernetes/components/users/nats-users.conf'
 NATS_STORE := source_directory() / '../.local/nats'
 NATS_RUNTIME_CONF := NATS_STORE / 'nats.conf'
 NATS_RUNTIME_USERS := NATS_STORE / 'nats-users.conf'
@@ -118,29 +117,6 @@ nats-check:
 		{{ NATS_IMAGE }} \
 		-t -c /etc/nats/nats-dev.conf
 
-# confirm a broken config is rejected (must fail). Safe to run while NATS is up.
-[group('NATS')]
-nats-check-invalid:
-	#!/usr/bin/env bash
-	set -euo pipefail
-	if command -v nats-server >/dev/null; then
-		if nats-server -t -c "{{ NATS_INVALID }}" >/tmp/nats-invalid.out 2>&1; then
-			echo 'nats-check-invalid: broken config was accepted' >&2
-			exit 1
-		fi
-		echo 'broken config rejected (expected)'
-		exit 0
-	fi
-	if docker run \
-		--rm \
-		--volume "{{ NATS_INVALID }}:/etc/nats/nats-invalid.conf:ro" \
-		{{ NATS_IMAGE }} \
-		-t -c /etc/nats/nats-invalid.conf >/tmp/nats-invalid.out 2>&1; then
-		echo 'nats-check-invalid: broken config was accepted' >&2
-		exit 1
-	fi
-	echo 'broken config rejected (expected)'
-
 # hot-reload the runtime config (edit .local/nats/nats-users.conf, then this). Does not restart.
 [group('NATS')]
 nats-reload:
@@ -196,10 +172,6 @@ nats-sub *args:
 nats-k8s-build:
 	#!/usr/bin/env bash
 	set -euo pipefail
-	if ! diff -q "{{ NATS_USERS }}" "{{ NATS_K8S }}/overlays/dev/nats-users.conf" >/dev/null; then
-		echo 'infra/kubernetes/overlays/dev/nats-users.conf drifted from infra/nats/nats-users.conf' >&2
-		exit 1
-	fi
 	kubectl kustomize "{{ NATS_K8S }}/overlays/dev" >/dev/null
 	for env in test prod; do
 		for zone in bad stg mnz; do
@@ -226,3 +198,19 @@ nats-k8s-dev-down:
 [group('LOCAL')]
 connect:
 	bun run --hot ./src/connect/index.ts
+
+# operator UI (stats over HTTP, live tail over WebSocket). http://127.0.0.1:4173
+# dev cluster: NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just connect-ui
+[group('LOCAL')]
+connect-ui:
+	bun run --hot ./src/connect/ui/index.ts
+
+# vite dev server for the operator UI. proxies /api to port 4173
+[group('LOCAL')]
+ui:
+	cd ui && bun x vite
+
+# build the operator UI into ui/dist, which connect-ui serves
+[group('LOCAL')]
+ui-build:
+	cd ui && bun x vite build

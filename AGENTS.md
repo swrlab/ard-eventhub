@@ -12,6 +12,7 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 - **Install dependencies:** `bun install`
 - **Start ingest service:** `bun run ingest` (runs with hot reload)
 - **Start connect (NATS access):** `just connect` (needs local NATS: `just nats-up` or `just nats-up-docker`; local user `svc-sidecar` / `local`)
+- **Operator UI:** `just ui-build` then `just connect-ui` (http://127.0.0.1:4173). Vite dev: `just ui`. Dev cluster: `NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just connect-ui`
 - **Run tests:** `just test`
 - **Hurl API suite:** `just integration` (needs running ingest + `hurl`)
 - **Lint code:** `just lint` (uses Oxlint)
@@ -28,7 +29,8 @@ Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `o
 - **Tech Stack:** Bun, Node.js, TypeScript (strict mode), Hono, Zod, Google Cloud Platform
 - **File Structure:**
   - `src/ingest/` – Ingest service (receives events, manages subscriptions)
-- `src/connect/` – Eventhub Connect NATS access layer (no validation sidecar yet)
+  - `src/connect/` – Eventhub Connect NATS access layer (no validation sidecar yet). `src/connect/ui/` is the operator UI
+  - `ui/` – Vue operator console (Vite, Tailwind). Served by `just connect-ui`
 - `src/schemas/` – Zod request/response schemas (runtime validation + OpenAPI)
 - `src/openapi/` – OpenAPI document assembly / `openapi.json` generator
 - `src/asyncapi/` – AsyncAPI document assembly / `asyncapi.json` generator (Eventhub Connect / MQTT)
@@ -36,7 +38,7 @@ Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `o
 - `cli/` – Command-line utilities
 - `config/` – Application configuration (ARD prefixes, allow-lists)
 - `infra/` – Local NATS config and NATS kustomize manifests (`infra/kubernetes`)
-- `just/` – Split just recipes (`encryption.just`, `mqtt.just`, `nats.just`)
+- `just/` – Split just recipes (`docs.just`, `encryption.just`, `integration.just`, `mqtt.just`, `nats.just`)
 - `integration/` – Hurl HTTP suite (`ingest-api.hurl`) mirroring `src/ingest/server.test.ts` (run with `just integration`)
 - `docs/` – Documentation (Markdown, built with Blume)
 - `blume.config.ts` – Docs site configuration

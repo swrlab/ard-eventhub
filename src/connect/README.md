@@ -6,7 +6,7 @@ There is no validation sidecar yet (RFC step 10). `just connect` opens a connect
 
 Do not put `NATS_URL` on the ingest env module. Connect reads its own vars from [`env.ts`](env.ts).
 
-Local users live in [`infra/nats/nats-users.conf`](../../infra/nats/nats-users.conf) (RFC §7). The file holds one bcrypt hash (`$DEV_PW`) of the well-known password `local` (not a secret). Production plaintext belongs in sops; rotate by issuing a new `pub-{label}-{date}` user, then `just nats-reload`. Hash a password with `just nats-passwd`.
+Users live in [`components/users/nats-users.conf`](../../infra/kubernetes/components/users/nats-users.conf) (RFC §7). [`infra/nats/nats-users.conf`](../../infra/nats/nats-users.conf) is a symlink to that file. It holds one bcrypt hash (`$DEV_PW`) of the well-known password `local` (not a secret). Rotate by issuing a new `pub-{label}-{date}` user, then `just nats-reload`. Hash a password with `just nats-passwd`.
 
 ## Environment
 
@@ -29,6 +29,38 @@ just connect           # ensure streams, log ready
 
 Monitor: `http://127.0.0.1:8222`. Optional CLI: `nats stream ls`, `nats sub 'inbox.>'`.
 
+## Operator UI
+
+Read-only boards for the broker. Stats are plain HTTP, polled every 8 seconds. The live tail is the only WebSocket, and it is not a monitoring feed.
+
+```sh
+just ui-build
+just connect-ui
+# http://127.0.0.1:4173
+```
+
+`just ui` runs Vite on `:5173` and proxies `/api` to `:4173`.
+
+Dev cluster (three pods behind one monitor URL):
+
+```sh
+NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just connect-ui
+```
+
+The process connects as `svc-operator` (subscribe `radio.>`, `feedback.>`, `inbox.>`, `plugin.>`; publish only `$JS.API` and `_INBOX`). `just nats-up` picks the user up from `infra/kubernetes/components/users/nats-users.conf`. A cluster that is already running needs that file reapplied before `svc-operator` exists. Until then set `NATS_USER=svc-sidecar`. Cluster and connection stats use the HTTP monitor and do not need this login. The UI never sends the password to the browser.
+
+Panels:
+
+- **On-air.** Last retained message per `radio.{livestream}`, oldest last-event first.
+- **Connections.** Users from `NATS_USERS_CONF` (default `infra/kubernetes/components/users/nats-users.conf`) plus `/connz`. Usernames and allow-lists only.
+- **Rejections.** Retained `feedback.>` plus what arrived while this process was up. `?institution=` filters one house.
+- **Cluster.** `/varz`, `/connz`, `/jsz`, sampled until each node behind the monitor URL has answered.
+- **Tail.** Default filter `radio.*.track.playing`. Closes after 2 minutes with no presence beat, and after 30 minutes even if someone is still there. At most 8 tails on this process. Over 20 frames/s the tail drops and shows `sampled`. Reopening is a click.
+
+`UI_HOST` (default `0.0.0.0`), `UI_PORT` (default `4173`). `UI_ALLOW_CIDR` is a comma-separated source list checked against the socket address. Empty allows every peer, which is the local default. Set it when the UI is reachable on a shared network.
+
+Tail limits are also in the page footer.
+
 Pin the Homebrew formula when you need a specific server; recipes assume whatever `nats-server` is on `PATH`.
 
 ## Cursor Cloud / remote Linux
@@ -45,7 +77,7 @@ Image: `nats:2.14.6` with [`infra/nats/nats-dev.conf`](../../infra/nats/nats-dev
 
 Kubernetes: dev runs three NATS pods in one cluster. Test and prod are one manifest per zone. See [`infra/kubernetes/README.md`](../../infra/kubernetes/README.md) (`just nats-k8s-dev`).
 
-Validate config before reload: `just nats-check`. A broken file is rejected by `just nats-check-invalid` and must not be reloaded onto a running server. After editing `.local/nats/nats-users.conf`, `just nats-reload` (HUP) picks up users without dropping connections. Hash a new password with `just nats-passwd`.
+Validate config before reload: `just nats-check`. After editing `.local/nats/nats-users.conf`, `just nats-reload` (HUP) picks up users without dropping connections. Hash a new password with `just nats-passwd`.
 
 If docker is also missing, download a pinned `nats-server` binary from [nats-io/nats-server releases](https://github.com/nats-io/nats-server/releases) (for example `v2.14.6`) onto `PATH`, then `just nats-up`. Do not pipe an installer into `sh`.
 

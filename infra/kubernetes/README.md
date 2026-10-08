@@ -56,11 +56,17 @@ kubectl -n eventhub-test create secret tls nats-tls \
 
 Create the secret before expecting the pod to become Ready. The server image has no shell, so a missing mount sits in `CreateContainerConfigError` until the secret exists.
 
-One pod per zone, pinned with `nodeSelector: topology.kubernetes.io/zone` (`bad`, `stg`, or `mnz`). Label the node before apply:
+One pod per zone, pinned with `nodeSelector: topology.kubernetes.io/zone` (`bad`, `stg`, or `mnz`). Each zone is its own k3s cluster, and k3s does not set that label, so the pod stays Pending until a node in that cluster has it. The selector only matches nodes in the cluster you apply to.
+
+Point `kubectl` at that zone's cluster and label the node with the same zone name as the overlay:
 
 ```sh
+kubectl get nodes
 kubectl label node <name> topology.kubernetes.io/zone=bad
+kubectl get nodes --show-labels
 ```
+
+Use `stg` or `mnz` on those clusters instead of `bad`.
 
 `server_name` is `connect-bad`, `connect-stg`, or `connect-mnz`. Cluster routes and `advertise` use those names on `:6222`, which is a hostPort, so the other zones dial the node rather than a pod IP. The three names have to resolve to that environment's nodes. Test and prod can use the same names because each environment has its own DNS. MQTT listens on host `:8883` with TLS. The certificate has to cover all three names. Use pod security `baseline` or `privileged` so the hostPorts are admitted.
 

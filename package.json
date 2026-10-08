@@ -79,6 +79,7 @@
 			"blume.config.ts!",
 			"src/cli/*.ts",
 			"src/connect/index.ts",
+			"src/connect/ui/index.ts",
 			"src/openapi/generate.ts",
 			"src/asyncapi/generate.ts",
 			"src/**/*.test.ts"
@@ -86,6 +87,7 @@
 		"ignoreDependencies": [
 			"cookie",
 			"@typescript/native-preview"
-		]
+		],
+		"ignore": ["ui/**"]
 	}
 }
