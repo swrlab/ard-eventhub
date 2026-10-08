@@ -283,9 +283,21 @@
 							"$ref": "#/definitions/servicesUrn"
 						},
 						"description": "URN-only service identifiers (Connect / MQTT)"
+					},
+					"creator": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Person or system that created the event, set by the publisher (for example an email address or the playout system)",
+						"examples": ["example@swr.de"]
+					},
+					"created": {
+						"type": "string",
+						"description": "Set by Eventhub validation to the time of delivery. A value sent by the publisher is replaced.",
+						"examples": ["2026-10-08T10:00:01.000Z"],
+						"readOnly": true
 					}
 				},
-				"required": ["start", "name", "state", "services"],
+				"required": ["start", "name", "state", "services", "creator", "created"],
 				"additionalProperties": false,
 				"description": "Eventhub Connect radio.control event. Not accepted on the HTTPS POST /events API.",
 				"definitions": {
@@ -428,9 +440,21 @@
 							"$ref": "#/definitions/servicesUrn"
 						},
 						"description": "URN-only service identifiers (Connect / MQTT)"
+					},
+					"creator": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Person or system that created the event, set by the publisher (for example an email address or the playout system)",
+						"examples": ["example@swr.de"]
+					},
+					"created": {
+						"type": "string",
+						"description": "Set by Eventhub validation to the time of delivery. A value sent by the publisher is replaced.",
+						"examples": ["2026-10-08T10:00:01.000Z"],
+						"readOnly": true
 					}
 				},
-				"required": ["start", "cycle", "data", "services"],
+				"required": ["start", "cycle", "data", "services", "creator", "created"],
 				"additionalProperties": false,
 				"description": "Eventhub Connect radio.data event. Not accepted on the HTTPS POST /events API.",
 				"definitions": {

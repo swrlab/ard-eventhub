@@ -1,5 +1,5 @@
-import type { ArdFeed, FeedReport } from '#types'
-import { livestreamOwners, type LivestreamOwner } from '../../utils/feed/known-livestreams.ts'
+import type { ArdFeed, FeedReport, LivestreamOwner } from '#types'
+import { livestreamOwners } from '../../utils/feed/known-livestreams.ts'
 import { createArdFeedState, feedReport } from './ard-feed.ts'
 
 /**

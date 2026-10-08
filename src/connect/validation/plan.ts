@@ -1,6 +1,12 @@
 import type { ZodError } from 'zod'
-import type { LivestreamOwner } from '../../utils/feed/known-livestreams.ts'
-import type { OwnershipParty } from './ownership.ts'
+import type {
+	FeedbackIssue,
+	LivestreamOwner,
+	OwnershipParty,
+	RejectCause,
+	ValidationPlan,
+	ValidationReject,
+} from '#types'
 import { parseConnectInboxEvent } from '../../schemas/events.ts'
 import {
 	eventClassToken,
@@ -12,45 +18,8 @@ import {
 import { enabledPluginTargets } from './eligibility.ts'
 import { checkEventOwnership } from './ownership.ts'
 
-/** Why a delivery is termed. Also the `cause` on `feedback/` and in the `validation rejected` log. */
-type RejectCause = 'json' | 'schema' | 'ownership'
-
 /** Larger payloads are logged and fed back as a prefix. NATS allows 1 MiB, radio events are a few KiB. */
 const MAX_LOGGED_PAYLOAD_BYTES = 64 * 1024
-
-/** Retained MQTT publish (`radio/` or `feedback/`). */
-type MqttPublish = {
-	topic: string
-	body: unknown
-}
-
-/** NATS-native publish to a plugin subject. Not retained. */
-type NatsPublish = {
-	subject: string
-	body: unknown
-}
-
-/** Accepted: retain on every `radio/` topic, fan out to every plugin subject, then ack. */
-export type ValidationAccept = {
-	action: 'ack'
-	radio: MqttPublish[]
-	plugins: NatsPublish[]
-}
-
-/** Rejected: retain the feedback (when the subject names an institution), then term. */
-export type ValidationReject = {
-	action: 'term'
-	cause: RejectCause
-	message: string
-	feedback: MqttPublish | null
-	/** The full inbox payload for the rejection log and the feedback body: decoded JSON, else the text. */
-	payload: unknown
-}
-
-/** Work for one inbox message, before any publish or ack. */
-export type ValidationPlan = ValidationAccept | ValidationReject
-
-type FeedbackIssue = { path: string[]; message: string }
 
 /**
  * Whether a value is a plain object.
@@ -190,7 +159,7 @@ const reject = (params: {
 /**
  * Decide ack or term for one inbox delivery. Does not publish.
  * The loop only calls this once a feed is loaded, so an unknown livestream is a real ownership failure.
- * @param params - Subject, payload bytes, feed owners, and timestamp for feedback
+ * @param params - Subject, payload bytes, feed owners, and the delivery timestamp (feedback `at`, event `created`)
  * @returns The plan
  */
 export const planInboxMessage = (params: {
@@ -220,7 +189,7 @@ export const planInboxMessage = (params: {
 	if (!json) return reject({ ...context, cause: 'json', message: 'payload is not JSON', value: text })
 
 	const { value } = json
-	const parsed = parseConnectInboxEvent(value)
+	const parsed = parseConnectInboxEvent(isRecord(value) ? { ...value, created: at } : value)
 	if (!parsed.success) {
 		const issues = zodIssues(parsed.error)
 		return reject({

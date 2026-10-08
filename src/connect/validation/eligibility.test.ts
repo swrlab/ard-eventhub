@@ -16,6 +16,8 @@ const playing = {
 	title: 'Song',
 	playlistItemId: 'item-1',
 	services: [service],
+	creator: 'example@swr.de',
+	created: '2026-10-08T10:00:01.000Z',
 }
 
 test('music track.playing reaches dts and radioplayer with no plugins set', () => {
@@ -42,6 +44,8 @@ test('control events have no plugin targets', () => {
 			name: 'TA',
 			state: true,
 			services: [service],
+			creator: 'example@swr.de',
+			created: '2026-10-08T10:00:01.000Z',
 		}),
 		[]
 	)

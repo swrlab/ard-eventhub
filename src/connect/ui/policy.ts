@@ -1,3 +1,5 @@
+import type { RateWindow, TailClock, TailCloseReason } from '#types'
+
 /**
  * Live-tail limits (RFC §14.4).
  * Idle is human presence: a click, key, scroll, or a return to a visible tab.
@@ -20,19 +22,6 @@ export const TAIL_MAX_PER_SECOND = 20
 
 /** Narrower than `radio.>`. Cyclic `radio.data` must not be the default. */
 export const DEFAULT_TAIL_FILTER = 'radio.*.track.playing'
-
-export type TailCloseReason = 'idle' | 'cap' | 'client' | 'nats' | 'denied'
-
-export type TailClock = {
-	openedAt: number
-	lastBeatAt: number
-}
-
-export type RateWindow = {
-	windowStart: number
-	forwarded: number
-	dropped: number
-}
 
 /**
  * Close reason for a tail at `now`, or null when it may stay open.

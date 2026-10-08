@@ -1,5 +1,4 @@
-import type { ArdFeed, ArdLivestream } from '#types'
-import type { ArdFeedStore, FeedSnapshot } from './ard-feed.ts'
+import type { ArdFeed, ArdFeedStore, ArdLivestream, FeedSnapshot } from '#types'
 import { test } from '@cross/test'
 import { assert, assertEquals } from '@std/assert'
 import { createSandbox } from 'sinon'

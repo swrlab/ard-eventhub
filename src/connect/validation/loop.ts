@@ -1,8 +1,6 @@
 import type { JsMsg } from '@nats-io/jetstream'
 import type { NatsConnection } from '@nats-io/transport-node'
-import type { LivestreamOwner } from '../../utils/feed/known-livestreams.ts'
-import type { ValidationPlan } from './plan.ts'
-import type { ValidationPublisher } from './publish.ts'
+import type { OwnersReader, ValidationPlan, ValidationPublisher, ValidationSettlement } from '#types'
 import { logger } from '@frytg/logger'
 import { jetstream } from '@nats-io/jetstream'
 import { INBOX_STREAM, VALIDATION_CONSUMER } from '../../utils/nats/ensure-streams.ts'
@@ -16,16 +14,6 @@ const PREFETCH = 32
 
 /** Delay before a publish failure is redelivered. */
 const PUBLISH_NAK_MS = 200
-
-/** Owner index for the ownership check. Null only before a feed is loaded, which boot rules out. */
-export type OwnersReader = () => ReadonlyMap<string, LivestreamOwner> | null
-
-/** One settled inbox delivery, for tests and the duplicate counter. */
-export type ValidationSettlement = {
-	seq: number
-	redelivered: boolean
-	action: ValidationPlan['action']
-}
 
 /**
  * Run every publish in the plan. Throws on the first failure so the caller can nak.

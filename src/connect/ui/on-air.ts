@@ -1,15 +1,7 @@
-import type { OnAirControl, OnAirData, OnAirStation, OnAirTrack } from '#types'
+import type { OnAirControl, OnAirData, OnAirStation, OnAirTrack, RadioEventClass, RadioObservation } from '#types'
 import { booleanField, isRecord, stringField } from './json.ts'
 
-const EVENT_CLASSES = ['track.playing', 'track.next', 'control', 'data'] as const
-
-export type RadioEventClass = (typeof EVENT_CLASSES)[number]
-
-export type RadioObservation = {
-	subject: string
-	at: string
-	payload: unknown
-}
+const EVENT_CLASSES = ['track.playing', 'track.next', 'control', 'data'] as const satisfies readonly RadioEventClass[]
 
 /**
  * Split `radio.{livestreamId}.{eventClass}` into its two parts.

@@ -1,4 +1,11 @@
-import type { ArdFeed, FeedOutcome, FeedReport, FeedStaleness } from '#types'
+import type {
+	ArdFeed,
+	ArdFeedState,
+	FeedReport,
+	FeedSnapshot,
+	FeedStaleness,
+	UpstreamDecision,
+} from '#types'
 import { getArdFeedValidationError } from '../../utils/feed/ard-feed-rules.ts'
 
 /** JetStream stream that holds the feed. KV subjects live under `$KV.ARD_FEED.>`. */
@@ -15,49 +22,6 @@ export const FEED_STALE_ALERT_MS = 12 * 60 * 60 * 1000
 
 /** Two days without a valid fetch. */
 export const FEED_STALE_PAGE_MS = 48 * 60 * 60 * 1000
-
-/** One accepted document plus its JetStream sequence. */
-export type FeedSnapshot = {
-	feed: ArdFeed
-	revision: number
-}
-
-/**
- * Shared store. The JetStream bucket is the production one. Tests pass a memory double.
- */
-export type ArdFeedStore = {
-	/**
-	 * Latest accepted document, or null when the bucket is empty or the bytes fail validation.
-	 */
-	read: () => Promise<FeedSnapshot | null>
-	/**
-	 * Append a new revision.
-	 * @param feed - Document that already passed the upstream checks
-	 * @returns The stored snapshot, including the new sequence
-	 */
-	write: (feed: ArdFeed) => Promise<FeedSnapshot>
-	/**
-	 * Call `onSnapshot` for the current revision (when there is one) and every revision after it.
-	 * @param onSnapshot - Validated revision
-	 * @returns Stops the watch
-	 */
-	watch: (onSnapshot: (snapshot: FeedSnapshot) => void) => () => void
-}
-
-/** Result of comparing a fetched candidate with the feed that is serving. */
-export type UpstreamDecision =
-	| { action: 'store'; feed: ArdFeed }
-	| { action: 'keep'; reason: string; successful: boolean }
-
-/** In-memory feed this process is serving. `feed` and `revision` only ever come from KV. */
-export type ArdFeedState = {
-	feed: ArdFeed | null
-	revision: number | null
-	lastSuccessAt: string | null
-	lastAttemptAt: string | null
-	lastError: string | null
-	outcome: FeedOutcome | null
-}
 
 /**
  * Empty state, before the first KV revision.

@@ -1,4 +1,4 @@
-import type { ArdFeed, ArdPublisher, KnownLivestream } from '#types'
+import type { ArdFeed, ArdPublisher, KnownLivestream, LivestreamOwner } from '#types'
 import allowedLivestreamsJson from '../../config/allowed-livestreams.json' with { type: 'json' }
 import { allowedLivestreamsConfig } from '../../schemas/config.ts'
 
@@ -9,12 +9,6 @@ export const livestreamOverlayNote = overlayConfig.note
 
 /** Publisher or institution as the catalog and later validation see them. */
 type KnownLivestreamParty = KnownLivestream['publisher']
-
-/** Publisher and institution the ownership check compares. */
-export type LivestreamOwner = {
-	publisherId: string
-	institutionId: string
-}
 
 type PublisherFace = {
 	title: string

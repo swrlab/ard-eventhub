@@ -39,7 +39,9 @@ Jede dieser fünf Stellen hat schon Publisher still verlieren lassen. Die Folge 
 | `externalId`         | Pflicht, `crid://…`                   | weglassen                                                                   |
 | `type`               | Pflicht, wählt das URN-Präfix         | weglassen                                                                   |
 
-Ein Publisher, der diese URNs schon schickt, ändert nur Verbindung und Zugangsdaten.
+**`creator` und `created`.** `creator` ist Pflicht und nennt, wer das Event erzeugt hat, etwa eine Team-Mailadresse oder das Playout-System. Über HTTPS setzt der Ingest es aus dem Token, auf MQTT schreibt es der Publisher. Fehlt es, endet das Event als Schema-Ablehnung. `created` setzt die Validierung auf den Zeitpunkt der Zustellung; ein mitgeschickter Wert wird überschrieben.
+
+Ein Publisher, der diese URNs schon schickt, ergänzt `creator` und ändert Verbindung und Zugangsdaten.
 
 ## Beispiel
 
@@ -78,6 +80,7 @@ const event = {
 	title: 'Song name',
 	playlistItemId: 'swr3-demo-1',
 	services: [{ id: livestreamId, publisherId, institutionId }],
+	creator: 'example@swr.de',
 }
 
 let sent = false
@@ -138,7 +141,8 @@ Eine CRID plus numerische Core-ID, so wie der HTTPS-Body sie heute schickt, komm
 		"length": 180,
 		"title": "Song name",
 		"playlistItemId": "swr3-demo-1",
-		"services": [{ "type": "PermanentLivestream", "externalId": "crid://swr.de/282310", "publisherId": "282310" }]
+		"services": [{ "type": "PermanentLivestream", "externalId": "crid://swr.de/282310", "publisherId": "282310" }],
+		"creator": "example@swr.de"
 	}
 }
 ```

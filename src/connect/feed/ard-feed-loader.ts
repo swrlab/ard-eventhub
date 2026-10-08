@@ -1,6 +1,5 @@
 import type { NatsConnection } from '@nats-io/transport-node'
-import type { FeedOutcome } from '#types'
-import type { ArdFeedState, ArdFeedStore, FeedSnapshot } from './ard-feed.ts'
+import type { ArdFeedState, ArdFeedStore, FeedOutcome, FeedSnapshot, FollowedArdFeed, RefreshInput } from '#types'
 import { readFileSync } from 'node:fs'
 import { logger } from '@frytg/logger'
 import { ardFeedUrl } from '../env.ts'
@@ -65,14 +64,6 @@ const liveInstitutions = async (): Promise<Set<string> | null> => {
 		})
 		return null
 	}
-}
-
-export type RefreshInput = {
-	store: ArdFeedStore
-	url: string
-	fetchFeed?: (url: string) => Promise<unknown>
-	connected?: ReadonlySet<string> | null
-	now?: () => Date
 }
 
 /**
@@ -146,13 +137,6 @@ export const refreshArdFeed = async (state: ArdFeedState, input: RefreshInput): 
 		data: { revision: snapshot.revision, items: snapshot.feed.items.length },
 	})
 	return state.outcome
-}
-
-/** A followed feed: resolves once a KV revision is serving, and stops the watch. */
-export type FollowedArdFeed = {
-	/** Resolves once `state` serves a KV revision. Stays pending while KV is empty. */
-	kvReady: Promise<void>
-	unwatch: () => void
 }
 
 /**

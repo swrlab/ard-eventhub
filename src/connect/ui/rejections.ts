@@ -1,16 +1,9 @@
 import type { NatsConnection, Subscription } from '@nats-io/transport-node'
-import type { Rejection } from '#types'
+import type { Rejection, RejectionLog } from '#types'
 import { errorMessage, isRecord, stringField, stringList } from './json.ts'
 
 const MAX_REJECTIONS = 200
 const MAX_MESSAGE = 4_000
-
-export type RejectionLog = {
-	push: (row: Rejection) => void
-	list: () => Rejection[]
-	setLiveError: (message: string | null) => void
-	liveError: () => string | null
-}
 
 /**
  * In-memory ring of feedback seen while this process is up. Not a history store.

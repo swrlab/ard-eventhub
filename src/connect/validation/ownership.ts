@@ -1,14 +1,4 @@
-import type { LivestreamOwner } from '../../utils/feed/known-livestreams.ts'
-
-/** Which of the three ownership inputs disagreed. */
-export type OwnershipParty = 'subject' | 'payload' | 'feed'
-
-/** One service that failed the three-way check. */
-export type OwnershipProblem = {
-	livestreamId: string
-	disagreed: OwnershipParty[]
-	message: string
-}
+import type { LivestreamOwner, OwnershipParty, OwnershipProblem } from '#types'
 
 const PARTY_ORDER: readonly OwnershipParty[] = ['subject', 'payload', 'feed']
 

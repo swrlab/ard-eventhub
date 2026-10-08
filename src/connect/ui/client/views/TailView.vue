@@ -1,20 +1,12 @@
 <script setup lang="ts">
 import type { NatsConnection, Subscription } from '@nats-io/nats-core'
-import type { MetaReport } from '#types'
-import type { RateWindow } from '../../policy.ts'
+import type { MetaReport, RateWindow, TailEvent } from '#types'
 import { wsconnect } from '@nats-io/nats-core'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { admitTailEvent, evaluateTail, parseTailFilter, tailCloseMessage } from '../../policy.ts'
 import { formatClock } from '../format'
 import { tailPhase } from '../tail-state'
-
-type TailEvent = {
-	subject: string
-	at: string
-	payload: unknown
-	sampled: boolean
-}
 
 /** Read-only browser user from nats-users.conf. No password. Publish still requires both. */
 const UI_NATS_USER = 'sub-ui'

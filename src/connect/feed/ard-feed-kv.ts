@@ -1,6 +1,5 @@
 import type { NatsConnection } from '@nats-io/transport-node'
-import type { ArdFeed } from '#types'
-import type { ArdFeedStore, FeedSnapshot } from './ard-feed.ts'
+import type { ArdFeed, ArdFeedStore, FeedSnapshot } from '#types'
 import { logger } from '@frytg/logger'
 import {
 	DeliverPolicy,

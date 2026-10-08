@@ -1,5 +1,6 @@
 import type { NatsConnection } from '@nats-io/transport-node'
 import type { MqttClient } from 'mqtt'
+import type { ValidationPublisher } from '#types'
 import { hostname } from 'node:os'
 import process from 'node:process'
 import { jetstream } from '@nats-io/jetstream'
@@ -8,24 +9,6 @@ import { natsMqttUrl, natsPassword, natsUser } from '../env.ts'
 
 const MQTT_V311 = 4 as const
 const CONNECT_TIMEOUT_MS = 5_000
-
-/** How the loop publishes. Tests can substitute an in-memory pair. */
-export type ValidationPublisher = {
-	/**
-	 * MQTT publish with RETAIN. Used for `radio/` and `feedback/`.
-	 * @param topic - MQTT topic (`/` separators)
-	 * @param body - JSON value
-	 * @returns Resolves after the QoS 1 PUBACK
-	 */
-	publishRetained: (topic: string, body: unknown) => Promise<void>
-	/**
-	 * NATS-native publish captured by the PLUGINS stream. Not retained.
-	 * @param subject - `plugin.{target}.{livestreamId}.{class}`
-	 * @param body - Validated event
-	 * @returns Resolves after the JetStream pub ack
-	 */
-	publishPlugin: (subject: string, body: unknown) => Promise<void>
-}
 
 /**
  * MQTT client id for this pod. Two pods must not share one, or the broker evicts them in a loop.

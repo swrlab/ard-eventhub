@@ -1,3 +1,4 @@
+import type { ValidationSettlement } from '#types'
 import { test } from '@cross/test'
 import { jetstreamManager } from '@nats-io/jetstream'
 import { assert, assertEquals } from '@std/assert'
@@ -26,8 +27,6 @@ const FEEDBACK_TOPIC = `feedback/${SWR_INSTITUTION_ID}`
 
 const owners = new Map([[LIVESTREAM, { publisherId: PUBLISHER, institutionId: SWR_INSTITUTION_ID }]])
 
-type Settlement = { seq: number; redelivered: boolean; action: string }
-
 /**
  * URN-only music now-playing event with no `plugins` array.
  * @param playlistItemId - Correlation id
@@ -42,6 +41,7 @@ const track = (playlistItemId: string, institutionId = SWR_INSTITUTION_ID) => ({
 	title: 'Song',
 	playlistItemId,
 	services: [{ id: LIVESTREAM, publisherId: PUBLISHER, institutionId }],
+	creator: 'example@swr.de',
 })
 
 /**
@@ -92,7 +92,7 @@ test('validation retains a valid event, rejects a bad one, and processes each ev
 
 	const acked = new Set<number>()
 	let duplicates = 0
-	const settlements: Settlement[] = []
+	const settlements: ValidationSettlement[] = []
 	const stops: (() => Promise<void>)[] = []
 
 	const publisher = await connectMqttUser(PUB_SWR, BROKER_PASSWORD)

@@ -59,7 +59,7 @@ const eventCreator = z
 	.meta({
 		description:
 			'Person or system that created the event, set by the publisher (for example an email address or the playout system)',
-		examples: ['playout@swr.de'],
+		examples: ['example@swr.de'],
 	})
 
 /** Connect events only. Validation overwrites it before the schema check, so subscribers always get the delivery time. */

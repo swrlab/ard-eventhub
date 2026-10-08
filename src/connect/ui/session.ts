@@ -1,5 +1,6 @@
 import type { NatsConnection } from '@nats-io/transport-node'
-import { attachFeedback, createRejectionLog, type RejectionLog } from './rejections.ts'
+import type { RejectionLog } from '#types'
+import { attachFeedback, createRejectionLog } from './rejections.ts'
 
 let nc: NatsConnection | null = null
 let detachFeedback: (() => void) | null = null

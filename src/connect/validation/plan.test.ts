@@ -1,4 +1,4 @@
-import type { ValidationAccept, ValidationPlan, ValidationReject } from './plan.ts'
+import type { ValidationAccept, ValidationPlan, ValidationReject } from '#types'
 import { test } from '@cross/test'
 import { assertEquals } from '@std/assert'
 import { parseRejection } from '../ui/rejections.ts'
@@ -21,6 +21,7 @@ const track = {
 	title: 'Song',
 	playlistItemId: 'item-1',
 	services: [{ id: LIVESTREAM, publisherId: PUBLISHER, institutionId: SUBJECT_INSTITUTION }],
+	creator: 'example@swr.de',
 }
 
 /**
@@ -67,6 +68,22 @@ test('a valid music now-playing event is retained and fanned out without an expl
 		result.plugins.map((item) => item.subject),
 		[`plugin.dts.${LIVESTREAM}.track.playing`, `plugin.radioplayer.${LIVESTREAM}.track.playing`]
 	)
+})
+
+test('the delivered event keeps the creator and carries the delivery time as created', () => {
+	const result = accepted(plan({ ...track, created: '2020-01-01T00:00:00.000Z' }))
+	for (const item of [...result.radio, ...result.plugins]) {
+		const body = item.body as { creator: string; created: string }
+		assertEquals(body.creator, 'example@swr.de')
+		assertEquals(body.created, AT)
+	}
+})
+
+test('an event without a creator is a schema rejection', () => {
+	const result = rejected(plan({ ...track, creator: undefined }))
+	assertEquals(result.cause, 'schema')
+	const body = result.feedback?.body as { issues: { path: string[] }[] } | undefined
+	assertEquals(body?.issues[0]?.path, ['creator'])
 })
 
 test('a duplicated service is retained and fanned out once', () => {

@@ -1,6 +1,7 @@
+import type { MonitorFetch } from '#types'
 import { test } from '@cross/test'
 import { assertEquals } from '@std/assert'
-import { sampleMonitor, type MonitorFetch } from './cluster.ts'
+import { sampleMonitor } from './cluster.ts'
 
 const urls = [
 	'nats-0.nats-headless.eventhub-dev.svc.cluster.local:6222',

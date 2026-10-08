@@ -14,8 +14,14 @@ test('users file yields names, issue dates, and institutions, never the bcrypt h
 	assert(swr)
 	assert(shared)
 	assert(connect)
-	assertEquals(users.some((user) => user.username === 'svc-operator'), false)
-	assertEquals(users.some((user) => user.username === 'svc-adapter-radioplayer'), false)
+	assertEquals(
+		users.some((user) => user.username === 'svc-operator'),
+		false
+	)
+	assertEquals(
+		users.some((user) => user.username === 'svc-adapter-radioplayer'),
+		false
+	)
 	assertEquals(swr.issued, '2026-06-26')
 	assertEquals(swr.institutions, ['urn:ard:institution:a3004ff924ece1a2'])
 	assertEquals(shared.institutions, ['urn:ard:institution:a3004ff924ece1a2', 'urn:ard:institution:b71c0e4d9a25f338'])

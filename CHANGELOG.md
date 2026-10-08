@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ci: separate NATS job (`just nats-up-docker`) so MQTT→NATS inbox translation is required
 - feat: local NATS auth (RFC §7 users, bcrypt, `allowed_connection_types`, institution-bound ACLs; `just nats-check` / `just nats-reload`)
 - feat: keep the ARD core feed in JetStream KV `KV_ARD_FEED`: every connect process reads it on boot (downloading `ARD_FEED_URL` only into an empty bucket), follows new revisions in memory, and `POST /api/update-feed` re-downloads it for the hourly CronJob, keeping the last good revision when the fetch fails
+- feat: Connect events (track, control, data) require `creator`, set by the publisher; validation sets `created` to the delivery time and replaces any value sent
 
 ### Changed
 

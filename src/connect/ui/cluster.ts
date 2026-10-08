@@ -1,44 +1,14 @@
-import type { ClusterNode, ClusterReport, ConsumerHealth, LiveConnection, ReplicaHealth } from '#types'
+import type {
+	ClusterNode,
+	ClusterReport,
+	ConsumerHealth,
+	LiveConnection,
+	MetaView,
+	MonitorFetch,
+	ReplicaHealth,
+	Slot,
+} from '#types'
 import { booleanField, isRecord, numberField, stringField, stringList } from './json.ts'
-
-type VarzView = {
-	name: string
-	version: string | null
-	uptime: string | null
-	connections: number
-	slowConsumers: number
-	staleConnections: number
-	subscriptions: number
-	memBytes: number | null
-	routes: number | null
-	expected: string[]
-}
-
-type ConnzView = {
-	total: number
-	connections: LiveConnection[]
-}
-
-type Slot = {
-	id: string
-	varz: VarzView | null
-	connz: ConnzView | null
-}
-
-type MetaView = {
-	cluster: string | null
-	leader: string | null
-	clusterSize: number | null
-	metaPending: number | null
-	storageBytes: number | null
-	storageMaxBytes: number | null
-	memoryBytes: number | null
-	memoryMaxBytes: number | null
-	streams: number | null
-	consumers: number | null
-	replicas: ReplicaHealth[]
-	consumerDetails: ConsumerHealth[]
-}
 
 /**
  * First DNS label of a cluster URL (`nats-0.nats-headless…:6222` → `nats-0`).
@@ -363,8 +333,6 @@ const finalizeMonitor = (
 	}
 	return { cluster, connections }
 }
-
-export type MonitorFetch = (input: string, init?: RequestInit) => Promise<Response>
 
 /**
  * Sample `/varz`, `/connz`, and `/jsz` until every cluster node has been seen, or rounds run out.

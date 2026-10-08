@@ -1,21 +1,10 @@
 import type { NatsConnection } from '@nats-io/transport-node'
+import type { RetainedMessage, RetainedRead } from '#types'
 import { jetstreamManager } from '@nats-io/jetstream'
 import { errorMessage } from './json.ts'
 
 const SUBJECT_CAP = 200
 const READ_CONCURRENCY = 8
-
-type RetainedMessage = {
-	subject: string
-	at: string
-	text: string
-}
-
-export type RetainedRead = {
-	messages: RetainedMessage[]
-	truncated: boolean
-	error: string | null
-}
 
 /**
  * Whether a stream subject list can hold messages for a filter prefix (`radio.` / `feedback.`).

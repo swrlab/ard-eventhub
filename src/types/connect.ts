@@ -1,7 +1,10 @@
 /**
- * @fileoverview Eventhub Connect types shared by the service and the operator UI.
- * The polled JSON shapes live here. The live tail is a separate socket.
+ * @fileoverview Eventhub Connect types.
+ * Covers the feed store, validation plans, and the operator UI, including the live tail.
  */
+
+import type { MqttClient } from 'mqtt'
+import type { ArdFeed } from './ard.ts'
 
 /** Publisher or institution as the catalog and later validation see them. */
 type KnownLivestreamParty = {
@@ -198,3 +201,247 @@ export type RejectionsReport = {
 	institution: string | null
 	rejections: Rejection[]
 }
+
+/** Publisher and institution the ownership check compares. */
+export type LivestreamOwner = {
+	publisherId: string
+	institutionId: string
+}
+
+/** One accepted document plus its JetStream sequence. */
+export type FeedSnapshot = {
+	feed: ArdFeed
+	revision: number
+}
+
+/**
+ * Shared store. The JetStream bucket is the production one. Tests pass a memory double.
+ */
+export type ArdFeedStore = {
+	/**
+	 * Latest accepted document, or null when the bucket is empty or the bytes fail validation.
+	 */
+	read: () => Promise<FeedSnapshot | null>
+	/**
+	 * Append a new revision.
+	 * @param feed - Document that already passed the upstream checks
+	 * @returns The stored snapshot, including the new sequence
+	 */
+	write: (feed: ArdFeed) => Promise<FeedSnapshot>
+	/**
+	 * Call `onSnapshot` for the current revision (when there is one) and every revision after it.
+	 * @param onSnapshot - Validated revision
+	 * @returns Stops the watch
+	 */
+	watch: (onSnapshot: (snapshot: FeedSnapshot) => void) => () => void
+}
+
+/** Result of comparing a fetched candidate with the feed that is serving. */
+export type UpstreamDecision =
+	| { action: 'store'; feed: ArdFeed }
+	| { action: 'keep'; reason: string; successful: boolean }
+
+/** In-memory feed this process is serving. `feed` and `revision` only ever come from KV. */
+export type ArdFeedState = {
+	feed: ArdFeed | null
+	revision: number | null
+	lastSuccessAt: string | null
+	lastAttemptAt: string | null
+	lastError: string | null
+	outcome: FeedOutcome | null
+}
+
+export type RefreshInput = {
+	store: ArdFeedStore
+	url: string
+	fetchFeed?: (url: string) => Promise<unknown>
+	connected?: ReadonlySet<string> | null
+	now?: () => Date
+}
+
+/** A followed feed: resolves once a KV revision is serving, and stops the watch. */
+export type FollowedArdFeed = {
+	/** Resolves once `state` serves a KV revision. Stays pending while KV is empty. */
+	kvReady: Promise<void>
+	unwatch: () => void
+}
+
+/** Which of the three ownership inputs disagreed. */
+export type OwnershipParty = 'subject' | 'payload' | 'feed'
+
+/** One service that failed the three-way check. */
+export type OwnershipProblem = {
+	livestreamId: string
+	disagreed: OwnershipParty[]
+	message: string
+}
+
+/** Why a delivery is termed. Also the `cause` on `feedback/` and in the `validation rejected` log. */
+export type RejectCause = 'json' | 'schema' | 'ownership'
+
+/** Retained MQTT publish (`radio/` or `feedback/`). */
+export type MqttPublish = {
+	topic: string
+	body: unknown
+}
+
+/** NATS-native publish to a plugin subject. Not retained. */
+export type NatsPublish = {
+	subject: string
+	body: unknown
+}
+
+/** Accepted: retain on every `radio/` topic, fan out to every plugin subject, then ack. */
+export type ValidationAccept = {
+	action: 'ack'
+	radio: MqttPublish[]
+	plugins: NatsPublish[]
+}
+
+/** Rejected: retain the feedback (when the subject names an institution), then term. */
+export type ValidationReject = {
+	action: 'term'
+	cause: RejectCause
+	message: string
+	feedback: MqttPublish | null
+	/** The full inbox payload for the rejection log and the feedback body: decoded JSON, else the text. */
+	payload: unknown
+}
+
+/** Work for one inbox message, before any publish or ack. */
+export type ValidationPlan = ValidationAccept | ValidationReject
+
+export type FeedbackIssue = { path: string[]; message: string }
+
+/** How the loop publishes. Tests can substitute an in-memory pair. */
+export type ValidationPublisher = {
+	/**
+	 * MQTT publish with RETAIN. Used for `radio/` and `feedback/`.
+	 * @param topic - MQTT topic (`/` separators)
+	 * @param body - JSON value
+	 * @returns Resolves after the QoS 1 PUBACK
+	 */
+	publishRetained: (topic: string, body: unknown) => Promise<void>
+	/**
+	 * NATS-native publish captured by the PLUGINS stream. Not retained.
+	 * @param subject - `plugin.{target}.{livestreamId}.{class}`
+	 * @param body - Validated event
+	 * @returns Resolves after the JetStream pub ack
+	 */
+	publishPlugin: (subject: string, body: unknown) => Promise<void>
+}
+
+/** Owner index for the ownership check. Null only before a feed is loaded, which boot rules out. */
+export type OwnersReader = () => ReadonlyMap<string, LivestreamOwner> | null
+
+/** One settled inbox delivery, for tests and the duplicate counter. */
+export type ValidationSettlement = {
+	seq: number
+	redelivered: boolean
+	action: ValidationPlan['action']
+}
+
+/** The running loop and the MQTT connection it publishes on. */
+export type RunningValidation = {
+	controller: AbortController
+	client: MqttClient
+	task: Promise<void>
+}
+
+/** Event class on a retained `radio.{livestreamId}.{eventClass}` subject. */
+export type RadioEventClass = 'track.playing' | 'track.next' | 'control' | 'data'
+
+export type RadioObservation = {
+	subject: string
+	at: string
+	payload: unknown
+}
+
+export type TailCloseReason = 'idle' | 'cap' | 'client' | 'nats' | 'denied'
+
+export type TailClock = {
+	openedAt: number
+	lastBeatAt: number
+}
+
+export type RateWindow = {
+	windowStart: number
+	forwarded: number
+	dropped: number
+}
+
+/** One frame the live tail shows. */
+export type TailEvent = {
+	subject: string
+	at: string
+	payload: unknown
+	sampled: boolean
+}
+
+export type ConfiguredUser = {
+	username: string
+	issued: string | null
+	institutions: string[]
+	allows: string[]
+	connectionTypes: string[]
+}
+
+export type RejectionLog = {
+	push: (row: Rejection) => void
+	list: () => Rejection[]
+	setLiveError: (message: string | null) => void
+	liveError: () => string | null
+}
+
+export type RetainedMessage = {
+	subject: string
+	at: string
+	text: string
+}
+
+export type RetainedRead = {
+	messages: RetainedMessage[]
+	truncated: boolean
+	error: string | null
+}
+
+export type VarzView = {
+	name: string
+	version: string | null
+	uptime: string | null
+	connections: number
+	slowConsumers: number
+	staleConnections: number
+	subscriptions: number
+	memBytes: number | null
+	routes: number | null
+	expected: string[]
+}
+
+export type ConnzView = {
+	total: number
+	connections: LiveConnection[]
+}
+
+export type Slot = {
+	id: string
+	varz: VarzView | null
+	connz: ConnzView | null
+}
+
+export type MetaView = {
+	cluster: string | null
+	leader: string | null
+	clusterSize: number | null
+	metaPending: number | null
+	storageBytes: number | null
+	storageMaxBytes: number | null
+	memoryBytes: number | null
+	memoryMaxBytes: number | null
+	streams: number | null
+	consumers: number | null
+	replicas: ReplicaHealth[]
+	consumerDetails: ConsumerHealth[]
+}
+
+export type MonitorFetch = (input: string, init?: RequestInit) => Promise<Response>

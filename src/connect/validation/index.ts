@@ -1,18 +1,11 @@
 import type { NatsConnection } from '@nats-io/transport-node'
-import type { MqttClient } from 'mqtt'
+import type { RunningValidation } from '#types'
 import { logger } from '@frytg/logger'
 import { VALIDATION_CONSUMER } from '../../utils/nats/ensure-streams.ts'
 import { runValidationLoop } from './loop.ts'
 import { connectValidationMqtt, createValidationPublisher, validationClientId } from './publish.ts'
 
 const source = 'connect.validation'
-
-/** The running loop and the MQTT connection it publishes on. */
-type RunningValidation = {
-	controller: AbortController
-	client: MqttClient
-	task: Promise<void>
-}
 
 let current: RunningValidation | null = null
 

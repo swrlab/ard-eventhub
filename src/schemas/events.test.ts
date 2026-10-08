@@ -30,7 +30,7 @@ const controlBody = {
 	name: 'TA',
 	state: true,
 	services: [urnService],
-	creator: 'playout@swr.de',
+	creator: 'example@swr.de',
 	created: '2026-05-27T15:03:01.000Z',
 }
 
@@ -44,7 +44,7 @@ const dataBody = {
 		{ type: 'rtdlplus' as const, id: 32, description: 'PROGRAM.Stationname long', value: 'SWR 3' },
 	],
 	services: [urnService],
-	creator: 'playout@swr.de',
+	creator: 'example@swr.de',
 	created: '2020-01-19T05:00:01.000Z',
 }
 
@@ -270,7 +270,7 @@ const trackBody = {
 	title: 'Song',
 	playlistItemId: 'item-1',
 	services: [urnService],
-	creator: 'playout@swr.de',
+	creator: 'example@swr.de',
 	created: '2026-10-08T10:00:01.000Z',
 }
 

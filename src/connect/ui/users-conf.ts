@@ -1,12 +1,4 @@
-import type { LiveConnection, UserRow } from '#types'
-
-export type ConfiguredUser = {
-	username: string
-	issued: string | null
-	institutions: string[]
-	allows: string[]
-	connectionTypes: string[]
-}
+import type { ConfiguredUser, LiveConnection, UserRow } from '#types'
 
 const INSTITUTION_RE = /urn:ard:institution:[a-z0-9]+/g
 const ISSUED_RE = /-(\d{4}-\d{2}-\d{2})$/
