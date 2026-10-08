@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 👀 Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: 🛠 Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -44,7 +44,7 @@ jobs:
           create_credentials_file: true
 
       - name: 🛠 Setup mise tools
-        uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+        uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
         with:
           cache: true
           github_token: ${{ github.token }}
@@ -71,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 👀 Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: 🛠 Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -82,7 +82,7 @@ jobs:
         run: bun install
 
       - name: 🛠 Setup mise tools
-        uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+        uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
         with:
           cache: true
           github_token: ${{ github.token }}
@@ -105,7 +105,7 @@ jobs:
       VERSION: ${{ steps.push.outputs.VERSION }}
     steps:
       - name: 👀 Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: 🛠 Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -121,7 +121,7 @@ jobs:
           credentials_json: ${{ secrets.GCP_GITHUB_SERVICE_ACCOUNT_KEY }}
 
       - name: 🛠 Setup mise tools
-        uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+        uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
         with:
           cache: true
           github_token: ${{ github.token }}
