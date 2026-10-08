@@ -1,11 +1,4 @@
-import type {
-	ArdFeed,
-	ArdFeedState,
-	FeedReport,
-	FeedSnapshot,
-	FeedStaleness,
-	UpstreamDecision,
-} from '#types'
+import type { ArdFeed, ArdFeedState, FeedReport, FeedSnapshot, FeedStaleness, UpstreamDecision } from '#types'
 import { getArdFeedValidationError } from '../../utils/feed/ard-feed-rules.ts'
 
 /** JetStream stream that holds the feed. KV subjects live under `$KV.ARD_FEED.>`. */

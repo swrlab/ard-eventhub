@@ -1,4 +1,5 @@
 import type { LivestreamOwner, OwnershipParty, OwnershipProblem } from '#types'
+import { currentOwners } from '../feed/current-feed.ts'
 
 const PARTY_ORDER: readonly OwnershipParty[] = ['subject', 'payload', 'feed']
 
@@ -61,16 +62,18 @@ export const checkServiceOwnership = (params: {
 }
 
 /**
- * Check every service of one event and merge the failures into one problem for feedback.
- * @param params - Subject institution, the event's services, and the feed owner index
+ * Check every service of one event against the serving feed and merge the failures into one problem for feedback.
+ * Throws when no feed is loaded, so the loop naks instead of rejecting a valid event.
+ * @param params - Subject institution and the event's services
  * @returns The merged problem (first failing livestream, union of parties, joined messages), or null when all agree
  */
 export const checkEventOwnership = (params: {
 	subjectInstitutionId: string
 	services: readonly { id: string; publisherId: string; institutionId: string }[]
-	owners: ReadonlyMap<string, LivestreamOwner>
 }): OwnershipProblem | null => {
-	const { subjectInstitutionId, services, owners } = params
+	const { subjectInstitutionId, services } = params
+	const owners = currentOwners()
+	if (!owners) throw new Error('ard feed is not loaded')
 	const problems = services.flatMap((service) => {
 		const problem = checkServiceOwnership({ subjectInstitutionId, service, owner: owners.get(service.id) ?? null })
 		return problem ? [problem] : []

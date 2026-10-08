@@ -1,10 +1,9 @@
 import type { JsMsg } from '@nats-io/jetstream'
 import type { NatsConnection } from '@nats-io/transport-node'
-import type { OwnersReader, ValidationPlan, ValidationPublisher, ValidationSettlement } from '#types'
+import type { ValidationPlan, ValidationPublisher, ValidationSettlement } from '#types'
 import { logger } from '@frytg/logger'
 import { jetstream } from '@nats-io/jetstream'
 import { INBOX_STREAM, VALIDATION_CONSUMER } from '../../utils/nats/ensure-streams.ts'
-import { currentOwners } from '../feed/current-feed.ts'
 import { planInboxMessage } from './plan.ts'
 
 const source = 'connect.validation'
@@ -65,15 +64,13 @@ const settle = (msg: JsMsg, plan: ValidationPlan): void => {
  * Pull `inbox.>`: plan, publish, then ack or term. Start it only once the feed is in KV (see `serveConnection`).
  * A throw before settling naks the message for redelivery. Returns when the signal aborts or the connection closes.
  * @param nc - NATS connection
- * @param options - Catalog, publisher, and stop signal
+ * @param options - Publisher, stop signal, and test hooks
  * @returns Resolves when the loop stops
  */
 export const runValidationLoop = async (
 	nc: NatsConnection,
 	options: {
 		signal: AbortSignal
-		/** Defaults to the serving feed. Tests pass a fixed map. */
-		owners?: OwnersReader
 		publisher: ValidationPublisher
 		/** Runs after a successful publish and before ack/term. Tests close the connection here. */
 		beforeAck?: () => Promise<void>
@@ -82,7 +79,6 @@ export const runValidationLoop = async (
 	}
 ): Promise<void> => {
 	const { signal, publisher, beforeAck, onSettled } = options
-	const readOwners = options.owners ?? currentOwners
 	const stopped = (): boolean => signal.aborted || nc.isClosed()
 	const js = jetstream(nc)
 	const consumer = await js.consumers.get(INBOX_STREAM, VALIDATION_CONSUMER)
@@ -97,9 +93,7 @@ export const runValidationLoop = async (
 			if (stopped()) return
 			let plan: ValidationPlan | null = null
 			try {
-				const owners = readOwners()
-				if (!owners) throw new Error('ard feed is no longer loaded')
-				plan = planInboxMessage({ subject: msg.subject, bytes: msg.data, owners, at: new Date().toISOString() })
+				plan = planInboxMessage({ subject: msg.subject, bytes: msg.data, at: new Date().toISOString() })
 				await publishPlan(publisher, plan)
 				if (beforeAck) await beforeAck()
 				if (stopped()) return

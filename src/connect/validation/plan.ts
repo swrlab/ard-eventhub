@@ -1,12 +1,5 @@
 import type { ZodError } from 'zod'
-import type {
-	FeedbackIssue,
-	LivestreamOwner,
-	OwnershipParty,
-	RejectCause,
-	ValidationPlan,
-	ValidationReject,
-} from '#types'
+import type { FeedbackIssue, OwnershipParty, RejectCause, ValidationPlan, ValidationReject } from '#types'
 import { parseConnectInboxEvent } from '../../schemas/events.ts'
 import {
 	eventClassToken,
@@ -159,16 +152,11 @@ const reject = (params: {
 /**
  * Decide ack or term for one inbox delivery. Does not publish.
  * The loop only calls this once a feed is loaded, so an unknown livestream is a real ownership failure.
- * @param params - Subject, payload bytes, feed owners, and the delivery timestamp (feedback `at`, event `created`)
+ * @param params - Subject, payload bytes, and the delivery timestamp (feedback `at`, event `created`)
  * @returns The plan
  */
-export const planInboxMessage = (params: {
-	subject: string
-	bytes: Uint8Array
-	owners: ReadonlyMap<string, LivestreamOwner>
-	at: string
-}): ValidationPlan => {
-	const { subject, bytes, owners, at } = params
+export const planInboxMessage = (params: { subject: string; bytes: Uint8Array; at: string }): ValidationPlan => {
+	const { subject, bytes, at } = params
 	const text = decodeUtf8(bytes)
 	const json = text === null ? null : parseJson(text)
 	const payload = loggablePayload(bytes, json)
@@ -202,7 +190,7 @@ export const planInboxMessage = (params: {
 	}
 
 	const event = parsed.data
-	const problem = checkEventOwnership({ subjectInstitutionId: institutionId, services: event.services, owners })
+	const problem = checkEventOwnership({ subjectInstitutionId: institutionId, services: event.services })
 	if (problem) {
 		return reject({
 			...context,

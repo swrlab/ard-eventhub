@@ -1,6 +1,7 @@
 import type { ValidationAccept, ValidationPlan, ValidationReject } from '#types'
 import { test } from '@cross/test'
-import { assertEquals } from '@std/assert'
+import { assertEquals, assertThrows } from '@std/assert'
+import { serveTestFeed } from '../feed/test-feed.ts'
 import { parseRejection } from '../ui/rejections.ts'
 import { planInboxMessage } from './plan.ts'
 
@@ -11,7 +12,7 @@ const PUBLISHER = 'urn:ard:publisher:75dbb3dace15f610'
 const INBOX = `inbox.${SUBJECT_INSTITUTION}`
 const AT = '2026-10-08T12:00:00.000Z'
 
-const owners = new Map([[LIVESTREAM, { publisherId: PUBLISHER, institutionId: SUBJECT_INSTITUTION }]])
+const OWNERS = { [LIVESTREAM]: { publisherId: PUBLISHER, institutionId: SUBJECT_INSTITUTION } }
 
 const track = {
 	event: 'de.ard.eventhub.v1.radio.track.playing',
@@ -25,18 +26,19 @@ const track = {
 }
 
 /**
- * Plan one JSON payload.
+ * Plan one JSON payload while the test feed is served.
  * @param body - JSON value
  * @param subject - Inbox subject
  * @returns The plan
  */
-const plan = (body: unknown, subject = INBOX): ValidationPlan =>
-	planInboxMessage({
-		subject,
-		bytes: new TextEncoder().encode(JSON.stringify(body)),
-		owners,
-		at: AT,
-	})
+const plan = (body: unknown, subject = INBOX): ValidationPlan => {
+	const restore = serveTestFeed(OWNERS)
+	try {
+		return planInboxMessage({ subject, bytes: new TextEncoder().encode(JSON.stringify(body)), at: AT })
+	} finally {
+		restore()
+	}
+}
 
 /**
  * Narrow to an accepted plan.
@@ -113,9 +115,7 @@ test('feedback leaves out fields the payload did not carry', () => {
 })
 
 test('a payload that is not JSON is a json rejection', () => {
-	const result = rejected(
-		planInboxMessage({ subject: INBOX, bytes: new TextEncoder().encode('{nope'), owners, at: AT })
-	)
+	const result = rejected(planInboxMessage({ subject: INBOX, bytes: new TextEncoder().encode('{nope'), at: AT }))
 	assertEquals(result.cause, 'json')
 	assertEquals(result.message, 'payload is not JSON')
 })
@@ -130,20 +130,16 @@ test('a rejection carries the full decoded event for the log and the feedback', 
 })
 
 test('a non-JSON or non-UTF-8 rejection carries the payload text', () => {
-	const notJson = rejected(
-		planInboxMessage({ subject: INBOX, bytes: new TextEncoder().encode('{nope'), owners, at: AT })
-	)
+	const notJson = rejected(planInboxMessage({ subject: INBOX, bytes: new TextEncoder().encode('{nope'), at: AT }))
 	assertEquals(notJson.payload, '{nope')
-	const notUtf8 = rejected(
-		planInboxMessage({ subject: INBOX, bytes: new Uint8Array([0x7b, 0xff, 0x7d]), owners, at: AT })
-	)
+	const notUtf8 = rejected(planInboxMessage({ subject: INBOX, bytes: new Uint8Array([0x7b, 0xff, 0x7d]), at: AT }))
 	assertEquals(notUtf8.cause, 'json')
 	assertEquals(notUtf8.payload, '{\uFFFD}')
 })
 
 test('an oversized rejected payload is logged as a prefix with its size', () => {
 	const bytes = new TextEncoder().encode(`"${'x'.repeat(70 * 1024)}"`)
-	const result = rejected(planInboxMessage({ subject: 'inbox.not-an-institution', bytes, owners, at: AT }))
+	const result = rejected(planInboxMessage({ subject: 'inbox.not-an-institution', bytes, at: AT }))
 	const payload = result.payload as { truncated: boolean; bytes: number; head: string }
 	assertEquals(payload.truncated, true)
 	assertEquals(payload.bytes, bytes.byteLength)
@@ -182,6 +178,14 @@ test('a subject without an institution URN is termed with no feedback', () => {
 	assertEquals(result.cause, 'ownership')
 	assertEquals(result.feedback, null)
 	assertEquals(result.payload, track)
+})
+
+test('a valid event without a served feed throws so the loop naks instead of rejecting', () => {
+	assertThrows(
+		() => planInboxMessage({ subject: INBOX, bytes: new TextEncoder().encode(JSON.stringify(track)), at: AT }),
+		Error,
+		'ard feed is not loaded'
+	)
 })
 
 test('track.next is retained and does not fan out when no plugin is set', () => {

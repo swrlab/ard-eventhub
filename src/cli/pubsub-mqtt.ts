@@ -64,8 +64,9 @@ const relay = async (subscriptionName: string): Promise<void> => {
 	 */
 	const publishMessage = async (message: Message): Promise<void> => {
 		let institutionId: string | undefined
+		const event = JSON.parse(message.data.toString())
 		try {
-			institutionId = eventInstitutionId(JSON.parse(message.data.toString()))
+			institutionId = eventInstitutionId(event)
 		} catch (error) {
 			console.error(`invalid json id=${message.id}`)
 			console.error(error)
@@ -79,9 +80,12 @@ const relay = async (subscriptionName: string): Promise<void> => {
 			return
 		}
 
+		event.name = undefined
+		if (!event.event) event.event = event.name
+
 		const topic = inboxTopic(institutionId)
 		try {
-			await client.publishAsync(topic, message.data, { qos: QOS_AT_LEAST_ONCE, retain: false })
+			await client.publishAsync(topic, JSON.stringify(event), { qos: QOS_AT_LEAST_ONCE, retain: false })
 			message.ack()
 			console.error(`published ${topic} id=${message.id}`)
 		} catch (error) {

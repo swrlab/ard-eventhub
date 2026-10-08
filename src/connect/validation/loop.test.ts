@@ -12,6 +12,7 @@ import {
 } from '../../utils/nats/ensure-streams.ts'
 import { inboxMqttTopic, pluginSubject } from '../../utils/nats/subjects.ts'
 import { BROKER_PASSWORD, connectMqttUser, skipUnlessNats, tryConnectService } from '../../utils/nats/test-broker.ts'
+import { serveTestFeed } from '../feed/test-feed.ts'
 import { runValidationLoop } from './loop.ts'
 import { connectValidationMqtt, createValidationPublisher, validationClientId } from './publish.ts'
 
@@ -25,7 +26,7 @@ const PUBLISHER = 'urn:ard:publisher:75dbb3dace15f610'
 const RADIO_TOPIC = `radio/${LIVESTREAM}/track/playing`
 const FEEDBACK_TOPIC = `feedback/${SWR_INSTITUTION_ID}`
 
-const owners = new Map([[LIVESTREAM, { publisherId: PUBLISHER, institutionId: SWR_INSTITUTION_ID }]])
+const OWNERS = { [LIVESTREAM]: { publisherId: PUBLISHER, institutionId: SWR_INSTITUTION_ID } }
 
 /**
  * URN-only music now-playing event with no `plugins` array.
@@ -95,6 +96,7 @@ test('validation retains a valid event, rejects a bad one, and processes each ev
 	const settlements: ValidationSettlement[] = []
 	const stops: (() => Promise<void>)[] = []
 
+	const restoreFeed = serveTestFeed(OWNERS)
 	const publisher = await connectMqttUser(PUB_SWR, BROKER_PASSWORD)
 	try {
 		const jsm = await jetstreamManager(admin)
@@ -121,7 +123,6 @@ test('validation retains a valid event, rejects a bad one, and processes each ev
 			const controller = new AbortController()
 			const task = runValidationLoop(nc, {
 				signal: controller.signal,
-				owners: () => owners,
 				publisher: createValidationPublisher(nc, mqttClient),
 				...(beforeAck ? { beforeAck } : {}),
 				onSettled: (settlement) => {
@@ -149,7 +150,6 @@ test('validation retains a valid event, rejects a bad one, and processes each ev
 			let crashed = false
 			const task = runValidationLoop(nc, {
 				signal: controller.signal,
-				owners: () => owners,
 				publisher: createValidationPublisher(nc, mqttClient),
 				beforeAck: async () => {
 					await nc.close()
@@ -280,5 +280,6 @@ test('validation retains a valid event, rejects a bad one, and processes each ev
 		}
 		await publisher.endAsync().catch(() => undefined)
 		if (!admin.isClosed()) await natsAccess.drain(admin)
+		restoreFeed()
 	}
 })

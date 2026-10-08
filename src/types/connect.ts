@@ -331,9 +331,6 @@ export type ValidationPublisher = {
 	publishPlugin: (subject: string, body: unknown) => Promise<void>
 }
 
-/** Owner index for the ownership check. Null only before a feed is loaded, which boot rules out. */
-export type OwnersReader = () => ReadonlyMap<string, LivestreamOwner> | null
-
 /** One settled inbox delivery, for tests and the duplicate counter. */
 export type ValidationSettlement = {
 	seq: number

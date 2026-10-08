@@ -1,5 +1,6 @@
 import { test } from '@cross/test'
 import { assertEquals } from '@std/assert'
+import { serveTestFeed } from '../feed/test-feed.ts'
 import { checkEventOwnership, checkServiceOwnership } from './ownership.ts'
 
 const SUBJECT = 'urn:ard:institution:a3004ff924ece1a2'
@@ -45,22 +46,30 @@ test('ownership rejects a livestream the feed does not know', () => {
 	assertEquals(problem?.livestreamId, LIVESTREAM)
 })
 
-test('event ownership accepts when every service agrees', () => {
-	const owners = new Map([[LIVESTREAM, owner]])
-	assertEquals(checkEventOwnership({ subjectInstitutionId: SUBJECT, services: [service], owners }), null)
+test('event ownership accepts when every service agrees with the served feed', () => {
+	const restore = serveTestFeed({ [LIVESTREAM]: owner })
+	try {
+		assertEquals(checkEventOwnership({ subjectInstitutionId: SUBJECT, services: [service] }), null)
+	} finally {
+		restore()
+	}
 })
 
 test('event ownership merges failures across services in party order', () => {
 	const unknown = 'urn:ard:permanent-livestream:0000000000000000'
-	const owners = new Map([[LIVESTREAM, owner]])
-	const problem = checkEventOwnership({
-		subjectInstitutionId: SUBJECT,
-		services: [
-			{ ...service, publisherId: 'urn:ard:publisher:0000000000000000' },
-			{ ...service, id: unknown },
-		],
-		owners,
-	})
+	const restore = serveTestFeed({ [LIVESTREAM]: owner })
+	let problem: ReturnType<typeof checkEventOwnership>
+	try {
+		problem = checkEventOwnership({
+			subjectInstitutionId: SUBJECT,
+			services: [
+				{ ...service, publisherId: 'urn:ard:publisher:0000000000000000' },
+				{ ...service, id: unknown },
+			],
+		})
+	} finally {
+		restore()
+	}
 	assertEquals(problem?.livestreamId, LIVESTREAM)
 	assertEquals(problem?.disagreed, ['payload', 'feed'])
 	assertEquals(problem?.message.includes(unknown), true)
