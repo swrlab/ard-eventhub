@@ -57,8 +57,8 @@ jobs:
       - name: 📚 Lint Code
         run: bun x oxlint
 
-      - name: 🐳 Start NanoMQ
-        run: just mqtt-up-docker
+      - name: 🐳 Start NATS
+        run: just nats-up-docker
 
       - name: 🧪 Run Ingest Tests
         env:

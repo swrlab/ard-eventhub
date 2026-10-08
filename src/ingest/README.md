@@ -66,10 +66,9 @@ GitHub Actions builds and pushes the Docker image to the container registry. Dep
 
 ## Local MQTT publish
 
-Ingest dual-writes each accepted event to `inbox/{institutionId}` on the CN MQTT gateway as `svc-ingest` when `MQTT_BROKER_URL` is set. Unset, the publish stays off and Pub/Sub stays the path of record. A failed publish is logged and does not fail the HTTP response. `just test` still injects the URL from sops. Point it at local NATS (`just nats-up`), not NanoMQ: the gateway rejects anonymous connects, and both bind `:1883`.
+Ingest dual-writes each accepted event to `inbox/{institutionId}` on the CN MQTT gateway as `svc-ingest` when `MQTT_BROKER_URL` is set. Unset, the publish stays off and Pub/Sub stays the path of record. A failed publish is logged and does not fail the HTTP response. `just test` still injects the URL from sops. Point it at local NATS (`just nats-up`). Anonymous connects are rejected.
 
 ```sh
-just mqtt-down           # if NanoMQ already holds 1883
 just nats-up
 just nats-sub --all
 just dev

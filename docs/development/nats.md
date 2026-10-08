@@ -12,7 +12,6 @@ Die vollständige Einrichtungsanleitung (Homebrew, Cursor Cloud, Docker) steht i
 ## Kurzbefehle
 
 ```sh
-just mqtt-down          # NanoMQ belegt ebenfalls :1883
 just nats-up            # nats-server auf PATH (Homebrew)
 just nats-up-docker     # Cursor Cloud / Linux / CI
 just nats-sub --all
@@ -34,4 +33,12 @@ Vor einem Reload: `just nats-check`. User hinzufügen, dann `just nats-reload` (
 
 Ein Publish auf `inbox.urn:…` über MQTT landet auf `inbox//urn:…` — ein Token, das niemand abonniert. Richtig ist `inbox/urn:…`.
 
-NanoMQ und NATS nicht parallel starten. Ingest publiziert bei gesetztem `MQTT_BROKER_URL` direkt auf das Gateway als `svc-ingest`. Ingest-CI startet weiter NanoMQ (anonymer Connect); die `svc-ingest`-ACL prüft der eigene NATS-Job.
+Ingest publiziert bei gesetztem `MQTT_BROKER_URL` direkt auf das Gateway als `svc-ingest`. Ingest-CI startet dafür NATS (`just nats-up-docker`). Die `svc-ingest`-ACL prüft der eigene NATS-Job.
+
+## Kubernetes
+
+Dev fährt drei NATS-Pods in einem Cluster. Test und prod haben je eine Config pro Zone (bad, stg, mnz): [`infra/kubernetes/README.md`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/README.md).
+
+```sh
+just nats-k8s-dev
+```

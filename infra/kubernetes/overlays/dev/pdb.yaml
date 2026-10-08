@@ -1,0 +1,14 @@
+# A voluntary drain may take one pod. Quorum stays at 2 of 3.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nats
+  labels:
+    app.kubernetes.io/name: nats
+    app.kubernetes.io/part-of: eventhub
+    app.kubernetes.io/component: broker
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nats

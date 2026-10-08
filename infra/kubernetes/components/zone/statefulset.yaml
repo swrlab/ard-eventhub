@@ -1,0 +1,131 @@
+# One NATS process for this zone. JetStream identity is server_name in nats.conf
+# plus this volume. Replacing the disk and keeping the name is a RAFT incident.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nats
+  labels:
+    app.kubernetes.io/name: nats
+    app.kubernetes.io/part-of: eventhub
+    app.kubernetes.io/component: broker
+spec:
+  serviceName: nats-headless
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nats
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nats
+        app.kubernetes.io/part-of: eventhub
+        app.kubernetes.io/component: broker
+    spec:
+      serviceAccountName: nats
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: nats
+          image: nats:2.14.6
+          imagePullPolicy: IfNotPresent
+          args: ['-c', '/etc/nats/nats.conf']
+          ports:
+            - name: nats
+              containerPort: 4222
+              protocol: TCP
+            - name: cluster
+              containerPort: 6222
+              hostPort: 6222
+              protocol: TCP
+            - name: mqtts
+              containerPort: 8883
+              hostPort: 8883
+              protocol: TCP
+            - name: monitor
+              containerPort: 8222
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: monitor
+            periodSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz?js-enabled-only=true
+              port: monitor
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: monitor
+            periodSeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 200m
+              memory: 1Gi
+            limits:
+              memory: 2Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ['ALL']
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nats/nats.conf
+              subPath: nats.conf
+              readOnly: true
+            - name: users
+              mountPath: /etc/nats/users
+              readOnly: true
+            - name: tls
+              mountPath: /etc/nats/tls
+              readOnly: true
+            - name: pid
+              mountPath: /var/run/nats
+            - name: tmp
+              mountPath: /tmp
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: config
+          configMap:
+            name: nats
+            defaultMode: 0444
+        - name: users
+          secret:
+            secretName: nats-users
+            defaultMode: 0444
+        - name: tls
+          secret:
+            secretName: nats-tls
+            defaultMode: 0444
+        - name: pid
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          app.kubernetes.io/name: nats
+          app.kubernetes.io/part-of: eventhub
+      spec:
+        accessModes: ['ReadWriteOnce']
+        resources:
+          requests:
+            storage: 10Gi

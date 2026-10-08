@@ -1,0 +1,29 @@
+# NodePorts land on localhost under Docker Desktop and on the node IP under k3s.
+apiVersion: v1
+kind: Service
+metadata:
+  name: nats
+  labels:
+    app.kubernetes.io/name: nats
+    app.kubernetes.io/part-of: eventhub
+    app.kubernetes.io/component: broker
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: nats
+  ports:
+    - name: nats
+      port: 4222
+      targetPort: nats
+      nodePort: 30422
+      protocol: TCP
+    - name: mqtt
+      port: 1883
+      targetPort: mqtt
+      nodePort: 30183
+      protocol: TCP
+    - name: monitor
+      port: 8222
+      targetPort: monitor
+      nodePort: 30822
+      protocol: TCP

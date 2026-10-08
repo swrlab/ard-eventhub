@@ -35,7 +35,7 @@ Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `o
 - `src/utils/` – Shared utilities (Pub/Sub, MQTT inbox hop, NATS client, Datastore, Firebase, plugins)
 - `cli/` – Command-line utilities
 - `config/` – Application configuration (ARD prefixes, allow-lists)
-- `infra/` – Local NanoMQ config and local NATS dev config
+- `infra/` – Local NATS config and NATS kustomize manifests (`infra/kubernetes`)
 - `just/` – Split just recipes (`encryption.just`, `mqtt.just`, `nats.just`)
 - `integration/` – Hurl HTTP suite (`ingest-api.hurl`) mirroring `src/ingest/server.test.ts` (run with `just integration`)
 - `docs/` – Documentation (Markdown, built with Blume)

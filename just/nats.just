@@ -7,6 +7,7 @@ NATS_STORE := source_directory() / '../.local/nats'
 NATS_RUNTIME_CONF := NATS_STORE / 'nats.conf'
 NATS_RUNTIME_USERS := NATS_STORE / 'nats-users.conf'
 NATS_DEFAULT_INSTITUTION := 'urn:ard:institution:a3004ff924ece1a2'
+NATS_K8S := source_directory() / '../infra/kubernetes'
 
 # copy committed NATS config into the writable runtime dir (hot-reload edits this copy)
 [group('NATS')]
@@ -17,7 +18,7 @@ _nats-stage-conf:
 	cp "{{ NATS_CONF }}" "{{ NATS_RUNTIME_CONF }}"
 	cp "{{ NATS_USERS }}" "{{ NATS_RUNTIME_USERS }}"
 
-# start a local nats-server (Homebrew / PATH binary). Stop NanoMQ first — both bind :1883.
+# start a local nats-server (Homebrew / PATH binary). MQTT binds :1883.
 [group('NATS')]
 nats-up: _nats-stage-conf
 	#!/usr/bin/env bash
@@ -31,7 +32,7 @@ nats-up: _nats-stage-conf
 		exit 1
 	fi
 	if bash -c 'echo > /dev/tcp/127.0.0.1/1883' 2>/dev/null; then
-		echo 'port 1883 is in use — stop NanoMQ with `just mqtt-down` so NATS MQTT can bind' >&2
+		echo 'port 1883 is in use — free it so NATS MQTT can bind' >&2
 		exit 1
 	fi
 	export NATS_JS_STORE="{{ NATS_STORE }}"
@@ -47,7 +48,7 @@ nats-up: _nats-stage-conf
 	echo 'nats-server did not listen on 4222; see .local/nats/nats-server.log' >&2
 	exit 1
 
-# start NATS with docker (Cursor Cloud / Linux / CI). Stop NanoMQ first — both bind :1883.
+# start NATS with docker (Cursor Cloud / Linux / CI). MQTT binds :1883.
 [group('NATS')]
 nats-up-docker: _nats-stage-conf
 	#!/usr/bin/env bash
@@ -57,7 +58,7 @@ nats-up-docker: _nats-stage-conf
 		exit 0
 	fi
 	if bash -c 'echo > /dev/tcp/127.0.0.1/1883' 2>/dev/null; then
-		echo 'port 1883 is in use — stop NanoMQ with `just mqtt-down-docker` so NATS MQTT can bind' >&2
+		echo 'port 1883 is in use — free it so NATS MQTT can bind' >&2
 		exit 1
 	fi
 	docker run \
@@ -190,6 +191,37 @@ nats-logs-docker:
 [group('NATS')]
 nats-sub *args:
 	bun run ./src/cli/nats-sub.ts {{ if args == '' { NATS_DEFAULT_INSTITUTION } else { args } }}
+
+# render dev and the per-zone test and prod manifests (no cluster required)
+[group('NATS')]
+nats-k8s-build:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	if ! diff -q "{{ NATS_USERS }}" "{{ NATS_K8S }}/overlays/dev/nats-users.conf" >/dev/null; then
+		echo 'infra/kubernetes/overlays/dev/nats-users.conf drifted from infra/nats/nats-users.conf' >&2
+		exit 1
+	fi
+	kubectl kustomize "{{ NATS_K8S }}/overlays/dev" >/dev/null
+	for env in test prod; do
+		for zone in bad stg mnz; do
+			kubectl kustomize "{{ NATS_K8S }}/overlays/${env}/${zone}" >/dev/null
+		done
+	done
+	echo 'kustomize build ok (dev, test/prod × bad/stg/mnz)'
+
+# apply the three-node dev overlay to the current kubecontext
+[group('NATS')]
+nats-k8s-dev:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	kubectl apply -k "{{ NATS_K8S }}/overlays/dev"
+	kubectl -n eventhub-dev rollout status statefulset/nats
+	echo 'NATS nats://127.0.0.1:30422  MQTT mqtt://127.0.0.1:30183  monitor http://127.0.0.1:30822'
+
+# delete the three-node dev overlay
+[group('NATS')]
+nats-k8s-dev-down:
+	kubectl delete -k "{{ NATS_K8S }}/overlays/dev"
 
 # start eventhub-connect (NATS access layer; no ingest env required)
 [group('LOCAL')]

@@ -14,14 +14,13 @@ Local users live in [`infra/nats/nats-users.conf`](../../infra/nats/nats-users.c
 - OPTIONAL `NATS_USER` — default `svc-sidecar`
 - OPTIONAL `NATS_PASSWORD` — default `local` (override via sops in deployed environments)
 
-Ingest dual-writes only when `MQTT_BROKER_URL` is set, as `svc-ingest` / `MQTT_PASSWORD` (default `local`). Unset, ingest stays on Pub/Sub. NanoMQ and NATS both bind `:1883`. Anonymous NATS/MQTT connects are rejected (`no_auth_user` is unset).
+Ingest dual-writes only when `MQTT_BROKER_URL` is set, as `svc-ingest` / `MQTT_PASSWORD` (default `local`). Unset, ingest stays on Pub/Sub. The local broker's MQTT listener is `:1883`. Anonymous connects are rejected (`no_auth_user` is unset).
 
 ## Local NATS (Mac / Homebrew)
 
 ```sh
 brew install nats-server
 brew install nats-io   # optional: `nats` CLI
-just mqtt-down         # if NanoMQ is already on 1883
 just nats-up
 just nats-sub          # one institution (default SWR example URN)
 just nats-sub --all    # inbox.>
@@ -37,13 +36,14 @@ Pin the Homebrew formula when you need a specific server; recipes assume whateve
 Homebrew and Apple `container` are usually missing. Use the official image (same path as CI):
 
 ```sh
-just mqtt-down-docker   # if a hop already holds 1883
 just nats-up-docker
 just nats-sub --all
 just connect
 ```
 
 Image: `nats:2.14.6` with [`infra/nats/nats-dev.conf`](../../infra/nats/nats-dev.conf) (JetStream + MQTT `:1883`, no TLS, users from `nats-users.conf`).
+
+Kubernetes: dev runs three NATS pods in one cluster. Test and prod are one manifest per zone. See [`infra/kubernetes/README.md`](../../infra/kubernetes/README.md) (`just nats-k8s-dev`).
 
 Validate config before reload: `just nats-check`. A broken file is rejected by `just nats-check-invalid` and must not be reloaded onto a running server. After editing `.local/nats/nats-users.conf`, `just nats-reload` (HUP) picks up users without dropping connections. Hash a new password with `just nats-passwd`.
 
@@ -55,7 +55,7 @@ If docker is also missing, download a pinned `nats-server` binary from [nats-io/
 2. In another terminal, publish MQTT QoS 1 as `pub-swr-2026-06-26` / `local` to `inbox/urn:ard:institution:a3004ff924ece1a2` on `mqtt://127.0.0.1:1883`
 3. The NATS subscriber prints the payload
 
-Optional: run ingest with `MQTT_BROKER_URL=mqtt://127.0.0.1:1883` (and NATS up, NanoMQ down) so HTTPS posts land on NATS subjects for `just connect` / `just nats-sub` to see. Ingest publishes as `svc-ingest`.
+Optional: run ingest with `MQTT_BROKER_URL=mqtt://127.0.0.1:1883` and NATS up so HTTPS posts land on NATS subjects for `just connect` / `just nats-sub` to see. Ingest publishes as `svc-ingest`.
 
 ```sh
 just nats-down

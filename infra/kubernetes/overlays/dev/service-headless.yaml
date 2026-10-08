@@ -1,0 +1,27 @@
+# Pod DNS for cluster routes. publishNotReadyAddresses lets the three pods find
+# each other before readiness, which is what forms the JetStream quorum.
+apiVersion: v1
+kind: Service
+metadata:
+  name: nats-headless
+  labels:
+    app.kubernetes.io/name: nats
+    app.kubernetes.io/part-of: eventhub
+    app.kubernetes.io/component: broker
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: nats
+  ports:
+    - name: nats
+      port: 4222
+      targetPort: nats
+      protocol: TCP
+    - name: cluster
+      port: 6222
+      targetPort: cluster
+      protocol: TCP
+    - name: mqtt
+      port: 1883
+      targetPort: mqtt
+      protocol: TCP

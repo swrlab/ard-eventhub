@@ -33,7 +33,7 @@ export const skipUnlessNats = (nc: Awaited<ReturnType<typeof tryConnectSidecar>>
 	if (nc) {
 		return false
 	}
-	const message = 'nats not listening on 4222 with local users — `just mqtt-down` then `just nats-up`'
+	const message = 'nats not listening on 4222 with local users — `just nats-up` or `just nats-up-docker`'
 	if (REQUIRE_NATS) {
 		throw new Error(message)
 	}

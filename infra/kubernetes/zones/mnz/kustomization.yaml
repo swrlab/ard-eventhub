@@ -1,0 +1,19 @@
+# Zone mnz. Apply via overlays/test/mnz or overlays/prod/mnz, not this directory.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+components:
+  - ../../components/zone
+
+patches:
+  - path: zone-patch.yaml
+
+configMapGenerator:
+  - name: nats
+    files:
+      - nats.conf
+
+labels:
+  - pairs:
+      zone: mnz
+    includeSelectors: false

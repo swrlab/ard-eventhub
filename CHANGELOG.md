@@ -15,10 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat: emit `services[].institutionId` and guarantee URN-shaped `id`/`publisherId` on ingest (`externalId`/`type` still populated, now deprecated; `id` or `externalId`+`type` is required)
 - feat: trust optional `MQTT_TLS_CA` (PEM or file path) when connecting to a private mqtts:// hop
 - feat: gate plugins Pub/Sub dispatch with `INGEST_PUBLISH_PLUGINS` (exact string `true`; off otherwise)
-- ci: start NanoMQ in ingest test jobs so `MQTT_BROKER_URL` round-trips against a live hop
+- ci: start NATS in ingest test jobs so `MQTT_BROKER_URL` connects to the gateway
 - feat: NATS-native access layer for eventhub-connect (`src/utils/nats/`, `just connect`) with local JetStream + MQTT gateway
-- ci: separate NATS job (`just nats-up-docker`) so MQTT→NATS inbox translation is required, without colliding with NanoMQ on `:1883`
+- ci: separate NATS job (`just nats-up-docker`) so MQTT→NATS inbox translation is required
 - feat: local NATS auth (RFC §7 users, bcrypt, `allowed_connection_types`, institution-bound ACLs; `just nats-check` / `just nats-reload`)
+- feat: kustomize manifests for NATS (three-node dev cluster; one config per zone for test and prod)
 
 ### Changed
 
@@ -31,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - chore: remove Datadog `dd-trace` (`DD_TRACE_ENABLED` / `DD_TRACER_ENABLED`)
+- chore: remove NanoMQ (local broker, Kubernetes manifest, CI hop)
 
 ## [3.0.0-beta.1] - 2026-08-10
 
