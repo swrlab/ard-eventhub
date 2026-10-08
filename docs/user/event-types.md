@@ -19,7 +19,7 @@ Ein Paar aus `next` und `playing` Events sollte eine Referenz zueinander haben (
 
 ## Eventhub Connect (MQTT only)
 
-Die folgenden Event-Klassen sind für **Eventhub Connect** vorgesehen und werden **nicht** über `POST /events/{eventName}` angenommen. Ein Request mit diesen Namen antwortet mit HTTP 400. Sie gelten erst auf dem künftigen MQTT-Pfad, mit URN-only `services[]` (`id`, `publisherId` und `institutionId` als `urn:ard:…`). Beide Klassen nutzen `start` (ISO8601), nicht `time`.
+Die folgenden Event-Klassen sind für **Eventhub Connect** vorgesehen und werden über `POST /events/{eventName}` mit HTTP 400 abgelehnt. Sie laufen über MQTT, mit URN-only `services[]` (`id`, `publisherId` und `institutionId` als `urn:ard:…`). Track-Events auf MQTT nutzen dieselbe Form. Beide Klassen nutzen `start` (ISO8601). Wohin publiziert wird, steht unter [_Topics_](./topics), die Verbindung unter [_Migration auf MQTT_](./connect-migration).
 
 Die vollständige Spezifikation steht im [Eventhub v3 Connect RFC](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#13-new-event-schemas). MQTT-Kanäle werden in der [Events-Referenz](/events) (AsyncAPI) dargestellt.
 

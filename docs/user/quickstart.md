@@ -5,7 +5,7 @@ sidebar:
   order: 1
 ---
 
-Dieser Leitfaden hilft dir beim Start in den ARD Eventhub.
+Dieser Leitfaden hilft dir beim Start über die HTTPS-API. Neue Anbindungen und die Umstellung laufender Publisher laufen über MQTT: [_Migration auf MQTT_](./connect-migration). Der HTTPS-Ingest auf dieser Seite bleibt nur für die Migrationsphase.
 
 Egal, ob du Publisher oder Subscriber bist: Du benötigst ein Benutzerkonto, um mit der API zu interagieren. Fordere ein Konto über deinen Ansprechpartner beim SWR Audio Lab oder ARD Online an.
 
