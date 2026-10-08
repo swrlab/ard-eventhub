@@ -1,9 +1,9 @@
 /**
  * Live-tail limits (RFC §14.4).
- * Idle is human presence: the page sends a beat from a click, key, scroll, or a visibility
- * change to visible. It must not send a timer keepalive. A hidden tab stops beating.
+ * Idle is human presence: a click, key, scroll, or a return to a visible tab.
+ * The page must not send a timer keepalive on the NATS socket. A hidden tab stops counting.
  * The 30 minute cap closes the socket even when someone is still interacting.
- * Stats stay on HTTP, so this socket is never required for the boards.
+ * Stats stay on HTTP. The tail is a NATS WebSocket the browser opens itself.
  */
 
 /** How often the boards poll. Independent of the tail socket. */
@@ -15,28 +15,13 @@ export const TAIL_IDLE_MS = 2 * 60 * 1000
 /** Close a tail this long after open, even if the operator is still there. */
 export const TAIL_CAP_MS = 30 * 60 * 1000
 
-/** Concurrent tails this process will hold. A forgotten tab must not multiply fan-out. */
-export const TAIL_MAX_CONCURRENT = 8
-
 /** Forwarded frames per tail per second. The rest are dropped and marked sampled. */
 export const TAIL_MAX_PER_SECOND = 20
 
 /** Narrower than `radio.>`. Cyclic `radio.data` must not be the default. */
 export const DEFAULT_TAIL_FILTER = 'radio.*.track.playing'
 
-const FILTER_RE = /^(radio|inbox|feedback|plugin)(\.[A-Za-z0-9_:*.>-]+)?$/
-
-export type TailCloseReason = 'idle' | 'cap' | 'limit' | 'client' | 'nats' | 'denied'
-
-/** WebSocket close codes. The UI reads the JSON frame, not only this code. */
-export const TAIL_CLOSE_CODE: Record<TailCloseReason, number> = {
-	idle: 4000,
-	cap: 4001,
-	limit: 4002,
-	client: 1000,
-	nats: 4003,
-	denied: 4004,
-}
+export type TailCloseReason = 'idle' | 'cap' | 'client' | 'nats' | 'denied'
 
 export type TailClock = {
 	openedAt: number
@@ -73,8 +58,6 @@ export const tailCloseMessage = (reason: TailCloseReason): string => {
 			return 'live tail stopped after 2 minutes with no one watching'
 		case 'cap':
 			return 'live tail stopped after 30 minutes, resume'
-		case 'limit':
-			return 'live tail refused, too many tails are open'
 		case 'client':
 			return 'live tail closed'
 		case 'nats':
@@ -104,23 +87,19 @@ export const admitTailEvent = (
 	return { rate: next, forward: true, sampled: next.dropped > 0 }
 }
 
-/**
- * Whether another tail may open.
- * @param open - Tails already admitted on this process
- * @returns True when under the cap
- */
-export const tailSlotFree = (open: number): boolean => open < TAIL_MAX_CONCURRENT
+const RADIO_FILTER_RE = /^radio(\.[A-Za-z0-9_:*.>-]+)?$/
 
 /**
- * Parse a tail subject filter. Blank becomes the default. System subjects are rejected.
+ * Parse a tail subject filter. Blank becomes the default.
+ * The browser user may only subscribe to verified `radio.>` events.
  * @param raw - Query value, or null
  * @returns The filter, or an error sentence
  */
 export const parseTailFilter = (raw: string | null): { ok: true; filter: string } | { ok: false; error: string } => {
 	const filter = raw?.trim() ? raw.trim() : DEFAULT_TAIL_FILTER
 	if (filter.length > 256) return { ok: false, error: 'filter is too long' }
-	if (!FILTER_RE.test(filter)) {
-		return { ok: false, error: 'filter must start with radio, inbox, feedback, or plugin' }
+	if (!RADIO_FILTER_RE.test(filter)) {
+		return { ok: false, error: 'filter must be a radio subject' }
 	}
 	return { ok: true, filter }
 }

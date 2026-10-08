@@ -3,10 +3,11 @@ import process from 'node:process'
 import { logger } from '@frytg/logger'
 import { natsAccess } from '../utils/nats/_client.ts'
 import { ensureStreams } from '../utils/nats/ensure-streams.ts'
+import { startArdFeed, stopArdFeed } from './ard-feed-loader.ts'
 import { natsPassword, natsUrl, natsUser } from './env.ts'
 import { natsMonitorUrl, uiHost, uiPort, useHmr } from './ui/env.ts'
-import { app, websocket } from './ui/server.ts'
-import { bindConnection, stopTail, unbindConnection } from './ui/session.ts'
+import { app } from './ui/server.ts'
+import { bindConnection, unbindConnection } from './ui/session.ts'
 
 const source = 'connect'
 
@@ -30,8 +31,6 @@ export default {
 	hostname: uiHost,
 	port: uiPort,
 	fetch: app.fetch,
-	idleTimeout: 255,
-	websocket,
 }
 
 /**
@@ -52,7 +51,8 @@ const keepBroker = async (): Promise<void> => {
 	const shutdown = (): void => {
 		if (stopped) return
 		stopped = true
-		stopTail()
+		unbindConnection()
+		stopArdFeed()
 		if (nc) void natsAccess.drain(nc)
 		process.exit(0)
 	}
@@ -70,6 +70,7 @@ const keepBroker = async (): Promise<void> => {
 			nc = next
 			const streams = await ensureStreams(next)
 			bindConnection(next)
+			await startArdFeed(next)
 			logger.info({
 				message: 'nats ready',
 				source,
@@ -84,6 +85,7 @@ const keepBroker = async (): Promise<void> => {
 				data: { natsUrl },
 			})
 		}
+		stopArdFeed()
 		unbindConnection()
 		if (nc) {
 			const dying = nc

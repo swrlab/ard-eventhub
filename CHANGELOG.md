@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat: NATS-native access layer for eventhub-connect (`src/utils/nats/`, `just connect`) with local JetStream + MQTT gateway
 - ci: separate NATS job (`just nats-up-docker`) so MQTT→NATS inbox translation is required
 - feat: local NATS auth (RFC §7 users, bcrypt, `allowed_connection_types`, institution-bound ACLs; `just nats-check` / `just nats-reload`)
-- feat: kustomize manifests for NATS (three-node dev cluster; one config per zone for test and prod)
+- feat: pull the ARD core feed (`ARD_FEED_URL`) hourly into JetStream KV, keeping the last good snapshot when the fetch fails
 
 ### Changed
 

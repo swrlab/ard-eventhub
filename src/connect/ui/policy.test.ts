@@ -42,6 +42,8 @@ test('tail filter defaults narrow and rejects a full wildcard or system subject'
 	assertEquals(parseTailFilter(null), { ok: true, filter: DEFAULT_TAIL_FILTER })
 	assertEquals(parseTailFilter('  '), { ok: true, filter: DEFAULT_TAIL_FILTER })
 	assertEquals(parseTailFilter('radio.>'), { ok: true, filter: 'radio.>' })
+	assertEquals(parseTailFilter('feedback.>').ok, false)
+	assertEquals(parseTailFilter('inbox.>').ok, false)
 	assertEquals(parseTailFilter('>').ok, false)
 	assertEquals(parseTailFilter('$SYS.>').ok, false)
 })

@@ -33,6 +33,7 @@
 		"@google-cloud/pubsub": "^6.2.0",
 		"@hono/bun": "^1.0.1",
 		"@nats-io/jetstream": "^3.4.0",
+		"@nats-io/nats-core": "^3.4.0",
 		"@nats-io/transport-node": "^3.4.0",
 		"@swrlab/utils": "^2.2.0",
 		"firebase-admin": "^14.5.0",

@@ -1,14 +1,17 @@
 /** JSON shapes the operator UI polls. The live tail is a separate socket. */
 
+export type { FeedReport } from '../ard-feed.ts'
+
 export type MetaReport = {
 	pollMs: number
 	tailIdleMs: number
 	tailCapMs: number
-	tailMax: number
 	tailPerSecond: number
 	defaultFilter: string
 	monitor: string
 	natsUrl: string
+	/** WebSocket listener the tail opens. The username is hardcoded in the page. */
+	wsUrl: string
 	user: string
 }
 

@@ -1,6 +1,12 @@
 <script setup lang="ts">
+import type { NatsConnection, Subscription } from '@nats-io/nats-core'
+import type { RateWindow } from '../../../src/connect/ui/policy.ts'
+import type { MetaReport } from '../../../src/connect/ui/types.ts'
+import { wsconnect } from '@nats-io/nats-core'
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { LOCAL_NATS_USERS } from '../../../src/connect/dev-users.ts'
+import { admitTailEvent, evaluateTail, parseTailFilter, tailCloseMessage } from '../../../src/connect/ui/policy.ts'
 import { formatClock } from '../format'
 import { tailPhase } from '../tail-state'
 
@@ -11,26 +17,32 @@ type TailEvent = {
 	sampled: boolean
 }
 
-const FILTER_RE = /^(radio|inbox|feedback|plugin)(\.[A-Za-z0-9_:*.>-]+)?$/
-const DEFAULT_FILTER = 'radio.*.track.playing'
+/** Read-only browser user. Publish still requires a username and password. */
+const UI_NATS_USER = LOCAL_NATS_USERS.subUi
 
 const presets = [
 	{ label: 'track.playing', filter: 'radio.*.track.playing' },
 	{ label: 'track.next', filter: 'radio.*.track.next' },
 	{ label: 'control', filter: 'radio.*.control' },
 	{ label: 'data', filter: 'radio.*.data' },
-	{ label: 'feedback', filter: 'feedback.>' },
+	{ label: 'radio', filter: 'radio.>' },
 ]
 
 const route = useRoute()
 const router = useRouter()
-const filter = ref(typeof route.query.filter === 'string' ? route.query.filter : DEFAULT_FILTER)
+const filter = ref(typeof route.query.filter === 'string' ? route.query.filter : 'radio.*.track.playing')
 const closeMessage = ref<string | null>(null)
+const connecting = ref(false)
 const events = ref<TailEvent[]>([])
 const dropped = ref(0)
 const copied = ref<number | null>(null)
-let socket: WebSocket | null = null
+
+let nc: NatsConnection | null = null
+let sub: Subscription | null = null
+let timer: ReturnType<typeof setInterval> | null = null
+let openedAt = 0
 let lastBeat = 0
+let rate: RateWindow = { windowStart: 0, forwarded: 0, dropped: 0 }
 let session = 0
 
 const wide = computed(() => filter.value.trim().endsWith('>'))
@@ -43,6 +55,9 @@ watch(
 	}
 )
 
+/**
+ * Stop counting presence. A hidden tab must not keep the tail open.
+ */
 const detachInput = (): void => {
 	window.removeEventListener('pointerdown', onActivity)
 	window.removeEventListener('keydown', onActivity)
@@ -50,105 +65,194 @@ const detachInput = (): void => {
 	document.removeEventListener('visibilitychange', onVisibility)
 }
 
+/**
+ * Record that someone is at the page. This does not send a NATS keepalive.
+ */
 const onActivity = (): void => {
-	if (!socket || socket.readyState !== WebSocket.OPEN || document.hidden) return
-	const now = Date.now()
-	if (now - lastBeat < 5_000) return
-	lastBeat = now
-	socket.send(JSON.stringify({ type: 'beat' }))
+	if (!nc || nc.isClosed() || document.hidden) return
+	lastBeat = Date.now()
 }
 
+/**
+ * A tab becoming visible counts as presence. Hiding it does not.
+ */
 const onVisibility = (): void => {
 	if (document.visibilityState !== 'visible') return
-	lastBeat = 0
 	onActivity()
 }
 
+/**
+ * Close the NATS socket. Idle and the 30 minute cap are checked locally.
+ */
 const stop = (): void => {
 	session += 1
 	detachInput()
-	socket?.close(1000, 'client')
-	socket = null
+	if (timer) clearInterval(timer)
+	timer = null
+	sub?.unsubscribe()
+	sub = null
+	const closing = nc
+	nc = null
+	if (closing && !closing.isClosed()) void closing.close()
 	tailPhase.value = 'closed'
 }
 
+/**
+ * Sentence for a NATS error status. Permission failures name the user limit.
+ * @param error - Status error
+ * @returns Operator-facing sentence
+ */
+const statusMessage = (error: Error): string => {
+	if (error.message.includes('Permissions')) return tailCloseMessage('denied')
+	return tailCloseMessage('nats')
+}
+
+/**
+ * Open a NATS WebSocket subscription. The username is fixed. There is no password.
+ */
 const watchTail = async (): Promise<void> => {
-	const next = filter.value.trim() || DEFAULT_FILTER
-	filter.value = next
-	if (!FILTER_RE.test(next)) {
-		closeMessage.value = 'filter must start with radio, inbox, feedback, or plugin'
+	const parsed = parseTailFilter(filter.value)
+	if (!parsed.ok) {
+		closeMessage.value = parsed.error
 		return
 	}
+	filter.value = parsed.filter
 	stop()
 	const generation = session
 	closeMessage.value = null
 	events.value = []
 	dropped.value = 0
-	await router.replace({ query: { filter: next } })
+	await router.replace({ query: { filter: parsed.filter } })
 	if (generation !== session) return
-	const url = new URL('/api/tail', window.location.href)
-	url.protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-	url.searchParams.set('filter', next)
-	const opened = new WebSocket(url)
-	socket = opened
-	opened.addEventListener('open', () => {
+	let wsUrl = ''
+	try {
+		const response = await fetch('/api/meta')
+		if (!response.ok) throw new Error('meta unavailable')
+		const meta = (await response.json()) as MetaReport
+		wsUrl = meta.wsUrl
+	} catch {
+		closeMessage.value = tailCloseMessage('nats')
+		return
+	}
+	if (generation !== session || !wsUrl) {
+		if (generation === session) closeMessage.value = tailCloseMessage('nats')
+		return
+	}
+	try {
+		connecting.value = true
+		const opened = await wsconnect({
+			servers: wsUrl,
+			user: UI_NATS_USER,
+			pass: '',
+			reconnect: false,
+			timeout: 5_000,
+			name: 'eventhub-ui',
+		})
+		connecting.value = false
 		if (generation !== session) {
-			opened.close()
+			await opened.close()
 			return
 		}
+		nc = opened
+		openedAt = Date.now()
+		lastBeat = openedAt
+		rate = { windowStart: openedAt, forwarded: 0, dropped: 0 }
 		tailPhase.value = 'live'
-		lastBeat = Date.now()
 		window.addEventListener('pointerdown', onActivity)
 		window.addEventListener('keydown', onActivity)
 		window.addEventListener('scroll', onActivity, true)
 		document.addEventListener('visibilitychange', onVisibility)
-	})
-	opened.addEventListener('message', (event) => {
-		if (typeof event.data !== 'string') return
-		let body: unknown
-		try {
-			body = JSON.parse(event.data) as unknown
-		} catch {
-			return
+		timer = setInterval(() => {
+			if (generation !== session) return
+			const reason = evaluateTail({ openedAt, lastBeatAt: lastBeat }, Date.now())
+			if (!reason) return
+			closeMessage.value = tailCloseMessage(reason)
+			stop()
+		}, 1000)
+		void (async () => {
+			for await (const status of opened.status()) {
+				if (generation !== session) return
+				if (status.type === 'error') {
+					closeMessage.value = statusMessage(status.error)
+					stop()
+					return
+				}
+				if (status.type === 'disconnect' || status.type === 'close') {
+					if (!closeMessage.value) closeMessage.value = tailCloseMessage('nats')
+					stop()
+					return
+				}
+			}
+		})()
+		const subscription = opened.subscribe(parsed.filter)
+		sub = subscription
+		for await (const msg of subscription) {
+			if (generation !== session) return
+			const now = Date.now()
+			const decision = admitTailEvent(rate, now)
+			rate = decision.rate
+			if (!decision.forward) {
+				dropped.value = decision.rate.dropped
+				tailPhase.value = 'sampled'
+				continue
+			}
+			const text = msg.string()
+			let payload: unknown = text
+			if (msg.data.byteLength > 65_536) payload = { truncated: true, bytes: msg.data.byteLength }
+			else {
+				try {
+					payload = JSON.parse(text) as unknown
+				} catch {
+					payload = text
+				}
+			}
+			events.value.unshift({
+				subject: msg.subject,
+				at: new Date().toISOString(),
+				payload,
+				sampled: decision.sampled,
+			})
+			if (events.value.length > 200) events.value.pop()
+			if (decision.sampled) tailPhase.value = 'sampled'
 		}
-		if (typeof body !== 'object' || body === null || !('type' in body)) return
-		if (body.type === 'close' && 'message' in body && typeof body.message === 'string') {
-			closeMessage.value = body.message
-			return
+		if (generation === session) {
+			if (!closeMessage.value) closeMessage.value = tailCloseMessage('nats')
+			stop()
 		}
-		if (body.type === 'sampled' && 'dropped' in body && typeof body.dropped === 'number') {
-			dropped.value = body.dropped
-			tailPhase.value = 'sampled'
-			return
-		}
-		if (body.type !== 'event' || !('subject' in body) || typeof body.subject !== 'string') return
-		const at = 'at' in body && typeof body.at === 'string' ? body.at : new Date().toISOString()
-		const sampled = 'sampled' in body && body.sampled === true
-		events.value.unshift({ subject: body.subject, at, payload: 'payload' in body ? body.payload : null, sampled })
-		if (events.value.length > 200) events.value.pop()
-		if (sampled) tailPhase.value = 'sampled'
-	})
-	opened.addEventListener('close', () => {
+	} catch {
+		connecting.value = false
 		if (generation !== session) return
-		detachInput()
-		socket = null
-		tailPhase.value = 'closed'
-		if (!closeMessage.value) closeMessage.value = 'live tail closed'
-	})
+		if (!closeMessage.value) closeMessage.value = tailCloseMessage('nats')
+		stop()
+	}
 }
 
+/**
+ * Apply a preset subject and close a live tail so the next watch uses it.
+ * @param value - Subject filter
+ */
 const usePreset = (value: string): void => {
 	filter.value = value
 	if (live.value) stop()
 	void router.replace({ query: { filter: value } })
 }
 
+/**
+ * Copy one frame's payload.
+ * @param payload - Frame body
+ * @param index - Row index, used to show which copy succeeded
+ */
 const copyPayload = async (payload: unknown, index: number): Promise<void> => {
 	const text = typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2)
 	await navigator.clipboard.writeText(text)
 	copied.value = index
 }
 
+/**
+ * Pretty-print a frame body.
+ * @param payload - Frame body
+ * @returns Text for the row
+ */
 const pretty = (payload: unknown): string => (typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2))
 
 onUnmounted(stop)
@@ -159,8 +263,8 @@ onUnmounted(stop)
 		<header class="mb-4 max-w-3xl">
 			<h1 class="text-xl text-heading">tail</h1>
 			<p class="mt-1 text-sm text-muted/80">
-				Opens only when you ask. A click, key, or scroll keeps it. A hidden tab does not. It stops after 2 minutes idle
-				and after 30 minutes anyway.
+				Opens a NATS WebSocket as sub-ui. No password. A click, key, or scroll keeps it. A hidden tab does not. It stops
+				after 2 minutes idle and after 30 minutes anyway.
 			</p>
 		</header>
 		<form class="mb-3 flex flex-wrap items-end gap-3" @submit.prevent="watchTail">
@@ -168,7 +272,9 @@ onUnmounted(stop)
 				filter
 				<input v-model="filter" class="field w-full" spellcheck="false" />
 			</label>
-			<button type="submit" class="press">{{ live ? 'restart' : closeMessage ? 'resume' : 'watch' }}</button>
+			<button type="submit" class="press">
+				{{ connecting ? 'connecting' : live ? 'restart' : closeMessage ? 'resume' : 'watch' }}
+			</button>
 			<button v-if="live" type="button" class="press" @click="stop">stop</button>
 		</form>
 		<div class="mb-4 flex flex-wrap gap-2">

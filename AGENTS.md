@@ -11,7 +11,7 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 - **Install tools:** [mise](https://mise.jdx.dev) → `mise install` (pins `just` + `sops` in [`mise.toml`](mise.toml))
 - **Install dependencies:** `bun install`
 - **Start ingest service:** `just ingest` (hot reload, sops env)
-- **Start connect (NATS access + operator UI):** `just dev` (needs local NATS: `just nats-up` or `just nats-up-docker`; local user `svc-sidecar` / `local`). UI at http://127.0.0.1:4173 after `just ui-build`. Vite HMR: `USE_HMR=true just dev` and `just ui`. Dev cluster: `NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just dev`
+- **Start connect (NATS access + operator UI):** `just dev` (needs local NATS: `just nats-up` or `just nats-up-docker`; local user `svc-sidecar` / `local`). UI at http://127.0.0.1:4173 after `just ui-build`. Vite HMR: `USE_HMR=true just dev` and `just ui`. Dev cluster: `NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just dev`. When `ARD_FEED_URL` is set, connect pulls it hourly into JetStream KV `KV_ARD_FEED`.
 - **Run tests:** `just test`
 - **Hurl API suite:** `just integration` (needs running ingest + `hurl`)
 - **Lint code:** `just lint` (uses Oxlint)

@@ -6,13 +6,16 @@ There is no validation sidecar yet (RFC step 10). `just dev` opens a connection,
 
 Do not put `NATS_URL` on the ingest env module. Connect reads its own vars from [`env.ts`](env.ts).
 
-Users live in [`components/users/nats-users.conf`](../../infra/kubernetes/components/users/nats-users.conf) (RFC §7). [`infra/nats/nats-users.conf`](../../infra/nats/nats-users.conf) is a symlink to that file. It holds one bcrypt hash (`$DEV_PW`) of the well-known password `local` (not a secret). Rotate by issuing a new `pub-{label}-{date}` user, then `just nats-reload`. Hash a password with `just nats-passwd`.
+Users live in [`components/users/nats-users.conf`](../../infra/kubernetes/components/users/nats-users.conf) (RFC §7). [`infra/nats/nats-users.conf`](../../infra/nats/nats-users.conf) is a symlink to that file. Publishers and services share one bcrypt hash (`$DEV_PW`) of the well-known password `local` (not a secret). `sub-ui` has no password. Rotate a publisher by issuing a new `pub-{label}-{date}` user, then `just nats-reload`. Hash a password with `just nats-passwd`.
 
 ## Environment
 
 - OPTIONAL `NATS_URL` — default `nats://127.0.0.1:4222`
 - OPTIONAL `NATS_USER` — default `svc-sidecar`
 - OPTIONAL `NATS_PASSWORD` — default `local` (override via sops in deployed environments)
+- OPTIONAL `ARD_FEED_URL` — ARD core livestream feed. `just env` injects it from sops. Connect fetches it on startup and then hourly, validates it, and writes the document to the JetStream bucket `KV_ARD_FEED` (subject `$KV.ARD_FEED.livestreams`). A failed fetch, a malformed body, a dropped institution count, or a `generatedAt` that is not newer leaves the previous revision serving. The age of the last successful fetch is on `/api/feed` and in the UI header (`warn` at 3h, `alert` at 12h, `page` at 48h). Unset, the process still starts and serves the last KV or disk copy, or `src/connect/bootstrap/ard-feed.json.gz` when both are empty.
+
+`svc-sidecar` publishes `$KV.ARD_FEED.>`. A cluster that is already running needs that users file reapplied (`just nats-reload` locally, or a config reload on the dev cluster) before the first write succeeds. Run one connect process as the fetcher. The RFC CronJob replaces this loop later.
 
 Ingest dual-writes only when `MQTT_BROKER_URL` is set, as `svc-ingest` / `MQTT_PASSWORD` (default `local`). Unset, ingest stays on Pub/Sub. The local broker's MQTT listener is `:1883`. Anonymous connects are rejected (`no_auth_user` is unset).
 
@@ -32,7 +35,7 @@ Monitor: `http://127.0.0.1:8222`. Optional CLI: `nats stream ls`, `nats sub 'inb
 
 ## Operator UI
 
-The same process serves the boards. Stats are plain HTTP, polled every 8 seconds. The live tail is the only WebSocket, and it is not a monitoring feed. Vite writes `static/dist` (manifest plus hashed assets), and connect serves that the way a built frontend is served: `/static/*` from the repo root, and every other GET returns the HTML shell.
+The same process serves the boards. Stats are plain HTTP, polled every 8 seconds. The live tail is not that process: the page opens a NATS WebSocket (`ws://` port 8080, or `NATS_WS_URL`) as `sub-ui` with no password and subscribes to `radio.>`. Publishing still requires a username and password. Vite writes `static/dist` (manifest plus hashed assets), and connect serves that the way a built frontend is served: `/static/*` from the repo root, and every other GET returns the HTML shell.
 
 ```sh
 just ui-build
@@ -48,7 +51,7 @@ Dev cluster (three pods behind one monitor URL):
 NATS_MONITOR_URL=http://leno0:8222 NATS_URL=nats://leno0:4222 just dev
 ```
 
-The process connects as `NATS_USER` (default `svc-sidecar`), the same login that ensures streams. `svc-operator` can subscribe to `radio.>` and `feedback.>`; it is in the repo users file, and a cluster that is already running needs that file reapplied before the user exists. Set `NATS_USER=svc-operator` when the tail should subscribe. Cluster and connection stats use the HTTP monitor and do not need that login. The UI never sends the password to the browser.
+The process connects as `NATS_USER` (default `svc-sidecar`), the same login that ensures streams. Cluster and connection stats use the HTTP monitor. The tail does not use that login. The page connects as `sub-ui` with no password, WebSocket only, and may subscribe to `radio.>` only. A cluster that is already running needs the users file and the `websocket` listener reapplied before that works. The UI never sends a password to the browser.
 
 Panels:
 
@@ -56,7 +59,7 @@ Panels:
 - **Connections.** Users from `NATS_USERS_CONF` (default `infra/kubernetes/components/users/nats-users.conf`) plus `/connz`. Usernames and allow-lists only.
 - **Rejections.** Retained `feedback.>` plus what arrived while this process was up. `?institution=` filters one house.
 - **Cluster.** `/varz`, `/connz`, `/jsz`, sampled until each node behind the monitor URL has answered.
-- **Tail.** Default filter `radio.*.track.playing`. Closes after 2 minutes with no presence beat, and after 30 minutes even if someone is still there. At most 8 tails on this process. Over 20 frames/s the tail drops and shows `sampled`. Reopening is a click.
+- **Tail.** Default filter `radio.*.track.playing`. The browser opens NATS WebSocket as `sub-ui` (no password) and subscribes itself. Closes after 2 minutes with no click, key, or scroll, and after 30 minutes even if someone is still there. Over 20 frames/s the page drops frames and shows `sampled`. Reopening is a click.
 
 `UI_HOST` (default `0.0.0.0`), `UI_PORT` (default `4173`). `UI_ALLOW_CIDR` is a comma-separated source list checked against the socket address. Empty allows every peer, which is the local default. Set it when the UI is reachable on a shared network.
 

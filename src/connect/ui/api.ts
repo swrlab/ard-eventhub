@@ -1,19 +1,13 @@
 import type { ClusterReport, ConnectionsReport, LiveConnection, MetaReport } from './types.ts'
 import { readFileSync } from 'node:fs'
 import { Hono } from 'hono'
+import { feedReport, feedState } from '../ard-feed.ts'
 import { natsUrl, natsUser } from '../env.ts'
 import { sampleMonitor } from './cluster.ts'
-import { natsMonitorUrl, usersConfPath } from './env.ts'
+import { natsMonitorUrl, natsWsUrl, usersConfPath } from './env.ts'
 import { errorMessage } from './json.ts'
 import { foldOnAir } from './on-air.ts'
-import {
-	DEFAULT_TAIL_FILTER,
-	STATS_POLL_MS,
-	TAIL_CAP_MS,
-	TAIL_IDLE_MS,
-	TAIL_MAX_CONCURRENT,
-	TAIL_MAX_PER_SECOND,
-} from './policy.ts'
+import { DEFAULT_TAIL_FILTER, STATS_POLL_MS, TAIL_CAP_MS, TAIL_IDLE_MS, TAIL_MAX_PER_SECOND } from './policy.ts'
 import { filterRejections, mergeRejections, parseRejection } from './rejections.ts'
 import { readRetained } from './retained.ts'
 import { currentConnection, rejectionLog } from './session.ts'
@@ -31,11 +25,11 @@ const meta = (): MetaReport => ({
 	pollMs: STATS_POLL_MS,
 	tailIdleMs: TAIL_IDLE_MS,
 	tailCapMs: TAIL_CAP_MS,
-	tailMax: TAIL_MAX_CONCURRENT,
 	tailPerSecond: TAIL_MAX_PER_SECOND,
 	defaultFilter: DEFAULT_TAIL_FILTER,
 	monitor: natsMonitorUrl,
 	natsUrl,
+	wsUrl: natsWsUrl,
 	user: natsUser,
 })
 
@@ -65,6 +59,8 @@ const loadMonitor = async (): Promise<{ cluster: ClusterReport; connections: Liv
 }
 
 api.get('/meta', (c) => c.json(meta()))
+
+api.get('/feed', (c) => c.json(feedReport(feedState)))
 
 api.get('/cluster', async (c) => c.json((await loadMonitor()).cluster))
 
