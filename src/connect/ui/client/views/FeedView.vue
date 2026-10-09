@@ -42,13 +42,13 @@ const publisherLabel = (entry: KnownLivestream): string => entry.publisher.title
 const origin = (entry: KnownLivestream): string => (entry.overlay ? 'overlay' : 'feed')
 
 /**
- * Tail for one livestream. The subject token is the livestream URN (`externalId` on a feed row).
+ * Tail for one livestream. The topic token is the livestream URN (`externalId` on a feed row).
  * @param entry - Catalog row
  * @returns Route to the live tail
  */
 const tailTo = (entry: KnownLivestream): { name: string; query: { filter: string } } => ({
 	name: 'tail',
-	query: { filter: `radio.${entry.id}.>` },
+	query: { filter: `radio/${entry.id}/#` },
 })
 </script>
 

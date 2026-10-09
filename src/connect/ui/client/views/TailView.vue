@@ -4,7 +4,8 @@ import type { MetaReport, RateWindow, TailEvent } from '#types'
 import { wsconnect } from '@nats-io/nats-core'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { admitTailEvent, evaluateTail, parseTailFilter, tailCloseMessage } from '../../policy.ts'
+import { natsSubjectToMqttTopic } from '../../../../utils/nats/subjects.ts'
+import { DEFAULT_TAIL_FILTER, admitTailEvent, evaluateTail, parseTailFilter, tailCloseMessage } from '../../policy.ts'
 import { formatClock } from '../format'
 import { tailPhase } from '../tail-state'
 
@@ -12,16 +13,16 @@ import { tailPhase } from '../tail-state'
 const UI_NATS_USER = 'sub-ui'
 
 const presets = [
-	{ label: 'track.playing', filter: 'radio.*.track.playing' },
-	{ label: 'track.next', filter: 'radio.*.track.next' },
-	{ label: 'control', filter: 'radio.*.control' },
-	{ label: 'data', filter: 'radio.*.data' },
-	{ label: 'radio', filter: 'radio.>' },
+	{ label: 'track.playing', filter: 'radio/+/track/playing' },
+	{ label: 'track.next', filter: 'radio/+/track/next' },
+	{ label: 'control', filter: 'radio/+/control' },
+	{ label: 'data', filter: 'radio/+/data' },
+	{ label: 'radio', filter: 'radio/#' },
 ]
 
 const route = useRoute()
 const router = useRouter()
-const filter = ref(typeof route.query.filter === 'string' ? route.query.filter : 'radio.*.track.playing')
+const filter = ref(typeof route.query.filter === 'string' ? route.query.filter : DEFAULT_TAIL_FILTER)
 const closeMessage = ref<string | null>(null)
 const connecting = ref(false)
 const events = ref<TailEvent[]>([])
@@ -36,7 +37,9 @@ let lastBeat = 0
 let rate: RateWindow = { windowStart: 0, forwarded: 0, dropped: 0 }
 let session = 0
 
-const wide = computed(() => filter.value.trim().endsWith('>'))
+const parsedFilter = computed(() => parseTailFilter(filter.value))
+const natsSubject = computed(() => (parsedFilter.value.ok ? parsedFilter.value.subject : ''))
+const wide = computed(() => parsedFilter.value.ok && parsedFilter.value.subject.endsWith('>'))
 const live = computed(() => tailPhase.value === 'live' || tailPhase.value === 'sampled')
 
 watch(
@@ -107,13 +110,13 @@ const watchTail = async (): Promise<void> => {
 		closeMessage.value = parsed.error
 		return
 	}
-	filter.value = parsed.filter
+	filter.value = parsed.topic
 	stop()
 	const generation = session
 	closeMessage.value = null
 	events.value = []
 	dropped.value = 0
-	await router.replace({ query: { filter: parsed.filter } })
+	await router.replace({ query: { filter: parsed.topic } })
 	if (generation !== session) return
 	let wsUrl = ''
 	try {
@@ -175,7 +178,7 @@ const watchTail = async (): Promise<void> => {
 				}
 			}
 		})()
-		const subscription = opened.subscribe(parsed.filter)
+		const subscription = opened.subscribe(parsed.subject)
 		sub = subscription
 		for await (const msg of subscription) {
 			if (generation !== session) return
@@ -219,8 +222,8 @@ const watchTail = async (): Promise<void> => {
 }
 
 /**
- * Apply a preset subject and close a live tail so the next watch uses it.
- * @param value - Subject filter
+ * Apply a preset MQTT topic and close a live tail so the next watch uses it.
+ * @param value - MQTT topic filter
  */
 const usePreset = (value: string): void => {
 	filter.value = value
@@ -262,16 +265,19 @@ onUnmounted(stop)
 				Ein Tab im Hintergrund zählt nicht. Nach 2 Minuten ohne Aktivität ist Schluss, spätestens nach 30 Minuten.
 			</p>
 		</header>
-		<form class="mb-3 flex flex-wrap items-end gap-3" @submit.prevent="watchTail">
-			<label class="flex min-w-0 flex-1 flex-col gap-1 text-sm text-muted/80">
-				filter
-				<input v-model="filter" class="field w-full" spellcheck="false" />
-			</label>
-			<button type="submit" class="press">
-				{{ connecting ? 'connecting' : live ? 'restart' : closeMessage ? 'resume' : 'watch' }}
-			</button>
-			<button v-if="live" type="button" class="press" @click="stop">stop</button>
-		</form>
+		<div class="mb-3">
+			<form class="flex flex-wrap items-end gap-3" @submit.prevent="watchTail">
+				<label class="flex min-w-0 flex-1 flex-col gap-1 text-sm text-muted/80">
+					filter
+					<input v-model="filter" class="field w-full" spellcheck="false" />
+				</label>
+				<button type="submit" class="press">
+					{{ connecting ? 'connecting' : live ? 'restart' : closeMessage ? 'resume' : 'watch' }}
+				</button>
+				<button v-if="live" type="button" class="press" @click="stop">stop</button>
+			</form>
+			<p v-if="natsSubject" class="mt-1 font-mono text-xs text-muted/70">{{ natsSubject }}</p>
+		</div>
 		<div class="mb-4 flex flex-wrap gap-2">
 			<button
 				v-for="preset in presets"
@@ -297,7 +303,7 @@ onUnmounted(stop)
 				<div class="mb-1 flex items-baseline justify-between gap-3">
 					<p class="font-mono text-xs text-muted/80">
 						<span>{{ formatClock(item.at) }}</span>
-						<span class="text-heading"> {{ item.subject }}</span>
+						<span class="text-heading"> {{ natsSubjectToMqttTopic(item.subject) }}</span>
 						<span v-if="item.sampled" class="text-warning"> sampled</span>
 					</p>
 					<button type="button" class="press" @click="copyPayload(item.payload, index)">

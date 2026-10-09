@@ -62,6 +62,40 @@ export const radioSubject = (livestreamId: string, eventClass: string): string =
 export const radioMqttTopic = (livestreamId: string, eventClass: string): string =>
 	`radio/${livestreamId}/${eventClass.replaceAll('.', '/')}`
 
+/**
+ * MQTT topic or filter as the NATS subject the gateway subscribes.
+ * `/` separates levels, `+` is one level, `#` is the rest of the tree.
+ * A `.` inside a level becomes `//` so it stays one NATS token.
+ * @param topic - MQTT topic (`radio/+/track/playing`)
+ * @returns NATS subject (`radio.*.track.playing`)
+ */
+export const mqttTopicToNatsSubject = (topic: string): string =>
+	topic
+		.split('/')
+		.map((level) => {
+			if (level === '+') return '*'
+			if (level === '#') return '>'
+			return level.replaceAll('.', '//')
+		})
+		.join('.')
+
+/**
+ * NATS subject as the MQTT topic the operator UI shows.
+ * `.` separates levels, `*` is one level, `>` is the rest of the tree.
+ * `//` inside a token is a literal `.`.
+ * @param subject - NATS subject (`radio.*.track.playing`)
+ * @returns MQTT topic (`radio/+/track/playing`)
+ */
+export const natsSubjectToMqttTopic = (subject: string): string =>
+	subject
+		.split('.')
+		.map((token) => {
+			if (token === '*') return '+'
+			if (token === '>') return '#'
+			return token.replaceAll('//', '.')
+		})
+		.join('/')
+
 /** Prefix shared by every v1 radio event name. */
 const RADIO_EVENT_PREFIX = 'de.ard.eventhub.v1.radio.'
 

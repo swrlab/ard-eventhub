@@ -59,6 +59,7 @@ export type MetaReport = {
 	tailIdleMs: number
 	tailCapMs: number
 	tailPerSecond: number
+	/** MQTT topic the tail field starts from. The page subscribes the NATS subject. */
 	defaultFilter: string
 	monitor: string
 	natsUrl: string

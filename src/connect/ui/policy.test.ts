@@ -38,14 +38,31 @@ test('tail drops frames past the per-second cap and marks them sampled', () => {
 	assertEquals(later.sampled, true)
 })
 
-test('tail filter defaults narrow and rejects a full wildcard or system subject', () => {
-	assertEquals(parseTailFilter(null), { ok: true, filter: DEFAULT_TAIL_FILTER })
-	assertEquals(parseTailFilter('  '), { ok: true, filter: DEFAULT_TAIL_FILTER })
-	assertEquals(parseTailFilter('radio.>'), { ok: true, filter: 'radio.>' })
-	assertEquals(parseTailFilter('feedback.>').ok, false)
-	assertEquals(parseTailFilter('inbox.>').ok, false)
-	assertEquals(parseTailFilter('>').ok, false)
-	assertEquals(parseTailFilter('$SYS.>').ok, false)
+test('tail filter accepts an MQTT topic and subscribes the NATS subject', () => {
+	assertEquals(parseTailFilter(null), {
+		ok: true,
+		topic: DEFAULT_TAIL_FILTER,
+		subject: 'radio.*.track.playing',
+	})
+	assertEquals(parseTailFilter('  '), {
+		ok: true,
+		topic: DEFAULT_TAIL_FILTER,
+		subject: 'radio.*.track.playing',
+	})
+	assertEquals(parseTailFilter('radio/#'), { ok: true, topic: 'radio/#', subject: 'radio.>' })
+	assertEquals(parseTailFilter('radio/urn:ard:permanent-livestream:abc/track/playing'), {
+		ok: true,
+		topic: 'radio/urn:ard:permanent-livestream:abc/track/playing',
+		subject: 'radio.urn:ard:permanent-livestream:abc.track.playing',
+	})
+	assertEquals(parseTailFilter('radio.>').ok, false)
+	assertEquals(parseTailFilter('radio.*.track.playing').ok, false)
+	assertEquals(parseTailFilter('feedback/#').ok, false)
+	assertEquals(parseTailFilter('inbox/#').ok, false)
+	assertEquals(parseTailFilter('#').ok, false)
+	assertEquals(parseTailFilter('$SYS/#').ok, false)
+	assertEquals(parseTailFilter('radio/#/track').ok, false)
+	assertEquals(parseTailFilter('radio/+/track.playing').ok, false)
 })
 
 test('source CIDR allow-list is empty-open and matches IPv4 ranges', () => {

@@ -7,6 +7,8 @@ import {
 	inboxMqttTopic,
 	inboxSubject,
 	institutionFromInboxSubject,
+	mqttTopicToNatsSubject,
+	natsSubjectToMqttTopic,
 	pluginSubject,
 	radioMqttTopic,
 	radioSubject,
@@ -32,4 +34,15 @@ test('topic-tree helpers use NATS subject syntax', () => {
 	assertEquals(institutionFromInboxSubject('inbox.not-a-urn'), null)
 	assertEquals(eventClassToken('de.ard.eventhub.v1.radio.track.playing'), 'track.playing')
 	assertEquals(eventClassToken('de.ard.eventhub.v1.radio.control'), 'control')
+})
+
+test('MQTT filters map onto NATS subjects and back', () => {
+	assertEquals(mqttTopicToNatsSubject('radio/+/track/playing'), 'radio.*.track.playing')
+	assertEquals(mqttTopicToNatsSubject('radio/#'), 'radio.>')
+	assertEquals(mqttTopicToNatsSubject(`radio/${LIVESTREAM_ID}/track/playing`), `radio.${LIVESTREAM_ID}.track.playing`)
+	assertEquals(mqttTopicToNatsSubject('radio/foo.bar/track'), 'radio.foo//bar.track')
+	assertEquals(natsSubjectToMqttTopic('radio.*.track.playing'), 'radio/+/track/playing')
+	assertEquals(natsSubjectToMqttTopic('radio.>'), 'radio/#')
+	assertEquals(natsSubjectToMqttTopic('radio.foo//bar.track'), 'radio/foo.bar/track')
+	assertEquals(natsSubjectToMqttTopic(mqttTopicToNatsSubject(`radio/${LIVESTREAM_ID}/#`)), `radio/${LIVESTREAM_ID}/#`)
 })

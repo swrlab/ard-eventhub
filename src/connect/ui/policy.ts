@@ -1,4 +1,5 @@
 import type { RateWindow, TailClock, TailCloseReason } from '#types'
+import { mqttTopicToNatsSubject } from '../../utils/nats/subjects.ts'
 
 /**
  * Live-tail limits (RFC §14.4).
@@ -20,8 +21,8 @@ export const TAIL_CAP_MS = 30 * 60 * 1000
 /** Forwarded frames per tail per second. The rest are dropped and marked sampled. */
 export const TAIL_MAX_PER_SECOND = 20
 
-/** Narrower than `radio.>`. Cyclic `radio.data` must not be the default. */
-export const DEFAULT_TAIL_FILTER = 'radio.*.track.playing'
+/** Narrower than `radio/#`. Cyclic `radio/+/data` must not be the default. */
+export const DEFAULT_TAIL_FILTER = 'radio/+/track/playing'
 
 /**
  * Close reason for a tail at `now`, or null when it may stay open.
@@ -79,18 +80,26 @@ export const admitTailEvent = (
 const RADIO_FILTER_RE = /^radio(\.[A-Za-z0-9_:*.>-]+)?$/
 
 /**
- * Parse a tail subject filter. Blank becomes the default.
- * The browser user may only subscribe to verified `radio.>` events.
+ * Parse a tail filter written as an MQTT topic. Blank becomes the default.
+ * The page subscribes the NATS subject. The browser user may only subscribe to verified `radio.>` events.
  * @param raw - Query value, or null
- * @returns The filter, or an error sentence
+ * @returns The MQTT topic and NATS subject, or an error sentence
  */
-export const parseTailFilter = (raw: string | null): { ok: true; filter: string } | { ok: false; error: string } => {
-	const filter = raw?.trim() ? raw.trim() : DEFAULT_TAIL_FILTER
-	if (filter.length > 256) return { ok: false, error: 'filter is too long' }
-	if (!RADIO_FILTER_RE.test(filter)) {
-		return { ok: false, error: 'filter must be a radio subject' }
+export const parseTailFilter = (
+	raw: string | null
+): { ok: true; topic: string; subject: string } | { ok: false; error: string } => {
+	const topic = raw?.trim() ? raw.trim() : DEFAULT_TAIL_FILTER
+	if (topic.length > 256) return { ok: false, error: 'filter is too long' }
+	const levels = topic.split('/')
+	const hash = levels.indexOf('#')
+	if (levels.some((level) => level.length === 0) || (hash !== -1 && hash !== levels.length - 1)) {
+		return { ok: false, error: 'filter must be a radio topic' }
 	}
-	return { ok: true, filter }
+	const subject = mqttTopicToNatsSubject(topic)
+	if (!RADIO_FILTER_RE.test(subject)) {
+		return { ok: false, error: 'filter must be a radio topic' }
+	}
+	return { ok: true, topic, subject }
 }
 
 /**

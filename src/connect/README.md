@@ -64,7 +64,7 @@ Panels:
 - **Connections.** Users from `NATS_USERS_CONF` (default `infra/kubernetes/components/users/nats-users.conf`) plus `/connz`. Usernames and allow-lists only.
 - **Rejections.** Retained `feedback.>` plus what arrived while this process was up. `?institution=` filters one house. Each row expands to the rejected event as JSON.
 - **Cluster.** `/varz`, `/connz`, `/jsz`, sampled until each node behind the monitor URL has answered.
-- **Tail.** Default filter `radio.*.track.playing`. The browser opens NATS WebSocket as `sub-ui` (no password) and subscribes itself. Closes after 2 minutes with no click, key, or scroll, and after 30 minutes even if someone is still there. Over 20 frames/s the page drops frames and shows `sampled`. Reopening is a click.
+- **Tail.** Default filter `radio/+/track/playing` (MQTT). The page rewrites that to the NATS subject `radio.*.track.playing` and shows the subject under the field. Incoming frames are shown as MQTT topics. The browser opens NATS WebSocket as `sub-ui` (no password) and subscribes itself. Closes after 2 minutes with no click, key, or scroll, and after 30 minutes even if someone is still there. Over 20 frames/s the page drops frames and shows `sampled`. Reopening is a click.
 
 `UI_HOST` (default `0.0.0.0`), `UI_PORT` (default `4173`). `UI_ALLOW_CIDR` is a comma-separated source list checked against the socket address. Empty allows every peer, which is the local default. Set it when the UI is reachable on a shared network.
 
