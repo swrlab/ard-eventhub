@@ -11,6 +11,7 @@ import {
 	parseAllowCidrs,
 	parseTailFilter,
 	tailCloseMessage,
+	tailTopicFromQuery,
 } from './policy.ts'
 
 test('tail closes on idle and the 30 minute cap wins when both are due', () => {
@@ -63,6 +64,17 @@ test('tail filter accepts an MQTT topic and subscribes the NATS subject', () => 
 	assertEquals(parseTailFilter('$SYS/#').ok, false)
 	assertEquals(parseTailFilter('radio/#/track').ok, false)
 	assertEquals(parseTailFilter('radio/+/track.playing').ok, false)
+})
+
+test('a NATS subject in the tail query is shown as an MQTT topic', () => {
+	assertEquals(tailTopicFromQuery('radio.*.track.playing'), 'radio/+/track/playing')
+	assertEquals(tailTopicFromQuery('radio.>'), 'radio/#')
+	assertEquals(
+		tailTopicFromQuery('radio.urn:ard:permanent-livestream:abc.>'),
+		'radio/urn:ard:permanent-livestream:abc/#'
+	)
+	assertEquals(tailTopicFromQuery('radio/+/control'), 'radio/+/control')
+	assertEquals(tailTopicFromQuery('feedback.>'), 'feedback.>')
 })
 
 test('source CIDR allow-list is empty-open and matches IPv4 ranges', () => {

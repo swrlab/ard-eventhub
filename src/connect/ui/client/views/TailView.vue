@@ -5,7 +5,14 @@ import { wsconnect } from '@nats-io/nats-core'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { natsSubjectToMqttTopic } from '../../../../utils/nats/subjects.ts'
-import { DEFAULT_TAIL_FILTER, admitTailEvent, evaluateTail, parseTailFilter, tailCloseMessage } from '../../policy.ts'
+import {
+	DEFAULT_TAIL_FILTER,
+	admitTailEvent,
+	evaluateTail,
+	parseTailFilter,
+	tailCloseMessage,
+	tailTopicFromQuery,
+} from '../../policy.ts'
 import { formatClock } from '../format'
 import { tailPhase } from '../tail-state'
 
@@ -22,7 +29,9 @@ const presets = [
 
 const route = useRoute()
 const router = useRouter()
-const filter = ref(typeof route.query.filter === 'string' ? route.query.filter : DEFAULT_TAIL_FILTER)
+const filter = ref(
+	typeof route.query.filter === 'string' ? tailTopicFromQuery(route.query.filter) : DEFAULT_TAIL_FILTER
+)
 const closeMessage = ref<string | null>(null)
 const connecting = ref(false)
 const events = ref<TailEvent[]>([])
@@ -45,7 +54,7 @@ const live = computed(() => tailPhase.value === 'live' || tailPhase.value === 's
 watch(
 	() => route.query.filter,
 	(value) => {
-		if (typeof value === 'string') filter.value = value
+		if (typeof value === 'string') filter.value = tailTopicFromQuery(value)
 	}
 )
 
@@ -276,7 +285,9 @@ onUnmounted(stop)
 				</button>
 				<button v-if="live" type="button" class="press" @click="stop">stop</button>
 			</form>
-			<p v-if="natsSubject" class="mt-1 font-mono text-xs text-muted/70">{{ natsSubject }}</p>
+			<p v-if="natsSubject" class="mt-1 text-xs text-muted/70">
+				NATS topic: <span class="font-mono">{{ natsSubject }}</span>
+			</p>
 		</div>
 		<div class="mb-4 flex flex-wrap gap-2">
 			<button

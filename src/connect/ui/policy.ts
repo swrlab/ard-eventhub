@@ -1,5 +1,5 @@
 import type { RateWindow, TailClock, TailCloseReason } from '#types'
-import { mqttTopicToNatsSubject } from '../../utils/nats/subjects.ts'
+import { mqttTopicToNatsSubject, natsSubjectToMqttTopic } from '../../utils/nats/subjects.ts'
 
 /**
  * Live-tail limits (RFC §14.4).
@@ -100,6 +100,20 @@ export const parseTailFilter = (
 		return { ok: false, error: 'filter must be a radio topic' }
 	}
 	return { ok: true, topic, subject }
+}
+
+/**
+ * MQTT topic to put in the filter field. A NATS subject left in the query is rewritten.
+ * @param raw - Query value
+ * @returns Topic for the field
+ */
+export const tailTopicFromQuery = (raw: string): string => {
+	const direct = parseTailFilter(raw)
+	if (direct.ok) return direct.topic
+	if (raw.includes('/')) return raw.trim()
+	const topic = natsSubjectToMqttTopic(raw.trim())
+	const mapped = parseTailFilter(topic)
+	return mapped.ok ? mapped.topic : raw.trim()
 }
 
 /**
