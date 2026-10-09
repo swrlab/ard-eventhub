@@ -7,6 +7,9 @@
 # without `mise trust` (avoids needing a writable ~/.local/state).
 
 [tools]
+# aqua marks hyperfine as Rosetta-only, so it installs the x86_64 macOS binary.
+# The GitHub backend picks the native asset, including aarch64-apple-darwin.
+"github:sharkdp/hyperfine" = "2.0.0"
 just = "1.58.0"
 kustomize = "5.8.2"
 sops = "3.13.3"

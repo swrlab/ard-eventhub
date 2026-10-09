@@ -8,13 +8,14 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 
 ## Setup Commands
 
-- **Install tools:** [mise](https://mise.jdx.dev) → `mise install` (pins `just` + `sops` in [`mise.toml`](mise.toml))
+- **Install tools:** [mise](https://mise.jdx.dev) → `mise install` (pins `just`, `sops`, and `hyperfine` in [`mise.toml`](mise.toml))
 - **Install dependencies:** `bun install`
 - **Start ingest service:** `just ingest` (hot reload, sops env)
 - **Start connect (NATS access + operator UI):** `just dev` (needs local NATS: `just nats-up` or `just nats-up-docker`; `NATS_USER` and `NATS_PASSWORD` come from sops). UI at http://127.0.0.1:4173 after `just ui-build`. Vite HMR: `USE_HMR=true just dev` and `just ui`. Connect reads the ARD feed from JetStream KV `KV_ARD_FEED` on boot (downloading `ARD_FEED_URL` only when the bucket is empty) and refreshes it on `POST /api/update-feed`.
 - **Run tests:** `just test`
 - **Hurl API suite:** `just integration` (needs running ingest + `hurl`)
 - **Lint code:** `just lint` (uses Oxlint)
+- **Benchmark inbox validation:** `just bench-validation` (hyperfine from `mise install`; writes `.local/validation-bench.md`). CI runs the same recipe in [`.github/workflows/validation-bench.yml`](.github/workflows/validation-bench.yml)
 - **Format code:** Oxfmt handles formatting automatically
 - **Docs (dev):** `just docs` (Blume)
 - **Docs (build):** `just docs-build` (writes to `dist/`)

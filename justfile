@@ -54,6 +54,22 @@ ingest:
 dev:
 	just env "bun run --hot ./src/connect/index.ts"
 
+# benchmark inbox validation (accept, schema rejection, ownership rejection)
+[group('LOCAL')]
+bench-validation:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	mkdir -p .local
+	hyperfine \
+		--warmup 3 \
+		--runs 10 \
+		--metrics time_wall_clock:ms \
+		--parameter-list case accept,schema,ownership \
+		--export-markdown .local/validation-bench.md \
+		--export-json .local/validation-bench.json \
+		'bun ./src/cli/bench-validation.ts {case}'
+	cat .local/validation-bench.md
+
 # lint the code
 [group('LOCAL')]
 lint:
