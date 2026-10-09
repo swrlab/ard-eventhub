@@ -5,7 +5,7 @@ description: 'Echtzeit-Metadaten für Hörfunksendungen der ARD verteilen.'
 
 ARD Eventhub verteilt Echtzeit-Metadaten (Live) vor allem für Hörfunksendungen.
 
-Für die Umstellung auf **Version 3.0** siehe die _Migration auf Eventhub v3_ Docs.
+Für die Umstellung auf **Version 3.0** siehe _Migration auf MQTT_ (Eventhub Connect). Breaking Changes der bestehenden HTTPS-API stehen unter _Migration auf Eventhub v3_.
 
 ## Aktive Datenlieferanten
 

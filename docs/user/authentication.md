@@ -3,7 +3,7 @@ title: 'Authentifizierung'
 description: 'Login und Token-Austausch für die Eventhub-API.'
 ---
 
-Auf dieser Seite wird der Prozess der Benutzerverwaltung beschrieben.
+Auf dieser Seite wird der Login der HTTPS-API beschrieben. Eventhub Connect (MQTT) nutzt diesen Token-Tausch nicht; Benutzername und Passwort stehen unter [_Zugangsdaten_](./acl).
 
 Um mit der Eventhub-API zu arbeiten (sich bei ihr zu authentifizieren), benötigst du einen gültigen Benutzer. Derzeit werden diese Benutzer getrennt von der ARD Core API verwaltet, verwenden jedoch eine ähnliche Anmeldemethode.
 

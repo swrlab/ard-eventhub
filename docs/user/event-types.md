@@ -19,7 +19,7 @@ Ein Paar aus `next` und `playing` Events sollte eine Referenz zueinander haben (
 
 ## Eventhub Connect (MQTT only)
 
-Die folgenden Event-Klassen sind für **Eventhub Connect** vorgesehen und werden **nicht** über `POST /events/{eventName}` angenommen. Ein Request mit diesen Namen antwortet mit HTTP 400. Sie gelten erst auf dem künftigen MQTT-Pfad, mit URN-only `services[]` (`id`, `publisherId` und `institutionId` als `urn:ard:…`). Beide Klassen nutzen `start` (ISO8601), nicht `time`.
+Die folgenden Event-Klassen sind für **Eventhub Connect** vorgesehen und werden über `POST /events/{eventName}` mit HTTP 400 abgelehnt. Sie laufen über MQTT, mit URN-only `services[]` (`id`, `publisherId` und `institutionId` als `urn:ard:…`). Track-Events auf MQTT nutzen dieselbe Form. Beide Klassen nutzen `start` (ISO8601). Jedes Connect-Event braucht `creator` (wer es erzeugt hat, vom Publisher gesetzt); `created` setzt die Validierung auf den Zeitpunkt der Zustellung und überschreibt einen mitgeschickten Wert. Wohin publiziert wird, steht unter [_Topics_](./topics), die Verbindung unter [_Migration auf MQTT_](./connect-migration).
 
 Die vollständige Spezifikation steht im [Eventhub v3 Connect RFC](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#13-new-event-schemas). MQTT-Kanäle werden in der [Events-Referenz](/events) (AsyncAPI) dargestellt.
 
@@ -40,7 +40,8 @@ Steuerbits (TA, TP, EON, Regio und weitere). `name` ist ein freier String und **
 			"institutionId": "urn:ard:institution:a3004ff924ece1a2",
 			"id": "urn:ard:permanent-livestream:49267f7d67be180d"
 		}
-	]
+	],
+	"creator": "example@swr.de"
 }
 ```
 
@@ -66,6 +67,7 @@ Zyklischer Radiotext, Dynamic Label und RT+/DL+. `cycle` ist die Wiederholzeit d
 			"institutionId": "urn:ard:institution:a3004ff924ece1a2",
 			"id": "urn:ard:permanent-livestream:49267f7d67be180d"
 		}
-	]
+	],
+	"creator": "example@swr.de"
 }
 ```

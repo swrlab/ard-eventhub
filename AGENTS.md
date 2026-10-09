@@ -8,12 +8,14 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 
 ## Setup Commands
 
-- **Install tools:** [mise](https://mise.jdx.dev) → `mise install` (pins `just` + `sops` in [`mise.toml`](mise.toml))
+- **Install tools:** [mise](https://mise.jdx.dev) → `mise install` (pins `just`, `sops`, and `hyperfine` in [`mise.toml`](mise.toml))
 - **Install dependencies:** `bun install`
-- **Start ingest service:** `bun run ingest` (runs with hot reload)
+- **Start ingest service:** `just ingest` (hot reload, sops env)
+- **Start connect (NATS access + operator UI):** `just dev` (needs local NATS: `just nats-up` or `just nats-up-docker`; `NATS_USER` and `NATS_PASSWORD` come from sops). UI at http://127.0.0.1:4173 after `just ui-build`. Vite HMR: `USE_HMR=true just dev` and `just ui`. Connect reads the ARD feed from JetStream KV `KV_ARD_FEED` on boot (downloading `ARD_FEED_URL` only when the bucket is empty) and refreshes it on `POST /api/update-feed`. MCP is on the same process at `POST /mcp` (stateless, no separate session).
 - **Run tests:** `just test`
 - **Hurl API suite:** `just integration` (needs running ingest + `hurl`)
 - **Lint code:** `just lint` (uses Oxlint)
+- **Benchmark inbox validation:** `just bench-validation` (hyperfine from `mise install`; writes `.local/validation-bench.md`). CI runs the same recipe in [`.github/workflows/validation-bench.yml`](.github/workflows/validation-bench.yml)
 - **Format code:** Oxfmt handles formatting automatically
 - **Docs (dev):** `just docs` (Blume)
 - **Docs (build):** `just docs-build` (writes to `dist/`)
@@ -27,24 +29,27 @@ Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `o
 - **Tech Stack:** Bun, Node.js, TypeScript (strict mode), Hono, Zod, Google Cloud Platform
 - **File Structure:**
   - `src/ingest/` – Ingest service (receives events, manages subscriptions)
-  - `src/schemas/` – Zod request/response schemas (runtime validation + OpenAPI)
-  - `src/openapi/` – OpenAPI document assembly / `openapi.json` generator
-  - `src/asyncapi/` – AsyncAPI document assembly / `asyncapi.json` generator (Eventhub Connect / MQTT)
-  - `src/utils/` – Shared utilities (Pub/Sub, MQTT inbox hop, Datastore, Firebase, plugins)
-  - `cli/` – Command-line utilities
-  - `config/` – Application configuration (ARD prefixes, allow-lists)
-  - `infra/` – Deployed-upstream config (NanoMQ hop)
-  - `just/` – Split just recipes (`encryption.just`, `mqtt.just`)
-  - `integration/` – Hurl HTTP suite (`ingest-api.hurl`) mirroring `src/ingest/server.test.ts` (run with `just integration`)
-  - `docs/` – Documentation (Markdown, built with Blume)
-  - `blume.config.ts` – Docs site configuration
-  - `tests/` – Test files (co-located with source files using `.test.ts` extension)
+- `src/connect/` – Eventhub Connect NATS access layer, including inbox validation (`src/connect/validation/`). `just dev` also serves the operator UI
+- `src/connect/ui/` – Operator console backend (Hono routes, reports). `src/connect/ui/client/` holds the Vue frontend (Vite, Tailwind), built to `static/dist`
+- `src/connect/mcp/` – MCP tools on the connect process at `/mcp`: cluster health and on-air lookup for a publisher or institution
+- `src/schemas/` – Zod request/response schemas (runtime validation + OpenAPI)
+- `src/openapi/` – OpenAPI document assembly / `openapi.json` generator
+- `src/asyncapi/` – AsyncAPI document assembly / `asyncapi.json` generator (Eventhub Connect / MQTT)
+- `src/utils/` – Shared utilities (Pub/Sub, MQTT inbox hop, NATS client, Datastore, Firebase, plugins)
+- `cli/` – Command-line utilities
+- `config/` – Application configuration (ARD prefixes, allow-lists)
+- `infra/` – Local NATS config and NATS kustomize manifests (`infra/kubernetes`)
+- `just/` – Split just recipes (`docs.just`, `encryption.just`, `integration.just`, `mqtt.just`, `nats.just`)
+- `integration/` – Hurl HTTP suite (`ingest-api.hurl`) mirroring `src/ingest/server.test.ts` (run with `just integration`)
+- `docs/` – Documentation (Markdown, built with Blume)
+- `blume.config.ts` – Docs site configuration
+- `tests/` – Test files (co-located with source files using `.test.ts` extension)
 
 ## Code Style
 
 Follow SWR Audio Lab engineering principles:
 
-- **Language:** Use English for filenames, variables, comments, and documentation
+- **Language:** Code, filenames, variables, comments, and JSDoc are always English. Operator UI copy and `docs/` are German. Internal developer docs in `docs/development/` and RFCs in `docs/context-rfc/` are English (US).
 - **Formatting:** Oxfmt handles formatting (single quotes, no semicolons, tabs for indentation, 120 char line width)
 - **TypeScript:** Strict mode enabled, prefer explicit types over inference where it improves clarity
 - **Naming:** Use descriptive, clear names. Follow existing patterns in the codebase
@@ -67,11 +72,13 @@ Follow SWR Audio Lab engineering principles:
 
 ## Boundaries
 
-- ✅ **Always do:** Write tests for new code, run linter before committing, use English for code/docs, follow existing patterns, run `just openapi` after changing `package.json` version (keeps `openapi.json` and `asyncapi.json` in sync)
+- ✅ **Always do:** Write tests for new code, run linter before committing, keep code and comments in English, follow existing patterns, run `just openapi` after changing `package.json` version (keeps `openapi.json` and `asyncapi.json` in sync)
 - ⚠️ **Ask first:** Modifying Google Cloud configuration, changing authentication flows, updating dependencies, major architectural changes
-- 🚫 **Never do:** Commit unencrypted secrets or API keys (use Secret Manager), modify `node_modules/` or `bun.lock`, remove failing tests without fixing them, use German in code/comments
+- 🚫 **Never do:** Commit unencrypted secrets or API keys (use Secret Manager), modify `node_modules/` or `bun.lock`, remove failing tests without fixing them, use German in identifiers, comments, or JSDoc
 
 ## Documentation
+
+Code comments and JSDoc are always English. Operator UI copy and `docs/` are German, except internal developer docs in `docs/development/` and RFCs in `docs/context-rfc/`, which are English (US).
 
 - Write documentation in Markdown files in the `docs/` directory
 - Keep documentation clear, concise, and practical

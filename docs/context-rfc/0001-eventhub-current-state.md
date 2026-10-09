@@ -261,7 +261,7 @@ cannot explain.
 ### 10.2 The ARD feed is never refreshed
 
 `getARDFeed()` is called once at startup and cached in a module-level variable
-(`src/utils/ard-feed.ts:66`). There is no timer and no invalidation. A new livestream or a changed
+(`src/utils/feed/ard-feed.ts`). There is no timer and no invalidation. A new livestream or a changed
 publisher/institution mapping in ARD Core only takes effect after a pod restart.
 
 ### 10.3 Plugin delivery is invisible to publishers

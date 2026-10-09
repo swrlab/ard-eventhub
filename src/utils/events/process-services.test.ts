@@ -6,7 +6,7 @@ import { assertEquals, assertExists } from '@std/assert'
 import { createHashedId } from '@swrlab/utils/packages/ard/index.js'
 import { createSandbox } from 'sinon'
 import { coreIdPrefixes, pubSubPrefix } from '#config'
-import { publisherLookup } from '../ard-core.ts'
+import { publisherLookup } from '../feed/ard-core.ts'
 import { allowedLivestreamLookup, processServices } from './process-services.ts'
 
 const INSTITUTION_ID = 'urn:ard:institution:swr'

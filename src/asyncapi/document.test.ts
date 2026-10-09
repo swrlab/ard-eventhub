@@ -7,6 +7,7 @@ test('buildAsyncApiDocument is AsyncAPI 3 with Connect send and receive operatio
 
 	assertStrictEquals(document.asyncapi, '3.0.0')
 	assertEquals(document.info.title, 'ARD Eventhub Connect')
+	assertEquals(document.servers.connect.protocolVersion, '3.1.1')
 	assertExists(document.info.version)
 
 	const inbox = document.channels.inboxInstitution
@@ -35,11 +36,14 @@ test('buildAsyncApiDocument is AsyncAPI 3 with Connect send and receive operatio
 		$ref: '#/components/schemas/eventV1RadioDataPostBody',
 	})
 
-	const controlSchema = document.components.schemas.eventV1RadioControlPostBody as { required?: string[] }
-	assertEquals(controlSchema.required, ['start', 'name', 'state', 'services'])
+	type EventSchema = { required?: string[]; properties: { created: { readOnly?: boolean } } }
+	const controlSchema = document.components.schemas.eventV1RadioControlPostBody as EventSchema
+	assertEquals(controlSchema.required, ['start', 'name', 'state', 'services', 'creator', 'created'])
+	assertEquals(controlSchema.properties.created.readOnly, true)
 
-	const dataSchema = document.components.schemas.eventV1RadioDataPostBody as { required?: string[] }
-	assertEquals(dataSchema.required, ['start', 'cycle', 'data', 'services'])
+	const dataSchema = document.components.schemas.eventV1RadioDataPostBody as EventSchema
+	assertEquals(dataSchema.required, ['start', 'cycle', 'data', 'services', 'creator', 'created'])
+	assertEquals(dataSchema.properties.created.readOnly, true)
 
 	assertExists(document.components.schemas.servicesUrn)
 })

@@ -25,7 +25,7 @@ just docs-build  # static build to dist/
 
 ## Service
 
-The Ingest service is responsible for receiving and publishing events and managing subscriptions. You'll find the core code in [`./src/ingest/`](./src/ingest/), with shared utilities in [`./src/utils/`](./src/utils/). NanoMQ hop files live in [`infra/nanomq/`](infra/nanomq/). Start a local broker with `just mqtt-up` (Apple `container` CLI).
+The Ingest service is responsible for receiving and publishing events and managing subscriptions. You'll find the core code in [`./src/ingest/`](./src/ingest/), with shared utilities in [`./src/utils/`](./src/utils/). When `MQTT_BROKER_URL` is set, ingest publishes accepted events over MQTT to `inbox/{institutionId}` on the CN gateway as `svc-ingest` (Pub/Sub unchanged). Eventhub Connect talks NATS-native; local broker recipes are `just nats-up` / `just nats-up-docker` ([`src/connect/README.md`](src/connect/README.md)). `just dev` also serves the operator UI on port 4173 (`just ui-build` first). `just ingest` starts the ingest service.
 
 ## Modules
 
@@ -73,12 +73,12 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | Type    | Name                           | License                                                                                            |
 | ------- | ------------------------------ | -------------------------------------------------------------------------------------------------- |
 | Docker  | `node:22-alpine`               | [MIT](https://github.com/nodejs/node/tree/main?tab=readme-ov-file#license)                         |
+| Docker  | `nats:2.14.6`                  | [Apache-2.0](https://github.com/nats-io/nats-server/blob/main/LICENSE)                             |
 | NPM     | `@google-cloud/datastore`      | [Apache License 2.0](https://github.com/googleapis/nodejs-datastore/blob/master/LICENSE)           |
 | NPM     | `@google-cloud/pubsub`         | [Apache License 2.0](https://github.com/googleapis/nodejs-pubsub/blob/master/LICENSE)              |
 | NPM     | `@google-cloud/secret-manager` | [Apache License 2.0](https://github.com/googleapis/nodejs-secret-manager/blob/master/LICENSE)      |
 | NPM     | `@std/ulid`                    | [MIT](https://github.com/swrlab/node-utils/blob/main/LICENSE.md)                                   |
 | NPM     | `@swrlab/utils`                | [MIT](https://github.com/swrlab/node-utils/blob/main/LICENSE.md)                                   |
-| NPM     | `dd-trace`                     | [Apache-2.0 OR BSD-3-Clause](https://github.com/DataDog/dd-trace-js/blob/master/LICENSE)           |
 | NPM     | `hono`                         | [MIT](https://github.com/honojs/hono/blob/main/LICENSE)                                            |
 | NPM     | `zod`                          | [MIT](https://github.com/colinhacks/zod/blob/main/LICENSE)                                         |
 | NPM     | `firebase-admin`               | [Apache License 2.0](https://github.com/firebase/firebase-admin-node/blob/master/LICENSE)          |
@@ -86,6 +86,8 @@ This source code is provided under EUPL v1.2, except for the [`spdx-exceptions`]
 | NPM     | `jsonwebtoken`                 | [MIT](https://github.com/auth0/node-jsonwebtoken/blob/master/LICENSE)                              |
 | NPM     | `luxon`                        | [MIT](https://github.com/moment/luxon/blob/master/LICENSE.md)                                      |
 | NPM     | `mqtt`                         | [MIT](https://github.com/mqttjs/MQTT.js/blob/main/LICENSE.md)                                      |
+| NPM     | `@nats-io/transport-node`      | [Apache-2.0](https://github.com/nats-io/nats.js/blob/main/LICENSE)                                 |
+| NPM     | `@nats-io/jetstream`           | [Apache-2.0](https://github.com/nats-io/nats.js/blob/main/LICENSE)                                 |
 | NPM     | `slug`                         | [MIT](https://github.com/Trott/slug/blob/master/LICENSE)                                           |
 | NPM     | `ulid`                         | [MIT](https://github.com/ulid/javascript/blob/master/LICENSE)                                      |
 | NPM DEV | `oxfmt`                        | [MIT](https://github.com/oxc-project/oxc/blob/main/crates/oxfmt/LICENSE)                           |

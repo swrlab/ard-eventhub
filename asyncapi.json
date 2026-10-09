@@ -2,7 +2,7 @@
 	"asyncapi": "3.0.0",
 	"info": {
 		"title": "ARD Eventhub Connect",
-		"description": "MQTT event contract for Eventhub Connect. Publishers send to `inbox/{institutionId}`; subscribers read validated events on `radio/{livestreamId}/…`. These types are **not** accepted on the HTTPS `POST /events` API. The broker is not deployed yet — host and credentials are placeholders.",
+		"description": "MQTT 3.1.1 event contract for Eventhub Connect. Publishers send to `inbox/{institutionId}`; subscribers read validated events on `radio/{livestreamId}/…`. TLS port 8883; configure `connect-bad`, `connect-stg`, and `connect-mnz` in the stage DNS. These types are **not** accepted on the HTTPS `POST /events` API. The server host below is a placeholder; connection details are in the publisher migration guide.",
 		"termsOfService": "https://www.ard.de",
 		"contact": {
 			"email": "lab@swr.de"
@@ -22,8 +22,8 @@
 		"connect": {
 			"host": "connect.eventhub.invalid",
 			"protocol": "mqtt",
-			"protocolVersion": "5.0",
-			"description": "Placeholder MQTT endpoint. Eventhub Connect is not deployed; do not point clients here yet.",
+			"protocolVersion": "3.1.1",
+			"description": "Placeholder host. Clients use mqtts on port 8883 against connect-bad, connect-stg, and connect-mnz in the stage DNS. MQTT 5 is rejected.",
 			"security": [
 				{
 					"mqttUserPassword": []
@@ -35,7 +35,7 @@
 		"inboxInstitution": {
 			"address": "inbox/{institutionId}",
 			"title": "inbox/{institutionId}",
-			"description": "Publisher write path. Send `radio.control` and `radio.data` here. The sidecar validates the payload and republishes onto `radio/{livestreamId}/…`.",
+			"description": "Publisher write path. Send `radio.control` and `radio.data` here. Eventhub validates the payload and republishes onto `radio/{livestreamId}/…`.",
 			"parameters": {
 				"institutionId": {
 					"description": "Owning institution URN (`urn:ard:institution:…`). Must match the livestream.",
@@ -54,7 +54,7 @@
 		"radioLivestreamControl": {
 			"address": "radio/{livestreamId}/control",
 			"title": "radio/{livestreamId}/control",
-			"description": "Sidecar output. Retained so a late joiner sees the current control bits. QoS 1, durable.",
+			"description": "Validation output. Retained so a late joiner sees the current control bits. QoS 1, durable.",
 			"parameters": {
 				"livestreamId": {
 					"description": "Livestream URN (`urn:ard:permanent-livestream:…` or `urn:ard:event-livestream:…`)",
@@ -70,7 +70,7 @@
 		"radioLivestreamData": {
 			"address": "radio/{livestreamId}/data",
 			"title": "radio/{livestreamId}/data",
-			"description": "Sidecar output. Cyclic radiotext / dynamic label / RT+. Retained as the latest cycle. QoS 1.",
+			"description": "Validation output. Cyclic radiotext / dynamic label / RT+. Retained as the latest cycle. QoS 1.",
 			"parameters": {
 				"livestreamId": {
 					"description": "Livestream URN (`urn:ard:permanent-livestream:…` or `urn:ard:event-livestream:…`)",
@@ -229,7 +229,7 @@
 						"type": "string",
 						"pattern": "^urn:ard:institution:[a-z0-9]+$",
 						"examples": ["urn:ard:institution:a3004ff924ece1a2"],
-						"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+						"description": "Owning institution URN (claim; validation checks it against the feed)"
 					},
 					"externalId": {
 						"deprecated": true,
@@ -283,9 +283,21 @@
 							"$ref": "#/definitions/servicesUrn"
 						},
 						"description": "URN-only service identifiers (Connect / MQTT)"
+					},
+					"creator": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Person or system that created the event, set by the publisher (for example an email address or the playout system)",
+						"examples": ["example@swr.de"]
+					},
+					"created": {
+						"type": "string",
+						"description": "Set by Eventhub validation to the time of delivery. A value sent by the publisher is replaced.",
+						"examples": ["2026-10-08T10:00:01.000Z"],
+						"readOnly": true
 					}
 				},
-				"required": ["start", "name", "state", "services"],
+				"required": ["start", "name", "state", "services", "creator", "created"],
 				"additionalProperties": false,
 				"description": "Eventhub Connect radio.control event. Not accepted on the HTTPS POST /events API.",
 				"definitions": {
@@ -308,7 +320,7 @@
 								"type": "string",
 								"pattern": "^urn:ard:institution:[a-z0-9]+$",
 								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
-								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+								"description": "Owning institution URN (claim; validation checks it against the feed)"
 							},
 							"externalId": {
 								"deprecated": true,
@@ -428,9 +440,21 @@
 							"$ref": "#/definitions/servicesUrn"
 						},
 						"description": "URN-only service identifiers (Connect / MQTT)"
+					},
+					"creator": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Person or system that created the event, set by the publisher (for example an email address or the playout system)",
+						"examples": ["example@swr.de"]
+					},
+					"created": {
+						"type": "string",
+						"description": "Set by Eventhub validation to the time of delivery. A value sent by the publisher is replaced.",
+						"examples": ["2026-10-08T10:00:01.000Z"],
+						"readOnly": true
 					}
 				},
-				"required": ["start", "cycle", "data", "services"],
+				"required": ["start", "cycle", "data", "services", "creator", "created"],
 				"additionalProperties": false,
 				"description": "Eventhub Connect radio.data event. Not accepted on the HTTPS POST /events API.",
 				"definitions": {
@@ -453,7 +477,7 @@
 								"type": "string",
 								"pattern": "^urn:ard:institution:[a-z0-9]+$",
 								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
-								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+								"description": "Owning institution URN (claim; validation checks it against the feed)"
 							},
 							"externalId": {
 								"deprecated": true,

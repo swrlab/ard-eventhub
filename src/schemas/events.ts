@@ -52,6 +52,23 @@ const institutionUrn = z
 	.regex(/^urn:ard:institution:[a-z0-9]+$/)
 	.meta({ examples: ['urn:ard:institution:a3004ff924ece1a2'] })
 
+/** Connect events only. HTTPS ingest fills `creator` from the token. */
+const eventCreator = z
+	.string()
+	.min(1)
+	.meta({
+		description:
+			'Person or system that created the event, set by the publisher (for example an email address or the playout system)',
+		examples: ['example@swr.de'],
+	})
+
+/** Connect events only. Validation overwrites it before the schema check, so subscribers always get the delivery time. */
+const eventCreated = iso8601Timestamp.meta({
+	readOnly: true,
+	description: 'Set by Eventhub validation to the time of delivery. A value sent by the publisher is replaced.',
+	examples: ['2026-10-08T10:00:01.000Z'],
+})
+
 /**
  * Whether a HTTPS service has enough identifiers to resolve a livestream URN.
  * `id` is enough on its own. A CRID still needs `type` so ingest can pick the prefix.
@@ -118,7 +135,7 @@ export const servicesUrn = z
 			examples: ['urn:ard:publisher:75dbb3dace15f610'],
 		}),
 		institutionId: institutionUrn.meta({
-			description: 'Owning institution URN (claim; sidecar checks it against the feed)',
+			description: 'Owning institution URN (claim; validation checks it against the feed)',
 			examples: ['urn:ard:institution:a3004ff924ece1a2'],
 		}),
 		externalId: serviceExternalId.optional().meta({
@@ -449,6 +466,8 @@ export const eventV1RadioControlPostBody = z
 		services: z.array(servicesUrn).meta({
 			description: 'URN-only service identifiers (Connect / MQTT)',
 		}),
+		creator: eventCreator,
+		created: eventCreated,
 	})
 	.strict()
 	.meta({
@@ -483,6 +502,8 @@ export const eventV1RadioDataPostBody = z
 		services: z.array(servicesUrn).meta({
 			description: 'URN-only service identifiers (Connect / MQTT)',
 		}),
+		creator: eventCreator,
+		created: eventCreated,
 	})
 	.strict()
 	.meta({
@@ -633,6 +654,70 @@ export const eventProcessResult = z
 		event: eventhubV1RadioPostBody,
 	})
 	.meta({ id: 'eventProcessResult' })
+
+const connectServices = z.array(servicesUrn).min(1)
+
+/**
+ * URN-only track event that validation accepts.
+ * Derived from {@link eventV1PostBody}: `services` is the URN shape, `event` is required
+ * because `track.playing` and `track.next` share a body, and `creator` / `created` are Connect-only.
+ */
+export const connectInboxTrackEvent = eventV1PostBody
+	.omit({ services: true, event: true })
+	.extend({
+		event: z.enum(['de.ard.eventhub.v1.radio.track.playing', 'de.ard.eventhub.v1.radio.track.next']),
+		services: connectServices,
+		creator: eventCreator,
+		created: eventCreated,
+	})
+	.strict()
+
+/**
+ * URN-only radio.control event that validation accepts. `event` is required so the class is explicit.
+ */
+export const connectInboxControlEvent = eventV1RadioControlPostBody
+	.omit({ event: true, services: true })
+	.extend({
+		event: z.literal('de.ard.eventhub.v1.radio.control'),
+		services: connectServices,
+	})
+	.strict()
+
+/**
+ * URN-only radio.data event that validation accepts. `event` is required so the class is explicit.
+ */
+export const connectInboxDataEvent = eventV1RadioDataPostBody
+	.omit({ event: true, services: true })
+	.extend({
+		event: z.literal('de.ard.eventhub.v1.radio.data'),
+		services: connectServices,
+	})
+	.strict()
+
+const connectInboxSchemaByEvent = {
+	'de.ard.eventhub.v1.radio.track.playing': connectInboxTrackEvent,
+	'de.ard.eventhub.v1.radio.track.next': connectInboxTrackEvent,
+	'de.ard.eventhub.v1.radio.control': connectInboxControlEvent,
+	'de.ard.eventhub.v1.radio.data': connectInboxDataEvent,
+} as const
+
+/** Inbox payload after the URN-only validation parse. */
+export type ConnectInboxEvent =
+	| z.infer<typeof connectInboxTrackEvent>
+	| z.infer<typeof connectInboxControlEvent>
+	| z.infer<typeof connectInboxDataEvent>
+
+/**
+ * Parse an inbox payload against the URN-only schema for its `event` class.
+ * A missing or unknown `event` fails before the class schema runs.
+ * @param value - Decoded JSON value
+ * @returns Zod safe-parse result
+ */
+export const parseConnectInboxEvent = (value: unknown) => {
+	const named = z.object({ event: z.enum(eventNames) }).safeParse(value)
+	if (!named.success) return named
+	return connectInboxSchemaByEvent[named.data.event].safeParse(value)
+}
 
 export type EventhubService = z.infer<typeof eventhubService>
 export type EventhubPlugin = z.infer<typeof eventhubPlugin>

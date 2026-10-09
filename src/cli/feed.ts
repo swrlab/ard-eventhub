@@ -3,7 +3,7 @@
  */
 
 import { exit } from 'node:process'
-import { getARDFeed } from '../utils/ard-feed.ts'
+import { getARDFeed } from '../utils/feed/ard-feed.ts'
 
 await getARDFeed()
 exit(0)
