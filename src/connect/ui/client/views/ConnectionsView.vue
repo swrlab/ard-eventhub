@@ -36,8 +36,8 @@ const toggleUser = (username: string): void => {
 		<header class="mb-5 max-w-3xl">
 			<h1 class="text-xl text-heading">connections</h1>
 			<p class="mt-1 text-sm text-muted/80">
-				Every configured user, oldest issue date first. Zero connections is safe to remove. A password never appears
-				here.
+				Die ältesten Zugänge stehen zuerst. Wer gerade nicht verbunden ist, kann entfernt werden. Passwörter stehen hier
+				nicht.
 			</p>
 		</header>
 		<p v-if="loading" class="font-mono text-sm text-muted/70">reading…</p>

@@ -1,5 +1,5 @@
 {
-	"note": "Nightly shared ARD broadcasts from docs/ids/common-ids.md (COMMON_IDS). These topic URNs are not ARD livestream-feed entries; Eventhub still accepts publishes when publisherId matches the listed publisher, then validates the user institution via that publisher in the feed.",
+	"note": "Gemeinsame nächtliche ARD-Sendungen. Sie stehen nicht im normalen Verzeichnis, sind aber zugelassen, wenn der Absender stimmt.",
 	"livestreams": [
 		{
 			"id": "urn:ard:event-livestream:22da95c49a047225",

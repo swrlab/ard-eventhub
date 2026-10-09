@@ -42,7 +42,7 @@ const clearFilter = (): void => {
 		<header class="mb-5 max-w-3xl">
 			<h1 class="text-xl text-heading">rejections</h1>
 			<p class="mt-1 text-sm text-muted/80">
-				Recent feedback, one line per error. Filter to one institution and the URL keeps the filter.
+				Hier stehen die letzten abgelehnten Meldungen, pro Fehler eine Zeile. Der Filter bleibt beim Neuladen erhalten.
 			</p>
 		</header>
 		<form class="mb-5 flex flex-wrap items-end gap-3" @submit.prevent="apply">

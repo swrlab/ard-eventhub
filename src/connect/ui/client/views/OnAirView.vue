@@ -20,7 +20,7 @@ const controlLine = (name: string | null, state: boolean | null, validUntil: str
 		<header class="mb-5 max-w-3xl">
 			<h1 class="text-xl text-heading">on-air</h1>
 			<p class="mt-1 text-sm text-muted/80">
-				Oldest last-event first. A station that went quiet is at the top. Retained state, read on each poll.
+				Oben stehen die Sender, von denen am längsten nichts mehr kam. Die Liste aktualisiert sich von selbst.
 			</p>
 		</header>
 		<p v-if="loading" class="font-mono text-sm text-muted/70">reading…</p>

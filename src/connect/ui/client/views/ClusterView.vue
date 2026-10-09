@@ -19,8 +19,9 @@ const storageRatio = computed(() => {
 		<header class="mb-5 max-w-3xl">
 			<h1 class="text-xl text-heading">cluster</h1>
 			<p class="mt-1 text-sm text-muted/80">
-				<span v-if="data?.leader">Leader {{ data.leader }}.</span>
-				Each node is whatever answered the monitor. JetStream totals are the cluster, not a sum of pods.
+				<span v-if="data?.leader">{{ data.leader }} führt gerade.</span>
+				Angezeigt werden nur Server, die geantwortet haben. Die Summen gelten für das ganze System, nicht für jeden
+				Server einzeln.
 			</p>
 		</header>
 		<p v-if="loading" class="font-mono text-sm text-muted/70">reading…</p>
@@ -72,7 +73,10 @@ const storageRatio = computed(() => {
 					</dl>
 				</article>
 			</div>
-			<h2 class="mt-8 mb-2 text-base text-heading">raft</h2>
+			<h2 class="mt-8 text-base text-heading">raft</h2>
+			<p class="mt-1 mb-2 text-sm text-muted/80">
+				Hier siehst du, ob die anderen Server noch auf dem Stand des führenden sind.
+			</p>
 			<p v-if="!data.replicas.length" class="font-mono text-sm text-muted">no replica list on this sample</p>
 			<ul v-else class="font-mono text-sm">
 				<li v-for="replica in data.replicas" :key="replica.name" class="flex gap-4 border-b border-border py-1">

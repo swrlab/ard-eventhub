@@ -48,7 +48,7 @@ Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `o
 
 Follow SWR Audio Lab engineering principles:
 
-- **Language:** Use English for filenames, variables, comments, and documentation
+- **Language:** Code, filenames, variables, comments, and JSDoc are always English. Operator UI copy and `docs/` are German. Internal developer docs in `docs/development/` and RFCs in `docs/context-rfc/` are English (US).
 - **Formatting:** Oxfmt handles formatting (single quotes, no semicolons, tabs for indentation, 120 char line width)
 - **TypeScript:** Strict mode enabled, prefer explicit types over inference where it improves clarity
 - **Naming:** Use descriptive, clear names. Follow existing patterns in the codebase
@@ -71,11 +71,13 @@ Follow SWR Audio Lab engineering principles:
 
 ## Boundaries
 
-- ✅ **Always do:** Write tests for new code, run linter before committing, use English for code/docs, follow existing patterns, run `just openapi` after changing `package.json` version (keeps `openapi.json` and `asyncapi.json` in sync)
+- ✅ **Always do:** Write tests for new code, run linter before committing, keep code and comments in English, follow existing patterns, run `just openapi` after changing `package.json` version (keeps `openapi.json` and `asyncapi.json` in sync)
 - ⚠️ **Ask first:** Modifying Google Cloud configuration, changing authentication flows, updating dependencies, major architectural changes
-- 🚫 **Never do:** Commit unencrypted secrets or API keys (use Secret Manager), modify `node_modules/` or `bun.lock`, remove failing tests without fixing them, use German in code/comments
+- 🚫 **Never do:** Commit unencrypted secrets or API keys (use Secret Manager), modify `node_modules/` or `bun.lock`, remove failing tests without fixing them, use German in identifiers, comments, or JSDoc
 
 ## Documentation
+
+Code comments and JSDoc are always English. Operator UI copy and `docs/` are German, except internal developer docs in `docs/development/` and RFCs in `docs/context-rfc/`, which are English (US).
 
 - Write documentation in Markdown files in the `docs/` directory
 - Keep documentation clear, concise, and practical

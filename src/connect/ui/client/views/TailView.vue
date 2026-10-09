@@ -258,8 +258,8 @@ onUnmounted(stop)
 		<header class="mb-4 max-w-3xl">
 			<h1 class="text-xl text-heading">tail</h1>
 			<p class="mt-1 text-sm text-muted/80">
-				Opens a NATS WebSocket as sub-ui. No password. A click, key, or scroll keeps it. A hidden tab does not. It stops
-				after 2 minutes idle and after 30 minutes anyway.
+				Hier siehst du eingehende Meldungen live. Solange du klickst, tippst oder scrollst, bleibt die Ansicht offen.
+				Ein Tab im Hintergrund zählt nicht. Nach 2 Minuten ohne Aktivität ist Schluss, spätestens nach 30 Minuten.
 			</p>
 		</header>
 		<form class="mb-3 flex flex-wrap items-end gap-3" @submit.prevent="watchTail">
@@ -285,7 +285,7 @@ onUnmounted(stop)
 			</button>
 		</div>
 		<p v-if="wide && !closeMessage" class="mb-3 font-mono text-sm text-warning">
-			wide filter. frames over 20/s are dropped and marked sampled.
+			Der Filter ist sehr weit gefasst. Ab 20 Meldungen pro Sekunde lässt die Ansicht welche aus und markiert sie.
 		</p>
 		<p v-if="closeMessage" class="mb-3 font-mono text-sm text-warning">{{ closeMessage }}</p>
 		<p v-if="tailPhase === 'sampled'" class="mb-3 font-mono text-sm text-warning">sampled · dropped {{ dropped }}</p>

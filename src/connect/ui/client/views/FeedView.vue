@@ -60,10 +60,8 @@ const tailTo = (entry: KnownLivestream): { name: string; query: { filter: string
 				built {{ formatStamp(data.generatedAt) }} · fetched {{ formatStamp(data.lastSuccessAt) }}
 			</p>
 			<p class="mt-2 text-sm text-muted/80">
-				The livestream title opens its tail. The id is the feed <code>externalId</code>, the URN publishers send. Rows
-				marked overlay are not in the ARD core feed. They come from <code>allowed-livestreams.json</code> and add a
-				publish permission: the event's <code>publisherId</code> must match, and the institution is still that
-				publisher's house in the feed.
+				Klick auf den Namen, dann siehst du die Live-Ansicht. Die ID ist die Kennung, unter der die Meldungen ankommen.
+				„overlay“ heißt: der Sender fehlt im normalen ARD-Verzeichnis und ist nur erlaubt, wenn der Absender stimmt.
 			</p>
 			<p v-if="data?.note" class="mt-2 text-sm text-muted/70">{{ data.note }}</p>
 		</header>
