@@ -1,6 +1,7 @@
 import type { Context } from 'hono'
 import { getConnInfo, serveStatic } from '@hono/bun'
 import { Hono } from 'hono'
+import { mcpHandler } from '../mcp/handler.ts'
 import { api } from './api.ts'
 import { manifestPath, staticRoot, uiAllowCidr, useHmr } from './env.ts'
 import { ipAllowed, parseAllowCidrs } from './policy.ts'
@@ -37,6 +38,8 @@ app.use('/api/*', async (c, next) => {
 })
 
 app.route('/api', api)
+
+app.all('/mcp', (c) => mcpHandler.fetch(c.req.raw))
 
 app.use('/static/*', serveStatic({ root: staticRoot }))
 app.all('/static/*', (c) => c.text('not found', 404))

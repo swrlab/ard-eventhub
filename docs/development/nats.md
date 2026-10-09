@@ -29,6 +29,10 @@ Lokale Config: [`infra/nats/nats-dev.conf`](https://github.com/swrlab/ard-eventh
 
 Vor einem Reload: `just nats-check`. User hinzufügen, dann `just nats-reload` (kein Restart).
 
+## MCP
+
+The connect process serves MCP at `/mcp`. `cluster` is the cluster board. `on-air` is the latest retained state for a publisher or institution, read from the connection and feed this process is already serving. Cursor points at `http://127.0.0.1:4173/mcp` from `.cursor/mcp.json`. `just dev` has to be running.
+
 ## MQTT nach NATS
 
 | MQTT (Wire) | NATS (Subject) |

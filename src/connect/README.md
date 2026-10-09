@@ -70,6 +70,14 @@ Panels:
 
 Tail limits are also in the page footer.
 
+## MCP
+
+The connect process serves MCP at `/mcp` (`http://127.0.0.1:4173/mcp` locally). Each request is answered on its own. There is no separate process and no session to keep open.
+
+`cluster` reads `/varz`, `/connz`, and `/jsz`. `on-air` takes a publisher or institution URN or title and returns the on-air board fields from the connection and feed this process is already serving. A title fragment matches (`SWR` matches SWR3). A URN matches only in full. Stations the feed lists with nothing retained come back with empty track fields.
+
+Cursor points at that URL from [`.cursor/mcp.json`](../../.cursor/mcp.json). `just dev` has to be running.
+
 Pin the Homebrew formula when you need a specific server; recipes assume whatever `nats-server` is on `PATH`.
 
 ## Cursor Cloud / remote Linux
