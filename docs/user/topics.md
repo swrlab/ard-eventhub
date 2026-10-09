@@ -1,6 +1,6 @@
 ---
-title: 'Topics'
-description: 'MQTT-Topic-Baum, Publish- und Subscribe-Ziele und die Übersetzung nach NATS.'
+title: 'MQTT Topics'
+description: 'MQTT-Topic-Baum, Publish- und Subscribe-Ziele, Wildcard-Filter und die Übersetzung nach NATS.'
 sidebar:
   order: 3
 ---
@@ -40,7 +40,25 @@ Publish auf die Inbox geht mit QoS 1 und **ohne** Retain. Retain auf `radio/` un
 
 Track, Control und Data teilen sich die Inbox. Nach der Validierung wird aus `event` das `radio/`-Topic: `de.ard.eventhub.v1.radio.track.playing` liegt auf `…/track/playing`. Die Livestream-URN in dem Topic ist `services[].id`.
 
-## MQTT nach NATS
+## Wildcard-Filter
+
+Ein Filter vergleicht Ebene für Ebene. `/` trennt die Ebenen. `+` und `#` ersetzen jeweils eine ganze Ebene. In `radio/urn:ard:+` ist `urn:ard:+` ein Literal, der Doppelpunkt schneidet die URN nicht.
+
+`+` trifft genau eine Ebene und darf mehrfach stehen. `radio/+/track/playing` trifft Now-Playing jedes Livestreams: die URN enthält Doppelpunkte und bleibt eine Ebene, weil kein `/` darin vorkommt. `radio/+/track/+` trifft `playing` und `next` aller Livestreams.
+
+`#` trifft den Rest des Baums, eine oder mehrere Ebenen, und steht als letzte Ebene. `radio/#` ist alles unter `radio/`. `radio/{livestreamId}/#` ist Control, Data und beide Track-Klassen. `radio/#/data` weist der Broker ab.
+
+Control und Data liegen eine Ebene unter dem Livestream (`…/control`, `…/data`). Die Track-Klassen liegen zwei Ebenen darunter (`…/track/playing`, `…/track/next`). `radio/{livestreamId}/+` trifft deshalb Control und Data. `…/track/+` trifft beide Track-Klassen, `#` trifft alle vier.
+
+`*` und `>` gelten auf der Leitung als Literale. Ein Punkt gehört zum Ebenennamen: `radio/+/track.playing` sucht die Ebene `track.playing` und verfehlt `…/track/playing`.
+
+Publish-Ziele tragen keine Wildcards. Die Inbox ist exakt `inbox/{institutionId}`.
+
+## Subscriber, die von Pub/Sub kommen
+
+Pub/Sub-Topics encodieren die URN (`urn%3Aard%3Apermanent-livestream%3A…`). MQTT und NATS nehmen den Doppelpunkt roh. Das Encoding entfällt.
+
+## Für Devs: MQTT nach NATS
 
 Das Gateway schreibt Topics um. Ein Connect, der klappt und dann nichts liefert, hat meist das falsche Trennzeichen.
 
@@ -55,7 +73,3 @@ Das Gateway schreibt Topics um. Ein Connect, der klappt und dann nichts liefert,
 Clients sprechen `/`, `+` und `#`. Ein Publish auf `inbox.urn:ard:institution:…` (Punkte) landet auf dem Subject `inbox//urn:…`, einem Token, das niemand abonniert. Richtig ist `inbox/urn:ard:institution:…`. ACLs stehen in NATS-Schreibweise (`inbox.urn:…`); auf der Leitung ist der Schrägstrich.
 
 Leerzeichen, Tab und Zeilenumbruch im Topic werden abgewiesen.
-
-## Subscriber, die von Pub/Sub kommen
-
-Pub/Sub-Topics encodieren die URN (`urn%3Aard%3Apermanent-livestream%3A…`). MQTT und NATS nehmen den Doppelpunkt roh. Das Encoding entfällt, und damit das Paar aus `pubsubBuildId` und `convert-id`. Ein Filter auf den alten Topic-Namen empfängt nichts. Die erste Nachricht auf einem `radio/`-Filter nach dem Connect ist der Retain, also der letzte angenommene Stand, und gilt als Zustand, nicht als frisches Event.

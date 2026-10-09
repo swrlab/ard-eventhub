@@ -21,7 +21,7 @@ Ein Paar aus `next` und `playing` Events sollte eine Referenz zueinander haben (
 
 Die folgenden Event-Klassen sind für **Eventhub Connect** vorgesehen und werden über `POST /events/{eventName}` mit HTTP 400 abgelehnt. Sie laufen über MQTT, mit URN-only `services[]` (`id`, `publisherId` und `institutionId` als `urn:ard:…`). Track-Events auf MQTT nutzen dieselbe Form. Beide Klassen nutzen `start` (ISO8601). Jedes Connect-Event braucht `creator` (wer es erzeugt hat, vom Publisher gesetzt); `created` setzt die Validierung auf den Zeitpunkt der Zustellung und überschreibt einen mitgeschickten Wert. Wohin publiziert wird, steht unter [_Topics_](./topics), die Verbindung unter [_Migration auf MQTT_](./connect-migration).
 
-Die vollständige Spezifikation steht im [Eventhub v3 Connect RFC](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#13-new-event-schemas). MQTT-Kanäle werden in der [Events-Referenz](/events) (AsyncAPI) dargestellt.
+Die vollständige Spezifikation steht im [Eventhub v3 Connect RFC](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#13-new-event-schemas). Inbox, zugestellte `radio/`-Topics (Track, Control, Data) und `feedback/{institutionId}` stehen in der [Events-Referenz](/events) (AsyncAPI).
 
 ## `de.ard.eventhub.v1.radio.control`
 
