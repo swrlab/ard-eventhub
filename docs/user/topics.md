@@ -9,7 +9,7 @@ Publisher schreiben nur nach `inbox/{institutionId}` und lesen nur `feedback/{in
 
 `{institutionId}` ist die Institutions-URN, zum Beispiel `urn:ard:institution:a3004ff924ece1a2`. `{livestreamId}` ist die Livestream-URN, zum Beispiel `urn:ard:permanent-livestream:49267f7d67be180d`. Es gibt keine Kurznamen wie `inbox/swr`: die URN ist dasselbe `urn:ard:…`, das in `services[].id` schon vorkommt.
 
-## Baum
+## Topic-Tree
 
 | Zweck                              | MQTT (Wire)                          | NATS (intern)                        |
 | ---------------------------------- | ------------------------------------ | ------------------------------------ |

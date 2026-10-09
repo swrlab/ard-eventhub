@@ -5,31 +5,27 @@ sidebar:
   order: 2
 ---
 
-Eventhub Connect nimmt Events über **MQTT 3.1.1** an. Der HTTPS-Ingest (`POST /events/…`) bleibt nur so lange, bis der letzte Publisher umgezogen ist, und wird danach abgeschaltet. Neue Klassen (`radio.control`, `radio.data`) lehnt er mit HTTP 400 ab. Wer auf HTTPS bleibt, liefert nur die bisherigen Track-Events, und auch die nur für die Dauer der Route.
+Eventhub Connect nimmt Events über **MQTT 3.1.1** an. Der HTTPS-Ingest (`POST /events/…`) bleibt nur so lange, bis der letzte Publisher umgezogen ist, und wird danach abgeschaltet. Neue Klassen (`radio.control`, `radio.data`) lehnt er mit HTTP 400 ab. Wer auf HTTPS bleibt, liefert nur die bisherigen Track-Events, und auch die nur für die Dauer der Migration.
 
 Zugangsdaten, die drei Knotennamen und das Passwort kommen vom Eventhub-Team. Topics stehen unter [_Topics_](./topics), Rechte unter [_Zugangsdaten_](./acl). Breaking Changes der HTTPS-API stehen unter [_Migration auf Eventhub v3_](./migration-v3).
 
 ## Verbindung
 
 - **Protokoll MQTT 3.1.1.** Ein Client, der Version 5 anbietet, bekommt CONNACK-Code 1 (_unacceptable protocol version_) und kommt nie online. In mqtt.js ist 3.1.1 der Wert `protocolVersion: 4`. Bibliotheken, die still auf v5 stehen, muss man explizit umstellen.
-- **TLS, Port `8883`.** Klartext `1883` gibt es nur am lokalen Broker, im CN ist er nicht offen.
-- **Drei Namen, alle drei im Client:** `connect-bad`, `connect-stg`, `connect-mnz`. Jeder Name ist eine Zone. Sie lösen im DNS der Stage auf; ein Resolver außerhalb dieses DNS braucht den vollständigen Namen aus den Zugangsdaten. Test und Produktion haben getrenntes DNS: derselbe Name zeigt in `test` auf andere Rechner als in `prod`. Die Stage steht bei den Zugangsdaten.
+- **TLS, Port `8883`.** Klartext `1883` gibt es nur am lokalen Dev-Broker, im ARD CN ist er nicht offen.
+- **Drei Namen, alle drei im Client:** `connect-bad`, `connect-stg`, `connect-mnz`. Jeder Name ist eine Zone. Test und Produktion haben getrennte Domains.
 - **Benutzername und Passwort** ersetzen den Firebase-Token. Der Name hat die Form `pub-{label}-{datum}`, zum Beispiel `pub-swr-2026-06-26`. Das Datum gehört zum Namen. Das Passwort läuft nicht ab und steht nicht in dieser Doku.
 - **Zertifikatsprüfung bleibt an.** Das Zertifikat deckt alle drei Namen. Wenn der Trust-Store die CA nicht kennt, liegt das CA-PEM bei den Zugangsdaten. Prüfung abzuschalten nimmt jeden Host an, der das Passwort kennt.
 
 ## Was der Client einhalten muss
 
-Jede dieser fünf Stellen hat schon Publisher still verlieren lassen. Die Folge steht jeweils dabei.
-
-**Stabile Client-ID.** Die Session hängt an der Client-ID, innerhalb des Accounts, unabhängig vom Benutzernamen. Eine neue ID bei jedem Start verwirft die persistente Session: QoS-1-Nachrichten, die während eines Abbruchs in der Warteschlange lagen, sind weg. Dieselbe ID über Neustart und Passwort-Wechsel behält die Session, deshalb ist die Rotation ohne Schnitt. Zwei Prozesse mit derselben ID werfen sich gegenseitig aus der Session, die Zustellung springt zwischen ihnen. Eine ID pro Verbindung, fest vergeben, zum Beispiel `swr3-playout`.
+**Stabile Client-ID.** Die Session hängt an der Client-ID, innerhalb des Accounts, unabhängig vom Benutzernamen. Eine neue ID bei jedem Start verwirft die persistente Session: QoS-1-Nachrichten, die während eines Abbruchs in der Warteschlange lagen, sind weg. Dieselbe ID über Neustart und Passwort-Wechsel behält die Session. Zwei Prozesse mit derselben ID werfen sich gegenseitig aus der Session, die Zustellung springt zwischen ihnen. Eine ID pro Verbindung, fest vergeben, zum Beispiel `swr3-playout`.
 
 **Alle drei DNS-Namen.** Ein Client mit nur `connect-bad` hat keinen Failover. Fällt diese Zone aus, publiziert er nichts, obwohl die anderen beiden Quorum halten und Events annehmen würden. Die Liste gehört in die Client-Konfiguration, mit Reconnect, Keep-Alive 30–60 Sekunden.
 
-**Idempotenter Empfang.** QoS 1 ist at-least-once. Ein Reconnect liefert dieselbe Nachricht ein zweites Mal. Wer jedes Paket als neues Event zählt, doppelt Titel oder Steuerbits. Dedupe über `playlistItemId` (Track) bzw. `name` plus `start` (Control). Ein erfolgreicher Publish schreibt nichts auf `feedback/`. Stille nach dem eigenen `playlistItemId` heißt angenommen. Ein zweites Publish aus dem Reconnect-Handler ist ein zweites Event.
+**Sicherer Empfang.** QoS 1 ist at-least-once. Ein Reconnect liefert dieselbe Nachricht ein zweites Mal. Wer jedes Paket als neues Event zählt, doppelt Titel oder Steuerbits. Deduplizierung über `playlistItemId` (Track) bzw. `name` plus `start` (Control). Ein erfolgreicher Publish schreibt nichts auf `feedback/`. Stille nach dem eigenen `playlistItemId` heißt angenommen.
 
-**Letzter `start` gewinnt.** Bei mehr als einem Validator ist die Ankunftsreihenfolge pro Livestream offen. Ein `track.next`, das ein `track.playing` überholt, setzt den falschen Titel, wenn der Subscriber nach Ankunft sortiert. Es gilt der Zeitstempel im Event: das Feld `start`, für Track, Control und Data. Ein Event mit älterem `start` als dem, das du schon hast, verwirfst du. Eine schiefe Publisher-Uhr lässt aktuelle Events als veraltet fallen oder lässt ein TA-Bit zu früh auslaufen.
-
-**URN-only `services[]`.** Der MQTT-Pfad rechnet keine IDs um. `id`, `publisherId` und `institutionId` sind `urn:ard:…` und Pflicht. Eine CRID (`externalId`) oder eine numerische Core-ID (`publisherId: "282310"`) endet als Schema-Ablehnung auf `feedback/`, das Event erreicht `radio/` nie. `services[].externalId` und `services[].type` weglassen: sie sind deprecated und werden ignoriert, die Ablehnung nennt sie in `deprecated`. Das `externalId` auf Event-Ebene (eure eigene Track-ID) und das Event-`type` (`music`, `news`, …) bleiben. Wer die Livestream-URNs nicht hat, liest sie vor dem Umzug aus `services[].topic.id` der heutigen HTTPS-Antwort. `institutionId` muss zur Inbox und zum Livestream passen.
+**URN-only `services[]`.** Der MQTT-Pfad rechnet keine IDs um. `id`, `publisherId` und `institutionId` sind `urn:ard:…` und Pflicht. Eine CRID (`externalId`) oder eine numerische Core-ID (`publisherId: "282310"`) endet als Schema-Ablehnung auf `feedback/`, das Event erreicht `radio/` nie. `services[].externalId` und `services[].type` weglassen: sie sind deprecated und werden ignoriert, die Ablehnung nennt sie in `deprecated`. Die `externalId` auf Event-Ebene (eure eigene Track-ID) und das Event-`type` (`music`, `news`, …) bleiben. Wer die Livestream-URNs nicht hat, liest sie vor dem Umzug aus `services[].topic.id` der heutigen HTTPS-Antwort. `institutionId` muss zur Inbox und zum Livestream passen.
 
 | Feld in `services[]` | HTTPS heute                           | MQTT                                                                        |
 | -------------------- | ------------------------------------- | --------------------------------------------------------------------------- |
@@ -39,9 +35,7 @@ Jede dieser fünf Stellen hat schon Publisher still verlieren lassen. Die Folge 
 | `externalId`         | Pflicht, `crid://…`                   | weglassen                                                                   |
 | `type`               | Pflicht, wählt das URN-Präfix         | weglassen                                                                   |
 
-**`creator` und `created`.** `creator` ist Pflicht und nennt, wer das Event erzeugt hat, etwa eine Team-Mailadresse oder das Playout-System. Über HTTPS setzt der Ingest es aus dem Token, auf MQTT schreibt es der Publisher. Fehlt es, endet das Event als Schema-Ablehnung. `created` setzt die Validierung auf den Zeitpunkt der Zustellung; ein mitgeschickter Wert wird überschrieben.
-
-Ein Publisher, der diese URNs schon schickt, ergänzt `creator` und ändert Verbindung und Zugangsdaten.
+**`creator` und `created`.** `creator` ist Pflicht und nennt, wer das Event erzeugt hat, etwa eine Team-Mailadresse oder das Playout-System. Dies kann für Rückfragen von Subscribern genutzt werden und sollte eine gültige erreichbare Adresse sein. `created` setzt die Validierung auf den Zeitpunkt der Zustellung; ein mitgeschickter Wert wird überschrieben.
 
 ## Beispiel
 
@@ -106,9 +100,9 @@ Zum Gegenprüfen brauchst du eine `sub-`-Kennung und abonnierst `radio/${livestr
 
 ## Feedback
 
-`feedback/{institutionId}` ist die Diagnose, kein Transaktions-ACK. Darauf zu warten blockiert den Publisher, und ein erfolgreiches Event schreibt dort nichts hin. Die Nachricht bleibt pro Institution retained: direkt nach dem Connect kommt die **letzte** Ablehnung, auch wenn sie Stunden alt ist. Zuordnen über `playlistItemId` (Track) oder über `start` plus Ziel-Subject (Control und Data). Eine neue Ablehnung ersetzt den Retain, ein Erfolg löscht ihn nicht.
+`feedback/{institutionId}` ist die Diagnose, kein Transaktions-ACK. Darauf zu warten blockiert den Publisher, und ein erfolgreiches Event schreibt dort nichts hin. Die Nachricht bleibt pro Institution retained: direkt nach dem Connect kommt die **letzte** Ablehnung, auch wenn sie Stunden alt ist. Zuordnen über `playlistItemId` (Track) oder über `start` plus Ziel-Subject (Control und Data).
 
-Eine CRID plus numerische Core-ID, so wie der HTTPS-Body sie heute schickt, kommt so zurück:
+Eine CRID plus numerische Core-ID, so wie der HTTPS-Body sie heute schickt, kommt beispielhaft so zurück:
 
 ```json
 {
