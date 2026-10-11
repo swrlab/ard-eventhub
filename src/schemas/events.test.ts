@@ -1,6 +1,5 @@
 import { test } from '@cross/test'
 import { assertEquals, assertStrictEquals } from '@std/assert'
-import { z } from 'zod'
 import {
 	connectEventNames,
 	eventNames,
@@ -8,6 +7,7 @@ import {
 	eventV1RadioDataPostBody,
 	httpsEventNames,
 	isConnectEventName,
+	parseConnectInboxEvent,
 	services,
 	servicesUrn,
 } from './events.ts'
@@ -30,6 +30,8 @@ const controlBody = {
 	name: 'TA',
 	state: true,
 	services: [urnService],
+	creator: 'example@swr.de',
+	created: '2026-05-27T15:03:01.000Z',
 }
 
 const dataBody = {
@@ -42,6 +44,8 @@ const dataBody = {
 		{ type: 'rtdlplus' as const, id: 32, description: 'PROGRAM.Stationname long', value: 'SWR 3' },
 	],
 	services: [urnService],
+	creator: 'example@swr.de',
+	created: '2020-01-19T05:00:01.000Z',
 }
 
 test('eventNames lists HTTPS and Connect classes', () => {
@@ -256,6 +260,53 @@ test('radiotext and dynlabel reject a non-zero id', () => {
 	})
 	assertStrictEquals(radiotext.success, false)
 	assertStrictEquals(dynlabel.success, false)
+})
+
+const trackBody = {
+	event: 'de.ard.eventhub.v1.radio.track.playing' as const,
+	type: 'music' as const,
+	start: '2026-10-08T12:00:00+02:00',
+	length: 180,
+	title: 'Song',
+	playlistItemId: 'item-1',
+	services: [urnService],
+	creator: 'example@swr.de',
+	created: '2026-10-08T10:00:01.000Z',
+}
+
+test('parseConnectInboxEvent accepts a URN-only track and keeps a deprecated service field', () => {
+	const result = parseConnectInboxEvent({
+		...trackBody,
+		services: [{ ...urnService, externalId: 'crid://swr.de/123450' }],
+		plugins: [{ type: 'dts', isDeactivated: true }],
+	})
+	assertStrictEquals(result.success, true)
+	if (!result.success) return
+	assertEquals(result.data.services[0]?.externalId, 'crid://swr.de/123450')
+	if (!('plugins' in result.data) || !result.data.plugins) return
+	assertEquals(result.data.plugins[0]?.isDeactivated, true)
+})
+
+test('parseConnectInboxEvent rejects a Core ID and an ingest envelope field', () => {
+	const coreId = parseConnectInboxEvent({
+		...trackBody,
+		services: [{ ...urnService, publisherId: '248000' }],
+	})
+	const envelope = parseConnectInboxEvent({ ...trackBody, name: 'de.ard.eventhub.v1.radio.track.playing' })
+	const missingEvent = parseConnectInboxEvent({ ...trackBody, event: undefined })
+	assertStrictEquals(coreId.success, false)
+	assertStrictEquals(envelope.success, false)
+	assertStrictEquals(missingEvent.success, false)
+})
+
+test('every Connect event class requires a non-empty creator and a created timestamp', () => {
+	for (const body of [trackBody, controlBody, dataBody]) {
+		assertStrictEquals(parseConnectInboxEvent(body).success, true)
+		assertStrictEquals(parseConnectInboxEvent({ ...body, creator: undefined }).success, false)
+		assertStrictEquals(parseConnectInboxEvent({ ...body, creator: '' }).success, false)
+		assertStrictEquals(parseConnectInboxEvent({ ...body, created: undefined }).success, false)
+		assertStrictEquals(parseConnectInboxEvent({ ...body, created: 'yesterday' }).success, false)
+	}
 })
 
 test('rtdlplus id 0 (DUMMY_CLASS) is accepted', () => {

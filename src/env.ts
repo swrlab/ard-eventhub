@@ -1,6 +1,7 @@
 import type { DTSKeys, RadioplayerApiKeys, Stage } from './schemas/config.ts'
 import { getRequiredEnv } from '@frytg/check-required-env/get'
 import { getEnv, getEnvBase64, getEnvBoolean, getEnvNumber } from './utils/env.ts'
+import { parseUserinfoUrl } from './utils/url-auth.ts'
 
 // NOTE: keys without a default are required and cause an error if missing.
 
@@ -27,12 +28,6 @@ const DEFAULT_HTTP_PORT = 8080
 export const port = getEnvNumber('PORT', DEFAULT_HTTP_PORT)
 
 /**
- * Datadog tracer enabled (`DD_TRACER_ENABLED === 'true'`).
- * `false` by default.
- */
-export const tracerEnabled = getEnvBoolean('DD_TRACER_ENABLED', false)
-
-/**
  * Whether ingest publishes plugin jobs to the internal Pub/Sub topic.
  * Only the exact string `true` enables it. Unset, `1`, `TRUE`, and `false` all leave it off.
  * Read at call time so a process restart (or a test) can flip it without re-importing this module.
@@ -43,12 +38,23 @@ export const isIngestPublishPluginsEnabled = (): boolean =>
 	getEnv<string>('INGEST_PUBLISH_PLUGINS', { defaultValue: '' }) === 'true'
 
 /**
- * MQTT broker connection string for the inbox dual-write hop.
- * `mqtt://` or `mqtts://`, with optional `user:pass@` in the URL.
+ * CN MQTT gateway for the inbox dual-write.
+ * `mqtt://user:password@host:1883`. Empty when unset so ingest stays on Pub/Sub.
+ * The exported value has userinfo removed.
  */
-export const mqttBrokerUrl = getRequiredEnv('MQTT_BROKER_URL')
+const mqttEndpoint = parseUserinfoUrl(getEnv<string>('MQTT_BROKER_URL', { defaultValue: '' }))
+
+/** MQTT server URL with userinfo removed. */
+export const mqttBrokerUrl = mqttEndpoint.url
+
 /**
- * Optional hop CA for mqtts://. PEM text, or a path to a PEM file.
- * Unset for local `mqtt://`. GKE mounts `eventhub-nanomq-tls` `ca.crt` and points here.
+ * Optional gateway CA for mqtts://. PEM text, or a path to a PEM file.
+ * Unset for local `mqtt://`.
  */
 export const mqttTlsCa = getEnv<string>('MQTT_TLS_CA', { defaultValue: '' })
+
+/** Username from `MQTT_BROKER_URL` userinfo. Empty when the URL has none. */
+export const mqttUsername = mqttEndpoint.user
+
+/** Password from `MQTT_BROKER_URL` userinfo. Empty when the URL has none. */
+export const mqttPassword = mqttEndpoint.password

@@ -2,7 +2,7 @@
 	"asyncapi": "3.0.0",
 	"info": {
 		"title": "ARD Eventhub Connect",
-		"description": "MQTT event contract for Eventhub Connect. Publishers send to `inbox/{institutionId}`; subscribers read validated events on `radio/{livestreamId}/…`. These types are **not** accepted on the HTTPS `POST /events` API. The broker is not deployed yet — host and credentials are placeholders.",
+		"description": "MQTT 3.1.1 event contract for Eventhub Connect. Publishers send `track.playing`, `track.next`, `radio.control`, and `radio.data` to `inbox/{institutionId}` and subscribe to rejections on `feedback/{institutionId}`. Subscribers read the validated event on `radio/{livestreamId}/track/playing`, `…/track/next`, `…/control`, or `…/data`. TLS port 8883; configure `connect-bad`, `connect-stg`, and `connect-mnz` in the stage DNS. `radio.control` and `radio.data` are not accepted on the HTTPS `POST /events` API. The server host below is a placeholder; connection details are in the publisher migration guide.",
 		"termsOfService": "https://www.ard.de",
 		"contact": {
 			"email": "lab@swr.de"
@@ -13,8 +13,8 @@
 		},
 		"version": "3.0.0-beta.1",
 		"externalDocs": {
-			"description": "Eventhub v3 Connect RFC §13",
-			"url": "https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#13-new-event-schemas"
+			"description": "Eventhub v3 Connect RFC §6.2",
+			"url": "https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#62-topic-tree"
 		}
 	},
 	"defaultContentType": "application/json",
@@ -22,8 +22,8 @@
 		"connect": {
 			"host": "connect.eventhub.invalid",
 			"protocol": "mqtt",
-			"protocolVersion": "5.0",
-			"description": "Placeholder MQTT endpoint. Eventhub Connect is not deployed; do not point clients here yet.",
+			"protocolVersion": "3.1.1",
+			"description": "Placeholder host. Clients use mqtts on port 8883 against connect-bad, connect-stg, and connect-mnz in the stage DNS. MQTT 5 is rejected.",
 			"security": [
 				{
 					"mqttUserPassword": []
@@ -35,7 +35,7 @@
 		"inboxInstitution": {
 			"address": "inbox/{institutionId}",
 			"title": "inbox/{institutionId}",
-			"description": "Publisher write path. Send `radio.control` and `radio.data` here. The sidecar validates the payload and republishes onto `radio/{livestreamId}/…`.",
+			"description": "Publisher write path for every event class. Eventhub validates the payload and republishes an accepted event onto `radio/{livestreamId}/…`. A rejection is retained on `feedback/{institutionId}`.",
 			"parameters": {
 				"institutionId": {
 					"description": "Owning institution URN (`urn:ard:institution:…`). Must match the livestream.",
@@ -43,6 +43,12 @@
 				}
 			},
 			"messages": {
+				"radioTrackPlaying": {
+					"$ref": "#/components/messages/radioTrackPlaying"
+				},
+				"radioTrackNext": {
+					"$ref": "#/components/messages/radioTrackNext"
+				},
 				"radioControl": {
 					"$ref": "#/components/messages/radioControl"
 				},
@@ -51,10 +57,42 @@
 				}
 			}
 		},
+		"radioLivestreamTrackPlaying": {
+			"address": "radio/{livestreamId}/track/playing",
+			"title": "radio/{livestreamId}/track/playing",
+			"description": "Validation output. Retained so a late joiner sees the current now-playing item. QoS 1.",
+			"parameters": {
+				"livestreamId": {
+					"description": "Livestream URN (`urn:ard:permanent-livestream:…` or `urn:ard:event-livestream:…`)",
+					"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"]
+				}
+			},
+			"messages": {
+				"radioTrackPlaying": {
+					"$ref": "#/components/messages/radioTrackPlaying"
+				}
+			}
+		},
+		"radioLivestreamTrackNext": {
+			"address": "radio/{livestreamId}/track/next",
+			"title": "radio/{livestreamId}/track/next",
+			"description": "Validation output. Retained latest planned next item. QoS 1.",
+			"parameters": {
+				"livestreamId": {
+					"description": "Livestream URN (`urn:ard:permanent-livestream:…` or `urn:ard:event-livestream:…`)",
+					"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"]
+				}
+			},
+			"messages": {
+				"radioTrackNext": {
+					"$ref": "#/components/messages/radioTrackNext"
+				}
+			}
+		},
 		"radioLivestreamControl": {
 			"address": "radio/{livestreamId}/control",
 			"title": "radio/{livestreamId}/control",
-			"description": "Sidecar output. Retained so a late joiner sees the current control bits. QoS 1, durable.",
+			"description": "Validation output. Retained so a late joiner sees the current control bits. QoS 1, durable.",
 			"parameters": {
 				"livestreamId": {
 					"description": "Livestream URN (`urn:ard:permanent-livestream:…` or `urn:ard:event-livestream:…`)",
@@ -70,7 +108,7 @@
 		"radioLivestreamData": {
 			"address": "radio/{livestreamId}/data",
 			"title": "radio/{livestreamId}/data",
-			"description": "Sidecar output. Cyclic radiotext / dynamic label / RT+. Retained as the latest cycle. QoS 1.",
+			"description": "Validation output. Cyclic radiotext / dynamic label / RT+. Retained as the latest cycle. QoS 1.",
 			"parameters": {
 				"livestreamId": {
 					"description": "Livestream URN (`urn:ard:permanent-livestream:…` or `urn:ard:event-livestream:…`)",
@@ -82,13 +120,85 @@
 					"$ref": "#/components/messages/radioData"
 				}
 			}
+		},
+		"feedbackInstitution": {
+			"address": "feedback/{institutionId}",
+			"title": "feedback/{institutionId}",
+			"description": "Publisher diagnostic. The last rejection for this institution, retained. Not an acknowledgement: an accepted event writes nothing here. QoS 1.",
+			"parameters": {
+				"institutionId": {
+					"description": "Owning institution URN (`urn:ard:institution:…`). Must match the livestream.",
+					"examples": ["urn:ard:institution:a3004ff924ece1a2"]
+				}
+			},
+			"messages": {
+				"validationFeedback": {
+					"$ref": "#/components/messages/validationFeedback"
+				}
+			}
 		}
 	},
 	"operations": {
+		"sendRadioTrackPlaying": {
+			"action": "send",
+			"title": "Publish track.playing on inbox/{institutionId}",
+			"description": "Publish a now-playing item to the institution inbox. Event type: [de.ard.eventhub.v1.radio.track.playing](/events/track.playing).",
+			"channel": {
+				"$ref": "#/channels/inboxInstitution"
+			},
+			"messages": [
+				{
+					"$ref": "#/channels/inboxInstitution/messages/radioTrackPlaying"
+				}
+			],
+			"tags": [
+				{
+					"name": "publish"
+				}
+			],
+			"bindings": {
+				"mqtt": {
+					"qos": 1,
+					"retain": false
+				}
+			},
+			"externalDocs": {
+				"description": "de.ard.eventhub.v1.radio.track.playing",
+				"url": "https://swrlab.github.io/ard-eventhub/events/track.playing"
+			}
+		},
+		"sendRadioTrackNext": {
+			"action": "send",
+			"title": "Publish track.next on inbox/{institutionId}",
+			"description": "Publish a planned next item to the institution inbox. Event type: [de.ard.eventhub.v1.radio.track.next](/events/track.next).",
+			"channel": {
+				"$ref": "#/channels/inboxInstitution"
+			},
+			"messages": [
+				{
+					"$ref": "#/channels/inboxInstitution/messages/radioTrackNext"
+				}
+			],
+			"tags": [
+				{
+					"name": "publish"
+				}
+			],
+			"bindings": {
+				"mqtt": {
+					"qos": 1,
+					"retain": false
+				}
+			},
+			"externalDocs": {
+				"description": "de.ard.eventhub.v1.radio.track.next",
+				"url": "https://swrlab.github.io/ard-eventhub/events/track.next"
+			}
+		},
 		"sendRadioControl": {
 			"action": "send",
 			"title": "Publish radio.control on inbox/{institutionId}",
-			"description": "Publish a control-bit change to the institution inbox. Not accepted on HTTPS `POST /events`.",
+			"description": "Publish a control-bit change to the institution inbox. Not accepted on HTTPS `POST /events`. Event type: [de.ard.eventhub.v1.radio.control](/events/control).",
 			"channel": {
 				"$ref": "#/channels/inboxInstitution"
 			},
@@ -107,12 +217,16 @@
 					"qos": 1,
 					"retain": false
 				}
+			},
+			"externalDocs": {
+				"description": "de.ard.eventhub.v1.radio.control",
+				"url": "https://swrlab.github.io/ard-eventhub/events/control"
 			}
 		},
 		"sendRadioData": {
 			"action": "send",
 			"title": "Publish radio.data on inbox/{institutionId}",
-			"description": "Publish a cyclic radiotext / RT+ bundle to the institution inbox. Not accepted on HTTPS `POST /events`.",
+			"description": "Publish a cyclic radiotext / RT+ bundle to the institution inbox. Not accepted on HTTPS `POST /events`. Event type: [de.ard.eventhub.v1.radio.data](/events/data).",
 			"channel": {
 				"$ref": "#/channels/inboxInstitution"
 			},
@@ -131,12 +245,72 @@
 					"qos": 1,
 					"retain": false
 				}
+			},
+			"externalDocs": {
+				"description": "de.ard.eventhub.v1.radio.data",
+				"url": "https://swrlab.github.io/ard-eventhub/events/data"
+			}
+		},
+		"receiveRadioTrackPlaying": {
+			"action": "receive",
+			"title": "Subscribe radio/{livestreamId}/track/playing",
+			"description": "Validated now-playing item for one livestream. Retained; QoS 1. The livestream URN is `services[].id`. Event type: [de.ard.eventhub.v1.radio.track.playing](/events/track.playing).",
+			"channel": {
+				"$ref": "#/channels/radioLivestreamTrackPlaying"
+			},
+			"messages": [
+				{
+					"$ref": "#/channels/radioLivestreamTrackPlaying/messages/radioTrackPlaying"
+				}
+			],
+			"tags": [
+				{
+					"name": "subscribe"
+				}
+			],
+			"bindings": {
+				"mqtt": {
+					"qos": 1,
+					"retain": true
+				}
+			},
+			"externalDocs": {
+				"description": "de.ard.eventhub.v1.radio.track.playing",
+				"url": "https://swrlab.github.io/ard-eventhub/events/track.playing"
+			}
+		},
+		"receiveRadioTrackNext": {
+			"action": "receive",
+			"title": "Subscribe radio/{livestreamId}/track/next",
+			"description": "Validated next item for one livestream. Retained; QoS 1. The livestream URN is `services[].id`. Event type: [de.ard.eventhub.v1.radio.track.next](/events/track.next).",
+			"channel": {
+				"$ref": "#/channels/radioLivestreamTrackNext"
+			},
+			"messages": [
+				{
+					"$ref": "#/channels/radioLivestreamTrackNext/messages/radioTrackNext"
+				}
+			],
+			"tags": [
+				{
+					"name": "subscribe"
+				}
+			],
+			"bindings": {
+				"mqtt": {
+					"qos": 1,
+					"retain": true
+				}
+			},
+			"externalDocs": {
+				"description": "de.ard.eventhub.v1.radio.track.next",
+				"url": "https://swrlab.github.io/ard-eventhub/events/track.next"
 			}
 		},
 		"receiveRadioControl": {
 			"action": "receive",
 			"title": "Subscribe radio/{livestreamId}/control",
-			"description": "Validated control bits for one livestream. Retained; QoS 1.",
+			"description": "Validated control bits for one livestream. Retained; QoS 1. Event type: [de.ard.eventhub.v1.radio.control](/events/control).",
 			"channel": {
 				"$ref": "#/channels/radioLivestreamControl"
 			},
@@ -155,18 +329,50 @@
 					"qos": 1,
 					"retain": true
 				}
+			},
+			"externalDocs": {
+				"description": "de.ard.eventhub.v1.radio.control",
+				"url": "https://swrlab.github.io/ard-eventhub/events/control"
 			}
 		},
 		"receiveRadioData": {
 			"action": "receive",
 			"title": "Subscribe radio/{livestreamId}/data",
-			"description": "Validated radiotext / dynamic label / RT+ for one livestream. Retained latest cycle; QoS 1.",
+			"description": "Validated radiotext / dynamic label / RT+ for one livestream. Retained latest cycle; QoS 1. Event type: [de.ard.eventhub.v1.radio.data](/events/data).",
 			"channel": {
 				"$ref": "#/channels/radioLivestreamData"
 			},
 			"messages": [
 				{
 					"$ref": "#/channels/radioLivestreamData/messages/radioData"
+				}
+			],
+			"tags": [
+				{
+					"name": "subscribe"
+				}
+			],
+			"bindings": {
+				"mqtt": {
+					"qos": 1,
+					"retain": true
+				}
+			},
+			"externalDocs": {
+				"description": "de.ard.eventhub.v1.radio.data",
+				"url": "https://swrlab.github.io/ard-eventhub/events/data"
+			}
+		},
+		"receiveFeedback": {
+			"action": "receive",
+			"title": "Subscribe feedback/{institutionId}",
+			"description": "Last rejection for this institution. Correlate track events by `playlistItemId`, control and data by `start`. Retained; QoS 1.",
+			"channel": {
+				"$ref": "#/channels/feedbackInstitution"
+			},
+			"messages": [
+				{
+					"$ref": "#/channels/feedbackInstitution/messages/validationFeedback"
 				}
 			],
 			"tags": [
@@ -190,6 +396,24 @@
 			}
 		},
 		"messages": {
+			"radioTrackPlaying": {
+				"name": "de.ard.eventhub.v1.radio.track.playing",
+				"title": "track.playing",
+				"summary": "Now-playing item. Retained on `radio/{livestreamId}/track/playing` after validation.",
+				"contentType": "application/json",
+				"payload": {
+					"$ref": "#/components/schemas/connectInboxTrackPlaying"
+				}
+			},
+			"radioTrackNext": {
+				"name": "de.ard.eventhub.v1.radio.track.next",
+				"title": "track.next",
+				"summary": "Planned next item. Retained on `radio/{livestreamId}/track/next` after validation.",
+				"contentType": "application/json",
+				"payload": {
+					"$ref": "#/components/schemas/connectInboxTrackNext"
+				}
+			},
 			"radioControl": {
 				"name": "de.ard.eventhub.v1.radio.control",
 				"title": "radio.control",
@@ -206,6 +430,15 @@
 				"contentType": "application/json",
 				"payload": {
 					"$ref": "#/components/schemas/eventV1RadioDataPostBody"
+				}
+			},
+			"validationFeedback": {
+				"name": "feedback",
+				"title": "feedback",
+				"summary": "Last rejection for one institution. Not an acknowledgement: a successful publish writes nothing here.",
+				"contentType": "application/json",
+				"payload": {
+					"$ref": "#/components/schemas/validationFeedbackBody"
 				}
 			}
 		},
@@ -229,7 +462,7 @@
 						"type": "string",
 						"pattern": "^urn:ard:institution:[a-z0-9]+$",
 						"examples": ["urn:ard:institution:a3004ff924ece1a2"],
-						"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+						"description": "Owning institution URN (claim; validation checks it against the feed)"
 					},
 					"externalId": {
 						"deprecated": true,
@@ -247,6 +480,682 @@
 				},
 				"required": ["id", "publisherId", "institutionId"],
 				"additionalProperties": false
+			},
+			"connectInboxTrackPlaying": {
+				"type": "object",
+				"properties": {
+					"type": {
+						"description": "The type of the element that triggered this event. See additional file in docs for details.",
+						"examples": ["music"],
+						"type": "string",
+						"enum": ["audio", "commercial", "jingle", "live", "music", "news", "traffic", "weather"]
+					},
+					"start": {
+						"type": "string",
+						"description": "ISO8601 compliant timestamp",
+						"examples": ["2020-01-19T06:00:00+01:00"]
+					},
+					"length": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"description": "Estimated length of the element in seconds. Must be set to a positive number (not 0 or null). The end of the current element is defined by the start of the next element.",
+						"examples": [240]
+					},
+					"title": {
+						"type": "string",
+						"description": "Representative title for external use",
+						"examples": ["Song name"]
+					},
+					"artist": {
+						"description": "Pre-formatted artist information",
+						"examples": ["Sam Feldt feat. Someone Else"],
+						"type": ["string", "null"]
+					},
+					"contributors": {
+						"description": "Full details about involved artists if available",
+						"anyOf": [
+							{
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/contributor"
+								}
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"references": {
+						"description": "related external entities",
+						"anyOf": [
+							{
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/reference"
+								}
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"playlistItemId": {
+						"type": "string",
+						"description": "Unique identifier (within a publisher) to connect next and playing items if needed",
+						"examples": ["swr3-5678"]
+					},
+					"hfdbIds": {
+						"description": "Can reference all available tracks in ARD HFDB instances. Should ideally at least include the common ZSK instance.",
+						"examples": [["swrhfdb1.KONF.12345", "zskhfdb1.KONF.12345"]],
+						"anyOf": [
+							{
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"externalId": {
+						"description": "Can reference the original ID in the publisher's system",
+						"examples": ["M012345.001"],
+						"type": ["string", "null"]
+					},
+					"isrc": {
+						"description": "Appropriate ISRC code if track is a music element",
+						"examples": ["DE012345678"],
+						"type": ["string", "null"]
+					},
+					"upc": {
+						"description": "Corresponding reference to an album where such ISRC was published",
+						"type": ["string", "null"]
+					},
+					"mpn": {
+						"description": "If available the reference to the original delivery from MPN",
+						"type": ["string", "null"]
+					},
+					"media": {
+						"description": "Can contain an array of media files like cover, artist, etc.",
+						"anyOf": [
+							{
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/mediaItem"
+								}
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"plugins": {
+						"description": "Highly optional field for future third-party metadata distribution or other connected services",
+						"anyOf": [
+							{
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/eventPlugin"
+								}
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"creator": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Person or system that created the event, set by the publisher (for example an email address or the playout system)",
+						"examples": ["example@swr.de"]
+					},
+					"created": {
+						"type": "string",
+						"description": "Set by Eventhub validation to the time of delivery. A value sent by the publisher is replaced.",
+						"examples": ["2026-10-08T10:00:01.000Z"],
+						"readOnly": true
+					},
+					"event": {
+						"type": "string",
+						"const": "de.ard.eventhub.v1.radio.track.playing",
+						"description": "Event class. It selects the `radio/` topic after validation.",
+						"examples": ["de.ard.eventhub.v1.radio.track.playing"]
+					},
+					"id": {
+						"description": "Optional id supplied by the publisher. Connect does not assign one.",
+						"examples": ["1234567890"],
+						"type": "string"
+					},
+					"services": {
+						"minItems": 1,
+						"type": "array",
+						"items": {
+							"$ref": "#/definitions/servicesUrn"
+						},
+						"description": "URN-only service identifiers. `id` is the livestream URN used in the `radio/` topic."
+					}
+				},
+				"required": ["type", "start", "length", "title", "playlistItemId", "creator", "created", "event", "services"],
+				"additionalProperties": false,
+				"description": "Now-playing item on Eventhub Connect. URN-only `services[]`. `created` is the delivery time.",
+				"definitions": {
+					"contributor": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string",
+								"examples": ["Sam Feldt"]
+							},
+							"role": {
+								"examples": ["artist"],
+								"type": "string",
+								"enum": [
+									"artist",
+									"author",
+									"composer",
+									"performer",
+									"conductor",
+									"choir",
+									"leader",
+									"ensemble",
+									"orchestra",
+									"soloist",
+									"producer",
+									"engineer"
+								]
+							},
+							"normDb": {
+								"description": "Reference to an entity in ARD's Norm-DB catalog",
+								"anyOf": [
+									{
+										"type": "object",
+										"properties": {
+											"type": {
+												"type": "string",
+												"examples": ["Person"]
+											},
+											"id": {
+												"type": "string",
+												"examples": ["1641010"]
+											}
+										},
+										"required": ["type", "id"],
+										"additionalProperties": false
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"isni": {
+								"description": "ISNI ID if available",
+								"type": ["string", "null"]
+							},
+							"url": {
+								"description": "Can link to external reference",
+								"type": ["string", "null"]
+							}
+						},
+						"required": ["name", "role"],
+						"additionalProperties": false
+					},
+					"reference": {
+						"type": "object",
+						"properties": {
+							"type": {
+								"type": "string",
+								"enum": ["Episode", "Section", "Publication", "Broadcast", "Show", "Season", "Article"]
+							},
+							"id": {
+								"examples": ["urn:ard:show:49267f7d67be180d"],
+								"type": "string",
+								"pattern": "^urn:ard:[a-z0-9-]+:[a-z0-9-]+$"
+							},
+							"externalId": {
+								"type": "string",
+								"pattern": "^(c|b)rid:\\/\\/.+$",
+								"examples": ["crid://swr.de/123450"]
+							},
+							"title": {
+								"type": "string"
+							},
+							"url": {
+								"type": "string",
+								"format": "uri"
+							},
+							"alternateIds": {
+								"examples": [["https://normdb.ivz.cn.ard.de/sendereihe/427"]],
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							}
+						},
+						"required": ["type", "externalId"],
+						"additionalProperties": false
+					},
+					"mediaItem": {
+						"type": "object",
+						"properties": {
+							"type": {
+								"examples": ["cover"],
+								"type": "string",
+								"enum": ["cover", "artist", "anchor", "audio", "video"]
+							},
+							"url": {
+								"type": "string",
+								"examples": ["https://example.com/cover.jpg"]
+							},
+							"templateUrl": {
+								"examples": ["https://example.com/cover.jpg?width={width}"],
+								"type": ["string", "null"]
+							},
+							"description": {
+								"type": "string",
+								"examples": ["Cover Demo Artist"]
+							},
+							"attribution": {
+								"examples": ["Photographer XYZ"],
+								"type": ["string", "null"]
+							},
+							"isFallback": {
+								"description": "Optional flag to mark media as fallback data that subscribers can filter out",
+								"examples": [false],
+								"type": "boolean"
+							}
+						},
+						"required": ["type", "url", "description"],
+						"additionalProperties": false
+					},
+					"eventPlugin": {
+						"type": "object",
+						"properties": {
+							"type": {
+								"examples": ["postToThirdPartyPlatformXYZ"],
+								"type": "string"
+							}
+						},
+						"additionalProperties": {}
+					},
+					"servicesUrn": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string",
+								"pattern": "^urn:ard:(permanent-livestream|event-livestream):[a-z0-9]+$",
+								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"description": "Pre-encoded ARD livestream URN"
+							},
+							"publisherId": {
+								"type": "string",
+								"pattern": "^urn:ard:publisher:[a-z0-9]+$",
+								"examples": ["urn:ard:publisher:75dbb3dace15f610"],
+								"description": "Pre-encoded ARD publisher URN"
+							},
+							"institutionId": {
+								"type": "string",
+								"pattern": "^urn:ard:institution:[a-z0-9]+$",
+								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
+								"description": "Owning institution URN (claim; validation checks it against the feed)"
+							},
+							"externalId": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["crid://swr.de/123450"],
+								"type": "string"
+							},
+							"type": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["PermanentLivestream"],
+								"type": "string",
+								"enum": ["EventLivestream", "PermanentLivestream"]
+							}
+						},
+						"required": ["id", "publisherId", "institutionId"],
+						"additionalProperties": false
+					}
+				}
+			},
+			"connectInboxTrackNext": {
+				"type": "object",
+				"properties": {
+					"type": {
+						"description": "The type of the element that triggered this event. See additional file in docs for details.",
+						"examples": ["music"],
+						"type": "string",
+						"enum": ["audio", "commercial", "jingle", "live", "music", "news", "traffic", "weather"]
+					},
+					"start": {
+						"type": "string",
+						"description": "ISO8601 compliant timestamp",
+						"examples": ["2020-01-19T06:00:00+01:00"]
+					},
+					"length": {
+						"type": "number",
+						"exclusiveMinimum": 0,
+						"description": "Estimated length of the element in seconds. Must be set to a positive number (not 0 or null). The end of the current element is defined by the start of the next element.",
+						"examples": [240]
+					},
+					"title": {
+						"type": "string",
+						"description": "Representative title for external use",
+						"examples": ["Song name"]
+					},
+					"artist": {
+						"description": "Pre-formatted artist information",
+						"examples": ["Sam Feldt feat. Someone Else"],
+						"type": ["string", "null"]
+					},
+					"contributors": {
+						"description": "Full details about involved artists if available",
+						"anyOf": [
+							{
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/contributor"
+								}
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"references": {
+						"description": "related external entities",
+						"anyOf": [
+							{
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/reference"
+								}
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"playlistItemId": {
+						"type": "string",
+						"description": "Unique identifier (within a publisher) to connect next and playing items if needed",
+						"examples": ["swr3-5678"]
+					},
+					"hfdbIds": {
+						"description": "Can reference all available tracks in ARD HFDB instances. Should ideally at least include the common ZSK instance.",
+						"examples": [["swrhfdb1.KONF.12345", "zskhfdb1.KONF.12345"]],
+						"anyOf": [
+							{
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"externalId": {
+						"description": "Can reference the original ID in the publisher's system",
+						"examples": ["M012345.001"],
+						"type": ["string", "null"]
+					},
+					"isrc": {
+						"description": "Appropriate ISRC code if track is a music element",
+						"examples": ["DE012345678"],
+						"type": ["string", "null"]
+					},
+					"upc": {
+						"description": "Corresponding reference to an album where such ISRC was published",
+						"type": ["string", "null"]
+					},
+					"mpn": {
+						"description": "If available the reference to the original delivery from MPN",
+						"type": ["string", "null"]
+					},
+					"media": {
+						"description": "Can contain an array of media files like cover, artist, etc.",
+						"anyOf": [
+							{
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/mediaItem"
+								}
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"plugins": {
+						"description": "Highly optional field for future third-party metadata distribution or other connected services",
+						"anyOf": [
+							{
+								"type": "array",
+								"items": {
+									"$ref": "#/definitions/eventPlugin"
+								}
+							},
+							{
+								"type": "null"
+							}
+						]
+					},
+					"creator": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Person or system that created the event, set by the publisher (for example an email address or the playout system)",
+						"examples": ["example@swr.de"]
+					},
+					"created": {
+						"type": "string",
+						"description": "Set by Eventhub validation to the time of delivery. A value sent by the publisher is replaced.",
+						"examples": ["2026-10-08T10:00:01.000Z"],
+						"readOnly": true
+					},
+					"event": {
+						"type": "string",
+						"const": "de.ard.eventhub.v1.radio.track.next",
+						"description": "Event class. It selects the `radio/` topic after validation.",
+						"examples": ["de.ard.eventhub.v1.radio.track.next"]
+					},
+					"id": {
+						"description": "Optional id supplied by the publisher. Connect does not assign one.",
+						"examples": ["1234567890"],
+						"type": "string"
+					},
+					"services": {
+						"minItems": 1,
+						"type": "array",
+						"items": {
+							"$ref": "#/definitions/servicesUrn"
+						},
+						"description": "URN-only service identifiers. `id` is the livestream URN used in the `radio/` topic."
+					}
+				},
+				"required": ["type", "start", "length", "title", "playlistItemId", "creator", "created", "event", "services"],
+				"additionalProperties": false,
+				"description": "Planned next item on Eventhub Connect. URN-only `services[]`. `created` is the delivery time.",
+				"definitions": {
+					"contributor": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string",
+								"examples": ["Sam Feldt"]
+							},
+							"role": {
+								"examples": ["artist"],
+								"type": "string",
+								"enum": [
+									"artist",
+									"author",
+									"composer",
+									"performer",
+									"conductor",
+									"choir",
+									"leader",
+									"ensemble",
+									"orchestra",
+									"soloist",
+									"producer",
+									"engineer"
+								]
+							},
+							"normDb": {
+								"description": "Reference to an entity in ARD's Norm-DB catalog",
+								"anyOf": [
+									{
+										"type": "object",
+										"properties": {
+											"type": {
+												"type": "string",
+												"examples": ["Person"]
+											},
+											"id": {
+												"type": "string",
+												"examples": ["1641010"]
+											}
+										},
+										"required": ["type", "id"],
+										"additionalProperties": false
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"isni": {
+								"description": "ISNI ID if available",
+								"type": ["string", "null"]
+							},
+							"url": {
+								"description": "Can link to external reference",
+								"type": ["string", "null"]
+							}
+						},
+						"required": ["name", "role"],
+						"additionalProperties": false
+					},
+					"reference": {
+						"type": "object",
+						"properties": {
+							"type": {
+								"type": "string",
+								"enum": ["Episode", "Section", "Publication", "Broadcast", "Show", "Season", "Article"]
+							},
+							"id": {
+								"examples": ["urn:ard:show:49267f7d67be180d"],
+								"type": "string",
+								"pattern": "^urn:ard:[a-z0-9-]+:[a-z0-9-]+$"
+							},
+							"externalId": {
+								"type": "string",
+								"pattern": "^(c|b)rid:\\/\\/.+$",
+								"examples": ["crid://swr.de/123450"]
+							},
+							"title": {
+								"type": "string"
+							},
+							"url": {
+								"type": "string",
+								"format": "uri"
+							},
+							"alternateIds": {
+								"examples": [["https://normdb.ivz.cn.ard.de/sendereihe/427"]],
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							}
+						},
+						"required": ["type", "externalId"],
+						"additionalProperties": false
+					},
+					"mediaItem": {
+						"type": "object",
+						"properties": {
+							"type": {
+								"examples": ["cover"],
+								"type": "string",
+								"enum": ["cover", "artist", "anchor", "audio", "video"]
+							},
+							"url": {
+								"type": "string",
+								"examples": ["https://example.com/cover.jpg"]
+							},
+							"templateUrl": {
+								"examples": ["https://example.com/cover.jpg?width={width}"],
+								"type": ["string", "null"]
+							},
+							"description": {
+								"type": "string",
+								"examples": ["Cover Demo Artist"]
+							},
+							"attribution": {
+								"examples": ["Photographer XYZ"],
+								"type": ["string", "null"]
+							},
+							"isFallback": {
+								"description": "Optional flag to mark media as fallback data that subscribers can filter out",
+								"examples": [false],
+								"type": "boolean"
+							}
+						},
+						"required": ["type", "url", "description"],
+						"additionalProperties": false
+					},
+					"eventPlugin": {
+						"type": "object",
+						"properties": {
+							"type": {
+								"examples": ["postToThirdPartyPlatformXYZ"],
+								"type": "string"
+							}
+						},
+						"additionalProperties": {}
+					},
+					"servicesUrn": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string",
+								"pattern": "^urn:ard:(permanent-livestream|event-livestream):[a-z0-9]+$",
+								"examples": ["urn:ard:permanent-livestream:49267f7d67be180d"],
+								"description": "Pre-encoded ARD livestream URN"
+							},
+							"publisherId": {
+								"type": "string",
+								"pattern": "^urn:ard:publisher:[a-z0-9]+$",
+								"examples": ["urn:ard:publisher:75dbb3dace15f610"],
+								"description": "Pre-encoded ARD publisher URN"
+							},
+							"institutionId": {
+								"type": "string",
+								"pattern": "^urn:ard:institution:[a-z0-9]+$",
+								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
+								"description": "Owning institution URN (claim; validation checks it against the feed)"
+							},
+							"externalId": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["crid://swr.de/123450"],
+								"type": "string"
+							},
+							"type": {
+								"deprecated": true,
+								"description": "Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.",
+								"examples": ["PermanentLivestream"],
+								"type": "string",
+								"enum": ["EventLivestream", "PermanentLivestream"]
+							}
+						},
+						"required": ["id", "publisherId", "institutionId"],
+						"additionalProperties": false
+					}
+				}
 			},
 			"eventV1RadioControlPostBody": {
 				"type": "object",
@@ -283,9 +1192,21 @@
 							"$ref": "#/definitions/servicesUrn"
 						},
 						"description": "URN-only service identifiers (Connect / MQTT)"
+					},
+					"creator": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Person or system that created the event, set by the publisher (for example an email address or the playout system)",
+						"examples": ["example@swr.de"]
+					},
+					"created": {
+						"type": "string",
+						"description": "Set by Eventhub validation to the time of delivery. A value sent by the publisher is replaced.",
+						"examples": ["2026-10-08T10:00:01.000Z"],
+						"readOnly": true
 					}
 				},
-				"required": ["start", "name", "state", "services"],
+				"required": ["start", "name", "state", "services", "creator", "created"],
 				"additionalProperties": false,
 				"description": "Eventhub Connect radio.control event. Not accepted on the HTTPS POST /events API.",
 				"definitions": {
@@ -308,7 +1229,7 @@
 								"type": "string",
 								"pattern": "^urn:ard:institution:[a-z0-9]+$",
 								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
-								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+								"description": "Owning institution URN (claim; validation checks it against the feed)"
 							},
 							"externalId": {
 								"deprecated": true,
@@ -428,9 +1349,21 @@
 							"$ref": "#/definitions/servicesUrn"
 						},
 						"description": "URN-only service identifiers (Connect / MQTT)"
+					},
+					"creator": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Person or system that created the event, set by the publisher (for example an email address or the playout system)",
+						"examples": ["example@swr.de"]
+					},
+					"created": {
+						"type": "string",
+						"description": "Set by Eventhub validation to the time of delivery. A value sent by the publisher is replaced.",
+						"examples": ["2026-10-08T10:00:01.000Z"],
+						"readOnly": true
 					}
 				},
-				"required": ["start", "cycle", "data", "services"],
+				"required": ["start", "cycle", "data", "services", "creator", "created"],
 				"additionalProperties": false,
 				"description": "Eventhub Connect radio.data event. Not accepted on the HTTPS POST /events API.",
 				"definitions": {
@@ -453,7 +1386,7 @@
 								"type": "string",
 								"pattern": "^urn:ard:institution:[a-z0-9]+$",
 								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
-								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+								"description": "Owning institution URN (claim; validation checks it against the feed)"
 							},
 							"externalId": {
 								"deprecated": true,
@@ -473,6 +1406,77 @@
 						"additionalProperties": false
 					}
 				}
+			},
+			"validationFeedbackBody": {
+				"type": "object",
+				"properties": {
+					"created": {
+						"type": "string",
+						"description": "Time of the rejection.",
+						"examples": ["2020-01-19T06:00:00+01:00"]
+					},
+					"institutionId": {
+						"type": "string",
+						"pattern": "^urn:ard:institution:[a-z0-9]+$",
+						"examples": ["urn:ard:institution:a3004ff924ece1a2"],
+						"description": "Institution the inbox belongs to."
+					},
+					"subject": {
+						"type": "string",
+						"description": "Inbox subject the event arrived on (`inbox.{institutionId}`).",
+						"examples": ["inbox.urn:ard:institution:a3004ff924ece1a2"]
+					},
+					"errors": {
+						"minItems": 1,
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"path": {
+									"type": "string",
+									"description": "JSON path of the problem (`.body.services.0.id`).",
+									"examples": [".body.title"]
+								},
+								"message": {
+									"type": "string",
+									"examples": ["should have required property 'title'"]
+								},
+								"errorCode": {
+									"type": "string",
+									"description": "Schema errors use `*.openapi.validation`. Ownership uses `unauthorized.eventhub.validation` or `notFound.eventhub.validation`.",
+									"examples": ["required.openapi.validation"]
+								}
+							},
+							"required": ["path", "message", "errorCode"],
+							"additionalProperties": false
+						},
+						"description": "Same shape as `errors` on the HTTPS API 400 response. One entry per problem."
+					},
+					"playlistItemId": {
+						"description": "Copied from the payload when present, so a track rejection can be correlated.",
+						"examples": ["swr3-demo-1"],
+						"type": "string"
+					},
+					"start": {
+						"description": "Copied from the payload when present. Control and data correlate on this plus `subject`.",
+						"examples": ["2026-10-08T12:00:00+02:00"],
+						"type": "string"
+					},
+					"deprecated": {
+						"description": "Deprecated `services[]` fields that were still sent (`services.externalId`, `services.type`).",
+						"examples": [["services.externalId", "services.type"]],
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"event": {
+						"description": "Rejected event as it arrived: a JSON value, otherwise text. Over 64 KiB this is `{ truncated, bytes, head }`."
+					}
+				},
+				"required": ["created", "institutionId", "subject", "errors", "event"],
+				"additionalProperties": false,
+				"description": "Last rejection for one institution, retained on `feedback/{institutionId}`. An accepted event writes nothing here."
 			}
 		}
 	}

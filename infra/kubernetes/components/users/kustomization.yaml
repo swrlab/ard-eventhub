@@ -1,0 +1,9 @@
+# One nats-users.conf for dev, test, and prod. Parents already generate ConfigMap `nats`.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+configMapGenerator:
+  - name: nats
+    behavior: merge
+    files:
+      - nats-users.conf

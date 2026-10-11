@@ -6,7 +6,7 @@ import { createHashedId } from '@swrlab/utils/packages/ard/index.js'
 import { coreIdPrefixes } from '#config'
 import allowedLivestreamsJson from '../../config/allowed-livestreams.json' with { type: 'json' }
 import { allowedLivestreamsConfig } from '../../schemas/config.ts'
-import { getPublisherById } from '../ard-core.ts'
+import { getPublisherById } from '../feed/ard-core.ts'
 import { pubsubBuildId } from '../pubsub/build-id.ts'
 
 const source = 'utils.events.processServices'
