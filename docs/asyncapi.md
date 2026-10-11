@@ -11,9 +11,16 @@ Eventhub Connect (MQTT) ist im [AsyncAPI](https://www.asyncapi.com/docs/referenc
 
 Die Spezifikation aus `asyncapi.json` wird in diesen Docs als [Events-Referenz](/events) gerendert — eine Seite pro `send`/`receive`-Operation.
 
-Aktuell sind das die Connect-Klassen `radio.control` und `radio.data`. Sie sind über `POST /events` mit HTTP 400 abgelehnt. Das Protokoll ist MQTT 3.1.1 auf TLS-Port `8883`; ein v5-Connect wird abgelehnt. Host `connect.eventhub.invalid` in der Spezifikation ist ein Platzhalter. Die drei Knotennamen, die Zugangsdaten und ein lauffähiges Beispiel stehen unter [_Migration auf MQTT_](./user/connect-migration).
+Publisher schreiben `track.playing`, `track.next`, `radio.control` und `radio.data` auf `inbox/{institutionId}`. Subscriber lesen die zugestellte Fassung auf `radio/{livestreamId}/track/playing`, `…/track/next`, `…/control` und `…/data`. Ablehnungen stehen retained auf `feedback/{institutionId}`. `radio.control` und `radio.data` lehnt `POST /events` mit HTTP 400 ab; Track-Events nimmt der HTTPS-Ingest während der Migration noch an. Das Protokoll ist MQTT 3.1.1 auf TLS-Port `8883`; ein v5-Connect wird abgelehnt. Host `connect.eventhub.invalid` in der Spezifikation ist ein Platzhalter. Die drei Knotennamen, die Zugangsdaten und ein lauffähiges Beispiel stehen unter [_Migration auf MQTT_](./user/connect-migration).
 
-Die Payload-Schemas stammen aus denselben Zod-Definitionen wie die OpenAPI-Komponenten. MQTT-Bindings (QoS, Retain) kommen aus dem [v3 Connect RFC](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#13-new-event-schemas).
+Jede Klasse hat eine eigene Erläuterung. Dieselbe Adresse hängt als `externalDocs` an der jeweiligen `send`- und `receive`-Operation:
+
+- [_de.ard.eventhub.v1.radio.track.playing_](./events/track.playing)
+- [_de.ard.eventhub.v1.radio.track.next_](./events/track.next)
+- [_de.ard.eventhub.v1.radio.control_](./events/control)
+- [_de.ard.eventhub.v1.radio.data_](./events/data)
+
+`radio.control` und `radio.data` nutzen dieselben Zod-Schemas wie die OpenAPI-Komponenten. Track-Events nutzen die URN-only Inbox-Form (`creator`, von der Validierung gesetztes `created`, `services[]` ohne CRID). Das Feedback-Schema ist der Body, den die Validierung auf `feedback/` ablegt. MQTT-Bindings (QoS, Retain) kommen aus dem [v3 Connect RFC](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#62-topic-tree).
 
 ## Spezifikation pflegen
 

@@ -694,6 +694,75 @@ export const connectInboxDataEvent = eventV1RadioDataPostBody
 	})
 	.strict()
 
+/**
+ * One problem on a rejected inbox event, in the HTTPS API 400 `errors[]` shape.
+ */
+const validationErrorItem = z
+	.object({
+		path: z.string().meta({
+			description: 'JSON path of the problem (`.body.services.0.id`).',
+			examples: ['.body.title'],
+		}),
+		message: z.string().meta({ examples: ["should have required property 'title'"] }),
+		errorCode: z.string().meta({
+			description:
+				'Schema errors use `*.openapi.validation`. Ownership uses `unauthorized.eventhub.validation` or `notFound.eventhub.validation`.',
+			examples: ['required.openapi.validation'],
+		}),
+	})
+	.strict()
+
+/**
+ * Retained body on `feedback/{institutionId}`. Diagnostic, not an acknowledgement.
+ * Optional fields are omitted when the payload did not carry them.
+ */
+export const validationFeedbackBody = z
+	.object({
+		created: iso8601Timestamp.meta({ description: 'Time of the rejection.' }),
+		institutionId: institutionUrn.meta({
+			description: 'Institution the inbox belongs to.',
+			examples: ['urn:ard:institution:a3004ff924ece1a2'],
+		}),
+		subject: z.string().meta({
+			description: 'Inbox subject the event arrived on (`inbox.{institutionId}`).',
+			examples: ['inbox.urn:ard:institution:a3004ff924ece1a2'],
+		}),
+		errors: z.array(validationErrorItem).min(1).meta({
+			description: 'Same shape as `errors` on the HTTPS API 400 response. One entry per problem.',
+		}),
+		playlistItemId: z
+			.string()
+			.optional()
+			.meta({
+				description: 'Copied from the payload when present, so a track rejection can be correlated.',
+				examples: ['swr3-demo-1'],
+			}),
+		start: z
+			.string()
+			.optional()
+			.meta({
+				description: 'Copied from the payload when present. Control and data correlate on this plus `subject`.',
+				examples: ['2026-10-08T12:00:00+02:00'],
+			}),
+		deprecated: z
+			.array(z.string())
+			.optional()
+			.meta({
+				description: 'Deprecated `services[]` fields that were still sent (`services.externalId`, `services.type`).',
+				examples: [['services.externalId', 'services.type']],
+			}),
+		event: z.unknown().meta({
+			description:
+				'Rejected event as it arrived: a JSON value, otherwise text. Over 64 KiB this is `{ truncated, bytes, head }`.',
+		}),
+	})
+	.strict()
+	.meta({
+		id: 'validationFeedbackBody',
+		description:
+			'Last rejection for one institution, retained on `feedback/{institutionId}`. An accepted event writes nothing here.',
+	})
+
 const connectInboxSchemaByEvent = {
 	'de.ard.eventhub.v1.radio.track.playing': connectInboxTrackEvent,
 	'de.ard.eventhub.v1.radio.track.next': connectInboxTrackEvent,

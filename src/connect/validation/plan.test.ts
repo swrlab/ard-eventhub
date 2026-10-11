@@ -1,6 +1,7 @@
 import type { ValidationAccept, ValidationPlan, ValidationReject } from '#types'
 import { test } from '@cross/test'
 import { assertEquals, assertThrows } from '@std/assert'
+import { validationFeedbackBody } from '../../schemas/events.ts'
 import { serveTestFeed } from '../feed/test-feed.ts'
 import { parseRejection } from '../ui/rejections.ts'
 import { planInboxMessage } from './plan.ts'
@@ -196,6 +197,22 @@ test('an unknown livestream is an ownership rejection', () => {
 			errorCode: 'notFound.eventhub.validation',
 		},
 	])
+})
+
+test('retained feedback matches the documented body', () => {
+	const schemaFailure = rejected(
+		plan({
+			...track,
+			title: undefined,
+			services: [{ ...track.services[0], type: 'PermanentLivestream', externalId: 'crid://swr.de/282310' }],
+		})
+	)
+	const parsed = validationFeedbackBody.safeParse(schemaFailure.feedback?.body)
+	if (!parsed.success) throw new Error(JSON.stringify(parsed.error.issues))
+
+	const notJson = rejected(planInboxMessage({ subject: INBOX, bytes: new TextEncoder().encode('{nope'), now: AT }))
+	const text = validationFeedbackBody.safeParse(notJson.feedback?.body)
+	if (!text.success) throw new Error(JSON.stringify(text.error.issues))
 })
 
 test('a subject without an institution URN is termed with no feedback', () => {
