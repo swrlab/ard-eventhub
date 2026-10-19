@@ -320,7 +320,8 @@ decrypts `.env.ci.sops.yaml` with an age key from a GitHub secret, and Kubernete
 **API contract.** `openapi.json` is generated from the Zod schemas by `just openapi`
 (`z.toJSONSchema` with `target: 'openapi-3.0'`). The schemas are the source of truth; the JSON is a
 build artifact that happens to be committed. It must be regenerated after any schema change and
-after any `package.json` version bump, since `info.version` is read from there. The service no
+after any `package.json` version bump, since `info.version` is read from there. Every operation in
+that spec is marked `deprecated: true`; Eventhub Connect replaces the HTTPS ingest. The service no
 longer serves Swagger UI — `/openapi` redirects to the docs site.
 
 **Testing.** Unit tests use `@cross/test` + `@std/assert` + sinon so the same files run on Bun,

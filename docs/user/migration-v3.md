@@ -8,6 +8,8 @@ sidebar:
 
 Diese Seite fasst die **Breaking Changes** von Eventhub **3.0** zusammen (aktuell Pre-Release `3.0.0-beta.2`): die HTTPS-API und die Umstellung auf Eventhub Connect über MQTT. Der HTTPS-Ingest bleibt nur bis zum letzten Umzug und wird dann abgeschaltet.
 
+Die HTTPS-Operationen sind in der [OpenAPI-Referenz](/api) als **deprecated** markiert: `POST /auth/login`, `POST /auth/refresh`, `POST /auth/reset`, `POST /events/…`, `GET` und `POST /subscriptions`, `GET` und `DELETE /subscriptions/{name}`, `GET /topics`. Sie antworten weiter. Neue Anbindungen nutzen [_Eventhub Connect_](./connect-mqtt).
+
 - Anbindung und Beispiel: [_Eventhub Connect_](./connect-mqtt)
 - Topics und Filter: [_Topics_](./topics)
 - Benutzer, Passwort, Rechte: [_Zugangsdaten_](./acl)

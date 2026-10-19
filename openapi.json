@@ -2,7 +2,7 @@
 	"openapi": "3.0.3",
 	"info": {
 		"title": "ARD Eventhub",
-		"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
+		"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.\n\nThis HTTPS API is deprecated. Every operation stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed. New integrations use Eventhub Connect.",
 		"termsOfService": "https://www.ard.de",
 		"contact": {
 			"email": "lab@swr.de"
@@ -26,19 +26,19 @@
 	"tags": [
 		{
 			"name": "auth",
-			"description": "Authentication services for Eventhub"
+			"description": "Deprecated. Authentication for the HTTPS ingest API. Eventhub Connect uses an MQTT username and password."
 		},
 		{
 			"name": "events",
-			"description": "Manage events"
+			"description": "Deprecated. Publish track events over HTTPS. Eventhub Connect publishes the same events on MQTT inbox/{institutionId}."
 		},
 		{
 			"name": "subscriptions",
-			"description": "Access to subscription management"
+			"description": "Deprecated. HTTPS push subscriptions. Eventhub Connect subscribers read MQTT topics instead."
 		},
 		{
 			"name": "topics",
-			"description": "Access to topics details"
+			"description": "Deprecated. List HTTPS/Pub/Sub topics. Eventhub Connect uses the MQTT topic tree."
 		}
 	],
 	"paths": {
@@ -97,7 +97,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		},
 		"/auth/refresh": {
@@ -155,7 +157,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		},
 		"/auth/reset": {
@@ -207,7 +211,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		},
 		"/events/de.ard.eventhub.v1.radio.track.next": {
@@ -292,7 +298,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		},
 		"/events/de.ard.eventhub.v1.radio.track.playing": {
@@ -377,7 +385,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		},
 		"/subscriptions": {
@@ -431,7 +441,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			},
 			"post": {
 				"tags": ["subscriptions"],
@@ -524,7 +536,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		},
 		"/subscriptions/{name}": {
@@ -601,7 +615,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			},
 			"delete": {
 				"tags": ["subscriptions"],
@@ -676,7 +692,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		},
 		"/topics": {
@@ -710,7 +728,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		}
 	},
