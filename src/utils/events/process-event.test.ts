@@ -6,7 +6,7 @@ import { DateTime } from '@frytg/dates'
 import { logger } from '@frytg/logger'
 import { assertEquals, assertExists, assertMatch } from '@std/assert'
 import { createSandbox } from 'sinon'
-import { publisherLookup } from '../ard-core.ts'
+import { publisherLookup } from '../feed/ard-core.ts'
 import { mqttInbox } from '../mqtt/publish-inbox.ts'
 import { processEvent, publishEventPlugins, pubsubFanout } from './process-event.ts'
 
@@ -39,17 +39,19 @@ const makeBody = (): Record<string, unknown> => ({
 
 /**
  * Stub ARD publisher lookup and Pub/Sub fan-out.
+ * @param resolvePublisher - When false for an id, lookup returns no publisher
  * @returns Sinon sandbox and the Pub/Sub stub
  */
-const stubFanout = () => {
+const stubFanout = (resolvePublisher: (publisherId: string) => boolean = () => true) => {
 	const sandbox = createSandbox()
-	sandbox.stub(publisherLookup, 'getById').callsFake(
-		(publisherId: string) =>
-			({
-				id: publisherId,
-				title: 'Probe Station',
-				institution: { id: INSTITUTION_ID, title: 'SWR' },
-			}) as ArdPublisher
+	sandbox.stub(publisherLookup, 'getById').callsFake((publisherId: string) =>
+		resolvePublisher(publisherId)
+			? ({
+					id: publisherId,
+					title: 'Probe Station',
+					institution: { id: INSTITUTION_ID, title: 'SWR' },
+				} as ArdPublisher)
+			: undefined
 	)
 	const publishMessage = sandbox.stub(pubsubFanout, 'publishMessage').resolves('pub-1')
 	sandbox.stub(logger, 'log')
@@ -96,7 +98,7 @@ test('processEvent publishes the enriched event to the MQTT inbox', async () => 
 	}
 })
 
-test('processEvent normalizes a numeric publisherId before the MQTT inbox hop', async () => {
+test('processEvent normalizes a numeric publisherId before the MQTT inbox publish', async () => {
 	const { sandbox } = stubFanout()
 	const publishInbox = sandbox.stub(mqttInbox, 'publish').resolves()
 
@@ -125,6 +127,98 @@ test('processEvent normalizes a numeric publisherId before the MQTT inbox hop', 
 		assertEquals(payload.services[0]?.externalId, 'crid://swr.de/123450')
 		assertEquals(payload.services[0]?.type, 'PermanentLivestream')
 		assertEquals(result.event.services[0]?.publisherId, payload.services[0]?.publisherId)
+	} finally {
+		sandbox.restore()
+	}
+})
+
+test('processEvent records a blocked service, skips Pub/Sub, and still sends it to the MQTT inbox', async () => {
+	const { sandbox, publishMessage } = stubFanout(() => false)
+	sandbox.stub(logger, 'warning')
+	const publishInbox = sandbox.stub(mqttInbox, 'publish').resolves()
+
+	try {
+		const result = await processEvent({
+			eventName: 'de.ard.eventhub.v1.radio.track.playing',
+			user,
+			body: makeBody(),
+		})
+
+		assertEquals(result.statuses, { published: 0, blocked: 1, failed: 0 })
+		assertEquals(result.plugins, [])
+		assertEquals(result.event.services[0]?.blocked, `Publisher not found > ${PUBLISHER_URN}`)
+		assertEquals(publishMessage.called, false)
+		assertEquals(publishInbox.calledOnce, true)
+		const payload = publishInbox.firstCall.args[1] as {
+			services: Array<{ blocked?: string; topic?: { messageId?: string } }>
+		}
+		assertEquals(payload.services[0]?.blocked, `Publisher not found > ${PUBLISHER_URN}`)
+		assertEquals(payload.services[0]?.topic?.messageId, undefined)
+	} finally {
+		sandbox.restore()
+	}
+})
+
+test('processEvent publishes only non-blocked services to the common topic', async () => {
+	const unknownPublisher = 'urn:ard:publisher:0000000000000000'
+	const { sandbox, publishMessage } = stubFanout((publisherId) => publisherId === PUBLISHER_URN)
+	sandbox.stub(logger, 'warning')
+	const publishInbox = sandbox.stub(mqttInbox, 'publish').resolves()
+
+	try {
+		const result = await processEvent({
+			eventName: 'de.ard.eventhub.v1.radio.track.playing',
+			user,
+			body: {
+				...makeBody(),
+				services: [
+					{
+						type: 'PermanentLivestream',
+						externalId: 'ext-ok',
+						publisherId: PUBLISHER_URN,
+					},
+					{
+						type: 'PermanentLivestream',
+						externalId: 'ext-blocked',
+						publisherId: unknownPublisher,
+					},
+				],
+			},
+		})
+
+		const allowed = result.event.services.find((service) => service.externalId === 'ext-ok')
+		const blocked = result.event.services.find((service) => service.externalId === 'ext-blocked')
+		assertEquals(result.statuses, { published: 1, blocked: 1, failed: 0 })
+		assertEquals(allowed?.blocked, undefined)
+		assertEquals(allowed?.topic?.messageId, 'pub-1')
+		assertEquals(blocked?.blocked, `Publisher not found > ${unknownPublisher}`)
+		assertEquals(blocked?.topic?.messageId, undefined)
+		assertEquals(
+			result.plugins.map((plugin) => plugin.type),
+			['common']
+		)
+
+		assertEquals(publishMessage.callCount, 2)
+		assertEquals(publishMessage.firstCall.args[0], allowed?.topic?.name)
+		const commonBody = publishMessage.secondCall.args[1] as {
+			services: Array<{ externalId?: string; blocked?: string }>
+		}
+		assertEquals(
+			commonBody.services.map((service) => service.externalId),
+			['ext-ok']
+		)
+		assertEquals(commonBody.services[0]?.blocked, undefined)
+
+		const payload = publishInbox.firstCall.args[1] as {
+			services: Array<{ externalId?: string; blocked?: string; topic?: { messageId?: string } }>
+		}
+		assertEquals(
+			payload.services.map((service) => service.externalId),
+			['ext-ok', 'ext-blocked']
+		)
+		assertEquals(payload.services[1]?.blocked, `Publisher not found > ${unknownPublisher}`)
+		assertEquals(payload.services[0]?.topic?.messageId, undefined)
+		assertEquals(payload.services[1]?.topic?.messageId, undefined)
 	} finally {
 		sandbox.restore()
 	}

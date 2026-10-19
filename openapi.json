@@ -2,7 +2,7 @@
 	"openapi": "3.0.3",
 	"info": {
 		"title": "ARD Eventhub",
-		"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.",
+		"description": "ARD system to distribute real-time (live) metadata for primarily radio broadcasts.\n\nThis HTTPS API is deprecated. Every operation stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed. New integrations use Eventhub Connect.",
 		"termsOfService": "https://www.ard.de",
 		"contact": {
 			"email": "lab@swr.de"
@@ -11,7 +11,7 @@
 			"name": "European Union Public License 1.2",
 			"url": "https://spdx.org/licenses/EUPL-1.2.html"
 		},
-		"version": "3.0.0-beta.1"
+		"version": "3.0.0-beta.2"
 	},
 	"externalDocs": {
 		"description": "ARD Eventhub Documentation",
@@ -26,19 +26,19 @@
 	"tags": [
 		{
 			"name": "auth",
-			"description": "Authentication services for Eventhub"
+			"description": "Deprecated. Authentication for the HTTPS ingest API. Eventhub Connect uses an MQTT username and password."
 		},
 		{
 			"name": "events",
-			"description": "Manage events"
+			"description": "Deprecated. Publish track events over HTTPS. Eventhub Connect publishes the same events on MQTT inbox/{institutionId}."
 		},
 		{
 			"name": "subscriptions",
-			"description": "Access to subscription management"
+			"description": "Deprecated. HTTPS push subscriptions. Eventhub Connect subscribers read MQTT topics instead."
 		},
 		{
 			"name": "topics",
-			"description": "Access to topics details"
+			"description": "Deprecated. List HTTPS/Pub/Sub topics. Eventhub Connect uses the MQTT topic tree."
 		}
 	],
 	"paths": {
@@ -97,7 +97,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		},
 		"/auth/refresh": {
@@ -155,7 +157,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		},
 		"/auth/reset": {
@@ -207,7 +211,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		},
 		"/events/de.ard.eventhub.v1.radio.track.next": {
@@ -292,7 +298,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		},
 		"/events/de.ard.eventhub.v1.radio.track.playing": {
@@ -377,7 +385,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		},
 		"/subscriptions": {
@@ -431,7 +441,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			},
 			"post": {
 				"tags": ["subscriptions"],
@@ -524,7 +536,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		},
 		"/subscriptions/{name}": {
@@ -601,7 +615,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			},
 			"delete": {
 				"tags": ["subscriptions"],
@@ -676,7 +692,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		},
 		"/topics": {
@@ -710,7 +728,9 @@
 							}
 						}
 					}
-				}
+				},
+				"deprecated": true,
+				"description": "Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed."
 			}
 		}
 	},
@@ -1111,7 +1131,7 @@
 								"type": "string",
 								"pattern": "^urn:ard:institution:[a-z0-9]+$",
 								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
-								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+								"description": "Owning institution URN (claim; validation checks it against the feed)"
 							},
 							"externalId": {
 								"deprecated": true,
@@ -1440,6 +1460,8 @@
 								"examples": ["https://example.com/cover.jpg"]
 							},
 							"templateUrl": {
+								"deprecated": true,
+								"description": "Deprecated. Send a concrete `url`. A `{width}` / `{height}` template is still accepted.",
 								"examples": ["https://example.com/cover.jpg?width={width}"],
 								"nullable": true,
 								"type": "string"
@@ -1512,9 +1534,21 @@
 									"$ref": "#/definitions/servicesUrn"
 								},
 								"description": "URN-only service identifiers (Connect / MQTT)"
+							},
+							"creator": {
+								"type": "string",
+								"minLength": 1,
+								"description": "Person or system that created the event, set by the publisher (for example an email address or the playout system)",
+								"examples": ["example@swr.de"]
+							},
+							"created": {
+								"type": "string",
+								"description": "Set by Eventhub validation to the time of delivery. A value sent by the publisher is replaced.",
+								"examples": ["2026-10-08T10:00:01.000Z"],
+								"readOnly": true
 							}
 						},
-						"required": ["start", "name", "state", "services"],
+						"required": ["start", "name", "state", "services", "creator", "created"],
 						"additionalProperties": false,
 						"description": "Eventhub Connect radio.control event. Not accepted on the HTTPS POST /events API."
 					},
@@ -1537,7 +1571,7 @@
 								"type": "string",
 								"pattern": "^urn:ard:institution:[a-z0-9]+$",
 								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
-								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+								"description": "Owning institution URN (claim; validation checks it against the feed)"
 							},
 							"externalId": {
 								"deprecated": true,
@@ -1661,9 +1695,21 @@
 									"$ref": "#/definitions/servicesUrn"
 								},
 								"description": "URN-only service identifiers (Connect / MQTT)"
+							},
+							"creator": {
+								"type": "string",
+								"minLength": 1,
+								"description": "Person or system that created the event, set by the publisher (for example an email address or the playout system)",
+								"examples": ["example@swr.de"]
+							},
+							"created": {
+								"type": "string",
+								"description": "Set by Eventhub validation to the time of delivery. A value sent by the publisher is replaced.",
+								"examples": ["2026-10-08T10:00:01.000Z"],
+								"readOnly": true
 							}
 						},
-						"required": ["start", "cycle", "data", "services"],
+						"required": ["start", "cycle", "data", "services", "creator", "created"],
 						"additionalProperties": false,
 						"description": "Eventhub Connect radio.data event. Not accepted on the HTTPS POST /events API."
 					},
@@ -1686,7 +1732,7 @@
 								"type": "string",
 								"pattern": "^urn:ard:institution:[a-z0-9]+$",
 								"examples": ["urn:ard:institution:a3004ff924ece1a2"],
-								"description": "Owning institution URN (claim; sidecar checks it against the feed)"
+								"description": "Owning institution URN (claim; validation checks it against the feed)"
 							},
 							"externalId": {
 								"deprecated": true,
@@ -2017,6 +2063,8 @@
 								"examples": ["https://example.com/cover.jpg"]
 							},
 							"templateUrl": {
+								"deprecated": true,
+								"description": "Deprecated. Send a concrete `url`. A `{width}` / `{height}` template is still accepted.",
 								"examples": ["https://example.com/cover.jpg?width={width}"],
 								"nullable": true,
 								"type": "string"

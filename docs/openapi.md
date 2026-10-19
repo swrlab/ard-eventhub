@@ -5,7 +5,9 @@ sidebar:
   order: 8
 ---
 
-Die ARD Eventhub-APIs sind im [OpenAPI](https://swagger.io/specification/)-Format dokumentiert (ein standardisiertes, sprachunabhängiges Interface für RESTful APIs).
+Die HTTPS-API des ARD Eventhub ist im [OpenAPI](https://swagger.io/specification/)-Format dokumentiert (ein standardisiertes, sprachunabhängiges Interface für RESTful APIs).
+
+Jede Operation in dieser Spezifikation ist **deprecated**. Login, Events, Subscriptions und Topics bleiben erreichbar, bis der HTTPS-Ingest abgeschaltet wird. Neue Anbindungen laufen über [_Eventhub Connect_](./user/connect-mqtt).
 
 ## API-Referenz in diesen Docs
 

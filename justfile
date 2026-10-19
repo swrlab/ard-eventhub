@@ -1,5 +1,8 @@
+import 'just/docs.just'
 import 'just/encryption.just'
+import 'just/integration.just'
 import 'just/mqtt.just'
+import 'just/nats.just'
 
 # run just in the CLI to see the list of shortcuts
 _default:
@@ -20,40 +23,25 @@ update *args:
 	mise lock {{ args }}
 	bun update
 	just format
+	bun outdated
 
 # run the ingest tests locally with injected environment variables
+# writes gitignored secrets when they are missing (CI decrypts the allow-list itself)
 [group('LOCAL')]
 test:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	if [[ ! -f src/config/users.json ]]; then
+		sops decrypt --output src/config/users.json keys/users-test.sops.json
+	fi
+	if [[ ! -f keys/gcp-ingest-prod.json ]]; then
+		sops decrypt --output keys/gcp-ingest-prod.json keys/gcp-ingest-prod.sops.json
+	fi
 	just env "just test-with-env"
 
 # run testing (envs need to be provided)
 test-with-env:
 	bun test --timeout 120000
-
-# run hurl integration tests against a host (default: local ingest)
-[group('LOCAL')]
-integration host="http://localhost:8080":
-	just env "just integration-with-env {{ host }}"
-
-# run hurl suite (envs need to be provided: TEST_USER, TEST_USER_PW)
-integration-with-env host:
-	#!/usr/bin/env bash
-	set -euo pipefail
-	: "${TEST_USER:?TEST_USER is required}"
-	: "${TEST_USER_PW:?TEST_USER_PW is required}"
-	mkdir -p integration/res
-	start="$(bun -e 'console.log(new Date().toISOString())')"
-	start_expired="$(bun -e 'console.log(new Date(Date.now() - 20 * 60 * 1000).toISOString())')"
-	start_invalid="${start}00"
-	hurl \
-		--variable host="{{ host }}" \
-		--variable email="$TEST_USER" \
-		--variable password="$TEST_USER_PW" \
-		--variable start="$start" \
-		--variable start_expired="$start_expired" \
-		--variable start_invalid="$start_invalid" \
-		--test \
-		integration/ingest-api.hurl
 
 # generate a coreId for a given text
 [group('LOCAL')]
@@ -67,8 +55,30 @@ feed:
 
 # start the ingest service in development mode
 [group('LOCAL')]
-dev:
+ingest:
 	just env "bun run ingest"
+
+# start eventhub-connect (NATS access + operator UI on :4173)
+# loads ARD_FEED_URL from sops when the shell did not set it, without replacing NATS_URL
+[group('LOCAL')]
+dev:
+	just env "bun run --hot ./src/connect/index.ts"
+
+# benchmark inbox validation (accept, schema rejection, ownership rejection)
+[group('LOCAL')]
+bench-validation:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	mkdir -p .local
+	hyperfine \
+		--warmup 3 \
+		--runs 10 \
+		--metrics time_wall_clock:ms \
+		--parameter-list case accept,schema,ownership \
+		--export-markdown .local/validation-bench.md \
+		--export-json .local/validation-bench.json \
+		'bun ./src/cli/bench-validation.ts {case}'
+	cat .local/validation-bench.md
 
 # lint the code
 [group('LOCAL')]
@@ -89,33 +99,6 @@ format:
 license:
 	bun x license-compliance -f json -r detailed
 
-# regenerate openapi.json from Zod schemas
-[group('DOCS')]
-openapi: asyncapi
-	bun run ./src/openapi/generate.ts
-	bun x oxfmt openapi.json
-
-# regenerate asyncapi.json from Zod schemas (Eventhub Connect / MQTT)
-[group('DOCS')]
-asyncapi:
-	bun run ./src/asyncapi/generate.ts
-	bun x oxfmt asyncapi.json
-
-# serve the documentation (dev server with hot reload)
-[group('DOCS')]
-docs: openapi
-	bun x blume dev
-
-# build the documentation to dist/
-[group('DOCS')]
-docs-build: openapi
-	bun x blume build
-
-# preview the built documentation
-[group('DOCS')]
-docs-preview:
-	bun x blume preview
-
 # print the radioplayer api keys in base64 format for kubernetes secret
 [group('KUBERNETES')]
 radioplayer-api-keys:
@@ -127,8 +110,3 @@ radioplayer-api-keys:
 	@echo ""
 	@echo "base64-wrapped twice"
 	@sops decrypt keys/radioplayer-api-keys.sops.json | base64 | base64
-
-# deploy kubernetes secret to current cluster
-[group('KUBERNETES')]
-apply-k8s-secrets:
-	sops decrypt keys/k8s-secrets.sops.yaml | kubectl apply -f -

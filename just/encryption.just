@@ -48,6 +48,7 @@ list-pgp:
 [group('ENCRYPTION')]
 edit-key file:
 	EDITOR=nano sops edit {{ file }}
+alias ek := edit-key
 
 # decrypt a secret file
 [confirm('This will overwrite any previously decrypted files, are you sure? (type `yes` to continue)')]

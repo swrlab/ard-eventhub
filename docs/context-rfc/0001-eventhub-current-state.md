@@ -261,7 +261,7 @@ cannot explain.
 ### 10.2 The ARD feed is never refreshed
 
 `getARDFeed()` is called once at startup and cached in a module-level variable
-(`src/utils/ard-feed.ts:66`). There is no timer and no invalidation. A new livestream or a changed
+(`src/utils/feed/ard-feed.ts`). There is no timer and no invalidation. A new livestream or a changed
 publisher/institution mapping in ARD Core only takes effect after a pod restart.
 
 ### 10.3 Plugin delivery is invisible to publishers
@@ -320,7 +320,8 @@ decrypts `.env.ci.sops.yaml` with an age key from a GitHub secret, and Kubernete
 **API contract.** `openapi.json` is generated from the Zod schemas by `just openapi`
 (`z.toJSONSchema` with `target: 'openapi-3.0'`). The schemas are the source of truth; the JSON is a
 build artifact that happens to be committed. It must be regenerated after any schema change and
-after any `package.json` version bump, since `info.version` is read from there. The service no
+after any `package.json` version bump, since `info.version` is read from there. Every operation in
+that spec is marked `deprecated: true`; Eventhub Connect replaces the HTTPS ingest. The service no
 longer serves Swagger UI — `/openapi` redirects to the docs site.
 
 **Testing.** Unit tests use `@cross/test` + `@std/assert` + sinon so the same files run on Bun,

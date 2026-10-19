@@ -118,6 +118,48 @@ const payloadTooLargeResponse = {
 	},
 }
 
+const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'] as const
+
+type HttpMethod = (typeof HTTP_METHODS)[number]
+
+/** Shown on every legacy HTTPS operation. Eventhub Connect (MQTT) replaces this API. */
+const LEGACY_HTTPS_DESCRIPTION =
+	'Deprecated. This HTTPS ingest endpoint stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed.'
+
+type LegacyHttpsOperation = {
+	description?: string
+	deprecated?: boolean
+	[key: string]: unknown
+}
+
+type LegacyHttpsPathItem = Partial<Record<HttpMethod, LegacyHttpsOperation>>
+
+/**
+ * Mark every operation on the legacy HTTPS ingest API as deprecated.
+ * @param paths - OpenAPI Paths Object
+ * @returns Paths with `deprecated: true` on each operation
+ */
+const deprecateLegacyHttpsPaths = (paths: Record<string, LegacyHttpsPathItem>): Record<string, LegacyHttpsPathItem> => {
+	const next: Record<string, LegacyHttpsPathItem> = {}
+	for (const [path, pathItem] of Object.entries(paths)) {
+		const item: LegacyHttpsPathItem = { ...pathItem }
+		for (const method of HTTP_METHODS) {
+			const operation = item[method]
+			if (!operation) continue
+			item[method] = {
+				...operation,
+				deprecated: true,
+				description:
+					typeof operation.description === 'string' && operation.description.length > 0
+						? operation.description
+						: LEGACY_HTTPS_DESCRIPTION,
+			}
+		}
+		next[path] = item
+	}
+	return next
+}
+
 const eventTrackRequestBody = {
 	description: `
 New event to be distributed to subscribers.
@@ -184,11 +226,13 @@ export const buildOpenApiDocument = () => {
 		schemas[id] = rest
 	}
 
-	return {
+	const document = {
 		openapi: '3.0.3',
 		info: {
 			title: 'ARD Eventhub',
-			description: 'ARD system to distribute real-time (live) metadata for primarily radio broadcasts.',
+			description: `ARD system to distribute real-time (live) metadata for primarily radio broadcasts.
+
+This HTTPS API is deprecated. Every operation stays available until publishers finish moving to Eventhub Connect (MQTT), then it is removed. New integrations use Eventhub Connect.`,
 			termsOfService: 'https://www.ard.de',
 			contact: {
 				email: 'lab@swr.de',
@@ -210,10 +254,24 @@ export const buildOpenApiDocument = () => {
 			},
 		],
 		tags: [
-			{ name: 'auth', description: 'Authentication services for Eventhub' },
-			{ name: 'events', description: 'Manage events' },
-			{ name: 'subscriptions', description: 'Access to subscription management' },
-			{ name: 'topics', description: 'Access to topics details' },
+			{
+				name: 'auth',
+				description:
+					'Deprecated. Authentication for the HTTPS ingest API. Eventhub Connect uses an MQTT username and password.',
+			},
+			{
+				name: 'events',
+				description:
+					'Deprecated. Publish track events over HTTPS. Eventhub Connect publishes the same events on MQTT inbox/{institutionId}.',
+			},
+			{
+				name: 'subscriptions',
+				description: 'Deprecated. HTTPS push subscriptions. Eventhub Connect subscribers read MQTT topics instead.',
+			},
+			{
+				name: 'topics',
+				description: 'Deprecated. List HTTPS/Pub/Sub topics. Eventhub Connect uses the MQTT topic tree.',
+			},
 		],
 		paths: {
 			'/auth/login': {
@@ -482,5 +540,10 @@ export const buildOpenApiDocument = () => {
 			},
 			schemas,
 		},
+	}
+
+	return {
+		...document,
+		paths: deprecateLegacyHttpsPaths(document.paths),
 	}
 }
