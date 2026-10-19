@@ -60,7 +60,7 @@ bun run ingest
 
 The deployment process of Eventhub-Ingest is different for `Non-Prod` and `Prod`-Stages.
 
-GitHub Actions builds and pushes the Docker image to the container registry. Deploying to Kubernetes environments is handled separately outside of GitHub Actions.
+GitHub Actions builds and pushes the Docker image to the Eventhub Artifact Registry and to ard-common (`voice-feeds-playout-search/ard-eventhub/ingest`). Deploying to Kubernetes environments is handled separately outside of GitHub Actions.
 
 ## Local MQTT publish
 
