@@ -90,7 +90,7 @@ just nats-sub --all
 just dev
 ```
 
-Image: `nats:2.14.6` with [`infra/nats/nats-dev.conf`](../../infra/nats/nats-dev.conf) (JetStream + MQTT `:1883`, no TLS, users from `nats-users.conf`).
+Image: `nats:2.14.6` with [`infra/nats/nats-dev.conf`](../../infra/nats/nats-dev.conf) (JetStream, MQTT `:1883`, monitor `:8222`, WebSocket `:9222`, no TLS, users from `nats-users.conf`). `just nats-up-docker` publishes all four so the operator UI tail on the host can open `ws://127.0.0.1:9222`.
 
 Kubernetes: dev runs three NATS pods in one cluster. Test and prod are one manifest per zone. See [`infra/kubernetes/README.md`](../../infra/kubernetes/README.md) (`just nats-k8s-dev`).
 

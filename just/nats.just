@@ -47,7 +47,7 @@ nats-up: _nats-stage-conf
 	echo 'nats-server did not listen on 4222; see .local/nats/nats-server.log' >&2
 	exit 1
 
-# start NATS with docker (Cursor Cloud / Linux / CI). MQTT binds :1883.
+# start NATS with docker (Cursor Cloud / Linux / CI). Publishes client :4222, MQTT :1883, monitor :8222, WebSocket :9222.
 [group('NATS')]
 nats-up-docker: _nats-stage-conf
 	#!/usr/bin/env bash
@@ -60,6 +60,10 @@ nats-up-docker: _nats-stage-conf
 		echo 'port 1883 is in use — free it so NATS MQTT can bind' >&2
 		exit 1
 	fi
+	if bash -c 'echo > /dev/tcp/127.0.0.1/9222' 2>/dev/null; then
+		echo 'port 9222 is in use — free it so the operator UI WebSocket can bind' >&2
+		exit 1
+	fi
 	docker run \
 		--detach \
 		--rm \
@@ -67,6 +71,7 @@ nats-up-docker: _nats-stage-conf
 		--publish 4222:4222 \
 		--publish 1883:1883 \
 		--publish 8222:8222 \
+		--publish 9222:9222 \
 		--volume "{{ NATS_RUNTIME_CONF }}:/etc/nats/nats-dev.conf" \
 		--volume "{{ NATS_RUNTIME_USERS }}:/etc/nats/nats-users.conf" \
 		--env NATS_JS_STORE=/data \
@@ -75,6 +80,7 @@ nats-up-docker: _nats-stage-conf
 		-c /etc/nats/nats-dev.conf
 	for _ in $(seq 1 30); do
 		if bash -c 'echo > /dev/tcp/127.0.0.1/4222' 2>/dev/null; then
+			echo 'NATS listening on 4222 (MQTT 1883, monitor 8222, websocket 9222)'
 			exit 0
 		fi
 		sleep 1
