@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - fix: publish NATS WebSocket `:9222` from `just nats-up-docker` so the operator UI live tail reaches the broker from the host
+- fix: expand nested OpenAPI schemas (`mediaItem`, `reference`, `contributor`, …) in the docs API reference
 
 ## [3.0.0-beta.2] - 2026-10-19
 
