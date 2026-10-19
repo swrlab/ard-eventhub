@@ -192,8 +192,7 @@ const eventTypeDoc = (type: EventTypeDoc) => ({
  * @param type - Event class token (`track.playing`, `control`, …)
  * @returns Link shown on the send and receive pages
  */
-const eventTypeLink = (type: EventTypeDoc): string =>
-	`[de.ard.eventhub.v1.radio.${type}](${eventTypeDocPath(type)})`
+const eventTypeLink = (type: EventTypeDoc): string => `[de.ard.eventhub.v1.radio.${type}](${eventTypeDocPath(type)})`
 
 /**
  * Retained `radio/` channel for one event class.

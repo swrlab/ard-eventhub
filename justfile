@@ -23,6 +23,7 @@ update *args:
 	mise lock {{ args }}
 	bun update
 	just format
+	bun outdated
 
 # run the ingest tests locally with injected environment variables
 # writes gitignored secrets when they are missing (CI decrypts the allow-list itself)

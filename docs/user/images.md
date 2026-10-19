@@ -14,20 +14,20 @@ Bild-URLs müssen öffentlich erreichbar sein. Wer Bilder liefert, muss die Rech
 
 ```json
 {
-  "type": "cover",
-  "url": "https://example.com/cover.jpg",
-  "description": "Cover Demo Artist",
-  "attribution": "Photographer XYZ",
-  "isFallback": false
+	"type": "cover",
+	"url": "https://example.com/cover.jpg",
+	"description": "Cover Demo Artist",
+	"attribution": "Photographer XYZ",
+	"isFallback": false
 }
 ```
 
 ```json
 {
-  "type": "artist",
-  "url": "https://example.com/artist.jpg",
-  "description": "Demo Artist",
-  "attribution": "Photographer XYZ"
+	"type": "artist",
+	"url": "https://example.com/artist.jpg",
+	"description": "Demo Artist",
+	"attribution": "Photographer XYZ"
 }
 ```
 
@@ -37,10 +37,10 @@ Tracks ohne eigenes Cover (z. B. Verkehr oder Wetter) können Station- oder Pl
 
 ```json
 {
-  "type": "cover",
-  "url": "https://example.com/swr3-fallback.jpg",
-  "description": "SWR3 Platzhalter",
-  "isFallback": true
+	"type": "cover",
+	"url": "https://example.com/swr3-fallback.jpg",
+	"description": "SWR3 Platzhalter",
+	"isFallback": true
 }
 ```
 

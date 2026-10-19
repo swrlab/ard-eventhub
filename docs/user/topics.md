@@ -31,7 +31,7 @@ Publish auf die Inbox geht mit QoS 1 und **ohne** Retain. Retain auf `radio/` un
 
 | Absicht                               | MQTT-Filter                                                         |
 | ------------------------------------- | ------------------------------------------------------------------- |
-| Ablehnungen einer Anstalt            | `feedback/urn:ard:institution:a3004ff924ece1a2`                     |
+| Ablehnungen einer Anstalt             | `feedback/urn:ard:institution:a3004ff924ece1a2`                     |
 | alles Validierte                      | `radio/#`                                                           |
 | ein Livestream, alle Klassen          | `radio/urn:ard:permanent-livestream:49267f7d67be180d/#`             |
 | eine Klasse, alle Livestreams         | `radio/+/track/playing`                                             |
