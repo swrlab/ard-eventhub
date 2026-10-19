@@ -6,7 +6,7 @@ import type { ArdFeed, ArdLivestream } from '#types'
 export const ardFeedRules = {
 	minItems: 190,
 	maxItems: 251,
-	stations: ['WDR 2', 'WDR 4', '1LIVE', 'NDR 1 Niedersachsen', 'SWR3', 'NDR 2', 'BAYERN 1', 'SWR4 BW', 'hr3', 'hr4'],
+	stations: ['WDR 2', 'WDR 4', '1LIVE', 'NDR 1 Niedersachsen', 'SWR3', 'NDR 2', 'Bayern 1', 'SWR4', 'hr3', 'hr4'],
 }
 
 /**

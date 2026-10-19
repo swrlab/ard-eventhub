@@ -25,8 +25,17 @@ update *args:
 	just format
 
 # run the ingest tests locally with injected environment variables
+# writes gitignored secrets when they are missing (CI decrypts the allow-list itself)
 [group('LOCAL')]
 test:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	if [[ ! -f src/config/users.json ]]; then
+		sops decrypt --output src/config/users.json keys/users-test.sops.json
+	fi
+	if [[ ! -f keys/gcp-ingest-prod.json ]]; then
+		sops decrypt --output keys/gcp-ingest-prod.json keys/gcp-ingest-prod.sops.json
+	fi
 	just env "just test-with-env"
 
 # run testing (envs need to be provided)
