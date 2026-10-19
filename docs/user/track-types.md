@@ -10,7 +10,7 @@ Jeder gesendete `track` muss einem bestimmten Typ entsprechen, damit er von empf
 
 ## `music`
 
-Ein Song oder kommerziell produziertes Musikstück. Es wird dringend empfohlen, mindestens `title` und `artist` zu setzen. Angaben zu beteiligten Künstlern im Feld `contributors` sind nützlich. Ideal sind außerdem Verweise auf Quell-IDs wie `confId` aus ARD's HFDB, `isrc` und `upc`.
+Ein Song oder kommerziell produziertes Musikstück. Es wird dringend empfohlen, mindestens `title` und `artist` zu setzen. Angaben zu beteiligten Künstlern im Feld `contributors` sind nützlich. Ideal sind außerdem Verweise auf Quell-IDs wie `hfdbIds` aus ARD's HFDB, `isrc` und `upc`.
 
 Das optionale `isFallback`-Boolean-Feld in `media`-Elementen ermöglicht es, Medien als Fallback-Daten zu kennzeichnen (z.B. benutzerdefinierte Sender-Bilder, wenn offizielle Cover nicht verfügbar sind). Subscriber können Fallback-Medien bei Bedarf herausfiltern.
 
@@ -26,17 +26,14 @@ Das optionale `isFallback`-Boolean-Feld in `media`-Elementen ermöglicht es, Med
     {
       "name": "Sam Feldt",
       "role": "artist",
-      "normDb": {"type": "Person", "id": "1641010"},
-      "isni": "string",
-      "url": "string"
+      "normDb": {"type": "Person", "id": "1641010"}
     }
   ],
   "playlistItemId": "swr3-5678",
   "hfdbIds": ["swrhfdb1.KONF.12345", "zskhfdb1.KONF.12345"],
   "externalId": "M012345.001",
   "isrc": "DE012345678",
-  "upc": "string",
-  "mpn": "string",
+  "upc": "123456789012",
   "media": [
     {
       "type": "cover",
@@ -61,6 +58,7 @@ Wenn ein Live-Element beginnt, z.B. Moderation, Interview oder andere Live-Beitr
   "start": "2020-01-19T06:20:00+01:00",
   "length": 240,
   "title": "Moderation",
+  "playlistItemId": "swr3-moderation-0620",
   …
 }
 ```
@@ -68,7 +66,7 @@ Wenn ein Live-Element beginnt, z.B. Moderation, Interview oder andere Live-Beitr
 ## `audio`
 
 Wird für Beiträge (pre-recorded) verwendet, die in keine andere Kategorie passen. So detailliert wie möglich ausfüllen.
-Das Feld `contributors` sollte Informationen zum `author` enthalten. `media` kann benutzt werden um zusätzliche Informationen zu liefern. `show` verweist auf die zugehörige Sendereihe.
+Das Feld `contributors` sollte einen Eintrag mit `role` `author` enthalten. `media` kann benutzt werden, um zusätzliche Informationen zu liefern. Die zugehörige Sendereihe steht in `references` mit `type` `Show`.
 
 ```json
 {
@@ -90,15 +88,17 @@ Das Feld `contributors` sollte Informationen zum `author` enthalten. `media` kan
   "references": [
     {
       "type": "Show",
+      "id": "urn:ard:show:027708befb6bfe14",
       "externalId": "crid://swr.de/1234567",
-      "alternateIds": ["https://normdb.ivz.cn.ard.de/sendereihe/427", "urn:ard:show:027708befb6bfe14", "brid://br.de/broadcastSeries/1235"]
+      "alternateIds": ["https://normdb.ivz.cn.ard.de/sendereihe/427", "brid://br.de/broadcastSeries/1235"]
     },
     {
       "type": "Article",
+      "externalId": "crid://dlf.de/article/1234567",
       "title": "Kommerzielle US-Raumfahrt - Die neue Weltraumökonomie",
       "url": "https://www.deutschlandfunkkultur.de/kommerzielle-us-raumfahrt-die-neue-weltraumoekonomie-100.html"
     }
-  ]
+  ],
   …
 }
 ```
@@ -117,11 +117,12 @@ Dies kennzeichnet den Beginn der Nachrichten im Allgemeinen.
   "playlistItemId": "BCS1:cd052498-da90-4308-85d3-046cb15c6832",
   "references": [
     {
-      "type": "Overview",
+      "type": "Publication",
+      "externalId": "crid://br.de/nachrichten/meldungen",
       "title": "BR Nachrichten",
       "url": "https://www.br.de/nachrichten/meldungen"
     }
-  ]
+  ],
   …
 }
 ```
@@ -137,13 +138,14 @@ Dies kennzeichnet den Beginn der Nachrichten im Allgemeinen.
   "start": "2020-01-19T06:03:00+01:00",
   "length": 30,
   "title": "Wetter",
+  "playlistItemId": "swr3-weather-0603",
   …
 }
 ```
 
 ## `traffic`
 
-Ähnlich wie `news` and `weather` markiert es den Beginn eines Verkehrberichts.
+Ähnlich wie `news` und `weather` markiert es den Beginn eines Verkehrsberichts.
 
 ```json
 {
@@ -152,14 +154,39 @@ Dies kennzeichnet den Beginn der Nachrichten im Allgemeinen.
   "start": "2020-01-19T06:03:30+01:00",
   "length": 10,
   "title": "Verkehr",
+  "playlistItemId": "swr3-traffic-0603",
   …
 }
 ```
 
 ## `commercial`
 
-Verwenden Sie diese Option, um Auslöser für die Wiedergabe von Werbespots festzulegen, z. B. Werbepausen vor den Nachrichten. Eine Segmentierung oder detaillierte Angaben im Feld `title` sind nicht erforderlich.
+Verwenden Sie diese Option, um Auslöser für die Wiedergabe von Werbespots festzulegen, z. B. Werbepausen vor den Nachrichten. Eine Segmentierung ist nicht erforderlich. `title` bleibt eine kurze, öffentlich darstellbare Bezeichnung.
+
+```json
+{
+  "event": "de.ard.eventhub.v1.radio.track.playing",
+  "type": "commercial",
+  "start": "2020-01-19T05:59:00+01:00",
+  "length": 180,
+  "title": "Werbung",
+  "playlistItemId": "swr3-ad-0559",
+  …
+}
+```
 
 ## `jingle`
 
-Ungünstig, kann jedoch verwendet werden, um einen neues Event zu signalisieren, der das vorherige Element beendet. Sollte nur verwendet werden, wenn keine Informationen über den Inhalt verfügbar ist. Beispielsweise sollte ein Jingle, der die Nachrichten einleitet, nicht als `jingle`, sondern als `news` gesendet werden. Das Feld `title` muss einen Wert enthalten, der extern angezeigt werden kann, und darf nicht der Dateiname des Jingles sein.
+Ungünstig, kann jedoch verwendet werden, um ein neues Event zu signalisieren, das das vorherige Element beendet. Sollte nur verwendet werden, wenn keine Informationen über den Inhalt verfügbar sind. Beispielsweise sollte ein Jingle, der die Nachrichten einleitet, nicht als `jingle`, sondern als `news` gesendet werden. Das Feld `title` muss einen Wert enthalten, der extern angezeigt werden kann, und darf nicht der Dateiname des Jingles sein.
+
+```json
+{
+  "event": "de.ard.eventhub.v1.radio.track.playing",
+  "type": "jingle",
+  "start": "2020-01-19T06:04:00+01:00",
+  "length": 5,
+  "title": "Jingle",
+  "playlistItemId": "swr3-jingle-0604",
+  …
+}
+```
