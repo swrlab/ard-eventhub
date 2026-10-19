@@ -1,6 +1,7 @@
 ---
 title: 'External IDs'
 description: 'Anforderungen an externalId / CRID für Livestreams.'
+deprecated: true
 sidebar:
   order: 4
 ---

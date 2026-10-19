@@ -97,4 +97,4 @@ Code comments and JSDoc are always English. Operator UI copy and `docs/` are Ger
 - Use `bun install` to add dependencies
 - Keep dependencies up-to-date for security patches
 - Test thoroughly after dependency upgrades
-- Check license compatibility (project uses EUPL-1.2)
+- Check license compatibility (project uses MIT)

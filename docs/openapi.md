@@ -1,6 +1,7 @@
 ---
 title: 'OpenAPI'
 description: 'OpenAPI-Spezifikation und API-Referenz.'
+deprecated: true
 sidebar:
   order: 8
 ---
