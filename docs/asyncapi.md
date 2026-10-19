@@ -15,12 +15,12 @@ Publisher schreiben `track.playing`, `track.next`, `radio.control` und `radio.da
 
 Jede Klasse hat eine eigene Erläuterung. Dieselbe Adresse hängt als `externalDocs` an der jeweiligen `send`- und `receive`-Operation:
 
-- [_de.ard.eventhub.v1.radio.track.playing_](./events/track.playing)
-- [_de.ard.eventhub.v1.radio.track.next_](./events/track.next)
-- [_de.ard.eventhub.v1.radio.control_](./events/control)
-- [_de.ard.eventhub.v1.radio.data_](./events/data)
+- [_de.ard.eventhub.v1.radio.track.playing_](./event/radio.track.playing)
+- [_de.ard.eventhub.v1.radio.track.next_](./event/radio.track.next)
+- [_de.ard.eventhub.v1.radio.control_](./event/radio.control)
+- [_de.ard.eventhub.v1.radio.data_](./event/radio.data)
 
-`radio.control` und `radio.data` nutzen dieselben Zod-Schemas wie die OpenAPI-Komponenten. Track-Events nutzen die URN-only Inbox-Form (`creator`, von der Validierung gesetztes `created`, `services[]` ohne CRID). Das Feedback-Schema ist der Body, den die Validierung auf `feedback/` ablegt. MQTT-Bindings (QoS, Retain) kommen aus dem [v3 Connect RFC](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#62-topic-tree).
+`radio.control` und `radio.data` nutzen dieselben Zod-Schemas wie die OpenAPI-Komponenten. Track-Events nutzen die URN-only Inbox-Form (`creator`, von der Eventhub Validierung gesetztes `created`, `services[]` ohne CRID). Das Feedback-Schema ist der Body, den die Eventhub Validierung auf `feedback/` ablegt. MQTT-Bindings (QoS, Retain) kommen aus dem [v3 Connect RFC](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#62-topic-tree).
 
 ## Spezifikation pflegen
 

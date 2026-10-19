@@ -11,7 +11,7 @@ Diese Seite fasst die **Breaking Changes** von Eventhub **3.0** zusammen (aktuel
 - Anbindung und Beispiel: [_Eventhub Connect_](./connect-mqtt)
 - Topics und Filter: [_Topics_](./topics)
 - Benutzer, Passwort, Rechte: [_Zugangsdaten_](./acl)
-- Payloads: [_track.playing_](../events/track.playing), [_track.next_](../events/track.next), [_radio.control_](../events/control), [_radio.data_](../events/data)
+- Payloads: [_radio.track.playing_](../event/radio.track.playing), [_radio.track.next_](../event/radio.track.next), [_radio.control_](../event/radio.control), [_radio.data_](../event/radio.data)
 
 Diese neuen Features für v3 wurden ursprünglich in der GitHub Discussion [Eventhub v3 — Plan](https://github.com/swrlab/ard-eventhub/discussions/771) besprochen.
 
@@ -39,8 +39,8 @@ Der Event-Typ **`de.ard.eventhub.v1.radio.text`** (Radiotext / Live-Encoder-Text
 
 - Requests an den früheren Endpoint für Radiotext schlagen fehl bzw. sind nicht mehr in der OpenAPI spezifiziert.
 - Nutze weiterhin die Track-Events `de.ard.eventhub.v1.radio.track.playing` und `de.ard.eventhub.v1.radio.track.next`.
-- Der Nachfolger ist `de.ard.eventhub.v1.radio.data` (Radiotext, Dynamic Label, RT+). Er ist **nur für Eventhub Connect / MQTT** vorgesehen und wird auf dem heutigen HTTPS-Ingest (`POST /events/…`) mit HTTP 400 abgelehnt. Siehe [_radio.data_](../events/data).
-- `de.ard.eventhub.v1.radio.control` ist neu und ebenfalls nur über MQTT erreichbar. Der HTTPS-Ingest antwortet mit HTTP 400. Siehe [_radio.control_](../events/control).
+- Der Nachfolger ist `de.ard.eventhub.v1.radio.data` (Radiotext, Dynamic Label, RT+). Er ist **nur für Eventhub Connect / MQTT** vorgesehen und wird auf dem heutigen HTTPS-Ingest (`POST /events/…`) mit HTTP 400 abgelehnt. Siehe [_radio.data_](../event/radio.data).
+- `de.ard.eventhub.v1.radio.control` ist neu und ebenfalls nur über MQTT erreichbar. Der HTTPS-Ingest antwortet mit HTTP 400. Siehe [_radio.control_](../event/radio.control).
 
 ## Response-Header `x-ard-eventhub-uid` entfernt
 
@@ -125,7 +125,7 @@ Auf HTTPS setzt der Ingest `institutionId` selbst. `externalId` und `type` in `s
 
 _Im aktuellen Pre-Release, nach `3.0.0-beta.1`._
 
-Jedes Connect-Event (`track.playing`, `track.next`, `radio.control`, `radio.data`) braucht `creator`: wer das Event erzeugt hat, etwa eine Team-Mailadresse oder das Playout-System. `created` setzt die Validierung auf den Zeitpunkt der Zustellung. Ein mitgeschickter Wert wird ersetzt.
+Jedes Connect-Event (`track.playing`, `track.next`, `radio.control`, `radio.data`) braucht `creator`: wer das Event erzeugt hat, etwa eine Team-Mailadresse oder das Playout-System. `created` setzt die Eventhub Validierung auf den Zeitpunkt der Zustellung. Ein mitgeschickter Wert wird ersetzt.
 
 **Aktion:** `creator` mitschicken. Einen mitgeschickten `created` nicht als eigenen Zeitstempel auswerten. Details und Beispiel: [_Eventhub Connect_](./connect-mqtt).
 

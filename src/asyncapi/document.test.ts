@@ -52,7 +52,7 @@ test('buildAsyncApiDocument is AsyncAPI 3 with Connect send and receive operatio
 	assertEquals(document.operations.receiveFeedback.title, 'Subscribe feedback/{institutionId}')
 	assertEquals(document.operations.sendRadioTrackPlaying.externalDocs, {
 		description: 'de.ard.eventhub.v1.radio.track.playing',
-		url: 'https://swrlab.github.io/ard-eventhub/events/track.playing',
+		url: 'https://swrlab.github.io/ard-eventhub/event/radio.track.playing',
 	})
 	assertEquals(
 		document.operations.receiveRadioTrackPlaying.externalDocs?.url,
@@ -60,15 +60,15 @@ test('buildAsyncApiDocument is AsyncAPI 3 with Connect send and receive operatio
 	)
 	assertEquals(
 		document.operations.receiveRadioTrackNext.externalDocs?.url,
-		'https://swrlab.github.io/ard-eventhub/events/track.next'
+		'https://swrlab.github.io/ard-eventhub/event/radio.track.next'
 	)
 	assertEquals(
 		document.operations.receiveRadioControl.externalDocs?.url,
-		'https://swrlab.github.io/ard-eventhub/events/control'
+		'https://swrlab.github.io/ard-eventhub/event/radio.control'
 	)
 	assertEquals(
 		document.operations.receiveRadioData.externalDocs?.url,
-		'https://swrlab.github.io/ard-eventhub/events/data'
+		'https://swrlab.github.io/ard-eventhub/event/radio.data'
 	)
 	assertEquals(document.operations.receiveFeedback.externalDocs, undefined)
 

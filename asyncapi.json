@@ -142,7 +142,7 @@
 		"sendRadioTrackPlaying": {
 			"action": "send",
 			"title": "Publish track.playing on inbox/{institutionId}",
-			"description": "Publish a now-playing item to the institution inbox. Event type: [de.ard.eventhub.v1.radio.track.playing](/events/track.playing).",
+			"description": "Publish a now-playing item to the institution inbox. Event type: [de.ard.eventhub.v1.radio.track.playing](/event/radio.track.playing).",
 			"channel": {
 				"$ref": "#/channels/inboxInstitution"
 			},
@@ -164,13 +164,13 @@
 			},
 			"externalDocs": {
 				"description": "de.ard.eventhub.v1.radio.track.playing",
-				"url": "https://swrlab.github.io/ard-eventhub/events/track.playing"
+				"url": "https://swrlab.github.io/ard-eventhub/event/radio.track.playing"
 			}
 		},
 		"sendRadioTrackNext": {
 			"action": "send",
 			"title": "Publish track.next on inbox/{institutionId}",
-			"description": "Publish a planned next item to the institution inbox. Event type: [de.ard.eventhub.v1.radio.track.next](/events/track.next).",
+			"description": "Publish a planned next item to the institution inbox. Event type: [de.ard.eventhub.v1.radio.track.next](/event/radio.track.next).",
 			"channel": {
 				"$ref": "#/channels/inboxInstitution"
 			},
@@ -192,13 +192,13 @@
 			},
 			"externalDocs": {
 				"description": "de.ard.eventhub.v1.radio.track.next",
-				"url": "https://swrlab.github.io/ard-eventhub/events/track.next"
+				"url": "https://swrlab.github.io/ard-eventhub/event/radio.track.next"
 			}
 		},
 		"sendRadioControl": {
 			"action": "send",
 			"title": "Publish radio.control on inbox/{institutionId}",
-			"description": "Publish a control-bit change to the institution inbox. Not accepted on HTTPS `POST /events`. Event type: [de.ard.eventhub.v1.radio.control](/events/control).",
+			"description": "Publish a control-bit change to the institution inbox. Not accepted on HTTPS `POST /events`. Event type: [de.ard.eventhub.v1.radio.control](/event/radio.control).",
 			"channel": {
 				"$ref": "#/channels/inboxInstitution"
 			},
@@ -220,13 +220,13 @@
 			},
 			"externalDocs": {
 				"description": "de.ard.eventhub.v1.radio.control",
-				"url": "https://swrlab.github.io/ard-eventhub/events/control"
+				"url": "https://swrlab.github.io/ard-eventhub/event/radio.control"
 			}
 		},
 		"sendRadioData": {
 			"action": "send",
 			"title": "Publish radio.data on inbox/{institutionId}",
-			"description": "Publish a cyclic radiotext / RT+ bundle to the institution inbox. Not accepted on HTTPS `POST /events`. Event type: [de.ard.eventhub.v1.radio.data](/events/data).",
+			"description": "Publish a cyclic radiotext / RT+ bundle to the institution inbox. Not accepted on HTTPS `POST /events`. Event type: [de.ard.eventhub.v1.radio.data](/event/radio.data).",
 			"channel": {
 				"$ref": "#/channels/inboxInstitution"
 			},
@@ -248,13 +248,13 @@
 			},
 			"externalDocs": {
 				"description": "de.ard.eventhub.v1.radio.data",
-				"url": "https://swrlab.github.io/ard-eventhub/events/data"
+				"url": "https://swrlab.github.io/ard-eventhub/event/radio.data"
 			}
 		},
 		"receiveRadioTrackPlaying": {
 			"action": "receive",
 			"title": "Subscribe radio/{livestreamId}/track/playing",
-			"description": "Validated now-playing item for one livestream. Retained; QoS 1. The livestream URN is `services[].id`. Event type: [de.ard.eventhub.v1.radio.track.playing](/events/track.playing).",
+			"description": "Validated now-playing item for one livestream. Retained; QoS 1. The livestream URN is `services[].id`. Event type: [de.ard.eventhub.v1.radio.track.playing](/event/radio.track.playing).",
 			"channel": {
 				"$ref": "#/channels/radioLivestreamTrackPlaying"
 			},
@@ -276,13 +276,13 @@
 			},
 			"externalDocs": {
 				"description": "de.ard.eventhub.v1.radio.track.playing",
-				"url": "https://swrlab.github.io/ard-eventhub/events/track.playing"
+				"url": "https://swrlab.github.io/ard-eventhub/event/radio.track.playing"
 			}
 		},
 		"receiveRadioTrackNext": {
 			"action": "receive",
 			"title": "Subscribe radio/{livestreamId}/track/next",
-			"description": "Validated next item for one livestream. Retained; QoS 1. The livestream URN is `services[].id`. Event type: [de.ard.eventhub.v1.radio.track.next](/events/track.next).",
+			"description": "Validated next item for one livestream. Retained; QoS 1. The livestream URN is `services[].id`. Event type: [de.ard.eventhub.v1.radio.track.next](/event/radio.track.next).",
 			"channel": {
 				"$ref": "#/channels/radioLivestreamTrackNext"
 			},
@@ -304,13 +304,13 @@
 			},
 			"externalDocs": {
 				"description": "de.ard.eventhub.v1.radio.track.next",
-				"url": "https://swrlab.github.io/ard-eventhub/events/track.next"
+				"url": "https://swrlab.github.io/ard-eventhub/event/radio.track.next"
 			}
 		},
 		"receiveRadioControl": {
 			"action": "receive",
 			"title": "Subscribe radio/{livestreamId}/control",
-			"description": "Validated control bits for one livestream. Retained; QoS 1. Event type: [de.ard.eventhub.v1.radio.control](/events/control).",
+			"description": "Validated control bits for one livestream. Retained; QoS 1. Event type: [de.ard.eventhub.v1.radio.control](/event/radio.control).",
 			"channel": {
 				"$ref": "#/channels/radioLivestreamControl"
 			},
@@ -332,13 +332,13 @@
 			},
 			"externalDocs": {
 				"description": "de.ard.eventhub.v1.radio.control",
-				"url": "https://swrlab.github.io/ard-eventhub/events/control"
+				"url": "https://swrlab.github.io/ard-eventhub/event/radio.control"
 			}
 		},
 		"receiveRadioData": {
 			"action": "receive",
 			"title": "Subscribe radio/{livestreamId}/data",
-			"description": "Validated radiotext / dynamic label / RT+ for one livestream. Retained latest cycle; QoS 1. Event type: [de.ard.eventhub.v1.radio.data](/events/data).",
+			"description": "Validated radiotext / dynamic label / RT+ for one livestream. Retained latest cycle; QoS 1. Event type: [de.ard.eventhub.v1.radio.data](/event/radio.data).",
 			"channel": {
 				"$ref": "#/channels/radioLivestreamData"
 			},
@@ -360,7 +360,7 @@
 			},
 			"externalDocs": {
 				"description": "de.ard.eventhub.v1.radio.data",
-				"url": "https://swrlab.github.io/ard-eventhub/events/data"
+				"url": "https://swrlab.github.io/ard-eventhub/event/radio.data"
 			}
 		},
 		"receiveFeedback": {

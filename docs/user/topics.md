@@ -6,7 +6,7 @@ sidebar:
   icon: list-tree
 ---
 
-Publisher schreiben nur nach `inbox/{institutionId}` und lesen nur `feedback/{institutionId}`. Alles unter `radio/` schreiben ausschließlich die Validierung, nachdem das Event angenommen wurde. Subscriber lesen `radio/`. Die Verbindung steht unter [_Eventhub Connect_](./connect-mqtt), die Rechte unter [_Zugangsdaten_](./acl).
+Publisher schreiben nur nach `inbox/{institutionId}` und lesen nur `feedback/{institutionId}`. Alles unter `radio/` schreiben ausschließlich die Eventhub Validierung, nachdem das Event angenommen wurde. Subscriber lesen `radio/`. Die Verbindung steht unter [_Eventhub Connect_](./connect-mqtt), die Rechte unter [_Zugangsdaten_](./acl).
 
 `{institutionId}` ist die Institutions-URN, zum Beispiel `urn:ard:institution:a3004ff924ece1a2`. `{livestreamId}` ist die Livestream-URN, zum Beispiel `urn:ard:permanent-livestream:49267f7d67be180d`. Es gibt keine Kurznamen wie `inbox/swr`: die URN ist dasselbe `urn:ard:…`, das in `services[].id` schon vorkommt.
 
@@ -25,21 +25,20 @@ Publisher schreiben nur nach `inbox/{institutionId}` und lesen nur `feedback/{in
 
 Der Livestream steht vor der Event-Klasse, auf fester Tiefe. Damit trifft `radio/{livestreamId}/#` Control, Data und beide Track-Klassen. Läge die URN hinten, würde ein Ein-Ebenen-Filter `track/playing` verfehlen, weil das Subject dann vier Token hat.
 
-Publish auf die Inbox geht mit QoS 1 und **ohne** Retain. Retain auf `radio/` und `feedback/` setzt die Validierung. Ein Retain vom Publisher auf der Inbox bleibt dort liegen und ist nicht der Titel, den Subscriber sehen.
+Publish auf die Inbox geht mit QoS 1 und **ohne** Retain. Retain auf `radio/` und `feedback/` setzt die Eventhub Validierung. Ein Retain vom Publisher auf der Inbox bleibt dort liegen und ist nicht der Titel, den Subscriber sehen.
 
 ## Wohin publizieren, worauf hören
 
 | Absicht                               | MQTT-Filter                                                         |
 | ------------------------------------- | ------------------------------------------------------------------- |
-| eine Anstalt, alles Roh               | `inbox/urn:ard:institution:a3004ff924ece1a2`                        |
-| Ablehnungen dieser Anstalt            | `feedback/urn:ard:institution:a3004ff924ece1a2`                     |
+| Ablehnungen einer Anstalt            | `feedback/urn:ard:institution:a3004ff924ece1a2`                     |
 | alles Validierte                      | `radio/#`                                                           |
 | ein Livestream, alle Klassen          | `radio/urn:ard:permanent-livestream:49267f7d67be180d/#`             |
 | eine Klasse, alle Livestreams         | `radio/+/track/playing`                                             |
 | ein Livestream, eine Klasse           | `radio/urn:ard:permanent-livestream:49267f7d67be180d/track/playing` |
 | beide Track-Klassen eines Livestreams | `radio/urn:ard:permanent-livestream:49267f7d67be180d/track/+`       |
 
-Track, Control und Data teilen sich die Inbox. Nach der Validierung wird aus `event` das `radio/`-Topic: `de.ard.eventhub.v1.radio.track.playing` liegt auf `…/track/playing`. Die Livestream-URN in dem Topic ist `services[].id`.
+Track, Control und Data teilen sich die Inbox. Nach der Eventhub Validierung wird aus `event` das `radio/`-Topic: `de.ard.eventhub.v1.radio.track.playing` liegt auf `…/track/playing`. Die Livestream-URN in dem Topic ist `services[].id`.
 
 ## Wildcard-Filter
 

@@ -5,9 +5,9 @@ sidebar:
   order: 3
 ---
 
-Dieses Event ist für Eventhub Connect vorgesehen und wird über `POST /events/de.ard.eventhub.v1.radio.control` mit HTTP 400 abgelehnt. Der Publisher schreibt es auf `inbox/{institutionId}`. Nach der Validierung liegt es retained auf `radio/{livestreamId}/control`.
+Dieses Event ist für Eventhub Connect vorgesehen und wird über `POST /events/de.ard.eventhub.v1.radio.control` mit HTTP 400 abgelehnt. Der Publisher schreibt es auf `inbox/{institutionId}`. Nach der Eventhub Validierung liegt es retained auf `radio/{livestreamId}/control`.
 
-`services[]` ist URN-only (`id`, `publisherId` und `institutionId` als `urn:ard:…`). `start` ist ISO8601. `creator` setzt der Publisher. `created` setzt die Validierung auf den Zeitpunkt der Zustellung und überschreibt einen mitgeschickten Wert.
+`services[]` ist URN-only (`id`, `publisherId` und `institutionId` als `urn:ard:…`). `start` ist ISO8601. `creator` setzt der Publisher. `created` setzt die Eventhub Validierung auf den Zeitpunkt der Zustellung und überschreibt einen mitgeschickten Wert.
 
 Steuerbits (TA, TP, EON, Regio und weitere). `name` ist ein freier String und kein Enum. Neue Steuerfunktionen brauchen keine Schema-Änderung.
 

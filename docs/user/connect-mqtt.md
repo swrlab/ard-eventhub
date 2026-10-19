@@ -6,9 +6,9 @@ sidebar:
   icon: rocket
 ---
 
-Eventhub Connect nimmt Events über **MQTT 3.1.1** an. Du publizierst auf `inbox/{institutionId}` und liest Ablehnungen auf `feedback/{institutionId}`. Die validierten Events schreibt die Eventhub Validierung auf `radio/`, mit Retain.
+Eventhub Connect nimmt Events über **MQTT 3.1.1** an. Du publizierst auf `inbox/{institutionId}` und liest Ablehnungen auf `feedback/{institutionId}`. Die validierten Events schreibt die Eventhub Validierung auf `radio/`, mit Retain und QoS 1.
 
-Zugangsdaten, die drei Knotennamen, das Passwort und das Präfix für die Client-ID kommen vom Eventhub-Team. Topics stehen unter [_Topics_](./topics), Rechte unter [_Zugangsdaten_](./acl). Breaking Changes beim Umstieg von der HTTPS-API stehen unter [_Migration auf Eventhub v3_](./migration-v3).
+Zugangsdaten, die drei Hosts im ARD CN, das Passwort und das Präfix für die Client-ID kommen vom Eventhub-Team. Topics stehen unter [_Topics_](./topics), Rechte unter [_Zugangsdaten_](./acl). Breaking Changes beim Umstieg von der HTTPS-API stehen unter [_Migration auf Eventhub v3_](./migration-v3).
 
 ## Verbindung
 
@@ -29,18 +29,20 @@ Zugangsdaten, die drei Knotennamen, das Passwort und das Präfix für die Client
 
 ## Payload
 
-`id`, `publisherId` und `institutionId` in `services[]` sind `urn:ard:…` und Pflicht. Eine CRID (`externalId`) oder eine numerische Core-ID (`publisherId: "282310"`) endet als Schema-Ablehnung auf `feedback/`, das Event erreicht `radio/` nie. `services[].externalId` und `services[].type` weglassen: sie sind deprecated und werden ignoriert, die Ablehnung nennt sie in `deprecated`. Die `externalId` auf Event-Ebene (eure eigene Track-ID) und das Event-`type` (`music`, `news`, …) bleiben. `institutionId` muss zur Inbox und zum Livestream passen.
+Der Payload muss gültiges JSON in UTF-8 sein. MQTT 3.1.1 hat kein Charset-Feld; die Eventhub Validierung liest die Bytes strikt als UTF-8. Anderes oder kein JSON ist ein Fehler auf `.body`.
+
+`id`, `publisherId` und `institutionId` in `services[]` sind `urn:ard:…` und Pflicht. Eine CRID (`externalId`) oder eine numerische Core-ID (`publisherId: "282310"`) endet als Schema-Ablehnung auf `feedback/`. `services[].externalId` und `services[].type` weglassen: sie sind deprecated und werden ignoriert, die Ablehnung nennt sie in `deprecated`. Die `externalId` auf Event-Ebene (eure eigene Track-ID) und das Event-`type` (`music`, `news`, …) bleiben. `institutionId` muss zur Inbox und zum Livestream passen.
 
 - `id`: `urn:ard:permanent-livestream:…` oder `urn:ard:event-livestream:…`
 - `publisherId`: `urn:ard:publisher:…`
 - `institutionId`: `urn:ard:institution:…`
 - `externalId` und `type` in `services[]`: weglassen
 
-**`creator` und `created`.** `creator` ist Pflicht und nennt, wer das Event erzeugt hat, etwa eine Team-Mailadresse oder das Playout-System. Dies kann für Rückfragen von Subscribern genutzt werden und sollte eine gültige erreichbare Adresse sein. `created` setzt die Validierung auf den Zeitpunkt der Zustellung; ein mitgeschickter Wert wird überschrieben.
+**`creator` und `created`.** `creator` ist Pflicht und nennt, wer das Event erzeugt hat, etwa eine Team-Mailadresse oder das Playout-System. Dies kann für Rückfragen von Subscribern genutzt werden und sollte eine gültige erreichbare Adresse sein. `created` setzt die Eventhub Validierung auf den Zeitpunkt der Zustellung; ein mitgeschickter Wert wird überschrieben.
 
 ## Beispiel
 
-Ersetze Benutzername, Client-ID-Präfix, die drei URNs und das Passwort mit den Werten aus den Zugangsdaten. Die URNs unten sind das SWR-Beispiel aus den übrigen Docs; eine fremde Inbox lehnt der Broker ab, ein fremder Livestream die Validierung.
+Ersetze Benutzername, Client-ID-Präfix, die drei URNs und das Passwort mit den Werten aus den Zugangsdaten. Die URNs unten sind das SWR-Beispiel aus den übrigen Docs; eine fremde Inbox lehnt der Broker ab, ein fremder Livestream die Eventhub Validierung.
 
 ```js
 import mqtt from 'mqtt'
@@ -95,9 +97,9 @@ client.on('message', (topic, payload, packet) => {
 })
 ```
 
-`radio.control` und `radio.data` gehen auf **dieselbe** Inbox. Die Klasse steht im Feld `event`, der Livestream in `services[].id`. Payloads stehen unter [_radio.control_](../events/control) und [_radio.data_](../events/data). Track-Events: [_track.playing_](../events/track.playing), [_track.next_](../events/track.next). Publish auf `radio/…` ist dem Publisher verboten; die validierte Fassung schreibt nur die Validierung, mit Retain.
+`radio.control` und `radio.data` gehen auf **dieselbe** Inbox. Die Klasse steht im Feld `event`, der Livestream in `services[].id`. Payloads stehen unter [_radio.control_](../event/radio.control) und [_radio.data_](../event/radio.data). Track-Events: [_radio.track.playing_](../event/radio.track.playing), [_radio.track.next_](../event/radio.track.next). Publish auf `radio/…` ist dem Publisher verboten; die validierte Fassung schreibt nur die Eventhub Validierung, mit Retain.
 
-Zum Gegenprüfen brauchst du eine `sub-`-Kennung und abonnierst `radio/${livestreamId}/track/playing` (QoS 1, Clean Session false). Die erste Nachricht nach dem Connect ist der letzte Retain und gilt als aktueller Titel.
+Zum Gegenprüfen/ Subscriben brauchst du eine `sub-`-Kennung und abonnierst `radio/${livestreamId}/track/playing`. Die erste Nachricht nach dem Connect ist der letzte Retain und gilt als aktueller Titel.
 
 ## Feedback
 
@@ -154,4 +156,4 @@ Fehlt `id`, oder ist `publisherId` keine URN, kommt zum Beispiel das hier zurüc
 
 Ist der Body kein UTF-8 oder kein JSON, steht ein einzelner Fehler auf `.body`. Maßgeblich bleiben Operator-UI und Cluster-Logs.
 
-Eine Kennung für mehrere Anstalten publiziert jedes Event auf die Inbox der Anstalt, der der Livestream gehört. Der Broker nimmt jede erlaubte Inbox an; die falsche Inbox fällt erst in der Validierung auf.
+Eine Kennung für mehrere Anstalten publiziert jedes Event auf die Inbox der Anstalt, der der Livestream gehört. Der Broker nimmt jede erlaubte Inbox an; die falsche Inbox fällt erst in der Eventhub Validierung auf.

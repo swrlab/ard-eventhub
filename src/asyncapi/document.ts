@@ -171,21 +171,29 @@ const mqttRetainBinding = {
 type EventTypeDoc = 'track.playing' | 'track.next' | 'control' | 'data'
 
 /**
+ * Prose page under `docs/event/`. The file is `radio.{type}.mdx`.
+ * @param type - Event class token (`track.playing`, `control`, …)
+ * @returns Site path of the prose page, without the docs base
+ */
+const eventTypeDocPath = (type: EventTypeDoc): string => `/event/radio.${type}`
+
+/**
  * Prose page for one event class. Linked from the matching send and receive operations.
- * @param type - Class token, also the doc slug under `docs/events/`
+ * @param type - Event class token (`track.playing`, `control`, …)
  * @returns AsyncAPI externalDocs object
  */
 const eventTypeDoc = (type: EventTypeDoc) => ({
 	description: `de.ard.eventhub.v1.radio.${type}`,
-	url: `https://swrlab.github.io/ard-eventhub/events/${type}`,
+	url: `https://swrlab.github.io/ard-eventhub${eventTypeDocPath(type)}`,
 })
 
 /**
  * Markdown link to the prose page. Blume renders the operation description and skips `externalDocs`.
- * @param type - Class token, also the doc slug under `docs/events/`
+ * @param type - Event class token (`track.playing`, `control`, …)
  * @returns Link shown on the send and receive pages
  */
-const eventTypeLink = (type: EventTypeDoc): string => `[de.ard.eventhub.v1.radio.${type}](/events/${type})`
+const eventTypeLink = (type: EventTypeDoc): string =>
+	`[de.ard.eventhub.v1.radio.${type}](${eventTypeDocPath(type)})`
 
 /**
  * Retained `radio/` channel for one event class.
