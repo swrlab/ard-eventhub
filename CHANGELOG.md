@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - docs: schema page for the retained `feedback/{institutionId}` body
+- docs: event overview — Now and Control are mandatory, Next and Data are optional
 
 ### Changed
 

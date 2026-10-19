@@ -13,7 +13,7 @@ Die Spezifikation aus `asyncapi.json` wird in diesen Docs als [Events-Referenz](
 
 Publisher schreiben `track.playing`, `track.next`, `radio.control` und `radio.data` auf `inbox/{institutionId}`. Subscriber lesen die zugestellte Fassung auf `radio/{livestreamId}/track/playing`, `…/track/next`, `…/control` und `…/data`. Ablehnungen stehen retained auf `feedback/{institutionId}`. `radio.control` und `radio.data` lehnt `POST /events` mit HTTP 400 ab; Track-Events nimmt der HTTPS-Ingest während der Migration noch an. Das Protokoll ist MQTT 3.1.1 auf TLS-Port `8883`; ein v5-Connect wird abgelehnt. Host `connect.eventhub.invalid` in der Spezifikation ist ein Platzhalter. Die drei Knotennamen, die Zugangsdaten und ein lauffähiges Beispiel stehen unter [_Eventhub Connect_](./user/connect-mqtt).
 
-Jede Klasse hat eine eigene Erläuterung. Dieselbe Adresse hängt als `externalDocs` an der jeweiligen `send`- und `receive`-Operation:
+Welche Klassen Pflicht sind, steht im [_Überblick_](./event/index): Now und Control sind Pflicht, Next und Data optional. Jede Klasse hat eine eigene Erläuterung. Dieselbe Adresse hängt als `externalDocs` an der jeweiligen `send`- und `receive`-Operation:
 
 - [_de.ard.eventhub.v1.radio.track.playing_](./event/radio.track.playing)
 - [_de.ard.eventhub.v1.radio.track.next_](./event/radio.track.next)

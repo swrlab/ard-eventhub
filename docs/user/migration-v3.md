@@ -13,6 +13,7 @@ Die HTTPS-Operationen sind in der [OpenAPI-Referenz](/api) als **deprecated** ma
 - Anbindung und Beispiel: [_Eventhub Connect_](./connect-mqtt)
 - Topics und Filter: [_Topics_](./topics)
 - Benutzer, Passwort, Rechte: [_Zugangsdaten_](./acl)
+- Welche Events Pflicht sind: [_Überblick_](../event/index) (Now und Control Pflicht, Next und Data optional)
 - Payloads: [_radio.track.playing_](../event/radio.track.playing), [_radio.track.next_](../event/radio.track.next), [_radio.control_](../event/radio.control), [_radio.data_](../event/radio.data), [_feedback_](../event/feedback)
 
 Diese neuen Features für v3 wurden ursprünglich in der GitHub Discussion [Eventhub v3 — Plan](https://github.com/swrlab/ard-eventhub/discussions/771) besprochen.

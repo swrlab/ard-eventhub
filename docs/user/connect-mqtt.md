@@ -97,7 +97,7 @@ client.on('message', (topic, payload, packet) => {
 })
 ```
 
-`radio.control` und `radio.data` gehen auf **dieselbe** Inbox. Die Klasse steht im Feld `event`, der Livestream in `services[].id`. Payloads stehen unter [_radio.control_](../event/radio.control) und [_radio.data_](../event/radio.data). Track-Events: [_radio.track.playing_](../event/radio.track.playing), [_radio.track.next_](../event/radio.track.next). Publish auf `radio/…` ist dem Publisher verboten; die validierte Fassung schreibt nur die Eventhub Validierung, mit Retain.
+`radio.control` und `radio.data` gehen auf **dieselbe** Inbox. Die Klasse steht im Feld `event`, der Livestream in `services[].id`. Now und Control sind Pflicht, Next und Data optional: [_Überblick_](../event/index). Payloads stehen unter [_radio.control_](../event/radio.control) und [_radio.data_](../event/radio.data). Track-Events: [_radio.track.playing_](../event/radio.track.playing), [_radio.track.next_](../event/radio.track.next). Publish auf `radio/…` ist dem Publisher verboten; die validierte Fassung schreibt nur die Eventhub Validierung, mit Retain.
 
 Zum Gegenprüfen/ Subscriben brauchst du eine `sub-`-Kennung und abonnierst `radio/${livestreamId}/track/playing`. Die erste Nachricht nach dem Connect ist der letzte Retain und gilt als aktueller Titel.
 
