@@ -6,7 +6,7 @@ sidebar:
   icon: wrench
 ---
 
-Diese Seite fasst die **Breaking Changes** von Eventhub **3.0** zusammen (aktuell Pre-Release `3.0.0-beta.x`): die HTTPS-API und die Umstellung auf Eventhub Connect über MQTT. Der HTTPS-Ingest bleibt nur bis zum letzten Umzug und wird dann abgeschaltet.
+Diese Seite fasst die **Breaking Changes** von Eventhub **3.0** zusammen (aktuell Pre-Release `3.0.0-beta.2`): die HTTPS-API und die Umstellung auf Eventhub Connect über MQTT. Der HTTPS-Ingest bleibt nur bis zum letzten Umzug und wird dann abgeschaltet.
 
 - Anbindung und Beispiel: [_Eventhub Connect_](./connect-mqtt)
 - Topics und Filter: [_Topics_](./topics)
@@ -24,7 +24,7 @@ Die vollständige Historie aller Changes findest du im [Changelog](https://githu
   - 🛑 **Response-Header `x-ard-eventhub-uid` entfernt** — betrifft Clients, die diesen Header ausgewertet haben
   - 🛑 **Feld `trace` deprecated und `null`** — in manchen Responses war das Feld enthalten, nun ist es immer `null` und wird bald entfernt
   - ⏳ **Feld `length` Pflicht und positiv** — betrifft alle Publisher von Track-Events
-- Im aktuellen Pre-Release (nach `3.0.0-beta.1`)
+- Mit `3.0.0-beta.2`
   - 🛑 **Temporäres Publisher-Mapping entfernt** — betrifft rbb und hr, die noch eine der alten Publisher-URNs senden
   - 🛑 **MQTT nimmt in `services[]` nur URNs** — Core-ID und CRID werden abgelehnt
   - 🛑 **`creator` Pflicht, `created` wird überschrieben** — betrifft jeden Connect-Publisher
@@ -86,7 +86,7 @@ Beispiel:
 
 ## Temporäres Publisher-Mapping entfernt
 
-_Im aktuellen Pre-Release, nach `3.0.0-beta.1`._
+_Ab Version `3.0.0-beta.2` und aufwärts._
 
 Für elf Sender von rbb und hr hat der HTTPS-Ingest eine ältere Publisher-URN still auf die URN aus dem ARD Core Feed umgebogen. Diese Zuordnung ist entfernt. `publisherId` muss die URN sein, die der Feed für den Sender führt. Eine URN aus der Spalte „Bisherige URN“ gilt als unbekannter Publisher, der Service kommt mit Status `blocked` zurück.
 
@@ -110,7 +110,7 @@ Eine numerische Core-ID hasht der HTTPS-Ingest weiterhin zu `urn:ard:publisher:�
 
 ## `services[]` auf MQTT nur noch URNs
 
-_Im aktuellen Pre-Release, nach `3.0.0-beta.1`._
+_Ab Version `3.0.0-beta.2` und aufwärts._
 
 Der HTTPS-Ingest rechnet weiter um: `publisherId` als numerische Core-ID oder URN, und `id` aus `externalId` plus `type`, wenn `id` fehlt. Eventhub Connect rechnet nicht um. Ein Event mit CRID oder Core-ID landet auf `feedback/` und erreicht `radio/` nicht.
 
@@ -124,7 +124,7 @@ Auf HTTPS setzt der Ingest `institutionId` selbst. `externalId` und `type` in `s
 
 ## `creator` und `created`
 
-_Im aktuellen Pre-Release, nach `3.0.0-beta.1`._
+_Ab Version `3.0.0-beta.2` und aufwärts._
 
 Jedes Connect-Event (`track.playing`, `track.next`, `radio.control`, `radio.data`) braucht `creator`: wer das Event erzeugt hat, etwa eine Team-Mailadresse oder das Playout-System. `created` setzt die Eventhub Validierung auf den Zeitpunkt der Zustellung. Ein mitgeschickter Wert wird ersetzt.
 
@@ -132,7 +132,7 @@ Jedes Connect-Event (`track.playing`, `track.next`, `radio.control`, `radio.data
 
 ## Topics ohne Percent-Encoding
 
-_Im aktuellen Pre-Release, nach `3.0.0-beta.1`._
+_Ab Version `3.0.0-beta.2` und aufwärts._
 
 Pub/Sub-Topics encodieren die URN (`urn%3Aard%3Apermanent-livestream%3A…`). MQTT und NATS nehmen den Doppelpunkt roh. Das Encoding entfällt, und mit ihm das Paar `pubsubBuildId` / `convert-id`.
 
@@ -140,7 +140,7 @@ Pub/Sub-Topics encodieren die URN (`urn%3Aard%3Apermanent-livestream%3A…`). MQ
 
 ## Feedback-Body umgestellt
 
-_Im aktuellen Pre-Release, nach `3.0.0-beta.1`._
+_Ab Version `3.0.0-beta.2` und aufwärts._
 
 `feedback/{institutionId}` ist die Diagnose, kein ACK. Ein angenommenes Event schreibt dort nichts. Die Nachricht bleibt pro Institution retained.
 
@@ -155,7 +155,7 @@ Wer den früheren Body schon gelesen hat, muss umstellen. Weg sind `cause`, `mes
 
 ## `media[].templateUrl` deprecated
 
-_Im aktuellen Pre-Release, nach `3.0.0-beta.1`._
+_Ab Version `3.0.0-beta.2` und aufwärts._
 
 `templateUrl` in `media[]` ist **deprecated**. Schick eine konkrete `url`. Ein Template mit `{width}` und `{height}` wird noch akzeptiert. Beispiele stehen unter [_Bilder_](./images).
 

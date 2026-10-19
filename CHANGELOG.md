@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0-beta.2] - 2026-10-19
+
 ### Added
 
 - docs: publisher migration guide, MQTT topic tree, and ACL reference for Eventhub Connect
