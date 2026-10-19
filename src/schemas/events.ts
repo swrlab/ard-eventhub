@@ -222,7 +222,12 @@ const mediaItem = z
 			.string()
 			.nullable()
 			.optional()
-			.meta({ examples: ['https://example.com/cover.jpg?width={width}'] }),
+			.meta({
+				deprecated: true,
+				description:
+					'Deprecated. Send a concrete `url`. A `{width}` / `{height}` template is still accepted.',
+				examples: ['https://example.com/cover.jpg?width={width}'],
+			}),
 		description: z.string().meta({ examples: ['Cover Demo Artist'] }),
 		attribution: z
 			.string()

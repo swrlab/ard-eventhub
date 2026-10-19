@@ -749,6 +749,8 @@
 								"examples": ["https://example.com/cover.jpg"]
 							},
 							"templateUrl": {
+								"deprecated": true,
+								"description": "Deprecated. Send a concrete `url`. A `{width}` / `{height}` template is still accepted.",
 								"examples": ["https://example.com/cover.jpg?width={width}"],
 								"type": ["string", "null"]
 							},
@@ -1087,6 +1089,8 @@
 								"examples": ["https://example.com/cover.jpg"]
 							},
 							"templateUrl": {
+								"deprecated": true,
+								"description": "Deprecated. Send a concrete `url`. A `{width}` / `{height}` template is still accepted.",
 								"examples": ["https://example.com/cover.jpg?width={width}"],
 								"type": ["string", "null"]
 							},
