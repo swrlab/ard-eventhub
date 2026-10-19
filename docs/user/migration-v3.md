@@ -30,6 +30,7 @@ Die vollständige Historie aller Changes findest du im [Changelog](https://githu
   - 🛑 **`creator` Pflicht, `created` wird überschrieben** — betrifft jeden Connect-Publisher
   - 🛑 **Topics ohne Percent-Encoding** — Subscriber, die Topic-Namen aus Pub/Sub übernehmen
   - 🛑 **Feedback-Body umgestellt** — `errors[]` und `created` ersetzen die früheren Felder
+  - **Feld `media[].templateUrl` deprecated** — eine konkrete `url` schicken; ein Template mit `{width}` und `{height}` wird noch akzeptiert
 
 ## Radiotext-Event entfernt
 
@@ -151,6 +152,14 @@ Wer den früheren Body schon gelesen hat, muss umstellen. Weg sind `cause`, `mes
 - Zuordnen über `playlistItemId` (Track) oder über `start` plus Subject (Control und Data)
 
 **Aktion:** Auswertungen der alten Felder entfernen. Beispiel und Fehlercodes: [_Eventhub Connect_](./connect-mqtt), Abschnitt Feedback.
+
+## `media[].templateUrl` deprecated
+
+_Im aktuellen Pre-Release, nach `3.0.0-beta.1`._
+
+`templateUrl` in `media[]` ist **deprecated**. Schick eine konkrete `url`. Ein Template mit `{width}` und `{height}` wird noch akzeptiert. Beispiele stehen unter [_Bilder_](./images).
+
+**Aktion:** `templateUrl` nicht mehr mitschicken.
 
 ## Weitere API-Hinweise (v3)
 

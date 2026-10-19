@@ -41,7 +41,6 @@ Das optionale `isFallback`-Boolean-Feld in `media`-Elementen ermöglicht es, Med
     {
       "type": "cover",
       "url": "https://example.com/cover.jpg",
-      "templateUrl": "https://example.com/cover.jpg?width={width}",
       "description": "Cover Demo Artist",
       "attribution": "Photographer XYZ",
       "isFallback": false

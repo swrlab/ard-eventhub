@@ -11,4 +11,10 @@ Dieses Ereignis markiert den Beginn eines neuen Elementes oder Tracks für den j
 
 `length` muss mit der geschätzten Dauer des Elements in Sekunden gesetzt werden und darf weder `0` noch `null` sein. Das Ende des aktuellen Elements ergibt sich aus dem `start` des folgenden Elements, nicht aus `start + length`.
 
+## Überschreiben
+
+Ein bereits gesendetes Event kann überschrieben werden, indem es innerhalb des konfigurierten Zeitfensters erneut mit denselben IDs gesendet wird. Das Zeitfenster beträgt aktuell 15 Minuten und gilt für `start`: liegt der Start weiter zurück, lehnt der HTTPS-Ingest das Event ab.
+
+Dieselben IDs sind `playlistItemId` und die Livestream-IDs in `services[]`. Der neue Payload ersetzt die vorherige Fassung desselben Elements, zum Beispiel einen korrigierten Titel oder ein nachgereichtes Cover. Auf MQTT liegt danach der neue Inhalt retained auf `radio/{livestreamId}/track/playing`.
+
 Auf MQTT sind `id`, `publisherId` und `institutionId` in `services[]` URNs (`urn:ard:…`). `creator` setzt der Publisher. `created` setzt die Eventhub Validierung auf den Zeitpunkt der Zustellung und überschreibt einen mitgeschickten Wert. Wohin publiziert wird, steht unter [_Topics_](../user/topics), die Verbindung unter [_Eventhub Connect_](../user/connect-mqtt). Der Kanal steht in der [Events-Referenz](/events/subscribe/receive-radio-track-playing).
