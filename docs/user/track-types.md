@@ -1,6 +1,9 @@
 ---
 title: 'Track-Types'
 description: 'Für die Subscriber-Darstellung.'
+sidebar:
+  order: 10
+  icon: music
 ---
 
 Jeder gesendete `track` muss einem bestimmten Typ entsprechen, damit er von empfangenden Subscribern korrekt dargestellt werden kann.

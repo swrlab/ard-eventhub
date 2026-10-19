@@ -11,4 +11,4 @@ Das `next`-Event hat Ähnlichkeiten zum [`playing`-Event](./track.playing), kenn
 
 Ein Paar aus `next` und `playing` sollte `playlistItemId` teilen, damit Abonnenten diese beiden Events miteinander verknüpfen können.
 
-Auf MQTT sind `id`, `publisherId` und `institutionId` in `services[]` URNs (`urn:ard:…`). `creator` setzt der Publisher. `created` setzt die Validierung auf den Zeitpunkt der Zustellung und überschreibt einen mitgeschickten Wert. Wohin publiziert wird, steht unter [_Topics_](../user/topics), die Verbindung unter [_Migration auf MQTT_](../user/connect-migration). Der Kanal steht in der [Events-Referenz](/events/subscribe/receive-radio-track-next).
+Auf MQTT sind `id`, `publisherId` und `institutionId` in `services[]` URNs (`urn:ard:…`). `creator` setzt der Publisher. `created` setzt die Validierung auf den Zeitpunkt der Zustellung und überschreibt einen mitgeschickten Wert. Wohin publiziert wird, steht unter [_Topics_](../user/topics), die Verbindung unter [_Eventhub Connect_](../user/connect-mqtt). Der Kanal steht in der [Events-Referenz](/events/subscribe/receive-radio-track-next).

@@ -3,11 +3,14 @@ title: 'Zugangsdaten'
 description: 'MQTT-Benutzernamen, Rotation und was eine Kennung publizieren und abonnieren darf.'
 sidebar:
   order: 4
+  icon: user-shield
 ---
 
-Eventhub Connect authentifiziert mit Benutzername und Passwort über TLS. Es gibt keinen Token-Refresh. Der HTTPS-Login unter [_Authentifizierung_](./authentication) gilt für `POST /events` und läuft mit dem HTTPS-Ingest aus. Verbindung und Client-Pflichten stehen unter [_Migration auf MQTT_](./connect-migration), die Topics unter [_Topics_](./topics).
+Eventhub Connect authentifiziert mit Benutzername und Passwort über TLS. Es gibt keinen Token-Refresh. Der HTTPS-Login unter [_Authentifizierung_](./authentication) gilt für `POST /events` und läuft mit dem HTTPS-Ingest aus. Verbindung und Client stehen unter [_Eventhub Connect_](./connect-mqtt), die Topics unter [_Topics_](./topics).
 
-Die Kennung beantragst du beim Eventhub-Team. Du bekommst den Benutzernamen, das Passwort, die Institutions-URN oder URNs, für die sie gilt, und die Stage (`test` oder `prod`). Das Passwort steht nur bei euch und in der verschlüsselten Betriebs-Config, nicht in Git und nicht in dieser Doku.
+Die Kennung beantragst du beim Eventhub-Team. Du bekommst den Benutzernamen, das Passwort, ein Präfix für die Client-IDs, die Institutions-URN oder URNs, für die sie gilt, und die Stage (`test` oder `prod`). Das Passwort steht nur bei euch und in der verschlüsselten Betriebs-Config, nicht in Git und nicht in dieser Doku.
+
+Jede Client-ID muss mit diesem Präfix beginnen. Die Session gilt für den ganzen Account: dieselbe ID bei einem anderen Benutzer beendet dessen Verbindung. Eine ID pro Verbindung, fest vergeben. Details stehen unter [_Eventhub Connect_](./connect-mqtt).
 
 ## Namen
 

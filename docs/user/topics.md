@@ -2,10 +2,11 @@
 title: 'MQTT Topics'
 description: 'MQTT-Topic-Baum, Publish- und Subscribe-Ziele, Wildcard-Filter und die Übersetzung nach NATS.'
 sidebar:
-  order: 3
+  order: 4
+  icon: list-tree
 ---
 
-Publisher schreiben nur nach `inbox/{institutionId}` und lesen nur `feedback/{institutionId}`. Alles unter `radio/` schreiben ausschließlich die Validierung, nachdem das Event angenommen wurde. Subscriber lesen `radio/`. Die Verbindung steht unter [_Migration auf MQTT_](./connect-migration), die Rechte unter [_Zugangsdaten_](./acl).
+Publisher schreiben nur nach `inbox/{institutionId}` und lesen nur `feedback/{institutionId}`. Alles unter `radio/` schreiben ausschließlich die Validierung, nachdem das Event angenommen wurde. Subscriber lesen `radio/`. Die Verbindung steht unter [_Eventhub Connect_](./connect-mqtt), die Rechte unter [_Zugangsdaten_](./acl).
 
 `{institutionId}` ist die Institutions-URN, zum Beispiel `urn:ard:institution:a3004ff924ece1a2`. `{livestreamId}` ist die Livestream-URN, zum Beispiel `urn:ard:permanent-livestream:49267f7d67be180d`. Es gibt keine Kurznamen wie `inbox/swr`: die URN ist dasselbe `urn:ard:…`, das in `services[].id` schon vorkommt.
 
