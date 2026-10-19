@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- docs: schema page for the retained `feedback/{institutionId}` body
+
 ### Changed
 
 - docs: mark every HTTPS ingest operation deprecated in the OpenAPI spec; Eventhub Connect (MQTT) replaces them

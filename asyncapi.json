@@ -366,7 +366,7 @@
 		"receiveFeedback": {
 			"action": "receive",
 			"title": "Subscribe feedback/{institutionId}",
-			"description": "Last rejection for this institution. Correlate track events by `playlistItemId`, control and data by `start`. Retained; QoS 1.",
+			"description": "Last rejection for this institution. Correlate track events by `playlistItemId`, control and data by `start`. Retained; QoS 1. Schema: [feedback](/event/feedback).",
 			"channel": {
 				"$ref": "#/channels/feedbackInstitution"
 			},
@@ -385,6 +385,10 @@
 					"qos": 1,
 					"retain": true
 				}
+			},
+			"externalDocs": {
+				"description": "feedback/{institutionId}",
+				"url": "https://swrlab.github.io/ard-eventhub/event/feedback"
 			}
 		}
 	},
