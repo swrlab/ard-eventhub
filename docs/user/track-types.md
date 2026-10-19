@@ -1,5 +1,5 @@
 ---
-title: 'Track-Types'
+title: 'Track Typen'
 description: 'Für die Subscriber-Darstellung.'
 sidebar:
   order: 10

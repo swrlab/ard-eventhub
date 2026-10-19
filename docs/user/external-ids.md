@@ -1,14 +1,14 @@
 ---
 title: 'External IDs'
-description: 'Anforderungen an externalId / CRID für Livestreams.'
-deprecated: true
+description: 'Ab v3 die gehashte externalId, dieselbe Livestream-ID wie in ARD Core.'
 sidebar:
-  order: 4
+  order: 6
+  icon: handshake
 ---
 
 Damit der Eventhub zuverlässig arbeitet, muss ein Dienst eindeutig identifizierbar sein. Dies geschieht über das Feld `externalId` in der neuen ARD Core API. Evtl. kennst du bereits dieses Feld schon als _CRID_, welche in der TVA-Dokumentation verwendet wird.
 
-⚠️ Bitte verwende **genau** die `externalId`, mit der du die Metadaten deiner Livestreams an ARD Core (_PermanentLivestream_) übermittelst. Bei Unsicherheit wende dich an deinen Metadaten-Ansprechpartner oder an das SWR Audio Lab.
+Ab Eventhub v3 steht im Event die gehashte Form dieser `externalId`: `urn:ard:permanent-livestream:{hash}` oder `urn:ard:event-livestream:{hash}`. Diese URN muss mit der Livestream-ID übereinstimmen, die für denselben Publisher im ARD Core veröffentlicht ist.
 
 > **Anforderungen und Empfehlungen für External IDs**
 > Das externalId-Feld kann beim Erstellen einer Entität übergeben werden.

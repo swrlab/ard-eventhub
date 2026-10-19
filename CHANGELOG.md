@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - docs: schema page for the retained `feedback/{institutionId}` body
 - docs: event overview — Now and Control are mandatory, Next and Data are optional
+- docs: move external-ID guidance to the user guides; v3 events carry the hashed ARD Core livestream URN
+- docs: v3 drops firehose topics; subscribers use an MQTT wildcard filter instead
 
 ### Changed
 

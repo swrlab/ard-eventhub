@@ -91,7 +91,7 @@ export const usersConfig = z.object({
 
 /**
  * Livestream topic that may be published even though it is absent from the ARD feed.
- * @see docs/ids/common-ids.md
+ * @see docs/user/common-ids.md
  */
 export const allowedLivestream = z.object({
 	id: z.string(),

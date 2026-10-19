@@ -1,8 +1,9 @@
 ---
-title: 'Allgemeine IDs'
-description: 'Gemeinsame nächtliche Sendungen und Firehose-Topics.'
+title: 'Allgemeine Service IDs'
+description: 'Gemeinsame nächtliche Sendungen. In v3 ersetzen MQTT-Wildcards die Firehose.'
 sidebar:
-  order: 3
+  order: 5
+  icon: id-card
 ---
 
 ## Nächtliche Landesweite Sendungen
@@ -19,12 +20,6 @@ Intern erlaubt Eventhub diese Topics über `src/config/allowed-livestreams.json`
 | ARD Popnacht            | SWR3       | `urn:ard:permanent-livestream:885aa9c84e5374bd` |
 | Die Junge Nacht der ARD | WDR/ 1LIVE | `urn:ard:permanent-livestream:d22e908de85bfd44` |
 
-## Allgemeine/ Firehose Topics
+## Firehose/ Wildcard
 
-Jede Instanz des Eventhubs hat allgemeine `topics`, die für die Bereitstellung aller Ereignisse verwendet werden. Dies sind die sogenannten „firehose“-Themen.
-
-Sie sind nach Ereignistypen unterteilt, daher kannst du entweder `v1.radio.track.playing` oder `v1.radio.track.next` abonnieren. Bitte beachte, dass du aufgrund der hohen Anzahl von für dich wahrscheinlich irrelevanten Ereignissen vorzugsweise ein Abonnement für das `topic` eines einzelnen Livestreams verwenden solltest.
-
-## Andere IDs
-
-Alle anderen IDs für Livestreams findest du in der API. (`GET /topics`).
+Eventhub v3 hat keine allgemeinen Firehose-Topics mehr. Dieselbe Reichweite hat ein MQTT-Wildcard-Filter. `radio/#` ist alles Validierte. `radio/+/track/playing` ist Now-Playing jedes Livestreams, `radio/+/track/next` der nächste Titel. Die Menge bleibt groß und größtenteils irrelevant; ein Filter auf einen einzelnen Livestream bleibt die engere Wahl. Filter und Wildcards stehen unter [_MQTT Topics_](./topics).
