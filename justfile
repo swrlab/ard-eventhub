@@ -1,3 +1,4 @@
+import 'just/certificate.just'
 import 'just/docs.just'
 import 'just/encryption.just'
 import 'just/integration.just'

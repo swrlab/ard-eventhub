@@ -54,7 +54,7 @@ kubectl -n eventhub-test create secret tls nats-tls \
   --cert=tls.crt --key=tls.key
 ```
 
-Create the secret before expecting the pod to become Ready. The server image has no shell, so a missing mount sits in `CreateContainerConfigError` until the secret exists.
+Create the secret before expecting the pod to become Ready. The server image has no shell, so a missing mount sits in `CreateContainerConfigError` until the secret exists. How to generate the CSR and install the same files on every zone: [Certificates](../../docs/development/certificates.md).
 
 One pod per zone, pinned with `nodeSelector: topology.kubernetes.io/zone` (`bad`, `stg`, or `mnz`). Each zone is its own k3s cluster, and k3s does not set that label, so the pod stays Pending until a node in that cluster has it. The selector only matches nodes in the cluster you apply to.
 
@@ -68,7 +68,7 @@ kubectl get nodes --show-labels
 
 Use `stg` or `mnz` on those clusters instead of `bad`.
 
-`server_name` is `connect-bad`, `connect-stg`, or `connect-mnz`. Cluster routes and `advertise` use those names on `:6222`, which is a hostPort, so the other zones dial the node rather than a pod IP. The three names have to resolve to that environment's nodes. Test and prod can use the same names because each environment has its own DNS. MQTT listens on host `:8883` with TLS. The certificate has to cover all three names. Use pod security `baseline` or `privileged` so the hostPorts are admitted.
+`server_name` is `connect-bad`, `connect-stg`, or `connect-mnz`. Cluster routes and `advertise` use those names on `:6222`, which is a hostPort, so the other zones dial the node rather than a pod IP. Those routes are plaintext. The three names have to resolve to that environment's nodes. Test and prod can use the same names because each environment has its own DNS. MQTT listens on host `:8883` with TLS, and the NATS WebSocket on `:9222` uses the same certificate. Use pod security `baseline` or `privileged` so the hostPorts are admitted.
 
 In-cluster NATS clients use `nats://nats.<namespace>.svc:4222`.
 
@@ -84,4 +84,4 @@ just nats-k8s-build
 
 ## Not in this tree
 
-TLS material and a local registry mirror. `eventhub-connect` creates the `INBOX` and `PLUGINS` streams when it connects, and that code does not set `num_replicas` yet, so those two streams land at 1 until it does. MQTT's own streams are pinned to 3.
+Signing keys, CSRs, and a local registry mirror. `eventhub-connect` creates the `INBOX` and `PLUGINS` streams when it connects, and that code does not set `num_replicas` yet, so those two streams land at 1 until it does. MQTT's own streams are pinned to 3.

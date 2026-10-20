@@ -48,7 +48,7 @@ Ingest publiziert bei gesetztem `MQTT_BROKER_URL` direkt auf das Gateway als `sv
 
 ## Kubernetes
 
-Dev fährt drei NATS-Pods in einem Cluster. Test und prod haben je eine Config pro Zone (bad, stg, mnz): [`infra/kubernetes/README.md`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/README.md).
+Dev fährt drei NATS-Pods in einem Cluster. Test und prod haben je eine Config pro Zone (bad, stg, mnz): [`infra/kubernetes/README.md`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/README.md). Zertifikat erzeugen und als Secret `nats-tls` auf jeden Zonen-Cluster legen: [Certificates](./certificates).
 
 ```sh
 just nats-k8s-dev
