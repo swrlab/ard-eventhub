@@ -1929,8 +1929,10 @@ Vector / VictoriaLogs / VictoriaMetrics / Perses / Beszel are all provisional. B
 
 ### 19.7 Q7 — `TEMP_PUBLISHER_MAPPING`
 
-**Decided (2026-10-08): removed.** The eleven hardcoded publisher-id remaps in `ard-core.ts` are
-gone. Lookup matches the publisher id on the feed exactly.
+**Decided (2026-10-20): kept on HTTPS ingest.** The eleven hardcoded publisher-id remaps stay in
+`getPublisherById` (`src/utils/feed/ard-core.ts`), which only the legacy ingest path calls.
+Eventhub Connect compares `publisherId` to the feed entry and does not apply the table. A decision
+on 2026-10-08 removed the table from that shared lookup and dropped the aliases from ingest as well.
 
 ## 20. Open questions
 
