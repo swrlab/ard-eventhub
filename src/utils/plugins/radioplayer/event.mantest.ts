@@ -40,8 +40,7 @@ const createJob = (overrides: Partial<Parameters<typeof radioplayerEvent>[0]> = 
 			length: 10,
 			services: [
 				{
-					type: 'PermanentLivestream',
-					externalId: 'crid://ard.de/test/unit',
+					id: MAPPED_LIVESTREAM_URN,
 					publisherId: 'urn:ard:publisher:test123',
 					topic: {
 						id: MAPPED_LIVESTREAM_URN,
@@ -165,15 +164,14 @@ test(
 			assertEquals(result, [])
 		})
 
-		await t.step('skips non-PermanentLivestream services', async () => {
+		await t.step('skips event-livestream services', async () => {
 			const result = await radioplayerEvent(
 				createJob({
 					event: {
 						...createJob().event,
 						services: [
 							{
-								type: 'EventLivestream',
-								externalId: 'crid://ard.de/test/unit',
+								id: 'urn:ard:event-livestream:abc123',
 								publisherId: 'urn:ard:publisher:test123',
 								topic: {
 									id: 'urn:ard:event-livestream:abc123',

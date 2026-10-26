@@ -1,7 +1,7 @@
 import type { EventhubPlugin, EventhubPluginMessage, EventhubV1RadioPostBody } from '../../../schemas/events.ts'
 import { getMs, getMsOffset } from '@frytg/dates'
 import { logger } from '@frytg/logger'
-import { defaultHeaders } from '#config'
+import { coreIdPrefixes, defaultHeaders } from '#config'
 import { radioplayerAPIKeys, stage } from '#env'
 // NOTE: Node.js does not support importing .json5 files.
 import livestreamMapping from '../../../config/radioplayer-mapping.json5'
@@ -13,6 +13,19 @@ const RUN_IN_NON_PROD = getEnvBoolean('RADIOPLAYER_RUN_IN_NON_PROD', false)
 
 // see API docs: https://radioplayerworldwide.atlassian.net/wiki/spaces/RPC/pages/1920073729/Programmatic+Ingest+of+Station+Information#V2-Endpoints
 const RADIOPLAYER_API_URL = 'https://np-ingest.radioplayer.cloud'
+
+/**
+ * Stubbable HTTP POST for the Radioplayer now-playing ingest.
+ */
+export const radioplayerHttp = {
+	/**
+	 * POST a now-playing URL to Radioplayer.
+	 * @param url - Ingest URL including query parameters
+	 * @param init - Fetch options (API key header, timeout)
+	 * @returns Radioplayer response
+	 */
+	post: (url: string, init: RequestInit): Promise<Response> => globalThis.fetch(url, init),
+}
 
 type RadioplayerOutput =
 	| {
@@ -63,7 +76,7 @@ const sendRadioplayerEvent = async (
 				'X-API-KEY': apiKey,
 			},
 		}
-		const posted = await globalThis.fetch(url.toString(), radioplayerConfig)
+		const posted = await radioplayerHttp.post(url.toString(), radioplayerConfig)
 		const response = await posted.text()
 
 		// log result
@@ -136,10 +149,10 @@ export const radioplayerEvent = async (job: EventhubPluginMessage): Promise<Radi
 			continue
 		}
 
-		// only process PermanentLivestream services
-		if (service.type !== 'PermanentLivestream') {
+		// service.type is deprecated; the livestream URN prefix decides
+		if (!livestreamId.startsWith(coreIdPrefixes.PermanentLivestream)) {
 			logger.warning({
-				message: `radioplayer skipping service not PermanentLivestream > ${service.type}`,
+				message: `radioplayer skipping service not permanent livestream > ${livestreamId}`,
 				source,
 				data: { service, job },
 			})
