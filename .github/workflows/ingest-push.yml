@@ -51,11 +51,6 @@ jobs:
           cache: true
           github_token: ${{ github.token }}
 
-      - name: 🔐 Decrypt CI users allow-list
-        env:
-          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_PRIVATE_KEY }}
-        run: sops decrypt keys/users.ci.sops.json > src/config/users.json
-
       - name: 📚 Lint Code
         run: bun x oxlint
 
@@ -65,8 +60,7 @@ jobs:
       - name: 🧪 Run Ingest Tests
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_PRIVATE_KEY }}
-          STAGE: dev
-        run: sops exec-env --same-process .env.ci.sops.yaml "bun test --timeout 120000"
+        run: just test-ci
 
   nats:
     needs: security

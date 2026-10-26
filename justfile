@@ -27,18 +27,17 @@ update *args:
 	bun outdated
 
 # run the ingest tests locally with injected environment variables
-# writes gitignored secrets when they are missing (CI decrypts the allow-list itself)
-[group('LOCAL')]
+[group('TEST')]
 test:
-	#!/usr/bin/env bash
-	set -euo pipefail
-	if [[ ! -f src/config/users.json ]]; then
-		sops decrypt --output src/config/users.json keys/users-test.sops.json
-	fi
-	if [[ ! -f keys/gcp-ingest-prod.json ]]; then
-		sops decrypt --output keys/gcp-ingest-prod.json keys/gcp-ingest-prod.sops.json
-	fi
+	sops decrypt --output src/config/users.json keys/users-test.sops.json
+	sops decrypt --output keys/gcp-ingest-prod.json keys/gcp-ingest-prod.sops.json
 	just env "just test-with-env"
+
+# run tests with CI variables
+[group('TEST')]
+test-ci:
+	sops decrypt --output src/config/users.json keys/users-ci.sops.json
+	sops exec-env --same-process .env.ci.sops.yaml "bun test --timeout 120000"
 
 # run testing (envs need to be provided)
 test-with-env:
