@@ -36,7 +36,7 @@ test:
 # run tests with CI variables
 [group('TEST')]
 test-ci:
-	sops decrypt --output src/config/users.json keys/users-ci.sops.json
+	sops decrypt --output src/config/users.json keys/users.ci.sops.json
 	sops exec-env --same-process .env.ci.sops.yaml "bun test --timeout 120000"
 
 # run testing (envs need to be provided)
