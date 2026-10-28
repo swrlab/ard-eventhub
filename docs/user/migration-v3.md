@@ -29,6 +29,7 @@ Die vollständige Historie aller Changes findest du im [Changelog](https://githu
   - ⏳ **Feld `length` Pflicht und positiv** — betrifft alle Publisher von Track-Events
 - Mit `3.0.0-beta.2`
   - 🛑 **Temporäres Publisher-Mapping entfernt** — betrifft rbb und hr, die noch eine der alten Publisher-URNs senden
+  - 🛑 **`publisherId` streng gegen ARD Core geprüft** — betrifft Publisher, die eine falsche oder fremde Publisher-ID senden, und die gemeinsamen Nachtprogramme
   - 🛑 **MQTT nimmt in `services[]` nur URNs** — Core-ID und CRID werden abgelehnt
   - 🛑 **`creator` Pflicht, `created` wird überschrieben** — betrifft jeden Connect-Publisher
   - 🛑 **Topics ohne Percent-Encoding** — Subscriber, die Topic-Namen aus Pub/Sub übernehmen
@@ -110,6 +111,18 @@ Eine numerische Core-ID hasht der HTTPS-Ingest weiterhin zu `urn:ard:publisher:�
 | you-fm              | `urn:ard:publisher:926798b983bc780a` | `urn:ard:publisher:1f4259e1b54a861d` |
 
 **Aktion:** rbb und hr stellen `publisherId` auf die URN aus der Spalte „URN im Feed“ um. Auf MQTT gilt dieselbe URN: der Connect-Pfad hat diese Aliase nie umgebogen.
+
+## `publisherId` streng gegen ARD Core geprüft
+
+_Ab Version `3.0.0-beta.2` und aufwärts._
+
+Der HTTPS-Ingest prüft jede `services[].publisherId` gegen die Publisher-URNs aus dem ARD Core Feed. Eine numerische Core-ID wird vorher zu `urn:ard:publisher:…` gehasht. Schlägt die Prüfung fehl, kommt der Service mit Status `blocked` zurück und wird nicht verteilt. Die übrigen Services des Events werden trotzdem veröffentlicht, die Antwort bleibt HTTP 201.
+
+- Publisher nicht im Feed: `blocked` ist `Publisher not found > urn:ard:publisher:…`
+- Publisher gehört zu einem anderen Haus als dein Login: `blocked` ist `User unauthorized for service`
+- Gemeinsame Nachtprogramme aus den [_Allgemeinen Service IDs_](./common-ids) stehen nicht im Feed. Für sie ist pro Livestream festgelegt, welche Publisher senden dürfen. Ein anderer Publisher, auch aus demselben Haus, bekommt `User unauthorized for service`.
+
+**Aktion:** In der HTTPS-Antwort `statuses.blocked` und `event.services[].blocked` auswerten. Steht dort ein Wert, `publisherId` auf die URN umstellen, die der Feed für den Sender führt. Für die Nachtprogramme gilt die Liste in [_Allgemeine Service IDs_](./common-ids).
 
 ## `services[]` auf MQTT nur noch URNs
 
