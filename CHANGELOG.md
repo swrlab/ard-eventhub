@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- fix: `allowed-livestreams.json` takes a `publisherIds` array; ARD Musikclub is accepted from SWR1 BW and SWR1 RP on HTTPS ingest and Eventhub Connect
 - fix: restore the temporary publisher-id remap (`TEMP_PUBLISHER_MAPPING`) on HTTPS ingest; Eventhub Connect still requires the feed URN
 - fix: publish NATS WebSocket `:9222` from `just nats-up-docker` so the operator UI live tail reaches the broker from the host
 - fix: expand nested OpenAPI schemas (`mediaItem`, `reference`, `contributor`, …) in the docs API reference

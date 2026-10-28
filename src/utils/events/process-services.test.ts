@@ -14,6 +14,7 @@ const PUBLISHER_URN = 'urn:ard:publisher:abcdef0123456789'
 const ALLOWED_EXTERNAL_ID = 'ext-allowed-common'
 const ALLOWED_TOPIC_ID = `${coreIdPrefixes.PermanentLivestream}${createHashedId(ALLOWED_EXTERNAL_ID)}`
 const ALLOWED_PUBLISHER_ID = 'urn:ard:publisher:fedcba9876543210'
+const MUSIKCLUB_ID = 'urn:ard:permanent-livestream:7c0dd5c9f90b67ab'
 
 const user = {
 	email: 'lab@swr.de',
@@ -61,7 +62,7 @@ const stubAllowedLivestream = (sandbox: ReturnType<typeof createSandbox>) => {
 					id: ALLOWED_TOPIC_ID,
 					name: 'Probe Common Night',
 					note: 'test allow-list entry',
-					publisherId: ALLOWED_PUBLISHER_ID,
+					publisherIds: [ALLOWED_PUBLISHER_ID],
 				}
 			: undefined
 	)
@@ -257,6 +258,20 @@ test('processServices allows COMMON_IDS livestream under its designated publishe
 		assertEquals(result.id, ALLOWED_TOPIC_ID)
 		assertEquals(result.publisherId, ALLOWED_PUBLISHER_ID)
 		assertEquals(result.institutionId, INSTITUTION_ID)
+	} finally {
+		sandbox.restore()
+	}
+})
+
+test('processServices allows ARD Musikclub from SWR1 BW and SWR1 RP (real allow-list)', async () => {
+	const sandbox = stubPublisher()
+
+	try {
+		for (const publisherId of ['urn:ard:publisher:ea659609f53316e6', 'urn:ard:publisher:2d74b4350f0d4d53']) {
+			const result = await processServices({ id: MUSIKCLUB_ID, publisherId }, { user })
+			assertEquals(result.blocked, undefined)
+			assertEquals(result.topic?.id, MUSIKCLUB_ID)
+		}
 	} finally {
 		sandbox.restore()
 	}

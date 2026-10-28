@@ -43,6 +43,16 @@ export const checkServiceOwnership = (params: {
 }
 
 /**
+ * Owner to compare a service with. Prefers the owner whose publisher the service claims.
+ * Falls back to the first owner, so a wrong publisher still reports a publisher mismatch.
+ * @param owners - Every owner of the livestream, or undefined when it is unknown
+ * @param publisherId - Publisher the service claims
+ * @returns The owner, or null when the livestream is unknown
+ */
+const pickOwner = (owners: LivestreamOwner[] | undefined, publisherId: string): LivestreamOwner | null =>
+	owners?.find((owner) => owner.publisherId === publisherId) ?? owners?.[0] ?? null
+
+/**
  * Check every service of one event against the serving feed.
  * Throws when no feed is loaded, so the loop naks instead of rejecting a valid event.
  * @param params - Subject institution and the event's services
@@ -56,6 +66,11 @@ export const checkEventOwnership = (params: {
 	const owners = currentOwners()
 	if (!owners) throw new Error('ard feed is not loaded')
 	return services.flatMap((service, index) =>
-		checkServiceOwnership({ subjectInstitutionId, service, index, owner: owners.get(service.id) ?? null })
+		checkServiceOwnership({
+			subjectInstitutionId,
+			service,
+			index,
+			owner: pickOwner(owners.get(service.id), service.publisherId),
+		})
 	)
 }

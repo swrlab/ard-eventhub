@@ -92,3 +92,27 @@ test('event ownership checks every service against the served feed in services o
 		restore()
 	}
 })
+
+test('event ownership accepts an overlay topic from any of its allowed publishers', () => {
+	const musikclub = 'urn:ard:permanent-livestream:7c0dd5c9f90b67ab'
+	const swr1Bw = 'urn:ard:publisher:ea659609f53316e6'
+	const swr1Rp = 'urn:ard:publisher:2d74b4350f0d4d53'
+	const restore = serveTestFeed({
+		'urn:ard:permanent-livestream:c2656164ae0f6745': { publisherId: swr1Bw, institutionId: SUBJECT },
+		'urn:ard:permanent-livestream:e55592f337f172a5': { publisherId: swr1Rp, institutionId: SUBJECT },
+	})
+	try {
+		const services = [swr1Bw, swr1Rp].map((publisherId) => ({ id: musikclub, publisherId, institutionId: SUBJECT }))
+		assertEquals(checkEventOwnership({ subjectInstitutionId: SUBJECT, services }), [])
+		const errors = checkEventOwnership({
+			subjectInstitutionId: SUBJECT,
+			services: [{ id: musikclub, publisherId: PUBLISHER, institutionId: SUBJECT }],
+		})
+		assertEquals(
+			errors.map((error) => error.path),
+			['.body.services.0.publisherId']
+		)
+	} finally {
+		restore()
+	}
+})
