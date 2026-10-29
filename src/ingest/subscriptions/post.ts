@@ -29,6 +29,11 @@ export const subscriptionsPost = async (c: Context) => {
 	try {
 		// fetch user from request
 		const user = c.get('user') as AuthUser | undefined
+		logger.info({
+			message: 'create subscription',
+			source,
+			data: { email: user?.email, params: c.req.param(), body },
+		})
 
 		// check if user is present
 		if (!user?.email) {

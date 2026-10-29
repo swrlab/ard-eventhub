@@ -18,6 +18,12 @@ export const subscriptionsGet = async (c: Context) => {
 	try {
 		// preset vars
 		const subscriptionName = c.req.param('subscriptionName')
+		const user = c.get('user') as AuthUser | undefined
+		logger.info({
+			message: 'get subscription',
+			source,
+			data: { email: user?.email, params: c.req.param() },
+		})
 
 		// check if subscription name is present
 		if (!subscriptionName) {
@@ -25,7 +31,6 @@ export const subscriptionsGet = async (c: Context) => {
 			return responseBadRequest(c, { status: 400, message: 'Subscription name is required' })
 		}
 
-		const user = c.get('user') as AuthUser | undefined
 		// check if user is present
 		if (!user) {
 			logger.notice({ message: 'User not found', source, data: { subscriptionName } })
