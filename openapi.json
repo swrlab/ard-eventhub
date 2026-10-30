@@ -11,7 +11,7 @@
 			"name": "MIT",
 			"url": "https://spdx.org/licenses/MIT.html"
 		},
-		"version": "3.0.0-beta.2"
+		"version": "3.0.0-beta.3"
 	},
 	"externalDocs": {
 		"description": "ARD Eventhub Documentation",

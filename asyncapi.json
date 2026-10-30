@@ -11,7 +11,7 @@
 			"name": "MIT",
 			"url": "https://spdx.org/licenses/MIT.html"
 		},
-		"version": "3.0.0-beta.2",
+		"version": "3.0.0-beta.3",
 		"externalDocs": {
 			"description": "Eventhub v3 Connect RFC §6.2",
 			"url": "https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#62-topic-tree"
