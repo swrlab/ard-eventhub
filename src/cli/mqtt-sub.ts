@@ -2,6 +2,7 @@ import process from 'node:process'
 import { getRequiredEnv } from '@frytg/check-required-env/get'
 import mqtt from 'mqtt'
 import { mqttTlsConnectOptions } from '../utils/mqtt/tls-ca.ts'
+import { parseUserinfoUrl } from '../utils/url-auth.ts'
 import { MQTT_SUB_USAGE, parseMqttSubArgs } from './mqtt-sub-args.ts'
 
 const MQTT_V311 = 4
@@ -21,6 +22,8 @@ try {
 }
 
 const brokerUrl = getRequiredEnv('MQTT_BROKER_URL').trim()
+// Scheme and host only. `brokerUrl` carries `user:password` in its userinfo; never log it in full.
+const brokerHost = parseUserinfoUrl(brokerUrl).url
 const { topic } = target
 const printTopic = target.kind === 'all'
 
@@ -37,7 +40,7 @@ client.on('connect', () => {
 			console.error(error)
 			process.exit(1)
 		}
-		console.error(`subscribed ${topic} on ${brokerUrl}`)
+		console.error(`subscribed ${topic} on ${brokerHost}`)
 	})
 })
 
