@@ -35,9 +35,9 @@ const controlLine = (name: string | null, state: boolean | null, validUntil: str
 				<thead>
 					<tr>
 						<th>station</th>
+						<th>publisher</th>
 						<th>last event</th>
 						<th>track</th>
-						<th>publisher</th>
 						<th>control</th>
 						<th>data</th>
 					</tr>
