@@ -1,5 +1,5 @@
 import type { Context } from 'hono'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { pubsubGetTopics } from '../../utils/pubsub/get-topics.ts'
 import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
 

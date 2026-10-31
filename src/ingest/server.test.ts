@@ -1,29 +1,12 @@
 import process from 'node:process'
 import { test } from '@cross/test'
+import { getRequiredEnv } from '@frytg/check-required-env/get'
 import { DateTime } from '@frytg/dates'
-import logger from '@frytg/logger'
 import { assert, assertExists, assertGreater, assertStrictEquals } from '@std/assert'
 import { app } from './server.ts'
 
-/**
- * Log an error and exit the process when required test env is missing.
- * @param message - Error message to log
- */
-const exitWithError = (message: string) => {
-	logger.error({
-		message,
-		source: 'config',
-	})
-	process.exit(1)
-}
-
-// check required env vars
-if (!process.env.TEST_USER) exitWithError('TEST_USER not found')
-if (!process.env.TEST_USER_PW) exitWithError('TEST_USER_PW not found')
-
-// set test-user env vars
-const testUser = process.env.TEST_USER
-const testUserPass = process.env.TEST_USER_PW
+const testUser = getRequiredEnv('TEST_USER')
+const testUserPass = getRequiredEnv('TEST_USER_PW')
 const testUserReset = process.env.TEST_USER_RESET
 
 /** Parsed HTTP response for ingest tests. */
@@ -290,7 +273,7 @@ test(`POST ${eventPath}`, async (t) => {
 		})
 		testResponse(res, 400)
 		// restore for later shared-event steps
-		event.references[1].externalId = 'crid://dlf.de/article/1234567'
+		event.references[1]!.externalId = 'crid://dlf.de/article/1234567'
 	})
 
 	await t.step('publish a new event with length 0', async () => {
@@ -519,6 +502,53 @@ test(`POST ${eventPath}`, async (t) => {
 		assertExists(commonPlugin)
 		assertStrictEquals(commonPlugin.type, 'common')
 		assertExists(commonPlugin.topic)
+	})
+})
+
+const connectControlName = 'de.ard.eventhub.v1.radio.control'
+const connectDataName = 'de.ard.eventhub.v1.radio.data'
+
+test('POST Connect event names are rejected on HTTPS', async (t) => {
+	await t.step('reject radio.control', async () => {
+		const res = await request('POST', `/events/${connectControlName}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: {
+				event: connectControlName,
+				start: DateTime.now().toISO(),
+				name: 'TA',
+				state: true,
+				services: [
+					{
+						id: 'urn:ard:permanent-livestream:49267f7d67be180d',
+						publisherId: 'urn:ard:publisher:75dbb3dace15f610',
+						institutionId: 'urn:ard:institution:a3004ff924ece1a2',
+					},
+				],
+			},
+		})
+		testResponse(res, 400)
+		assertStrictEquals(res.body.message, 'event type is not accepted on the HTTPS API')
+	})
+
+	await t.step('reject radio.data', async () => {
+		const res = await request('POST', `/events/${connectDataName}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: {
+				event: connectDataName,
+				start: DateTime.now().toISO(),
+				cycle: 8,
+				data: [{ type: 'radiotext', id: 0, value: 'Sie hören die ARD Popnacht' }],
+				services: [
+					{
+						id: 'urn:ard:permanent-livestream:49267f7d67be180d',
+						publisherId: 'urn:ard:publisher:75dbb3dace15f610',
+						institutionId: 'urn:ard:institution:a3004ff924ece1a2',
+					},
+				],
+			},
+		})
+		testResponse(res, 400)
+		assertStrictEquals(res.body.message, 'event type is not accepted on the HTTPS API')
 	})
 })
 

@@ -2,9 +2,9 @@ import type { AuthUser } from '#types'
 import type { EventhubService } from '../../schemas/events.ts'
 import type { EventhubTopicDatastore } from '../../schemas/subscriptions.ts'
 import { DateTime } from '@frytg/dates'
-import logger from '@frytg/logger'
-import { getPublisherById } from '../ard-core.ts'
+import { logger } from '@frytg/logger'
 import { datastoreSave } from '../datastore/save.ts'
+import { getPublisherById } from '../feed/ard-core.ts'
 import { pubsubCreateTopic } from '../pubsub/create-topic.ts'
 
 const source = 'utils.events.createNewTopic'
@@ -42,7 +42,7 @@ export const createNewTopic = async (service: EventhubService, user: AuthUser) =
 		creator: user.email,
 
 		coreId: service.topic.id,
-		externalId: service.externalId,
+		externalId: service.externalId ?? service.id ?? service.topic.id,
 		name: service.topic.name,
 
 		institution: {

@@ -1,5 +1,5 @@
 import type { Context } from 'hono'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 import { dtsEvent } from '../../utils/plugins/dts/event.ts'
 import { radioplayerEvent } from '../../utils/plugins/radioplayer/event.ts'

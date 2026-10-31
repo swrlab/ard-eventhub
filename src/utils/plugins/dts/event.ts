@@ -1,6 +1,6 @@
 import type { LiveRadioEvent, LiveradioCredential, PermittedExcludedFields } from '../../../schemas/config.ts'
 import type { EventhubPluginMessage, EventhubService } from '../../../schemas/events.ts'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { defaultHeaders, version } from '#config'
 import { dtsKeys, serviceName, stage } from '#env'
 
@@ -43,8 +43,16 @@ export const dtsEvent = async (job: EventhubPluginMessage): Promise<void> => {
 		return
 	}
 
-	// collect ARD Core ids
+	// collect ARD Core ids — an empty list is `[]` on the wire, which DTS rejects with 400
 	const coreIds = getCoreIds(event.services)
+	if (coreIds.length === 0) {
+		logger.warning({
+			message: `dts skipping event no core ids > ${event.services[0]?.publisherId ?? ''}`,
+			source,
+			data: { job },
+		})
+		return
+	}
 
 	// remap playing type
 	let type = 'other'

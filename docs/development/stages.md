@@ -1,6 +1,7 @@
 ---
 title: 'Stages'
 description: 'Stage-Werte und Deployment-Umgebungen.'
+deprecated: true
 sidebar:
   order: 11
 ---

@@ -1,7 +1,7 @@
 import type { Context } from 'hono'
 import type { AuthUser } from '#types'
 import type { EventhubSubscriptionWithLabels } from '../../schemas/subscriptions.ts'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { datastoreDelete } from '../../utils/datastore/delete.ts'
 import { deleteSubscription } from '../../utils/pubsub/delete-subscription.ts'
 import { getSubscription } from '../../utils/pubsub/get-subscription.ts'
@@ -22,6 +22,12 @@ export const subscriptionsDelete = async (c: Context) => {
 	try {
 		// preset vars
 		const subscriptionName = c.req.param('subscriptionName')
+		const user = c.get('user') as AuthUser | undefined
+		logger.info({
+			message: 'delete subscription',
+			source,
+			data: { email: user?.email, params: c.req.param() },
+		})
 
 		// check if subscription name is present
 		if (!subscriptionName) {
@@ -33,7 +39,6 @@ export const subscriptionsDelete = async (c: Context) => {
 			return responseBadRequest(c, { status: 400, message: 'Subscription name is required' })
 		}
 
-		const user = c.get('user') as AuthUser | undefined
 		// check if user is present
 		if (!user) {
 			logger.notice({

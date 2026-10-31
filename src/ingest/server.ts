@@ -1,13 +1,17 @@
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { Hono } from 'hono'
 import { compress } from 'hono/compress'
 import { serviceUrl, userAgent, version } from '#config'
-import { isLocal, port, serviceName } from '#env'
-import { getARDFeed } from '../utils/ard-feed.ts'
+import { isIngestPublishPluginsEnabled, isLocal, port, serviceName } from '#env'
+import { getARDFeed } from '../utils/feed/ard-feed.ts'
 import { getSafeHeaders } from '../utils/get-safe-headers.ts'
+import { startMqttClient } from '../utils/mqtt/_client.ts'
 import { router } from './router.ts'
 
 await getARDFeed()
+
+// Bun closes sockets idle for longer than this (default 10s, max 255s), which clients see as an empty reply
+const IDLE_TIMEOUT_SECONDS = 60
 
 export const app = new Hono({ strict: false })
 
@@ -32,9 +36,18 @@ app.route('/', router)
 
 // Run the server if this file is invoked directly
 if (import.meta.main) {
+	const ingestPublishPlugins = isIngestPublishPluginsEnabled()
+	logger.log({
+		level: 'info',
+		message: `plugin job dispatch ${ingestPublishPlugins ? 'enabled' : 'disabled'}`,
+		source: 'ingest.server',
+		data: { ingestPublishPlugins },
+	})
+	await startMqttClient()
 	Bun.serve({
 		fetch: app.fetch,
 		port: port ?? 8080,
+		idleTimeout: IDLE_TIMEOUT_SECONDS,
 	})
 }
 

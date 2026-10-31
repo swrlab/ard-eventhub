@@ -3,6 +3,7 @@ title: 'KI-kompatible Dokumentation'
 description: 'Diese Docs für LLMs und Coding-Agenten nutzen — Markdown-URLs, Copy as Markdown und llms.txt.'
 sidebar:
   order: 2
+  icon: sparkle
 ---
 
 Diese Dokumentation ist nicht nur im Browser lesbar. Sie lässt sich auch von KI-Assistenten und Coding-Agenten (Cursor, Claude Code, ChatGPT usw.) direkt einlesen — ohne HTML zu scrapen.

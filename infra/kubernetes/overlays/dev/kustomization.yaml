@@ -1,0 +1,27 @@
+# Three NATS pods in one cluster. No hostname anti-affinity, so one node can run all three.
+# Users come from components/users, the same file as test and prod.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: eventhub-dev
+
+components:
+  - ../../components/users
+
+resources:
+  - namespace.yaml
+  - serviceaccount.yaml
+  - service.yaml
+  - service-headless.yaml
+  - statefulset.yaml
+  - pdb.yaml
+
+configMapGenerator:
+  - name: nats
+    files:
+      - nats.conf
+
+labels:
+  - pairs:
+      environment: dev
+    includeSelectors: false

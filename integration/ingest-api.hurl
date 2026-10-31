@@ -575,6 +575,68 @@ jsonpath "$.event.services[?(@.blocked)]" not exists
 jsonpath "$.plugins[?(@.type=='common')]" exists
 jsonpath "$.plugins[?(@.type=='common')].topic" exists
 
+# --- EVENTS: radio.control is not accepted on HTTPS → 400 ---
+POST {{host}}/events/de.ard.eventhub.v1.radio.control
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+[Options]
+output: res/03-events-connect-control-rejected.json
+```json
+{
+	"event": "de.ard.eventhub.v1.radio.control",
+	"start": "{{start}}",
+	"name": "TA",
+	"state": true,
+	"services": [
+		{
+			"id": "urn:ard:permanent-livestream:49267f7d67be180d",
+			"publisherId": "urn:ard:publisher:75dbb3dace15f610",
+			"institutionId": "urn:ard:institution:a3004ff924ece1a2"
+		}
+	]
+}
+```
+HTTP 400
+[Asserts]
+jsonpath "$.message" == "event type is not accepted on the HTTPS API"
+jsonpath "$.errors" isCollection
+jsonpath "$.errors" count >= 1
+jsonpath "$.trace" == null
+
+# --- EVENTS: radio.data is not accepted on HTTPS → 400 ---
+POST {{host}}/events/de.ard.eventhub.v1.radio.data
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+[Options]
+output: res/03-events-connect-data-rejected.json
+```json
+{
+	"event": "de.ard.eventhub.v1.radio.data",
+	"start": "{{start}}",
+	"cycle": 8,
+	"data": [
+		{
+			"type": "radiotext",
+			"id": 0,
+			"value": "Sie hören die ARD Popnacht"
+		}
+	],
+	"services": [
+		{
+			"id": "urn:ard:permanent-livestream:49267f7d67be180d",
+			"publisherId": "urn:ard:publisher:75dbb3dace15f610",
+			"institutionId": "urn:ard:institution:a3004ff924ece1a2"
+		}
+	]
+}
+```
+HTTP 400
+[Asserts]
+jsonpath "$.message" == "event type is not accepted on the HTTPS API"
+jsonpath "$.errors" isCollection
+jsonpath "$.errors" count >= 1
+jsonpath "$.trace" == null
+
 # --- PUBSUB: missing auth on PUT → 401 ---
 PUT {{host}}/pubsub
 Content-Type: application/json

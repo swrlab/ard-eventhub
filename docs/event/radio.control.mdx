@@ -1,0 +1,32 @@
+---
+title: 'radio.control'
+description: 'Steuerbits wie TA, TP, EON und Regio.'
+sidebar:
+  order: 3
+---
+
+Dieses Event ist für Eventhub Connect vorgesehen und wird über `POST /events/de.ard.eventhub.v1.radio.control` mit HTTP 400 abgelehnt. Der Publisher schreibt es auf `inbox/{institutionId}`. Nach der Eventhub Validierung liegt es retained auf `radio/{livestreamId}/control`.
+
+`services[]` ist URN-only (`id`, `publisherId` und `institutionId` als `urn:ard:…`). `start` ist ISO8601. `creator` setzt der Publisher. `created` setzt die Eventhub Validierung auf den Zeitpunkt der Zustellung und überschreibt einen mitgeschickten Wert.
+
+Steuerbits (TA, TP, EON, Regio und weitere). `name` ist ein freier String und kein Enum. Neue Steuerfunktionen brauchen keine Schema-Änderung.
+
+```json
+{
+	"event": "de.ard.eventhub.v1.radio.control",
+	"start": "2026-05-27T16:03:00+01:00",
+	"validUntil": "2026-05-27T16:18:00+01:00",
+	"name": "TA",
+	"state": true,
+	"services": [
+		{
+			"publisherId": "urn:ard:publisher:75dbb3dace15f610",
+			"institutionId": "urn:ard:institution:a3004ff924ece1a2",
+			"id": "urn:ard:permanent-livestream:49267f7d67be180d"
+		}
+	],
+	"creator": "example@swr.de"
+}
+```
+
+Die Spezifikation steht im [Eventhub v3 Connect RFC](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#13-new-event-schemas). Wohin publiziert wird, steht unter [_Topics_](../user/topics), die Verbindung unter [_Eventhub Connect_](../user/connect-mqtt). Der Kanal steht in der [Events-Referenz](/events/subscribe/receive-radio-control).
