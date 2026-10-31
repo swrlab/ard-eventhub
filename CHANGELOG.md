@@ -7,14 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0-beta.3] - 2026-10-30
+
+### Added
+
+- docs: schema page for the retained `feedback/{institutionId}` body
+- docs: event overview — Now and Control are mandatory, Next and Data are optional
+- docs: move external-ID guidance to the user guides; v3 events carry the hashed ARD Core livestream URN
+- docs: v3 drops firehose topics; subscribers use an MQTT wildcard filter instead
+
 ### Changed
 
 - docs: mark every HTTPS ingest operation deprecated in the OpenAPI spec; Eventhub Connect (MQTT) replaces them
 
 ### Fixed
 
+- fix: `allowed-livestreams.json` takes a `publisherIds` array; ARD Musikclub is accepted from SWR1 BW and SWR1 RP on HTTPS ingest and Eventhub Connect
+- fix: restore the temporary publisher-id remap (`TEMP_PUBLISHER_MAPPING`) on HTTPS ingest; Eventhub Connect still requires the feed URN
 - fix: publish NATS WebSocket `:9222` from `just nats-up-docker` so the operator UI live tail reaches the broker from the host
 - fix: expand nested OpenAPI schemas (`mediaItem`, `reference`, `contributor`, …) in the docs API reference
+- fix: ingest sets Bun `idleTimeout` to 60 s, so a slow `GET /subscriptions` returns a response instead of an empty reply after 10 s
+- fix: `GET /subscriptions` skips subscriptions that fail to map (logged as warning) instead of failing the whole list with 500
 
 ## [3.0.0-beta.2] - 2026-10-19
 

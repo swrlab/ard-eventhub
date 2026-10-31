@@ -38,8 +38,8 @@ test('knownLivestreams uses externalId and nests publisher and institution', () 
 			item(
 				'urn:ard:permanent-livestream:aaa',
 				'Daytime',
-				'urn:ard:publisher:a8aa147108ee961a',
-				'SWR1',
+				'urn:ard:publisher:ea659609f53316e6',
+				'SWR1 BW',
 				'urn:ard:institution:house',
 				'Südwestrundfunk'
 			),
@@ -47,16 +47,20 @@ test('knownLivestreams uses externalId and nests publisher and institution', () 
 	} as ArdFeed
 	const rows = knownLivestreams(feed)
 	const daytime = rows.find((entry) => entry.id === 'urn:ard:permanent-livestream:aaa')
-	const musikclub = rows.find((entry) => entry.id === 'urn:ard:permanent-livestream:7c0dd5c9f90b67ab')
+	const musikclub = rows.find(
+		(entry) =>
+			entry.id === 'urn:ard:permanent-livestream:7c0dd5c9f90b67ab' &&
+			entry.publisher.id === 'urn:ard:publisher:ea659609f53316e6'
+	)
 	assertEquals(daytime?.overlay, false)
 	assertEquals(daytime?.id.startsWith('urn:ard:permanent-livestream-fusion:'), false)
-	assertEquals(daytime?.publisher, { id: 'urn:ard:publisher:a8aa147108ee961a', title: 'SWR1' })
+	assertEquals(daytime?.publisher, { id: 'urn:ard:publisher:ea659609f53316e6', title: 'SWR1 BW' })
 	assertEquals(daytime?.institution, { id: 'urn:ard:institution:house', title: 'Südwestrundfunk' })
 	assertEquals(musikclub?.overlay, true)
 	assertEquals(musikclub?.title, 'ARD Musikclub')
-	assertEquals(musikclub?.publisher, { id: 'urn:ard:publisher:a8aa147108ee961a', title: 'SWR1' })
+	assertEquals(musikclub?.publisher, { id: 'urn:ard:publisher:ea659609f53316e6', title: 'SWR1 BW' })
 	assertEquals(musikclub?.institution, { id: 'urn:ard:institution:house', title: 'Südwestrundfunk' })
-	assertEquals(rows.filter((entry) => entry.overlay).length, 5)
+	assertEquals(rows.filter((entry) => entry.overlay).length, 6)
 	assertEquals(rows[0]?.overlay, false)
 })
 
@@ -87,8 +91,8 @@ test('knownLivestreams skips a feed item with no externalId', () => {
 				id: 'urn:ard:permanent-livestream-fusion:missing',
 				title: 'No external id',
 				publisher: {
-					id: 'urn:ard:publisher:a8aa147108ee961a',
-					title: 'SWR1',
+					id: 'urn:ard:publisher:ea659609f53316e6',
+					title: 'SWR1 BW',
 					institution: { id: 'urn:ard:institution:house', title: 'Südwestrundfunk', acronym: 'SWR' },
 				},
 			} as ArdLivestream,
@@ -99,10 +103,10 @@ test('knownLivestreams skips a feed item with no externalId', () => {
 		rows.some((entry) => entry.title === 'No external id'),
 		false
 	)
-	assertEquals(rows.filter((entry) => entry.overlay).length, 5)
+	assertEquals(rows.filter((entry) => entry.overlay).length, 6)
 	assertEquals(
-		rows.find((entry) => entry.publisher.id === 'urn:ard:publisher:a8aa147108ee961a')?.publisher.title,
-		'SWR1'
+		rows.find((entry) => entry.publisher.id === 'urn:ard:publisher:ea659609f53316e6')?.publisher.title,
+		'SWR1 BW'
 	)
 })
 
@@ -121,16 +125,18 @@ test('livestreamOwners indexes a loaded feed and is null when none is loaded', (
 		],
 	} as ArdFeed
 	const owners = livestreamOwners(feed)
-	assertEquals(owners?.get('urn:ard:permanent-livestream:aaa'), {
-		publisherId: 'urn:ard:publisher:pub',
-		institutionId: 'urn:ard:institution:house',
-	})
+	assertEquals(owners?.get('urn:ard:permanent-livestream:aaa'), [
+		{
+			publisherId: 'urn:ard:publisher:pub',
+			institutionId: 'urn:ard:institution:house',
+		},
+	])
 	assertEquals(livestreamOwners(feed), owners)
 })
 
 test('knownLivestreams still lists the overlay when no feed is loaded', () => {
 	const rows = knownLivestreams(null)
-	assertEquals(rows.length, 5)
+	assertEquals(rows.length, 6)
 	assertEquals(
 		rows.every((entry) => entry.overlay && entry.institution === null && entry.publisher.title === ''),
 		true

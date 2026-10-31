@@ -168,31 +168,43 @@ const mqttRetainBinding = {
 	},
 }
 
-type EventTypeDoc = 'track.playing' | 'track.next' | 'control' | 'data'
+type EventTypeDoc = 'track.playing' | 'track.next' | 'control' | 'data' | 'feedback'
 
 /**
- * Prose page under `docs/event/`. The file is `radio.{type}.mdx`.
- * @param type - Event class token (`track.playing`, `control`, …)
+ * Prose page under `docs/event/`. Event classes are `radio.{type}.mdx`; feedback is `feedback.mdx`.
+ * @param type - Event class token, or `feedback`
  * @returns Site path of the prose page, without the docs base
  */
-const eventTypeDocPath = (type: EventTypeDoc): string => `/event/radio.${type}`
+const eventTypeDocPath = (type: EventTypeDoc): string =>
+	type === 'feedback' ? '/event/feedback' : `/event/radio.${type}`
 
 /**
- * Prose page for one event class. Linked from the matching send and receive operations.
- * @param type - Event class token (`track.playing`, `control`, …)
+ * Prose page for one payload. Linked from the matching send and receive operations.
+ * @param type - Event class token, or `feedback`
  * @returns AsyncAPI externalDocs object
  */
 const eventTypeDoc = (type: EventTypeDoc) => ({
-	description: `de.ard.eventhub.v1.radio.${type}`,
+	description: type === 'feedback' ? 'feedback/{institutionId}' : `de.ard.eventhub.v1.radio.${type}`,
 	url: `https://swrlab.github.io/ard-eventhub${eventTypeDocPath(type)}`,
 })
 
 /**
  * Markdown link to the prose page. Blume renders the operation description and skips `externalDocs`.
- * @param type - Event class token (`track.playing`, `control`, …)
+ * @param type - Event class token, or `feedback`
  * @returns Link shown on the send and receive pages
  */
-const eventTypeLink = (type: EventTypeDoc): string => `[de.ard.eventhub.v1.radio.${type}](${eventTypeDocPath(type)})`
+const eventTypeLink = (type: EventTypeDoc): string =>
+	type === 'feedback'
+		? `[feedback](${eventTypeDocPath(type)})`
+		: `[de.ard.eventhub.v1.radio.${type}](${eventTypeDocPath(type)})`
+
+/**
+ * Sentence appended to an operation description. Blume shows this; it does not render `externalDocs`.
+ * @param type - Event class token, or `feedback`
+ * @returns Sentence with the prose-page link
+ */
+const eventTypeSentence = (type: EventTypeDoc): string =>
+	type === 'feedback' ? `Schema: ${eventTypeLink(type)}.` : `Event type: ${eventTypeLink(type)}.`
 
 /**
  * Retained `radio/` channel for one event class.
@@ -227,7 +239,7 @@ const sendInbox = (title: string, description: string, messageId: MessageId, doc
 	messages: [channelMessageRef('inboxInstitution', messageId)],
 	tags: [{ name: 'publish' }],
 	bindings: mqttSendBinding,
-	...(doc ? { description: `${description} Event type: ${eventTypeLink(doc)}.`, externalDocs: eventTypeDoc(doc) } : {}),
+	...(doc ? { description: `${description} ${eventTypeSentence(doc)}`, externalDocs: eventTypeDoc(doc) } : {}),
 })
 
 /**
@@ -236,7 +248,7 @@ const sendInbox = (title: string, description: string, messageId: MessageId, doc
  * @param description - What the subscriber receives
  * @param channelId - Channel the operation reads
  * @param messageId - Message on that channel
- * @param doc - Prose page for this event class, omitted for feedback
+ * @param doc - Prose page for this payload
  * @returns AsyncAPI receive operation
  */
 const receiveRetained = (
@@ -253,7 +265,7 @@ const receiveRetained = (
 	messages: [channelMessageRef(channelId, messageId)],
 	tags: [{ name: 'subscribe' }],
 	bindings: mqttRetainBinding,
-	...(doc ? { description: `${description} Event type: ${eventTypeLink(doc)}.`, externalDocs: eventTypeDoc(doc) } : {}),
+	...(doc ? { description: `${description} ${eventTypeSentence(doc)}`, externalDocs: eventTypeDoc(doc) } : {}),
 })
 
 /**
@@ -284,8 +296,8 @@ export const buildAsyncApiDocument = () => {
 				email: 'lab@swr.de',
 			},
 			license: {
-				name: 'European Union Public License 1.2',
-				url: 'https://spdx.org/licenses/EUPL-1.2.html',
+				name: 'MIT',
+				url: 'https://spdx.org/licenses/MIT.html',
 			},
 			version: packageJson.version,
 			externalDocs: {
@@ -406,7 +418,8 @@ export const buildAsyncApiDocument = () => {
 				`Subscribe ${feedbackTopic}`,
 				'Last rejection for this institution. Correlate track events by `playlistItemId`, control and data by `start`. Retained; QoS 1.',
 				'feedbackInstitution',
-				'validationFeedback'
+				'validationFeedback',
+				'feedback'
 			),
 		},
 

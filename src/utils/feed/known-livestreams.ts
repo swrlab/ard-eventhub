@@ -45,6 +45,7 @@ const byName = (a: KnownLivestream, b: KnownLivestream): number => {
  * Feed plus overlay in one list.
  * A feed row's id is `externalId` (the livestream URN). The fusion `id` is ignored.
  * Overlay topics already present under that URN stay feed rows.
+ * An overlay topic gets one row per allowed publisher, so a topic with two publishers is listed twice.
  * An overlay publisher copies its title and institution from the first feed item with the same publisher id.
  * @param feed - Snapshot in memory, or null when none is loaded
  * @returns Combined livestreams
@@ -76,14 +77,16 @@ export const knownLivestreams = (feed: ArdFeed | null): KnownLivestream[] => {
 
 	for (const extra of overlayConfig.livestreams) {
 		if (seen.has(extra.id)) continue
-		const face = publishers.get(extra.publisherId)
-		entries.push({
-			id: extra.id,
-			title: extra.name,
-			publisher: { id: extra.publisherId, title: face?.title ?? '' },
-			institution: face?.institution ?? null,
-			overlay: true,
-		})
+		for (const publisherId of extra.publisherIds) {
+			const face = publishers.get(publisherId)
+			entries.push({
+				id: extra.id,
+				title: extra.name,
+				publisher: { id: publisherId, title: face?.title ?? '' },
+				institution: face?.institution ?? null,
+				overlay: true,
+			})
+		}
 	}
 
 	entries.sort(byName)
@@ -91,21 +94,23 @@ export const knownLivestreams = (feed: ArdFeed | null): KnownLivestream[] => {
 }
 
 let indexedFeed: ArdFeed | null = null
-let indexedOwners = new Map<string, LivestreamOwner>()
+let indexedOwners = new Map<string, LivestreamOwner[]>()
 
 /**
- * Livestream URN to publisher and institution, including the overlay.
+ * Livestream URN to every publisher and institution allowed to send it, including the overlay.
+ * Feed rows have one owner. An overlay topic has one owner per allowed publisher.
  * Rows with no institution are left out. The same feed object keeps the map built on the previous call.
  * @param feed - Serving snapshot, or null when none is loaded
  * @returns Owners, or null when no feed is loaded
  */
-export const livestreamOwners = (feed: ArdFeed | null): Map<string, LivestreamOwner> | null => {
+export const livestreamOwners = (feed: ArdFeed | null): Map<string, LivestreamOwner[]> | null => {
 	if (!feed) return null
 	if (feed === indexedFeed) return indexedOwners
-	const next = new Map<string, LivestreamOwner>()
+	const next = new Map<string, LivestreamOwner[]>()
 	for (const row of knownLivestreams(feed)) {
 		if (!row.institution?.id || !row.publisher.id) continue
-		next.set(row.id, { publisherId: row.publisher.id, institutionId: row.institution.id })
+		const owner = { publisherId: row.publisher.id, institutionId: row.institution.id }
+		next.set(row.id, [...(next.get(row.id) ?? []), owner])
 	}
 	indexedFeed = feed
 	indexedOwners = next

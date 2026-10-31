@@ -54,8 +54,8 @@ export default defineConfig({
 	navigation: {
 		tabs: [
 			{ label: 'Docs', path: '/', href: '/' },
-			{ label: 'OpenAPI', path: '/api', href: '/api' },
-			{ label: 'Events (v3 Connect Beta)', path: '/events', href: '/events' },
+			{ label: 'OpenAPI (EOL)', path: '/api', href: '/api' },
+			{ label: 'Events', path: '/events', href: '/events' },
 		],
 		featured: [
 			{

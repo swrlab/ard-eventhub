@@ -8,10 +8,10 @@
 			"email": "lab@swr.de"
 		},
 		"license": {
-			"name": "European Union Public License 1.2",
-			"url": "https://spdx.org/licenses/EUPL-1.2.html"
+			"name": "MIT",
+			"url": "https://spdx.org/licenses/MIT.html"
 		},
-		"version": "3.0.0-beta.2",
+		"version": "3.0.0-beta.3",
 		"externalDocs": {
 			"description": "Eventhub v3 Connect RFC §6.2",
 			"url": "https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#62-topic-tree"
@@ -366,7 +366,7 @@
 		"receiveFeedback": {
 			"action": "receive",
 			"title": "Subscribe feedback/{institutionId}",
-			"description": "Last rejection for this institution. Correlate track events by `playlistItemId`, control and data by `start`. Retained; QoS 1.",
+			"description": "Last rejection for this institution. Correlate track events by `playlistItemId`, control and data by `start`. Retained; QoS 1. Schema: [feedback](/event/feedback).",
 			"channel": {
 				"$ref": "#/channels/feedbackInstitution"
 			},
@@ -385,6 +385,10 @@
 					"qos": 1,
 					"retain": true
 				}
+			},
+			"externalDocs": {
+				"description": "feedback/{institutionId}",
+				"url": "https://swrlab.github.io/ard-eventhub/event/feedback"
 			}
 		}
 	},

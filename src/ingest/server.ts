@@ -10,6 +10,9 @@ import { router } from './router.ts'
 
 await getARDFeed()
 
+// Bun closes sockets idle for longer than this (default 10s, max 255s), which clients see as an empty reply
+const IDLE_TIMEOUT_SECONDS = 60
+
 export const app = new Hono({ strict: false })
 
 // add debugging information to all headers
@@ -44,6 +47,7 @@ if (import.meta.main) {
 	Bun.serve({
 		fetch: app.fetch,
 		port: port ?? 8080,
+		idleTimeout: IDLE_TIMEOUT_SECONDS,
 	})
 }
 

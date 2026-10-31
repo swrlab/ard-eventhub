@@ -15,6 +15,12 @@ const source = 'ingest/subscriptions/list'
 export const subscriptionsList = async (c: Context) => {
 	try {
 		const user = c.get('user') as AuthUser | undefined
+		logger.info({
+			message: 'list subscriptions',
+			source,
+			data: { email: user?.email, params: c.req.param() },
+		})
+
 		// check if user is present
 		if (!user) {
 			logger.notice({ message: 'user not found', source, data: getSafeHeaders(c.req.raw.headers) })

@@ -309,8 +309,8 @@ This HTTPS API is deprecated. Every operation stays available until publishers f
 				email: 'lab@swr.de',
 			},
 			license: {
-				name: 'European Union Public License 1.2',
-				url: 'https://spdx.org/licenses/EUPL-1.2.html',
+				name: 'MIT',
+				url: 'https://spdx.org/licenses/MIT.html',
 			},
 			version: packageJson.version,
 		},

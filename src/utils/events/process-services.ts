@@ -69,7 +69,7 @@ const resolveInstitutionId = (publisher: ArdPublisher | undefined, user: AuthUse
 /**
  * Enrich a service with topic ids, normalized identifier URNs, and block unauthorized publishers.
  * Allow-listed COMMON_IDS topics (absent from the ARD feed) may only be published
- * under their configured `publisherId`; institution is still checked via the feed.
+ * under one of their configured `publisherIds`; institution is still checked via the feed.
  * @param service - Service from the event body
  * @param params - Authenticated user
  * @returns Updated service (possibly blocked)
@@ -110,8 +110,8 @@ export const processServices = async (
 
 	const allowedLivestream = allowedLivestreamLookup.getById(topicId)
 
-	// COMMON_IDS topics may only be published under their designated publisher
-	if (allowedLivestream && allowedLivestream.publisherId !== service.publisherId) {
+	// COMMON_IDS topics may only be published under one of their designated publishers
+	if (allowedLivestream && !allowedLivestream.publisherIds.includes(service.publisherId)) {
 		service.blocked = 'User unauthorized for service'
 
 		logger.warning({

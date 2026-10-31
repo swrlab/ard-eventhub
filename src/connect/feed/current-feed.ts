@@ -15,10 +15,10 @@ export const feedState = createArdFeedState()
 export const currentFeed = (): ArdFeed | null => feedState.feed
 
 /**
- * Livestream URN to publisher and institution, for the ownership check. Rebuilt once per revision.
+ * Livestream URN to every allowed publisher and institution, for the ownership check. Rebuilt once per revision.
  * @returns Owners, or null before the first revision arrived
  */
-export const currentOwners = (): ReadonlyMap<string, LivestreamOwner> | null => livestreamOwners(feedState.feed)
+export const currentOwners = (): ReadonlyMap<string, LivestreamOwner[]> | null => livestreamOwners(feedState.feed)
 
 /**
  * Status of the serving feed for `/api/feed`.

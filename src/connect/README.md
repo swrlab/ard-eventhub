@@ -60,7 +60,7 @@ The process connects as `NATS_USER` (local sops uses `svc-eventhub-connect`) wit
 Panels:
 
 - **On-air.** Last retained message per `radio.{livestream}`, oldest last-event first.
-- **Feed.** The snapshot this process is authorizing with, plus the `allowed-livestreams.json` overlay, as one list (`knownLivestreams`). A feed row's id is the item `externalId`, the livestream URN publishers send, not the fusion id. Overlay rows are topics absent from the core feed. They add a publish permission: `publisherId` must match, and the institution is still that publisher's house in the feed. The livestream title opens that station's tail.
+- **Feed.** The snapshot this process is authorizing with, plus the `allowed-livestreams.json` overlay, as one list (`knownLivestreams`). A feed row's id is the item `externalId`, the livestream URN publishers send, not the fusion id. Overlay rows are topics absent from the core feed. They add a publish permission: `publisherId` must be one of the entry's `publisherIds`, and the institution is still that publisher's house in the feed. A topic with several publishers gets one row per publisher. The livestream title opens that station's tail.
 - **Connections.** Users from `NATS_USERS_CONF` (default `infra/kubernetes/components/users/nats-users.conf`) plus `/connz`. Usernames and allow-lists only.
 - **Rejections.** Retained `feedback.>` plus what arrived while this process was up. `?institution=` filters one house. Each row expands to the rejected event as JSON.
 - **Cluster.** `/varz`, `/connz`, `/jsz`, sampled until each node behind the monitor URL has answered.

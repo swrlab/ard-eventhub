@@ -97,63 +97,12 @@ client.on('message', (topic, payload, packet) => {
 })
 ```
 
-`radio.control` und `radio.data` gehen auf **dieselbe** Inbox. Die Klasse steht im Feld `event`, der Livestream in `services[].id`. Payloads stehen unter [_radio.control_](../event/radio.control) und [_radio.data_](../event/radio.data). Track-Events: [_radio.track.playing_](../event/radio.track.playing), [_radio.track.next_](../event/radio.track.next). Publish auf `radio/…` ist dem Publisher verboten; die validierte Fassung schreibt nur die Eventhub Validierung, mit Retain.
+`radio.control` und `radio.data` gehen auf **dieselbe** Inbox. Die Klasse steht im Feld `event`, der Livestream in `services[].id`. Now und Control sind Pflicht, Next und Data optional: [_Überblick_](../event/index). Payloads stehen unter [_radio.control_](../event/radio.control) und [_radio.data_](../event/radio.data). Track-Events: [_radio.track.playing_](../event/radio.track.playing), [_radio.track.next_](../event/radio.track.next). Publish auf `radio/…` ist dem Publisher verboten; die validierte Fassung schreibt nur die Eventhub Validierung, mit Retain.
 
 Zum Gegenprüfen/ Subscriben brauchst du eine `sub-`-Kennung und abonnierst `radio/${livestreamId}/track/playing`. Die erste Nachricht nach dem Connect ist der letzte Retain und gilt als aktueller Titel.
 
 ## Feedback
 
-`feedback/{institutionId}` ist die Diagnose, kein Transaktions-ACK. Darauf zu warten blockiert den Publisher, und ein erfolgreiches Event schreibt dort nichts hin. Die Nachricht bleibt pro Institution retained: direkt nach dem Connect kommt die **letzte** Ablehnung, auch wenn sie Stunden alt ist. Zuordnen über `playlistItemId` (Track) oder über `start` plus Ziel-Subject (Control und Data).
-
-Fehlt `id`, oder ist `publisherId` keine URN, kommt zum Beispiel das hier zurück:
-
-```json
-{
-	"created": "2026-10-08T10:00:01.000Z",
-	"institutionId": "urn:ard:institution:a3004ff924ece1a2",
-	"subject": "inbox.urn:ard:institution:a3004ff924ece1a2",
-	"errors": [
-		{
-			"path": ".body.services.0.id",
-			"message": "should have required property 'id'",
-			"errorCode": "required.openapi.validation"
-		},
-		{
-			"path": ".body.services.0.publisherId",
-			"message": "should match format \"regex\"",
-			"errorCode": "format.openapi.validation"
-		},
-		{
-			"path": ".body.services.0.institutionId",
-			"message": "should have required property 'institutionId'",
-			"errorCode": "required.openapi.validation"
-		}
-	],
-	"playlistItemId": "swr3-demo-1",
-	"start": "2026-10-08T12:00:00+02:00",
-	"deprecated": ["services.externalId", "services.type"],
-	"event": {
-		"event": "de.ard.eventhub.v1.radio.track.playing",
-		"type": "music",
-		"start": "2026-10-08T12:00:00+02:00",
-		"length": 180,
-		"title": "Song name",
-		"playlistItemId": "swr3-demo-1",
-		"services": [{ "type": "PermanentLivestream", "externalId": "crid://swr.de/282310", "publisherId": "282310" }],
-		"creator": "example@swr.de"
-	}
-}
-```
-
-`event` ist das abgelehnte Event, so wie es ankam: JSON, sonst als Text. Über 64 KiB steht dort nur der Anfang (`truncated`, `bytes`, `head`).
-
-`created` ist der Zeitpunkt der Ablehnung. `errors` hat `path`, `message` und `errorCode`, ein Eintrag pro Problem, dieselbe Form wie `errors` in der 400-Antwort der HTTPS-API. Schema-Fehler tragen die bekannten `*.openapi.validation`-Codes. Passt ein Service nicht zur Inbox oder zum ARD-Feed, steht der Fehler am betroffenen Feld:
-
-- `.body.services.N.id`, `User unauthorized for service` (`unauthorized.eventhub.validation`): der Livestream gehört laut Feed nicht der Anstalt dieser Inbox.
-- `.body.services.N.id`, `Livestream not found > …` (`notFound.eventhub.validation`): der Livestream steht nicht im Feed.
-- `.body.services.N.institutionId`, `should match the inbox institution`: `institutionId` nennt eine andere Anstalt als die Inbox.
-- `.body.services.N.publisherId`, `should match the publisher of the livestream`: der Feed führt einen anderen Publisher für den Livestream.
-
-Ist der Body kein UTF-8 oder kein JSON, steht ein einzelner Fehler auf `.body`. Maßgeblich bleiben Operator-UI und Cluster-Logs.
+`feedback/{institutionId}` ist die Diagnose, kein Transaktions-ACK. Darauf zu warten blockiert den Publisher, und ein erfolgreiches Event schreibt dort nichts hin. Die Nachricht bleibt pro Institution retained: direkt nach dem Connect kommt die **letzte** Ablehnung, auch wenn sie Stunden alt ist. Zuordnen über `playlistItemId` (Track) oder über `start` plus Ziel-Subject (Control und Data). Felder, Fehlercodes und ein Beispiel stehen unter [_feedback_](../event/feedback). Maßgeblich bleiben Operator-UI und Cluster-Logs.
 
 Eine Kennung für mehrere Anstalten publiziert jedes Event auf die Inbox der Anstalt, der der Livestream gehört. Der Broker nimmt jede erlaubte Inbox an; die falsche Inbox fällt erst in der Eventhub Validierung auf.

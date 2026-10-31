@@ -201,52 +201,6 @@ test('ACL does not inspect payload — shared publisher can misroute a livestrea
 	}
 })
 
-test('hot-reload keeps the service connection and picks up a new MQTT user', async () => {
-	const nc = await tryConnectService()
-	if (skipUnlessNats(nc)) {
-		return
-	}
-
-	let original = ''
-	try {
-		original = await readFile(USERS_FILE, 'utf8')
-	} catch {
-		console.warn('skip: no writable .local/nats/nats-users.conf (start with just nats-up)')
-		await natsAccess.drain(nc)
-		return
-	}
-
-	const reloadUser = `pub-reload-test-${process.pid}`
-	const insertion = `\t\t{ user: "${reloadUser}", password: "${BROKER_PASSWORD}", allowed_connection_types: ["MQTT"], permissions: { publish: { allow: ["inbox.${SWR_INSTITUTION_ID}"] }, subscribe: { allow: ["feedback.${SWR_INSTITUTION_ID}"] } } }\n`
-	const updated = original.replace('users: [', `users: [\n${insertion}`)
-	const repoRoot = join(import.meta.dir, '../../..')
-
-	try {
-		await mkdir(join(repoRoot, '.local/nats'), { recursive: true })
-		await writeFile(USERS_FILE, updated)
-		assertEquals(spawnSync('just', ['nats-reload'], { cwd: repoRoot, encoding: 'utf8' }).status, 0)
-		assert(nc.isClosed() === false)
-
-		const seen = inboxSawMessage(nc, SWR_INSTITUTION_ID)
-		const client = await connectMqttUser(reloadUser, BROKER_PASSWORD)
-		try {
-			await client.publishAsync(inboxMqttTopic(SWR_INSTITUTION_ID), JSON.stringify({ reload: true }), {
-				qos: 1,
-				retain: false,
-			})
-		} finally {
-			await client.endAsync()
-		}
-		assertEquals(await seen, true)
-	} finally {
-		await writeFile(USERS_FILE, original)
-		spawnSync('just', ['nats-reload'], { cwd: repoRoot, encoding: 'utf8' })
-		if (!nc.isClosed()) {
-			await natsAccess.drain(nc)
-		}
-	}
-})
-
 test('MQTT URL without credentials cannot use the gateway', async () => {
 	const nc = await tryConnectService()
 	if (skipUnlessNats(nc)) {

@@ -5,9 +5,11 @@ sidebar:
   order: 12
 ---
 
-Eventhub Connect spricht NATS-nativ (`:4222`). Publisher bleiben bei MQTT; das MQTT-Gateway schreibt `inbox/{institutionId}` nach `inbox.{institutionId}` um.
+## Role
 
-Die vollständige Einrichtungsanleitung (Homebrew, Cursor Cloud, Docker) steht in [`src/connect/README.md`](https://github.com/swrlab/ard-eventhub/blob/main/src/connect/README.md).
+NATS is the broker Eventhub Connect runs on. It carries live radio metadata between publishers, subscribers, and the connect process. Publishers stay on MQTT. The server's built-in gateway rewrites those topics into NATS subjects, and JetStream holds sessions, retained messages, and key-value data such as the ARD feed. Connect speaks the native client protocol. Eventhub runs the upstream server.
+
+NATS is an open-source system for connecting distributed services. Core NATS provides publish/subscribe and request/reply. JetStream adds durable streams and key-value. Synadia donated the project to the [Cloud Native Computing Foundation](https://www.cncf.io/projects/nats/) (CNCF) in 2018, which hosts it as an incubating project under vendor-neutral governance. It is widely used in production across industries.
 
 ## Kurzbefehle
 
@@ -48,7 +50,7 @@ Ingest publiziert bei gesetztem `MQTT_BROKER_URL` direkt auf das Gateway als `sv
 
 ## Kubernetes
 
-Dev fährt drei NATS-Pods in einem Cluster. Test und prod haben je eine Config pro Zone (bad, stg, mnz): [`infra/kubernetes/README.md`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/README.md).
+Dev fährt drei NATS-Pods in einem Cluster. Test und prod haben je eine Config pro Zone (bad, stg, mnz): [`infra/kubernetes/README.md`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/README.md). Zertifikat erzeugen und als Secret `nats-tls` auf jeden Zonen-Cluster legen: [Certificates](./certificates).
 
 ```sh
 just nats-k8s-dev

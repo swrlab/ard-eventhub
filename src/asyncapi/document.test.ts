@@ -70,7 +70,11 @@ test('buildAsyncApiDocument is AsyncAPI 3 with Connect send and receive operatio
 		document.operations.receiveRadioData.externalDocs?.url,
 		'https://swrlab.github.io/ard-eventhub/event/radio.data'
 	)
-	assertEquals(document.operations.receiveFeedback.externalDocs, undefined)
+	assertEquals(document.operations.receiveFeedback.externalDocs, {
+		description: 'feedback/{institutionId}',
+		url: 'https://swrlab.github.io/ard-eventhub/event/feedback',
+	})
+	assertEquals(document.operations.receiveFeedback.description.endsWith('Schema: [feedback](/event/feedback).'), true)
 
 	assertEquals(document.components.messages.radioTrackPlaying.payload, {
 		$ref: '#/components/schemas/connectInboxTrackPlaying',

@@ -30,7 +30,7 @@ const makeItem = (publisher: ArdPublisher): ArdLivestream =>
 		publisher,
 	}) as ArdLivestream
 
-test('getPublisherById matches the feed id and does not remap legacy publisher ids', async () => {
+test('getPublisherById remaps a legacy publisher id onto the feed publisher', async () => {
 	const sandbox = createSandbox()
 	sandbox.stub(ardFeedRules, 'minItems').value(1)
 	sandbox.stub(ardFeedRules, 'maxItems').value(10)
@@ -56,7 +56,8 @@ test('getPublisherById matches the feed id and does not remap legacy publisher i
 	try {
 		await getARDFeed()
 		assertEquals(getPublisherById(CURRENT_PUBLISHER_ID)?.id, CURRENT_PUBLISHER_ID)
-		assertEquals(getPublisherById(FORMER_REMAP_ID), undefined)
+		assertEquals(getPublisherById(FORMER_REMAP_ID)?.id, CURRENT_PUBLISHER_ID)
+		assertEquals(getPublisherById('urn:ard:publisher:0000000000000000'), undefined)
 	} finally {
 		sandbox.restore()
 		resetArdFeed()
