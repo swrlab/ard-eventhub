@@ -10,11 +10,18 @@ import { logger } from '@frytg/logger'
 import { ulid } from 'ulid'
 import { pubSubTopicSelf } from '#config'
 import { isIngestPublishPluginsEnabled } from '#env'
+import { parseConnectInboxEvent } from '../../schemas/events.ts'
 import { mqttInbox } from '../mqtt/publish-inbox.ts'
 import { pubsubBuildId } from '../pubsub/build-id.ts'
 import { publishPubSubMessage } from '../pubsub/publish-message.ts'
 import { createNewTopic } from './create-new-topic.ts'
-import { buildEventMessage, ensureDefaultPlugins, parseEventStart, summarizeEventStatuses } from './event-helpers.ts'
+import {
+	buildEventMessage,
+	buildInboxPayload,
+	ensureDefaultPlugins,
+	parseEventStart,
+	summarizeEventStatuses,
+} from './event-helpers.ts'
 import { processServices } from './process-services.ts'
 
 const source = 'utils.events.processEvent'
@@ -186,14 +193,24 @@ export const processEvent = async (params: {
 	// generate unique Id from the institution id and a random ULID
 	message.id = `${user.institution.id}-${ulid()}`
 
-	void mqttInbox.publish(user.institution.id, structuredClone(message)).catch((error: unknown) => {
-		logger.warning({
-			message: 'mqtt inbox publish failed',
-			source,
-			error,
-			data: { institutionId: user.institution.id },
+	const inboxPayload = buildInboxPayload(message, eventName)
+	const parsedInboxPayload = parseConnectInboxEvent(inboxPayload)
+	if (parsedInboxPayload.success) {
+		void mqttInbox.publish(user.institution.id, structuredClone(parsedInboxPayload.data)).catch((error: unknown) => {
+			logger.warning({
+				message: 'mqtt inbox publish failed',
+				source,
+				error,
+				data: { institutionId: user.institution.id },
+			})
 		})
-	})
+	} else {
+		logger.warning({
+			message: 'mqtt inbox payload failed connect validation, skipping dual-write',
+			source,
+			data: { institutionId: user.institution.id, eventName, issues: parsedInboxPayload.error.issues },
+		})
+	}
 
 	message.services = await publishEventToServices(message, attributes, user)
 

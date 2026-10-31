@@ -6,6 +6,7 @@ import { DateTime } from '@frytg/dates'
 import { logger } from '@frytg/logger'
 import { assertEquals, assertExists, assertMatch } from '@std/assert'
 import { createSandbox } from 'sinon'
+import { parseConnectInboxEvent } from '../../schemas/events.ts'
 import { publisherLookup } from '../feed/ard-core.ts'
 import { mqttInbox } from '../mqtt/publish-inbox.ts'
 import { processEvent, publishEventPlugins, pubsubFanout } from './process-event.ts'
@@ -23,7 +24,7 @@ const user = {
  * @returns Event body
  */
 const makeBody = (): Record<string, unknown> => ({
-	type: 'speech',
+	type: 'news',
 	start: DateTime.now().toISO(),
 	title: 'Probe',
 	length: 60,
@@ -149,11 +150,12 @@ test('processEvent records a blocked service, skips Pub/Sub, and still sends it 
 		assertEquals(result.event.services[0]?.blocked, `Publisher not found > ${PUBLISHER_URN}`)
 		assertEquals(publishMessage.called, false)
 		assertEquals(publishInbox.calledOnce, true)
+		// The Connect inbox shape has no `blocked` / `topic` fields: Connect re-checks ownership itself.
 		const payload = publishInbox.firstCall.args[1] as {
-			services: Array<{ blocked?: string; topic?: { messageId?: string } }>
+			services: Array<{ publisherId?: string; institutionId?: string }>
 		}
-		assertEquals(payload.services[0]?.blocked, `Publisher not found > ${PUBLISHER_URN}`)
-		assertEquals(payload.services[0]?.topic?.messageId, undefined)
+		assertEquals(payload.services[0]?.publisherId, PUBLISHER_URN)
+		assertEquals(payload.services[0]?.institutionId, INSTITUTION_ID)
 	} finally {
 		sandbox.restore()
 	}
@@ -209,16 +211,16 @@ test('processEvent publishes only non-blocked services to the common topic', asy
 		)
 		assertEquals(commonBody.services[0]?.blocked, undefined)
 
+		// The Connect inbox shape has no `blocked` / `topic` fields: both services still forward,
+		// and Connect re-checks ownership itself.
 		const payload = publishInbox.firstCall.args[1] as {
-			services: Array<{ externalId?: string; blocked?: string; topic?: { messageId?: string } }>
+			services: Array<{ externalId?: string; publisherId?: string }>
 		}
 		assertEquals(
 			payload.services.map((service) => service.externalId),
 			['ext-ok', 'ext-blocked']
 		)
-		assertEquals(payload.services[1]?.blocked, `Publisher not found > ${unknownPublisher}`)
-		assertEquals(payload.services[0]?.topic?.messageId, undefined)
-		assertEquals(payload.services[1]?.topic?.messageId, undefined)
+		assertEquals(payload.services[1]?.publisherId, unknownPublisher)
 	} finally {
 		sandbox.restore()
 	}
@@ -240,6 +242,50 @@ test('processEvent still returns Pub/Sub statuses when MQTT publish rejects', as
 		assertEquals(result.statuses.failed, 0)
 		assertExists(result.event.id)
 		assertEquals(publishMessage.called, true)
+	} finally {
+		sandbox.restore()
+	}
+})
+
+test('the MQTT inbox dual-write payload passes Connect\u2019s own inbox validation', async () => {
+	const { sandbox } = stubFanout()
+	const publishInbox = sandbox.stub(mqttInbox, 'publish').resolves()
+
+	try {
+		await processEvent({
+			eventName: 'de.ard.eventhub.v1.radio.track.playing',
+			user,
+			body: makeBody(),
+		})
+
+		const payload = publishInbox.firstCall.args[1]
+		const parsed = parseConnectInboxEvent(payload)
+		if (!parsed.success) throw new Error(JSON.stringify(parsed.error.issues))
+		assertEquals(parsed.data.event, 'de.ard.eventhub.v1.radio.track.playing')
+		assertEquals('name' in (payload as Record<string, unknown>), false)
+	} finally {
+		sandbox.restore()
+	}
+})
+
+test('an inbox payload that still fails Connect validation is logged and never dual-written', async () => {
+	const { sandbox } = stubFanout()
+	const warning = sandbox.stub(logger, 'warning')
+	const publishInbox = sandbox.stub(mqttInbox, 'publish').resolves()
+
+	try {
+		await processEvent({
+			eventName: 'de.ard.eventhub.v1.radio.track.playing',
+			user,
+			// `type` is required by both the HTTPS and the Connect schema; omitting it fails the Connect parse.
+			body: { ...makeBody(), type: undefined },
+		})
+
+		assertEquals(publishInbox.called, false)
+		assertEquals(
+			warning.calledWithMatch({ message: 'mqtt inbox payload failed connect validation, skipping dual-write' }),
+			true
+		)
 	} finally {
 		sandbox.restore()
 	}
