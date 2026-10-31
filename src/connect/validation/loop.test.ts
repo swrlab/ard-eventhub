@@ -30,6 +30,7 @@ const OWNERS = { [LIVESTREAM]: { publisherId: PUBLISHER, institutionId: SWR_INST
 
 /**
  * URN-only music now-playing event with no `plugins` array.
+ * `start` is the current time: validation rejects a track whose start is more than 15 minutes old.
  * @param playlistItemId - Correlation id
  * @param institutionId - Claimed institution
  * @returns Inbox JSON
@@ -37,7 +38,7 @@ const OWNERS = { [LIVESTREAM]: { publisherId: PUBLISHER, institutionId: SWR_INST
 const track = (playlistItemId: string, institutionId = SWR_INSTITUTION_ID) => ({
 	event: 'de.ard.eventhub.v1.radio.track.playing',
 	type: 'music',
-	start: '2026-10-08T12:00:00+02:00',
+	start: new Date().toISOString(),
 	length: 180,
 	title: 'Song',
 	playlistItemId,
