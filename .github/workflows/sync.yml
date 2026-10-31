@@ -1,0 +1,61 @@
+name: Sync Git Repository
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+  TANGLED_URL: git@tangled.org:swrlab.tngl.sh/ard-eventhub
+  GITLAB_URL: git@gitlab.ard.de:swrlab/ard-eventhub.git
+
+jobs:
+  sync:
+    name: Sync to ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: tangled
+            remote: TANGLED_URL
+            host: tangled.org
+          - name: gitlab
+            remote: GITLAB_URL
+            host: gitlab.ard.de
+    steps:
+      - name: 👀 Checkout Code
+        uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+          show-progress: false
+
+      - name: Setup SSH Keys and known_hosts
+        env:
+          TANGLED_DEPLOY_KEY: ${{ secrets.TANGLED_DEPLOY_KEY }}
+          GITLAB_DEPLOY_KEY: ${{ secrets.GITLAB_DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          touch ~/.ssh/known_hosts
+          ssh-agent -a "$SSH_AUTH_SOCK" > /dev/null
+          case "${{ matrix.name }}" in
+            tangled) ssh-add - <<< "$TANGLED_DEPLOY_KEY" ;;
+            gitlab) ssh-add - <<< "$GITLAB_DEPLOY_KEY" ;;
+          esac
+          ssh-keyscan -t rsa,ed25519 "${{ matrix.host }}" >> ~/.ssh/known_hosts
+
+      - name: Push data
+        id: version
+        run: |
+          git config user.name "ard-eventhub"
+          git config user.email "audiolab@ard.de"
+          remote="${{ matrix.remote }}"
+          git remote add mirror "${!remote}"
+          git push --force mirror main
