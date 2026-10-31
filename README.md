@@ -2,6 +2,17 @@
 
 ARD system to distribute real-time (live) metadata for primarily radio broadcasts.
 
+## Git
+
+Origin: [github.com/swrlab/ard-eventhub](https://github.com/swrlab/ard-eventhub)
+
+Mirrors:
+
+- [tangled.org/swrlab.tngl.sh/ard-eventhub](https://tangled.org/swrlab.tngl.sh/ard-eventhub)
+- [gitlab.ard.de/swrlab/ard-eventhub](https://gitlab.ard.de/swrlab/ard-eventhub)
+
+Sync from the origin to both mirrors is described in [Git sync](docs/development/git-sync.md).
+
 ## Get Started and Documentation
 
 Important places to go ahead:
