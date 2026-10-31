@@ -1,5 +1,7 @@
 import type { RejectCause, ValidationErrorItem, ValidationPlan, ValidationReject } from '#types'
-import { parseConnectInboxEvent } from '../../schemas/events.ts'
+import { DateTime } from '@frytg/dates'
+import { httpsEventNames, parseConnectInboxEvent } from '../../schemas/events.ts'
+import { isEventStartExpired, parseEventStart } from '../../utils/events/event-helpers.ts'
 import {
 	eventClassToken,
 	feedbackMqttTopic,
@@ -10,6 +12,14 @@ import {
 import { zodToOpenApiError } from '../../utils/validation/zod-to-openapi-error.ts'
 import { enabledPluginTargets } from './eligibility.ts'
 import { checkEventOwnership } from './ownership.ts'
+
+/** `httpsEventNames` as a lookup for the staleness check, which only applies where HTTPS applies it too. */
+const STALENESS_CHECKED_EVENTS: ReadonlySet<string> = new Set(httpsEventNames)
+
+/** Error for a `start` further in the past than `MAX_OFFSET_IN_MINUTES` allows (mirrors the HTTPS rejection). */
+const EXPIRED_START_ERROR: ValidationErrorItem[] = [
+	{ path: '.body.start', message: 'should not be expired event', errorCode: 'required.openapi.validation' },
+]
 
 /** Larger payloads are logged and fed back as a prefix. NATS allows 1 MiB, radio events are a few KiB. */
 const MAX_LOGGED_PAYLOAD_BYTES = 64 * 1024
@@ -181,6 +191,13 @@ export const planInboxMessage = (params: { subject: string; bytes: Uint8Array; n
 	}
 
 	const event = parsed.data
+	if (
+		STALENESS_CHECKED_EVENTS.has(event.event) &&
+		isEventStartExpired(parseEventStart(event.start), DateTime.fromISO(now))
+	) {
+		return reject({ ...context, cause: 'schema', errors: EXPIRED_START_ERROR, value })
+	}
+
 	const ownershipErrors = checkEventOwnership({ subjectInstitutionId: institutionId, services: event.services })
 	if (ownershipErrors.length > 0) return reject({ ...context, cause: 'ownership', errors: ownershipErrors, value })
 

@@ -57,6 +57,7 @@ Schema-Fehler tragen `*.openapi.validation`. Passt ein Service nicht zur Inbox o
 - `.body.services.N.id`, `Livestream not found > …` (`notFound.eventhub.validation`): der Livestream steht nicht im Feed.
 - `.body.services.N.institutionId`, `should match the inbox institution` (`unauthorized.eventhub.validation`): `institutionId` nennt eine andere Anstalt als die Inbox.
 - `.body.services.N.publisherId`, `should match the publisher of the livestream` (`unauthorized.eventhub.validation`): der Feed führt einen anderen Publisher für den Livestream.
+- `.body.start`, `should not be expired event` (`required.openapi.validation`): nur für `track.playing` und `track.next` — `start` liegt mehr als 15 Minuten zurück, siehe [_radio.track.playing_](./radio.track.playing#nachträglich-überschreiben).
 
 Ist der Body kein UTF-8 oder kein JSON, steht ein einzelner Fehler auf `.body` (`type.openapi.validation`, `should be UTF-8` oder `should be JSON`). `event` ist dann der Text, soweit er lesbar ist.
 

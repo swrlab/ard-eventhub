@@ -18,7 +18,7 @@ const OWNERS = { [LIVESTREAM]: { publisherId: PUBLISHER, institutionId: SUBJECT_
 const track = {
 	event: 'de.ard.eventhub.v1.radio.track.playing',
 	type: 'music',
-	start: '2026-10-08T12:00:00+02:00',
+	start: '2026-10-08T13:55:00+02:00',
 	length: 180,
 	title: 'Song',
 	playlistItemId: 'item-1',
@@ -237,4 +237,38 @@ test('track.next is retained and does not fan out when no plugin is set', () => 
 		[`radio/${LIVESTREAM}/track/next`]
 	)
 	assertEquals(result.plugins, [])
+})
+
+test('a track.playing event with a start older than 15 minutes is rejected, mirroring the HTTPS check', () => {
+	const result = rejected(plan({ ...track, start: '2026-10-08T13:00:00+02:00' }))
+	assertEquals(result.cause, 'schema')
+	assertEquals(result.errors, [
+		{ path: '.body.start', message: 'should not be expired event', errorCode: 'required.openapi.validation' },
+	])
+})
+
+test('a track.next event with a start older than 15 minutes is rejected, same as track.playing', () => {
+	const result = rejected(
+		plan({ ...track, event: 'de.ard.eventhub.v1.radio.track.next', start: '2026-10-08T13:00:00+02:00' })
+	)
+	assertEquals(result.cause, 'schema')
+	assertEquals(result.errors, [
+		{ path: '.body.start', message: 'should not be expired event', errorCode: 'required.openapi.validation' },
+	])
+})
+
+test('a radio.control event is not subject to the 15-minute staleness check (HTTPS does not accept control events either)', () => {
+	const control = {
+		event: 'de.ard.eventhub.v1.radio.control',
+		start: '2026-10-08T13:00:00+02:00',
+		name: 'TA',
+		state: true,
+		services: [{ id: LIVESTREAM, publisherId: PUBLISHER, institutionId: SUBJECT_INSTITUTION }],
+		creator: 'example@swr.de',
+	}
+	const result = accepted(plan(control))
+	assertEquals(
+		result.radio.map((item) => item.topic),
+		[`radio/${LIVESTREAM}/control`]
+	)
 })
