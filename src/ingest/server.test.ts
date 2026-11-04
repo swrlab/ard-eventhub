@@ -245,6 +245,19 @@ test(`POST ${eventPath}`, async (t) => {
 		testEventKeys(res.body)
 	})
 
+	await t.step('publish response stays JSON when the client accepts gzip', async () => {
+		const res = await request('POST', eventPath, {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+				'Accept-Encoding': 'gzip, deflate',
+			},
+			body: event,
+		})
+		testResponse(res, 201)
+		testEventKeys(res.body)
+		assertStrictEquals(res.headers.get('content-encoding'), null)
+	})
+
 	await t.step('publish a new event with expired time', async () => {
 		event.start = DateTime.now().minus({ minutes: 20 }).toISO()
 		const res = await request('POST', eventPath, {
