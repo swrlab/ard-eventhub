@@ -6,15 +6,18 @@ import { assertEquals, assertExists } from '@std/assert'
 import { createHashedId } from '@swrlab/utils/packages/ard/index.js'
 import { createSandbox } from 'sinon'
 import { coreIdPrefixes, pubSubPrefix } from '#config'
+import allowedLivestreamsJson from '../../config/allowed-livestreams.json' with { type: 'json' }
+import { allowedLivestreamsConfig } from '../../schemas/config.ts'
 import { publisherLookup } from '../feed/ard-core.ts'
 import { allowedLivestreamLookup, processServices } from './process-services.ts'
+
+const overlay = allowedLivestreamsConfig.parse(allowedLivestreamsJson)
 
 const INSTITUTION_ID = 'urn:ard:institution:swr'
 const PUBLISHER_URN = 'urn:ard:publisher:abcdef0123456789'
 const ALLOWED_EXTERNAL_ID = 'ext-allowed-common'
 const ALLOWED_TOPIC_ID = `${coreIdPrefixes.PermanentLivestream}${createHashedId(ALLOWED_EXTERNAL_ID)}`
 const ALLOWED_PUBLISHER_ID = 'urn:ard:publisher:fedcba9876543210'
-const MUSIKCLUB_ID = 'urn:ard:permanent-livestream:7c0dd5c9f90b67ab'
 
 const user = {
 	email: 'lab@swr.de',
@@ -263,14 +266,17 @@ test('processServices allows COMMON_IDS livestream under its designated publishe
 	}
 })
 
-test('processServices allows ARD Musikclub from SWR1 BW and SWR1 RP (real allow-list)', async () => {
+test('processServices allows every publisher on the allow-list', async () => {
 	const sandbox = stubPublisher()
 
 	try {
-		for (const publisherId of ['urn:ard:publisher:ea659609f53316e6', 'urn:ard:publisher:2d74b4350f0d4d53']) {
-			const result = await processServices({ id: MUSIKCLUB_ID, publisherId }, { user })
-			assertEquals(result.blocked, undefined)
-			assertEquals(result.topic?.id, MUSIKCLUB_ID)
+		for (const livestream of overlay.livestreams) {
+			for (const publisherId of livestream.publisherIds) {
+				const result = await processServices({ id: livestream.id, publisherId }, { user })
+				assertEquals(result.blocked, undefined)
+				assertEquals(result.topic?.id, livestream.id)
+				assertEquals(result.publisherId, publisherId)
+			}
 		}
 	} finally {
 		sandbox.restore()
