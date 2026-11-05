@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- fix: update allowed livestreams for ard hitnacht
+
 ## [3.0.0-beta.3] - 2026-10-30
 
 ### Added
