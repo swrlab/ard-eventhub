@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: victoria-logs
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: victoria-logs
+  template:
+    metadata:
+      labels:
+        app: victoria-logs
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: victoria-logs
+          # Repo: https://github.com/VictoriaMetrics/VictoriaLogs
+          image: docker.io/victoriametrics/victoria-logs:v1.53.0
+          imagePullPolicy: IfNotPresent
+          # https://docs.victoriametrics.com/victorialogs/#list-of-command-line-flags
+          # local-path does not enforce the PVC size, so the disk cap below is what keeps logs
+          # from filling the disk JetStream also writes to. Keep it under the PVC request.
+          args:
+            - -storageDataPath=/victoria-logs-data
+            - -httpListenAddr=:9428
+            - -retentionPeriod=30d
+            - -retention.maxDiskSpaceUsageBytes=16GiB
+            - -insert.maxQueueDuration=30s
+            - -loggerFormat=json
+            - -loggerLevel=WARN
+          ports:
+            - name: http
+              containerPort: 9428
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ['ALL']
+          volumeMounts:
+            - name: data
+              mountPath: /victoria-logs-data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: victoria-logs-data

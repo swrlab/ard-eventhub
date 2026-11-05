@@ -39,7 +39,7 @@ export const natsMonitorUrl = getEnv<string>('NATS_MONITOR_URL', { defaultValue:
 export const natsWsUrl = getEnv<string>('NATS_WS_URL', { defaultValue: defaultWsUrl(natsUrl) })
 
 /** Path to the NATS users file. The board shows usernames and ACLs, never the hash. */
-const defaultUsersConf = join(import.meta.dir, '../../../infra/kubernetes/components/users/nats-users.conf')
+const defaultUsersConf = join(import.meta.dir, '../../../infra/kubernetes/services/nats/users/nats-users.conf')
 
 /** Override when the broker's user file is not the repo copy. */
 export const usersConfPath = getEnv<string>('NATS_USERS_CONF', { defaultValue: defaultUsersConf })

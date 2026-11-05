@@ -1,0 +1,19 @@
+# zot registry, one per machine. The namespace comes from platform/registry.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - pvc.yaml
+  - deployment.yaml
+  - service.yaml
+
+configMapGenerator:
+  - name: registry-config
+    files:
+      - config.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: registry
+      app.kubernetes.io/component: registry
+    includeSelectors: false

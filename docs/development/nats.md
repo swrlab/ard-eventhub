@@ -27,7 +27,7 @@ just dev            # streams plus the operator UI, http://127.0.0.1:4173
 
 The boards use the connect login (`NATS_USER`, `svc-eventhub-connect` locally, password in `NATS_PASSWORD`). The tail uses `sub-ui` with no password. Set `NATS_WS_URL` when the WebSocket listener is not `ws://` plus the NATS host on port 9222. Passwords are not shown. Vite hot reload is `USE_HMR=true just dev` plus `just ui`. The feed board lists the serving snapshot, plus `allowed-livestreams.json` rows that add a publish permission for topics absent from the core feed. It shows when that snapshot was built and when this process last fetched it. A livestream title opens that station's tail. Feed ids are the item `externalId`, not the fusion id. Connect reads `KV_ARD_FEED` on boot, downloads `ARD_FEED_URL` only when the bucket is empty, and refreshes it on `POST /api/update-feed` (hourly CronJob). A bad fetch keeps the previous KV revision.
 
-Lokale Config: [`infra/nats/nats-dev.conf`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nats/nats-dev.conf) — ein Knoten, JetStream, MQTT `:1883`, WebSocket `:9222` ohne TLS. User und bcrypt-Hashes stehen in [`components/users/nats-users.conf`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/components/users/nats-users.conf). Das Passwort liegt nur in sops. `sub-ui` hat kein Passwort. `infra/nats/nats-users.conf` ist ein Symlink darauf. Anonyme Connects schlagen fehl.
+Lokale Config: [`infra/nats/nats-dev.conf`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nats/nats-dev.conf) — ein Knoten, JetStream, MQTT `:1883`, WebSocket `:9222` ohne TLS. User und bcrypt-Hashes stehen in [`services/nats/users/nats-users.conf`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/services/nats/users/nats-users.conf). Das Passwort liegt nur in sops. `sub-ui` hat kein Passwort. `infra/nats/nats-users.conf` ist ein Symlink darauf. Anonyme Connects schlagen fehl.
 
 Vor einem Reload: `just nats-check`. User hinzufügen, dann `just nats-reload` (kein Restart).
 
@@ -50,8 +50,9 @@ Ingest publiziert bei gesetztem `MQTT_BROKER_URL` direkt auf das Gateway als `sv
 
 ## Kubernetes
 
-Dev fährt drei NATS-Pods in einem Cluster. Test und prod haben je eine Config pro Zone (bad, stg, mnz): [`infra/kubernetes/README.md`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/README.md). Zertifikat erzeugen und als Secret `nats-tls` auf jeden Zonen-Cluster legen: [Certificates](./certificates).
+Dev, test und prod laufen auf allen drei Maschinen (bad, stg, mnz), jede Stage mit eigenem Namespace, eigenen Host-Ports und NetworkPolicies: [`infra/kubernetes/README.md`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/README.md). Zertifikat erzeugen und als Secret `nats-tls` auf jeden Zonen-Cluster legen: [Certificates](./certificates).
 
 ```sh
-just nats-k8s-dev
+just k8s-diff eventhub-connect-bad eventhub-dev
+just k8s-apply eventhub-connect-bad eventhub-dev
 ```

@@ -1,0 +1,7 @@
+# Vector mounts hostPath volumes, which only the privileged level admits.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+  labels:
+    pod-security.kubernetes.io/enforce: privileged

@@ -1,0 +1,6 @@
+# Shared by every stage: network isolation. Included by environments/<stage>, which sets the namespace.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - network-policies.yaml

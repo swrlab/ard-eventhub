@@ -1,0 +1,37 @@
+# Eventhub dev: NATS and eventhub-connect in namespace eventhub-dev, on all three machines.
+# Applied through clusters/<machine>/eventhub-dev, which adds the server identity.
+# Host ports: cluster 26222, MQTT 28883, WebSocket 29222, operator UI 24173.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: eventhub-dev
+
+resources:
+  - namespace.yaml
+  - ../shared
+  - ../../services/nats/base
+  - ../../services/eventhub-connect/base
+
+patches:
+  - path: host-ports.yaml
+
+configMapGenerator:
+  - name: nats
+    behavior: merge
+    files:
+      - routes.conf
+  # The cluster layer merges NATS_SERVER_NAME and NATS_CLUSTER_ADVERTISE into this map.
+  - name: nats-zone
+    literals:
+      - NATS_CLUSTER_NAME=eventhub-dev
+
+# Pin once the connect image is built and pushed to the registry.
+images:
+  - name: eventhub-connect
+    newName: eventhub-connect
+    newTag: dev
+
+labels:
+  - pairs:
+      environment: dev
+    includeSelectors: false

@@ -1,0 +1,102 @@
+# Isolation for one stage namespace (eventhub-dev, -test, -prod). The namespace comes from the
+# environment layer. k3s enforces NetworkPolicy with its built-in kube-router controller.
+#
+# Inside the cluster a stage only talks to itself and to DNS. Pods of another stage cannot reach
+# its pod IPs or Services. The host ports are public on purpose: other machines route to them, so
+# anything that reaches the machine, including another stage, can reach them. NATS authentication
+# is the guard there.
+#
+# 10.42.0.0/16 and 10.43.0.0/16 are the k3s default pod and service CIDRs. Change them here if
+# the NixOS k3s flags ever set --cluster-cidr or --service-cidr.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+  policyTypes: ['Ingress', 'Egress']
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-same-namespace
+spec:
+  podSelector: {}
+  policyTypes: ['Ingress', 'Egress']
+  ingress:
+    - from:
+        - podSelector: {}
+  egress:
+    - to:
+        - podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+spec:
+  podSelector: {}
+  policyTypes: ['Egress']
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+---
+# NATS routes to the other machines, connect downloads ARD_FEED_URL and dials its own MQTT and
+# WebSocket names. Everything off-cluster is allowed; other namespaces are not.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-off-cluster
+spec:
+  podSelector: {}
+  policyTypes: ['Egress']
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.42.0.0/16
+              - 10.43.0.0/16
+---
+# Ports are the container ports behind the stage's hostPorts (see host-ports.yaml).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-nats-host-ports
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: nats
+  policyTypes: ['Ingress']
+  ingress:
+    - ports:
+        - port: 6222
+          protocol: TCP
+        - port: 8883
+          protocol: TCP
+        - port: 9222
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-connect-host-port
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: eventhub-connect
+  policyTypes: ['Ingress']
+  ingress:
+    - ports:
+        - port: 4173
+          protocol: TCP

@@ -1,0 +1,10 @@
+# Everything that runs on eventhub-connect-stg. `just k8s-apply eventhub-connect-stg <part>` applies one subdirectory.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - registry
+  - observability
+  - eventhub-dev
+  - eventhub-test
+  - eventhub-prod

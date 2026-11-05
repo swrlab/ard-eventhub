@@ -1,0 +1,40 @@
+# Container ports are the same in every stage. Only the host side differs, so dev, test, and
+# prod run side by side on one machine. Ports merge on containerPort plus protocol; without
+# `protocol` kustomize drops the hostPort silently.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nats
+spec:
+  template:
+    spec:
+      containers:
+        - name: nats
+          ports:
+            - name: cluster
+              containerPort: 6222
+              hostPort: 26222
+              protocol: TCP
+            - name: mqtts
+              containerPort: 8883
+              hostPort: 28883
+              protocol: TCP
+            - name: websocket
+              containerPort: 9222
+              hostPort: 29222
+              protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventhub-connect
+spec:
+  template:
+    spec:
+      containers:
+        - name: eventhub-connect
+          ports:
+            - name: http
+              containerPort: 4173
+              hostPort: 24173
+              protocol: TCP
