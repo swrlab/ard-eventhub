@@ -1,6 +1,7 @@
 # Kubernetes bundles under infra/kubernetes/clusters/<host>. Hosts are the friendly names from
 # infra/nixos/hosts, and every recipe passes that host's kubeconfig (keys/<host>-k3s-cert.yaml)
-# explicitly instead of trusting the current context.
+# explicitly instead of trusting the current context. A part (registry, observability,
+# eventhub-dev, eventhub-test, eventhub-prod) selects objects by label app.kubernetes.io/instance.
 
 K8S := source_directory() / '../infra/kubernetes'
 
@@ -21,7 +22,7 @@ k8s-diff host part='':
 	#!/usr/bin/env bash
 	set -uo pipefail
 	kubectl --kubeconfig {{ quote('keys/' + host + '-k3s-cert.yaml') }} diff \
-		-k {{ quote(K8S / 'clusters' / host / part) }}
+		-k {{ quote(K8S / 'clusters' / host) }} {{ if part == '' { '' } else { '-l app.kubernetes.io/instance=' + quote(part) } }}
 	status=$?
 	# kubectl diff exits 1 when there are differences, >1 on errors.
 	if [[ $status -gt 1 ]]; then exit $status; fi
@@ -31,4 +32,4 @@ k8s-diff host part='':
 [group('K3S')]
 k8s-apply host part='':
 	kubectl --kubeconfig {{ quote('keys/' + host + '-k3s-cert.yaml') }} apply \
-		-k {{ quote(K8S / 'clusters' / host / part) }}
+		-k {{ quote(K8S / 'clusters' / host) }} {{ if part == '' { '' } else { '-l app.kubernetes.io/instance=' + quote(part) } }}

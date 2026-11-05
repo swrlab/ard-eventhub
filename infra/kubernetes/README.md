@@ -16,30 +16,31 @@ Kubernetes does not connect the machines. The three NATS servers of one stage, o
 
 ```text
 infra/kubernetes/
-├── services/              one base per workload, no namespace, no machine or stage values
-│   ├── registry/base
-│   ├── nats/base          StatefulSet, Services, shared nats.conf
-│   ├── nats/users         nats-users.conf (Component)
-│   ├── eventhub-connect/base
-│   ├── vector/base
-│   └── victoria-logs/base
-├── platform/              per-machine services shared by all stages
-│   ├── registry
-│   └── observability
-├── environments/          what one stage shares across machines
-│   ├── shared             NetworkPolicies, included by every stage
-│   ├── dev                namespace, host ports, route hosts, image
+├── services/              one directory per workload, no machine or stage values
+│   ├── registry           namespace registry, ready to apply
+│   ├── observability      namespace observability: vector, victoria-logs
+│   ├── nats               StatefulSet, Services, shared nats.conf; users/ holds nats-users.conf
+│   └── eventhub-connect
+├── environments/          one stage, the same on every machine
+│   ├── shared             namespace, NetworkPolicies, NATS, connect, host-port wiring (Component)
+│   ├── dev                namespace name, ConfigMap eventhub-stage (STAGE, PORT_*), image tag
 │   ├── test
 │   └── prod
-└── clusters/<host>/       what one machine runs; one subdirectory per part
-    ├── registry
-    ├── observability      machine name for Vector
-    ├── eventhub-dev       NATS identity, advertise address, connect URLs
-    ├── eventhub-test
-    └── eventhub-prod
+└── clusters/<host>/       one file: everything the machine runs, plus its zone
 ```
 
-A value lives in the lowest layer that owns it. Bump an image in `services/`, a port in `environments/<stage>`, a hostname in `clusters/`. Do not copy whole manifests into a machine directory.
+Each value is written once. An image or probe goes in `services/`, a stage's ports in `environments/<stage>`, a machine's zone in `clusters/<host>`. Everything else derives from `STAGE`, `ZONE`, and `PORT_*` through Kubernetes `$(VAR)` expansion in the workload env:
+
+| Value                                  | Built as                                                        |
+| -------------------------------------- | --------------------------------------------------------------- |
+| NATS server name                       | `$(STAGE)-$(ZONE)` (`prod-bad`)                                 |
+| NATS cluster name                      | `eventhub-$(STAGE)`                                             |
+| Public hostname                        | `eventhub-connect-$(ZONE)-$(STAGE).swr.cn.ard.de`               |
+| Advertise address, routes              | public hostname and `$(PORT_CLUSTER)`                           |
+| Connect `NATS_MQTT_URL`, `NATS_WS_URL` | public hostname and `$(PORT_MQTT)`, `$(PORT_WS)`                |
+| Host ports                             | `PORT_*`, copied into the pod specs by kustomize `replacements` |
+
+`clusters/<host>` patches `ZONE` and the zone `nodeSelector` into NATS and connect. The bases default both to `unset`, so a workload without a machine layer stays Pending. Registry and observability have no machine values: Vector reads the zone from the node label and names the machine `eventhub-connect-<zone>`.
 
 ## Three stages on one machine
 
@@ -76,11 +77,11 @@ The policies assume the k3s default pod and Service CIDRs (`10.42.0.0/16`, `10.4
 
 ### How the NATS config is assembled
 
-`services/nats/base/nats.conf` is shared. It takes the server name, cluster name, advertise address, and routes as whole-value environment variables (NATS does not expand a variable inside a longer string). Most come from ConfigMap `nats-zone`: `environments/<stage>` sets the cluster name and the three route hosts (`NATS_ROUTE_HOST_BAD|STG|MNZ`), `clusters/<host>/<stage>` adds the server name and advertise address. The StatefulSet builds each route URL with its credentials, `nats://eventhub-route:$(NATS_ROUTE_PASSWORD)@$(NATS_ROUTE_HOST_<ZONE>)`, through Kubernetes variable expansion. Users come from `services/nats/users`. A change to any of these files changes the ConfigMap hash and rolls the pod. Changing the `nats-route` Secret does not; restart the StatefulSet on all three machines after a rotation.
+`services/nats/nats.conf` is shared. It takes the server name, cluster name, advertise address, and routes as whole-value environment variables, because NATS does not expand a variable inside a longer string. The StatefulSet env builds them (see the table above). Each route URL carries the credentials: `nats://eventhub-route:$(NATS_ROUTE_PASSWORD)@eventhub-connect-<zone>-$(STAGE).swr.cn.ard.de:$(PORT_CLUSTER)`. Users come from `services/nats/users`. A change to `nats.conf`, the users file, or ConfigMap `eventhub-stage` changes a ConfigMap hash and rolls the pod. Changing the `nats-route` Secret does not; restart the StatefulSet on all three machines after a rotation.
 
 ## Deploy
 
-All recipes take the host's kubeconfig from `keys/<host>-k3s-cert.yaml` ([`just/k3s.just`](../../just/k3s.just)), never the current context.
+All recipes take the host's kubeconfig from `keys/<host>-k3s-cert.yaml` ([`just/k3s.just`](../../just/k3s.just)), never the current context. A part renders the whole machine and keeps the objects labelled `app.kubernetes.io/instance=<part>`.
 
 ```sh
 just k8s-build                                    # render every machine, no cluster needed
@@ -91,7 +92,7 @@ just k8s-apply eventhub-connect-bad eventhub-dev
 
 Order on a fresh machine: `registry`, `observability`, then `eventhub-dev`, `eventhub-test`, `eventhub-prod`. Promote a change through the stages in that order. Roll NATS changes one machine at a time and wait for `kubectl -n <namespace> rollout status statefulset/nats` before the next, so two of three stay in quorum.
 
-The NATS pod has `nodeSelector: topology.kubernetes.io/zone: <zone>`. The NixOS host config sets that label. A bundle applied to the wrong machine stays Pending instead of joining with the wrong identity.
+NATS and connect have `nodeSelector: topology.kubernetes.io/zone: <zone>`. The NixOS host config sets that label. A bundle applied to the wrong machine stays Pending instead of joining with the wrong identity.
 
 ### Secrets
 
@@ -118,9 +119,9 @@ Run `openssl rand` once per stage and reuse its output on all three machines. A 
 ## Services
 
 - **NATS**: one StatefulSet replica per stage per machine, 10Gi PVC on k3s `local-path`. MQTT streams use 3 replicas. `eventhub-connect` creates `INBOX` and `PLUGINS` without `num_replicas`, so those two streams stay at 1 replica until the code sets it. Three stages share one disk; JetStream is capped at 8G per server.
-- **eventhub-connect**: one replica, `Recreate` because of the host port. The image is a placeholder (`environments/<stage>` `images:`); the repo `Dockerfile` starts ingest, so connect needs its own image with the built UI. Probes only check the TCP port, because the HTTP server is up before NATS and the feed are ready. `UI_ALLOW_CIDR` is not set yet, so the UI accepts every peer that reaches the host port.
+- **eventhub-connect**: one replica, `Recreate` because of the host port. The image is a placeholder (`images:` in `environments/<stage>`); the repo `Dockerfile` starts ingest, so connect needs its own image with the built UI. Probes only check the TCP port, because the HTTP server is up before NATS and the feed are ready. `UI_ALLOW_CIDR` is not set yet, so the UI accepts every peer that reaches the host port.
 - **registry**: zot with htpasswd auth and a 50Gi PVC. Only a ClusterIP Service so far. Exposure (ingress and TLS) and the k3s `registries.yaml` mirror config (NixOS) are still open. The registry image itself is pulled from ghcr.io, so the registry never depends on itself.
-- **Vector**: DaemonSet that reads pod logs from `/var/log` and ships them to the local VictoriaLogs with `machine`, `zone`, and `k8s_*` fields. `zone` is the node label `topology.kubernetes.io/zone`. Filter by `k8s_namespace` to pick a stage. Checkpoints and a 256 MiB disk buffer live in `/var/lib/vector` on the host.
+- **Vector**: DaemonSet that reads pod logs from `/var/log` and ships them to the local VictoriaLogs with `machine`, `zone`, and `k8s_*` fields. `zone` is the node label `topology.kubernetes.io/zone`; `machine` is `eventhub-connect-<zone>`. Filter by `k8s_namespace` to pick a stage. Checkpoints and a 256 MiB disk buffer live in `/var/lib/vector` on the host.
 - **VictoriaLogs**: one replica, 20Gi PVC, 30 days retention. `local-path` does not enforce PVC sizes. `-retention.maxDiskSpaceUsageBytes=16GiB` drops the oldest daily partitions above 16GiB, but always keeps the last two days, so it is a target, not a cap. The hard stop is `-storage.minFreeDiskSpaceBytes=32GiB`: once the host disk has less free space than that, VictoriaLogs stops accepting logs (Vector buffers 256 MiB, then blocks) and the rest stays for JetStream. On a disk smaller than about 60GB logs stop early. Size both from measured volume.
 
 ## Local development

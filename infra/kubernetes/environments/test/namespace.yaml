@@ -1,9 +1,0 @@
-# hostPorts are outside every Pod Security level except privileged.
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: eventhub-test
-  labels:
-    app.kubernetes.io/part-of: eventhub
-    environment: test
-    pod-security.kubernetes.io/enforce: privileged

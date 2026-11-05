@@ -2,8 +2,7 @@
 # The friendly name is the directory under infra/nixos/, the flake attribute, and the
 # argument to `just nix-*`. The server number is the NixOS hostname and the SSH target.
 #
-# Placeholder server numbers are not assigned yet: replace the number once it is known.
 # The directory name stays the friendly name.
 eventhub-connect-mnz s0006663
-eventhub-connect-bad sXXXXXXX
-eventhub-connect-stg sYYYYYYY
+eventhub-connect-bad s0006669
+eventhub-connect-stg s0006670

@@ -69,7 +69,7 @@ spec:
               - 10.42.0.0/16
               - 10.43.0.0/16
 ---
-# Ports are the container ports behind the stage's hostPorts (see host-ports.yaml).
+# Ports are the container ports behind the stage's hostPorts (PORT_* in environments/<stage>).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
