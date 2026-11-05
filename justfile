@@ -4,6 +4,7 @@ import 'just/encryption.just'
 import 'just/integration.just'
 import 'just/mqtt.just'
 import 'just/nats.just'
+import 'just/nixos.just'
 
 # run just in the CLI to see the list of shortcuts
 _default:
