@@ -2,7 +2,7 @@
 title: 'Secrets'
 description: 'Verwaltung von Secrets und Konfigurationsdateien.'
 sidebar:
-  order: 10
+  icon: key-round
 ---
 
 Dieses Repository benötigt verschiedene Secrets und Konfigurationsdateien, die an unterschiedlichen Orten verwaltet werden. Diese Seite dokumentiert, welche Konfigurationen wie und wo verwaltet werden.

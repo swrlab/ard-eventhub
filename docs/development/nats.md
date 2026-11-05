@@ -2,7 +2,7 @@
 title: 'NATS lokal'
 description: 'Lokaler NATS-Broker mit JetStream und MQTT-Gateway für Eventhub Connect.'
 sidebar:
-  order: 12
+  icon: waypoints
 ---
 
 ## Role

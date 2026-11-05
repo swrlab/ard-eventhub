@@ -1,21 +1,21 @@
 ---
-title: 'Namenskonventionen'
-description: 'Konsistente Namen für Pub/Sub und Services.'
+title: 'Naming Conventions'
+description: 'Consistent names for Pub/Sub and services.'
 sidebar:
-  order: 9
+  icon: user-round-pen
 ---
 
-Verschiedene Teile dieses Dienstes erfordern durchgehende (konsistente) Namenskonventionen.
+Several parts of this service need consistent naming conventions.
 
 ## Google Cloud Pub/Sub
 
-Pub/Sub besitzt Einschränkungen für Namen, Keys und Werte. Für alle Felder (Module, Stage, serviceId etc.) gelten unter anderem folgende Regeln:
+Pub/Sub has limits on names, keys, and values. For all fields (module, stage, serviceId, and so on) the following rules apply among others:
 
-- Keys außer `stage` dürfen keine Werte einer Staging-Umgebung enthalten (z.B. darf `service` nicht `prod` enthalten)
-- Alle Werte werden klein geschrieben und enthalten keine Sonderzeichen wie `äöü`.
-  - Dieser Dienst nutzt einen Slug-Converter, um Institutionennamen in verwendbare und lesbare Strings zu verwandeln
-- Google-Einschränkungen für IDs:
-  - Muss 3–255 Zeichen lang sein, mit einem Buchstaben beginnen und darf nur die folgenden Zeichen enthalten: Buchstaben, Zahlen, Bindestriche (-), Punkte (.), Unterstriche (_), Tilden (~), Prozentzeichen (%) oder Pluszeichen (+). Darf nicht mit `goog` beginnen.
+- Keys other than `stage` must not contain a staging-environment value (for example, `service` must not contain `prod`)
+- All values are lowercase and contain no special characters such as `äöü`.
+  - This service uses a slug converter to turn institution names into usable, readable strings
+- Google limits on IDs:
+  - Must be 3–255 characters long, start with a letter, and may only contain letters, numbers, hyphens (-), periods (.), underscores (_), tildes (~), percent signs (%), or plus signs (+). Must not start with `goog`.
 
 ## Pub/Sub Topics
 

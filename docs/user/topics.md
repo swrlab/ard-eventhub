@@ -2,7 +2,7 @@
 title: 'MQTT Topics'
 description: 'MQTT-Topic-Baum, Publish- und Subscribe-Ziele, Wildcard-Filter und die Übersetzung nach NATS.'
 sidebar:
-  order: 4
+  order: 3
   icon: list-tree
 ---
 

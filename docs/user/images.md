@@ -2,7 +2,7 @@
 title: 'Bilder'
 description: 'Infos zu Covern und Bildern.'
 sidebar:
-  order: 10
+  order: 11
   icon: image-up
 ---
 

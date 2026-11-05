@@ -2,7 +2,7 @@
 title: 'Certificates'
 description: 'Generate the connect CSR and install it as nats-tls on each k3s zone.'
 sidebar:
-  order: 13
+  icon: certificate
 ---
 
 One certificate per environment covers all three zones. MQTT `:8883` and the NATS WebSocket `:9222` present it. Cluster routes on `:6222` are plaintext, so the short names `connect-bad`, `connect-stg`, and `connect-mnz` are not on the certificate.
