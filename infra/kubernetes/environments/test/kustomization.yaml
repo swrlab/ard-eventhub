@@ -1,0 +1,27 @@
+# Eventhub test on every machine, in namespace eventhub-test.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: eventhub-test
+
+components:
+  - ../shared
+
+configMapGenerator:
+  - name: eventhub-stage
+    literals:
+      - STAGE=test
+      - PORT_CLUSTER=16222
+      - PORT_MQTT=18883
+      - PORT_WS=19222
+      - PORT_UI=14173
+
+# Pin once the connect image is built and pushed to the registry.
+images:
+  - name: eventhub-connect
+    newName: eventhub-connect
+    newTag: test
+
+labels:
+  - pairs:
+      app.kubernetes.io/instance: eventhub-test

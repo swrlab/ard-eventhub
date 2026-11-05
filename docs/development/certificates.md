@@ -1,13 +1,13 @@
 ---
 title: 'Certificates'
-description: 'Generate the connect CSR and install it as nats-tls on each k3s zone.'
+description: 'Generate the connect CSR and install it as nats-tls on each k3s machine.'
 sidebar:
   icon: certificate
 ---
 
-One certificate per environment covers all three zones. MQTT `:8883` and the NATS WebSocket `:9222` present it. Cluster routes on `:6222` are plaintext, so the short names `connect-bad`, `connect-stg`, and `connect-mnz` are not on the certificate.
+One certificate per stage covers all three machines. Dev, test, and prod run side by side on each machine: MQTT (`:28883` dev, `:18883` test, `:8883` prod) and the NATS WebSocket (`:29222` dev, `:19222` test, `:9222` prod) present that stage's certificate. Connect dials those ports by the `eventhub-connect-<zone>-<env>.swr.cn.ard.de` names, so they must stay on the certificate. Cluster routes (`:26222` dev, `:16222` test, `:6222` prod) are plaintext and authenticate with the stage route password (Secret `nats-route`, see [`infra/kubernetes/README.md`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/README.md)).
 
-The lab overlay `overlays/dev` (`just nats-k8s-dev`) serves MQTT in plaintext and does not mount a TLS secret. Test and prod do: one k3s cluster per zone, secret `nats-tls`.
+Each machine is one k3s cluster. Every stage needs the secret `nats-tls` in its own namespace (`eventhub-dev`, `eventhub-test`, `eventhub-prod`).
 
 ## Generate
 
@@ -66,30 +66,29 @@ openssl pkey -in .local/certs/dev/eventhub-connect-dev.key -pubout | openssl sha
 openssl x509 -in tls.crt -noout -ext subjectAltName
 ```
 
-Each zone is its own cluster. The same `tls.crt` and the same key go on all three. The secret name is `nats-tls`. The pod mounts it at `/etc/nats/tls`, and `nats.conf` reads `tls.crt` and `tls.key` from there.
+Each machine is its own cluster. The same `tls.crt` and the same key go on all three. The secret name is `nats-tls`. The pod mounts it at `/etc/nats/tls`, and `nats.conf` reads `tls.crt` and `tls.key` from there.
 
-The commands below are test. Prod uses namespace `eventhub-prod`, `overlays/prod/<zone>`, and `.local/certs/prod/eventhub-connect-prod.key`. A CN dev cluster uses namespace `eventhub-dev` and `.local/certs/dev/eventhub-connect-dev.key` the same way. The lab overlay `overlays/dev` is a different cluster and does not take this secret.
+The commands below are test on Baden-Baden. Dev and prod work the same way with their own namespace and bundle part (`eventhub-dev`, `eventhub-prod`) and key (`.local/certs/dev/eventhub-connect-dev.key`, `.local/certs/prod/eventhub-connect-prod.key`).
 
-Create the secret before the pod is expected to become Ready. A missing mount stays in `CreateContainerConfigError`. The server image has no shell.
-
-Point kubectl at the Baden-Baden cluster, then:
+Apply the bundle part first so the namespace exists, then create the secret. Until it exists, the pod stays in `CreateContainerConfigError`; the server image has no shell. It starts on its own once the secret is there.
 
 ```sh
-kubectl -n eventhub-test create secret tls nats-tls \
+just k8s-apply eventhub-connect-bad eventhub-test
+
+kubectl --kubeconfig keys/eventhub-connect-bad-k3s-cert.yaml \
+  -n eventhub-test create secret tls nats-tls \
   --cert=tls.crt \
   --key=.local/certs/test/eventhub-connect-test.key
 
-kubectl apply -k infra/kubernetes/overlays/test/bad
-kubectl -n eventhub-test rollout status statefulset/nats
+kubectl --kubeconfig keys/eventhub-connect-bad-k3s-cert.yaml \
+  -n eventhub-test rollout status statefulset/nats
 ```
 
-Repeat with kubectl aimed at Stuttgart (`overlays/test/stg`), then Mainz (`overlays/test/mnz`). Same files, same secret name. One zone at a time, so the other two keep quorum.
-
-Prod is the same sequence under `overlays/prod/<zone>` in namespace `eventhub-prod`, with `.local/certs/prod/eventhub-connect-prod.key`.
+Repeat on `eventhub-connect-stg`, then `eventhub-connect-mnz`. Same files, same secret name. One machine at a time, so the other two keep quorum.
 
 ## Replace a certificate
 
-NATS reads the files at process start. Update the secret, then restart that zone's pod. Do one zone, wait until it is Ready, then the next.
+NATS reads the files at process start. Update the secret, then restart that machine's pod. Do one machine, wait until it is Ready, then the next.
 
 ```sh
 kubectl -n eventhub-test create secret tls nats-tls \

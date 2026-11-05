@@ -1,0 +1,24 @@
+# Everything on eventhub-connect-bad. The zone is the only machine value. It names the NATS servers
+# (dev-bad, test-bad, prod-bad) and the public hostnames, and pins NATS and connect to the node
+# labelled with it, so this bundle applied to another machine stays Pending.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../services/registry
+  - ../../services/observability
+  - ../../environments/dev
+  - ../../environments/test
+  - ../../environments/prod
+
+patches:
+  - target:
+      kind: StatefulSet|Deployment
+      labelSelector: app.kubernetes.io/part-of=eventhub
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/nodeSelector/topology.kubernetes.io~1zone
+        value: bad
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0
+        value: { name: ZONE, value: bad }

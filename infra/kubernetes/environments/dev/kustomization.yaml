@@ -1,0 +1,27 @@
+# Eventhub dev on every machine, in namespace eventhub-dev.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: eventhub-dev
+
+components:
+  - ../shared
+
+configMapGenerator:
+  - name: eventhub-stage
+    literals:
+      - STAGE=dev
+      - PORT_CLUSTER=26222
+      - PORT_MQTT=28883
+      - PORT_WS=29222
+      - PORT_UI=24173
+
+# Pin once the connect image is built and pushed to the registry.
+images:
+  - name: eventhub-connect
+    newName: eventhub-connect
+    newTag: dev
+
+labels:
+  - pairs:
+      app.kubernetes.io/instance: eventhub-dev

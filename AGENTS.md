@@ -38,8 +38,9 @@ Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `o
 - `src/utils/` – Shared utilities (Pub/Sub, MQTT inbox hop, NATS client, Datastore, Firebase, plugins)
 - `cli/` – Command-line utilities
 - `config/` – Application configuration (ARD prefixes, allow-lists)
-- `infra/` – Local NATS config and NATS kustomize manifests (`infra/kubernetes`)
-- `just/` – Split just recipes (`docs.just`, `encryption.just`, `integration.just`, `mqtt.just`, `nats.just`)
+- `infra/` – Local NATS config (`infra/nats`) and Kustomize manifests for the k3s machines (`infra/kubernetes`: `services/` one directory per workload, `environments/` dev, test, and prod stages, one namespace each, `clusters/<host>` one file per machine that sets its zone). Render with `just k8s-build`, deploy with `just k8s-diff|k8s-apply <host> [part]`
+- `infra/nixos/` – NixOS flake for the Eventhub Connect hosts: `common/base.nix` plus one overlay directory per host. Sync with `just nix-upload|nix-apply|nix-download <host>` (see `infra/nixos/README.md`)
+- `just/` – Split just recipes (`certificate.just`, `docs.just`, `encryption.just`, `integration.just`, `k3s.just`, `kubernetes.just`, `mqtt.just`, `nats.just`, `nixos.just`)
 - `integration/` – Hurl HTTP suite (`ingest-api.hurl`) mirroring `src/ingest/server.test.ts` (run with `just integration`)
 - `docs/` – Documentation (Markdown, built with Blume)
 - `blume.config.ts` – Docs site configuration

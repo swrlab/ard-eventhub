@@ -1,0 +1,15 @@
+# Vector and VictoriaLogs, one set per machine, shared by every stage. Nothing here is machine
+# specific: Vector reads the zone from the node label.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: observability
+
+resources:
+  - namespace.yaml
+  - victoria-logs
+  - vector
+
+labels:
+  - pairs:
+      app.kubernetes.io/instance: observability

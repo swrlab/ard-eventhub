@@ -1,0 +1,30 @@
+# https://zotregistry.dev/v2.1.22/admin-guide/admin-configuration/
+distSpecVersion: '1.1.1'
+storage:
+  rootDirectory: /var/lib/registry
+  gc: true
+  gcDelay: 1h
+  gcInterval: 24h
+  dedupe: true
+  commit: true
+http:
+  address: 0.0.0.0
+  port: '5000'
+  realm: eventhub registry
+  readTimeout: 0
+  writeTimeout: 0
+  # Accept Docker manifest v2 schema 2 so images pushed by stock Docker keep their digests.
+  compat:
+    - docker2s2
+  auth:
+    htpasswd:
+      path: /etc/zot/htpasswd
+    failDelay: 5
+log:
+  level: info
+  output: /dev/stderr
+extensions:
+  ui:
+    enable: true
+  search:
+    enable: true

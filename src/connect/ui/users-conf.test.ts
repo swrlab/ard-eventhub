@@ -4,7 +4,7 @@ import { test } from '@cross/test'
 import { assert, assertEquals } from '@std/assert'
 import { buildUserRows, parseUsersConf } from './users-conf.ts'
 
-const USERS_FILE = join(import.meta.dir, '../../../infra/kubernetes/components/users/nats-users.conf')
+const USERS_FILE = join(import.meta.dir, '../../../infra/kubernetes/services/nats/users/nats-users.conf')
 
 test('users file yields names, issue dates, and institutions, never the bcrypt hash', () => {
 	const users = parseUsersConf(readFileSync(USERS_FILE, 'utf8'))

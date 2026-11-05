@@ -2,8 +2,11 @@ import 'just/certificate.just'
 import 'just/docs.just'
 import 'just/encryption.just'
 import 'just/integration.just'
+import 'just/k3s.just'
+import 'just/kubernetes.just'
 import 'just/mqtt.just'
 import 'just/nats.just'
+import 'just/nixos.just'
 
 # run just in the CLI to see the list of shortcuts
 _default:
