@@ -1,23 +1,23 @@
 # NixOS host config sync over SSH — local commands, run from the repo.
-# Central tree: ./nixos/ (common/, one directory per host, flake.nix, justfile, README.md).
-# Recipes take the friendly name (eventhub-connect-mnz). nixos/hosts maps that name
+# Central tree: ./infra/nixos/ (common/, one directory per host, flake.nix, justfile, README.md).
+# Recipes take the friendly name (eventhub-connect-mnz). infra/nixos/hosts maps that name
 # to the server number, which is the SSH target and the NixOS hostname.
-# The justfile inside ./nixos/ holds the commands that run ON a host
+# The justfile inside ./infra/nixos/ holds the commands that run ON a host
 # (rebuild, rollback, upgrade, clean); it is uploaded with the tree.
 
-# friendly names from nixos/hosts, one per line
+# friendly names from infra/nixos/hosts, one per line
 _nix-hosts:
 	#!/usr/bin/env bash
 	set -euo pipefail
-	awk '!/^[[:space:]]*#/ && NF { print $1 }' nixos/hosts
+	awk '!/^[[:space:]]*#/ && NF { print $1 }' infra/nixos/hosts
 
 # server number mapped from a friendly name
 _nix-server host:
 	#!/usr/bin/env bash
 	set -euo pipefail
-	server=$(awk -v name="{{ host }}" '$1 == name { print $2; exit }' nixos/hosts)
+	server=$(awk -v name="{{ host }}" '$1 == name { print $2; exit }' infra/nixos/hosts)
 	if [[ -z "$server" ]]; then
-		echo "no server number for {{ host }} in nixos/hosts" >&2
+		echo "no server number for {{ host }} in infra/nixos/hosts" >&2
 		exit 1
 	fi
 	printf '%s\n' "$server"
@@ -29,13 +29,13 @@ ssh host:
 	set -euo pipefail
 	exec ssh "root@$(just --quiet _nix-server {{ host }})"
 
-# upload via ssh — the full ./nixos/ folder (common, flake, all hosts, justfile)
+# upload via ssh — the full ./infra/nixos/ folder (common, flake, all hosts, justfile)
 [group('NIX')]
 nix-upload host:
 	#!/usr/bin/env bash
 	set -euo pipefail
 	server=$(just --quiet _nix-server {{ host }})
-	scp -r ./nixos/ "root@${server}:/etc/"
+	scp -r ./infra/nixos/ "root@${server}:/etc/"
 alias nixu := nix-upload
 
 # download via ssh — the host's own subtree plus the flake lock
@@ -44,10 +44,10 @@ nix-download host:
 	#!/usr/bin/env bash
 	set -euo pipefail
 	server=$(just --quiet _nix-server {{ host }})
-	rm -rf "./nixos/{{ host }}/"
-	mkdir -p ./nixos/
-	scp -r "root@${server}:/etc/nixos/{{ host }}/" ./nixos/
-	scp "root@${server}:/etc/nixos/flake.lock" ./nixos/flake.lock || true
+	rm -rf "./infra/nixos/{{ host }}/"
+	mkdir -p ./infra/nixos/
+	scp -r "root@${server}:/etc/nixos/{{ host }}/" ./infra/nixos/
+	scp "root@${server}:/etc/nixos/flake.lock" ./infra/nixos/flake.lock || true
 alias nixd := nix-download
 
 # download all nix configs via ssh
@@ -63,7 +63,7 @@ alias nixda := nix-download-all
 # evaluate the flake locally (no build, nothing applied)
 [group('NIX')]
 nix-check:
-	nix flake check --impure ./nixos
+	nix flake check --impure ./infra/nixos
 
 # apply the local Nix config to one host: upload, rebuild, sync the flake lock back
 [group('NIX')]
@@ -73,7 +73,7 @@ nix-apply host:
 	server=$(just --quiet _nix-server {{ host }})
 	just nix-upload {{ host }}
 	ssh "root@${server}" "cd /etc/nixos && just --yes flake {{ host }}"
-	scp "root@${server}:/etc/nixos/flake.lock" ./nixos/flake.lock || true
+	scp "root@${server}:/etc/nixos/flake.lock" ./infra/nixos/flake.lock || true
 alias nixp := nix-apply
 
 # apply local Nix config to all hosts

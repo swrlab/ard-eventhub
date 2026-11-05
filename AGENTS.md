@@ -39,7 +39,7 @@ Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `o
 - `cli/` – Command-line utilities
 - `config/` – Application configuration (ARD prefixes, allow-lists)
 - `infra/` – Local NATS config and NATS kustomize manifests (`infra/kubernetes`)
-- `nixos/` – NixOS flake for the Eventhub Connect hosts: `common/base.nix` plus one overlay directory per host. Sync with `just nix-upload|nix-apply|nix-download <host>` (see `nixos/README.md`)
+- `infra/nixos/` – NixOS flake for the Eventhub Connect hosts: `common/base.nix` plus one overlay directory per host. Sync with `just nix-upload|nix-apply|nix-download <host>` (see `infra/nixos/README.md`)
 - `just/` – Split just recipes (`docs.just`, `encryption.just`, `integration.just`, `mqtt.just`, `nats.just`, `nixos.just`)
 - `integration/` – Hurl HTTP suite (`ingest-api.hurl`) mirroring `src/ingest/server.test.ts` (run with `just integration`)
 - `docs/` – Documentation (Markdown, built with Blume)

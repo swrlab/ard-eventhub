@@ -28,7 +28,7 @@ Local commands live in `just/nixos.just`; host-side commands live in the [`justf
 # from the repo
 just nix-upload eventhub-connect-mnz     # scp the full tree to /etc/nixos/ on s0006663
 just nix-apply eventhub-connect-mnz      # upload + rebuild + pull flake.lock back
-just nix-all                             # nix-apply for every host in nixos/hosts
+just nix-all                             # nix-apply for every host in infra/nixos/hosts
 just nix-download eventhub-connect-mnz   # pull the host's subtree + flake.lock
 just nix-check                           # evaluate the flake locally
 
