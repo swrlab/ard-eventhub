@@ -44,6 +44,10 @@ Replace `<host>` with a friendly name from `infra/nixos/hosts`.
 
 The flake also works standalone on the host: `nixos-rebuild switch --flake "/etc/nixos#<host>"`.
 
+## Time synchronization
+
+All hosts use chrony with the three internal SWR NTP servers configured in `common/base.nix`. Each server uses `iburst` for rapid initial synchronization. The NixOS chrony module disables systemd-timesyncd automatically. After applying the configuration, run `just ntp` from `/etc/nixos` on the host to inspect synchronization and source status.
+
 ## Local k3s access
 
 The recipes in `just/k3s.just` use the same friendly host names and SSH mapping as `just nix-*`:

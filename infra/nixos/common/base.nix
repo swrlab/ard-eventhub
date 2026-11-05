@@ -19,6 +19,16 @@
   time.timeZone = lib.mkDefault "Europe/Berlin";
   i18n.defaultLocale = "en_US.UTF-8";
 
+  services.chrony = {
+    enable = true;
+    serverOption = "iburst";
+    servers = [
+      "s0.ntp.swr.de"
+      "b0.ntp.swr.de"
+      "m1.ntp.swr.de"
+    ];
+  };
+
   # one key per line; hosts can still append via authorizedKeys.keys
   users.users.root.openssh.authorizedKeys.keyFiles = [ ./authorized_keys ];
 

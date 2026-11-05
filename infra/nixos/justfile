@@ -54,7 +54,8 @@ check:
 [group('NIXOS')]
 ntp:
 	timedatectl status
-	timedatectl timesync-status
+	chronyc tracking
+	chronyc sources -v
 
 # ── k3s unit (confirm-gated where mutating) ──────────────────────────
 
