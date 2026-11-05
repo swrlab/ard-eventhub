@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::warning[Firewall]
-BEFORE starting this install tutorial the server needs to have configured firewall entries to reach the internet (downloading NixOS assets; rules from FQDN `s....swr.ard` to HTTPS 443).
+BEFORE starting this install tutorial the server needs to have configured firewall entries to reach the internet (downloading NixOS assets).
 :::
 
 This guide is basically the same as the official [NixOS Install docs](https://nixos.org/manual/nixos/stable/#ch-installation) with small adjustments or notes.
@@ -21,6 +21,19 @@ To register a new server, place a request with these details:
 - 24x7 high reliability/ monitoring
 - placement: one of the internal DC zones in the internal network (not DMZ!)
 - backup: yes, daily
+
+## Workflow
+
+Since we cannot register everything at once, the workflow for server setup is currently roughly as follows:
+
+- Server registration (one at a time)
+  - this provides you with a server number
+- Firewall for outbound HTTPS
+  - rules from FQDN `s....swr.ard` to HTTPS 443
+- NixOS install
+  - afterwards this server no longer announces itself as `nixos`
+- repeat server registration steps
+- Firewall for NATS with all servers
 
 ## Step-by-step
 
