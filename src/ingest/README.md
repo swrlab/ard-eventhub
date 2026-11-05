@@ -13,6 +13,9 @@ Several environment variables need to be set in `.env` config in order to run th
 - REQUIRED `GOOGLE_APPLICATION_CREDENTIALS` - where the Google Cloud Service Account Key can be found (usually a path to a .json file)
 - REQUIRED `PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL` - for verification of internal publisher service account
 - REQUIRED `STAGE` - can be one of the Stages below to switch several settings
+- OPTIONAL `MQTT_BROKER_URL` - CN MQTT gateway. Credentials go in the URL (`mqtt://user:password@host:1883`). The plaintext is only in sops. Unset skips the inbox dual-write so ingest stays on Pub/Sub. A failed publish never fails the HTTP response.
+- OPTIONAL `MQTT_TLS_CA` - PEM of the gateway CA, or a path to that PEM. Needed for `mqtts://` against a private CA. Omit for local `mqtt://`.
+- OPTIONAL `INGEST_PUBLISH_PLUGINS` - must be the exact string `true` to publish DTS / Radioplayer jobs to the internal Pub/Sub topic. Unset or any other value (`1`, `TRUE`, `false`) leaves dispatch off. Independent of per-event `plugins[].isDeactivated`. Restart the process after changing it. The flag is logged on boot and on every processed event as `ingestPublishPlugins`.
 - OPTIONAL `PORT` - override server port setting, default is 8080
 - OPTIONAL `DEBUG` - set true to enable more detailed logging
 
@@ -58,3 +61,15 @@ bun run ingest
 The deployment process of Eventhub-Ingest is different for `Non-Prod` and `Prod`-Stages.
 
 GitHub Actions builds and pushes the Docker image to the Eventhub Artifact Registry and to ard-common (`voice-feeds-playout-search/ard-eventhub/ingest`). Deploying to Kubernetes environments is handled separately outside of GitHub Actions.
+
+## Local MQTT publish
+
+Ingest dual-writes each accepted event to `inbox/{institutionId}` on the CN MQTT gateway as `svc-ingest` when `MQTT_BROKER_URL` is set. Unset, the publish stays off and Pub/Sub stays the path of record. A failed publish is logged and does not fail the HTTP response. `just test` still injects the URL from sops. Point it at local NATS (`just nats-up`). Anonymous connects are rejected.
+
+```sh
+just nats-up
+just nats-sub --all
+just ingest
+```
+
+Against a private mqtts:// gateway, set `MQTT_TLS_CA` to the CA PEM or its file path so mqtt.js can verify the broker.

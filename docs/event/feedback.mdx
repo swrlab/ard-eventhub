@@ -1,0 +1,64 @@
+---
+title: 'feedback'
+description: 'Letzte Ablehnung einer Anstalt, retained auf feedback/{institutionId}.'
+sidebar:
+  order: 5
+---
+
+`feedback/{institutionId}` ist die Diagnose, kein ACK. Ein angenommenes Event schreibt dort nichts. Die Eventhub Validierung legt die letzte Ablehnung retained ab, mit QoS 1. Publisher lesen das Topic; sie schreiben es nicht. Pro Institution liegt genau eine Nachricht: direkt nach dem Connect kommt die letzte Ablehnung, auch wenn sie Stunden alt ist.
+
+`created` ist der Zeitpunkt der Ablehnung, ISO8601. `institutionId` ist die Institutions-URN der Inbox. `subject` ist das NATS-Subject, auf dem das Event ankam (`inbox.{institutionId}`). `errors` hat dieselbe Form wie `errors` in der HTTPS-400: `path`, `message` und `errorCode`, ein Eintrag pro Problem.
+
+`playlistItemId` und `start` stehen nur im Body, wenn das abgelehnte Event sie mitgeschickt hat. Track-Ablehnungen ordnet man über `playlistItemId` zu, Control und Data über `start` plus `subject`. `deprecated` nennt `services[]`-Felder, die noch mitgeschickt und ignoriert wurden (`services.externalId`, `services.type`). Fehlt ein optionales Feld im Event, fehlt es auch hier.
+
+`event` ist das abgelehnte Event, so wie es ankam: ein JSON-Wert, sonst Text. Über 64 KiB steht dort `{ "truncated": true, "bytes": …, "head": "…" }`.
+
+```json
+{
+	"created": "2026-10-08T10:00:01.000Z",
+	"institutionId": "urn:ard:institution:a3004ff924ece1a2",
+	"subject": "inbox.urn:ard:institution:a3004ff924ece1a2",
+	"errors": [
+		{
+			"path": ".body.services.0.id",
+			"message": "should have required property 'id'",
+			"errorCode": "required.openapi.validation"
+		},
+		{
+			"path": ".body.services.0.publisherId",
+			"message": "should match format \"regex\"",
+			"errorCode": "format.openapi.validation"
+		},
+		{
+			"path": ".body.services.0.institutionId",
+			"message": "should have required property 'institutionId'",
+			"errorCode": "required.openapi.validation"
+		}
+	],
+	"playlistItemId": "swr3-demo-1",
+	"start": "2026-10-08T12:00:00+02:00",
+	"deprecated": ["services.externalId", "services.type"],
+	"event": {
+		"event": "de.ard.eventhub.v1.radio.track.playing",
+		"type": "music",
+		"start": "2026-10-08T12:00:00+02:00",
+		"length": 180,
+		"title": "Song name",
+		"playlistItemId": "swr3-demo-1",
+		"services": [{ "type": "PermanentLivestream", "externalId": "crid://swr.de/282310", "publisherId": "282310" }],
+		"creator": "example@swr.de"
+	}
+}
+```
+
+Schema-Fehler tragen `*.openapi.validation`. Passt ein Service nicht zur Inbox oder zum ARD-Feed, steht der Fehler am betroffenen Feld:
+
+- `.body.services.N.id`, `User unauthorized for service` (`unauthorized.eventhub.validation`): der Livestream gehört laut Feed nicht der Anstalt dieser Inbox.
+- `.body.services.N.id`, `Livestream not found > …` (`notFound.eventhub.validation`): der Livestream steht nicht im Feed.
+- `.body.services.N.institutionId`, `should match the inbox institution` (`unauthorized.eventhub.validation`): `institutionId` nennt eine andere Anstalt als die Inbox.
+- `.body.services.N.publisherId`, `should match the publisher of the livestream` (`unauthorized.eventhub.validation`): der Feed führt einen anderen Publisher für den Livestream.
+- `.body.start`, `should not be expired event` (`required.openapi.validation`): nur für `track.playing` und `track.next` — `start` liegt mehr als 15 Minuten zurück, siehe [_radio.track.playing_](./radio.track.playing#nachträglich-überschreiben).
+
+Ist der Body kein UTF-8 oder kein JSON, steht ein einzelner Fehler auf `.body` (`type.openapi.validation`, `should be UTF-8` oder `should be JSON`). `event` ist dann der Text, soweit er lesbar ist.
+
+Die Spezifikation steht im [Eventhub v3 Connect RFC](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#125-validation-feedback). Wohin publiziert wird, steht unter [_Topics_](../user/topics), die Verbindung unter [_Eventhub Connect_](../user/connect-mqtt). Der Kanal steht in der [Events-Referenz](/events/subscribe/receive-feedback).

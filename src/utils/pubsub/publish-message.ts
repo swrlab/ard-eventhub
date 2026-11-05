@@ -1,4 +1,4 @@
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { version } from '#config'
 import { stage } from '#env'
 import { pubSubClient } from './_client.ts'

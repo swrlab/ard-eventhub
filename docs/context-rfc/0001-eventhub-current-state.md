@@ -146,11 +146,12 @@ data to car dashboards is worse than dropping it.
 
 **Service resolution** (`src/utils/events/process-services.ts`). For each entry in `services[]`:
 
-1. The topic URN is derived, not supplied: `coreIdPrefixes[type] + createHashedId(externalId)`.
+1. The topic URN is `services[].id` when that is already a livestream URN. Otherwise it is derived: `coreIdPrefixes[type] + createHashedId(externalId)`. The same value is written to `services[].id`.
 2. `publisherId` is normalized to `urn:ard:publisher:{hash}` if a legacy numeric ID was sent.
-3. Nightly nationwide broadcasts are checked against `src/config/allowed-livestreams.json`.
-4. The publisher is looked up in the cached ARD feed; unknown publishers are blocked.
-5. The publisher's institution must equal the authenticated user's institution.
+3. The publisher is looked up in the cached ARD feed. `institutionId` is filled from that publisher, or from the authenticated user's institution when the publisher is unknown.
+4. Nightly nationwide broadcasts are checked against `src/config/allowed-livestreams.json`.
+5. Unknown publishers are blocked.
+6. The publisher's institution must equal the authenticated user's institution.
 
 Failures here set `service.blocked` to a reason string. Blocked services stay in the array — the
 publisher gets a per-service verdict rather than a single opaque rejection, which matters when one
@@ -261,7 +262,7 @@ cannot explain.
 ### 10.2 The ARD feed is never refreshed
 
 `getARDFeed()` is called once at startup and cached in a module-level variable
-(`src/utils/ard-feed.ts:66`). There is no timer and no invalidation. A new livestream or a changed
+(`src/utils/feed/ard-feed.ts`). There is no timer and no invalidation. A new livestream or a changed
 publisher/institution mapping in ARD Core only takes effect after a pod restart.
 
 ### 10.3 Plugin delivery is invisible to publishers
@@ -320,7 +321,8 @@ decrypts `.env.ci.sops.yaml` with an age key from a GitHub secret, and Kubernete
 **API contract.** `openapi.json` is generated from the Zod schemas by `just openapi`
 (`z.toJSONSchema` with `target: 'openapi-3.0'`). The schemas are the source of truth; the JSON is a
 build artifact that happens to be committed. It must be regenerated after any schema change and
-after any `package.json` version bump, since `info.version` is read from there. The service no
+after any `package.json` version bump, since `info.version` is read from there. Every operation in
+that spec is marked `deprecated: true`; Eventhub Connect replaces the HTTPS ingest. The service no
 longer serves Swagger UI — `/openapi` redirects to the docs site.
 
 **Testing.** Unit tests use `@cross/test` + `@std/assert` + sinon so the same files run on Bun,

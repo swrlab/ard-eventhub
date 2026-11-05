@@ -2,12 +2,12 @@ import type { Context } from 'hono'
 import type { ArdLivestream, AuthUser } from '#types'
 import type { EventhubSubscriptionDatastore, SubscriptionPost } from '../../schemas/subscriptions.ts'
 import { DateTime } from '@frytg/dates'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { ulid } from 'ulid'
 import { pubSubPrefix } from '#config'
 import { stage } from '#env'
-import { ardFeed } from '../../utils/ard-feed.ts'
 import { datastoreSave } from '../../utils/datastore/save.ts'
+import { ardFeed } from '../../utils/feed/ard-feed.ts'
 import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 import { pubsubBuildId } from '../../utils/pubsub/build-id.ts'
 import { pubsubCreateSubscription } from '../../utils/pubsub/create-subscription.ts'
@@ -29,6 +29,11 @@ export const subscriptionsPost = async (c: Context) => {
 	try {
 		// fetch user from request
 		const user = c.get('user') as AuthUser | undefined
+		logger.info({
+			message: 'create subscription',
+			source,
+			data: { email: user?.email, params: c.req.param(), body },
+		})
 
 		// check if user is present
 		if (!user?.email) {

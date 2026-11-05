@@ -1,8 +1,9 @@
 ---
 title: 'Stages'
 description: 'Stage-Werte und Deployment-Umgebungen.'
+deprecated: true
 sidebar:
-  order: 11
+  icon: layer-arrow-up
 ---
 
 Der Eventhub unterscheidet zwischen dem über die Umgebungsvariable `STAGE` gesetzten Stage-Wert und verschiedenen Laufzeit-Umgebungen bzw. Deployments (z.B. `beta`, `test`, `prod`).

@@ -1,11 +1,13 @@
 ---
 title: 'ARD Eventhub'
 description: 'Echtzeit-Metadaten für Hörfunksendungen der ARD verteilen.'
+sidebar:
+  icon: house
 ---
 
 ARD Eventhub verteilt Echtzeit-Metadaten (Live) vor allem für Hörfunksendungen.
 
-Für die Umstellung auf **Version 3.0** siehe die _Migration auf Eventhub v3_ Docs.
+Neue Anbindungen laufen über [_Eventhub Connect_](./user/connect-mqtt) (MQTT). Die HTTPS-API ist deprecated und bleibt bis zum letzten Umzug erreichbar. Breaking Changes stehen unter [_Migration auf Eventhub v3_](./user/migration-v3).
 
 ## Aktive Datenlieferanten
 

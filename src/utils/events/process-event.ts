@@ -6,16 +6,32 @@ import type {
 	EventPluginResult,
 	EventProcessResult,
 } from '../../schemas/events.ts'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { ulid } from 'ulid'
 import { pubSubTopicSelf } from '#config'
+import { isIngestPublishPluginsEnabled } from '#env'
+import { parseConnectInboxEvent } from '../../schemas/events.ts'
+import { mqttInbox } from '../mqtt/publish-inbox.ts'
 import { pubsubBuildId } from '../pubsub/build-id.ts'
 import { publishPubSubMessage } from '../pubsub/publish-message.ts'
 import { createNewTopic } from './create-new-topic.ts'
-import { buildEventMessage, ensureDefaultPlugins, parseEventStart, summarizeEventStatuses } from './event-helpers.ts'
+import {
+	buildEventMessage,
+	buildInboxPayload,
+	ensureDefaultPlugins,
+	parseEventStart,
+	summarizeEventStatuses,
+} from './event-helpers.ts'
 import { processServices } from './process-services.ts'
 
 const source = 'utils.events.processEvent'
+
+/**
+ * Stubbable Pub/Sub publish used by processEvent fan-out.
+ */
+export const pubsubFanout = {
+	publishMessage: publishPubSubMessage,
+}
 
 /**
  * Resolve Pub/Sub topic metadata for each service and publish the event.
@@ -36,7 +52,7 @@ export const publishEventToServices = async (
 		// ignoring blocked services
 		if (!service.blocked && service.topic?.name) {
 			// try sending message
-			const messageId = await publishPubSubMessage(service.topic.name, message, attributes)
+			const messageId = await pubsubFanout.publishMessage(service.topic.name, message, attributes)
 
 			// handle errors
 			if (messageId === 'TOPIC_ERROR') {
@@ -92,7 +108,7 @@ export const publishEventToCommonTopic = async (params: {
 		services: nonBlockedServices,
 	}
 
-	commonEvent.messageId = await publishPubSubMessage(topicName, filteredMessage, attributes)
+	commonEvent.messageId = await pubsubFanout.publishMessage(topicName, filteredMessage, attributes)
 
 	if (commonEvent.messageId === 'TOPIC_ERROR' || commonEvent.messageId === 'TOPIC_NOT_FOUND') {
 		logger.warning({
@@ -111,6 +127,8 @@ export const publishEventToCommonTopic = async (params: {
 
 /**
  * Publish active plugin jobs to the internal Pub/Sub topic.
+ * No-op unless `INGEST_PUBLISH_PLUGINS` is the exact string `true`.
+ * Per-event `plugins[].isDeactivated` is still honoured when the flag is on.
  * @param params - Message, user, attributes, and non-blocked services
  * @returns Plugin publish results
  */
@@ -122,6 +140,10 @@ export const publishEventPlugins = async (params: {
 }): Promise<EventPluginResult[]> => {
 	const { message, user, attributes, nonBlockedServices } = params
 	const pluginMessages: EventPluginResult[] = []
+
+	if (!isIngestPublishPluginsEnabled()) {
+		return pluginMessages
+	}
 
 	if (!(message.plugins?.length > 0)) {
 		return pluginMessages
@@ -136,7 +158,7 @@ export const publishEventPlugins = async (params: {
 				institutionId: user.institution.id,
 			}
 
-			const messageId = await publishPubSubMessage(pubSubTopicSelf, pluginMessage, attributes)
+			const messageId = await pubsubFanout.publishMessage(pubSubTopicSelf, pluginMessage, attributes)
 
 			pluginMessages.push({
 				type: plugin.type,
@@ -170,6 +192,25 @@ export const processEvent = async (params: {
 
 	// generate unique Id from the institution id and a random ULID
 	message.id = `${user.institution.id}-${ulid()}`
+
+	const inboxPayload = buildInboxPayload(message, eventName)
+	const parsedInboxPayload = parseConnectInboxEvent(inboxPayload)
+	if (parsedInboxPayload.success) {
+		void mqttInbox.publish(user.institution.id, structuredClone(parsedInboxPayload.data)).catch((error: unknown) => {
+			logger.warning({
+				message: 'mqtt inbox publish failed',
+				source,
+				error,
+				data: { institutionId: user.institution.id },
+			})
+		})
+	} else {
+		logger.warning({
+			message: 'mqtt inbox payload failed connect validation, skipping dual-write',
+			source,
+			data: { institutionId: user.institution.id, eventName, issues: parsedInboxPayload.error.issues },
+		})
+	}
 
 	message.services = await publishEventToServices(message, attributes, user)
 
@@ -208,7 +249,7 @@ export const processEvent = async (params: {
 		level: data.statuses.blocked > 0 ? 'warning' : 'info',
 		message: `event processed > ${eventName} > ${message.services.length}x services > ${message.services[0]?.publisherId}`,
 		source,
-		data: { ...data, body },
+		data: { ...data, body, ingestPublishPlugins: isIngestPublishPluginsEnabled() },
 	})
 
 	return data

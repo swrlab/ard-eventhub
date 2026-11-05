@@ -1,33 +1,27 @@
+import process from 'node:process'
 import { test, type TestContext } from '@cross/test'
 import { assertEquals, assertStrictEquals, assertThrows } from '@std/assert'
-import { createSandbox } from 'sinon'
-import {
-	envLookup,
-	getEnv,
-	getEnvBase64,
-	getEnvBoolean,
-	getEnvString,
-	MissingEnvVarError,
-	parseBase64,
-	toBase64,
-} from './env.ts'
+import { getEnv, getEnvBase64, getEnvBoolean, parseBase64, toBase64 } from './env.ts'
+
+const REQUIRED_MISSING_MESSAGE = 'env MISSING is required'
 
 test('no env values available', async (t) => {
 	await t.step('should throw an error for missing required values', () => {
-		assertThrows(() => getEnv<string>('MISSING', { type: 'string', required: true }), MissingEnvVarError)
+		assertThrows(() => getEnv<string>('MISSING', { type: 'string', required: true }), Error, REQUIRED_MISSING_MESSAGE)
 	})
 	await t.step('should throw an error for missing required values (even with defaultValue)', () => {
-		assertThrows(() => getEnv<string>('MISSING', { type: 'string', required: true, defaultValue: 'hi' }))
+		assertThrows(
+			() => getEnv<string>('MISSING', { type: 'string', required: true, defaultValue: 'hi' }),
+			Error,
+			REQUIRED_MISSING_MESSAGE
+		)
 	})
 	await t.step('should return the defaultValue for optional values', () => {
 		assertStrictEquals(getEnv<string>('MISSING', { type: 'string', required: false, defaultValue: 'def' }), 'def')
 	})
 	await t.step('functions with `required` set to `true` by default', async (requiredTrue: TestContext) => {
-		await requiredTrue.step('should throw an error for getEnvString when the value is missing', () => {
-			assertThrows(() => getEnvString('MISSING'), MissingEnvVarError)
-		})
 		await requiredTrue.step('should throw an error for getEnvBase64 when the value is missing', () => {
-			assertThrows(() => getEnvBase64('MISSING'), MissingEnvVarError)
+			assertThrows(() => getEnvBase64('MISSING'), Error, REQUIRED_MISSING_MESSAGE)
 		})
 	})
 	await t.step('functions with `required` set to `false` by default', async (requiredFalse: TestContext) => {
@@ -49,12 +43,15 @@ test('mocked env values', async (t) => {
 		BROKEN_JSON: '{ "asdf"',
 	}
 
-	const sandbox = createSandbox()
-	sandbox.stub(envLookup, 'get').callsFake((key: string) => mocked[key])
+	const previous = new Map<string, string | undefined>()
+	for (const key of Object.keys(mocked)) {
+		previous.set(key, process.env[key])
+		process.env[key] = mocked[key]
+	}
 
 	try {
 		await t.step('should throw an error for missing required values', () => {
-			assertThrows(() => getEnv<string>('MISSING', { type: 'string', required: true }))
+			assertThrows(() => getEnv<string>('MISSING', { type: 'string', required: true }), Error, REQUIRED_MISSING_MESSAGE)
 		})
 		await t.step('should not throw an error for existing values', () => {
 			assertStrictEquals(getEnv<string>('FOO', { type: 'string', required: true }), mocked.FOO)
@@ -76,17 +73,14 @@ test('mocked env values', async (t) => {
 				assertThrows(() => getEnvBase64('BROKEN_JSON'), Error, 'BROKEN_JSON')
 			})
 		})
-		await t.step('getEnvString', async (envString: TestContext) => {
-			await envString.step('should throw when optional string has no default', () => {
-				assertThrows(
-					() => getEnvString('MISSING_STR', undefined, false),
-					Error,
-					'Missing default value for optional env string.'
-				)
-			})
-		})
 	} finally {
-		sandbox.restore()
+		for (const [key, value] of previous) {
+			if (value === undefined) {
+				delete process.env[key]
+			} else {
+				process.env[key] = value
+			}
+		}
 	}
 })
 

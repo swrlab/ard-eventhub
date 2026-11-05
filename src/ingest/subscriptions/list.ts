@@ -1,6 +1,6 @@
 import type { Context } from 'hono'
 import type { AuthUser } from '#types'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { getSafeHeaders } from '../../utils/get-safe-headers.ts'
 import { getSubscriptions } from '../../utils/pubsub/get-subscriptions.ts'
 import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
@@ -15,6 +15,12 @@ const source = 'ingest/subscriptions/list'
 export const subscriptionsList = async (c: Context) => {
 	try {
 		const user = c.get('user') as AuthUser | undefined
+		logger.info({
+			message: 'list subscriptions',
+			source,
+			data: { email: user?.email, params: c.req.param() },
+		})
+
 		// check if user is present
 		if (!user) {
 			logger.notice({ message: 'user not found', source, data: getSafeHeaders(c.req.raw.headers) })

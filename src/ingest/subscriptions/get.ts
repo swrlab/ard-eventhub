@@ -1,7 +1,7 @@
 import type { Context } from 'hono'
 import type { AuthUser } from '#types'
 import type { EventhubSubscriptionLimited } from '../../schemas/subscriptions.ts'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { getSubscription } from '../../utils/pubsub/get-subscription.ts'
 import { badRequest as responseBadRequest } from '../../utils/response/bad-request.ts'
 import { responseInternalServerError } from '../../utils/response/internal-server-error.ts'
@@ -18,6 +18,12 @@ export const subscriptionsGet = async (c: Context) => {
 	try {
 		// preset vars
 		const subscriptionName = c.req.param('subscriptionName')
+		const user = c.get('user') as AuthUser | undefined
+		logger.info({
+			message: 'get subscription',
+			source,
+			data: { email: user?.email, params: c.req.param() },
+		})
 
 		// check if subscription name is present
 		if (!subscriptionName) {
@@ -25,7 +31,6 @@ export const subscriptionsGet = async (c: Context) => {
 			return responseBadRequest(c, { status: 400, message: 'Subscription name is required' })
 		}
 
-		const user = c.get('user') as AuthUser | undefined
 		// check if user is present
 		if (!user) {
 			logger.notice({ message: 'User not found', source, data: { subscriptionName } })

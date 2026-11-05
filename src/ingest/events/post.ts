@@ -1,6 +1,6 @@
 import type { Context } from 'hono'
 import type { AuthUser } from '#types'
-import logger from '@frytg/logger'
+import { logger } from '@frytg/logger'
 import { isEventStartExpired, parseEventStart } from '../../utils/events/event-helpers.ts'
 import { processEvent } from '../../utils/events/process-event.ts'
 import { getSafeHeaders } from '../../utils/get-safe-headers.ts'

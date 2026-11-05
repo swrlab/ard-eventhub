@@ -1,0 +1,117 @@
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+@import 'tailwindcss';
+
+@theme {
+	--font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+	--font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+	--color-canvas: #000000;
+	--color-panel: #111111;
+	--color-border: #2e2e2e;
+	--color-text: #ededed;
+	--color-heading: #ffffff;
+	--color-muted: #888888;
+	--color-link: #3291ff;
+	--color-warning: #f5a623;
+	--color-danger: #ff6166;
+	--color-ok: #3ecf8e;
+}
+
+html {
+	color-scheme: dark;
+	background: #000000;
+}
+
+body {
+	margin: 0;
+	min-height: 100dvh;
+	background: #000000;
+	color: #ededed;
+	font-family: var(--font-sans);
+}
+
+::selection {
+	background: rgba(255, 255, 255, 0.18);
+	color: #ffffff;
+}
+
+:focus-visible {
+	outline: 1px solid #3291ff;
+	outline-offset: 2px;
+}
+
+* {
+	scrollbar-color: #2e2e2e #000000;
+}
+
+*,
+*::before,
+*::after {
+	border-radius: 0;
+}
+
+.status-dot {
+	border-radius: 9999px;
+}
+
+.press {
+	border: 1px solid #2e2e2e;
+	background: transparent;
+	color: #ededed;
+	padding: 0.35rem 0.7rem;
+	font-family: var(--font-mono);
+	font-size: 0.8rem;
+	cursor: pointer;
+}
+
+.press:hover,
+.press:focus-visible {
+	background: #111111;
+	color: #ffffff;
+	border-color: #444444;
+}
+
+.field {
+	background: transparent;
+	border: 0;
+	border-bottom: 1px solid #2e2e2e;
+	color: #ffffff;
+	caret-color: #ffffff;
+	font-family: var(--font-mono);
+	font-size: 0.85rem;
+	padding: 0.3rem 0;
+}
+
+.field:focus {
+	outline: none;
+	border-bottom-color: #ffffff;
+}
+
+.board {
+	width: 100%;
+	border-collapse: collapse;
+	font-variant-numeric: tabular-nums;
+}
+
+.board th {
+	text-align: left;
+	font-family: var(--font-sans);
+	font-weight: 400;
+	font-size: 0.75rem;
+	color: #888888;
+	padding: 0.4rem 0.7rem 0.4rem 0;
+	border-bottom: 1px solid #2e2e2e;
+	white-space: nowrap;
+}
+
+.board td {
+	padding: 0.45rem 0.9rem 0.45rem 0;
+	border-bottom: 1px solid #1a1a1a;
+	vertical-align: top;
+	font-family: var(--font-mono);
+	font-size: 0.8rem;
+}
+
+.board tbody tr:hover {
+	background: #111111;
+}

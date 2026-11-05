@@ -8,27 +8,148 @@ import { iso8601Timestamp, responseTrace } from './common.ts'
  */
 const requiredEnum = <const T extends [string, ...string[]]>(values: T) => z.string().pipe(z.enum(values))
 
+/** All v1 event class names (HTTPS track events plus Connect/MQTT-only classes). */
+export const eventNames = [
+	'de.ard.eventhub.v1.radio.track.playing',
+	'de.ard.eventhub.v1.radio.track.next',
+	'de.ard.eventhub.v1.radio.control',
+	'de.ard.eventhub.v1.radio.data',
+] as const
+
+/** Event names accepted by the legacy HTTPS POST /events/:eventName route. */
+export const httpsEventNames = [
+	'de.ard.eventhub.v1.radio.track.playing',
+	'de.ard.eventhub.v1.radio.track.next',
+] as const
+
+/** Event names reserved for the future Eventhub Connect MQTT path. */
+export const connectEventNames = ['de.ard.eventhub.v1.radio.control', 'de.ard.eventhub.v1.radio.data'] as const
+
 /**
- * Service entry attached to an event.
+ * Whether an event name is a Connect/MQTT-only class (rejected on HTTPS).
+ * @param eventName - Event class from the URL or body
+ * @returns True when the name is radio.control or radio.data
+ */
+export const isConnectEventName = (eventName: string): boolean =>
+	(connectEventNames as readonly string[]).includes(eventName)
+
+const serviceType = requiredEnum(['EventLivestream', 'PermanentLivestream']).meta({
+	examples: ['PermanentLivestream'],
+})
+const serviceExternalId = z.string().meta({ examples: ['crid://swr.de/123450'] })
+const livestreamUrn = z
+	.string()
+	.regex(/^urn:ard:(permanent-livestream|event-livestream):[a-z0-9]+$/)
+	.meta({
+		examples: ['urn:ard:permanent-livestream:49267f7d67be180d'],
+	})
+const publisherUrn = z
+	.string()
+	.regex(/^urn:ard:publisher:[a-z0-9]+$/)
+	.meta({ examples: ['urn:ard:publisher:75dbb3dace15f610'] })
+const institutionUrn = z
+	.string()
+	.regex(/^urn:ard:institution:[a-z0-9]+$/)
+	.meta({ examples: ['urn:ard:institution:a3004ff924ece1a2'] })
+
+/** Connect events only. HTTPS ingest fills `creator` from the token. */
+const eventCreator = z
+	.string()
+	.min(1)
+	.meta({
+		description:
+			'Person or system that created the event, set by the publisher (for example an email address or the playout system)',
+		examples: ['example@swr.de'],
+	})
+
+/** Connect events only. Validation overwrites it before the schema check, so subscribers always get the delivery time. */
+const eventCreated = iso8601Timestamp.meta({
+	readOnly: true,
+	description: 'Set by Eventhub validation to the time of delivery. A value sent by the publisher is replaced.',
+	examples: ['2026-10-08T10:00:01.000Z'],
+})
+
+/**
+ * Whether a HTTPS service has enough identifiers to resolve a livestream URN.
+ * `id` is enough on its own. A CRID still needs `type` so ingest can pick the prefix.
+ * @param service - Candidate service entry
+ * @returns True when `id` is set, or both `externalId` and `type` are set
+ */
+const hasLivestreamIdentifier = (service: {
+	id?: string | undefined
+	externalId?: string | undefined
+	type?: string | undefined
+}): boolean => Boolean(service.id || (service.externalId && service.type))
+
+/**
+ * Service entry attached to an event (legacy HTTPS shape).
+ * Either `id` (preferred) or `externalId` + `type` must be set. `type` and `externalId` are
+ * deprecated; ingest still sends them when provided.
  */
 export const services = z
 	.object({
-		type: requiredEnum(['EventLivestream', 'PermanentLivestream']).meta({ examples: ['PermanentLivestream'] }),
-		externalId: z.string().meta({ examples: ['crid://swr.de/123450'] }),
+		id: livestreamUrn.optional().meta({
+			description: 'Preferred. Livestream URN. When absent, Eventhub creates it from `type` + `externalId`.',
+			examples: ['urn:ard:permanent-livestream:49267f7d67be180d'],
+		}),
 		publisherId: z.string().meta({
-			description:
-				'External ID or globally unique identifier (Core ID) for the associated publisher. When no Core ID is provided, the External ID will be converted by Eventhub.',
+			description: 'Publisher Core ID or URN. Ingest normalizes this to `urn:ard:publisher:{hash}`.',
 			examples: ['248000'],
 		}),
-		id: z
-			.string()
-			.optional()
-			.meta({
-				description: 'Globally unique identifier, created by Eventhub',
-				examples: ['urn:ard:permanent-livestream:49267f7d67be180d'],
-			}),
+		institutionId: institutionUrn.optional().meta({
+			description: 'Owning institution URN. Filled in by ingest from the resolved publisher.',
+			examples: ['urn:ard:institution:a3004ff924ece1a2'],
+		}),
+		type: serviceType.optional().meta({
+			deprecated: true,
+			description:
+				'Selects the livestream URN prefix when Eventhub creates `id` from `externalId`. Deprecated; ingest still sends it when provided.',
+			examples: ['PermanentLivestream'],
+		}),
+		externalId: serviceExternalId.optional().meta({
+			deprecated: true,
+			description: 'CRID hashed into `id` when `id` is absent. Deprecated; ingest still sends it when provided.',
+			examples: ['crid://swr.de/123450'],
+		}),
 	})
-	.meta({ id: 'services' })
+	.refine(hasLivestreamIdentifier, {
+		path: ['id'],
+		message: "should have required property 'id'",
+	})
+	.meta({
+		id: 'services',
+		description: 'Either `id` (preferred) or `externalId` and `type` must be set.',
+	})
+
+/**
+ * URN-only service entry for Eventhub Connect (MQTT). Not accepted on HTTPS ingest.
+ */
+export const servicesUrn = z
+	.object({
+		id: livestreamUrn.meta({
+			description: 'Pre-encoded ARD livestream URN',
+			examples: ['urn:ard:permanent-livestream:49267f7d67be180d'],
+		}),
+		publisherId: publisherUrn.meta({
+			description: 'Pre-encoded ARD publisher URN',
+			examples: ['urn:ard:publisher:75dbb3dace15f610'],
+		}),
+		institutionId: institutionUrn.meta({
+			description: 'Owning institution URN (claim; validation checks it against the feed)',
+			examples: ['urn:ard:institution:a3004ff924ece1a2'],
+		}),
+		externalId: serviceExternalId.optional().meta({
+			deprecated: true,
+			description: 'Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.',
+			examples: ['crid://swr.de/123450'],
+		}),
+		type: serviceType.optional().meta({
+			deprecated: true,
+			description: 'Deprecated on Connect. Optional and ignored; still emitted by legacy ingest.',
+			examples: ['PermanentLivestream'],
+		}),
+	})
+	.meta({ id: 'servicesUrn' })
 
 /**
  * Related external entity reference.
@@ -101,7 +222,11 @@ const mediaItem = z
 			.string()
 			.nullable()
 			.optional()
-			.meta({ examples: ['https://example.com/cover.jpg?width={width}'] }),
+			.meta({
+				deprecated: true,
+				description: 'Deprecated. Send a concrete `url`. A `{width}` / `{height}` template is still accepted.',
+				examples: ['https://example.com/cover.jpg?width={width}'],
+			}),
 		description: z.string().meta({ examples: ['Cover Demo Artist'] }),
 		attribution: z
 			.string()
@@ -147,10 +272,11 @@ const eventhubTopic = z.object({
  */
 export const eventhubService = z
 	.object({
-		type: z.string(),
-		externalId: z.string(),
+		type: z.string().optional(),
+		externalId: z.string().optional(),
 		publisherId: z.string(),
 		id: z.string().optional(),
+		institutionId: z.string().optional(),
 		blocked: z.string().optional(),
 		topic: eventhubTopic.optional(),
 	})
@@ -184,7 +310,7 @@ export const eventhubPlugin = z
 export const eventV1PostBody = z
 	.object({
 		event: z
-			.enum(['de.ard.eventhub.v1.radio.track.playing', 'de.ard.eventhub.v1.radio.track.next'])
+			.enum(httpsEventNames)
 			.optional()
 			.meta({
 				description: 'If set, it needs to match the URL event parameter',
@@ -272,6 +398,121 @@ export const eventV1PostBody = z
 	.meta({
 		id: 'eventV1PostBody',
 		description: '**Please also note the details in the `POST /events/v1` endpoint above!**',
+	})
+
+/**
+ * Whether an RT+ content-type id is allowed (0–53 and 56–63; 54 and 55 are reserved).
+ * @param id - Candidate RT+ content type
+ * @returns True when the id is in the allowlist
+ */
+const isAllowedRtdlplusId = (id: number): boolean => (id >= 0 && id <= 53) || (id >= 56 && id <= 63)
+
+const rtdlplusId = z
+	.number()
+	.int()
+	.min(0)
+	.max(63)
+	.refine(isAllowedRtdlplusId, { message: 'RT+ content type ids 54 and 55 are reserved' })
+
+const radioDataClassicItem = {
+	id: z.literal(0),
+	value: z.string(),
+	description: z.string().optional(),
+}
+
+/**
+ * One radiotext / dynamic-label / RT+ field inside a radio.data event.
+ */
+const radioDataItem = z.discriminatedUnion('type', [
+	z
+		.object({
+			type: z.literal('radiotext'),
+			...radioDataClassicItem,
+		})
+		.strict(),
+	z
+		.object({
+			type: z.literal('dynlabel'),
+			...radioDataClassicItem,
+		})
+		.strict(),
+	z
+		.object({
+			type: z.literal('rtdlplus'),
+			id: rtdlplusId,
+			value: z.string(),
+			description: z.string().optional(),
+		})
+		.strict(),
+])
+
+/**
+ * Eventhub Connect radio.control payload (MQTT). Not accepted on HTTPS ingest.
+ */
+export const eventV1RadioControlPostBody = z
+	.object({
+		event: z
+			.literal('de.ard.eventhub.v1.radio.control')
+			.optional()
+			.meta({
+				description: 'If set, it needs to match the published event class',
+				examples: ['de.ard.eventhub.v1.radio.control'],
+			}),
+		start: iso8601Timestamp,
+		validUntil: iso8601Timestamp.optional().meta({
+			description: 'Backstop TTL. Receivers drop the state when it passes. Omit for states with no natural expiry.',
+		}),
+		name: z.string().meta({
+			description: 'Control element identifier (TA, TP, EON, Regio, …). Not an enum — new functions need no release.',
+			examples: ['TA'],
+		}),
+		state: z.boolean().meta({ description: 'New control state', examples: [true] }),
+		services: z.array(servicesUrn).meta({
+			description: 'URN-only service identifiers (Connect / MQTT)',
+		}),
+		creator: eventCreator,
+		created: eventCreated,
+	})
+	.strict()
+	.meta({
+		id: 'eventV1RadioControlPostBody',
+		description: 'Eventhub Connect radio.control event. Not accepted on the HTTPS POST /events API.',
+	})
+
+/**
+ * Eventhub Connect radio.data payload (MQTT). Not accepted on HTTPS ingest.
+ */
+export const eventV1RadioDataPostBody = z
+	.object({
+		event: z
+			.literal('de.ard.eventhub.v1.radio.data')
+			.optional()
+			.meta({
+				description: 'If set, it needs to match the published event class',
+				examples: ['de.ard.eventhub.v1.radio.data'],
+			}),
+		start: iso8601Timestamp,
+		cycle: z
+			.number()
+			.int()
+			.positive()
+			.meta({
+				description: 'Seconds between repeats from the source',
+				examples: [8],
+			}),
+		data: z.array(radioDataItem).meta({
+			description: 'Radiotext, dynamic label, and RT+/DL+ fields. Any combination, any length.',
+		}),
+		services: z.array(servicesUrn).meta({
+			description: 'URN-only service identifiers (Connect / MQTT)',
+		}),
+		creator: eventCreator,
+		created: eventCreated,
+	})
+	.strict()
+	.meta({
+		id: 'eventV1RadioDataPostBody',
+		description: 'Eventhub Connect radio.data event. Not accepted on the HTTPS POST /events API.',
 	})
 
 /**
@@ -417,6 +658,139 @@ export const eventProcessResult = z
 		event: eventhubV1RadioPostBody,
 	})
 	.meta({ id: 'eventProcessResult' })
+
+const connectServices = z.array(servicesUrn).min(1)
+
+/**
+ * URN-only track event that validation accepts.
+ * Derived from {@link eventV1PostBody}: `services` is the URN shape, `event` is required
+ * because `track.playing` and `track.next` share a body, and `creator` / `created` are Connect-only.
+ */
+export const connectInboxTrackEvent = eventV1PostBody
+	.omit({ services: true, event: true })
+	.extend({
+		event: z.enum(['de.ard.eventhub.v1.radio.track.playing', 'de.ard.eventhub.v1.radio.track.next']),
+		services: connectServices,
+		creator: eventCreator,
+		created: eventCreated,
+	})
+	.strict()
+
+/**
+ * URN-only radio.control event that validation accepts. `event` is required so the class is explicit.
+ */
+export const connectInboxControlEvent = eventV1RadioControlPostBody
+	.omit({ event: true, services: true })
+	.extend({
+		event: z.literal('de.ard.eventhub.v1.radio.control'),
+		services: connectServices,
+	})
+	.strict()
+
+/**
+ * URN-only radio.data event that validation accepts. `event` is required so the class is explicit.
+ */
+export const connectInboxDataEvent = eventV1RadioDataPostBody
+	.omit({ event: true, services: true })
+	.extend({
+		event: z.literal('de.ard.eventhub.v1.radio.data'),
+		services: connectServices,
+	})
+	.strict()
+
+/**
+ * One problem on a rejected inbox event, in the HTTPS API 400 `errors[]` shape.
+ */
+const validationErrorItem = z
+	.object({
+		path: z.string().meta({
+			description: 'JSON path of the problem (`.body.services.0.id`).',
+			examples: ['.body.title'],
+		}),
+		message: z.string().meta({ examples: ["should have required property 'title'"] }),
+		errorCode: z.string().meta({
+			description:
+				'Schema errors use `*.openapi.validation`. Ownership uses `unauthorized.eventhub.validation` or `notFound.eventhub.validation`.',
+			examples: ['required.openapi.validation'],
+		}),
+	})
+	.strict()
+
+/**
+ * Retained body on `feedback/{institutionId}`. Diagnostic, not an acknowledgement.
+ * Optional fields are omitted when the payload did not carry them.
+ */
+export const validationFeedbackBody = z
+	.object({
+		created: iso8601Timestamp.meta({ description: 'Time of the rejection.' }),
+		institutionId: institutionUrn.meta({
+			description: 'Institution the inbox belongs to.',
+			examples: ['urn:ard:institution:a3004ff924ece1a2'],
+		}),
+		subject: z.string().meta({
+			description: 'Inbox subject the event arrived on (`inbox.{institutionId}`).',
+			examples: ['inbox.urn:ard:institution:a3004ff924ece1a2'],
+		}),
+		errors: z.array(validationErrorItem).min(1).meta({
+			description: 'Same shape as `errors` on the HTTPS API 400 response. One entry per problem.',
+		}),
+		playlistItemId: z
+			.string()
+			.optional()
+			.meta({
+				description: 'Copied from the payload when present, so a track rejection can be correlated.',
+				examples: ['swr3-demo-1'],
+			}),
+		start: z
+			.string()
+			.optional()
+			.meta({
+				description: 'Copied from the payload when present. Control and data correlate on this plus `subject`.',
+				examples: ['2026-10-08T12:00:00+02:00'],
+			}),
+		deprecated: z
+			.array(z.string())
+			.optional()
+			.meta({
+				description: 'Deprecated `services[]` fields that were still sent (`services.externalId`, `services.type`).',
+				examples: [['services.externalId', 'services.type']],
+			}),
+		event: z.unknown().meta({
+			description:
+				'Rejected event as it arrived: a JSON value, otherwise text. Over 64 KiB this is `{ truncated, bytes, head }`.',
+		}),
+	})
+	.strict()
+	.meta({
+		id: 'validationFeedbackBody',
+		description:
+			'Last rejection for one institution, retained on `feedback/{institutionId}`. An accepted event writes nothing here.',
+	})
+
+const connectInboxSchemaByEvent = {
+	'de.ard.eventhub.v1.radio.track.playing': connectInboxTrackEvent,
+	'de.ard.eventhub.v1.radio.track.next': connectInboxTrackEvent,
+	'de.ard.eventhub.v1.radio.control': connectInboxControlEvent,
+	'de.ard.eventhub.v1.radio.data': connectInboxDataEvent,
+} as const
+
+/** Inbox payload after the URN-only validation parse. */
+export type ConnectInboxEvent =
+	| z.infer<typeof connectInboxTrackEvent>
+	| z.infer<typeof connectInboxControlEvent>
+	| z.infer<typeof connectInboxDataEvent>
+
+/**
+ * Parse an inbox payload against the URN-only schema for its `event` class.
+ * A missing or unknown `event` fails before the class schema runs.
+ * @param value - Decoded JSON value
+ * @returns Zod safe-parse result
+ */
+export const parseConnectInboxEvent = (value: unknown) => {
+	const named = z.object({ event: z.enum(eventNames) }).safeParse(value)
+	if (!named.success) return named
+	return connectInboxSchemaByEvent[named.data.event].safeParse(value)
+}
 
 export type EventhubService = z.infer<typeof eventhubService>
 export type EventhubPlugin = z.infer<typeof eventhubPlugin>

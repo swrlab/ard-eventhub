@@ -1,0 +1,37 @@
+---
+title: 'radio.data'
+description: 'Zyklischer Radiotext, Dynamic Label und RT+.'
+sidebar:
+  order: 4
+---
+
+Dieses Event ist für Eventhub Connect vorgesehen und wird über `POST /events/de.ard.eventhub.v1.radio.data` mit HTTP 400 abgelehnt. Der Publisher schreibt es auf `inbox/{institutionId}`. Nach der Eventhub Validierung liegt es retained auf `radio/{livestreamId}/data`.
+
+`services[]` ist URN-only (`id`, `publisherId` und `institutionId` als `urn:ard:…`). `start` ist ISO8601. `creator` setzt der Publisher. `created` setzt die Eventhub Validierung auf den Zeitpunkt der Zustellung und überschreibt einen mitgeschickten Wert.
+
+Zyklischer Radiotext, Dynamic Label und RT+/DL+. `cycle` ist die Wiederholzeit der Quelle in Sekunden.
+
+`data[].type` ist `radiotext`, `dynlabel` oder `rtdlplus`. Für `radiotext` und `dynlabel` ist `id` immer `0`. Für `rtdlplus` gilt die RT+-Allowlist: `0`–`53` und `56`–`63` sind gültig, `54` und `55` sind reserviert und werden abgelehnt. Die vollständige IEC-62106-6-Tabelle steht im [RFC §13.3](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#133-rt-content-types).
+
+```json
+{
+	"event": "de.ard.eventhub.v1.radio.data",
+	"start": "2020-01-19T06:00:00+01:00",
+	"cycle": 8,
+	"data": [
+		{ "type": "radiotext", "id": 0, "value": "Sie hören die ARD Popnacht" },
+		{ "type": "dynlabel", "id": 0, "value": "Sie hören die ARD Popnacht" },
+		{ "type": "rtdlplus", "id": 32, "description": "PROGRAM.Stationname long", "value": "SWR 3" }
+	],
+	"services": [
+		{
+			"publisherId": "urn:ard:publisher:75dbb3dace15f610",
+			"institutionId": "urn:ard:institution:a3004ff924ece1a2",
+			"id": "urn:ard:permanent-livestream:49267f7d67be180d"
+		}
+	],
+	"creator": "example@swr.de"
+}
+```
+
+Wohin publiziert wird, steht unter [_Topics_](../user/topics), die Verbindung unter [_Eventhub Connect_](../user/connect-mqtt). Der Kanal steht in der [Events-Referenz](/events/subscribe/receive-radio-data).

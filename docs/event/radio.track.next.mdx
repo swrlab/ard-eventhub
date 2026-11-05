@@ -1,0 +1,14 @@
+---
+title: 'radio.track.next'
+description: 'Der planmäßig nächste Titel eines Radiosenders.'
+sidebar:
+  order: 2
+---
+
+Der HTTPS-Ingest akzeptiert dieses Event unter `POST /events/de.ard.eventhub.v1.radio.track.next`. Auf MQTT publiziert der Publisher es auf `inbox/{institutionId}`; nach der Eventhub Validierung liegt es retained auf `radio/{livestreamId}/track/next`.
+
+Das `next`-Event hat Ähnlichkeiten zum [`playing`-Event](./radio.track.playing), kennzeichnet aber nur den planmäßig nächsten Titel. Das `next`-Element kann durch ein neues `next`-Element vor einem `playing`-Element ersetzt werden, um einen neuen geplanten Titel zu kennzeichnen.
+
+Ein Paar aus `next` und `playing` sollte `playlistItemId` teilen, damit Abonnenten diese beiden Events miteinander verknüpfen können.
+
+Auf MQTT sind `id`, `publisherId` und `institutionId` in `services[]` URNs (`urn:ard:…`). `creator` setzt der Publisher. `created` setzt die Eventhub Validierung auf den Zeitpunkt der Zustellung und überschreibt einen mitgeschickten Wert. Wohin publiziert wird, steht unter [_Topics_](../user/topics), die Verbindung unter [_Eventhub Connect_](../user/connect-mqtt). Der Kanal steht in der [Events-Referenz](/events/subscribe/receive-radio-track-next).

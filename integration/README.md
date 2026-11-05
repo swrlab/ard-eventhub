@@ -20,7 +20,7 @@ For other systems, see the [installation docs](https://hurl.dev/docs/installatio
 
 ## How to run
 
-Start ingest locally (`just dev`) or point at a remote host, then:
+Start ingest locally (`just ingest`) or point at a remote host, then:
 
 ```shell
 # local (default host http://localhost:8080)

@@ -1,11 +1,14 @@
 ---
 title: 'OpenAPI'
 description: 'OpenAPI-Spezifikation und API-Referenz.'
+deprecated: true
 sidebar:
   order: 8
 ---
 
-Die ARD Eventhub-APIs sind im [OpenAPI](https://swagger.io/specification/)-Format dokumentiert (ein standardisiertes, sprachunabhängiges Interface für RESTful APIs).
+Die HTTPS-API des ARD Eventhub ist im [OpenAPI](https://swagger.io/specification/)-Format dokumentiert (ein standardisiertes, sprachunabhängiges Interface für RESTful APIs).
+
+Jede Operation in dieser Spezifikation ist **deprecated**. Login, Events, Subscriptions und Topics bleiben erreichbar, bis der HTTPS-Ingest abgeschaltet wird. Neue Anbindungen laufen über [_Eventhub Connect_](./user/connect-mqtt).
 
 ## API-Referenz in diesen Docs
 
@@ -21,6 +24,6 @@ Nach Schema- oder Path-Änderungen regenerieren:
 just openapi
 ```
 
-Das schreibt `openapi.json` via `z.toJSONSchema(..., { target: 'openapi-3.0' })` und formatiert die Datei.
+Das schreibt `openapi.json` via `z.toJSONSchema(..., { target: 'openapi-3.0' })` und formatiert die Datei. Derselbe Befehl regeneriert auch `asyncapi.json` (siehe [AsyncAPI](./asyncapi)).
 
 Named Zod-Schemas (`.meta({ id })`) werden nach `components.schemas` gehoben und als `#/components/schemas/{id}` referenziert. Ohne diesen Schritt bleiben Untertypen wie `mediaItem` in der API-Referenz nur ein Name ohne Felder.

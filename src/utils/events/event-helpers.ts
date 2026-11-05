@@ -54,6 +54,20 @@ export const buildEventMessage = (params: {
 }
 
 /**
+ * Build the Connect inbox payload from the enriched Pub/Sub message.
+ * Drops the Pub/Sub-only `name` field and sets the `event` discriminator Connect's inbox schema requires,
+ * so the HTTPS dual-write to `inbox/{institutionId}` matches what `parseConnectInboxEvent` accepts.
+ * @param message - Enriched event message (output of {@link buildEventMessage})
+ * @param eventName - Event name the HTTPS request was posted under
+ * @returns Payload shaped for Connect's inbox schema (still unvalidated)
+ */
+export const buildInboxPayload = (message: EventhubV1RadioPostBody, eventName: string): Record<string, unknown> => {
+	const payload: Record<string, unknown> = { ...(message as unknown as Record<string, unknown>), event: eventName }
+	delete payload.name
+	return payload
+}
+
+/**
  * Enable DTS / Radioplayer plugins by opt-out for music `track.playing` events only.
  * Does not auto-enable for `track.next`.
  * @param message - Event message (plugins array mutated)

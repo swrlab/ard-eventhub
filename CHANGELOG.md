@@ -7,9 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0-beta.3] - 2026-10-30
+
+### Added
+
+- docs: schema page for the retained `feedback/{institutionId}` body
+- docs: event overview — Now and Control are mandatory, Next and Data are optional
+- docs: move external-ID guidance to the user guides; v3 events carry the hashed ARD Core livestream URN
+- docs: v3 drops firehose topics; subscribers use an MQTT wildcard filter instead
+
+### Changed
+
+- docs: mark every HTTPS ingest operation deprecated in the OpenAPI spec; Eventhub Connect (MQTT) replaces them
+
 ### Fixed
 
+- fix: `allowed-livestreams.json` takes a `publisherIds` array; ARD Musikclub is accepted from SWR1 BW and SWR1 RP on HTTPS ingest and Eventhub Connect
+- fix: restore the temporary publisher-id remap (`TEMP_PUBLISHER_MAPPING`) on HTTPS ingest; Eventhub Connect still requires the feed URN
+- fix: publish NATS WebSocket `:9222` from `just nats-up-docker` so the operator UI live tail reaches the broker from the host
 - fix: expand nested OpenAPI schemas (`mediaItem`, `reference`, `contributor`, …) in the docs API reference
+- fix: ingest sets Bun `idleTimeout` to 60 s, so a slow `GET /subscriptions` returns a response instead of an empty reply after 10 s
+- fix: `GET /subscriptions` skips subscriptions that fail to map (logged as warning) instead of failing the whole list with 500
+
+## [3.0.0-beta.2] - 2026-10-19
+
+### Added
+
+- docs: publisher migration guide, MQTT topic tree, and ACL reference for Eventhub Connect
+- feat: add `radio.control` and `radio.data` Zod schemas (Eventhub Connect / MQTT; rejected on HTTPS POST)
+- feat: generate AsyncAPI 3 spec from those Zod schemas (`just asyncapi`, Blume `/events`)
+- feat: dual-write accepted HTTPS events to MQTT `inbox/{institutionId}` as `svc-ingest` on the CN gateway (Pub/Sub unchanged)
+- feat: emit `services[].institutionId` and guarantee URN-shaped `id`/`publisherId` on ingest (`externalId`/`type` still populated, now deprecated; `id` or `externalId`+`type` is required)
+- feat: trust optional `MQTT_TLS_CA` (PEM or file path) when connecting to a private mqtts:// hop
+- feat: gate plugins Pub/Sub dispatch with `INGEST_PUBLISH_PLUGINS` (exact string `true`; off otherwise)
+- ci: start NATS in ingest test jobs so `MQTT_BROKER_URL` connects to the gateway
+- feat: NATS-native access layer for eventhub-connect (`src/utils/nats/`, `just connect`) with local JetStream + MQTT gateway
+- ci: separate NATS job (`just nats-up-docker`) so MQTT→NATS inbox translation is required
+- feat: local NATS auth (RFC §7 users, bcrypt, `allowed_connection_types`, institution-bound ACLs; `just nats-check` / `just nats-reload`)
+- feat: keep the ARD core feed in JetStream KV `KV_ARD_FEED`: every connect process reads it on boot (downloading `ARD_FEED_URL` only into an empty bucket), follows new revisions in memory, and `POST /api/update-feed` re-downloads it for the hourly CronJob, keeping the last good revision when the fetch fails
+- feat: Connect events (track, control, data) require `creator`, set by the publisher; validation sets `created` to the delivery time and replaces any value sent
+
+### Changed
+
+- feat: read the NATS login from `NATS_USER` and `NATS_PASSWORD`; `NATS_URL` is the server address only
+- feat: rename the connect NATS user to `svc-eventhub-connect`, drop unused `svc-operator` and `svc-adapter-radioplayer`, and let that user subscribe to `feedback.>` and `plugin.>`
+- refactor: rename the connect sidecar to validation (`src/connect/validation/`, log source `connect.validation`, logs `validation accepted` / `validation rejected` / `validation publish failed`, metric `connect.validation.rejection`); the durable consumer keeps the name `sidecar`
+- feat: log the full inbox payload on every `validation rejected` line (prefix past 64 KiB)
+- feat: log the full accepted event on every `validation accepted` line, and on `validation publish failed` (same 64 KiB prefix)
+- feat: `feedback/{institutionId}` carries the full rejected event as `event` (previously only its type string); each rejections board row expands to it
+- feat: `feedback/{institutionId}` follows the HTTPS API errors: `errors[]` with `path`, `message`, `errorCode` replaces `cause`, `message`, `issues`, `disagreed`, and `livestreamId`, and `created` replaces `at`; ownership failures name the offending `services` field, and the board no longer lists deprecated fields
+- chore: upgrade dependencies (Google clients, firebase-admin 14, TypeScript 7, Blume 2, Knip 6)
+
+### Fixed
+
+- fix: connect starts validation only once the ARD feed is in KV, so a cold start no longer drops valid events silently once `max_deliver` naks run out
+- fix: drop the AsyncAPI `scalar` options Blume 2.2 rejects, so the docs build runs
+- fix: start ingest when `MQTT_BROKER_URL` is unset (MQTT hop stays off; Pub/Sub unchanged)
+
+### Removed
+
+- chore: remove the temporary publisher-id remap (`TEMP_PUBLISHER_MAPPING`); the old rbb/hr URNs are listed in the v3 migration guide
+- feat: drop the shipped gzip ARD feed fallback and the `.local/ard-feed.json` disk copy; cold start uses KV, else downloads
+- chore: remove Datadog `dd-trace` (`DD_TRACE_ENABLED` / `DD_TRACER_ENABLED`)
+- chore: remove NanoMQ (local broker, Kubernetes manifest, CI hop)
 
 ## [3.0.0-beta.1] - 2026-08-10
 
