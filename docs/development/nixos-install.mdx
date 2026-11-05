@@ -1,0 +1,105 @@
+---
+title: 'NixOS Install'
+description: 'Setup fresh NixOS install on an internal or test server.'
+sidebar:
+  icon: server-cog
+---
+
+:::warning[Firewall]
+BEFORE starting this install tutorial the server needs to have configured firewall entries to reach the internet (downloading NixOS assets; rules from FQDN `s....swr.ard` to HTTPS 443).
+:::
+
+This guide is basically the same as the official [NixOS Install docs](https://nixos.org/manual/nixos/stable/#ch-installation) with small adjustments or notes.
+
+## Server requirements
+
+To register a new server, place a request with these details:
+
+- Type: `VM`
+- OS: `NixOS -> Minimal ISO https://nixos.org/download/`
+- VM: min 2 CPU; 4GB RAM; 64GB SSD
+- 24x7 high reliability/ monitoring
+- placement: one of the internal DC zones in the internal network (not DMZ!)
+- backup: yes, daily
+
+## Step-by-step
+
+Log into the server via SSH. `ssh s000...` might not work since the new NixOS install announces itself as hostname `nixos`.
+For this to work your SSH key also needs to be placed in `/home/nixos/.ssh/authorized_keys` or `/root/.ssh/authorized_keys`.
+
+```bash
+ssh root@nixos
+```
+
+Identify the target disk (e.g. `sda`).
+
+```bash
+lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS
+```
+
+Confirm the installer booted in UEFI mode.
+
+```bash
+test -d /sys/firmware/efi && echo UEFI || echo BIOS
+```
+
+Partition and format the virtual disk.
+
+```bash
+parted /dev/sda -- mklabel gpt
+parted /dev/sda -- mkpart root ext4 512MB -8GB
+parted /dev/sda -- mkpart swap linux-swap -8GB 100%
+parted /dev/sda -- mkpart ESP fat32 1MB 512MB
+parted /dev/sda -- set 3 esp on
+```
+
+```bash
+mkfs.ext4 -L nixos /dev/sda1
+mkswap -L swap /dev/sda2
+mkfs.fat -F 32 -n boot /dev/sda3
+```
+
+Mount partition.
+
+```bash
+mount /dev/disk/by-label/nixos /mnt
+mkdir -p /mnt/boot
+mount -o umask=077 /dev/disk/by-label/boot /mnt/boot
+```
+
+Generate the NixOS config.
+
+```bash
+nixos-generate-config --root /mnt
+```
+
+Update if needed (insert SSH key).
+
+```bash
+nano /mnt/etc/nixos/configuration.nix
+```
+
+```nix
+# ...
+networking.hostName = "eventhub-connect-xxx";
+users.users.root.openssh.authorizedKeys.keys = [
+	# ...
+];
+nix.settings.experimental-features = [ "nix-command" "flakes" ];
+programs.zsh.enable = true;
+services.openssh = {
+	enable = true;
+	settings.PermitRootLogin = "yes";
+	settings.PasswordAuthentication = false;
+};
+```
+
+Run installation.
+
+```bash
+nixos-install
+```
+
+```bash
+reboot
+```
