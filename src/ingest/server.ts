@@ -1,6 +1,5 @@
 import { logger } from '@frytg/logger'
 import { Hono } from 'hono'
-import { compress } from 'hono/compress'
 import { serviceUrl, userAgent, version } from '#config'
 import { isIngestPublishPluginsEnabled, isLocal, port, serviceName } from '#env'
 import { getARDFeed } from '../utils/feed/ard-feed.ts'
@@ -31,7 +30,9 @@ app.use('*', async (c, next) => {
 	await next()
 })
 
-app.use('*', compress())
+// Identity JSON only. The pre-Hono API never compressed (Express `compression()` was mounted
+// after the router), and publisher clients parse the POST body as JSON. gzip here shows up as
+// binary and they can no longer tell whether the publish succeeded.
 app.route('/', router)
 
 // Run the server if this file is invoked directly
