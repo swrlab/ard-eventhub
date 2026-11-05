@@ -55,3 +55,16 @@ check:
 ntp:
 	timedatectl status
 	timedatectl timesync-status
+
+# ── k3s unit (confirm-gated where mutating) ──────────────────────────
+
+# follow the k3s unit logs
+[group('NIXOS')]
+k3s-logs:
+	journalctl -u k3s -f --no-pager
+
+# restart the k3s unit
+[confirm]
+[group('NIXOS')]
+k3s-restart:
+	systemctl restart k3s

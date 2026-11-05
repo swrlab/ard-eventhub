@@ -8,4 +8,10 @@
     ./hardware-configuration.nix
     ../common/base.nix
   ];
+
+  # Replaces the base extraFlags. The zone manifest selects this label.
+  services.k3s.extraFlags = toString [
+    "--supervisor-metrics"
+    "--node-label topology.kubernetes.io/zone=mnz"
+  ];
 }

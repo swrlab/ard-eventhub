@@ -27,7 +27,20 @@
     wget
     htop
     just
+    k3s
   ];
+
+  # One single-node cluster per host. extraFlags is a string, so a host that
+  # sets it replaces this mkDefault rather than appending.
+  services.k3s = {
+    enable = true;
+    role = "server";
+    extraFlags = lib.mkDefault (toString [
+      "--supervisor-metrics"
+    ]);
+  };
+
+  networking.firewall.enable = false;
 
   programs.zsh.enable = true;
 

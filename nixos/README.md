@@ -4,7 +4,7 @@ Central NixOS configuration for the Eventhub Connect hosts. One tree, uploaded i
 
 ## Structure
 
-- `common/base.nix` — shared module imported by every host: systemd-boot, NetworkManager, key-only OpenSSH, base packages, zsh, flakes. List options merge by concatenation; strings use `mkDefault` so a host's plain assignment wins.
+- `common/base.nix` — shared module imported by every host: systemd-boot, NetworkManager, key-only OpenSSH, base packages, zsh, flakes, and a single-node k3s server. List options merge by concatenation; strings use `mkDefault` so a host's plain assignment wins. Each host overlay sets the k3s zone label (`mnz`, `bad`, `stg`) the NATS manifest selects on.
 - `common/authorized_keys` — root SSH keys, one per line, loaded by the base module. Hosts can still append keys through `authorizedKeys.keys`.
 - `hosts` — one line per host: friendly name, then server number. The friendly name is the directory, the flake attribute, and the `just nix-*` argument. The server number is the NixOS hostname and the SSH target.
 - `flake.nix` — one flake per friendly name in `hosts`. It sets `networking.hostName` from the server number. The flake root must be this directory so host configs can import `../common/base.nix`.
