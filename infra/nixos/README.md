@@ -27,11 +27,11 @@ Local commands live in `just/nixos.just`; host-side commands live in the [`justf
 
 ```sh
 # from the repo
-just nix-upload eventhub-connect-mnz     # scp the full tree to /etc/nixos/ on s0006663
-just nix-apply eventhub-connect-mnz      # upload + rebuild + pull flake.lock back
-just nix-all                             # nix-apply for every host in infra/nixos/hosts
-just nix-download eventhub-connect-mnz   # pull the host's subtree + flake.lock
-just nix-check                           # evaluate the flake locally
+just nix-upload "<host>"     # scp the full tree to /etc/nixos/ on the mapped server
+just nix-apply "<host>"      # upload + rebuild + pull flake.lock back
+just nix-all                # nix-apply for every host in infra/nixos/hosts
+just nix-download "<host>"   # pull the host's subtree + flake.lock
+just nix-check              # evaluate the flake locally
 
 # on the host (resolves hostname -s back to the friendly name)
 cd /etc/nixos
@@ -40,4 +40,23 @@ just flake                               # apply the uploaded config (confirm-ga
 just rollback                            # roll back to the previous generation
 ```
 
-The flake also works standalone on the host: `nixos-rebuild switch --flake /etc/nixos#eventhub-connect-mnz`.
+Replace `<host>` with a friendly name from `infra/nixos/hosts`.
+
+The flake also works standalone on the host: `nixos-rebuild switch --flake "/etc/nixos#<host>"`.
+
+## Local k3s access
+
+The recipes in `just/k3s.just` use the same friendly host names and SSH mapping as `just nix-*`:
+
+```sh
+just cp-k3s-config "<host>"  # download /etc/rancher/k3s/k3s.yaml over SSH
+# Before confirming encryption, edit keys/<host>-k3s-cert.yaml:
+# replace 127.0.0.1 in server: with the reachable IP/hostname.
+# If you declined the prompt, encrypt the edited file separately:
+just k3s-encrypt "<host>"
+just k3s-decrypt "<host>"    # restore the local kubeconfig from SOPS
+just k9s "<host>"
+just radar "<host>"
+```
+
+Plaintext kubeconfigs contain cluster-admin credentials. They are stored with mode `600` in the gitignored `keys/<host>-k3s-cert.yaml`. Only the encrypted `keys/<host>-k3s-cert.sops.yaml` may be committed. Encryption uses the existing `.sops.yaml` recipients. The API endpoint must be reachable on port `6443` and covered by the server's TLS certificate.
