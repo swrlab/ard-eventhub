@@ -16,14 +16,15 @@ patches:
   - path: host-ports.yaml
 
 configMapGenerator:
-  - name: nats
-    behavior: merge
-    files:
-      - routes.conf
   # The cluster layer merges NATS_SERVER_NAME and NATS_CLUSTER_ADVERTISE into this map.
+  # Route hosts: each name must resolve to its machine. The dev, test, and prod names of one
+  # machine share its IP because the ports differ.
   - name: nats-zone
     literals:
       - NATS_CLUSTER_NAME=eventhub-test
+      - NATS_ROUTE_HOST_BAD=eventhub-connect-bad-test.swr.cn.ard.de:16222
+      - NATS_ROUTE_HOST_STG=eventhub-connect-stg-test.swr.cn.ard.de:16222
+      - NATS_ROUTE_HOST_MNZ=eventhub-connect-mnz-test.swr.cn.ard.de:16222
 
 # Pin once the connect image is built and pushed to the registry.
 images:

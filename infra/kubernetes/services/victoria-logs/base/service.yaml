@@ -5,7 +5,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: victoria-logs
+    app.kubernetes.io/name: victoria-logs
   ports:
     - name: http
       port: 9428

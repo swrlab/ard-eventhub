@@ -5,7 +5,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: registry
+    app.kubernetes.io/name: registry
   ports:
     - name: http
       port: 5000

@@ -1,8 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: observability
-
 resources:
   - ../../../platform/observability
 
@@ -11,4 +9,3 @@ configMapGenerator:
     behavior: merge
     literals:
       - VECTOR_MACHINE=eventhub-connect-stg
-      - VECTOR_ZONE=stg

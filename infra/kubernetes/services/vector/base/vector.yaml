@@ -1,5 +1,6 @@
 # https://vector.dev/docs/reference/configuration/
-# ${VECTOR_MACHINE} and ${VECTOR_ZONE} are interpolated from ConfigMap vector-env at startup.
+# ${VECTOR_MACHINE} is interpolated from ConfigMap vector-env at startup. The zone comes from the
+# node label topology.kubernetes.io/zone that the NixOS host config sets.
 
 data_dir: /vector-data-dir
 
@@ -17,7 +18,7 @@ transforms:
       - kubernetes_logs
     source: |
       .machine = "${VECTOR_MACHINE}"
-      .zone = "${VECTOR_ZONE}"
+      .zone = .kubernetes.node_labels."topology.kubernetes.io/zone"
       .k8s_namespace = .kubernetes.pod_namespace
       .k8s_pod_name = .kubernetes.pod_name
       .k8s_container_name = .kubernetes.container_name

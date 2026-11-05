@@ -1,5 +1,5 @@
 # One NATS server per stage per machine. Not applied on its own: an environment layer
-# adds routes.conf, the host ports, and the namespace; a cluster layer adds the server identity.
+# adds the route hosts, the host ports, and the namespace; a cluster layer adds the server identity.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 

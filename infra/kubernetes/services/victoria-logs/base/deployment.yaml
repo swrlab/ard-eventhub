@@ -9,11 +9,11 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: victoria-logs
+      app.kubernetes.io/name: victoria-logs
   template:
     metadata:
       labels:
-        app: victoria-logs
+        app.kubernetes.io/name: victoria-logs
     spec:
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 30
@@ -30,13 +30,17 @@ spec:
           image: docker.io/victoriametrics/victoria-logs:v1.53.0
           imagePullPolicy: IfNotPresent
           # https://docs.victoriametrics.com/victorialogs/#list-of-command-line-flags
-          # local-path does not enforce the PVC size, so the disk cap below is what keeps logs
-          # from filling the disk JetStream also writes to. Keep it under the PVC request.
+          # local-path does not enforce the PVC size. maxDiskSpaceUsageBytes drops old daily
+          # partitions but always keeps the last two days, so it is not a hard cap. The hard stop is
+          # minFreeDiskSpaceBytes: below that much free space on the host disk, VictoriaLogs turns
+          # read-only (Vector buffers, then blocks) and leaves the rest to JetStream. 32GiB covers
+          # three stages at max_file_store 8G plus margin.
           args:
             - -storageDataPath=/victoria-logs-data
             - -httpListenAddr=:9428
             - -retentionPeriod=30d
             - -retention.maxDiskSpaceUsageBytes=16GiB
+            - -storage.minFreeDiskSpaceBytes=32GiB
             - -insert.maxQueueDuration=30s
             - -loggerFormat=json
             - -loggerLevel=WARN

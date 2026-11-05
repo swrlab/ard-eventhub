@@ -3,8 +3,9 @@
 #
 # Inside the cluster a stage only talks to itself and to DNS. Pods of another stage cannot reach
 # its pod IPs or Services. The host ports are public on purpose: other machines route to them, so
-# anything that reaches the machine, including another stage, can reach them. NATS authentication
-# is the guard there.
+# anything that reaches the machine, including another stage, can reach them. Authentication is
+# the guard there: route credentials (Secret nats-route) on the cluster port, nats-users.conf on
+# MQTT and WebSocket.
 #
 # 10.42.0.0/16 and 10.43.0.0/16 are the k3s default pod and service CIDRs. Change them here if
 # the NixOS k3s flags ever set --cluster-cidr or --service-cidr.

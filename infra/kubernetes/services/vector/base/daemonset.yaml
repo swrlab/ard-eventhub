@@ -6,11 +6,11 @@ spec:
   revisionHistoryLimit: 3
   selector:
     matchLabels:
-      app: vector
+      app.kubernetes.io/name: vector
   template:
     metadata:
       labels:
-        app: vector
+        app.kubernetes.io/name: vector
     spec:
       serviceAccountName: vector
       terminationGracePeriodSeconds: 60

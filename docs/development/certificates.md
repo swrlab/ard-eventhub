@@ -5,7 +5,7 @@ sidebar:
   icon: certificate
 ---
 
-One certificate per stage covers all three machines. Dev, test, and prod run side by side on each machine: MQTT (`:28883` dev, `:18883` test, `:8883` prod) and the NATS WebSocket (`:29222` dev, `:19222` test, `:9222` prod) present that stage's certificate. Connect dials those ports by the `eventhub-connect-<zone>-<env>.swr.cn.ard.de` names, so they must stay on the certificate. Cluster routes (`:26222` dev, `:16222` test, `:6222` prod) are plaintext.
+One certificate per stage covers all three machines. Dev, test, and prod run side by side on each machine: MQTT (`:28883` dev, `:18883` test, `:8883` prod) and the NATS WebSocket (`:29222` dev, `:19222` test, `:9222` prod) present that stage's certificate. Connect dials those ports by the `eventhub-connect-<zone>-<env>.swr.cn.ard.de` names, so they must stay on the certificate. Cluster routes (`:26222` dev, `:16222` test, `:6222` prod) are plaintext and authenticate with the stage route password (Secret `nats-route`, see [`infra/kubernetes/README.md`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/README.md)).
 
 Each machine is one k3s cluster. Every stage needs the secret `nats-tls` in its own namespace (`eventhub-dev`, `eventhub-test`, `eventhub-prod`).
 

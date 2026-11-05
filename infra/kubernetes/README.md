@@ -28,12 +28,12 @@ infra/kubernetes/
 │   └── observability
 ├── environments/          what one stage shares across machines
 │   ├── shared             NetworkPolicies, included by every stage
-│   ├── dev                namespace, host ports, routes, image
+│   ├── dev                namespace, host ports, route hosts, image
 │   ├── test
 │   └── prod
 └── clusters/<host>/       what one machine runs; one subdirectory per part
     ├── registry
-    ├── observability      machine and zone fields for Vector
+    ├── observability      machine name for Vector
     ├── eventhub-dev       NATS identity, advertise address, connect URLs
     ├── eventhub-test
     └── eventhub-prod
@@ -67,13 +67,16 @@ Every stage namespace gets the policies in [`environments/shared/network-policie
 - Egress to cluster DNS, and to anything outside the cluster (other machines, `ARD_FEED_URL`). Pod and Service IPs of other namespaces are excluded, so dev cannot reach a prod pod or Service.
 - Ingress from anywhere on the stage's host ports: NATS cluster, MQTT, WebSocket, and the operator UI.
 
-The host ports are public on purpose, because the other machines route to them. Any client that reaches the machine can reach them, including pods of another stage. NATS authentication is the guard there, and all stages still share one `nats-users.conf`.
+The host ports are public on purpose, because the other machines route to them. Any client that reaches the machine can reach them, including pods of another stage. Authentication is the guard there:
+
+- The cluster port accepts only routes that present user `eventhub-route` and the stage's route password (Secret `nats-route`). Use a different password per stage. Routes are plaintext, so the password crosses the network unencrypted.
+- MQTT and WebSocket accept the users in `nats-users.conf`. All stages still share that file.
 
 The policies assume the k3s default pod and Service CIDRs (`10.42.0.0/16`, `10.43.0.0/16`). Update them if the NixOS k3s flags change those.
 
 ### How the NATS config is assembled
 
-`services/nats/base/nats.conf` is shared. It takes the server name, cluster name, and advertise address as whole-value environment variables from ConfigMap `nats-zone` (NATS does not expand a variable inside a longer string). `environments/<stage>/routes.conf` is included inside its `cluster` block. Users come from `services/nats/users`. A change to any of these files changes the ConfigMap hash and rolls the pod.
+`services/nats/base/nats.conf` is shared. It takes the server name, cluster name, advertise address, and routes as whole-value environment variables (NATS does not expand a variable inside a longer string). Most come from ConfigMap `nats-zone`: `environments/<stage>` sets the cluster name and the three route hosts (`NATS_ROUTE_HOST_BAD|STG|MNZ`), `clusters/<host>/<stage>` adds the server name and advertise address. The StatefulSet builds each route URL with its credentials, `nats://eventhub-route:$(NATS_ROUTE_PASSWORD)@$(NATS_ROUTE_HOST_<ZONE>)`, through Kubernetes variable expansion. Users come from `services/nats/users`. A change to any of these files changes the ConfigMap hash and rolls the pod. Changing the `nats-route` Secret does not; restart the StatefulSet on all three machines after a rotation.
 
 ## Deploy
 
@@ -97,18 +100,28 @@ Nothing secret is committed. Create these after the namespace exists; the pods w
 | Namespace                        | Secret              | Keys                                            |
 | -------------------------------- | ------------------- | ----------------------------------------------- |
 | `eventhub-dev`, `-test`, `-prod` | `nats-tls`          | `tls.crt`, `tls.key` (type `kubernetes.io/tls`) |
+| `eventhub-dev`, `-test`, `-prod` | `nats-route`        | `password` (same on all three machines)         |
 | `eventhub-dev`, `-test`, `-prod` | `eventhub-connect`  | `NATS_USER`, `NATS_PASSWORD`, `ARD_FEED_URL`    |
 | `registry`                       | `registry-htpasswd` | `htpasswd` (bcrypt lines)                       |
 
 The NATS password is in sops. All stages currently use the same `nats-users.conf`.
+
+The route password goes into a URL, so keep it URL-safe. Generate one per stage and create it on every machine:
+
+```sh
+kubectl --kubeconfig keys/<host>-k3s-cert.yaml -n eventhub-prod create secret generic nats-route \
+  --from-literal=password="$(openssl rand -hex 32)"
+```
+
+Run `openssl rand` once per stage and reuse its output on all three machines. A server with a different password cannot route to the others.
 
 ## Services
 
 - **NATS**: one StatefulSet replica per stage per machine, 10Gi PVC on k3s `local-path`. MQTT streams use 3 replicas. `eventhub-connect` creates `INBOX` and `PLUGINS` without `num_replicas`, so those two streams stay at 1 replica until the code sets it. Three stages share one disk; JetStream is capped at 8G per server.
 - **eventhub-connect**: one replica, `Recreate` because of the host port. The image is a placeholder (`environments/<stage>` `images:`); the repo `Dockerfile` starts ingest, so connect needs its own image with the built UI. Probes only check the TCP port, because the HTTP server is up before NATS and the feed are ready. `UI_ALLOW_CIDR` is not set yet, so the UI accepts every peer that reaches the host port.
 - **registry**: zot with htpasswd auth and a 50Gi PVC. Only a ClusterIP Service so far. Exposure (ingress and TLS) and the k3s `registries.yaml` mirror config (NixOS) are still open. The registry image itself is pulled from ghcr.io, so the registry never depends on itself.
-- **Vector**: DaemonSet that reads pod logs from `/var/log` and ships them to the local VictoriaLogs with `machine`, `zone`, and `k8s_*` fields. Filter by `k8s_namespace` to pick a stage. Checkpoints and a 256 MiB disk buffer live in `/var/lib/vector` on the host.
-- **VictoriaLogs**: one replica, 20Gi PVC, 30 days retention, capped at 16GiB on disk. `local-path` does not enforce PVC sizes, so that cap is what keeps logs from filling the disk JetStream writes to. Size it from measured volume.
+- **Vector**: DaemonSet that reads pod logs from `/var/log` and ships them to the local VictoriaLogs with `machine`, `zone`, and `k8s_*` fields. `zone` is the node label `topology.kubernetes.io/zone`. Filter by `k8s_namespace` to pick a stage. Checkpoints and a 256 MiB disk buffer live in `/var/lib/vector` on the host.
+- **VictoriaLogs**: one replica, 20Gi PVC, 30 days retention. `local-path` does not enforce PVC sizes. `-retention.maxDiskSpaceUsageBytes=16GiB` drops the oldest daily partitions above 16GiB, but always keeps the last two days, so it is a target, not a cap. The hard stop is `-storage.minFreeDiskSpaceBytes=32GiB`: once the host disk has less free space than that, VictoriaLogs stops accepting logs (Vector buffers 256 MiB, then blocks) and the rest stays for JetStream. On a disk smaller than about 60GB logs stop early. Size both from measured volume.
 
 ## Local development
 

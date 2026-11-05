@@ -15,7 +15,6 @@ configMapGenerator:
   - name: vector-env
     literals:
       - VECTOR_MACHINE=unset
-      - VECTOR_ZONE=unset
 
 labels:
   - pairs:

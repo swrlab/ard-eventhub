@@ -42,6 +42,21 @@ spec:
           envFrom:
             - configMapRef:
                 name: nats-zone
+          # Kubelet expands $(VAR) from envFrom and earlier entries; NATS cannot, it only takes whole
+          # values. Created by hand per namespace like nats-tls; the pod waits until it exists.
+          # The password goes into a URL, so it must be URL-safe (openssl rand -hex 32).
+          env:
+            - name: NATS_ROUTE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nats-route
+                  key: password
+            - name: NATS_ROUTE_BAD
+              value: nats://eventhub-route:$(NATS_ROUTE_PASSWORD)@$(NATS_ROUTE_HOST_BAD)
+            - name: NATS_ROUTE_STG
+              value: nats://eventhub-route:$(NATS_ROUTE_PASSWORD)@$(NATS_ROUTE_HOST_STG)
+            - name: NATS_ROUTE_MNZ
+              value: nats://eventhub-route:$(NATS_ROUTE_PASSWORD)@$(NATS_ROUTE_HOST_MNZ)
           ports:
             - name: nats
               containerPort: 4222
