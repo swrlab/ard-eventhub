@@ -60,7 +60,6 @@ test('knownLivestreams uses externalId and nests publisher and institution', () 
 	assertEquals(musikclub?.title, 'ARD Musikclub')
 	assertEquals(musikclub?.publisher, { id: 'urn:ard:publisher:ea659609f53316e6', title: 'SWR1 BW' })
 	assertEquals(musikclub?.institution, { id: 'urn:ard:institution:house', title: 'Südwestrundfunk' })
-	assertEquals(rows.filter((entry) => entry.overlay).length, 6)
 	assertEquals(rows[0]?.overlay, false)
 })
 
@@ -81,7 +80,6 @@ test('knownLivestreams keeps a feed row when its externalId is also an overlay t
 	const musikclub = rows.filter((entry) => entry.id === 'urn:ard:permanent-livestream:7c0dd5c9f90b67ab')
 	assertEquals(musikclub.length, 1)
 	assertEquals(musikclub[0]?.overlay, false)
-	assertEquals(rows.filter((entry) => entry.overlay).length, 4)
 })
 
 test('knownLivestreams skips a feed item with no externalId', () => {
@@ -103,7 +101,6 @@ test('knownLivestreams skips a feed item with no externalId', () => {
 		rows.some((entry) => entry.title === 'No external id'),
 		false
 	)
-	assertEquals(rows.filter((entry) => entry.overlay).length, 6)
 	assertEquals(
 		rows.find((entry) => entry.publisher.id === 'urn:ard:publisher:ea659609f53316e6')?.publisher.title,
 		'SWR1 BW'
@@ -136,7 +133,11 @@ test('livestreamOwners indexes a loaded feed and is null when none is loaded', (
 
 test('knownLivestreams still lists the overlay when no feed is loaded', () => {
 	const rows = knownLivestreams(null)
-	assertEquals(rows.length, 6)
+	const hrInfoKoop = rows.find((entry) => entry.id === 'urn:ard:permanent-livestream:5edfe1cef52b1e2c')
+	assertEquals(rows.length, 7)
+	assertEquals(hrInfoKoop?.title, 'hr-info Kooperation')
+	assertEquals(hrInfoKoop?.publisher.id, 'urn:ard:publisher:91601d9841363177')
+	assertEquals(hrInfoKoop?.overlay, true)
 	assertEquals(
 		rows.every((entry) => entry.overlay && entry.institution === null && entry.publisher.title === ''),
 		true

@@ -19,6 +19,7 @@ Intern erlaubt Eventhub diese Topics über `src/config/allowed-livestreams.json`
 | ARD Musikclub           | SWR1 BW/RP | `urn:ard:permanent-livestream:7c0dd5c9f90b67ab` |
 | ARD Popnacht            | SWR3       | `urn:ard:permanent-livestream:885aa9c84e5374bd` |
 | Die Junge Nacht der ARD | WDR/ 1LIVE | `urn:ard:permanent-livestream:d22e908de85bfd44` |
+| hr-info Kooperation     | hr-info    | `urn:ard:permanent-livestream:5edfe1cef52b1e2c` |
 
 ## Firehose/ Wildcard
 

@@ -25,6 +25,11 @@
 			"id": "urn:ard:permanent-livestream:d22e908de85bfd44",
 			"name": "Die Junge Nacht der ARD",
 			"publisherIds": ["urn:ard:publisher:4560bc62a6bdc9ef"]
+		},
+		{
+			"id": "urn:ard:permanent-livestream:5edfe1cef52b1e2c",
+			"name": "hr-info Kooperation",
+			"publisherIds": ["urn:ard:publisher:91601d9841363177"]
 		}
 	]
 }
