@@ -1,7 +1,25 @@
+import type { LivestreamOwner } from '#types'
 import { test } from '@cross/test'
 import { assertEquals } from '@std/assert'
+import allowedLivestreamsJson from '../../config/allowed-livestreams.json' with { type: 'json' }
+import { allowedLivestreamsConfig } from '../../schemas/config.ts'
 import { serveTestFeed } from '../feed/test-feed.ts'
 import { checkEventOwnership, checkServiceOwnership } from './ownership.ts'
+
+const overlay = allowedLivestreamsConfig.parse(allowedLivestreamsJson)
+
+/**
+ * Livestream URN that is not an allow-listed topic, so the overlay row stays an overlay.
+ * @param index - Disambiguator
+ * @param taken - URNs already chosen
+ * @returns URN absent from the allow-list
+ */
+const fixtureLivestreamId = (index: number, taken: Set<string>): string => {
+	let id = `urn:ard:permanent-livestream:fixture-${index.toString(16).padStart(4, '0')}`
+	while (taken.has(id)) id = `${id}x`
+	taken.add(id)
+	return id
+}
 
 const SUBJECT = 'urn:ard:institution:a3004ff924ece1a2'
 const OTHER = 'urn:ard:institution:b71c0e4d9a25f338'
@@ -94,24 +112,32 @@ test('event ownership checks every service against the served feed in services o
 })
 
 test('event ownership accepts an overlay topic from any of its allowed publishers', () => {
-	const musikclub = 'urn:ard:permanent-livestream:7c0dd5c9f90b67ab'
-	const swr1Bw = 'urn:ard:publisher:ea659609f53316e6'
-	const swr1Rp = 'urn:ard:publisher:2d74b4350f0d4d53'
-	const restore = serveTestFeed({
-		'urn:ard:permanent-livestream:c2656164ae0f6745': { publisherId: swr1Bw, institutionId: SUBJECT },
-		'urn:ard:permanent-livestream:e55592f337f172a5': { publisherId: swr1Rp, institutionId: SUBJECT },
-	})
+	const publishers = [...new Set(overlay.livestreams.flatMap((entry) => entry.publisherIds))]
+	const taken = new Set(overlay.livestreams.map((entry) => entry.id))
+	const feedOwners: Record<string, LivestreamOwner> = {}
+	for (const [index, publisherId] of publishers.entries()) {
+		feedOwners[fixtureLivestreamId(index, taken)] = { publisherId, institutionId: SUBJECT }
+	}
+	const restore = serveTestFeed(feedOwners)
 	try {
-		const services = [swr1Bw, swr1Rp].map((publisherId) => ({ id: musikclub, publisherId, institutionId: SUBJECT }))
-		assertEquals(checkEventOwnership({ subjectInstitutionId: SUBJECT, services }), [])
-		const errors = checkEventOwnership({
-			subjectInstitutionId: SUBJECT,
-			services: [{ id: musikclub, publisherId: PUBLISHER, institutionId: SUBJECT }],
-		})
-		assertEquals(
-			errors.map((error) => error.path),
-			['.body.services.0.publisherId']
-		)
+		for (const topic of overlay.livestreams) {
+			const services = topic.publisherIds.map((publisherId) => ({
+				id: topic.id,
+				publisherId,
+				institutionId: SUBJECT,
+			}))
+			assertEquals(checkEventOwnership({ subjectInstitutionId: SUBJECT, services }), [])
+			let outsider = 'urn:ard:publisher:not-allow-listed'
+			while (topic.publisherIds.includes(outsider)) outsider = `${outsider}-x`
+			const errors = checkEventOwnership({
+				subjectInstitutionId: SUBJECT,
+				services: [{ id: topic.id, publisherId: outsider, institutionId: SUBJECT }],
+			})
+			assertEquals(
+				errors.map((error) => error.path),
+				['.body.services.0.publisherId']
+			)
+		}
 	} finally {
 		restore()
 	}

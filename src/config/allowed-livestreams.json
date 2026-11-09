@@ -4,7 +4,11 @@
 		{
 			"id": "urn:ard:event-livestream:22da95c49a047225",
 			"name": "ARD Hitnacht",
-			"publisherIds": ["urn:ard:publisher:f2b792614f2e6f87"]
+			"publisherIds": [
+				"urn:ard:publisher:4a35b75753f10416",
+				"urn:ard:publisher:775651b61cfa02a1",
+				"urn:ard:publisher:08c556bcfa1b3285"
+			]
 		},
 		{
 			"id": "urn:ard:permanent-livestream:873b8349bf7db07e",
