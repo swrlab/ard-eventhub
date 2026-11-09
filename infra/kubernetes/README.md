@@ -44,7 +44,7 @@ The NATS server name is the JetStream identity of its volume. Do not rename it o
 Recipes take the kubeconfig from `keys/<host>-k3s-cert.yaml`. They never use the current context.
 
 ```sh
-just k8s-build
+just k8s-build-dryrun
 just k8s-diff eventhub-connect-bad
 just k8s-diff eventhub-connect-bad eventhub-dev
 just k8s-apply eventhub-connect-bad eventhub-dev
@@ -52,7 +52,7 @@ just k8s-apply eventhub-connect-bad eventhub-dev
 
 On a fresh machine apply `registry`, `observability`, then `eventhub-dev`, `eventhub-test`, `eventhub-prod`. Roll a NATS change one machine at a time and wait for `rollout status statefulset/nats` before the next.
 
-`k8s-build`, `k8s-diff`, and `k8s-apply` decrypt [`services/registry/passwd.sops.yaml`](services/registry/passwd.sops.yaml) and [`components/registry-pull/secret.sops.yaml`](components/registry-pull/secret.sops.yaml), run kustomize, then delete the plaintext. The first is Secret `registry-htpasswd`. The second is Secret `registry` (pull auth for `registry.registry.svc:5000`) in `observability` and each stage namespace. Both plaintext files are gitignored.
+`k8s-build-dryrun`, `k8s-diff`, and `k8s-apply` decrypt [`services/registry/passwd.sops.yaml`](services/registry/passwd.sops.yaml) and [`components/registry-pull/secret.sops.yaml`](components/registry-pull/secret.sops.yaml), run kustomize, then delete the plaintext. The first is Secret `registry-htpasswd`. The second is Secret `registry` (pull auth for `registry.registry.svc:5000`) in `observability` and each stage namespace. Both plaintext files are gitignored.
 
 These Secrets are still created by hand. The pods wait for them.
 
@@ -70,7 +70,7 @@ The route password is part of a URL, so keep it URL-safe. Generate it once per s
 
 `just registry-sync <host>` copies [`external-images.txt`](external-images.txt) into zot at `http://<server>:5000`. `<server>` is the number in [`infra/nixos/hosts`](../nixos/hosts). The upstream host is dropped on push, so pods pull `registry.registry.svc:5000/library/nats:2.14.6`. zot itself stays on ghcr.io.
 
-`just build-docker <host>` and `just build-container <host>` push `ingest:<UTC timestamp>--v<package version>`. The connect image is still the placeholder tag in `environments/<stage>` until one is pinned.
+`just build-docker` and `just build-container` build `ingest:<UTC timestamp>--v<package version>` once and push that tag to every host in [`infra/nixos/hosts`](../nixos/hosts). The connect image is still the placeholder tag in `environments/<stage>` until one is pinned.
 
 NixOS writes `/etc/rancher/k3s/registries.yaml` so containerd pulls `registry.registry.svc:5000` from `http://127.0.0.1:5000`. Restart k3s after that file changes.
 

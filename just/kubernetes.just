@@ -10,15 +10,15 @@ PULL_SECRET := K8S / 'components/registry-pull/secret.yaml'
 
 # Decrypt registry secrets into gitignored files kustomize reads.
 _k8s-decrypt:
-	umask 077 && sops --decrypt --output {{ quote(PASSWD) }} {{ quote(K8S / 'services/registry/passwd.sops.yaml') }}
-	umask 077 && sops --decrypt --output {{ quote(PULL_SECRET) }} {{ quote(K8S / 'components/registry-pull/secret.sops.yaml') }}
+	just --yes decrypt-key {{ K8S / 'services/registry/passwd.sops.yaml' }}
+	just --yes decrypt-key {{ K8S / 'components/registry-pull/secret.sops.yaml' }}
 
 _k8s-clean:
 	rm -f {{ quote(PASSWD) }} {{ quote(PULL_SECRET) }}
 
 # render every machine bundle (no cluster required)
 [group('K3S')]
-k8s-build:
+k8s-build-dryrun:
 	#!/usr/bin/env bash
 	set -euo pipefail
 	trap 'just _k8s-clean' EXIT

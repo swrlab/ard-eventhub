@@ -25,6 +25,6 @@ log:
   output: /dev/stderr
 extensions:
   ui:
-    enable: true
+    enable: false
   search:
     enable: false
