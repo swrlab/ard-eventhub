@@ -16,6 +16,7 @@ keys/*.json
 # Plaintext kustomize inputs. just k8s-* decrypts these and deletes them.
 infra/kubernetes/services/registry/passwd.yaml
 infra/kubernetes/components/registry-pull/secret.yaml
+infra/kubernetes/services/nats/tls.yaml
 
 # Dependency directories
 node_modules/

@@ -22,6 +22,8 @@ Tasks are `just` recipes. `just --list` is the index.
 
 Code, filenames, variables, comments, and JSDoc are English. Operator UI copy and `docs/` are German. Internal docs in `docs/development/` and RFCs in `docs/context-rfc/` are English (US).
 
+Never use Python. Not for scripts, recipes, generators, glue, or one-off helpers. Use TypeScript, or shell in a `just` recipe.
+
 ## Changes
 
 - Match the surrounding code. Oxfmt owns formatting; `just lint` checks and `just format` fixes.

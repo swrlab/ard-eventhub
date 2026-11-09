@@ -144,8 +144,8 @@ spec:
           configMap:
             name: nats
             defaultMode: 0444
-        # Created by hand per namespace (see docs/development/certificates.md). The image has no
-        # shell, so the pod waits in CreateContainerConfigError until this secret exists.
+        # Self-signed placeholder from tls.sops.yaml until the CA certificate replaces it.
+        # See docs/development/certificates.md. The image has no shell.
         - name: tls
           secret:
             secretName: nats-tls

@@ -2,19 +2,21 @@
 # infra/nixos/hosts, and every recipe passes that host's kubeconfig (keys/<host>-k3s-cert.yaml)
 # explicitly instead of trusting the current context. A part (registry, observability,
 # eventhub-dev, eventhub-test, eventhub-prod) selects objects by label app.kubernetes.io/instance.
-# Each recipe decrypts the registry sops files, runs kustomize, then deletes the plaintext.
+# Each recipe decrypts the sops files kustomize reads, runs kustomize, then deletes the plaintext.
 
 K8S := source_directory() / '../infra/kubernetes'
 PASSWD := K8S / 'services/registry/passwd.yaml'
 PULL_SECRET := K8S / 'components/registry-pull/secret.yaml'
+NATS_TLS := K8S / 'services/nats/tls.yaml'
 
-# Decrypt registry secrets into gitignored files kustomize reads.
+# Decrypt sops files into gitignored files kustomize reads.
 _k8s-decrypt:
 	just --yes decrypt-key {{ K8S / 'services/registry/passwd.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'components/registry-pull/secret.sops.yaml' }}
+	just --yes decrypt-key {{ K8S / 'services/nats/tls.sops.yaml' }}
 
 _k8s-clean:
-	rm -f {{ quote(PASSWD) }} {{ quote(PULL_SECRET) }}
+	rm -f {{ quote(PASSWD) }} {{ quote(PULL_SECRET) }} {{ quote(NATS_TLS) }}
 
 # render every machine bundle (no cluster required)
 [group('K3S')]
@@ -57,3 +59,38 @@ k8s-apply host part='':
 	part={{ quote(part) }}
 	kubectl --kubeconfig "$kubeconfig" apply \
 		-k {{ quote(K8S / 'clusters' / host) }} {{ if part == '' { '' } else { '-l app.kubernetes.io/instance=' + quote(part) } }}
+
+# install a CA leaf as Secret nats-tls and restart NATS (stage: dev, test, prod; cert defaults to tls.crt)
+# the key is .local/certs/<stage>/eventhub-connect-<stage>.key from just csr
+[confirm('Replace nats-tls on this host? Type yes...')]
+[group('K3S')]
+k8s-tls host stage cert='tls.crt':
+	#!/usr/bin/env bash
+	set -euo pipefail
+	stage={{ quote(stage) }}
+	cert={{ quote(cert) }}
+	case "$stage" in
+		dev|test|prod) ;;
+		*)
+			echo "stage must be dev, test, or prod" >&2
+			exit 1
+			;;
+	esac
+	key={{ quote(source_directory() / '../.local/certs') }}/"$stage/eventhub-connect-$stage.key"
+	if [[ ! -f "$cert" ]]; then
+		echo "certificate not found: $cert" >&2
+		exit 1
+	fi
+	if [[ ! -f "$key" ]]; then
+		echo "key not found: $key" >&2
+		exit 1
+	fi
+	kubeconfig={{ quote('keys/' + host + '-k3s-cert.yaml') }}
+	ns="eventhub-$stage"
+	kubectl --kubeconfig "$kubeconfig" -n "$ns" create secret tls nats-tls \
+		--cert="$cert" \
+		--key="$key" \
+		--dry-run=client -o yaml \
+		| kubectl --kubeconfig "$kubeconfig" apply -f -
+	kubectl --kubeconfig "$kubeconfig" -n "$ns" rollout restart statefulset/nats
+	kubectl --kubeconfig "$kubeconfig" -n "$ns" rollout status statefulset/nats

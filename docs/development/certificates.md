@@ -68,34 +68,23 @@ openssl x509 -in tls.crt -noout -ext subjectAltName
 
 Each machine is its own cluster. The same `tls.crt` and the same key go on all three. The secret name is `nats-tls`. The pod mounts it at `/etc/nats/tls`, and `nats.conf` reads `tls.crt` and `tls.key` from there.
 
+The bundle already creates `nats-tls` from [`tls.sops.yaml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/services/nats/tls.sops.yaml). That certificate is self-signed, valid for one year, and lists every stage hostname, so the pod can start while the CA request is open. Clients that check the trust store will reject it. `just k8s-apply` writes this placeholder back over whatever is in the cluster.
+
 The commands below are test on Baden-Baden. Dev and prod work the same way with their own namespace and bundle part (`eventhub-dev`, `eventhub-prod`) and key (`.local/certs/dev/eventhub-connect-dev.key`, `.local/certs/prod/eventhub-connect-prod.key`).
 
-Apply the bundle part first so the namespace exists, then create the secret. Until it exists, the pod stays in `CreateContainerConfigError`; the server image has no shell. It starts on its own once the secret is there.
+Remove `tls.yaml` from [`services/nats/kustomization.yaml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/services/nats/kustomization.yaml) before installing the CA certificate, or the next `just k8s-apply` puts the placeholder back. Apply the bundle part so the namespace exists, then install the leaf. NATS reads the files at process start. `just k8s-tls` writes Secret `nats-tls` and restarts that machine's pod.
 
 ```sh
 just k8s-apply eventhub-connect-bad eventhub-test
-
-kubectl --kubeconfig keys/eventhub-connect-bad-k3s-cert.yaml \
-  -n eventhub-test create secret tls nats-tls \
-  --cert=tls.crt \
-  --key=.local/certs/test/eventhub-connect-test.key
-
-kubectl --kubeconfig keys/eventhub-connect-bad-k3s-cert.yaml \
-  -n eventhub-test rollout status statefulset/nats
+just k8s-tls eventhub-connect-bad test tls.crt
 ```
 
-Repeat on `eventhub-connect-stg`, then `eventhub-connect-mnz`. Same files, same secret name. One machine at a time, so the other two keep quorum.
+Repeat on `eventhub-connect-stg`, then `eventhub-connect-mnz`. Same leaf, same key. One machine at a time, so the other two keep quorum.
 
 ## Replace a certificate
 
-NATS reads the files at process start. Update the secret, then restart that machine's pod. Do one machine, wait until it is Ready, then the next.
+`just k8s-tls` replaces an existing secret and waits until the pod is Ready. Do one machine, then the next.
 
 ```sh
-kubectl -n eventhub-test create secret tls nats-tls \
-  --cert=tls.crt \
-  --key=.local/certs/test/eventhub-connect-test.key \
-  --dry-run=client -o yaml | kubectl apply -f -
-
-kubectl -n eventhub-test rollout restart statefulset/nats
-kubectl -n eventhub-test rollout status statefulset/nats
+just k8s-tls eventhub-connect-bad test tls.crt
 ```

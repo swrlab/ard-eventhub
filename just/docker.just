@@ -74,28 +74,30 @@ _build-container:
 		echo "REGISTRY_USER and REGISTRY_PASSWORD must be set in .env.docker.sops.yaml" >&2
 		exit 1
 	fi
-	if ! command -v container >/dev/null; then
-		echo "Apple container CLI is not on PATH" >&2
+	if ! command -v container >/dev/null || ! command -v crane >/dev/null || ! command -v rsync >/dev/null; then
+		echo "Apple container CLI, crane, and rsync must be on PATH" >&2
 		exit 1
 	fi
 
 	version=$(just --quiet _image-version)
 	targets=$(just --quiet _image-targets "$version")
 	local_ref="ingest:${version}"
-	refs=("$local_ref")
-	cleanup() {
-		container image rm --force "${refs[@]}" >/dev/null 2>&1 || true
-	}
-	trap cleanup EXIT
+	tmp=$(mktemp -d)
+	cfg=$(mktemp -d)
+	context=$(mktemp -d)
+	trap 'rm -rf "$tmp" "$cfg" "$context"; container image rm --force "$local_ref" >/dev/null 2>&1 || true' EXIT
+
+	grep -v -e '^#' -e '^$' .dockerignore | rsync -a --exclude-from=- ./ "$context/"
 	container system start
-	container build --tag "$local_ref" --platform linux/arm64 --platform linux/amd64 .
+	container build --tag "$local_ref" --platform linux/arm64 --platform linux/amd64 "$context"
+	container image save --output "${tmp}/image.tar" "$local_ref"
+	tar -xf "${tmp}/image.tar" -C "$tmp"
+	rm "${tmp}/image.tar"
 
 	while read -r registry ref; do
 		[[ -z "${registry}" ]] && continue
-		printf '%s' "$REGISTRY_PASSWORD" | container registry login "$registry" \
-			--scheme http --username "$REGISTRY_USER" --password-stdin
-		container image tag "$local_ref" "$ref"
-		refs+=("$ref")
-		container image push --scheme http "$ref"
+		printf '%s' "$REGISTRY_PASSWORD" | DOCKER_CONFIG="$cfg" crane auth login "$registry" --insecure \
+			--username "$REGISTRY_USER" --password-stdin >/dev/null
+		DOCKER_CONFIG="$cfg" crane push --insecure "$tmp" "$ref"
 		echo "pushed ${ref}"
 	done <<< "$targets"

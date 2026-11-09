@@ -52,13 +52,14 @@ just k8s-apply eventhub-connect-bad eventhub-dev
 
 On a fresh machine apply `registry`, `observability`, then `eventhub-dev`, `eventhub-test`, `eventhub-prod`. Roll a NATS change one machine at a time and wait for `rollout status statefulset/nats` before the next.
 
-`k8s-build-dryrun`, `k8s-diff`, and `k8s-apply` decrypt [`services/registry/passwd.sops.yaml`](services/registry/passwd.sops.yaml) and [`components/registry-pull/secret.sops.yaml`](components/registry-pull/secret.sops.yaml), run kustomize, then delete the plaintext. The first is Secret `registry-htpasswd`. The second is Secret `registry` (pull auth for `registry.registry.svc:5000`) in `observability` and each stage namespace. Both plaintext files are gitignored.
+`k8s-build-dryrun`, `k8s-diff`, and `k8s-apply` decrypt [`services/registry/passwd.sops.yaml`](services/registry/passwd.sops.yaml), [`components/registry-pull/secret.sops.yaml`](components/registry-pull/secret.sops.yaml), and [`services/nats/tls.sops.yaml`](services/nats/tls.sops.yaml), run kustomize, then delete the plaintext. The first is Secret `registry-htpasswd`. The second is Secret `registry` (pull auth for `registry.registry.svc:5000`) in `observability` and each stage namespace. The third is Secret `nats-tls`, a self-signed placeholder, in each stage namespace. All three plaintext files are gitignored.
+
+`just k8s-apply` resets `nats-tls` to that placeholder. After the CA certificate is installed, remove `tls.yaml` from [`services/nats/kustomization.yaml`](services/nats/kustomization.yaml) or the next apply puts the placeholder back.
 
 These Secrets are still created by hand. The pods wait for them.
 
 | Namespace                        | Secret             | Keys                                         |
 | -------------------------------- | ------------------ | -------------------------------------------- |
-| `eventhub-dev`, `-test`, `-prod` | `nats-tls`         | `tls.crt`, `tls.key` (`kubernetes.io/tls`)   |
 | `eventhub-dev`, `-test`, `-prod` | `nats-route`       | `password`, same value on all three machines |
 | `eventhub-dev`, `-test`, `-prod` | `eventhub-connect` | `NATS_USER`, `NATS_PASSWORD`, `ARD_FEED_URL` |
 
