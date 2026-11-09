@@ -7,6 +7,12 @@ sidebar:
 
 Server numbers are the second column of [`infra/nixos/hosts`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nixos/hosts). The three stage names of one machine resolve to the same host. Cluster routes, MQTT, WebSocket, and the operator UI use the `.swr.cn.ard.de` name.
 
+## Broadcasters
+
+A house connects outbound from the ARD CN only. There is no internet endpoint and no inbound port on the house side. Each house arranges its own ARD CN access through the ARD process.
+
+The house opens TCP to the three MQTT names below: prod `8883`, test `18883`. TLS verification uses the CA PEM shipped with the credentials. All three names go in the client. When the test servers are ready is covered under [Stages](./stages).
+
 ## Requests
 
 Each block is one request: every FQDN under it is a source, a destination, or both. A block with more than one port stays one request when the form accepts several ports. With a single port field, file that block once per port and keep all three names on it.

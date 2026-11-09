@@ -8,6 +8,10 @@ sidebar:
 
 Der Eventhub unterscheidet zwischen dem über die Umgebungsvariable `STAGE` gesetzten Stage-Wert und verschiedenen Laufzeit-Umgebungen bzw. Deployments (z.B. `beta`, `test`, `prod`).
 
+## Connect
+
+Die Connect-Testumgebung wartet auf die Bereitstellung der Server durch SWR. Einen Termin gibt es noch nicht. Zugänge, Zertifikat und Verbindungsinfos gehen an die Häuser, sobald die drei Testserver bereit stehen. Die Kennung beantragst du beim Eventhub-Team, siehe [_Zugangsdaten_](../user/acl). Hostnamen und Ports stehen unter [_Firewall_](./firewall).
+
 ## Ingest
 
 ### Ingest Service Stages

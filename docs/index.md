@@ -7,7 +7,7 @@ sidebar:
 
 ARD Eventhub verteilt Echtzeit-Metadaten (Live) vor allem für Hörfunksendungen.
 
-Neue Anbindungen laufen über [_Eventhub Connect_](./user/connect-mqtt) (MQTT). Die HTTPS-API ist deprecated und bleibt bis zum letzten Umzug erreichbar. Breaking Changes stehen unter [_Migration auf Eventhub v3_](./user/migration-v3).
+Neue Anbindungen laufen über [_Eventhub Connect_](./user/connect-mqtt) (MQTT). Support steht unter [_Betrieb und Support_](./user/betrieb), der Teststatus unter [_Stages_](./development/stages), die Firewall-Freigaben unter [_Firewall_](./development/firewall). Die HTTPS-API ist deprecated und bleibt bis zum letzten Umzug erreichbar. Breaking Changes stehen unter [_Migration auf Eventhub v3_](./user/migration-v3).
 
 ## Aktive Datenlieferanten
 
