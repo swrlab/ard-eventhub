@@ -24,9 +24,10 @@ coverage
 lib-cov
 .nyc_output
 
-# Blume docs build
+# Blume docs build and built operator UI
 .blume/
 dist/
+static/dist/
 
 # Local temporary exports (e.g. CLI dumps)
 tmp/

@@ -9,12 +9,13 @@ PASSWD := K8S / 'services/registry/passwd.yaml'
 PULL_SECRET := K8S / 'components/registry-pull/secret.yaml'
 NATS_TLS := K8S / 'services/nats/tls.yaml'
 
-# Decrypt sops files into gitignored files kustomize reads.
+# decrypt sops files into gitignored files kustomize reads
 _k8s-decrypt:
 	just --yes decrypt-key {{ K8S / 'services/registry/passwd.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'components/registry-pull/secret.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'services/nats/tls.sops.yaml' }}
 
+# delete the plaintext kustomize inputs after rendering or applying
 _k8s-clean:
 	rm -f {{ quote(PASSWD) }} {{ quote(PULL_SECRET) }} {{ quote(NATS_TLS) }}
 
@@ -61,7 +62,6 @@ k8s-apply host part='':
 		-k {{ quote(K8S / 'clusters' / host) }} {{ if part == '' { '' } else { '-l app.kubernetes.io/instance=' + quote(part) } }}
 
 # install a CA leaf as Secret nats-tls and restart NATS (stage: dev, test, prod; cert defaults to tls.crt)
-# the key is .local/certs/<stage>/eventhub-connect-<stage>.key from just csr
 [confirm('Replace nats-tls on this host? Type yes...')]
 [group('K3S')]
 k8s-tls host stage cert='tls.crt':

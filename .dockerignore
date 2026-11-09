@@ -17,5 +17,6 @@ tmp
 .blume-verify
 coverage
 dist
+static/dist
 *.log
 .DS_Store

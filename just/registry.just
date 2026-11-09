@@ -1,17 +1,16 @@
-# Copy infra/kubernetes/external-images.txt into the zot registry on one machine.
+# Manage the zot registry on each host.
 # The registry is http://<server>:5000 (k3s LoadBalancer). Credentials come from
 # .env.docker.sops.yaml (REGISTRY_USER, REGISTRY_PASSWORD).
 
-# copy each pinned image to one host, skipping a tag whose digest already matches
+# write zot credentials for every host into the local Docker config
 [group('K3S')]
-registry-sync host:
-	sops exec-env --same-process .env.docker.sops.yaml "just _registry-sync {{ quote(host) }}"
+registry-local-setup:
+	sops exec-env --same-process .env.docker.sops.yaml "just _registry-local-setup"
 
-_registry-sync host:
+# log crane in to each host's zot registry using the decrypted env vars
+_registry-local-setup:
 	#!/usr/bin/env bash
 	set -euo pipefail
-	server=$(just --quiet _nix-server {{ quote(host) }})
-	registry="${server}:5000"
 	if [[ -z "${REGISTRY_USER:-}" || -z "${REGISTRY_PASSWORD:-}" ]]; then
 		echo "REGISTRY_USER and REGISTRY_PASSWORD must be set in .env.docker.sops.yaml" >&2
 		exit 1
@@ -21,11 +20,24 @@ _registry-sync host:
 		exit 1
 	fi
 
-	export DOCKER_CONFIG
-	DOCKER_CONFIG=$(mktemp -d)
-	trap 'rm -rf "$DOCKER_CONFIG"' EXIT
-	printf '%s' "$REGISTRY_PASSWORD" | crane auth login "$registry" --insecure \
-		--username "$REGISTRY_USER" --password-stdin >/dev/null
+	while read -r host; do
+		[[ -z "$host" ]] && continue
+		registry="$(just --quiet _nix-server "$host"):5000"
+		printf '%s' "$REGISTRY_PASSWORD" | crane auth login "$registry" --insecure \
+			--username "$REGISTRY_USER" --password-stdin
+	done < <(just --quiet _nix-hosts)
+
+# copy each pinned image to one host, skipping a tag whose digest already matches
+[group('K3S')]
+registry-sync host:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	if ! command -v crane >/dev/null; then
+		echo "crane is not on PATH; run mise install" >&2
+		exit 1
+	fi
+	server=$(just --quiet _nix-server {{ quote(host) }})
+	registry="${server}:5000"
 	echo "syncing to ${registry}"
 
 	while IFS= read -r line || [[ -n "$line" ]]; do

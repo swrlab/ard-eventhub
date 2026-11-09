@@ -2,13 +2,13 @@
 
 Three machines, one k3s cluster each: `eventhub-connect-bad`, `eventhub-connect-stg`, `eventhub-connect-mnz`. Each machine runs dev, test, and prod in its own namespace. The clusters are not joined. The three NATS servers of one stage route to each other over that stage's host ports.
 
-| Part            | Namespace       | What                                     |
-| --------------- | --------------- | ---------------------------------------- |
-| `registry`      | `registry`      | zot, shared by every stage               |
-| `observability` | `observability` | Vector and VictoriaLogs, shared          |
-| `eventhub-dev`  | `eventhub-dev`  | NATS and eventhub-connect                |
-| `eventhub-test` | `eventhub-test` | NATS and eventhub-connect                |
-| `eventhub-prod` | `eventhub-prod` | NATS and eventhub-connect                |
+| Part            | Namespace       | What                            |
+| --------------- | --------------- | ------------------------------- |
+| `registry`      | `registry`      | zot, shared by every stage      |
+| `observability` | `observability` | Vector and VictoriaLogs, shared |
+| `eventhub-dev`  | `eventhub-dev`  | NATS and eventhub-connect       |
+| `eventhub-test` | `eventhub-test` | NATS and eventhub-connect       |
+| `eventhub-prod` | `eventhub-prod` | NATS and eventhub-connect       |
 
 ## Layout
 
@@ -69,9 +69,11 @@ The route password is part of a URL, so keep it URL-safe. Generate it once per s
 
 ## Registry
 
+`just registry-local-setup` writes the zot credentials from `.env.docker.sops.yaml` into the local Docker config for every host in [`infra/nixos/hosts`](../nixos/hosts), so `crane`, `just registry-sync`, `just build-docker`, and `just build-container` can talk to `<server>:5000` directly.
+
 `just registry-sync <host>` copies [`external-images.txt`](external-images.txt) into zot at `http://<server>:5000`. `<server>` is the number in [`infra/nixos/hosts`](../nixos/hosts). The upstream host is dropped on push, so pods pull `registry.registry.svc:5000/library/nats:2.14.6`. zot itself stays on ghcr.io.
 
-`just build-docker` and `just build-container` build `ingest:<UTC timestamp>--v<package version>` once and push that tag to every host in [`infra/nixos/hosts`](../nixos/hosts). The connect image is still the placeholder tag in `environments/<stage>` until one is pinned.
+`just build-docker` and `just build-container` build `eventhub-connect:<UTC timestamp>--v<package version>` from [`Dockerfile.connect`](../../Dockerfile.connect) once and push that tag to every host in [`infra/nixos/hosts`](../nixos/hosts). The connect image is still the placeholder tag in `environments/<stage>` until one is pinned.
 
 NixOS writes `/etc/rancher/k3s/registries.yaml` so containerd pulls `registry.registry.svc:5000` from `http://127.0.0.1:5000`. Restart k3s after that file changes.
 

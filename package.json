@@ -17,13 +17,14 @@
 		"#types": "./src/types/index.ts"
 	},
 	"scripts": {
-		"docker:build": "docker build . -t swr/ard-eventhub",
+		"docker:build": "docker build -f Dockerfile.ingest . -t swr/ard-eventhub",
 		"docker:clean": "docker rm ard-eventhub",
 		"docker:run": "docker run --env-file .env -p 8080:8080 --name ard-eventhub swr/ard-eventhub",
 		"docker:scan": "bun docker:build && docker scout quickview",
 		"format:check": "oxfmt --check",
 		"ingest": "bun run --hot ./src/ingest/server.ts",
-		"start": "bun ./src/ingest/server.ts"
+		"start": "bun ./src/ingest/server.ts",
+		"start:connect": "bun ./src/connect/index.ts"
 	},
 	"dependencies": {
 		"@frytg/check-required-env": "npm:@jsr/frytg__check-required-env@0.2.0",

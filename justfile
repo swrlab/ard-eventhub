@@ -64,7 +64,6 @@ ingest:
 	just env "bun run ingest"
 
 # start eventhub-connect (NATS access + operator UI on :4173)
-# loads ARD_FEED_URL from sops when the shell did not set it, without replacing NATS_URL
 [group('LOCAL')]
 dev:
 	just env "bun run --hot ./src/connect/index.ts"
