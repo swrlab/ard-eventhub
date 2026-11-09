@@ -33,10 +33,12 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
+      imagePullSecrets:
+        - name: registry
       containers:
         - name: nats
-          # Pinned in infra/kubernetes/external-images.txt (docker.io/library/nats).
-          image: nats:2.14.6
+          # Upstream docker.io/library/nats, copied in by just registry-sync.
+          image: registry.registry.svc:5000/library/nats:2.14.6
           imagePullPolicy: IfNotPresent
           args: ['-c', '/etc/nats/nats.conf']
           # STAGE and PORT_* from the stage layer.

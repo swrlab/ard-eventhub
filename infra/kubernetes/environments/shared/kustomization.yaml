@@ -10,6 +10,9 @@ resources:
   - ../../services/nats
   - ../../services/eventhub-connect
 
+components:
+  - ../../components/registry-pull
+
 replacements:
   - source: { kind: ConfigMap, name: eventhub-stage, fieldPath: data.PORT_CLUSTER }
     targets:

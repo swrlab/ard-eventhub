@@ -24,11 +24,13 @@ spec:
         fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
+      imagePullSecrets:
+        - name: registry
       containers:
         - name: victoria-logs
           # Repo: https://github.com/VictoriaMetrics/VictoriaLogs
-          # Pinned in infra/kubernetes/external-images.txt.
-          image: docker.io/victoriametrics/victoria-logs:v1.53.0
+          # Upstream docker.io/victoriametrics/victoria-logs, copied in by just registry-sync.
+          image: registry.registry.svc:5000/victoriametrics/victoria-logs:v1.53.0
           imagePullPolicy: IfNotPresent
           # https://docs.victoriametrics.com/victorialogs/#list-of-command-line-flags
           # local-path does not enforce the PVC size. maxDiskSpaceUsageBytes drops old daily

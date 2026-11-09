@@ -52,6 +52,15 @@
     ]);
   };
 
+  # Image names use registry.registry.svc:5000. containerd on the host cannot
+  # resolve that DNS name, and zot is HTTP, so pull it from the local ServiceLB port.
+  environment.etc."rancher/k3s/registries.yaml".text = ''
+    mirrors:
+      "registry.registry.svc:5000":
+        endpoint:
+          - "http://127.0.0.1:5000"
+  '';
+
   networking.firewall.enable = false;
 
   programs.zsh.enable = true;

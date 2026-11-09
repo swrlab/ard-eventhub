@@ -79,7 +79,7 @@ spec:
         - name: config
           configMap:
             name: registry-config
-        # Key `htpasswd` (bcrypt lines). Created from sops, never committed.
+        # Key `htpasswd` (bcrypt lines) from passwd.sops.yaml, decrypted into the bundle by just k8s-*.
         - name: htpasswd
           secret:
             secretName: registry-htpasswd

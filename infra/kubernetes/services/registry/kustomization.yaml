@@ -1,4 +1,5 @@
 # zot registry, one per machine, shared by every stage.
+# passwd.yaml is the decrypt of passwd.sops.yaml. just k8s-* writes it and deletes it after kustomize.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -9,6 +10,7 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
+  - passwd.yaml
 
 configMapGenerator:
   - name: registry-config

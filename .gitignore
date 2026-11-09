@@ -13,6 +13,10 @@ keys/*.json
 !keys/*.sops.json
 .env
 
+# Plaintext kustomize inputs. just k8s-* decrypts these and deletes them.
+infra/kubernetes/services/registry/passwd.yaml
+infra/kubernetes/components/registry-pull/secret.yaml
+
 # Dependency directories
 node_modules/
 coverage

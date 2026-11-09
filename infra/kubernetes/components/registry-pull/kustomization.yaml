@@ -1,0 +1,7 @@
+# Secret registry, pull auth for registry.registry.svc:5000.
+# secret.yaml is the decrypt of secret.sops.yaml. just k8s-* writes it and deletes it after kustomize.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - secret.yaml

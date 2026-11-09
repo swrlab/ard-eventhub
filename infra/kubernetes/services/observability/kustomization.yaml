@@ -10,6 +10,9 @@ resources:
   - victoria-logs
   - vector
 
+components:
+  - ../../components/registry-pull
+
 labels:
   - pairs:
       app.kubernetes.io/instance: observability
