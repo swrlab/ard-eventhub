@@ -25,3 +25,22 @@ images:
 labels:
   - pairs:
       app.kubernetes.io/instance: eventhub-dev
+
+# env/8 and env/9 are NATS_MAX_MEMORY_STORE and GOMEMLIMIT. env/0 stays ZONE.
+patches:
+  - target:
+      kind: StatefulSet
+      name: nats
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env/8/value
+        value: 128M
+      - op: replace
+        path: /spec/template/spec/containers/0/env/9/value
+        value: 400MiB
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 256Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 512Mi

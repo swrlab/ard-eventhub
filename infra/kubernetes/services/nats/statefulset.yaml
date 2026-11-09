@@ -50,6 +50,7 @@ spec:
           # names of one machine share its IP because the ports differ.
           env:
             # Must stay first: clusters/<machine> replaces env/0.
+            # env/8 and env/9 stay NATS_MAX_MEMORY_STORE and GOMEMLIMIT: dev and test replace those values.
             - name: ZONE
               value: unset
             - name: NATS_SERVER_NAME
@@ -71,6 +72,12 @@ spec:
               value: nats://eventhub-route:$(NATS_ROUTE_PASSWORD)@eventhub-connect-stg-$(STAGE).swr.cn.ard.de:$(PORT_CLUSTER)
             - name: NATS_ROUTE_MNZ
               value: nats://eventhub-route:$(NATS_ROUTE_PASSWORD)@eventhub-connect-mnz-$(STAGE).swr.cn.ard.de:$(PORT_CLUSTER)
+            # Prod. Dev and test patch both. The store ceiling is only memory-backed streams;
+            # GOMEMLIMIT is about 80% of the limit so the garbage collector runs before the cgroup kills the process.
+            - name: NATS_MAX_MEMORY_STORE
+              value: 512M
+            - name: GOMEMLIMIT
+              value: 800MiB
           ports:
             - name: nats
               containerPort: 4222
@@ -107,12 +114,13 @@ spec:
             periodSeconds: 15
             timeoutSeconds: 2
             failureThreshold: 3
+          # Prod. Dev and test patch the request and the limit.
           resources:
             requests:
               cpu: 200m
-              memory: 1Gi
+              memory: 512Mi
             limits:
-              memory: 2Gi
+              memory: 1Gi
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
