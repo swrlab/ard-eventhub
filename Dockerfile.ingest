@@ -6,7 +6,7 @@ WORKDIR /web/app
 COPY package.json bun.lock .npmrc bunfig.toml ./
 RUN bun install --frozen-lockfile --production
 
-COPY . .
+COPY src ./src
 
 EXPOSE 80
 

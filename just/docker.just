@@ -56,8 +56,8 @@ build-docker:
 build-container:
 	#!/usr/bin/env bash
 	set -euo pipefail
-	if ! command -v container >/dev/null || ! command -v crane >/dev/null || ! command -v rsync >/dev/null; then
-		echo "Apple container CLI, crane, and rsync must be on PATH" >&2
+	if ! command -v container >/dev/null || ! command -v crane >/dev/null; then
+		echo "Apple container CLI and crane must be on PATH" >&2
 		exit 1
 	fi
 
@@ -65,12 +65,10 @@ build-container:
 	targets=$(just --quiet _image-targets "$version")
 	local_ref="eventhub-connect:${version}"
 	tmp=$(mktemp -d)
-	context=$(mktemp -d)
-	trap 'rm -rf "$tmp" "$context"; container image rm --force "$local_ref" >/dev/null 2>&1 || true' EXIT
+	trap 'rm -rf "$tmp"; container image rm --force "$local_ref" >/dev/null 2>&1 || true' EXIT
 
-	grep -v -e '^#' -e '^$' .dockerignore | rsync -a --exclude-from=- ./ "$context/"
 	container system start
-	container build -f "$context/Dockerfile.connect" --tag "$local_ref" --platform linux/arm64 --platform linux/amd64 "$context"
+	container build -f Dockerfile.connect --tag "$local_ref" --platform linux/arm64 --platform linux/amd64 .
 	container image save --output "${tmp}/image.tar" "$local_ref"
 	tar -xf "${tmp}/image.tar" -C "$tmp"
 	rm "${tmp}/image.tar"
