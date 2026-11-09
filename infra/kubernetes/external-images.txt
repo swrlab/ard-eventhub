@@ -1,0 +1,15 @@
+# Upstream images copied into the zot registry on each machine.
+# One image per line: registry/repository:tag
+# Blank lines and # comments are ignored. No digests, no floating tags.
+#
+# The registry host is dropped on push. docker.io/library/nats:2.14.6 is stored
+# as library/nats:2.14.6, which is the path a docker.io mirror requests.
+# A manifest image nats:2.14.6 matches docker.io/library/nats:2.14.6.
+#
+# Keep this list in step with image: under services/. just registry-check fails
+# when they differ. ghcr.io/project-zot/zot stays on ghcr.io so zot can start
+# empty. eventhub-connect is built here and is not listed.
+
+docker.io/library/nats:2.14.6
+docker.io/timberio/vector:0.61.0-distroless-libc
+docker.io/victoriametrics/victoria-logs:v1.53.0

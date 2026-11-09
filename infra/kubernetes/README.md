@@ -16,6 +16,7 @@ Kubernetes does not connect the machines. The three NATS servers of one stage, o
 
 ```text
 infra/kubernetes/
+├── external-images.txt    upstream images copied into the per-machine zot
 ├── services/              one directory per workload, no machine or stage values
 │   ├── registry           namespace registry, ready to apply
 │   ├── observability      namespace observability: vector, victoria-logs
@@ -120,9 +121,26 @@ Run `openssl rand` once per stage and reuse its output on all three machines. A 
 
 - **NATS**: one StatefulSet replica per stage per machine, 10Gi PVC on k3s `local-path`. MQTT streams use 3 replicas. `eventhub-connect` creates `INBOX` and `PLUGINS` without `num_replicas`, so those two streams stay at 1 replica until the code sets it. Three stages share one disk; JetStream is capped at 8G per server.
 - **eventhub-connect**: one replica, `Recreate` because of the host port. The image is a placeholder (`images:` in `environments/<stage>`); the repo `Dockerfile` starts ingest, so connect needs its own image with the built UI. Probes only check the TCP port, because the HTTP server is up before NATS and the feed are ready. `UI_ALLOW_CIDR` is not set yet, so the UI accepts every peer that reaches the host port.
-- **registry**: zot with htpasswd auth and a 50Gi PVC. Only a ClusterIP Service so far. Exposure (ingress and TLS) and the k3s `registries.yaml` mirror config (NixOS) are still open. The registry image itself is pulled from ghcr.io, so the registry never depends on itself.
+- **registry**: zot with htpasswd auth and a 50Gi PVC. Only a ClusterIP Service so far. Exposure (ingress and TLS) and the k3s `registries.yaml` mirror config (NixOS) are still open. The registry image itself is pulled from ghcr.io, so the registry never depends on itself. Other upstream images are copied in with `just registry-sync` ([External images](#external-images)).
 - **Vector**: DaemonSet that reads pod logs from `/var/log` and ships them to the local VictoriaLogs with `machine`, `zone`, and `k8s_*` fields. `zone` is the node label `topology.kubernetes.io/zone`; `machine` is `eventhub-connect-<zone>`. Filter by `k8s_namespace` to pick a stage. Checkpoints and a 256 MiB disk buffer live in `/var/lib/vector` on the host.
 - **VictoriaLogs**: one replica, 20Gi PVC, 30 days retention. `local-path` does not enforce PVC sizes. `-retention.maxDiskSpaceUsageBytes=16GiB` drops the oldest daily partitions above 16GiB, but always keeps the last two days, so it is a target, not a cap. The hard stop is `-storage.minFreeDiskSpaceBytes=32GiB`: once the host disk has less free space than that, VictoriaLogs stops accepting logs (Vector buffers 256 MiB, then blocks) and the rest stays for JetStream. On a disk smaller than about 60GB logs stop early. Size both from measured volume.
+
+## External images
+
+[`external-images.txt`](external-images.txt) lists the upstream images the cluster runs, one `registry/repository:tag` per line. `just registry-sync <host>` port-forwards that machine's zot (`svc/registry` in namespace `registry`) and copies each image with `crane copy`, keeping the digest. The registry host is dropped on the way in, so `docker.io/library/nats:2.14.6` is stored as `library/nats:2.14.6`. That is the path a `docker.io` mirror asks for.
+
+zot is HTTP and only a ClusterIP, so the copy uses `keys/<host>-k3s-cert.yaml` plus `REGISTRY_USER` and `REGISTRY_PASSWORD`. Those are the plaintext user and password that were hashed into Secret `registry-htpasswd`. `just registry-sync-all` sends that same pair to every host. Sync one host at a time when a machine's password differs.
+
+`just registry-check` fails when an `image:` under `services/` and the file disagree. A manifest image `nats:2.14.6` matches `docker.io/library/nats:2.14.6`. zot and `eventhub-connect` are not in the file. Bump the tag in both places, sync every machine, then apply.
+
+```sh
+just registry-list
+just registry-check
+REGISTRY_USER=<user> REGISTRY_PASSWORD=<password> just registry-sync eventhub-connect-bad
+REGISTRY_USER=<user> REGISTRY_PASSWORD=<password> just registry-sync-all
+```
+
+Workloads still name the upstream image. k3s pulls from zot once the NixOS `registries.yaml` mirror exists. Until then the copy only makes the blobs available in that machine's registry.
 
 ## Local development
 

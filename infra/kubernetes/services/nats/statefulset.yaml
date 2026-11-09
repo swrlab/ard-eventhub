@@ -35,6 +35,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: nats
+          # Pinned in infra/kubernetes/external-images.txt (docker.io/library/nats).
           image: nats:2.14.6
           imagePullPolicy: IfNotPresent
           args: ['-c', '/etc/nats/nats.conf']

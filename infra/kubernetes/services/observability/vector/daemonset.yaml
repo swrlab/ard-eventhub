@@ -17,6 +17,7 @@ spec:
       containers:
         - name: vector
           # Repo: https://github.com/vectordotdev/vector
+          # Pinned in infra/kubernetes/external-images.txt.
           image: docker.io/timberio/vector:0.61.0-distroless-libc
           imagePullPolicy: IfNotPresent
           args: ['--config-dir', '/etc/vector/']

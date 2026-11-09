@@ -7,6 +7,7 @@ import 'just/kubernetes.just'
 import 'just/mqtt.just'
 import 'just/nats.just'
 import 'just/nixos.just'
+import 'just/registry.just'
 
 # run just in the CLI to see the list of shortcuts
 _default:

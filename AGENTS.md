@@ -8,7 +8,7 @@ ARD Eventhub is a system to distribute real-time (live) metadata for primarily r
 
 ## Setup Commands
 
-- **Install tools:** [mise](https://mise.jdx.dev) → `mise install` (pins `just`, `sops`, and `hyperfine` in [`mise.toml`](mise.toml))
+- **Install tools:** [mise](https://mise.jdx.dev) → `mise install` (pins `just`, `sops`, `hyperfine`, and `crane` in [`mise.toml`](mise.toml))
 - **Install dependencies:** `bun install`
 - **Start ingest service:** `just ingest` (hot reload, sops env)
 - **Start connect (NATS access + operator UI):** `just dev` (needs local NATS: `just nats-up` or `just nats-up-docker`; `NATS_USER` and `NATS_PASSWORD` come from sops). UI at http://127.0.0.1:4173 after `just ui-build`. Vite HMR: `USE_HMR=true just dev` and `just ui`. Connect reads the ARD feed from JetStream KV `KV_ARD_FEED` on boot (downloading `ARD_FEED_URL` only when the bucket is empty) and refreshes it on `POST /api/update-feed`. MCP is on the same process at `POST /mcp` (stateless, no separate session).
@@ -40,7 +40,7 @@ Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `o
 - `config/` – Application configuration (ARD prefixes, allow-lists)
 - `infra/` – Local NATS config (`infra/nats`) and Kustomize manifests for the k3s machines (`infra/kubernetes`: `services/` one directory per workload, `environments/` dev, test, and prod stages, one namespace each, `clusters/<host>` one file per machine that sets its zone). Render with `just k8s-build`, deploy with `just k8s-diff|k8s-apply <host> [part]`
 - `infra/nixos/` – NixOS flake for the Eventhub Connect hosts: `common/base.nix` plus one overlay directory per host. Sync with `just nix-upload|nix-apply|nix-download <host>` (see `infra/nixos/README.md`)
-- `just/` – Split just recipes (`certificate.just`, `docs.just`, `encryption.just`, `integration.just`, `k3s.just`, `kubernetes.just`, `mqtt.just`, `nats.just`, `nixos.just`)
+- `just/` – Split just recipes (`certificate.just`, `docs.just`, `encryption.just`, `integration.just`, `k3s.just`, `kubernetes.just`, `mqtt.just`, `nats.just`, `nixos.just`, `registry.just`)
 - `integration/` – Hurl HTTP suite (`ingest-api.hurl`) mirroring `src/ingest/server.test.ts` (run with `just integration`)
 - `docs/` – Documentation (Markdown, built with Blume)
 - `blume.config.ts` – Docs site configuration

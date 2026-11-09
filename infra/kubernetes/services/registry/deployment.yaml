@@ -27,6 +27,7 @@ spec:
       containers:
         - name: zot
           # Repo: https://github.com/project-zot/zot
+          # Pulled from ghcr.io so the registry can start empty. Not mirrored.
           image: ghcr.io/project-zot/zot:v2.1.22
           imagePullPolicy: IfNotPresent
           args: ['serve', '/etc/zot/config.yaml']

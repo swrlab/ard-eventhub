@@ -27,6 +27,7 @@ spec:
       containers:
         - name: victoria-logs
           # Repo: https://github.com/VictoriaMetrics/VictoriaLogs
+          # Pinned in infra/kubernetes/external-images.txt.
           image: docker.io/victoriametrics/victoria-logs:v1.53.0
           imagePullPolicy: IfNotPresent
           # https://docs.victoriametrics.com/victorialogs/#list-of-command-line-flags
