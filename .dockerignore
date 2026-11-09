@@ -1,0 +1,21 @@
+# Host node_modules is the wrong libc. The image runs bun install itself.
+node_modules
+
+# Secrets and local state. Runtime config comes from the environment.
+.env
+.env.*
+*.sops.*
+*.sops.json
+keys
+.local
+tmp
+
+.git
+.github
+.idea
+.blume
+.blume-verify
+coverage
+dist
+*.log
+.DS_Store

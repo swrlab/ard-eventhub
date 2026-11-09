@@ -19,8 +19,7 @@ creation_rules:
     # this first age public key is a backup key for Audio Lab, created and saved by @frytg
     # this second age public key is the key for GitHub Actions
     pgp: >-
-      BAB9DADFB4B23DEE516EA46A519E2E308159C0E9,
-      EC400072D5EF8BEE57251ED3588FAABBFCD9F44B
+      BAB9DADFB4B23DEE516EA46A519E2E308159C0E9
     # these fingerprints of PGP keys belong to the team
     # they need to be comma-separated (except the last one)
     # you can get your own fingerprints with `just list-pgp`
@@ -28,4 +27,3 @@ creation_rules:
     #
     # this is the mapping of the keys to the team members:
     # BAB9DADFB4B23DEE516EA46A519E2E308159C0E9 - ed25519 daniel.freytag@swr.de
-    # EC400072D5EF8BEE57251ED3588FAABBFCD9F44B - rsa4096 lab@swr.de

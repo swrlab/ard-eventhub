@@ -1,9 +1,11 @@
+# k3s ServiceLB publishes port 5000 on the node. just registry-sync, just build-docker,
+# and just build-container reach it at <server>:5000 (infra/nixos/hosts). HTTP, htpasswd.
 apiVersion: v1
 kind: Service
 metadata:
   name: registry
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app.kubernetes.io/name: registry
   ports:

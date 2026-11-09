@@ -27,4 +27,4 @@ extensions:
   ui:
     enable: true
   search:
-    enable: true
+    enable: false
