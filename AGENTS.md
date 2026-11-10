@@ -31,6 +31,20 @@ Never use Python. Not for scripts, recipes, generators, glue, or one-off helpers
 - A `package.json` change that feeds the OpenAPI or AsyncAPI `info` block, including `version`, needs `just openapi` so `openapi.json` and `asyncapi.json` stay in sync. Schema and path edits are covered in [docs/openapi.md](docs/openapi.md) and [docs/asyncapi.md](docs/asyncapi.md).
 - Update `docs/` when user-facing behavior changes.
 
+## Logs
+
+Each host in [infra/nixos/hosts](infra/nixos/hosts) runs its own k3s cluster. Pass that host's kubeconfig to every `kubectl` call with `--kubeconfig`, and never rely on the current context. If `keys/<host>-k3s-cert.yaml` is missing, restore it with `just k3s-decrypt <host>`. Namespaces are listed in [infra/kubernetes/README.md](infra/kubernetes/README.md).
+
+```sh
+kc=keys/eventhub-connect-mnz-k3s-cert.yaml
+kubectl --kubeconfig "$kc" get pods -n eventhub-dev
+kubectl --kubeconfig "$kc" logs -n eventhub-dev deployment/eventhub-connect --since=1h
+kubectl --kubeconfig "$kc" logs -n eventhub-dev statefulset/nats --tail=200 -f
+kubectl --kubeconfig "$kc" logs -n eventhub-dev <pod> --previous  # after a crash or restart
+```
+
+Read logs only. Do not run `apply`, `delete`, `rollout restart`, or `exec` without asking. Logs of the k3s unit itself are on the host: `journalctl -u k3s`.
+
 ## Git
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/) and are signed (SSH or GPG). Development branches are `dev/*` or `feature/*`. Only `main` deploys to production.

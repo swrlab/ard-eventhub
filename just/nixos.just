@@ -7,8 +7,6 @@
 
 # friendly names from infra/nixos/hosts, one per line
 _nix-hosts:
-	#!/usr/bin/env bash
-	set -euo pipefail
 	awk '!/^[[:space:]]*#/ && NF { print $1 }' infra/nixos/hosts
 
 # server number mapped from a friendly name
@@ -25,17 +23,12 @@ _nix-server host:
 # open a root shell on a host
 [group('NIX')]
 ssh host:
-	#!/usr/bin/env bash
-	set -euo pipefail
 	exec ssh "root@$(just --quiet _nix-server {{ host }})"
 
 # upload via ssh — the full ./infra/nixos/ folder (common, flake, all hosts, justfile)
 [group('NIX')]
 nix-upload host:
-	#!/usr/bin/env bash
-	set -euo pipefail
-	server=$(just --quiet _nix-server {{ host }})
-	scp -r ./infra/nixos/ "root@${server}:/etc/"
+	scp -r ./infra/nixos/ "root@${just --quiet _nix-server {{ host }}}:/etc/"
 alias nixu := nix-upload
 
 # download via ssh — the host's own subtree plus the flake lock

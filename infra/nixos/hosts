@@ -4,5 +4,5 @@
 #
 # The directory name stays the friendly name.
 eventhub-connect-mnz s0006663
-# eventhub-connect-bad s0006669
-# eventhub-connect-stg s0006670
+eventhub-connect-bad s0006669
+eventhub-connect-stg s0006670

@@ -94,7 +94,7 @@ nano /mnt/etc/nixos/configuration.nix
 
 ```nix
 # ...
-networking.hostName = "eventhub-connect-xxx";
+networking.hostName = "s000...";
 users.users.root.openssh.authorizedKeys.keys = [
 	# ...
 ];
@@ -116,3 +116,8 @@ nixos-install
 ```bash
 reboot
 ```
+
+## Known Problems
+
+- `Could not resolve hostname (6) Could not resolve host: cache.nixos.org;` --> Fix resolv.conf
+- ssh `Permission denied` --> Fix `authorized_keys`

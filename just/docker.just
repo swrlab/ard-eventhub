@@ -2,6 +2,9 @@
 # Tag: <UTC timestamp>--v<package.json version>, stored as eventhub-connect:<tag>.
 # Hosts come from infra/nixos/hosts. Run `just registry-local-setup` once to
 # store zot credentials in the local Docker config.
+# The OCI layout for the push lives under .local/tmp and is removed on exit.
+
+IMAGE_TMP := justfile_directory() / '.local/tmp'
 
 # print the image tag, shared by every host
 _image-version:
@@ -39,8 +42,14 @@ build-docker:
 
 	version=$(just --quiet _image-version)
 	targets=$(just --quiet _image-targets "$version")
-	tmp=$(mktemp -d)
+	mkdir -p {{ quote(IMAGE_TMP) }}
+	export TMPDIR={{ quote(IMAGE_TMP) }}
+	tmp=$(mktemp -d {{ quote(IMAGE_TMP / 'eventhub-connect.XXXXXX') }})
+	echo "version=${version}"
+	echo "targets=${targets}"
+	echo "tmp=${tmp}"
 	trap 'rm -rf "$tmp"' EXIT
+
 	docker buildx build -f Dockerfile.connect --platform linux/arm64,linux/amd64 --output "type=oci,dest=${tmp}/image.tar" .
 	tar -xf "${tmp}/image.tar" -C "$tmp"
 	rm "${tmp}/image.tar"
@@ -64,8 +73,13 @@ build-container:
 	version=$(just --quiet _image-version)
 	targets=$(just --quiet _image-targets "$version")
 	local_ref="eventhub-connect:${version}"
-	tmp=$(mktemp -d)
+	mkdir -p {{ quote(IMAGE_TMP) }}
+	export TMPDIR={{ quote(IMAGE_TMP) }}
+	tmp=$(mktemp -d {{ quote(IMAGE_TMP / 'eventhub-connect.XXXXXX') }})
 	trap 'rm -rf "$tmp"; container image rm --force "$local_ref" >/dev/null 2>&1 || true' EXIT
+	echo "version=${version}"
+	echo "targets=${targets}"
+	echo "tmp=${tmp}"
 
 	container system start
 	container build -f Dockerfile.connect --tag "$local_ref" --platform linux/arm64 --platform linux/amd64 .
