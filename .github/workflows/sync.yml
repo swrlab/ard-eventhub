@@ -11,7 +11,7 @@ permissions:
 
 env:
   SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-  TANGLED_URL: git@tangled.org:swrlab.tngl.sh/ard-eventhub
+  TANGLED_URL: git@tangled.org:lab.swr.de/ard-eventhub
   GITLAB_URL: git@gitlab.ard.de:swrlab/ard-eventhub.git
 
 jobs:
