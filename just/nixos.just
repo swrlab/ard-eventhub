@@ -53,6 +53,12 @@ nix-download-all:
 	done
 alias nixda := nix-download-all
 
+# initial download of nix config after first install
+[confirm]
+[group('NIX')]
+nix-download-init host:
+	scp -r "root@$(just --quiet _nix-server {{ host }}):/etc/nixos/" ./infra/nixos/
+
 # evaluate the flake locally (no build, nothing applied)
 [group('NIX')]
 nix-check:

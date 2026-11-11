@@ -145,10 +145,10 @@ reboot
 
 ## Post Install
 
-Download the remote config
+Download the remote config with the init command (copies the whole folder)
 
 ```bash
-just nix-download eventhub-connect-xxx
+just nix-download-init eventhub-connect-xxx
 ```
 
 Merge the downloaded `hardware-configuration.nix` into the correct host folder. update `config.nix` if needed (static IP addresses).
@@ -170,4 +170,5 @@ nixos-rebuild switch --flake /etc/nixos#eventhub-connect-xxx
 ## Known Problems
 
 - `Could not resolve hostname (6) Could not resolve host: cache.nixos.org;` --> Fix resolv.conf
+  - otherwise: `ip route replace default via 10.xxx.xxx.1 dev ens33 src 10.xxx.xxx.xxx`
 - ssh `Permission denied` --> Fix `authorized_keys`
