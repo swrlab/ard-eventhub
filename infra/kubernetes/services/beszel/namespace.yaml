@@ -1,0 +1,7 @@
+# The agent uses hostNetwork and hostPath, which only the privileged level admits.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: beszel
+  labels:
+    pod-security.kubernetes.io/enforce: privileged

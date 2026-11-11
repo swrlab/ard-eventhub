@@ -29,21 +29,21 @@ Same list as source and as destination. TCP.
 
 **prod `6222`**
 
-- `eventhub-connect-bad-prod.swr.cn.ard.de`
-- `eventhub-connect-mnz-prod.swr.cn.ard.de`
-- `eventhub-connect-stg-prod.swr.cn.ard.de`
+- `eventhub-connect-bad-prod.swr.ard`
+- `eventhub-connect-mnz-prod.swr.ard`
+- `eventhub-connect-stg-prod.swr.ard`
 
 **test `16222`**
 
-- `eventhub-connect-bad-test.swr.cn.ard.de`
-- `eventhub-connect-mnz-test.swr.cn.ard.de`
-- `eventhub-connect-stg-test.swr.cn.ard.de`
+- `eventhub-connect-bad-test.swr.ard`
+- `eventhub-connect-mnz-test.swr.ard`
+- `eventhub-connect-stg-test.swr.ard`
 
 **dev `26222`**
 
-- `eventhub-connect-bad-dev.swr.cn.ard.de`
-- `eventhub-connect-mnz-dev.swr.cn.ard.de`
-- `eventhub-connect-stg-dev.swr.cn.ard.de`
+- `eventhub-connect-bad-dev.swr.ard`
+- `eventhub-connect-mnz-dev.swr.ard`
+- `eventhub-connect-stg-dev.swr.ard`
 
 ### 3. MQTT TLS — ARD CN to hosts
 
@@ -82,3 +82,13 @@ Source empty (ARD CN). Same destinations as MQTT. TCP.
 - **prod** `4173`
 - **test** `14173`
 - **dev** `24173`
+
+### 6. Beszel agent — host to host, bidirectional
+
+Same list as source and as destination. TCP `45876`. The hub on each machine polls the agent on every machine.
+
+- `<server-number>.swr.ard` for each host in [`infra/nixos/hosts.toml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nixos/hosts.toml)
+
+### 7. Beszel hub UI — ARD CN to hosts
+
+Source empty (ARD CN). TCP `8081`. Destination `<server-number>.swr.ard` for each host in [`infra/nixos/hosts.toml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nixos/hosts.toml).

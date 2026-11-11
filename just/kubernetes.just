@@ -1,6 +1,6 @@
 # Kubernetes bundles under infra/kubernetes/clusters/<host>. Hosts are the friendly names or aliases
 # from infra/nixos/hosts.toml, and every recipe passes that host's kubeconfig (keys/<host>-k3s-cert.yaml)
-# explicitly instead of trusting the current context. A part (registry, observability,
+# explicitly instead of trusting the current context. A part (registry, observability, beszel,
 # eventhub-dev, eventhub-test, eventhub-prod) selects objects by label app.kubernetes.io/instance.
 # Each recipe decrypts the sops files kustomize reads, runs kustomize, then deletes the plaintext.
 
@@ -11,6 +11,7 @@ NATS_TLS := K8S / 'services/nats/tls.yaml'
 NATS_ROUTE_DEV := K8S / 'environments/dev/nats-route.yaml'
 NATS_ROUTE_TEST := K8S / 'environments/test/nats-route.yaml'
 NATS_ROUTE_PROD := K8S / 'environments/prod/nats-route.yaml'
+BESZEL_HUB := K8S / 'services/beszel/hub/secret.yaml'
 
 # decrypt sops files into gitignored files kustomize reads
 _k8s-decrypt:
@@ -20,11 +21,13 @@ _k8s-decrypt:
 	just --yes decrypt-key {{ K8S / 'environments/dev/nats-route.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'environments/test/nats-route.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'environments/prod/nats-route.sops.yaml' }}
+	just --yes decrypt-key {{ K8S / 'services/beszel/hub/secret.sops.yaml' }}
 
 # delete the plaintext kustomize inputs after rendering or applying
 _k8s-clean:
 	rm -f {{ quote(PASSWD) }} {{ quote(PULL_SECRET) }} {{ quote(NATS_TLS) }}
 	rm -f {{ quote(NATS_ROUTE_DEV) }} {{ quote(NATS_ROUTE_TEST) }} {{ quote(NATS_ROUTE_PROD) }}
+	rm -f {{ quote(BESZEL_HUB) }}
 
 # render every machine bundle (no cluster required)
 [group('K3S')]
@@ -39,7 +42,7 @@ k8s-build-dryrun:
 		echo "ok $(basename "$dir")"
 	done
 
-# show what applying a host bundle would change (part: registry, observability, eventhub-dev, eventhub-test, eventhub-prod)
+# show what applying a host bundle would change (part: registry, observability, beszel, eventhub-dev, eventhub-test, eventhub-prod)
 [group('K3S')]
 k8s-diff host part='':
 	#!/usr/bin/env bash
@@ -56,7 +59,7 @@ k8s-diff host part='':
 	if [[ $diff_status -gt 1 ]]; then exit $diff_status; fi
 	if [[ $diff_status -eq 1 ]]; then exit 1; fi
 
-# apply a host bundle, or one part of it (registry, observability, eventhub-dev, eventhub-test, eventhub-prod)
+# apply a host bundle, or one part of it (registry, observability, beszel, eventhub-dev, eventhub-test, eventhub-prod)
 [confirm('Apply to this host? Type yes...')]
 [group('K3S')]
 k8s-apply host part='':

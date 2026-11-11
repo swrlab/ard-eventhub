@@ -1,0 +1,14 @@
+# Synced into the hub on every start. A system missing here is deleted from the hub, so systems
+# added in the UI do not survive a restart. Hosts are the `server` values in infra/nixos/hosts.toml.
+# The agent listens on the host network (agent/daemonset.yaml), so the hub dials the machine itself.
+# No users: SHARE_ALL_SYSTEMS in deployment.yaml shows every system to every user.
+systems:
+  - name: eventhub-connect-bad
+    host: s0006669.swr.ard
+    port: 45876
+  - name: eventhub-connect-mnz
+    host: s0006663.swr.ard
+    port: 45876
+  - name: eventhub-connect-stg
+    host: s0006670.swr.ard
+    port: 45876

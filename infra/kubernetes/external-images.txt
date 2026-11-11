@@ -4,6 +4,8 @@
 # is stored as library/nats:2.14.6.
 # zot itself stays on ghcr.io. eventhub-connect is built here and is not listed.
 
+docker.io/henrygd/beszel:0.21.1
+docker.io/henrygd/beszel-agent:0.21.1
 docker.io/library/nats:2.14.6
 docker.io/timberio/vector:0.61.0-distroless-libc
 docker.io/victoriametrics/victoria-logs:v1.53.0

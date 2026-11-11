@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beszel-hub
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  # Recreate avoids two pods writing to the same ReadWriteOnce PVC.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: beszel-hub
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: beszel-hub
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      imagePullSecrets:
+        - name: registry
+      containers:
+        - name: beszel-hub
+          # Repo: https://github.com/henrygd/beszel
+          # Upstream docker.io/henrygd/beszel, copied in by just registry-sync.
+          image: registry.registry.svc:5000/henrygd/beszel:0.21.1
+          imagePullPolicy: IfNotPresent
+          args: ['serve', '--http=0.0.0.0:8090']
+          # https://beszel.dev/guide/environment-variables
+          env:
+            - name: SHARE_ALL_SYSTEMS
+              value: 'true'
+            # First admin, created on a fresh data volume only. Change the password in the UI after.
+            - name: USER_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: beszel-hub
+                  key: USER_EMAIL
+            - name: USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: beszel-hub
+                  key: USER_PASSWORD
+          ports:
+            - name: http
+              containerPort: 8090
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ['ALL']
+          volumeMounts:
+            - name: data
+              mountPath: /beszel_data
+            # The hub loads <data>/id_ed25519 if present and only generates one when it is missing.
+            # One shared key lets every agent trust every hub with a single KEY.
+            - name: secret
+              mountPath: /beszel_data/id_ed25519
+              subPath: id_ed25519
+              readOnly: true
+            - name: config
+              mountPath: /beszel_data/config.yml
+              subPath: config.yml
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: beszel-hub-data
+        - name: secret
+          secret:
+            secretName: beszel-hub
+            defaultMode: 0440
+            items:
+              - key: id_ed25519
+                path: id_ed25519
+        - name: config
+          configMap:
+            name: beszel-hub-config
+        - name: tmp
+          emptyDir: {}

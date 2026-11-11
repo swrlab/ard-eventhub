@@ -1,0 +1,11 @@
+# Beszel agent on the host network, polled over SSH on 45876 by the hub on every machine.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - daemonset.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: beszel-agent
+      app.kubernetes.io/component: monitoring

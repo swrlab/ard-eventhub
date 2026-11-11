@@ -6,6 +6,9 @@
 
 CERT_DIR := justfile_directory() / '.local/certs'
 
+# contact address written into the CSR subject (override: just CERT_EMAIL=team@example.de csr dev)
+CERT_EMAIL := env('CERT_EMAIL', '')
+
 # write a CSR for dev, test, or prod (just csr dev, just csr dev --force)
 [group('CERTIFICATES')]
 csr env force='':
@@ -14,6 +17,7 @@ csr env force='':
 
 	env={{ quote(env) }}
 	force={{ quote(force) }}
+	email={{ quote(CERT_EMAIL) }}
 
 	case "$env" in
 		dev|test|prod) ;;
@@ -25,6 +29,11 @@ csr env force='':
 
 	if [[ -n "$force" && "$force" != '--force' ]]; then
 		echo "second argument must be --force" >&2
+		exit 1
+	fi
+
+	if [[ -z "$email" ]]; then
+		echo 'set CERT_EMAIL, e.g. just CERT_EMAIL=team@example.de csr dev' >&2
 		exit 1
 	fi
 
@@ -48,9 +57,9 @@ csr env force='':
 
 	zones=(bad mnz stg)
 	names=()
-	for zone in "${zones[@]}"; do
-		names+=("eventhub-connect-${zone}-${env}.swr.cn.ard.de")
-	done
+	# for zone in "${zones[@]}"; do
+	# 	names+=("eventhub-connect-${zone}-${env}.swr.cn.ard.de")
+	# done
 	for zone in "${zones[@]}"; do
 		names+=("eventhub-connect-${zone}-${env}.swr.ard")
 	done
@@ -70,6 +79,7 @@ csr env force='':
 	C  = DE
 	O  = SWR
 	CN = ${cn}
+	emailAddress = ${email}
 
 	[ v3_req ]
 	basicConstraints = CA:FALSE

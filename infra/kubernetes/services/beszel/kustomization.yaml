@@ -1,0 +1,20 @@
+# Beszel monitoring, one hub and one agent per machine. Every hub polls the agents on all three
+# machines, so each machine shows the whole fleet and survives the loss of the others. Nothing here
+# is machine specific.
+# hub/secret.yaml is the decrypt of hub/secret.sops.yaml. just k8s-* writes it and deletes it after kustomize.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: beszel
+
+resources:
+  - namespace.yaml
+  - hub
+  - agent
+
+components:
+  - ../../components/registry-pull
+
+labels:
+  - pairs:
+      app.kubernetes.io/instance: beszel
