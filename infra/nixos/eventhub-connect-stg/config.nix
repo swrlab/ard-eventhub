@@ -15,4 +15,18 @@
     "--supervisor-metrics"
     "--node-label topology.kubernetes.io/zone=stg"
   ];
+
+  # Fixed address. NetworkManager would otherwise run DHCP on ens33 and add a
+  # second address, so the scripted networking owns this interface instead.
+  networking.networkmanager.unmanaged = [ "ens33" ];
+  networking.interfaces.ens33.ipv4.addresses = [
+    {
+      address = "10.127.102.143";
+      prefixLength = 24;
+    }
+  ];
+  networking.defaultGateway = {
+    address = "10.127.102.1";
+    interface = "ens33";
+  };
 }

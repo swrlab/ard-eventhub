@@ -16,6 +16,14 @@
 
   networking.networkmanager.enable = true;
 
+  # Internal resolvers. NetworkManager writes resolv.conf through resolvconf,
+  # which puts these ahead of any DHCP-provided servers.
+  networking.nameservers = [
+    "10.127.201.221"
+    "10.63.101.221"
+    "10.191.201.221"
+  ];
+
   time.timeZone = lib.mkDefault "Europe/Berlin";
   i18n.defaultLocale = "en_US.UTF-8";
 

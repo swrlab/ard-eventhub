@@ -28,7 +28,7 @@ ssh host:
 # upload via ssh — the full ./infra/nixos/ folder (common, flake, all hosts, justfile)
 [group('NIX')]
 nix-upload host:
-	scp -r ./infra/nixos/ "root@${just --quiet _nix-server {{ host }}}:/etc/"
+	scp -r ./infra/nixos/ "root@$(just --quiet _nix-server {{ host }}):/etc/"
 alias nixu := nix-upload
 
 # download via ssh — the host's own subtree plus the flake lock
