@@ -2,12 +2,12 @@
 # The registry is http://<server>:5000 (k3s LoadBalancer). Credentials come from
 # .env.docker.sops.yaml (REGISTRY_USER, REGISTRY_PASSWORD).
 
-# write zot credentials for every host into the local Docker config
+# write zot credentials for every host into the local Docker config and the container keychain
 [group('K3S')]
 registry-local-setup:
 	sops exec-env --same-process .env.docker.sops.yaml "just _registry-local-setup"
 
-# log crane in to each host's zot registry using the decrypted env vars
+# log crane (and the Apple container CLI, if present) in to each host's zot registry using the decrypted env vars
 _registry-local-setup:
 	#!/usr/bin/env bash
 	set -euo pipefail
@@ -25,6 +25,10 @@ _registry-local-setup:
 		registry="$(just --quiet _nix-alias-to-server-name "$host"):5000"
 		printf '%s' "$REGISTRY_PASSWORD" | crane auth login "$registry" --insecure \
 			--username "$REGISTRY_USER" --password-stdin
+		if command -v container >/dev/null; then
+			printf '%s' "$REGISTRY_PASSWORD" | container registry login "$registry" \
+				--username "$REGISTRY_USER" --password-stdin
+		fi
 	done < <(just --quiet _nix-list-friendly-names)
 
 # copy each pinned image to one host, skipping a tag whose digest already matches

@@ -76,14 +76,3 @@ nix-apply host:
 	ssh "root@${server}" "cd /etc/nixos && just --yes flake ${host}"
 	scp "root@${server}:/etc/nixos/flake.lock" ./infra/nixos/flake.lock || true
 alias nixp := nix-apply
-
-# apply local Nix config to all hosts
-[group('NIX')]
-nix-all:
-	#!/usr/bin/env bash
-	set -euo pipefail
-	just _nix-list-friendly-names | while read -r host; do
-		just nix-apply "$host" || exit 1
-	done
-alias nix-auto := nix-all
-alias nixa := nix-all
