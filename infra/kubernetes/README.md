@@ -52,7 +52,7 @@ just k8s-apply eventhub-connect-bad eventhub-dev
 
 On a fresh machine apply `registry`, `observability`, then `eventhub-dev`, `eventhub-test`, `eventhub-prod`. Roll a NATS change one machine at a time and wait for `rollout status statefulset/nats` before the next.
 
-`k8s-build-dryrun`, `k8s-diff`, and `k8s-apply` decrypt [`services/registry/passwd.sops.yaml`](services/registry/passwd.sops.yaml), [`components/registry-pull/secret.sops.yaml`](components/registry-pull/secret.sops.yaml), and [`services/nats/tls.sops.yaml`](services/nats/tls.sops.yaml), run kustomize, then delete the plaintext. The first is Secret `registry-htpasswd`. The second is Secret `registry` (pull auth for `registry.registry.svc:5000`) in `observability` and each stage namespace. The third is Secret `nats-tls`, a self-signed placeholder, in each stage namespace. All three plaintext files are gitignored.
+`k8s-build-dryrun`, `k8s-diff`, and `k8s-apply` decrypt [`services/registry/passwd.sops.yaml`](services/registry/passwd.sops.yaml), [`components/registry-pull/secret.sops.yaml`](components/registry-pull/secret.sops.yaml), [`services/nats/tls.sops.yaml`](services/nats/tls.sops.yaml), and `environments/<stage>/nats-route.sops.yaml`, run kustomize, then delete the plaintext. The first is Secret `registry-htpasswd`. The second is Secret `registry` (pull auth for `registry.registry.svc:5000`) in `observability` and each stage namespace. The third is Secret `nats-tls`, a self-signed placeholder, in each stage namespace. The last is Secret `nats-route` with key `password`, one per stage and the same on every machine. All plaintext files are gitignored.
 
 `just k8s-apply` resets `nats-tls` to that placeholder. After the CA certificate is installed, remove `tls.yaml` from [`services/nats/kustomization.yaml`](services/nats/kustomization.yaml) or the next apply puts the placeholder back.
 
@@ -60,10 +60,9 @@ These Secrets are still created by hand. The pods wait for them.
 
 | Namespace                        | Secret             | Keys                                         |
 | -------------------------------- | ------------------ | -------------------------------------------- |
-| `eventhub-dev`, `-test`, `-prod` | `nats-route`       | `password`, same value on all three machines |
 | `eventhub-dev`, `-test`, `-prod` | `eventhub-connect` | `NATS_USER`, `NATS_PASSWORD`, `ARD_FEED_URL` |
 
-The route password is part of a URL, so keep it URL-safe. Generate it once per stage and reuse that value on every machine.
+The route password is part of a URL, so keep it URL-safe (`openssl rand -hex 32`). To rotate it, edit `environments/<stage>/nats-route.sops.yaml` with `sops`, apply that stage on all three machines, then restart `statefulset/nats` on each. A pod with the old password cannot route to one with the new password, so the stage stays split until all three restart.
 
 `registry-htpasswd` is mounted as a subPath, so a password change does not roll the pod. Restart `deployment/registry` after a rotation.
 

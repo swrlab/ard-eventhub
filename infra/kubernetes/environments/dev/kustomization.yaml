@@ -4,6 +4,10 @@ kind: Kustomization
 
 namespace: eventhub-dev
 
+resources:
+  # Secret nats-route. just k8s-* decrypts nats-route.sops.yaml and deletes the plaintext.
+  - nats-route.yaml
+
 components:
   - ../shared
 

@@ -8,16 +8,23 @@ K8S := source_directory() / '../infra/kubernetes'
 PASSWD := K8S / 'services/registry/passwd.yaml'
 PULL_SECRET := K8S / 'components/registry-pull/secret.yaml'
 NATS_TLS := K8S / 'services/nats/tls.yaml'
+NATS_ROUTE_DEV := K8S / 'environments/dev/nats-route.yaml'
+NATS_ROUTE_TEST := K8S / 'environments/test/nats-route.yaml'
+NATS_ROUTE_PROD := K8S / 'environments/prod/nats-route.yaml'
 
 # decrypt sops files into gitignored files kustomize reads
 _k8s-decrypt:
 	just --yes decrypt-key {{ K8S / 'services/registry/passwd.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'components/registry-pull/secret.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'services/nats/tls.sops.yaml' }}
+	just --yes decrypt-key {{ K8S / 'environments/dev/nats-route.sops.yaml' }}
+	just --yes decrypt-key {{ K8S / 'environments/test/nats-route.sops.yaml' }}
+	just --yes decrypt-key {{ K8S / 'environments/prod/nats-route.sops.yaml' }}
 
 # delete the plaintext kustomize inputs after rendering or applying
 _k8s-clean:
 	rm -f {{ quote(PASSWD) }} {{ quote(PULL_SECRET) }} {{ quote(NATS_TLS) }}
+	rm -f {{ quote(NATS_ROUTE_DEV) }} {{ quote(NATS_ROUTE_TEST) }} {{ quote(NATS_ROUTE_PROD) }}
 
 # render every machine bundle (no cluster required)
 [group('K3S')]

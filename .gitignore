@@ -17,6 +17,7 @@ keys/*.json
 infra/kubernetes/services/registry/passwd.yaml
 infra/kubernetes/components/registry-pull/secret.yaml
 infra/kubernetes/services/nats/tls.yaml
+infra/kubernetes/environments/*/nats-route.yaml
 
 # Dependency directories
 node_modules/
