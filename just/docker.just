@@ -1,6 +1,6 @@
 # Build the eventhub-connect image once and push it to every host's zot.
 # Tag: <UTC timestamp>--v<package.json version>, stored as eventhub-connect:<tag>.
-# Hosts come from infra/nixos/hosts. Run `just registry-local-setup` once to
+# Hosts come from infra/nixos/hosts.toml. Run `just registry-local-setup` once to
 # store zot credentials in the local Docker config.
 # The OCI layout for the push lives under .local/tmp and is removed on exit.
 
@@ -21,12 +21,12 @@ _image-targets version:
 	found=0
 	while read -r host; do
 		[[ -z "$host" ]] && continue
-		server=$(just --quiet _nix-server "$host")
+		server=$(just --quiet _nix-alias-to-server-name "$host")
 		printf '%s\n' "${server}:5000/eventhub-connect:${version}"
 		found=1
-	done < <(just --quiet _nix-hosts)
+	done < <(just --quiet _nix-list-friendly-names)
 	if [[ "$found" -eq 0 ]]; then
-		echo "no hosts in infra/nixos/hosts" >&2
+		echo "no hosts in infra/nixos/hosts.toml" >&2
 		exit 1
 	fi
 

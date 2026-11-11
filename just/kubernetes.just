@@ -1,5 +1,5 @@
-# Kubernetes bundles under infra/kubernetes/clusters/<host>. Hosts are the friendly names from
-# infra/nixos/hosts, and every recipe passes that host's kubeconfig (keys/<host>-k3s-cert.yaml)
+# Kubernetes bundles under infra/kubernetes/clusters/<host>. Hosts are the friendly names or aliases
+# from infra/nixos/hosts.toml, and every recipe passes that host's kubeconfig (keys/<host>-k3s-cert.yaml)
 # explicitly instead of trusting the current context. A part (registry, observability,
 # eventhub-dev, eventhub-test, eventhub-prod) selects objects by label app.kubernetes.io/instance.
 # Each recipe decrypts the sops files kustomize reads, runs kustomize, then deletes the plaintext.
@@ -39,10 +39,11 @@ k8s-diff host part='':
 	set -uo pipefail
 	trap 'just _k8s-clean' EXIT
 	just _k8s-decrypt || exit $?
-	kubeconfig={{ quote('keys/' + host + '-k3s-cert.yaml') }}
+	host=$(just --quiet _nix-alias-to-friendly-name {{ quote(host) }})
+	kubeconfig="keys/${host}-k3s-cert.yaml"
 	part={{ quote(part) }}
 	kubectl --kubeconfig "$kubeconfig" diff \
-		-k {{ quote(K8S / 'clusters' / host) }} {{ if part == '' { '' } else { '-l app.kubernetes.io/instance=' + quote(part) } }}
+		-k {{ quote(K8S / 'clusters') }}/"$host" {{ if part == '' { '' } else { '-l app.kubernetes.io/instance=' + quote(part) } }}
 	diff_status=$?
 	# kubectl diff exits 1 when there are differences, >1 on errors.
 	if [[ $diff_status -gt 1 ]]; then exit $diff_status; fi
@@ -56,10 +57,11 @@ k8s-apply host part='':
 	set -euo pipefail
 	trap 'just _k8s-clean' EXIT
 	just _k8s-decrypt
-	kubeconfig={{ quote('keys/' + host + '-k3s-cert.yaml') }}
+	host=$(just --quiet _nix-alias-to-friendly-name {{ quote(host) }})
+	kubeconfig="keys/${host}-k3s-cert.yaml"
 	part={{ quote(part) }}
 	kubectl --kubeconfig "$kubeconfig" apply \
-		-k {{ quote(K8S / 'clusters' / host) }} {{ if part == '' { '' } else { '-l app.kubernetes.io/instance=' + quote(part) } }}
+		-k {{ quote(K8S / 'clusters') }}/"$host" {{ if part == '' { '' } else { '-l app.kubernetes.io/instance=' + quote(part) } }}
 
 # install a CA leaf as Secret nats-tls and restart NATS (stage: dev, test, prod; cert defaults to tls.crt)
 [confirm('Replace nats-tls on this host? Type yes...')]
@@ -85,7 +87,8 @@ k8s-tls host stage cert='tls.crt':
 		echo "key not found: $key" >&2
 		exit 1
 	fi
-	kubeconfig={{ quote('keys/' + host + '-k3s-cert.yaml') }}
+	host=$(just --quiet _nix-alias-to-friendly-name {{ quote(host) }})
+	kubeconfig="keys/${host}-k3s-cert.yaml"
 	ns="eventhub-$stage"
 	kubectl --kubeconfig "$kubeconfig" -n "$ns" create secret tls nats-tls \
 		--cert="$cert" \

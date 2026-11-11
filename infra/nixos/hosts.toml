@@ -1,0 +1,16 @@
+# One table per host. The table key is the friendly name: the directory under infra/nixos/,
+# the flake attribute, and the argument to `just nix-*`. `server` is the NixOS hostname and
+# the SSH target. `aliases` are short names the local just recipes accept (`just k9s stg`).
+# Read by flake.nix (fromTOML), src/cli/hosts.ts (local recipes), and the host-side justfile.
+
+[eventhub-connect-mnz]
+server = "s0006663"
+aliases = ["mnz"]
+
+[eventhub-connect-bad]
+server = "s0006669"
+aliases = ["bad"]
+
+[eventhub-connect-stg]
+server = "s0006670"
+aliases = ["stg"]

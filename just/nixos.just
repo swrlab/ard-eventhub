@@ -1,34 +1,34 @@
 # NixOS host config sync over SSH — local commands, run from the repo.
 # Central tree: ./infra/nixos/ (common/, one directory per host, flake.nix, justfile, README.md).
-# Recipes take the friendly name (eventhub-connect-mnz). infra/nixos/hosts maps that name
-# to the server number, which is the SSH target and the NixOS hostname.
+# Recipes take the friendly name (eventhub-connect-mnz) or its alias (mnz). infra/nixos/hosts.toml maps
+# that name to the server number, which is the SSH target and the NixOS hostname.
 # The justfile inside ./infra/nixos/ holds the commands that run ON a host
 # (rebuild, rollback, upgrade, clean); it is uploaded with the tree.
 
-# friendly names from infra/nixos/hosts, one per line
-_nix-hosts:
-	awk '!/^[[:space:]]*#/ && NF { print $1 }' infra/nixos/hosts
-
-# server number mapped from a friendly name
-_nix-server host:
+# friendly names from infra/nixos/hosts.toml, one per line
+_nix-list-friendly-names:
 	#!/usr/bin/env bash
-	set -euo pipefail
-	server=$(awk -v name="{{ host }}" '$1 == name { print $2; exit }' infra/nixos/hosts)
-	if [[ -z "$server" ]]; then
-		echo "no server number for {{ host }} in infra/nixos/hosts" >&2
-		exit 1
-	fi
-	printf '%s\n' "$server"
+	exec bun ./src/cli/hosts.ts names
+
+# friendly name mapped from a friendly name or alias
+_nix-alias-to-friendly-name host:
+	#!/usr/bin/env bash
+	exec bun ./src/cli/hosts.ts name {{ quote(host) }}
+
+# server name (NixOS hostname and SSH target) mapped from a friendly name or alias
+_nix-alias-to-server-name host:
+	#!/usr/bin/env bash
+	exec bun ./src/cli/hosts.ts server {{ quote(host) }}
 
 # open a root shell on a host
 [group('NIX')]
 ssh host:
-	exec ssh "root@$(just --quiet _nix-server {{ host }})"
+	exec ssh "root@$(just --quiet _nix-alias-to-server-name {{ host }})"
 
 # upload via ssh — the full ./infra/nixos/ folder (common, flake, all hosts, justfile)
 [group('NIX')]
 nix-upload host:
-	scp -r ./infra/nixos/ "root@$(just --quiet _nix-server {{ host }}):/etc/"
+	scp -r ./infra/nixos/ "root@$(just --quiet _nix-alias-to-server-name {{ host }}):/etc/"
 alias nixu := nix-upload
 
 # download via ssh — the host's own subtree plus the flake lock
@@ -36,10 +36,11 @@ alias nixu := nix-upload
 nix-download host:
 	#!/usr/bin/env bash
 	set -euo pipefail
-	server=$(just --quiet _nix-server {{ host }})
-	rm -rf "./infra/nixos/{{ host }}/"
+	host=$(just --quiet _nix-alias-to-friendly-name {{ quote(host) }})
+	server=$(just --quiet _nix-alias-to-server-name "$host")
+	rm -rf "./infra/nixos/${host}/"
 	mkdir -p ./infra/nixos/
-	scp -r "root@${server}:/etc/nixos/{{ host }}/" ./infra/nixos/
+	scp -r "root@${server}:/etc/nixos/${host}/" ./infra/nixos/
 	scp "root@${server}:/etc/nixos/flake.lock" ./infra/nixos/flake.lock || true
 alias nixd := nix-download
 
@@ -48,7 +49,7 @@ alias nixd := nix-download
 nix-download-all:
 	#!/usr/bin/env bash
 	set -euo pipefail
-	just _nix-hosts | while read -r host; do
+	just _nix-list-friendly-names | while read -r host; do
 		just nix-download "$host" || exit 1
 	done
 alias nixda := nix-download-all
@@ -57,7 +58,7 @@ alias nixda := nix-download-all
 [confirm]
 [group('NIX')]
 nix-download-init host:
-	scp -r "root@$(just --quiet _nix-server {{ host }}):/etc/nixos/" ./infra/nixos/
+	scp -r "root@$(just --quiet _nix-alias-to-server-name {{ host }}):/etc/nixos/" ./infra/nixos/
 
 # evaluate the flake locally (no build, nothing applied)
 [group('NIX')]
@@ -69,9 +70,10 @@ nix-check:
 nix-apply host:
 	#!/usr/bin/env bash
 	set -euo pipefail
-	server=$(just --quiet _nix-server {{ host }})
-	just nix-upload {{ host }}
-	ssh "root@${server}" "cd /etc/nixos && just --yes flake {{ host }}"
+	host=$(just --quiet _nix-alias-to-friendly-name {{ quote(host) }})
+	server=$(just --quiet _nix-alias-to-server-name "$host")
+	just nix-upload "$host"
+	ssh "root@${server}" "cd /etc/nixos && just --yes flake ${host}"
 	scp "root@${server}:/etc/nixos/flake.lock" ./infra/nixos/flake.lock || true
 alias nixp := nix-apply
 
@@ -80,7 +82,7 @@ alias nixp := nix-apply
 nix-all:
 	#!/usr/bin/env bash
 	set -euo pipefail
-	just _nix-hosts | while read -r host; do
+	just _nix-list-friendly-names | while read -r host; do
 		just nix-apply "$host" || exit 1
 	done
 alias nix-auto := nix-all

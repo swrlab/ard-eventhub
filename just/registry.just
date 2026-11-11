@@ -22,10 +22,10 @@ _registry-local-setup:
 
 	while read -r host; do
 		[[ -z "$host" ]] && continue
-		registry="$(just --quiet _nix-server "$host"):5000"
+		registry="$(just --quiet _nix-alias-to-server-name "$host"):5000"
 		printf '%s' "$REGISTRY_PASSWORD" | crane auth login "$registry" --insecure \
 			--username "$REGISTRY_USER" --password-stdin
-	done < <(just --quiet _nix-hosts)
+	done < <(just --quiet _nix-list-friendly-names)
 
 # copy each pinned image to one host, skipping a tag whose digest already matches
 [group('K3S')]
@@ -36,7 +36,7 @@ registry-sync host:
 		echo "crane is not on PATH; run mise install" >&2
 		exit 1
 	fi
-	server=$(just --quiet _nix-server {{ quote(host) }})
+	server=$(just --quiet _nix-alias-to-server-name {{ quote(host) }})
 	registry="${server}:5000"
 	echo "syncing to ${registry}"
 

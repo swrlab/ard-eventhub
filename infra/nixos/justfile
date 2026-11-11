@@ -1,15 +1,15 @@
 # NixOS commands run ON a host — uploaded to /etc/nixos/ by `just nix-upload`
 # (local sync commands live in just/nixos.just in the repo).
 # Run from the host: `cd /etc/nixos && just <recipe>`. Recipes default to the
-# friendly name from /etc/nixos/hosts: hostname -s is the server number after
+# friendly name from /etc/nixos/hosts.toml: hostname -s is the server number after
 # the first switch, and may still be the friendly name before it.
 
 # list all recipes
 default:
 	just --list
 
-# flake attribute for this machine; either column of /etc/nixos/hosts matches
-host := `awk -v n="$(hostname -s)" '$1 == n { print $1; f=1; exit } $2 == n { print $1; f=1; exit } END { if (!f) print n }' /etc/nixos/hosts`
+# flake attribute for this machine; the friendly name or the server number in /etc/nixos/hosts.toml matches
+host := `N="$(hostname -s)" nix eval --raw --impure --expr 'let n = builtins.getEnv "N"; hosts = builtins.fromTOML (builtins.readFile /etc/nixos/hosts.toml); match = builtins.filter (name: name == n || hosts.${name}.server == n) (builtins.attrNames hosts); in if match == [ ] then n else builtins.head match'`
 
 # ── rebuild (confirm-gated) ──────────────────────────────────────────
 

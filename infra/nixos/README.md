@@ -15,11 +15,11 @@ Central NixOS configuration for the Eventhub Connect hosts. One tree, uploaded i
 
 ## Add a host
 
-1. Add a line to `hosts`: `<friendly-name> <server-number>`.
+1. Add a `[<friendly-name>]` table to `hosts.toml` with `server = "<server-number>"` and optional `aliases = ["<short>"]`.
 2. Create `<friendly-name>/config.nix` modeled on an existing host.
 3. Copy `hardware-configuration.nix` from the host into that directory.
 
-`just nix-all` and `just nix-download-all` read the friendly names from `hosts`, so the list is not repeated in the justfile.
+`just nix-all` and `just nix-download-all` read the friendly names from `hosts.toml`, so the list is not repeated in the justfile.
 
 ## Workflow
 
@@ -29,7 +29,7 @@ Local commands live in `just/nixos.just`; host-side commands live in the [`justf
 # from the repo
 just nix-upload "<host>"     # scp the full tree to /etc/nixos/ on the mapped server
 just nix-apply "<host>"      # upload + rebuild + pull flake.lock back
-just nix-all                # nix-apply for every host in infra/nixos/hosts
+just nix-all                # nix-apply for every host in infra/nixos/hosts.toml
 just nix-download "<host>"   # pull the host's subtree + flake.lock
 just nix-check              # evaluate the flake locally
 
@@ -40,7 +40,7 @@ just flake                               # apply the uploaded config (confirm-ga
 just rollback                            # roll back to the previous generation
 ```
 
-Replace `<host>` with a friendly name from `infra/nixos/hosts`.
+Replace `<host>` with a table key from `infra/nixos/hosts.toml` or one of its `aliases` (`just k9s stg`).
 
 The flake also works standalone on the host: `nixos-rebuild switch --flake "/etc/nixos#<host>"`.
 
@@ -50,7 +50,7 @@ All hosts use chrony with the three internal SWR NTP servers configured in `comm
 
 ## Local k3s access
 
-The recipes in `just/k3s.just` use the same friendly host names and SSH mapping as `just nix-*`:
+The recipes in `just/k3s.just` use the same friendly host names, aliases, and SSH mapping as `just nix-*`:
 
 ```sh
 just cp-k3s-config "<host>"  # download /etc/rancher/k3s/k3s.yaml over SSH

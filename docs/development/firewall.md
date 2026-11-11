@@ -5,7 +5,7 @@ sidebar:
   icon: brick-wall-shield
 ---
 
-Server numbers are the second column of [`infra/nixos/hosts`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nixos/hosts). The three stage names of one machine resolve to the same host. Cluster routes, MQTT, WebSocket, and the operator UI use the `.swr.cn.ard.de` name.
+Server numbers are the `server` values in [`infra/nixos/hosts.toml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nixos/hosts.toml). The three stage names of one machine resolve to the same host. Cluster routes, MQTT, WebSocket, and the operator UI use the `.swr.cn.ard.de` name.
 
 ## Broadcasters
 
@@ -19,7 +19,7 @@ Each block is one request: every FQDN under it is a source, a destination, or bo
 
 ### 1. Outbound HTTPS — hosts to internet
 
-TCP `443`. Destination empty. Source FQDN is `<server-number>.swr.ard` for each line in [`infra/nixos/hosts`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nixos/hosts).
+TCP `443`. Destination empty. Source FQDN is `<server-number>.swr.ard` for each host in [`infra/nixos/hosts.toml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nixos/hosts.toml).
 
 Needed for NixOS, images, `ARD_FEED_URL`, Radioplayer (`np-ingest.radioplayer.cloud`), and DTS. Same rule as [NixOS Install](./nixos-install).
 

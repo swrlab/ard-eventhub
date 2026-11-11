@@ -33,7 +33,7 @@ Never use Python. Not for scripts, recipes, generators, glue, or one-off helpers
 
 ## Logs
 
-Each host in [infra/nixos/hosts](infra/nixos/hosts) runs its own k3s cluster. Pass that host's kubeconfig to every `kubectl` call with `--kubeconfig`, and never rely on the current context. If `keys/<host>-k3s-cert.yaml` is missing, restore it with `just k3s-decrypt <host>`. Namespaces are listed in [infra/kubernetes/README.md](infra/kubernetes/README.md).
+Each host in [infra/nixos/hosts.toml](infra/nixos/hosts.toml) runs its own k3s cluster. Pass that host's kubeconfig to every `kubectl` call with `--kubeconfig`, and never rely on the current context. If `keys/<host>-k3s-cert.yaml` is missing, restore it with `just k3s-decrypt <host>`. Namespaces are listed in [infra/kubernetes/README.md](infra/kubernetes/README.md).
 
 ```sh
 kc=keys/eventhub-connect-mnz-k3s-cert.yaml
