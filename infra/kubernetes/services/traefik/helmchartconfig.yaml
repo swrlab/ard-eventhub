@@ -1,0 +1,24 @@
+# websecure (:443) serves eventhub-connect of every stage. registry (:5000) serves zot. Both
+# terminate TLS with our certificates, see services/eventhub-connect/ingressroute.yaml and
+# services/registry/ingressroute.yaml.
+# https://github.com/traefik/traefik-helm-chart/blob/v40.1.0/traefik/values.yaml
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+spec:
+  valuesContent: |-
+    ports:
+      registry:
+        port: 5000
+        expose:
+          default: true
+        exposedPort: 5000
+        protocol: TCP
+        http:
+          tls:
+            enabled: true
+        # A large layer upload outlasts the default 60s read timeout. zot sets none either.
+        transport:
+          respondingTimeouts:
+            readTimeout: 0

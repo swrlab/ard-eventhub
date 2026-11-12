@@ -88,6 +88,8 @@ spec:
         - port: 9222
           protocol: TCP
 ---
+# Connect has no host port. Traefik in kube-system terminates TLS on :443 and is the only peer
+# outside the namespace. The name stays from the host-port days so an apply replaces the old rule.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -98,6 +100,13 @@ spec:
       app.kubernetes.io/name: eventhub-connect
   policyTypes: ['Ingress']
   ingress:
-    - ports:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
         - port: 4173
           protocol: TCP

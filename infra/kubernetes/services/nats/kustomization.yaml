@@ -7,8 +7,6 @@ resources:
   - service-client.yaml
   - service-headless.yaml
   - statefulset.yaml
-  # Self-signed placeholder. just k8s-* decrypts tls.sops.yaml and deletes the plaintext.
-  - tls.yaml
 
 components:
   - users

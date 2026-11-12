@@ -148,7 +148,7 @@ spec:
         # See docs/development/certificates.md. The image has no shell.
         - name: tls
           secret:
-            secretName: nats-tls
+            secretName: eventhub-tls
             defaultMode: 0444
         - name: pid
           emptyDir: {}

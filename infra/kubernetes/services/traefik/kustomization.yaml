@@ -1,0 +1,13 @@
+# Settings for the Traefik that k3s ships, one per machine. k3s merges HelmChartConfig traefik into
+# its bundled chart and redeploys Traefik.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kube-system
+
+resources:
+  - helmchartconfig.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/instance: traefik

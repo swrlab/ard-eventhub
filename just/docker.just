@@ -13,7 +13,7 @@ _image-version:
 	package_version=$(bun -e 'console.log((await Bun.file("package.json").json()).version)')
 	printf '%s\n' "$(date -u +%Y-%m-%d-%H-%M-%S)--v${package_version}"
 
-# print `<server>:5000/eventhub-connect:<version>` for every host, one per line
+# print `<registry>/eventhub-connect:<version>` for every host, one per line
 _image-targets version:
 	#!/usr/bin/env bash
 	set -euo pipefail
@@ -21,8 +21,8 @@ _image-targets version:
 	found=0
 	while read -r host; do
 		[[ -z "$host" ]] && continue
-		server=$(just --quiet _nix-alias-to-server-name "$host")
-		printf '%s\n' "${server}:5000/eventhub-connect:${version}"
+		registry=$(just --quiet _registry-host "$host")
+		printf '%s\n' "${registry}/eventhub-connect:${version}"
 		found=1
 	done < <(just --quiet _nix-list-friendly-names)
 	if [[ "$found" -eq 0 ]]; then
@@ -30,7 +30,7 @@ _image-targets version:
 		exit 1
 	fi
 
-# build linux/arm64 and linux/amd64 with Docker, then push to every host's :5000
+# build linux/arm64 and linux/amd64 with Docker, then push to every host's registry
 [group('DOCKER')]
 build-docker:
 	#!/usr/bin/env bash
@@ -56,11 +56,11 @@ build-docker:
 
 	while read -r ref; do
 		[[ -z "${ref}" ]] && continue
-		crane push --insecure "$tmp" "$ref"
+		crane push {{ CRANE_TLS }} "$tmp" "$ref"
 		echo "pushed ${ref}"
 	done <<< "$targets"
 
-# build linux/arm64 and linux/amd64 with the Apple container CLI, then push to every host's :5000
+# build linux/arm64 and linux/amd64 with the Apple container CLI, then push to every host's registry
 [group('DOCKER')]
 build-container:
 	#!/usr/bin/env bash

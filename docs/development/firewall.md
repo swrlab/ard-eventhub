@@ -77,11 +77,7 @@ Source empty (ARD CN). Same destinations as MQTT. TCP.
 
 ### 5. Operator UI — ARD CN to hosts
 
-Source empty (ARD CN). Same destinations as MQTT. TCP.
-
-- **prod** `4173`
-- **test** `14173`
-- **dev** `24173`
+Source empty (ARD CN). Same destinations as MQTT. TCP `443` for every stage. The hostname selects the stage.
 
 ### 6. Beszel agent — host to host, bidirectional
 
@@ -92,3 +88,11 @@ Same list as source and as destination. TCP `45876`. The hub on each machine pol
 ### 7. Beszel hub UI — ARD CN to hosts
 
 Source empty (ARD CN). TCP `8081`. Destination `<server-number>.swr.ard` for each host in [`infra/nixos/hosts.toml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nixos/hosts.toml).
+
+### 8. Registry TLS — workstations to hosts
+
+Source: the workstations that push images. TCP `5000`. Destinations:
+
+- `eventhub-connect-bad-dev.swr.ard`
+- `eventhub-connect-mnz-dev.swr.ard`
+- `eventhub-connect-stg-dev.swr.ard`

@@ -1,13 +1,13 @@
 ---
 title: 'Certificates'
-description: 'Generate the connect CSR and install it as nats-tls on each k3s machine.'
+description: 'Generate the connect CSR and install it on each k3s machine.'
 sidebar:
   icon: certificate
 ---
 
 One certificate per stage covers all three machines. Dev, test, and prod run side by side on each machine: MQTT (`:28883` dev, `:18883` test, `:8883` prod) and the NATS WebSocket (`:29222` dev, `:19222` test, `:9222` prod) present that stage's certificate. Connect dials those ports by the `eventhub-connect-<zone>-<env>.swr.cn.ard.de` names, so they must stay on the certificate. Cluster routes (`:26222` dev, `:16222` test, `:6222` prod) are plaintext and authenticate with the stage route password (Secret `nats-route`, see [`infra/kubernetes/README.md`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/README.md)).
 
-Each machine is one k3s cluster. Every stage needs the secret `nats-tls` in its own namespace (`eventhub-dev`, `eventhub-test`, `eventhub-prod`).
+Each machine is one k3s cluster. Every stage needs the secret `eventhub-tls` in its own namespace (`eventhub-dev`, `eventhub-test`, `eventhub-prod`).
 
 ## Generate
 
@@ -66,13 +66,13 @@ openssl pkey -in .local/certs/dev/eventhub-connect-dev.key -pubout | openssl sha
 openssl x509 -in tls.crt -noout -ext subjectAltName
 ```
 
-Each machine is its own cluster. The same `tls.crt` and the same key go on all three. The secret name is `nats-tls`. The pod mounts it at `/etc/nats/tls`, and `nats.conf` reads `tls.crt` and `tls.key` from there.
+Each machine is its own cluster. The same `tls.crt` and the same key go on all three. The secret name is `eventhub-tls`. The pod mounts it at `/etc/nats/tls`, and `nats.conf` reads `tls.crt` and `tls.key` from there. Traefik serves the same Secret for the operator UI on `:443` and reloads it without a restart. For dev, `just k8s-tls` also writes it as `registry-tls` in namespace `registry`, because the registry on `:5000` answers as `eventhub-connect-<zone>-dev.swr.ard`.
 
-The bundle already creates `nats-tls` from [`tls.sops.yaml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/services/nats/tls.sops.yaml). That certificate is self-signed, valid for one year, and lists every stage hostname, so the pod can start while the CA request is open. Clients that check the trust store will reject it. `just k8s-apply` writes this placeholder back over whatever is in the cluster.
+The bundle already creates `eventhub-tls` from [`tls.sops.yaml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/environments/shared/tls.sops.yaml). That certificate is self-signed, valid for one year, and lists every stage hostname, so the pod can start while the CA request is open. Clients that check the trust store will reject it. `just k8s-apply` writes this placeholder back over whatever is in the cluster.
 
 The commands below are test on Baden-Baden. Dev and prod work the same way with their own namespace and bundle part (`eventhub-dev`, `eventhub-prod`) and key (`.local/certs/dev/eventhub-connect-dev.key`, `.local/certs/prod/eventhub-connect-prod.key`).
 
-Remove `tls.yaml` from [`services/nats/kustomization.yaml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/services/nats/kustomization.yaml) before installing the CA certificate, or the next `just k8s-apply` puts the placeholder back. Apply the bundle part so the namespace exists, then install the leaf. NATS reads the files at process start. `just k8s-tls` writes Secret `nats-tls` and restarts that machine's pod.
+Remove `tls.yaml` from [`environments/shared/kustomization.yaml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/environments/shared/kustomization.yaml) before installing the CA certificate, or the next `just k8s-apply` puts the placeholder back. Apply the bundle part so the namespace exists, then install the leaf. NATS reads the files at process start. `just k8s-tls` writes Secret `eventhub-tls` and restarts that machine's pod.
 
 ```sh
 just k8s-apply eventhub-connect-bad eventhub-test

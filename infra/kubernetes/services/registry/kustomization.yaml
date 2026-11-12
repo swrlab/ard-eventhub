@@ -10,6 +10,7 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
+  - ingressroute.yaml
   - passwd.yaml
 
 configMapGenerator:

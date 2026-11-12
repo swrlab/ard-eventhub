@@ -50,7 +50,7 @@ Ingest publiziert bei gesetztem `MQTT_BROKER_URL` direkt auf das Gateway als `sv
 
 ## Kubernetes
 
-Dev, test und prod laufen auf allen drei Maschinen (bad, stg, mnz), jede Stage mit eigenem Namespace, eigenen Host-Ports und NetworkPolicies: [`infra/kubernetes/README.md`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/README.md). Zertifikat erzeugen und als Secret `nats-tls` auf jeden Zonen-Cluster legen: [Certificates](./certificates).
+Dev, test und prod laufen auf allen drei Maschinen (bad, stg, mnz), jede Stage mit eigenem Namespace, eigenen Host-Ports und NetworkPolicies: [`infra/kubernetes/README.md`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/README.md). Zertifikat erzeugen und als Secret `eventhub-tls` auf jeden Zonen-Cluster legen: [Certificates](./certificates).
 
 ```sh
 just k8s-diff eventhub-connect-bad eventhub-dev

@@ -45,7 +45,7 @@ spec:
             - secretRef:
                 name: eventhub-connect
           # Browser and MQTT endpoints of this machine. The hostname must be a SAN of the stage's
-          # nats-tls certificate.
+          # eventhub-tls certificate.
           env:
             # Must stay first: clusters/<machine> replaces env/0.
             - name: ZONE

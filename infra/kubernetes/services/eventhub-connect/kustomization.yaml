@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - deployment.yaml
   - service.yaml
+  - ingressroute.yaml
 
 configMapGenerator:
   - name: eventhub-connect

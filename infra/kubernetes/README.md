@@ -4,6 +4,7 @@ Three machines, one k3s cluster each: `eventhub-connect-bad`, `eventhub-connect-
 
 | Part            | Namespace       | What                                   |
 | --------------- | --------------- | -------------------------------------- |
+| `traefik`       | `kube-system`   | TLS on :443 and :5000, shared          |
 | `registry`      | `registry`      | zot, shared by every stage             |
 | `observability` | `observability` | Vector, VictoriaLogs, logs MCP, shared |
 | `beszel`        | `beszel`        | Beszel hub and agent, shared           |
@@ -30,12 +31,12 @@ infra/kubernetes/
 | NATS cluster routes  | 6222      | 26222 / 16222 / 6222     |
 | MQTT (TLS)           | 8883      | 28883 / 18883 / 8883     |
 | NATS WebSocket (TLS) | 9222      | 29222 / 19222 / 9222     |
-| Operator UI          | 4173      | 24173 / 14173 / 4173     |
-| Registry             | 5000      | 5000, shared             |
+| Operator UI (TLS)    | 4173      | 443, by hostname         |
+| Registry (TLS)       | 5000      | 5000, shared             |
 | Beszel hub UI        | 8090      | 8081, shared             |
 | Beszel agent         | 45876     | 45876, host network      |
 
-NATS client (`4222`) and monitor (`8222`) stay in the cluster. Hosts are reached at `<server>.swr.ard`, where `<server>` comes from [`infra/nixos/hosts.toml`](../nixos/hosts.toml).
+Traefik terminates TLS for the operator UI and the registry with our certificates. Each stage routes its own `eventhub-connect-<zone>-<stage>` names on :443. The registry is `eventhub-connect-<zone>-dev.swr.ard:5000`, a dev SAN. NATS client (`4222`) and monitor (`8222`) stay in the cluster. Hosts are reached at `<server>.swr.ard`, where `<server>` comes from [`infra/nixos/hosts.toml`](../nixos/hosts.toml).
 
 ## Deploy
 
@@ -45,14 +46,14 @@ just k8s-diff bad eventhub-dev       # host alias or name, optional part
 just k8s-apply bad eventhub-dev
 ```
 
-On a fresh machine apply `registry`, `observability`, and `beszel` first, then the stages. Roll a NATS change one machine at a time. The NATS server name is the JetStream identity of its volume, so never rename it on a running machine.
+On a fresh machine apply `traefik`, `registry`, `observability`, and `beszel` first, then the stages. Roll a NATS change one machine at a time. The NATS server name is the JetStream identity of its volume, so never rename it on a running machine.
 
 ## Secrets
 
 The `k8s-*` recipes decrypt the `*.sops.yaml` files next to the manifests, run kustomize, and delete the plaintext.
 
 - `nats-route` has one password per stage, the same on every machine. A rotation splits the stage until NATS restarts on all three.
-- `nats-tls` is a self-signed placeholder. Install the CA certificate with `just k8s-tls`, then drop `tls.yaml` from [`services/nats/kustomization.yaml`](services/nats/kustomization.yaml), or the next apply restores the placeholder.
+- `eventhub-tls` is the stage certificate, one per stage for all three zones, served by NATS (MQTT, WebSocket) and Traefik (operator UI). It starts as a self-signed placeholder. Install the CA certificate with `just k8s-tls`, which for dev also writes `registry-tls`, then drop `tls.yaml` from [`environments/shared/kustomization.yaml`](environments/shared/kustomization.yaml), or the next apply restores the placeholder.
 - `beszel-hub` holds the hub SSH key all machines share and the first admin login. The sops file explains how to re-create the key.
 - `registry-htpasswd` is mounted as a subPath, so restart `deployment/registry` after a password change.
 - `eventhub-connect` (`NATS_USER`, `NATS_PASSWORD`, `ARD_FEED_URL`) is still created by hand in each stage namespace.
@@ -80,7 +81,9 @@ just registry-sync-all       # copy external-images.txt into zot on every host (
 just build-container         # build eventhub-connect and push it to every host
 ```
 
-Pods pull `registry.registry.svc:5000/<repository>`, and NixOS points containerd at `127.0.0.1:5000` for that name. The connect image stays a placeholder tag in `environments/<stage>` until one is pinned.
+Pods pull `registry.registry.svc:5000/<repository>`. NixOS points containerd at the fixed ClusterIP `10.43.0.50:5000` for that name, plain HTTP that stays on the machine. Until `registry-tls` holds the CA certificate, run the recipes with `REGISTRY_INSECURE=1`. The connect image stays a placeholder tag in `environments/<stage>` until one is pinned.
+
+The Service used to be a LoadBalancer. A ClusterIP cannot change in place, so a machine that still has the old Service needs `kubectl delete service registry -n registry` once before `just k8s-apply <host> registry`.
 
 ## Local development
 

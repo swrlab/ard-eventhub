@@ -1,13 +1,13 @@
 # Kubernetes bundles under infra/kubernetes/clusters/<host>. Hosts are the friendly names or aliases
 # from infra/nixos/hosts.toml, and every recipe passes that host's kubeconfig (keys/<host>-k3s-cert.yaml)
-# explicitly instead of trusting the current context. A part (registry, observability, beszel,
+# explicitly instead of trusting the current context. A part (traefik, registry, observability, beszel,
 # eventhub-dev, eventhub-test, eventhub-prod) selects objects by label app.kubernetes.io/instance.
 # Each recipe decrypts the sops files kustomize reads, runs kustomize, then deletes the plaintext.
 
 K8S := source_directory() / '../infra/kubernetes'
 PASSWD := K8S / 'services/registry/passwd.yaml'
 PULL_SECRET := K8S / 'components/registry-pull/secret.yaml'
-NATS_TLS := K8S / 'services/nats/tls.yaml'
+STAGE_TLS := K8S / 'environments/shared/tls.yaml'
 NATS_ROUTE_DEV := K8S / 'environments/dev/nats-route.yaml'
 NATS_ROUTE_TEST := K8S / 'environments/test/nats-route.yaml'
 NATS_ROUTE_PROD := K8S / 'environments/prod/nats-route.yaml'
@@ -17,7 +17,7 @@ BESZEL_HUB := K8S / 'services/beszel/hub/secret.yaml'
 _k8s-decrypt:
 	just --yes decrypt-key {{ K8S / 'services/registry/passwd.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'components/registry-pull/secret.sops.yaml' }}
-	just --yes decrypt-key {{ K8S / 'services/nats/tls.sops.yaml' }}
+	just --yes decrypt-key {{ K8S / 'environments/shared/tls.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'environments/dev/nats-route.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'environments/test/nats-route.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'environments/prod/nats-route.sops.yaml' }}
@@ -25,7 +25,7 @@ _k8s-decrypt:
 
 # delete the plaintext kustomize inputs after rendering or applying
 _k8s-clean:
-	rm -f {{ quote(PASSWD) }} {{ quote(PULL_SECRET) }} {{ quote(NATS_TLS) }}
+	rm -f {{ quote(PASSWD) }} {{ quote(PULL_SECRET) }} {{ quote(STAGE_TLS) }}
 	rm -f {{ quote(NATS_ROUTE_DEV) }} {{ quote(NATS_ROUTE_TEST) }} {{ quote(NATS_ROUTE_PROD) }}
 	rm -f {{ quote(BESZEL_HUB) }}
 
@@ -42,7 +42,7 @@ k8s-build-dryrun:
 		echo "ok $(basename "$dir")"
 	done
 
-# show what applying a host bundle would change (part: registry, observability, beszel, eventhub-dev, eventhub-test, eventhub-prod)
+# show what applying a host bundle would change (part: traefik, registry, observability, beszel, eventhub-dev, eventhub-test, eventhub-prod)
 [group('K3S')]
 k8s-diff host part='':
 	#!/usr/bin/env bash
@@ -59,7 +59,7 @@ k8s-diff host part='':
 	if [[ $diff_status -gt 1 ]]; then exit $diff_status; fi
 	if [[ $diff_status -eq 1 ]]; then exit 1; fi
 
-# apply a host bundle, or one part of it (registry, observability, beszel, eventhub-dev, eventhub-test, eventhub-prod)
+# apply a host bundle, or one part of it (traefik, registry, observability, beszel, eventhub-dev, eventhub-test, eventhub-prod)
 [confirm('Apply to this host? Type yes...')]
 [group('K3S')]
 k8s-apply host part='':
@@ -104,8 +104,8 @@ k8s-logs-mcp host='':
 	done
 	wait
 
-# install a CA leaf as Secret nats-tls and restart NATS (stage: dev, test, prod; cert defaults to tls.crt)
-[confirm('Replace nats-tls on this host? Type yes...')]
+# install a CA leaf as Secret eventhub-tls (dev also as registry-tls) and restart NATS (stage: dev, test, prod; cert defaults to tls.crt)
+[confirm('Replace eventhub-tls on this host? Type yes...')]
 [group('K3S')]
 k8s-tls host stage cert='tls.crt':
 	#!/usr/bin/env bash
@@ -131,10 +131,19 @@ k8s-tls host stage cert='tls.crt':
 	host=$(just --quiet _nix-alias-to-friendly-name {{ quote(host) }})
 	kubeconfig="keys/${host}-k3s-cert.yaml"
 	ns="eventhub-$stage"
-	kubectl --kubeconfig "$kubeconfig" -n "$ns" create secret tls nats-tls \
+	kubectl --kubeconfig "$kubeconfig" -n "$ns" create secret tls eventhub-tls \
 		--cert="$cert" \
 		--key="$key" \
 		--dry-run=client -o yaml \
 		| kubectl --kubeconfig "$kubeconfig" apply -f -
+	# The registry name eventhub-connect-<zone>-dev.swr.ard is a dev SAN. Traefik reloads the
+	# Secret on its own, as it does eventhub-tls for connect.
+	if [[ "$stage" == dev ]]; then
+		kubectl --kubeconfig "$kubeconfig" -n registry create secret tls registry-tls \
+			--cert="$cert" \
+			--key="$key" \
+			--dry-run=client -o yaml \
+			| kubectl --kubeconfig "$kubeconfig" apply -f -
+	fi
 	kubectl --kubeconfig "$kubeconfig" -n "$ns" rollout restart statefulset/nats
 	kubectl --kubeconfig "$kubeconfig" -n "$ns" rollout status statefulset/nats

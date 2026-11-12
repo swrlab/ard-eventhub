@@ -18,7 +18,6 @@ configMapGenerator:
       - PORT_CLUSTER=6222
       - PORT_MQTT=8883
       - PORT_WS=9222
-      - PORT_UI=4173
 
 # Pin once the connect image is built and pushed to the registry.
 images:
@@ -29,3 +28,13 @@ images:
 labels:
   - pairs:
       app.kubernetes.io/instance: eventhub-prod
+
+patches:
+  # Operator UI hostnames of this stage on every machine, both domains of the stage certificate.
+  - target:
+      kind: IngressRoute
+      name: eventhub-connect
+    patch: |-
+      - op: replace
+        path: /spec/routes/0/match
+        value: HostRegexp(`^eventhub-connect-[a-z]+-prod\.swr\.(ard|cn\.ard\.de)$`)

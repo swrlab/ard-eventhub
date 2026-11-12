@@ -61,12 +61,14 @@
   };
 
   # Image names use registry.registry.svc:5000. containerd on the host cannot
-  # resolve that DNS name, and zot is HTTP, so pull it from the local ServiceLB port.
+  # resolve that DNS name, so pull from the fixed ClusterIP of Service registry
+  # (infra/kubernetes/services/registry/service.yaml). Plain HTTP, but the hop
+  # stays on this machine. Traefik owns :5000 on the node and serves it with TLS.
   environment.etc."rancher/k3s/registries.yaml".text = ''
     mirrors:
       "registry.registry.svc:5000":
         endpoint:
-          - "http://127.0.0.1:5000"
+          - "http://10.43.0.50:5000"
   '';
 
   networking.firewall.enable = false;

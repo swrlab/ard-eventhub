@@ -1,6 +1,16 @@
 # Manage the zot registry on each host.
-# The registry is http://<server>:5000 (k3s LoadBalancer). Credentials come from
-# .env.docker.sops.yaml (REGISTRY_USER, REGISTRY_PASSWORD).
+# The registry is https://eventhub-connect-<zone>-dev.swr.ard:5000, TLS by Traefik with the dev
+# certificate. Credentials come from .env.docker.sops.yaml (REGISTRY_USER, REGISTRY_PASSWORD).
+
+# crane skips TLS verification only when asked, for a registry that still serves a placeholder
+# certificate (REGISTRY_INSECURE=1 just registry-sync bad)
+CRANE_TLS := if env('REGISTRY_INSECURE', '') == '' { '' } else { '--insecure' }
+
+# print host:port of a host's registry, a SAN of the dev certificate
+_registry-host host:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	printf '%s-dev.swr.ard:5000\n' "$(just --quiet _nix-alias-to-friendly-name {{ quote(host) }})"
 
 # write zot credentials for every host into the local Docker config and the container keychain
 [group('K3S')]
@@ -22,8 +32,8 @@ _registry-local-setup:
 
 	while read -r host; do
 		[[ -z "$host" ]] && continue
-		registry="$(just --quiet _nix-alias-to-server-name "$host"):5000"
-		printf '%s' "$REGISTRY_PASSWORD" | crane auth login "$registry" --insecure \
+		registry=$(just --quiet _registry-host "$host")
+		printf '%s' "$REGISTRY_PASSWORD" | crane auth login "$registry" \
 			--username "$REGISTRY_USER" --password-stdin
 		if command -v container >/dev/null; then
 			printf '%s' "$REGISTRY_PASSWORD" | container registry login "$registry" \
@@ -40,8 +50,7 @@ registry-sync host:
 		echo "crane is not on PATH; run mise install" >&2
 		exit 1
 	fi
-	server=$(just --quiet _nix-alias-to-server-name {{ quote(host) }})
-	registry="${server}:5000"
+	registry=$(just --quiet _registry-host {{ quote(host) }})
 	echo "syncing to ${registry}"
 
 	while IFS= read -r line || [[ -n "$line" ]]; do
@@ -57,14 +66,14 @@ registry-sync host:
 		tag="${line##*:}"
 		dest="${registry}/${repo#*/}:${tag}"
 		src_digest=$(crane digest "$line")
-		if dst_digest=$(crane digest --insecure "$dest" 2>/dev/null); then
+		if dst_digest=$(crane digest {{ CRANE_TLS }} "$dest" 2>/dev/null); then
 			if [[ "$src_digest" == "$dst_digest" ]]; then
 				echo "current  $line"
 				continue
 			fi
 		fi
 		echo "copy     $line"
-		crane copy --insecure "$line" "$dest"
+		crane copy {{ CRANE_TLS }} "$line" "$dest"
 	done < infra/kubernetes/external-images.txt
 
 # copy each pinned image to every host in infra/nixos/hosts.toml
