@@ -26,7 +26,7 @@ configMapGenerator:
 images:
   - name: eventhub-connect
     newName: registry.registry.svc:5000/eventhub-connect
-    newTag: 2026-11-12-14-33-39--v3.0.0-beta.3
+    newTag: 2026-11-12-15-44-28--v3.0.0-beta.3
 
 labels:
   - pairs:

@@ -70,7 +70,10 @@ export type MetaReport = {
 
 export type ClusterNode = {
 	name: string
+	/** Monitor answered, or a sampled node holds a live route to this peer. */
 	reachable: boolean
+	/** Stats came from this node's own `/varz`. False for peers known only from routes or raft. */
+	sampled: boolean
 	version: string | null
 	uptime: string | null
 	connections: number
@@ -416,7 +419,6 @@ export type VarzView = {
 	subscriptions: number
 	memBytes: number | null
 	routes: number | null
-	expected: string[]
 }
 
 export type ConnzView = {
@@ -428,6 +430,8 @@ export type Slot = {
 	id: string
 	varz: VarzView | null
 	connz: ConnzView | null
+	/** Remote server names from `/routez`, or null until that endpoint answered. */
+	peers: string[] | null
 }
 
 export type MetaView = {

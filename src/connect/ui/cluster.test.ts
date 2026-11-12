@@ -3,12 +3,6 @@ import { test } from '@cross/test'
 import { assertEquals } from '@std/assert'
 import { sampleMonitor } from './cluster.ts'
 
-const urls = [
-	'nats-0.nats-headless.eventhub-dev.svc.cluster.local:6222',
-	'nats-1.nats-headless.eventhub-dev.svc.cluster.local:6222',
-	'nats-2.nats-headless.eventhub-dev.svc.cluster.local:6222',
-]
-
 const names = ['nats-0', 'nats-1', 'nats-2']
 const ids = ['id-0', 'id-1', 'id-2']
 
@@ -24,7 +18,7 @@ const json = (body: unknown): Response => Response.json(body)
  * @returns Fetch double and nothing else
  */
 const rotatingFetch = (): MonitorFetch => {
-	const cursor = { varz: 0, connz: 0, jsz: 0 }
+	const cursor = { varz: 0, connz: 0, routez: 0, jsz: 0 }
 	return async (input) => {
 		if (input.includes('/varz')) {
 			const i = cursor.varz % 3
@@ -40,7 +34,7 @@ const rotatingFetch = (): MonitorFetch => {
 				subscriptions: 4,
 				mem: 1024,
 				routes: 2,
-				cluster: { name: 'eventhub', urls },
+				cluster: { name: 'eventhub' },
 			})
 		}
 		if (input.includes('/connz')) {
@@ -66,6 +60,12 @@ const rotatingFetch = (): MonitorFetch => {
 						]
 					: [],
 			})
+		}
+		if (input.includes('/routez')) {
+			const i = cursor.routez % 3
+			cursor.routez += 1
+			const routes = names.filter((_, j) => j !== i).map((name) => ({ remote_name: name }))
+			return json({ server_id: ids[i], num_routes: routes.length, routes })
 		}
 		const i = cursor.jsz % 3
 		cursor.jsz += 1
@@ -136,31 +136,69 @@ test('monitor sampling joins three load-balanced nodes without tripling jetstrea
 })
 
 /**
- * Monitor that only ever answers as nats-0, while advertising three cluster URLs.
- * @param input - Request URL
- * @returns JSON response
+ * One machine of the multi-host dev cluster: its monitor only ever answers as itself.
+ * Route URLs use machine hostnames (`eventhub-connect-<zone>-dev`), server names are `<stage>-<zone>`.
+ * @param peers - Remote names `/routez` reports, with route pooling duplicating each one
+ * @param raft - Raft replica names in `/jsz`
+ * @returns Fetch double
  */
-const singleNodeFetch: MonitorFetch = async (input) => {
-	if (input.includes('/varz')) {
+const machineFetch =
+	(peers: string[], raft: string[]): MonitorFetch =>
+	async (input) => {
+		if (input.includes('/varz')) {
+			return json({
+				server_id: 'id-stg',
+				server_name: 'dev-stg',
+				version: '2.14.6',
+				uptime: '1m',
+				connections: 0,
+				slow_consumers: 0,
+				stale_connections: 0,
+				subscriptions: 0,
+				mem: 1,
+				routes: peers.length * 3,
+				cluster: {
+					name: 'eventhub-dev',
+					urls: ['bad', 'stg', 'mnz'].map((zone) => `eventhub-connect-${zone}-dev.swr.ard:26222`),
+				},
+			})
+		}
+		if (input.includes('/connz')) return json({ server_id: 'id-stg', num_connections: 0, connections: [] })
+		if (input.includes('/routez')) {
+			const routes = peers.flatMap((name) => [1, 2, 3].map(() => ({ remote_name: name })))
+			return json({ server_id: 'id-stg', server_name: 'dev-stg', num_routes: routes.length, routes })
+		}
 		return json({
-			server_id: 'id-0',
-			server_name: 'nats-0',
-			version: '2.14.6',
-			uptime: '1m',
-			connections: 0,
-			slow_consumers: 0,
-			stale_connections: 0,
-			subscriptions: 0,
-			mem: 1,
-			routes: 0,
-			cluster: { urls },
+			server_id: 'id-stg',
+			streams: 0,
+			consumers: 0,
+			storage: 0,
+			memory: 0,
+			config: {},
+			meta_cluster: {
+				name: 'eventhub-dev',
+				leader: 'dev-bad',
+				cluster_size: 3,
+				pending: 0,
+				replicas: raft.map((name) => ({ name, current: true, active: 1000 })),
+			},
 		})
 	}
-	if (input.includes('/connz')) {
-		return json({ server_id: 'id-0', num_connections: 0, connections: [] })
-	}
-	return json({ server_id: 'id-0', streams: 0, consumers: 0, storage: 0, memory: 0, config: {} })
-}
+
+test('peers on other machines come from routes, not route hostnames', async () => {
+	const sampled = await sampleMonitor('http://127.0.0.1:8222', machineFetch(['dev-bad', 'dev-mnz'], ['dev-mnz']), 1, 1)
+	assertEquals(
+		sampled.cluster.nodes.map((node) => `${node.name}:${node.reachable}:${node.sampled}`),
+		['dev-bad:true:false', 'dev-mnz:true:false', 'dev-stg:true:true']
+	)
+	assertEquals(sampled.cluster.clusterSize, 3)
+})
+
+test('a raft peer without a live route is listed unreachable', async () => {
+	const sampled = await sampleMonitor('http://127.0.0.1:8222', machineFetch(['dev-bad'], ['dev-mnz']), 1, 1)
+	const down = sampled.cluster.nodes.filter((node) => !node.reachable).map((node) => node.name)
+	assertEquals(down, ['dev-mnz'])
+})
 
 test('raft replicas fill in when the first jetstream sample omits them', async () => {
 	let jsz = 0
@@ -250,11 +288,4 @@ test('connz type uses the same names as allowed_connection_types', async () => {
 		sampled.connections.map((row) => `${row.user}:${row.type}`),
 		['a:MQTT', 'b:WEBSOCKET', 'c:STANDARD', 'd:MQTT']
 	)
-})
-
-test('a node that never answers is listed unreachable', async () => {
-	const sampled = await sampleMonitor('http://127.0.0.1:8222', singleNodeFetch)
-	const down = sampled.cluster.nodes.filter((node) => !node.reachable).map((node) => node.name)
-	assertEquals(down, ['nats-1', 'nats-2'])
-	assertEquals(sampled.cluster.nodes[0]?.reachable, true)
 })

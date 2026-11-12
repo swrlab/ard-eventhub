@@ -10,16 +10,6 @@ import type {
 } from '#types'
 import { booleanField, isRecord, numberField, stringField, stringList } from './json.ts'
 
-/**
- * First DNS label of a cluster URL (`nats-0.nats-headless…:6222` → `nats-0`).
- * @param url - Route URL from `/varz`
- * @returns Node name
- */
-const nodeNameFromUrl = (url: string): string => {
-	const host = url.split(':')[0] ?? url
-	return host.split('.')[0] ?? host
-}
-
 const CONNECTION_TYPE_LABELS: Record<string, string> = {
 	mqtt: 'MQTT',
 	websocket: 'WEBSOCKET',
@@ -166,8 +156,24 @@ const readMeta = (body: Record<string, unknown>, current: MetaView | null, serve
 }
 
 /**
+ * Remote server names from `/routez`. Route pooling opens several connections per peer, so names are deduplicated.
+ * @param body - `/routez` JSON
+ * @returns Unique `remote_name` values, sorted
+ */
+const readPeers = (body: Record<string, unknown>): string[] => {
+	const rows = Array.isArray(body.routes) ? body.routes : []
+	const names = new Set<string>()
+	for (const row of rows) {
+		if (!isRecord(row)) continue
+		const name = stringField(row, 'remote_name')
+		if (name) names.add(name)
+	}
+	return [...names].toSorted()
+}
+
+/**
  * Fold one monitor JSON document into per-server slots.
- * `/varz`, `/connz`, and `/jsz` are told apart by shape. A load balancer may
+ * `/varz`, `/connz`, `/routez`, and `/jsz` are told apart by shape. A load balancer may
  * answer each call from a different node, so slots join on `server_id`.
  * @param slots - Accumulator
  * @param meta - Cluster-wide JetStream view
@@ -178,10 +184,8 @@ const absorbMonitor = (slots: Map<string, Slot>, meta: MetaView | null, body: un
 	if (!isRecord(body)) return meta
 	const id = stringField(body, 'server_id')
 	if (!id) return meta
-	const slot: Slot = slots.get(id) ?? { id, varz: null, connz: null }
+	const slot: Slot = slots.get(id) ?? { id, varz: null, connz: null, peers: null }
 	if (typeof body.version === 'string' && typeof body.server_name === 'string') {
-		const cluster = isRecord(body.cluster) ? body.cluster : null
-		const urls = cluster ? stringList(cluster.urls) : []
 		slot.varz = {
 			name: body.server_name,
 			version: stringField(body, 'version'),
@@ -192,8 +196,12 @@ const absorbMonitor = (slots: Map<string, Slot>, meta: MetaView | null, body: un
 			subscriptions: numberField(body, 'subscriptions') ?? 0,
 			memBytes: numberField(body, 'mem'),
 			routes: numberField(body, 'routes'),
-			expected: urls.map(nodeNameFromUrl),
 		}
+		slots.set(id, slot)
+		return meta
+	}
+	if (typeof body.num_routes === 'number') {
+		slot.peers = readPeers(body)
 		slots.set(id, slot)
 		return meta
 	}
@@ -231,26 +239,20 @@ const raftReady = (meta: MetaView | null): boolean => {
 }
 
 /**
- * True when every node named by cluster URLs has both `/varz` and `/connz`.
- * A single-node broker with no cluster URLs is done once `/varz` arrived.
+ * True when every node that answered `/varz` also answered `/connz` and `/routez`.
+ * Peers on other machines are never waited for: their monitor port is not reachable from here.
  * @param slots - Accumulator
- * @returns Whether another sample round is needed
+ * @returns Whether the sampled nodes are complete
  */
 const monitorCovered = (slots: Map<string, Slot>): boolean => {
-	const expected = new Set<string>()
-	for (const slot of slots.values()) {
-		for (const name of slot.varz?.expected ?? []) expected.add(name)
-	}
-	if (expected.size === 0) return [...slots.values()].some((slot) => slot.varz !== null)
-	for (const name of expected) {
-		const slot = [...slots.values()].find((item) => item.varz?.name === name)
-		if (!slot?.varz || !slot.connz) return false
-	}
-	return true
+	const sampled = [...slots.values()].filter((slot) => slot.varz !== null)
+	if (sampled.length === 0) return false
+	return sampled.every((slot) => slot.connz !== null && slot.peers !== null)
 }
 
 /**
- * Build the board payload. Nodes named in cluster URLs but never sampled are unreachable.
+ * Build the board payload. Sampled nodes carry their own stats. Other peers come from `/routez`
+ * remote names and raft replicas: a live route marks them reachable, a raft peer without one is unreachable.
  * @param slots - Accumulator
  * @param meta - JetStream view
  * @param error - Transport error, ignored when at least one node answered
@@ -265,7 +267,7 @@ const finalizeMonitor = (
 ): { cluster: ClusterReport; connections: LiveConnection[] } => {
 	const nodes: ClusterNode[] = []
 	const connections: LiveConnection[] = []
-	const expected = new Set<string>()
+	const routed = new Set<string>()
 	const names = new Map<string, string>()
 	for (const slot of slots.values()) {
 		if (slot.varz) names.set(slot.id, slot.varz.name)
@@ -275,7 +277,7 @@ const finalizeMonitor = (
 			connections.push(...(slot.connz?.connections ?? []))
 			continue
 		}
-		for (const name of slot.varz.expected) expected.add(name)
+		for (const name of slot.peers ?? []) routed.add(name)
 		const server = slot.varz.name
 		for (const connection of slot.connz?.connections ?? []) {
 			connections.push(connection.server === server ? connection : { ...connection, server })
@@ -283,6 +285,7 @@ const finalizeMonitor = (
 		nodes.push({
 			name: server,
 			reachable: true,
+			sampled: true,
 			version: slot.varz.version,
 			uptime: slot.varz.uptime,
 			connections: slot.connz?.total ?? slot.varz.connections,
@@ -293,12 +296,17 @@ const finalizeMonitor = (
 			routes: slot.varz.routes,
 		})
 	}
+	const peers = new Set(routed)
+	for (const replica of meta?.replicas ?? []) peers.add(replica.name)
+	if (meta?.leader) peers.add(meta.leader)
 	const seen = new Set(nodes.map((node) => node.name))
-	for (const name of expected) {
+	for (const name of peers) {
 		if (seen.has(name)) continue
+		seen.add(name)
 		nodes.push({
 			name,
-			reachable: false,
+			reachable: routed.has(name),
+			sampled: false,
 			version: null,
 			uptime: null,
 			connections: 0,
@@ -316,7 +324,7 @@ const finalizeMonitor = (
 		error: nodes.some((node) => node.reachable) ? null : error,
 		cluster: meta?.cluster ?? null,
 		leader: meta?.leader ?? null,
-		clusterSize: meta?.clusterSize ?? (expected.size > 0 ? expected.size : null),
+		clusterSize: meta?.clusterSize ?? (nodes.length > 0 ? nodes.length : null),
 		metaPending: meta?.metaPending ?? null,
 		storageBytes: meta?.storageBytes ?? null,
 		storageMaxBytes: meta?.storageMaxBytes ?? null,
@@ -335,8 +343,9 @@ const finalizeMonitor = (
 }
 
 /**
- * Sample `/varz`, `/connz`, and `/jsz` until every cluster node has been seen, or rounds run out.
- * The dev monitor is one URL in front of three pods, so each request can land on a different node.
+ * Sample `/varz`, `/connz`, `/routez`, and `/jsz` until every node behind the monitor URL is complete, or rounds run out.
+ * Each machine's monitor is one pod, so other machines show up through routes and raft, not their own stats.
+ * A URL in front of several pods still works: each request can land on a different node and slots join on `server_id`.
  * @param baseUrl - Monitor origin, no trailing path
  * @param fetchImpl - `fetch` or a test double
  * @param rounds - Extra passes when the first pass misses a node
@@ -368,7 +377,12 @@ export const sampleMonitor = async (
 	for (let round = 0; round < rounds; round++) {
 		const jobs: Promise<void>[] = []
 		for (let i = 0; i < width; i++) {
-			jobs.push(pull('/varz'), pull('/connz?subs=1&auth=1&limit=1024'), pull('/jsz?streams=1&consumers=1'))
+			jobs.push(
+				pull('/varz'),
+				pull('/connz?subs=1&auth=1&limit=1024'),
+				pull('/routez'),
+				pull('/jsz?streams=1&consumers=1')
+			)
 		}
 		await Promise.all(jobs)
 		if (monitorCovered(slots) && raftReady(meta)) break

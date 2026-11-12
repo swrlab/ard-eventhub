@@ -20,8 +20,8 @@ const storageRatio = computed(() => {
 			<h1 class="text-xl text-heading">cluster</h1>
 			<p class="mt-1 text-sm text-muted/80">
 				<span v-if="data?.leader">{{ data.leader }} führt gerade.</span>
-				Angezeigt werden nur Server, die geantwortet haben. Die Summen gelten für das ganze System, nicht für jeden
-				Server einzeln.
+				Kennzahlen gibt es nur für Server, deren Monitor geantwortet hat. Die anderen erscheinen über ihre Route und den
+				Raft-Stand. Die Summen gelten für das ganze System, nicht für jeden Server einzeln.
 			</p>
 		</header>
 		<p v-if="loading" class="font-mono text-sm text-muted/70">reading…</p>
@@ -53,6 +53,7 @@ const storageRatio = computed(() => {
 						<span v-if="data.leader === node.name" class="font-mono text-xs text-link">leader</span>
 					</div>
 					<p v-if="!node.reachable" class="mt-2 font-mono text-sm text-warning">unreachable</p>
+					<p v-else-if="!node.sampled" class="mt-2 font-mono text-sm text-muted">routed · not sampled</p>
 					<dl v-else class="mt-3 grid grid-cols-[7rem_1fr] gap-y-1 font-mono text-xs">
 						<dt class="text-muted/70">version</dt>
 						<dd>{{ node.version ?? '—' }}</dd>
