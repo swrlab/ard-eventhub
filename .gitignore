@@ -18,6 +18,7 @@ infra/kubernetes/services/registry/passwd.yaml
 infra/kubernetes/components/registry-pull/secret.yaml
 infra/kubernetes/environments/*/tls.yaml
 infra/kubernetes/environments/*/connect.yaml
+infra/kubernetes/components/ard-ca/*.pem
 infra/kubernetes/services/registry/tls.yaml
 infra/kubernetes/services/beszel/hub/tls.yaml
 infra/kubernetes/environments/*/nats-route.yaml

@@ -51,16 +51,22 @@ spec:
             # Must stay first: clusters/<machine> replaces env/0.
             - name: ZONE
               value: unset
+            # Client and monitor ports stay inside the namespace, plain TCP. They are not on a host
+            # port, so the public names refuse them.
             - name: NATS_URL
-              value: nats://eventhub-connect-$(ZONE)-$(STAGE).swr.ard:4222
+              value: nats://nats:4222
             - name: NATS_MONITOR_URL
-              value: http://eventhub-connect-$(ZONE)-$(STAGE).swr.ard:8222
+              value: http://nats:8222
             - name: NATS_USERS_CONF
               value: /etc/nats-users/nats-users.conf
+            # MQTT and WebSocket only listen with TLS, so connect dials the names on the certificate.
             - name: NATS_MQTT_URL
               value: mqtts://eventhub-connect-$(ZONE)-$(STAGE).swr.ard:$(PORT_MQTT)
             - name: NATS_WS_URL
               value: wss://eventhub-connect-$(ZONE)-$(STAGE).swr.ard:$(PORT_WS)
+            # Bun ships its own root store without the ARD CA. It adds this file at start.
+            - name: NODE_EXTRA_CA_CERTS
+              value: /etc/ard-ca/root.pem
           ports:
             - name: http
               containerPort: 4173
@@ -99,7 +105,14 @@ spec:
             - name: nats-users
               mountPath: /etc/nats-users
               readOnly: true
+            - name: ard-ca
+              mountPath: /etc/ard-ca
+              readOnly: true
       volumes:
+        # From components/ard-ca, which environments/shared includes.
+        - name: ard-ca
+          configMap:
+            name: ard-ca
         - name: nats-users
           configMap:
             name: nats

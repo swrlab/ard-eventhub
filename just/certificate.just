@@ -163,12 +163,24 @@ tls-store env cert='tls.crt':
 		fi
 	done
 
+	# Store the leaf followed by the intermediates, whatever chain the CA sent, so every server
+	# sends the full chain and clients only need the root.
+	ca=$(mktemp -d)
+	trap 'rm -rf "$ca"' EXIT
+	sops exec-env --same-process .env.k3s.sops.yaml "just _ard-ca '$ca'"
+	fullchain="$ca/fullchain.pem"
+	{ openssl x509 -in "$cert"; cat "$ca/chain.pem"; } > "$fullchain"
+	if ! openssl verify -CAfile "$ca/root.pem" -untrusted "$ca/chain.pem" "$fullchain" >/dev/null; then
+		echo "$cert does not chain to the ARD root through ARD_CA_CHAIN_URLS" >&2
+		exit 1
+	fi
+
 	# Secret name, sops file. The plaintext only passes through the pipe.
 	store() {
 		local name=$1 out=$2
 		{
 			printf '# Secret %s, the %s certificate. Written by just tls-store %s.\n' "$name" "$env" "$env"
-			KUBECONFIG=/dev/null kubectl create secret tls "$name" --cert="$cert" --key="$key" \
+			KUBECONFIG=/dev/null kubectl create secret tls "$name" --cert="$fullchain" --key="$key" \
 				--dry-run=client -o yaml
 		} | sops encrypt --filename-override "$out" --input-type yaml --output-type yaml /dev/stdin > "$out.tmp"
 		mv "$out.tmp" "$out"
@@ -181,3 +193,46 @@ tls-store env cert='tls.crt':
 		store beszel-tls "{{ K8S }}/services/beszel/hub/tls.sops.yaml"
 	fi
 	openssl x509 -in "$cert" -noout -subject -issuer -enddate
+
+# download the ARD root and intermediates into dir as root.pem and chain.pem (URLs and root pin from .env.k3s.sops.yaml)
+_ard-ca dir:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	dir={{ quote(dir) }}
+	for var in ARD_CA_ROOT_URL ARD_CA_ROOT_SHA256 ARD_CA_CHAIN_URLS; do
+		if [[ -z "${!var:-}" ]]; then
+			echo "$var must be set in .env.k3s.sops.yaml" >&2
+			exit 1
+		fi
+	done
+	tmp=$(mktemp -d)
+	trap 'rm -rf "$tmp"' EXIT
+
+	# The CAs publish DER or PEM. Print PEM.
+	fetch() {
+		curl -fsS --max-time 15 -o "$tmp/raw" "$1"
+		openssl x509 -inform DER -in "$tmp/raw" 2>/dev/null || openssl x509 -in "$tmp/raw"
+	}
+
+	# The downloads are plain HTTP, so the root is pinned and everything else must chain to it.
+	fetch "$ARD_CA_ROOT_URL" > "$tmp/root.pem"
+	sha=$(openssl x509 -in "$tmp/root.pem" -noout -fingerprint -sha256 | cut -d= -f2)
+	if [[ "$sha" != "$ARD_CA_ROOT_SHA256" ]]; then
+		echo "root at $ARD_CA_ROOT_URL has fingerprint $sha, not ARD_CA_ROOT_SHA256" >&2
+		exit 1
+	fi
+	n=0
+	for url in $ARD_CA_CHAIN_URLS; do
+		n=$((n + 1))
+		fetch "$url" > "$tmp/ca-$n.pem"
+	done
+	cat "$tmp"/ca-*.pem > "$tmp/chain.pem"
+	for ca in "$tmp"/ca-*.pem; do
+		if ! openssl verify -CAfile "$tmp/root.pem" -untrusted "$tmp/chain.pem" "$ca" >/dev/null; then
+			echo "$(openssl x509 -in "$ca" -noout -subject) does not chain to the pinned root" >&2
+			exit 1
+		fi
+	done
+
+	mkdir -p "$dir"
+	mv "$tmp/root.pem" "$tmp/chain.pem" "$dir/"

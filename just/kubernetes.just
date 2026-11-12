@@ -2,7 +2,8 @@
 # from infra/nixos/hosts.toml, and every recipe passes that host's kubeconfig (keys/<host>-k3s-cert.yaml)
 # explicitly instead of trusting the current context. A part (traefik, registry, observability, beszel,
 # eventhub-dev, eventhub-test, eventhub-prod) selects objects by label app.kubernetes.io/instance.
-# Each recipe decrypts the sops files kustomize reads, runs kustomize, then deletes the plaintext.
+# Each recipe decrypts the sops files kustomize reads, downloads the ARD root CA, runs kustomize, then
+# deletes both.
 
 K8S := source_directory() / '../infra/kubernetes'
 PASSWD := K8S / 'services/registry/passwd.yaml'
@@ -19,6 +20,7 @@ CONNECT_TEST := K8S / 'environments/test/connect.yaml'
 CONNECT_PROD := K8S / 'environments/prod/connect.yaml'
 BESZEL_HUB := K8S / 'services/beszel/hub/secret.yaml'
 BESZEL_TLS := K8S / 'services/beszel/hub/tls.yaml'
+ARD_CA := K8S / 'components/ard-ca'
 
 # decrypt sops files into gitignored files kustomize reads
 _k8s-decrypt:
@@ -36,6 +38,7 @@ _k8s-decrypt:
 	just --yes decrypt-key {{ K8S / 'environments/prod/connect.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'services/beszel/hub/secret.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'services/beszel/hub/tls.sops.yaml' }}
+	sops exec-env --same-process .env.k3s.sops.yaml "just _ard-ca '{{ ARD_CA }}'"
 
 # delete the plaintext kustomize inputs after rendering or applying
 _k8s-clean:
@@ -44,6 +47,7 @@ _k8s-clean:
 	rm -f {{ quote(TLS_DEV) }} {{ quote(TLS_TEST) }} {{ quote(TLS_PROD) }}
 	rm -f {{ quote(CONNECT_DEV) }} {{ quote(CONNECT_TEST) }} {{ quote(CONNECT_PROD) }}
 	rm -f {{ quote(BESZEL_HUB) }} {{ quote(BESZEL_TLS) }}
+	rm -f {{ quote(ARD_CA / 'root.pem') }} {{ quote(ARD_CA / 'chain.pem') }}
 
 # render every machine bundle (no cluster required)
 [group('K3S')]

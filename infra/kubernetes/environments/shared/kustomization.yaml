@@ -12,6 +12,7 @@ resources:
 
 components:
   - ../../components/registry-pull
+  - ../../components/ard-ca
 
 replacements:
   - source: { kind: ConfigMap, name: eventhub-stage, fieldPath: data.PORT_CLUSTER }

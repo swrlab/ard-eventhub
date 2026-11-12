@@ -1,6 +1,6 @@
 # Manage the zot registry on each host.
 # The registry is https://eventhub-connect-<zone>-dev.swr.ard:5000, TLS by Traefik with the dev
-# certificate. Credentials come from .env.docker.sops.yaml (REGISTRY_USER, REGISTRY_PASSWORD).
+# certificate. Credentials come from .env.k3s.sops.yaml (REGISTRY_USER, REGISTRY_PASSWORD).
 
 # crane skips TLS verification only when asked, for a registry that still serves a placeholder
 # certificate (REGISTRY_INSECURE=1 just registry-sync bad)
@@ -15,14 +15,14 @@ _registry-host host:
 # write zot credentials for every host into the local Docker config and the container keychain
 [group('K3S')]
 registry-local-setup:
-	sops exec-env --same-process .env.docker.sops.yaml "just _registry-local-setup"
+	sops exec-env --same-process .env.k3s.sops.yaml "just _registry-local-setup"
 
 # log crane (and the Apple container CLI, if present) in to each host's zot registry using the decrypted env vars
 _registry-local-setup:
 	#!/usr/bin/env bash
 	set -euo pipefail
 	if [[ -z "${REGISTRY_USER:-}" || -z "${REGISTRY_PASSWORD:-}" ]]; then
-		echo "REGISTRY_USER and REGISTRY_PASSWORD must be set in .env.docker.sops.yaml" >&2
+		echo "REGISTRY_USER and REGISTRY_PASSWORD must be set in .env.k3s.sops.yaml" >&2
 		exit 1
 	fi
 	if ! command -v crane >/dev/null; then
