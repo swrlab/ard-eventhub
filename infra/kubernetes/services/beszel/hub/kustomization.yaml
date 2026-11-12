@@ -6,7 +6,9 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
+  - ingressroute.yaml
   - secret.yaml
+  - tls.yaml
 
 configMapGenerator:
   - name: beszel-hub-config

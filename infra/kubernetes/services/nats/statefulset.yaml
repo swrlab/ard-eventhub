@@ -145,7 +145,7 @@ spec:
             name: nats
             defaultMode: 0444
         # Stage certificate from environments/<stage>/tls.sops.yaml. NATS reads it only at start, so
-        # restart the pod after a change (just k8s-nats-restart). The image has no shell.
+        # restart the pod after a change (kubectl rollout restart statefulset/nats). The image has no shell.
         - name: tls
           secret:
             secretName: eventhub-tls

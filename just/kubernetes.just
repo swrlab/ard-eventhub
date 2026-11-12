@@ -14,7 +14,11 @@ NATS_ROUTE_PROD := K8S / 'environments/prod/nats-route.yaml'
 TLS_DEV := K8S / 'environments/dev/tls.yaml'
 TLS_TEST := K8S / 'environments/test/tls.yaml'
 TLS_PROD := K8S / 'environments/prod/tls.yaml'
+CONNECT_DEV := K8S / 'environments/dev/connect.yaml'
+CONNECT_TEST := K8S / 'environments/test/connect.yaml'
+CONNECT_PROD := K8S / 'environments/prod/connect.yaml'
 BESZEL_HUB := K8S / 'services/beszel/hub/secret.yaml'
+BESZEL_TLS := K8S / 'services/beszel/hub/tls.yaml'
 
 # decrypt sops files into gitignored files kustomize reads
 _k8s-decrypt:
@@ -27,14 +31,19 @@ _k8s-decrypt:
 	just --yes decrypt-key {{ K8S / 'environments/dev/tls.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'environments/test/tls.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'environments/prod/tls.sops.yaml' }}
+	just --yes decrypt-key {{ K8S / 'environments/dev/connect.sops.yaml' }}
+	just --yes decrypt-key {{ K8S / 'environments/test/connect.sops.yaml' }}
+	just --yes decrypt-key {{ K8S / 'environments/prod/connect.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'services/beszel/hub/secret.sops.yaml' }}
+	just --yes decrypt-key {{ K8S / 'services/beszel/hub/tls.sops.yaml' }}
 
 # delete the plaintext kustomize inputs after rendering or applying
 _k8s-clean:
 	rm -f {{ quote(PASSWD) }} {{ quote(PULL_SECRET) }} {{ quote(REGISTRY_TLS) }}
 	rm -f {{ quote(NATS_ROUTE_DEV) }} {{ quote(NATS_ROUTE_TEST) }} {{ quote(NATS_ROUTE_PROD) }}
 	rm -f {{ quote(TLS_DEV) }} {{ quote(TLS_TEST) }} {{ quote(TLS_PROD) }}
-	rm -f {{ quote(BESZEL_HUB) }}
+	rm -f {{ quote(CONNECT_DEV) }} {{ quote(CONNECT_TEST) }} {{ quote(CONNECT_PROD) }}
+	rm -f {{ quote(BESZEL_HUB) }} {{ quote(BESZEL_TLS) }}
 
 # render every machine bundle (no cluster required)
 [group('K3S')]
@@ -110,22 +119,3 @@ k8s-logs-mcp host='':
 			port-forward service/victoria-logs-mcp "${port}:http" &
 	done
 	wait
-
-# restart NATS of one stage on one host, after its certificate changed (stage: dev, test, prod)
-[confirm('Restart NATS of this stage on this host? Type yes...')]
-[group('K3S')]
-k8s-nats-restart host stage:
-	#!/usr/bin/env bash
-	set -euo pipefail
-	stage={{ quote(stage) }}
-	case "$stage" in
-		dev|test|prod) ;;
-		*)
-			echo "stage must be dev, test, or prod" >&2
-			exit 1
-			;;
-	esac
-	host=$(just --quiet _nix-alias-to-friendly-name {{ quote(host) }})
-	kubeconfig="keys/${host}-k3s-cert.yaml"
-	kubectl --kubeconfig "$kubeconfig" -n "eventhub-$stage" rollout restart statefulset/nats
-	kubectl --kubeconfig "$kubeconfig" -n "eventhub-$stage" rollout status statefulset/nats

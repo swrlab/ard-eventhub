@@ -1,14 +1,14 @@
-# k3s ServiceLB publishes port 8081 on the node: http://<server>.swr.ard:8081 (infra/nixos/hosts.toml).
+# Inside the cluster only. Browsers reach the hub through Traefik with TLS (ingressroute.yaml).
 apiVersion: v1
 kind: Service
 metadata:
   name: beszel-hub
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app.kubernetes.io/name: beszel-hub
   ports:
     - name: http
-      port: 8081
+      port: 8090
       targetPort: http
       protocol: TCP

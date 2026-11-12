@@ -5,10 +5,11 @@ kind: Kustomization
 namespace: eventhub-test
 
 resources:
-  # Secrets nats-route and eventhub-tls. just k8s-* decrypts the *.sops.yaml files and deletes the
-  # plaintext. eventhub-tls is the stage certificate, written by just tls-store.
+  # Secrets nats-route, eventhub-tls, and eventhub-connect. just k8s-* decrypts the *.sops.yaml files
+  # and deletes the plaintext. eventhub-tls is the stage certificate, written by just tls-store.
   - nats-route.yaml
   - tls.yaml
+  - connect.yaml
 
 components:
   - ../shared
@@ -24,8 +25,8 @@ configMapGenerator:
 # Pin once the connect image is built and pushed to the registry.
 images:
   - name: eventhub-connect
-    newName: eventhub-connect
-    newTag: test
+    newName: registry.registry.svc:5000/eventhub-connect
+    newTag: 2026-11-12-14-33-39--v3.0.0-beta.3
 
 labels:
   - pairs:

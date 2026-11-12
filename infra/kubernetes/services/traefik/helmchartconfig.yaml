@@ -1,6 +1,5 @@
-# websecure (:443) serves eventhub-connect of every stage. registry (:5000) serves zot. Both
-# terminate TLS with our certificates, see services/eventhub-connect/ingressroute.yaml and
-# services/registry/ingressroute.yaml.
+# websecure (:443) serves eventhub-connect of every stage, registry (:5000) zot, beszel (:8081) the
+# Beszel hub. All terminate TLS with our certificates, see the ingressroute.yaml next to each service.
 # https://github.com/traefik/traefik-helm-chart/blob/v40.1.0/traefik/values.yaml
 apiVersion: helm.cattle.io/v1
 kind: HelmChartConfig
@@ -22,3 +21,12 @@ spec:
         transport:
           respondingTimeouts:
             readTimeout: 0
+      beszel:
+        port: 8081
+        expose:
+          default: true
+        exposedPort: 8081
+        protocol: TCP
+        http:
+          tls:
+            enabled: true

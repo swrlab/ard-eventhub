@@ -4,7 +4,7 @@ Three machines, one k3s cluster each: `eventhub-connect-bad`, `eventhub-connect-
 
 | Part            | Namespace       | What                                   |
 | --------------- | --------------- | -------------------------------------- |
-| `traefik`       | `kube-system`   | TLS on :443 and :5000, shared          |
+| `traefik`       | `kube-system`   | TLS on :443, :5000, :8081, shared      |
 | `registry`      | `registry`      | zot, shared by every stage             |
 | `observability` | `observability` | Vector, VictoriaLogs, logs MCP, shared |
 | `beszel`        | `beszel`        | Beszel hub and agent, shared           |
@@ -33,10 +33,10 @@ infra/kubernetes/
 | NATS WebSocket (TLS) | 9222      | 29222 / 19222 / 9222     |
 | Operator UI (TLS)    | 4173      | 443, by hostname         |
 | Registry (TLS)       | 5000      | 5000, shared             |
-| Beszel hub UI        | 8090      | 8081, shared             |
+| Beszel hub UI (TLS)  | 8090      | 8081, shared             |
 | Beszel agent         | 45876     | 45876, host network      |
 
-Traefik terminates TLS for the operator UI and the registry with our certificates. Each stage routes its own `eventhub-connect-<zone>-<stage>` names on :443. The registry is `eventhub-connect-<zone>-dev.swr.ard:5000`, a dev SAN. NATS client (`4222`) and monitor (`8222`) stay in the cluster. Hosts are reached at `<server>.swr.ard`, where `<server>` comes from [`infra/nixos/hosts.toml`](../nixos/hosts.toml).
+Traefik terminates TLS for the operator UI, the registry, and Beszel with our certificates. Each stage routes its own `eventhub-connect-<zone>-<stage>` names on :443. The registry (`:5000`) and the Beszel hub (`:8081`) answer as `eventhub-connect-<zone>-dev.swr.ard`, a dev SAN. NATS client (`4222`) and monitor (`8222`) stay in the cluster. Hosts are reached at `<server>.swr.ard`, where `<server>` comes from [`infra/nixos/hosts.toml`](../nixos/hosts.toml).
 
 ## Deploy
 
@@ -53,10 +53,10 @@ On a fresh machine apply `traefik`, `registry`, `observability`, and `beszel` fi
 The `k8s-*` recipes decrypt the `*.sops.yaml` files next to the manifests, run kustomize, and delete the plaintext.
 
 - `nats-route` has one password per stage, the same on every machine. A rotation splits the stage until NATS restarts on all three.
-- `eventhub-tls` is the stage certificate in `environments/<stage>/tls.sops.yaml`, one per stage for all three zones. NATS (MQTT, WebSocket) and Traefik (operator UI) serve it. `just tls-store <stage> tls.crt` writes it, and for dev also `registry-tls`. NATS needs `just k8s-nats-restart` after an apply, see [Certificates](../../docs/development/certificates.md).
+- `eventhub-tls` is the stage certificate in `environments/<stage>/tls.sops.yaml`, one per stage for all three zones. NATS (MQTT, WebSocket) and Traefik (operator UI) serve it. `just tls-store <stage> tls.crt` writes it, and for dev also `registry-tls` and `beszel-tls`. NATS reads it only at start, so restart `statefulset/nats` after an apply, see [Certificates](../../docs/development/certificates.md).
 - `beszel-hub` holds the hub SSH key all machines share and the first admin login. The sops file explains how to re-create the key.
 - `registry-htpasswd` is mounted as a subPath, so restart `deployment/registry` after a password change.
-- `eventhub-connect` (`NATS_USER`, `NATS_PASSWORD`, `ARD_FEED_URL`) is still created by hand in each stage namespace.
+- `eventhub-connect` (`NATS_USER`, `NATS_PASSWORD`, `ARD_FEED_URL`) is `environments/<stage>/connect.sops.yaml`. The login must match the hash in `nats-users.conf`.
 
 ## Logs
 
@@ -71,7 +71,7 @@ just k8s-logs-mcp bad    # one host
 
 ## Beszel
 
-Each hub polls the agents on all three machines, so any one hub shows the whole fleet. The machines are listed in [`services/beszel/hub/config.yml`](services/beszel/hub/config.yml). The hub deletes every system not in that file when it starts, so add machines there, not in the UI.
+Each hub polls the agents on all three machines, so any one hub shows the whole fleet. The UI is `https://eventhub-connect-<zone>-dev.swr.ard:8081`. The machines are listed in [`services/beszel/hub/config.yml`](services/beszel/hub/config.yml). The hub deletes every system not in that file when it starts, so add machines there, not in the UI.
 
 ## Registry
 

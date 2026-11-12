@@ -118,7 +118,7 @@ csr env force='':
 	echo
 	cat "$csr"
 
-# check a CA leaf against its key and store both in the stage's sops file, dev also for the registry (just tls-store dev tls.crt)
+# check a CA leaf against its key and store both in the stage's sops file, dev also for registry and Beszel (just tls-store dev tls.crt)
 [group('CERTIFICATES')]
 tls-store env cert='tls.crt':
 	#!/usr/bin/env bash
@@ -175,8 +175,9 @@ tls-store env cert='tls.crt':
 		echo "wrote $out"
 	}
 	store eventhub-tls "{{ K8S }}/environments/$env/tls.sops.yaml"
-	# The registry answers as eventhub-connect-<zone>-dev.swr.ard:5000.
+	# The registry (:5000) and the Beszel hub (:8081) answer as eventhub-connect-<zone>-dev.swr.ard.
 	if [[ "$env" == dev ]]; then
 		store registry-tls "{{ K8S }}/services/registry/tls.sops.yaml"
+		store beszel-tls "{{ K8S }}/services/beszel/hub/tls.sops.yaml"
 	fi
 	openssl x509 -in "$cert" -noout -subject -issuer -enddate

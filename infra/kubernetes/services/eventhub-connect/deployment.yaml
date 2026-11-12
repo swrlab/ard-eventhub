@@ -30,18 +30,19 @@ spec:
         runAsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
+      # zot requires a login. Secret registry comes from components/registry-pull.
+      imagePullSecrets:
+        - name: registry
       containers:
         - name: eventhub-connect
           # Placeholder name; the environment layer pins the real image with `images:`.
           image: eventhub-connect
           imagePullPolicy: IfNotPresent
           envFrom:
-            - configMapRef:
-                name: eventhub-connect
             # STAGE and PORT_* from the stage layer.
             - configMapRef:
                 name: eventhub-stage
-            # NATS_USER, NATS_PASSWORD, ARD_FEED_URL. Created from sops, never committed.
+            # NATS_USER, NATS_PASSWORD, ARD_FEED_URL from environments/<stage>/connect.sops.yaml.
             - secretRef:
                 name: eventhub-connect
           # Browser and MQTT endpoints of this machine. The hostname must be a SAN of the stage's
@@ -50,10 +51,16 @@ spec:
             # Must stay first: clusters/<machine> replaces env/0.
             - name: ZONE
               value: unset
+            - name: NATS_URL
+              value: nats://eventhub-connect-$(ZONE)-$(STAGE).swr.ard:4222
+            - name: NATS_MONITOR_URL
+              value: http://eventhub-connect-$(ZONE)-$(STAGE).swr.ard:8222
+            - name: NATS_USERS_CONF
+              value: /etc/nats-users/nats-users.conf
             - name: NATS_MQTT_URL
-              value: mqtts://eventhub-connect-$(ZONE)-$(STAGE).swr.cn.ard.de:$(PORT_MQTT)
+              value: mqtts://eventhub-connect-$(ZONE)-$(STAGE).swr.ard:$(PORT_MQTT)
             - name: NATS_WS_URL
-              value: wss://eventhub-connect-$(ZONE)-$(STAGE).swr.cn.ard.de:$(PORT_WS)
+              value: wss://eventhub-connect-$(ZONE)-$(STAGE).swr.ard:$(PORT_WS)
           ports:
             - name: http
               containerPort: 4173

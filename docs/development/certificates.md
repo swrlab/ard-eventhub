@@ -58,18 +58,18 @@ cat chain.pem >> tls.crt
 
 The key is `.local/certs/<env>/eventhub-connect-<env>.key`. A later `just csr --force` produces a different key, and this certificate will not match it.
 
-`just tls-store` checks that the certificate was signed for that key, has not expired, and lists the three `eventhub-connect-<zone>-<env>.swr.ard` names. Then it writes certificate and key into [`environments/<env>/tls.sops.yaml`](https://github.com/swrlab/ard-eventhub/tree/main/infra/kubernetes/environments) as Secret `eventhub-tls`. For dev it also writes [`services/registry/tls.sops.yaml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/services/registry/tls.sops.yaml) as Secret `registry-tls`, because the registry on `:5000` answers as `eventhub-connect-<zone>-dev.swr.ard`. Nothing touches a cluster. Commit the sops files with the change that needs them.
+`just tls-store` checks that the certificate was signed for that key, has not expired, and lists the three `eventhub-connect-<zone>-<env>.swr.ard` names. Then it writes certificate and key into [`environments/<env>/tls.sops.yaml`](https://github.com/swrlab/ard-eventhub/tree/main/infra/kubernetes/environments) as Secret `eventhub-tls`. For dev it also writes Secret `registry-tls` ([`services/registry/tls.sops.yaml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/services/registry/tls.sops.yaml)) and Secret `beszel-tls` ([`services/beszel/hub/tls.sops.yaml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/services/beszel/hub/tls.sops.yaml)), because the registry on `:5000` and the Beszel hub on `:8081` answer as `eventhub-connect-<zone>-dev.swr.ard`. Nothing touches a cluster. Commit the sops files with the change that needs them.
 
 Until then each file holds a self-signed placeholder with every stage hostname, so the pods start while the CA request is open. Clients that check the trust store reject it.
 
 ## Roll out
 
-`just k8s-apply` puts the Secret on a machine. Traefik serves it for the operator UI on `:443` and the registry on `:5000`, and reloads it on its own. NATS mounts it at `/etc/nats/tls` and reads it only at start, so restart NATS after the apply. One machine at a time, so the other two keep quorum:
+`just k8s-apply` puts the Secret on a machine. Traefik serves it for the operator UI on `:443`, the registry on `:5000`, and Beszel on `:8081`, and reloads it on its own. NATS mounts it at `/etc/nats/tls` and reads it only at start, so restart NATS after the apply. One machine at a time, so the other two keep quorum:
 
 ```sh
 just tls-store test tls.crt
 just k8s-apply bad eventhub-test
-just k8s-nats-restart bad test
+kubectl --kubeconfig keys/eventhub-connect-bad-k3s-cert.yaml -n eventhub-test rollout restart statefulset/nats
 ```
 
-Repeat the last two lines for `stg`, then `mnz`. A replacement certificate takes the same steps.
+Wait for `rollout status statefulset/nats`, then repeat the last two lines for `stg` and `mnz`. A replacement certificate takes the same steps.

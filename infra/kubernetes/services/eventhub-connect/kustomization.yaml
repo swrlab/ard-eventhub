@@ -7,13 +7,6 @@ resources:
   - service.yaml
   - ingressroute.yaml
 
-configMapGenerator:
-  - name: eventhub-connect
-    literals:
-      - NATS_URL=nats://nats:4222
-      - NATS_MONITOR_URL=http://nats:8222
-      - NATS_USERS_CONF=/etc/nats-users/nats-users.conf
-
 labels:
   - pairs:
       app.kubernetes.io/name: eventhub-connect
