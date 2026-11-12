@@ -9,3 +9,4 @@ docker.io/henrygd/beszel-agent:0.21.1
 docker.io/library/nats:2.14.6
 docker.io/timberio/vector:0.61.0-distroless-libc
 docker.io/victoriametrics/victoria-logs:v1.53.0
+ghcr.io/victoriametrics/mcp-victorialogs:v1.9.0

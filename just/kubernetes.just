@@ -73,6 +73,37 @@ k8s-apply host part='':
 	kubectl --kubeconfig "$kubeconfig" apply \
 		-k {{ quote(K8S / 'clusters') }}/"$host" {{ if part == '' { '' } else { '-l app.kubernetes.io/instance=' + quote(part) } }}
 
+# forward the VictoriaLogs MCP of one host, or every host when empty, to the local ports in .cursor/mcp.json
+[group('K3S')]
+k8s-logs-mcp host='':
+	#!/usr/bin/env bash
+	set -euo pipefail
+	# One fixed local port per host so all three can run at once. Keep in sync with .cursor/mcp.json.
+	port_for() {
+		case "$1" in
+			eventhub-connect-bad) echo 9431 ;;
+			eventhub-connect-mnz) echo 9432 ;;
+			eventhub-connect-stg) echo 9433 ;;
+			*)
+				echo "no local MCP port for $1" >&2
+				return 1
+				;;
+		esac
+	}
+	if [[ -n {{ quote(host) }} ]]; then
+		hosts=$(just --quiet _nix-alias-to-friendly-name {{ quote(host) }})
+	else
+		hosts=$(just --quiet _nix-list-friendly-names)
+	fi
+	trap 'kill $(jobs -p) 2>/dev/null' EXIT
+	for host in $hosts; do
+		port=$(port_for "$host")
+		echo "${host}: http://127.0.0.1:${port}/mcp"
+		kubectl --kubeconfig "keys/${host}-k3s-cert.yaml" -n observability \
+			port-forward service/victoria-logs-mcp "${port}:http" &
+	done
+	wait
+
 # install a CA leaf as Secret nats-tls and restart NATS (stage: dev, test, prod; cert defaults to tls.crt)
 [confirm('Replace nats-tls on this host? Type yes...')]
 [group('K3S')]

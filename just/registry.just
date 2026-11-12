@@ -66,3 +66,12 @@ registry-sync host:
 		echo "copy     $line"
 		crane copy --insecure "$line" "$dest"
 	done < infra/kubernetes/external-images.txt
+
+# copy each pinned image to every host in infra/nixos/hosts.toml
+[group('K3S')]
+registry-sync-all:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	just --quiet _nix-list-friendly-names | while read -r host; do
+		just registry-sync "$host" || exit 1
+	done

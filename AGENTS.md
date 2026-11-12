@@ -43,6 +43,8 @@ kubectl --kubeconfig "$kc" logs -n eventhub-dev statefulset/nats --tail=200 -f
 kubectl --kubeconfig "$kc" logs -n eventhub-dev <pod> --previous  # after a crash or restart
 ```
 
+To search logs with LogsQL, ask the user to run `just k8s-logs-mcp`, then use the `victorialogs-<zone>` MCP servers from `.cursor/mcp.json`.
+
 Read logs only. Do not run `apply`, `delete`, `rollout restart`, or `exec` without asking. Logs of the k3s unit itself are on the host: `journalctl -u k3s`.
 
 ## Git
