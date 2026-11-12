@@ -117,3 +117,66 @@ csr env force='':
 		| sed 's/^[[:space:]]*/  /'
 	echo
 	cat "$csr"
+
+# check a CA leaf against its key and store both in the stage's sops file, dev also for the registry (just tls-store dev tls.crt)
+[group('CERTIFICATES')]
+tls-store env cert='tls.crt':
+	#!/usr/bin/env bash
+	set -euo pipefail
+
+	env={{ quote(env) }}
+	cert={{ quote(cert) }}
+
+	case "$env" in
+		dev|test|prod) ;;
+		*)
+			echo "env must be dev, test, or prod" >&2
+			exit 1
+			;;
+	esac
+
+	key="{{ CERT_DIR }}/$env/eventhub-connect-$env.key"
+	for file in "$cert" "$key"; do
+		if [[ ! -f "$file" ]]; then
+			echo "not found: $file" >&2
+			exit 1
+		fi
+	done
+
+	cert_pub=$(openssl x509 -in "$cert" -noout -pubkey | openssl sha256)
+	key_pub=$(openssl pkey -in "$key" -pubout | openssl sha256)
+	if [[ "$cert_pub" != "$key_pub" ]]; then
+		echo "$cert was not signed for $key" >&2
+		exit 1
+	fi
+	if ! openssl x509 -in "$cert" -noout -checkend 0 >/dev/null; then
+		echo "$cert has expired" >&2
+		exit 1
+	fi
+	# The same names just csr requests.
+	sans=$(openssl x509 -in "$cert" -noout -ext subjectAltName)
+	for zone in bad mnz stg; do
+		name="eventhub-connect-${zone}-${env}.swr.ard"
+		if ! grep -qE "DNS:${name//./\\.}(,|$)" <<< "$sans"; then
+			echo "$cert lacks $name" >&2
+			exit 1
+		fi
+	done
+
+	# Secret name, sops file. The plaintext only passes through the pipe.
+	store() {
+		local name=$1 out=$2
+		{
+			printf '# Secret %s, the %s certificate. Written by just tls-store %s.\n' "$name" "$env" "$env"
+			KUBECONFIG=/dev/null kubectl create secret tls "$name" --cert="$cert" --key="$key" \
+				--dry-run=client -o yaml
+		} | sops encrypt --filename-override "$out" --input-type yaml --output-type yaml /dev/stdin > "$out.tmp"
+		mv "$out.tmp" "$out"
+		echo "wrote $out"
+	}
+	store eventhub-tls "{{ K8S }}/environments/$env/tls.sops.yaml"
+	# The registry answers as eventhub-connect-<zone>-dev.swr.ard:5000.
+	if [[ "$env" == dev ]]; then
+		store registry-tls "{{ K8S }}/services/registry/tls.sops.yaml"
+	fi
+	openssl x509 -in "$cert" -noout -subject -issuer -enddate

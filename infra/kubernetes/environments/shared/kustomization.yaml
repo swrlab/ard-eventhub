@@ -7,9 +7,6 @@ kind: Component
 resources:
   - namespace.yaml
   - network-policies.yaml
-  # Secret eventhub-tls, a self-signed placeholder for the stage certificate. just k8s-* decrypts
-  # tls.sops.yaml and deletes the plaintext. Remove this line once the CA certificate is installed.
-  - tls.yaml
   - ../../services/nats
   - ../../services/eventhub-connect
 

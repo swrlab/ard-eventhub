@@ -7,26 +7,33 @@
 K8S := source_directory() / '../infra/kubernetes'
 PASSWD := K8S / 'services/registry/passwd.yaml'
 PULL_SECRET := K8S / 'components/registry-pull/secret.yaml'
-STAGE_TLS := K8S / 'environments/shared/tls.yaml'
+REGISTRY_TLS := K8S / 'services/registry/tls.yaml'
 NATS_ROUTE_DEV := K8S / 'environments/dev/nats-route.yaml'
 NATS_ROUTE_TEST := K8S / 'environments/test/nats-route.yaml'
 NATS_ROUTE_PROD := K8S / 'environments/prod/nats-route.yaml'
+TLS_DEV := K8S / 'environments/dev/tls.yaml'
+TLS_TEST := K8S / 'environments/test/tls.yaml'
+TLS_PROD := K8S / 'environments/prod/tls.yaml'
 BESZEL_HUB := K8S / 'services/beszel/hub/secret.yaml'
 
 # decrypt sops files into gitignored files kustomize reads
 _k8s-decrypt:
 	just --yes decrypt-key {{ K8S / 'services/registry/passwd.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'components/registry-pull/secret.sops.yaml' }}
-	just --yes decrypt-key {{ K8S / 'environments/shared/tls.sops.yaml' }}
+	just --yes decrypt-key {{ K8S / 'services/registry/tls.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'environments/dev/nats-route.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'environments/test/nats-route.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'environments/prod/nats-route.sops.yaml' }}
+	just --yes decrypt-key {{ K8S / 'environments/dev/tls.sops.yaml' }}
+	just --yes decrypt-key {{ K8S / 'environments/test/tls.sops.yaml' }}
+	just --yes decrypt-key {{ K8S / 'environments/prod/tls.sops.yaml' }}
 	just --yes decrypt-key {{ K8S / 'services/beszel/hub/secret.sops.yaml' }}
 
 # delete the plaintext kustomize inputs after rendering or applying
 _k8s-clean:
-	rm -f {{ quote(PASSWD) }} {{ quote(PULL_SECRET) }} {{ quote(STAGE_TLS) }}
+	rm -f {{ quote(PASSWD) }} {{ quote(PULL_SECRET) }} {{ quote(REGISTRY_TLS) }}
 	rm -f {{ quote(NATS_ROUTE_DEV) }} {{ quote(NATS_ROUTE_TEST) }} {{ quote(NATS_ROUTE_PROD) }}
+	rm -f {{ quote(TLS_DEV) }} {{ quote(TLS_TEST) }} {{ quote(TLS_PROD) }}
 	rm -f {{ quote(BESZEL_HUB) }}
 
 # render every machine bundle (no cluster required)
@@ -104,14 +111,13 @@ k8s-logs-mcp host='':
 	done
 	wait
 
-# install a CA leaf as Secret eventhub-tls (dev also as registry-tls) and restart NATS (stage: dev, test, prod; cert defaults to tls.crt)
-[confirm('Replace eventhub-tls on this host? Type yes...')]
+# restart NATS of one stage on one host, after its certificate changed (stage: dev, test, prod)
+[confirm('Restart NATS of this stage on this host? Type yes...')]
 [group('K3S')]
-k8s-tls host stage cert='tls.crt':
+k8s-nats-restart host stage:
 	#!/usr/bin/env bash
 	set -euo pipefail
 	stage={{ quote(stage) }}
-	cert={{ quote(cert) }}
 	case "$stage" in
 		dev|test|prod) ;;
 		*)
@@ -119,31 +125,7 @@ k8s-tls host stage cert='tls.crt':
 			exit 1
 			;;
 	esac
-	key={{ quote(source_directory() / '../.local/certs') }}/"$stage/eventhub-connect-$stage.key"
-	if [[ ! -f "$cert" ]]; then
-		echo "certificate not found: $cert" >&2
-		exit 1
-	fi
-	if [[ ! -f "$key" ]]; then
-		echo "key not found: $key" >&2
-		exit 1
-	fi
 	host=$(just --quiet _nix-alias-to-friendly-name {{ quote(host) }})
 	kubeconfig="keys/${host}-k3s-cert.yaml"
-	ns="eventhub-$stage"
-	kubectl --kubeconfig "$kubeconfig" -n "$ns" create secret tls eventhub-tls \
-		--cert="$cert" \
-		--key="$key" \
-		--dry-run=client -o yaml \
-		| kubectl --kubeconfig "$kubeconfig" apply -f -
-	# The registry name eventhub-connect-<zone>-dev.swr.ard is a dev SAN. Traefik reloads the
-	# Secret on its own, as it does eventhub-tls for connect.
-	if [[ "$stage" == dev ]]; then
-		kubectl --kubeconfig "$kubeconfig" -n registry create secret tls registry-tls \
-			--cert="$cert" \
-			--key="$key" \
-			--dry-run=client -o yaml \
-			| kubectl --kubeconfig "$kubeconfig" apply -f -
-	fi
-	kubectl --kubeconfig "$kubeconfig" -n "$ns" rollout restart statefulset/nats
-	kubectl --kubeconfig "$kubeconfig" -n "$ns" rollout status statefulset/nats
+	kubectl --kubeconfig "$kubeconfig" -n "eventhub-$stage" rollout restart statefulset/nats
+	kubectl --kubeconfig "$kubeconfig" -n "eventhub-$stage" rollout status statefulset/nats

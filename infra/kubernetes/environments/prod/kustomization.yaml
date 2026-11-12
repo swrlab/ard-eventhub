@@ -5,8 +5,10 @@ kind: Kustomization
 namespace: eventhub-prod
 
 resources:
-  # Secret nats-route. just k8s-* decrypts nats-route.sops.yaml and deletes the plaintext.
+  # Secrets nats-route and eventhub-tls. just k8s-* decrypts the *.sops.yaml files and deletes the
+  # plaintext. eventhub-tls is the stage certificate, written by just tls-store.
   - nats-route.yaml
+  - tls.yaml
 
 components:
   - ../shared

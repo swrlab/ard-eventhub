@@ -144,8 +144,8 @@ spec:
           configMap:
             name: nats
             defaultMode: 0444
-        # Self-signed placeholder from tls.sops.yaml until the CA certificate replaces it.
-        # See docs/development/certificates.md. The image has no shell.
+        # Stage certificate from environments/<stage>/tls.sops.yaml. NATS reads it only at start, so
+        # restart the pod after a change (just k8s-nats-restart). The image has no shell.
         - name: tls
           secret:
             secretName: eventhub-tls

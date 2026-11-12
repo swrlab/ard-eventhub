@@ -53,7 +53,7 @@ On a fresh machine apply `traefik`, `registry`, `observability`, and `beszel` fi
 The `k8s-*` recipes decrypt the `*.sops.yaml` files next to the manifests, run kustomize, and delete the plaintext.
 
 - `nats-route` has one password per stage, the same on every machine. A rotation splits the stage until NATS restarts on all three.
-- `eventhub-tls` is the stage certificate, one per stage for all three zones, served by NATS (MQTT, WebSocket) and Traefik (operator UI). It starts as a self-signed placeholder. Install the CA certificate with `just k8s-tls`, which for dev also writes `registry-tls`, then drop `tls.yaml` from [`environments/shared/kustomization.yaml`](environments/shared/kustomization.yaml), or the next apply restores the placeholder.
+- `eventhub-tls` is the stage certificate in `environments/<stage>/tls.sops.yaml`, one per stage for all three zones. NATS (MQTT, WebSocket) and Traefik (operator UI) serve it. `just tls-store <stage> tls.crt` writes it, and for dev also `registry-tls`. NATS needs `just k8s-nats-restart` after an apply, see [Certificates](../../docs/development/certificates.md).
 - `beszel-hub` holds the hub SSH key all machines share and the first admin login. The sops file explains how to re-create the key.
 - `registry-htpasswd` is mounted as a subPath, so restart `deployment/registry` after a password change.
 - `eventhub-connect` (`NATS_USER`, `NATS_PASSWORD`, `ARD_FEED_URL`) is still created by hand in each stage namespace.
