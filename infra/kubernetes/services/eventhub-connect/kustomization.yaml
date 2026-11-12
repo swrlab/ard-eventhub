@@ -8,7 +8,8 @@ resources:
   - ingressroute.yaml
 
 labels:
-  - pairs:
+  - includeTemplates: true
+    pairs:
       app.kubernetes.io/name: eventhub-connect
       app.kubernetes.io/part-of: eventhub
       app.kubernetes.io/component: connect

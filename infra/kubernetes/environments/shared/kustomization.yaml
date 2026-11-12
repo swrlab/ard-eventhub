@@ -19,14 +19,11 @@ replacements:
     targets:
       - select: { kind: StatefulSet, name: nats }
         fieldPaths: ['spec.template.spec.containers.[name=nats].ports.[name=cluster].hostPort']
-        options: { create: true }
   - source: { kind: ConfigMap, name: eventhub-stage, fieldPath: data.PORT_MQTT }
     targets:
       - select: { kind: StatefulSet, name: nats }
         fieldPaths: ['spec.template.spec.containers.[name=nats].ports.[name=mqtts].hostPort']
-        options: { create: true }
   - source: { kind: ConfigMap, name: eventhub-stage, fieldPath: data.PORT_WS }
     targets:
       - select: { kind: StatefulSet, name: nats }
         fieldPaths: ['spec.template.spec.containers.[name=nats].ports.[name=websocket].hostPort']
-        options: { create: true }

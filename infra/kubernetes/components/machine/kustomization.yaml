@@ -1,0 +1,27 @@
+# Everything one machine runs. clusters/<host> includes this and sets ZONE in ConfigMap machine.
+# The zone names the NATS servers (dev-bad, test-bad, prod-bad) and the public hostnames, and pins NATS
+# and connect to the node labelled with it, so a bundle applied to another machine stays Pending.
+# The replacements find their targets by name, not by position.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - ../../services/traefik
+  - ../../services/registry
+  - ../../services/observability
+  - ../../services/beszel
+  - ../../environments/dev
+  - ../../environments/test
+  - ../../environments/prod
+
+replacements:
+  - source: { kind: ConfigMap, name: machine, fieldPath: data.ZONE }
+    targets:
+      - select: { kind: StatefulSet, name: nats }
+        fieldPaths:
+          - spec.template.spec.nodeSelector.[topology.kubernetes.io/zone]
+          - spec.template.spec.containers.[name=nats].env.[name=ZONE].value
+      - select: { kind: Deployment, name: eventhub-connect }
+        fieldPaths:
+          - spec.template.spec.nodeSelector.[topology.kubernetes.io/zone]
+          - spec.template.spec.containers.[name=eventhub-connect].env.[name=ZONE].value

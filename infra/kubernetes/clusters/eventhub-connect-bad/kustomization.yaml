@@ -1,26 +1,16 @@
-# Everything on eventhub-connect-bad. The zone is the only machine value. It names the NATS servers
-# (eventhub-connect-bad-dev, -test, -prod, the first label of each public hostname), and pins NATS
-# and connect to the node labelled with it, so this bundle applied to another machine stays Pending.
+# Everything on eventhub-connect-bad. The zone is the only machine value, see components/machine.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-resources:
-  - ../../services/traefik
-  - ../../services/registry
-  - ../../services/observability
-  - ../../services/beszel
-  - ../../environments/dev
-  - ../../environments/test
-  - ../../environments/prod
+components:
+  - ../../components/machine
 
-patches:
-  - target:
-      kind: StatefulSet|Deployment
-      labelSelector: app.kubernetes.io/part-of=eventhub
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/nodeSelector/topology.kubernetes.io~1zone
-        value: bad
-      - op: replace
-        path: /spec/template/spec/containers/0/env/0
-        value: { name: ZONE, value: bad }
+# Input for the replacements in components/machine. local-config keeps it out of the output.
+configMapGenerator:
+  - name: machine
+    literals:
+      - ZONE=bad
+    options:
+      disableNameSuffixHash: true
+      annotations:
+        config.kubernetes.io/local-config: 'true'

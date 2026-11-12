@@ -14,15 +14,16 @@ spec:
       app.kubernetes.io/name: nats
   template:
     metadata:
+      # Written here, not by includeTemplates in kustomization.yaml: that would also add labels to
+      # volumeClaimTemplates, which a running StatefulSet cannot change.
       labels:
         app.kubernetes.io/name: nats
         app.kubernetes.io/part-of: eventhub
         app.kubernetes.io/component: broker
     spec:
-      # clusters/<machine> sets the zone. Until then the pod stays Pending.
+      # components/machine sets the zone from clusters/<host>. Until then the pod stays Pending.
       nodeSelector:
         topology.kubernetes.io/zone: unset
-      serviceAccountName: nats
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 60
       securityContext:
@@ -49,8 +50,7 @@ spec:
           # envFrom and earlier entries. Each route host must resolve to its machine; the three stage
           # names of one machine share its IP because the ports differ.
           env:
-            # Must stay first: clusters/<machine> replaces env/0.
-            # env/8 and env/9 stay NATS_MAX_MEMORY_STORE and GOMEMLIMIT: dev and test replace those values.
+            # components/machine sets ZONE by name.
             - name: ZONE
               value: unset
             - name: NATS_SERVER_NAME
@@ -72,27 +72,33 @@ spec:
               value: nats://eventhub-route:$(NATS_ROUTE_PASSWORD)@eventhub-connect-stg-$(STAGE).swr.ard:$(PORT_CLUSTER)
             - name: NATS_ROUTE_MNZ
               value: nats://eventhub-route:$(NATS_ROUTE_PASSWORD)@eventhub-connect-mnz-$(STAGE).swr.ard:$(PORT_CLUSTER)
-            # Prod. Dev and test patch both. The store ceiling is only memory-backed streams;
-            # GOMEMLIMIT is about 80% of the limit so the garbage collector runs before the cgroup kills the process.
+            # Same size on every stage. The store ceiling is only memory-backed streams; GOMEMLIMIT is
+            # about 80% of the limit so the garbage collector runs before the cgroup kills the process.
             - name: NATS_MAX_MEMORY_STORE
-              value: 512M
+              value: 128M
             - name: GOMEMLIMIT
-              value: 800MiB
+              value: 400MiB
           ports:
             - name: nats
               containerPort: 4222
               protocol: TCP
             - name: cluster
               containerPort: 6222
+              # Stage host port, set by environments/shared from ConfigMap eventhub-stage.
+              hostPort: 0
               protocol: TCP
             - name: mqtts
               containerPort: 8883
+              # Stage host port, set by environments/shared from ConfigMap eventhub-stage.
+              hostPort: 0
               protocol: TCP
             - name: monitor
               containerPort: 8222
               protocol: TCP
             - name: websocket
               containerPort: 9222
+              # Stage host port, set by environments/shared from ConfigMap eventhub-stage.
+              hostPort: 0
               protocol: TCP
           startupProbe:
             httpGet:
@@ -114,13 +120,12 @@ spec:
             periodSeconds: 15
             timeoutSeconds: 2
             failureThreshold: 3
-          # Prod. Dev and test patch the request and the limit.
           resources:
             requests:
               cpu: 200m
-              memory: 512Mi
+              memory: 256Mi
             limits:
-              memory: 1Gi
+              memory: 512Mi
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

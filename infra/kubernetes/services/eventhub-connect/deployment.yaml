@@ -13,13 +13,10 @@ spec:
     matchLabels:
       app.kubernetes.io/name: eventhub-connect
   template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: eventhub-connect
-        app.kubernetes.io/part-of: eventhub
-        app.kubernetes.io/component: connect
+    # Labels come from kustomization.yaml (includeTemplates).
+    metadata: {}
     spec:
-      # clusters/<machine> sets the zone. Until then the pod stays Pending.
+      # components/machine sets the zone from clusters/<host>. Until then the pod stays Pending.
       nodeSelector:
         topology.kubernetes.io/zone: unset
       automountServiceAccountToken: false
@@ -48,7 +45,7 @@ spec:
           # Browser and MQTT endpoints of this machine. The hostname must be a SAN of the stage's
           # eventhub-tls certificate.
           env:
-            # Must stay first: clusters/<machine> replaces env/0.
+            # components/machine sets ZONE by name.
             - name: ZONE
               value: unset
             # Client and monitor ports stay inside the namespace, plain TCP. They are not on a host
