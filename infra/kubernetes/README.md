@@ -23,7 +23,7 @@ infra/kubernetes/
 └── clusters/<host>/     the machine, including its zone
 ```
 
-The zone and stage name the NATS server and the public hostname. A bundle applied to the wrong machine stays Pending.
+The zone and stage name the public hostname, and its first label (`eventhub-connect-<zone>-<stage>`) is the NATS server name. The operator UI links cluster peers by swapping that label. A bundle applied to the wrong machine stays Pending.
 
 ## Ports
 

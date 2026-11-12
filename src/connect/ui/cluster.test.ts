@@ -137,7 +137,7 @@ test('monitor sampling joins three load-balanced nodes without tripling jetstrea
 
 /**
  * One machine of the multi-host dev cluster: its monitor only ever answers as itself.
- * Route URLs use machine hostnames (`eventhub-connect-<zone>-dev`), server names are `<stage>-<zone>`.
+ * Route URLs use machine hostnames (`eventhub-connect-<zone>-dev`), server names match their first label.
  * @param peers - Remote names `/routez` reports, with route pooling duplicating each one
  * @param raft - Raft replica names in `/jsz`
  * @returns Fetch double
@@ -148,7 +148,7 @@ const machineFetch =
 		if (input.includes('/varz')) {
 			return json({
 				server_id: 'id-stg',
-				server_name: 'dev-stg',
+				server_name: 'eventhub-connect-stg-dev',
 				version: '2.14.6',
 				uptime: '1m',
 				connections: 0,
@@ -166,7 +166,7 @@ const machineFetch =
 		if (input.includes('/connz')) return json({ server_id: 'id-stg', num_connections: 0, connections: [] })
 		if (input.includes('/routez')) {
 			const routes = peers.flatMap((name) => [1, 2, 3].map(() => ({ remote_name: name })))
-			return json({ server_id: 'id-stg', server_name: 'dev-stg', num_routes: routes.length, routes })
+			return json({ server_id: 'id-stg', server_name: 'eventhub-connect-stg-dev', num_routes: routes.length, routes })
 		}
 		return json({
 			server_id: 'id-stg',
@@ -177,7 +177,7 @@ const machineFetch =
 			config: {},
 			meta_cluster: {
 				name: 'eventhub-dev',
-				leader: 'dev-bad',
+				leader: 'eventhub-connect-bad-dev',
 				cluster_size: 3,
 				pending: 0,
 				replicas: raft.map((name) => ({ name, current: true, active: 1000 })),
@@ -186,18 +186,28 @@ const machineFetch =
 	}
 
 test('peers on other machines come from routes, not route hostnames', async () => {
-	const sampled = await sampleMonitor('http://127.0.0.1:8222', machineFetch(['dev-bad', 'dev-mnz'], ['dev-mnz']), 1, 1)
+	const sampled = await sampleMonitor(
+		'http://127.0.0.1:8222',
+		machineFetch(['eventhub-connect-bad-dev', 'eventhub-connect-mnz-dev'], ['eventhub-connect-mnz-dev']),
+		1,
+		1
+	)
 	assertEquals(
 		sampled.cluster.nodes.map((node) => `${node.name}:${node.reachable}:${node.sampled}`),
-		['dev-bad:true:false', 'dev-mnz:true:false', 'dev-stg:true:true']
+		['eventhub-connect-bad-dev:true:false', 'eventhub-connect-mnz-dev:true:false', 'eventhub-connect-stg-dev:true:true']
 	)
 	assertEquals(sampled.cluster.clusterSize, 3)
 })
 
 test('a raft peer without a live route is listed unreachable', async () => {
-	const sampled = await sampleMonitor('http://127.0.0.1:8222', machineFetch(['dev-bad'], ['dev-mnz']), 1, 1)
+	const sampled = await sampleMonitor(
+		'http://127.0.0.1:8222',
+		machineFetch(['eventhub-connect-bad-dev'], ['eventhub-connect-mnz-dev']),
+		1,
+		1
+	)
 	const down = sampled.cluster.nodes.filter((node) => !node.reachable).map((node) => node.name)
-	assertEquals(down, ['dev-mnz'])
+	assertEquals(down, ['eventhub-connect-mnz-dev'])
 })
 
 test('raft replicas fill in when the first jetstream sample omits them', async () => {
@@ -288,4 +298,16 @@ test('connz type uses the same names as allowed_connection_types', async () => {
 		sampled.connections.map((row) => `${row.user}:${row.type}`),
 		['a:MQTT', 'b:WEBSOCKET', 'c:STANDARD', 'd:MQTT']
 	)
+})
+
+test('a machine that is not the meta leader stops after one round', async () => {
+	const inner = machineFetch(['eventhub-connect-bad-dev', 'eventhub-connect-mnz-dev'], [])
+	let varz = 0
+	const fetchImpl: MonitorFetch = async (input, init) => {
+		if (input.includes('/varz')) varz += 1
+		return inner(input, init)
+	}
+	const sampled = await sampleMonitor('http://127.0.0.1:8222', fetchImpl, 4, 1)
+	assertEquals(varz, 1)
+	assertEquals(sampled.cluster.replicas, [])
 })

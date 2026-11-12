@@ -1,4 +1,4 @@
-# JetStream identity is NATS_SERVER_NAME (<stage>-<zone>) plus this volume. Replacing the disk and
+# JetStream identity is NATS_SERVER_NAME (eventhub-connect-<zone>-<stage>) plus this volume. Replacing the disk and
 # keeping the name is a RAFT incident. Container ports are the same in every stage; environments/shared
 # maps cluster, MQTT, and WebSocket to the stage's hostPorts so dev, test, and prod share a machine.
 apiVersion: apps/v1
@@ -54,7 +54,7 @@ spec:
             - name: ZONE
               value: unset
             - name: NATS_SERVER_NAME
-              value: $(STAGE)-$(ZONE)
+              value: eventhub-connect-$(ZONE)-$(STAGE)
             - name: NATS_CLUSTER_NAME
               value: eventhub-$(STAGE)
             - name: NATS_CLUSTER_ADVERTISE

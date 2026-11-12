@@ -1,6 +1,6 @@
 # Everything on eventhub-connect-stg. The zone is the only machine value. It names the NATS servers
-# (dev-stg, test-stg, prod-stg) and the public hostnames, and pins NATS and connect to the node
-# labelled with it, so this bundle applied to another machine stays Pending.
+# (eventhub-connect-stg-dev, -test, -prod, the first label of each public hostname), and pins NATS
+# and connect to the node labelled with it, so this bundle applied to another machine stays Pending.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 

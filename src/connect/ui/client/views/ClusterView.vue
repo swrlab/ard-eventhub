@@ -2,6 +2,7 @@
 import type { ClusterReport } from '#types'
 import { computed } from 'vue'
 import { formatBytes, formatContact } from '../format'
+import { peerUrl } from '../peer-url'
 import { usePoll } from '../use-poll'
 
 const { data, error, loading } = usePoll<ClusterReport>(() => '/api/cluster')
@@ -11,6 +12,25 @@ const storageRatio = computed(() => {
 	const max = data.value?.storageMaxBytes
 	if (used === null || used === undefined || max === null || max === undefined || max <= 0) return 0
 	return Math.min(1, used / max)
+})
+
+/** Only the meta leader reports raft replicas, so the section needs the leader among the sampled nodes. */
+const leaderSampled = computed(() => {
+	const report = data.value
+	if (!report?.leader) return false
+	return report.nodes.some((node) => node.sampled && node.name === report.leader)
+})
+
+/** Operator UI of each other node, keyed by server name. Empty when this host is not named after its node. */
+const peerLinks = computed(() => {
+	const nodes = data.value?.nodes ?? []
+	const self = nodes.filter((node) => node.sampled).map((node) => node.name)
+	const links = new Map<string, string>()
+	for (const node of nodes) {
+		const url = peerUrl(node.name, self, window.location)
+		if (url) links.set(node.name, url)
+	}
+	return links
 })
 </script>
 
@@ -49,7 +69,10 @@ const storageRatio = computed(() => {
 							class="status-dot inline-block h-2 w-2"
 							:class="!node.reachable ? 'bg-danger' : node.slowConsumers > 0 ? 'bg-warning' : 'bg-ok'"
 						></span>
-						<h2 class="font-mono text-sm text-heading">{{ node.name }}</h2>
+						<h2 class="font-mono text-sm text-heading">
+							<a v-if="peerLinks.has(node.name)" class="text-link" :href="peerLinks.get(node.name)">{{ node.name }}</a>
+							<template v-else>{{ node.name }}</template>
+						</h2>
 						<span v-if="data.leader === node.name" class="font-mono text-xs text-link">leader</span>
 					</div>
 					<p v-if="!node.reachable" class="mt-2 font-mono text-sm text-warning">unreachable</p>
@@ -74,20 +97,22 @@ const storageRatio = computed(() => {
 					</dl>
 				</article>
 			</div>
-			<h2 class="mt-8 text-base text-heading">raft</h2>
-			<p class="mt-1 mb-2 text-sm text-muted/80">
-				Hier siehst du, ob die anderen Server noch auf dem Stand des führenden sind.
-			</p>
-			<p v-if="!data.replicas.length" class="font-mono text-sm text-muted">no replica list on this sample</p>
-			<ul v-else class="font-mono text-sm">
-				<li v-for="replica in data.replicas" :key="replica.name" class="flex gap-4 border-b border-border py-1">
-					<span>{{ replica.name }}</span>
-					<span :class="replica.current ? 'text-ok' : 'text-warning'">{{
-						replica.current ? 'current' : 'behind'
-					}}</span>
-					<span class="text-muted/70">last contact {{ formatContact(replica.activeNs) }}</span>
-				</li>
-			</ul>
+			<template v-if="leaderSampled">
+				<h2 class="mt-8 text-base text-heading">raft</h2>
+				<p class="mt-1 mb-2 text-sm text-muted/80">
+					Hier siehst du, ob die anderen Server noch auf dem Stand des führenden sind.
+				</p>
+				<p v-if="!data.replicas.length" class="font-mono text-sm text-muted">no replica list on this sample</p>
+				<ul v-else class="font-mono text-sm">
+					<li v-for="replica in data.replicas" :key="replica.name" class="flex gap-4 border-b border-border py-1">
+						<span>{{ replica.name }}</span>
+						<span :class="replica.current ? 'text-ok' : 'text-warning'">{{
+							replica.current ? 'current' : 'behind'
+						}}</span>
+						<span class="text-muted/70">last contact {{ formatContact(replica.activeNs) }}</span>
+					</li>
+				</ul>
+			</template>
 			<h2 class="mt-8 mb-2 text-base text-heading">consumers</h2>
 			<p v-if="!data.consumerDetails.length" class="font-mono text-sm text-muted">no jetstream consumers</p>
 			<div v-else class="overflow-x-auto">

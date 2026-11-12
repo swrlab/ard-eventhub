@@ -96,7 +96,7 @@ const readConsumers = (body: Record<string, unknown>, server: string, seen: Set<
 }
 
 /**
- * Raft peers from a `/jsz` meta cluster. The leader often omits this list.
+ * Raft peers from a `/jsz` meta cluster. Only the meta leader reports this list.
  * @param meta - `meta_cluster` object
  * @returns Replica rows, empty when the field is absent
  */
@@ -116,7 +116,7 @@ const readReplicas = (meta: Record<string, unknown>): ReplicaHealth[] => {
 
 /**
  * Cluster-wide JetStream fields. Storage totals stay with the first sample so three nodes do not triple them.
- * Raft replicas are filled from a later sample when the first one omitted the list.
+ * Raft replicas are filled from a later sample when the first one omitted the list (a non-leader answered first).
  * @param body - `/jsz` JSON
  * @param current - Meta already collected, or null
  * @param server - Server id for consumer rows
@@ -227,14 +227,17 @@ const absorbMonitor = (slots: Map<string, Slot>, meta: MetaView | null, body: un
 }
 
 /**
- * The leader's `/jsz` leaves `replicas` out. A later sample from another node has the peer list.
- * One-node clusters have no peers to wait for.
+ * Only the meta leader's `/jsz` lists raft replicas. When the leader sits behind another machine's monitor,
+ * no amount of sampling here returns that list. One-node clusters have no peers to wait for.
  * @param meta - JetStream view so far
+ * @param slots - Accumulator, to tell whether the leader is a node this monitor reaches
  * @returns Whether raft is complete enough to stop sampling
  */
-const raftReady = (meta: MetaView | null): boolean => {
+const raftReady = (meta: MetaView | null, slots: Map<string, Slot>): boolean => {
 	if (!meta?.leader) return false
 	if ((meta.clusterSize ?? 1) <= 1) return true
+	const leader = meta.leader
+	if (![...slots.values()].some((slot) => slot.varz?.name === leader)) return true
 	return meta.replicas.length > 0
 }
 
@@ -385,7 +388,7 @@ export const sampleMonitor = async (
 			)
 		}
 		await Promise.all(jobs)
-		if (monitorCovered(slots) && raftReady(meta)) break
+		if (monitorCovered(slots) && raftReady(meta, slots)) break
 	}
 	return finalizeMonitor(slots, meta, error, new Date().toISOString())
 }
