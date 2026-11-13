@@ -57,9 +57,9 @@ csr env force='':
 
 	zones=(bad mnz stg)
 	names=()
-	# for zone in "${zones[@]}"; do
-	# 	names+=("eventhub-connect-${zone}-${env}.swr.cn.ard.de")
-	# done
+	for zone in "${zones[@]}"; do
+		names+=("eventhub-connect-${zone}-${env}.swr.cn.ard.de")
+	done
 	for zone in "${zones[@]}"; do
 		names+=("eventhub-connect-${zone}-${env}.swr.ard")
 	done
