@@ -1,0 +1,30 @@
+# Connect image. Stage 1 builds the operator UI into static/dist; stage 2 installs only production dependencies.
+FROM oven/bun:1-alpine AS ui
+
+WORKDIR /web/app
+
+COPY package.json bun.lock .npmrc bunfig.toml ./
+RUN bun install --frozen-lockfile
+
+# Named paths only. `COPY . .` makes the Apple container CLI pack the whole
+# checkout, including node_modules, before .dockerignore applies.
+COPY vite.config.ts tsconfig.json ./
+COPY src ./src
+RUN bun x vite build
+
+FROM oven/bun:1-alpine
+
+WORKDIR /web/app
+
+COPY package.json bun.lock .npmrc bunfig.toml ./
+RUN bun install --frozen-lockfile --production
+
+COPY src ./src
+COPY infra/kubernetes/services/nats/users/nats-users.conf ./infra/kubernetes/services/nats/users/nats-users.conf
+COPY --from=ui /web/app/static/dist ./static/dist
+
+USER 1000:1000
+EXPOSE 4173
+
+# Run via package script so Bun injects npm_package_version for @frytg/logger
+CMD ["bun", "run", "start:connect"]

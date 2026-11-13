@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: eventhub-connect
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: eventhub-connect
+  ports:
+    - name: http
+      port: 4173
+      targetPort: http
+      protocol: TCP

@@ -6,7 +6,7 @@ NATS-native access layer for Eventhub Connect. This process talks to NATS on `:4
 
 Do not put `NATS_URL` on the ingest env module. Connect reads its own vars from [`env.ts`](env.ts).
 
-Users live in [`components/users/nats-users.conf`](../../infra/kubernetes/components/users/nats-users.conf) (RFC §7). [`infra/nats/nats-users.conf`](../../infra/nats/nats-users.conf) is a symlink to that file. Publishers and services share one bcrypt hash (`$DEV_PW`). The plaintext password is only in sops. `sub-ui` has no password. Rotate a publisher by issuing a new `pub-{label}-{date}` user, then `just nats-reload`. Hash a password with `just nats-passwd`.
+Users live in [`services/nats/users/nats-users.conf`](../../infra/kubernetes/services/nats/users/nats-users.conf) (RFC §7). [`infra/nats/nats-users.conf`](../../infra/nats/nats-users.conf) is a symlink to that file. Publishers and services share one bcrypt hash (`$DEV_PW`). The plaintext password is only in sops. `sub-ui` has no password. Rotate a publisher by issuing a new `pub-{label}-{date}` user, then `just nats-reload`. Hash a password with `just nats-passwd`.
 
 ## Environment
 
@@ -61,9 +61,9 @@ Panels:
 
 - **On-air.** Last retained message per `radio.{livestream}`, oldest last-event first.
 - **Feed.** The snapshot this process is authorizing with, plus the `allowed-livestreams.json` overlay, as one list (`knownLivestreams`). A feed row's id is the item `externalId`, the livestream URN publishers send, not the fusion id. Overlay rows are topics absent from the core feed. They add a publish permission: `publisherId` must be one of the entry's `publisherIds`, and the institution is still that publisher's house in the feed. A topic with several publishers gets one row per publisher. The livestream title opens that station's tail.
-- **Connections.** Users from `NATS_USERS_CONF` (default `infra/kubernetes/components/users/nats-users.conf`) plus `/connz`. Usernames and allow-lists only.
+- **Connections.** Users from `NATS_USERS_CONF` (default `infra/kubernetes/services/nats/users/nats-users.conf`) plus `/connz`. Usernames and allow-lists only.
 - **Rejections.** Retained `feedback.>` plus what arrived while this process was up. `?institution=` filters one house. Each row expands to the rejected event as JSON.
-- **Cluster.** `/varz`, `/connz`, `/jsz`, sampled until each node behind the monitor URL has answered.
+- **Cluster.** `/varz`, `/connz`, `/routez`, `/jsz`, sampled until each node behind the monitor URL has answered. Each machine's monitor is its own pod, so peers on other machines have no stats. They come from `/routez` remote names and raft replicas: a live route shows `routed · not sampled`, and a raft peer without a route shows `unreachable`. Only the meta leader reports raft replicas, so the raft section appears only on the machine whose node currently leads.
 - **Tail.** Default filter `radio/+/track/playing` (MQTT). The page rewrites that to the NATS subject `radio.*.track.playing` and shows the subject under the field. Incoming frames are shown as MQTT topics. The browser opens NATS WebSocket as `sub-ui` (no password) and subscribes itself. Closes after 2 minutes with no click, key, or scroll, and after 30 minutes even if someone is still there. Over 20 frames/s the page drops frames and shows `sampled`. Reopening is a click.
 
 `UI_HOST` (default `0.0.0.0`), `UI_PORT` (default `4173`). `UI_ALLOW_CIDR` is a comma-separated source list checked against the socket address. Empty allows every peer, which is the local default. Set it when the UI is reachable on a shared network.
@@ -92,7 +92,7 @@ just dev
 
 Image: `nats:2.14.6` with [`infra/nats/nats-dev.conf`](../../infra/nats/nats-dev.conf) (JetStream, MQTT `:1883`, monitor `:8222`, WebSocket `:9222`, no TLS, users from `nats-users.conf`). `just nats-up-docker` publishes all four so the operator UI tail on the host can open `ws://127.0.0.1:9222`.
 
-Kubernetes: dev runs three NATS pods in one cluster. Test and prod are one manifest per zone. See [`infra/kubernetes/README.md`](../../infra/kubernetes/README.md) (`just nats-k8s-dev`).
+Kubernetes: dev, test, and prod each run NATS plus connect on all three machines, one namespace per stage, side by side on different host ports. See [`infra/kubernetes/README.md`](../../infra/kubernetes/README.md) (`just k8s-apply <host> <part>`).
 
 Validate config before reload: `just nats-check`. After editing `.local/nats/nats-users.conf`, `just nats-reload` (HUP) picks up users without dropping connections. Hash a new password with `just nats-passwd`.
 

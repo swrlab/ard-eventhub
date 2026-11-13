@@ -1,0 +1,17 @@
+# zot on eventhub-connect-<zone>-dev.swr.ard:5000 through Traefik's registry entrypoint. The name
+# is a SAN of the dev certificate. Secret registry-tls (tls.sops.yaml) is that certificate, written by
+# just tls-store dev.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: registry
+spec:
+  entryPoints: ['registry']
+  routes:
+    - kind: Rule
+      match: HostRegexp(`^eventhub-connect-[a-z]+-dev\.swr\.ard$`)
+      services:
+        - name: registry
+          port: http
+  tls:
+    secretName: registry-tls

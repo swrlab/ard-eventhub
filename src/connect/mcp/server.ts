@@ -47,6 +47,7 @@ const clusterOutput = z.object({
 		z.object({
 			name: z.string(),
 			reachable: z.boolean(),
+			sampled: z.boolean(),
 			version: nullableString,
 			uptime: nullableString,
 			connections: z.number(),
@@ -130,7 +131,11 @@ const clusterBody = (report: ClusterReport): ClusterOutput => report
  */
 const summarizeCluster = (report: ClusterReport): string => {
 	const nodes = report.nodes
-		.map((node) => `${node.name} ${node.reachable ? 'reachable' : 'unreachable'} connections=${node.connections}`)
+		.map((node) => {
+			if (!node.reachable) return `${node.name} unreachable`
+			if (!node.sampled) return `${node.name} routed (not sampled)`
+			return `${node.name} reachable connections=${node.connections}`
+		})
 		.join('; ')
 	return [
 		`cluster ${report.cluster ?? 'unknown'}`,

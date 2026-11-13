@@ -1,0 +1,71 @@
+# NixOS commands run ON a host — uploaded to /etc/nixos/ by `just nix-upload`
+# (local sync commands live in just/nixos.just in the repo).
+# Run from the host: `cd /etc/nixos && just <recipe>`. Recipes default to the
+# friendly name from /etc/nixos/hosts.toml: hostname -s is the server number after
+# the first switch, and may still be the friendly name before it.
+
+# list all recipes
+default:
+	just --list
+
+# flake attribute for this machine; the friendly name or the server number in /etc/nixos/hosts.toml matches
+host := `N="$(hostname -s)" nix eval --raw --impure --expr 'let n = builtins.getEnv "N"; hosts = builtins.fromTOML (builtins.readFile /etc/nixos/hosts.toml); match = builtins.filter (name: name == n || hosts.${name}.server == n) (builtins.attrNames hosts); in if match == [ ] then n else builtins.head match'`
+
+# ── rebuild (confirm-gated) ──────────────────────────────────────────
+
+# apply the uploaded config: nixos-rebuild switch
+[confirm]
+[group('NIXOS')]
+flake host=host:
+	nixos-rebuild switch --flake /etc/nixos#{{ host }}
+
+# roll back to the previous generation
+[confirm]
+[group('NIXOS')]
+rollback host=host:
+	nixos-rebuild switch --rollback --flake /etc/nixos#{{ host }}
+
+# update nixpkgs via flake update, then rebuild
+[confirm]
+[group('NIXOS')]
+upgrade host=host:
+	cd /etc/nixos && nix flake update
+	nixos-rebuild switch --flake /etc/nixos#{{ host }}
+
+# garbage-collect old generations
+[confirm]
+[group('NIXOS')]
+clean:
+	nix-collect-garbage -d
+
+# ── inspection ───────────────────────────────────────────────────────
+
+# build this host's config without activating it (nothing applied)
+[group('NIXOS')]
+dry host=host:
+	nixos-rebuild dry-build --flake /etc/nixos#{{ host }}
+
+# evaluate the flake (no build, nothing applied)
+[group('NIXOS')]
+check:
+	nix flake check --impure /etc/nixos
+
+# check the NTP time status
+[group('NIXOS')]
+ntp:
+	timedatectl status
+	chronyc tracking
+	chronyc sources -v
+
+# ── k3s unit (confirm-gated where mutating) ──────────────────────────
+
+# follow the k3s unit logs
+[group('NIXOS')]
+k3s-logs:
+	journalctl -u k3s -f --no-pager
+
+# restart the k3s unit
+[confirm]
+[group('NIXOS')]
+k3s-restart:
+	systemctl restart k3s

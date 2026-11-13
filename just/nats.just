@@ -1,12 +1,11 @@
 NATS_IMAGE := 'nats:2.14.6'
 NATS_NAME := 'eventhub-nats'
 NATS_CONF := source_directory() / '../infra/nats/nats-dev.conf'
-NATS_USERS := source_directory() / '../infra/kubernetes/components/users/nats-users.conf'
+NATS_USERS := source_directory() / '../infra/kubernetes/services/nats/users/nats-users.conf'
 NATS_STORE := source_directory() / '../.local/nats'
 NATS_RUNTIME_CONF := NATS_STORE / 'nats.conf'
 NATS_RUNTIME_USERS := NATS_STORE / 'nats-users.conf'
 NATS_DEFAULT_INSTITUTION := 'urn:ard:institution:a3004ff924ece1a2'
-NATS_K8S := source_directory() / '../infra/kubernetes'
 
 # copy committed NATS config into the writable runtime dir (hot-reload edits this copy)
 [group('NATS')]
@@ -172,33 +171,6 @@ nats-logs-docker:
 [group('NATS')]
 nats-sub *args:
 	bun run ./src/cli/nats-sub.ts {{ if args == '' { NATS_DEFAULT_INSTITUTION } else { args } }}
-
-# render dev and the per-zone test and prod manifests (no cluster required)
-[group('NATS')]
-nats-k8s-build:
-	#!/usr/bin/env bash
-	set -euo pipefail
-	kubectl kustomize "{{ NATS_K8S }}/overlays/dev" >/dev/null
-	for env in test prod; do
-		for zone in bad stg mnz; do
-			kubectl kustomize "{{ NATS_K8S }}/overlays/${env}/${zone}" >/dev/null
-		done
-	done
-	echo 'kustomize build ok (dev, test/prod × bad/stg/mnz)'
-
-# apply the three-node dev overlay to the current kubecontext
-[group('NATS')]
-nats-k8s-dev:
-	#!/usr/bin/env bash
-	set -euo pipefail
-	kubectl apply -k "{{ NATS_K8S }}/overlays/dev"
-	kubectl -n eventhub-dev rollout status statefulset/nats
-	echo 'NATS nats://127.0.0.1:30422  MQTT mqtt://127.0.0.1:30183  monitor http://127.0.0.1:30822'
-
-# delete the three-node dev overlay
-[group('NATS')]
-nats-k8s-dev-down:
-	kubectl delete -k "{{ NATS_K8S }}/overlays/dev"
 
 # alias of `just dev`
 [group('LOCAL')]

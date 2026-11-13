@@ -1,0 +1,11 @@
+# ConfigMap ard-ca: the ARD root every ARD CN certificate chains to. eventhub-connect trusts it through
+# NODE_EXTRA_CA_CERTS to dial its own MQTT and WebSocket names.
+# root.pem is not committed. just k8s-* downloads it from ARD_CA_ROOT_URL in .env.k3s.sops.yaml,
+# checks ARD_CA_ROOT_SHA256, and deletes it after kustomize.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+configMapGenerator:
+  - name: ard-ca
+    files:
+      - root.pem

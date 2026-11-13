@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- feat: allow hr-info to publish the cooperation livestream `urn:ard:permanent-livestream:5edfe1cef52b1e2c` (`crid://hr-online/radio/hr-info/koop/`)
+
 ### Fixed
 
 - fix: update allowed livestreams for ard hitnacht

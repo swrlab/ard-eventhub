@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: victoria-logs
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: victoria-logs
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: victoria-logs
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      imagePullSecrets:
+        - name: registry
+      containers:
+        - name: victoria-logs
+          # Repo: https://github.com/VictoriaMetrics/VictoriaLogs
+          # Upstream docker.io/victoriametrics/victoria-logs, copied in by just registry-sync.
+          image: registry.registry.svc:5000/victoriametrics/victoria-logs:v1.53.0
+          imagePullPolicy: IfNotPresent
+          # https://docs.victoriametrics.com/victorialogs/#list-of-command-line-flags
+          # local-path does not enforce the PVC size. maxDiskSpaceUsageBytes drops old daily
+          # partitions but always keeps the last two days, so it is not a hard cap. The hard stop is
+          # minFreeDiskSpaceBytes: below that much free space on the host disk, VictoriaLogs turns
+          # read-only (Vector buffers, then blocks) and leaves the rest to JetStream. 32GiB covers
+          # three stages at max_file_store 8G plus margin.
+          args:
+            - -storageDataPath=/victoria-logs-data
+            - -httpListenAddr=:9428
+            - -retentionPeriod=30d
+            - -retention.maxDiskSpaceUsageBytes=16GiB
+            - -storage.minFreeDiskSpaceBytes=32GiB
+            - -insert.maxQueueDuration=30s
+            - -loggerFormat=json
+            - -loggerLevel=WARN
+          ports:
+            - name: http
+              containerPort: 9428
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ['ALL']
+          volumeMounts:
+            - name: data
+              mountPath: /victoria-logs-data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: victoria-logs-data

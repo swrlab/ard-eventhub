@@ -1,0 +1,15 @@
+# eventhub-connect next to the NATS server of its namespace. Applied only through environments/<stage>.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - deployment.yaml
+  - service.yaml
+  - ingressroute.yaml
+
+labels:
+  - includeTemplates: true
+    pairs:
+      app.kubernetes.io/name: eventhub-connect
+      app.kubernetes.io/part-of: eventhub
+      app.kubernetes.io/component: connect

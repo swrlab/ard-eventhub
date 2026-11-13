@@ -1,0 +1,18 @@
+# Inside the cluster only. Clients outside reach zot through Traefik with TLS (ingressroute.yaml).
+# containerd on the host pulls from this ClusterIP over plain HTTP, which never leaves the machine
+# (infra/nixos/common/base.nix). The address is fixed for that reason. It sits in the low band of
+# the k3s service CIDR 10.43.0.0/16, which Kubernetes keeps free for static addresses.
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+spec:
+  type: ClusterIP
+  clusterIP: 10.43.0.50
+  selector:
+    app.kubernetes.io/name: registry
+  ports:
+    - name: http
+      port: 5000
+      targetPort: http
+      protocol: TCP

@@ -1,0 +1,43 @@
+# Eventhub prod on every machine, in namespace eventhub-prod.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: eventhub-prod
+
+resources:
+  # Secrets nats-route, eventhub-tls, and eventhub-connect. just k8s-* decrypts the *.sops.yaml files
+  # and deletes the plaintext. eventhub-tls is the stage certificate, written by just tls-store.
+  - nats-route.yaml
+  - tls.yaml
+  - connect.yaml
+
+components:
+  - ../shared
+
+configMapGenerator:
+  - name: eventhub-stage
+    literals:
+      - STAGE=prod
+      - PORT_CLUSTER=6222
+      - PORT_MQTT=8883
+      - PORT_WS=9222
+
+# Pin once the connect image is built and pushed to the registry.
+images:
+  - name: eventhub-connect
+    newName: registry.registry.svc:5000/eventhub-connect
+    newTag: 2026-11-12-15-44-28--v3.0.0-beta.3
+
+labels:
+  - pairs:
+      app.kubernetes.io/instance: eventhub-prod
+
+patches:
+  # Operator UI hostnames of this stage on every machine, both domains of the stage certificate.
+  - target:
+      kind: IngressRoute
+      name: eventhub-connect
+    patch: |-
+      - op: replace
+        path: /spec/routes/0/match
+        value: HostRegexp(`^eventhub-connect-[a-z]+-prod\.swr\.(ard|cn\.ard\.de)$`)

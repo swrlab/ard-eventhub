@@ -1,0 +1,22 @@
+# One NATS server per stage per machine. Applied only through environments/<stage>.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - service-client.yaml
+  - service-headless.yaml
+  - statefulset.yaml
+
+components:
+  - users
+
+configMapGenerator:
+  - name: nats
+    files:
+      - nats.conf
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: nats
+      app.kubernetes.io/part-of: eventhub
+      app.kubernetes.io/component: broker

@@ -1,0 +1,21 @@
+# Beszel hub (PocketBase UI on 8090). config.yml lists the agents it polls.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - pvc.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingressroute.yaml
+  - secret.yaml
+  - tls.yaml
+
+configMapGenerator:
+  - name: beszel-hub-config
+    files:
+      - config.yml
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: beszel-hub
+      app.kubernetes.io/component: monitoring

@@ -1,13 +1,13 @@
 ---
 title: 'Certificates'
-description: 'Generate the connect CSR and install it as nats-tls on each k3s zone.'
+description: 'Generate the connect CSR, store the certificate in sops, and roll it out to each k3s machine.'
 sidebar:
   icon: certificate
 ---
 
-One certificate per environment covers all three zones. MQTT `:8883` and the NATS WebSocket `:9222` present it. Cluster routes on `:6222` are plaintext, so the short names `connect-bad`, `connect-stg`, and `connect-mnz` are not on the certificate.
+One certificate per stage covers all three machines. Dev, test, and prod run side by side on each machine: MQTT (`:28883` dev, `:18883` test, `:8883` prod) and the NATS WebSocket (`:29222` dev, `:19222` test, `:9222` prod) present that stage's certificate. Connect dials those ports by the `eventhub-connect-<zone>-<env>.swr.cn.ard.de` names, so they must stay on the certificate. Cluster routes (`:26222` dev, `:16222` test, `:6222` prod) are plaintext and authenticate with the stage route password (Secret `nats-route`, see [`infra/kubernetes/README.md`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/README.md)).
 
-The lab overlay `overlays/dev` (`just nats-k8s-dev`) serves MQTT in plaintext and does not mount a TLS secret. Test and prod do: one k3s cluster per zone, secret `nats-tls`.
+Each machine is one k3s cluster. Every stage gets the Secret `eventhub-tls` in its own namespace (`eventhub-dev`, `eventhub-test`, `eventhub-prod`).
 
 ## Generate
 
@@ -56,47 +56,20 @@ A PEM leaf is already `tls.crt`. Append a separate chain after it:
 cat chain.pem >> tls.crt
 ```
 
-The key in the secret is `.local/certs/<env>/eventhub-connect-<env>.key`. A later `just csr --force` produces a different key, and this certificate will not match it.
+The key is `.local/certs/<env>/eventhub-connect-<env>.key`. A later `just csr --force` produces a different key, and this certificate will not match it.
 
-Confirm the pair and the names. The two hashes are equal when the certificate was signed from this key.
+`just tls-store` checks that the certificate was signed for that key, has not expired, lists the three `eventhub-connect-<zone>-<env>.swr.ard` names, and chains to `Rundfunk-Root-CA-2015`. It stores the leaf followed by the intermediates `SWR IMP-IIS CA` and `SWR-CA`, whatever chain the CA sent. It downloads root and intermediates from `ARD_CA_ROOT_URL` and `ARD_CA_CHAIN_URLS` in `.env.k3s.sops.yaml` and refuses a root that does not match `ARD_CA_ROOT_SHA256`. Every server then sends the full chain, and clients only need the root. Then it writes certificate and key into [`environments/<env>/tls.sops.yaml`](https://github.com/swrlab/ard-eventhub/tree/main/infra/kubernetes/environments) as Secret `eventhub-tls`. For dev it also writes Secret `registry-tls` ([`services/registry/tls.sops.yaml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/services/registry/tls.sops.yaml)) and Secret `beszel-tls` ([`services/beszel/hub/tls.sops.yaml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/kubernetes/services/beszel/hub/tls.sops.yaml)), because the registry on `:5000` and the Beszel hub on `:8081` answer as `eventhub-connect-<zone>-dev.swr.ard`. Nothing touches a cluster. Commit the sops files with the change that needs them.
 
-```sh
-openssl x509 -in tls.crt -noout -pubkey | openssl sha256
-openssl pkey -in .local/certs/dev/eventhub-connect-dev.key -pubout | openssl sha256
-openssl x509 -in tls.crt -noout -ext subjectAltName
-```
+Until then each file holds a self-signed placeholder with every stage hostname, so the pods start while the CA request is open. Clients that check the trust store reject it.
 
-Each zone is its own cluster. The same `tls.crt` and the same key go on all three. The secret name is `nats-tls`. The pod mounts it at `/etc/nats/tls`, and `nats.conf` reads `tls.crt` and `tls.key` from there.
+## Roll out
 
-The commands below are test. Prod uses namespace `eventhub-prod`, `overlays/prod/<zone>`, and `.local/certs/prod/eventhub-connect-prod.key`. A CN dev cluster uses namespace `eventhub-dev` and `.local/certs/dev/eventhub-connect-dev.key` the same way. The lab overlay `overlays/dev` is a different cluster and does not take this secret.
-
-Create the secret before the pod is expected to become Ready. A missing mount stays in `CreateContainerConfigError`. The server image has no shell.
-
-Point kubectl at the Baden-Baden cluster, then:
+`just k8s-apply` puts the Secret on a machine. Traefik serves it for the operator UI on `:443`, the registry on `:5000`, and Beszel on `:8081`, and reloads it on its own. NATS mounts it at `/etc/nats/tls` and reads it only at start, so restart NATS after the apply. Connect dials its own MQTT and WebSocket names with TLS and trusts the root through `NODE_EXTRA_CA_CERTS`. One machine at a time, so the other two keep quorum:
 
 ```sh
-kubectl -n eventhub-test create secret tls nats-tls \
-  --cert=tls.crt \
-  --key=.local/certs/test/eventhub-connect-test.key
-
-kubectl apply -k infra/kubernetes/overlays/test/bad
-kubectl -n eventhub-test rollout status statefulset/nats
+just tls-store test tls.crt
+just k8s-apply bad eventhub-test
+kubectl --kubeconfig keys/eventhub-connect-bad-k3s-cert.yaml -n eventhub-test rollout restart statefulset/nats
 ```
 
-Repeat with kubectl aimed at Stuttgart (`overlays/test/stg`), then Mainz (`overlays/test/mnz`). Same files, same secret name. One zone at a time, so the other two keep quorum.
-
-Prod is the same sequence under `overlays/prod/<zone>` in namespace `eventhub-prod`, with `.local/certs/prod/eventhub-connect-prod.key`.
-
-## Replace a certificate
-
-NATS reads the files at process start. Update the secret, then restart that zone's pod. Do one zone, wait until it is Ready, then the next.
-
-```sh
-kubectl -n eventhub-test create secret tls nats-tls \
-  --cert=tls.crt \
-  --key=.local/certs/test/eventhub-connect-test.key \
-  --dry-run=client -o yaml | kubectl apply -f -
-
-kubectl -n eventhub-test rollout restart statefulset/nats
-kubectl -n eventhub-test rollout status statefulset/nats
-```
+Wait for `rollout status statefulset/nats`, then repeat the last two lines for `stg` and `mnz`. A replacement certificate takes the same steps.

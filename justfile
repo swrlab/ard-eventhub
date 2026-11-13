@@ -1,9 +1,14 @@
 import 'just/certificate.just'
+import 'just/docker.just'
 import 'just/docs.just'
 import 'just/encryption.just'
 import 'just/integration.just'
+import 'just/k3s.just'
+import 'just/kubernetes.just'
 import 'just/mqtt.just'
 import 'just/nats.just'
+import 'just/nixos.just'
+import 'just/registry.just'
 
 # run just in the CLI to see the list of shortcuts
 _default:
@@ -59,7 +64,6 @@ ingest:
 	just env "bun run ingest"
 
 # start eventhub-connect (NATS access + operator UI on :4173)
-# loads ARD_FEED_URL from sops when the shell did not set it, without replacing NATS_URL
 [group('LOCAL')]
 dev:
 	just env "bun run --hot ./src/connect/index.ts"

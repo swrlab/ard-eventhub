@@ -1,0 +1,16 @@
+# Everything on eventhub-connect-mnz. The zone is the only machine value, see components/machine.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+components:
+  - ../../components/machine
+
+# Input for the replacements in components/machine. local-config keeps it out of the output.
+configMapGenerator:
+  - name: machine
+    literals:
+      - ZONE=mnz
+    options:
+      disableNameSuffixHash: true
+      annotations:
+        config.kubernetes.io/local-config: 'true'

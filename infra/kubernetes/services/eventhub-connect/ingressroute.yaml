@@ -1,0 +1,17 @@
+# Operator UI and MCP on :443 through Traefik. The stage layer replaces the match with its own
+# hostnames, so dev, test, and prod share the port. The certificate is the stage's eventhub-tls, the
+# same one NATS presents on MQTT and WebSocket.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: eventhub-connect
+spec:
+  entryPoints: ['websecure']
+  routes:
+    - kind: Rule
+      match: Host(`unset`)
+      services:
+        - name: eventhub-connect
+          port: http
+  tls:
+    secretName: eventhub-tls

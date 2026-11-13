@@ -1,0 +1,13 @@
+# VictoriaLogs MCP server, one per machine. It has no authentication, so it stays a ClusterIP
+# Service: just k8s-logs-mcp port-forwards it with the host's kubeconfig.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - deployment.yaml
+  - service.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: victoria-logs-mcp
+      app.kubernetes.io/component: logs-mcp

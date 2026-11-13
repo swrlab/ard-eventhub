@@ -1,0 +1,9 @@
+# The stage layer renames this to eventhub-<stage>. hostPorts are outside every Pod Security level
+# except privileged.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eventhub
+  labels:
+    app.kubernetes.io/part-of: eventhub
+    pod-security.kubernetes.io/enforce: privileged

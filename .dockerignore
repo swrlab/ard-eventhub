@@ -1,0 +1,58 @@
+# Host node_modules is the wrong libc. The image runs bun install itself.
+node_modules
+
+# Secrets and local state. Runtime config comes from the environment.
+.env
+.env.*
+*.sops.*
+*.sops.json
+.sops.yaml
+keys
+.local
+tmp
+
+# VCS, editors, and CI.
+.git
+.github
+.idea
+.vscode
+.zed
+.cursor
+
+# Docs site, generated specs, and repo prose. The process does not read these.
+.blume
+.blume-verify
+docs
+public
+openapi.json
+asyncapi.json
+blume.config.ts
+*.md
+*.mdx
+LICENSE.txt
+
+# Tooling that does not run in the image.
+coverage
+dist
+static/dist
+just
+justfile
+integration
+mise.toml
+mise.lock
+.oxlintrc.json
+.oxfmtrc.json
+.editorconfig
+.gitignore
+.markdownlint.yaml
+.markdownlintignore
+.license-compliancerc.cjs
+Dockerfile.connect
+Dockerfile.ingest
+*.log
+.DS_Store
+
+# Tests and local CLIs.
+src/cli
+**/*.test.ts
+**/*.mantest.ts

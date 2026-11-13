@@ -1,0 +1,27 @@
+# zot registry, one per machine, shared by every stage.
+# passwd.yaml and tls.yaml are the decrypts of their *.sops.yaml. just k8s-* writes them and deletes
+# them after kustomize.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: registry
+
+resources:
+  - namespace.yaml
+  - pvc.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingressroute.yaml
+  - passwd.yaml
+  - tls.yaml
+
+configMapGenerator:
+  - name: registry-config
+    files:
+      - config.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: registry
+      app.kubernetes.io/component: registry
+      app.kubernetes.io/instance: registry

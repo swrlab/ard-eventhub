@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::warning[Firewall]
-BEFORE starting this install tutorial the server needs to have configured firewall entries to reach the internet (downloading NixOS assets; rules from FQDN `s....swr.ard` to HTTPS 443).
+BEFORE starting this install tutorial the server needs to have configured firewall entries to reach the internet (downloading NixOS assets).
 :::
 
 This guide is basically the same as the official [NixOS Install docs](https://nixos.org/manual/nixos/stable/#ch-installation) with small adjustments or notes.
@@ -21,6 +21,19 @@ To register a new server, place a request with these details:
 - 24x7 high reliability/ monitoring
 - placement: one of the internal DC zones in the internal network (not DMZ!)
 - backup: yes, daily
+
+## Workflow
+
+Since we cannot register everything at once, the workflow for server setup is currently roughly as follows:
+
+- Server registration (one at a time)
+  - this provides you with a server number
+- Firewall for outbound HTTPS
+  - rules from FQDN `s....swr.ard` to HTTPS 443
+- NixOS install
+  - afterwards this server no longer announces itself as `nixos`
+- repeat server registration steps
+- Firewall for NATS with all servers — copy-paste values in [Firewall](./firewall)
 
 ## Step-by-step
 
@@ -73,7 +86,17 @@ Generate the NixOS config.
 nixos-generate-config --root /mnt
 ```
 
-Update if needed (insert SSH key).
+Check IP config to set static IP.
+
+```bash
+ip -br addr; ip route; nmcli -t -f NAME,DEVICE,TYPE con show'
+```
+
+The first block in the second line print something like `ens33` or `eth0`. This is the network interface name. The line also shows the IP address of the interface (e.g. `10.xxx.xxx.xxx/24`).
+
+Somewhere it says `default via`, which is the default gateway.
+
+Update the config: insert `hostName`, SSH keys and update networking config from previous step.
 
 ```bash
 nano /mnt/etc/nixos/configuration.nix
@@ -81,7 +104,7 @@ nano /mnt/etc/nixos/configuration.nix
 
 ```nix
 # ...
-networking.hostName = "eventhub-connect-xxx";
+networking.hostName = "s000...";
 users.users.root.openssh.authorizedKeys.keys = [
 	# ...
 ];
@@ -91,6 +114,22 @@ services.openssh = {
 	enable = true;
 	settings.PermitRootLogin = "yes";
 	settings.PasswordAuthentication = false;
+};
+networking.nameservers = [
+  "10.127.201.221"
+  "10.63.101.221"
+  "10.191.201.221"
+];
+networking.networkmanager.unmanaged = [ "ens33" ];
+networking.interfaces.ens33.ipv4.addresses = [
+  {
+    address = "10.xxx.xxx.xxx";
+    prefixLength = 24;
+  }
+];
+networking.defaultGateway = {
+  address = "10.xxx.xxx.1";
+  interface = "ens33";
 };
 ```
 
@@ -103,3 +142,33 @@ nixos-install
 ```bash
 reboot
 ```
+
+## Post Install
+
+Download the remote config with the init command (copies the whole folder)
+
+```bash
+just nix-download-init eventhub-connect-xxx
+```
+
+Merge the downloaded `hardware-configuration.nix` into the correct host folder. update `config.nix` if needed (static IP addresses).
+
+Then upload the config to the server.
+
+```bash
+just nix-upload eventhub-connect-xxx
+```
+
+SSH into the server with the new hostname.
+
+```bash
+ssh s000...
+cd /etc/nixos
+nixos-rebuild switch --flake /etc/nixos#eventhub-connect-xxx
+```
+
+## Known Problems
+
+- `Could not resolve hostname (6) Could not resolve host: cache.nixos.org;` --> Fix resolv.conf
+  - otherwise: `ip route replace default via 10.xxx.xxx.1 dev ens33 src 10.xxx.xxx.xxx`
+- ssh `Permission denied` --> Fix `authorized_keys`

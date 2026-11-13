@@ -7,6 +7,7 @@ SELECTED_SOPS_FILE := env('SOPS_ENV_FILE', DEFAULT_SOPS_FILE)
 env *args:
 	sops exec-env --same-process {{ SELECTED_SOPS_FILE }} "{{ args }}"
 
+# list all sops-encrypted files in the repo
 _sops-files:
 	#!/usr/bin/env bash
 	find . -name '*.sops.*' -not -name '.sops.yaml' -not -path '*/node_modules/*' -not -path '*/.git/*' | sort

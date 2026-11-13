@@ -26,6 +26,7 @@ const cluster: ClusterReport = {
 		{
 			name: 'nats-0',
 			reachable: true,
+			sampled: true,
 			version: '2.14.6',
 			uptime: '1h',
 			connections: 3,

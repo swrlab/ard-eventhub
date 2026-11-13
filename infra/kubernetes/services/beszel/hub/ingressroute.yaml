@@ -1,0 +1,17 @@
+# Hub UI on eventhub-connect-<zone>-dev.swr.ard:8081 through Traefik's beszel entrypoint. The name
+# is a SAN of the dev certificate. Secret beszel-tls (tls.sops.yaml) is that certificate, written by
+# just tls-store dev.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: beszel-hub
+spec:
+  entryPoints: ['beszel']
+  routes:
+    - kind: Rule
+      match: HostRegexp(`^eventhub-connect-[a-z]+-dev\.swr\.ard$`)
+      services:
+        - name: beszel-hub
+          port: http
+  tls:
+    secretName: beszel-tls

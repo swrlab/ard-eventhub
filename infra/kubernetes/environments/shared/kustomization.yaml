@@ -1,0 +1,29 @@
+# What every stage runs: namespace, NetworkPolicies, NATS, and eventhub-connect. environments/<stage>
+# includes this and sets the namespace and ConfigMap eventhub-stage. Host ports come from that
+# ConfigMap; hostnames, server and cluster names derive from it in the workload env.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - namespace.yaml
+  - network-policies.yaml
+  - ../../services/nats
+  - ../../services/eventhub-connect
+
+components:
+  - ../../components/registry-pull
+  - ../../components/ard-ca
+
+replacements:
+  - source: { kind: ConfigMap, name: eventhub-stage, fieldPath: data.PORT_CLUSTER }
+    targets:
+      - select: { kind: StatefulSet, name: nats }
+        fieldPaths: ['spec.template.spec.containers.[name=nats].ports.[name=cluster].hostPort']
+  - source: { kind: ConfigMap, name: eventhub-stage, fieldPath: data.PORT_MQTT }
+    targets:
+      - select: { kind: StatefulSet, name: nats }
+        fieldPaths: ['spec.template.spec.containers.[name=nats].ports.[name=mqtts].hostPort']
+  - source: { kind: ConfigMap, name: eventhub-stage, fieldPath: data.PORT_WS }
+    targets:
+      - select: { kind: StatefulSet, name: nats }
+        fieldPaths: ['spec.template.spec.containers.[name=nats].ports.[name=websocket].hostPort']

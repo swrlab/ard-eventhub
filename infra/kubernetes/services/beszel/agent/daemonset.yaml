@@ -1,0 +1,80 @@
+# hostNetwork so the agent reports the machine's interfaces and the hubs on the other machines reach
+# it at <server>.swr.ard:45876. The SSH key is the only guard on that port.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: beszel-agent
+spec:
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: beszel-agent
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: beszel-agent
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 10
+      imagePullSecrets:
+        - name: registry
+      containers:
+        - name: beszel-agent
+          # Repo: https://github.com/henrygd/beszel
+          # Upstream docker.io/henrygd/beszel-agent, copied in by just registry-sync.
+          image: registry.registry.svc:5000/henrygd/beszel-agent:0.21.1
+          imagePullPolicy: IfNotPresent
+          # https://beszel.dev/guide/environment-variables
+          env:
+            # Public half of id_ed25519 in hub/secret.sops.yaml. Rotate both together.
+            - name: KEY
+              value: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGbALGIeM2VWe4MwFZSpAJjqZjCwdKR43mX+yMjvDpW3 beszel-hub
+            - name: LISTEN
+              value: '45876'
+            - name: DATA_DIR
+              value: /var/lib/beszel-agent
+            # k3s runs containerd, not Docker, and the host has no GPU.
+            - name: DOCKER_HOST
+              value: ''
+            - name: SKIP_GPU
+              value: 'true'
+            # No D-Bus socket in the pod.
+            - name: SKIP_SYSTEMD
+              value: 'true'
+          ports:
+            - name: ssh
+              containerPort: 45876
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: ssh
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: ssh
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          # Root, so the fingerprint in DATA_DIR survives on a root-owned hostPath.
+          securityContext:
+            runAsUser: 0
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ['ALL']
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/beszel-agent
+      volumes:
+        # The fingerprint the hubs pin outlives the pod.
+        - name: data
+          hostPath:
+            path: /var/lib/beszel-agent
+            type: DirectoryOrCreate

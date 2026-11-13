@@ -1,0 +1,118 @@
+# Operator UI, MCP, feed loader, and inbox validation in one process.
+# Recreate, because the stage layer gives the pod a hostPort that a surge pod cannot share.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventhub-connect
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: eventhub-connect
+  template:
+    # Labels come from kustomization.yaml (includeTemplates).
+    metadata: {}
+    spec:
+      # components/machine sets the zone from clusters/<host>. Until then the pod stays Pending.
+      nodeSelector:
+        topology.kubernetes.io/zone: unset
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      # zot requires a login. Secret registry comes from components/registry-pull.
+      imagePullSecrets:
+        - name: registry
+      containers:
+        - name: eventhub-connect
+          # Placeholder name; the environment layer pins the real image with `images:`.
+          image: eventhub-connect
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            # STAGE and PORT_* from the stage layer.
+            - configMapRef:
+                name: eventhub-stage
+            # NATS_USER, NATS_PASSWORD, ARD_FEED_URL from environments/<stage>/connect.sops.yaml.
+            - secretRef:
+                name: eventhub-connect
+          # Browser and MQTT endpoints of this machine. The hostname must be a SAN of the stage's
+          # eventhub-tls certificate.
+          env:
+            # components/machine sets ZONE by name.
+            - name: ZONE
+              value: unset
+            # Client and monitor ports stay inside the namespace, plain TCP. They are not on a host
+            # port, so the public names refuse them.
+            - name: NATS_URL
+              value: nats://nats:4222
+            - name: NATS_MONITOR_URL
+              value: http://nats:8222
+            - name: NATS_USERS_CONF
+              value: /etc/nats-users/nats-users.conf
+            # MQTT and WebSocket only listen with TLS, so connect dials the names on the certificate.
+            - name: NATS_MQTT_URL
+              value: mqtts://eventhub-connect-$(ZONE)-$(STAGE).swr.ard:$(PORT_MQTT)
+            - name: NATS_WS_URL
+              value: wss://eventhub-connect-$(ZONE)-$(STAGE).swr.ard:$(PORT_WS)
+            # Bun ships its own root store without the ARD CA. It adds this file at start.
+            - name: NODE_EXTRA_CA_CERTS
+              value: /etc/ard-ca/root.pem
+          ports:
+            - name: http
+              containerPort: 4173
+              protocol: TCP
+          # The HTTP server listens before NATS and the feed are ready, so this only proves the
+          # process is up. Swap in a readiness endpoint once connect exposes one.
+          startupProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ['ALL']
+          volumeMounts:
+            # The users board reads the broker's users file (usernames and ACLs, never the hash).
+            - name: nats-users
+              mountPath: /etc/nats-users
+              readOnly: true
+            - name: ard-ca
+              mountPath: /etc/ard-ca
+              readOnly: true
+      volumes:
+        # From components/ard-ca, which environments/shared includes.
+        - name: ard-ca
+          configMap:
+            name: ard-ca
+        - name: nats-users
+          configMap:
+            name: nats
+            items:
+              - key: nats-users.conf
+                path: nats-users.conf

@@ -13,15 +13,27 @@ keys/*.json
 !keys/*.sops.json
 .env
 
+# Plaintext kustomize inputs. just k8s-* decrypts these and deletes them.
+infra/kubernetes/services/registry/passwd.yaml
+infra/kubernetes/components/registry-pull/secret.yaml
+infra/kubernetes/environments/*/tls.yaml
+infra/kubernetes/environments/*/connect.yaml
+infra/kubernetes/components/ard-ca/*.pem
+infra/kubernetes/services/registry/tls.yaml
+infra/kubernetes/services/beszel/hub/tls.yaml
+infra/kubernetes/environments/*/nats-route.yaml
+infra/kubernetes/services/beszel/hub/secret.yaml
+
 # Dependency directories
 node_modules/
 coverage
 lib-cov
 .nyc_output
 
-# Blume docs build
+# Blume docs build and built operator UI
 .blume/
 dist/
+static/dist/
 
 # Local temporary exports (e.g. CLI dumps)
 tmp/

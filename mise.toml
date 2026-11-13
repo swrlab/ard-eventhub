@@ -9,6 +9,7 @@
 [tools]
 # aqua marks hyperfine as Rosetta-only, so it installs the x86_64 macOS binary.
 # The GitHub backend picks the native asset, including aarch64-apple-darwin.
+crane = "0.22.1"
 "github:sharkdp/hyperfine" = "2.0.0"
 just = "1.59.0"
 kustomize = "5.8.3"

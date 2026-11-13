@@ -1825,6 +1825,8 @@ it is not.
 
 ### 19.1 Q1 — are there potential subscribers who cannot connect within the ARD CN?
 
+**Decided (2026-11-09): none.** The broker stays inside the ARD CN, with no internet-facing gateway. Houses connect only from the CN, and each house arranges its own CN access through the ARD process. Q2 is therefore assessed against a CN-only population.
+
 The design places the broker inside the CN and has publishers and subscribers connect to it there.
 Plugin targets are already handled — adapters reach Radioplayer and DTS with _outbound_ HTTPS, so
 those partners never connect inward. The open part is subscribers, and it is currently assumed rather

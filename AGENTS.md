@@ -2,99 +2,57 @@
 
 Instructions for AI coding agents working on ARD Eventhub.
 
-## Project Overview
+## Project
 
-ARD Eventhub is a system to distribute real-time (live) metadata for primarily radio broadcasts. It uses Bun as the runtime and package manager, TypeScript for type safety, and Google Cloud services (Pub/Sub, Datastore, Secret Manager) for backend infrastructure.
+ARD Eventhub distributes real-time metadata for radio broadcasts. Ingest (`src/ingest/`) receives events and manages subscriptions. Connect (`src/connect/`) is the NATS access layer, with inbox validation, the operator UI, and MCP. Shared code is in `src/utils/`. Request and response contracts are Zod schemas in `src/schemas/`, assembled into OpenAPI and AsyncAPI.
 
-## Setup Commands
+Read the doc next to the code you change:
 
-- **Install tools:** [mise](https://mise.jdx.dev) → `mise install` (pins `just`, `sops`, and `hyperfine` in [`mise.toml`](mise.toml))
-- **Install dependencies:** `bun install`
-- **Start ingest service:** `just ingest` (hot reload, sops env)
-- **Start connect (NATS access + operator UI):** `just dev` (needs local NATS: `just nats-up` or `just nats-up-docker`; `NATS_USER` and `NATS_PASSWORD` come from sops). UI at http://127.0.0.1:4173 after `just ui-build`. Vite HMR: `USE_HMR=true just dev` and `just ui`. Connect reads the ARD feed from JetStream KV `KV_ARD_FEED` on boot (downloading `ARD_FEED_URL` only when the bucket is empty) and refreshes it on `POST /api/update-feed`. MCP is on the same process at `POST /mcp` (stateless, no separate session).
-- **Run tests:** `just test`
-- **Hurl API suite:** `just integration` (needs running ingest + `hurl`)
-- **Lint code:** `just lint` (uses Oxlint)
-- **Benchmark inbox validation:** `just bench-validation` (hyperfine from `mise install`; writes `.local/validation-bench.md`). CI runs the same recipe in [`.github/workflows/validation-bench.yml`](.github/workflows/validation-bench.yml)
-- **Format code:** Oxfmt handles formatting automatically
-- **Docs (dev):** `just docs` (Blume)
-- **Docs (build):** `just docs-build` (writes to `dist/`)
+- [README.md](README.md) — what the system is and how to set up a local checkout
+- [src/ingest/README.md](src/ingest/README.md) — ingest service
+- [src/connect/README.md](src/connect/README.md) — connect, NATS, operator UI, MCP
+- [infra/kubernetes/README.md](infra/kubernetes/README.md) and [infra/nixos/README.md](infra/nixos/README.md) — hosts
+- [docs/development/](docs/development/) — secrets, stages, naming, certificates
+- [TESTING.md](TESTING.md) — how to run tests
+- [integration/README.md](integration/README.md) — Hurl suite
 
-Docs deploy via [`.github/workflows/docs-push.yml`](.github/workflows/docs-push.yml) to GitHub Pages. The repo Pages source must be set to **GitHub Actions** (not “Deploy from a branch”). `cookie@2` is pinned as a devDependency so Astro’s prerender can resolve ESM exports while Express keeps nested `cookie@0.7`.
+Tasks are `just` recipes. `just --list` is the index.
 
-Regenerate OpenAPI and AsyncAPI for docs with `just openapi` (Zod schemas → `openapi.json` via `z.toJSONSchema`; also writes `asyncapi.json`). **Always run `just openapi` after changing `package.json` version** (or any other field that feeds the OpenAPI / AsyncAPI `info` block) so both specs stay in sync. AsyncAPI only: `just asyncapi`.
+## Language
 
-## Project Knowledge
+Code, filenames, variables, comments, and JSDoc are English. Operator UI copy and `docs/` are German. Internal docs in `docs/development/` and RFCs in `docs/context-rfc/` are English (US).
 
-- **Tech Stack:** Bun, Node.js, TypeScript (strict mode), Hono, Zod, Google Cloud Platform
-- **File Structure:**
-  - `src/ingest/` – Ingest service (receives events, manages subscriptions)
-- `src/connect/` – Eventhub Connect NATS access layer, including inbox validation (`src/connect/validation/`). `just dev` also serves the operator UI
-- `src/connect/ui/` – Operator console backend (Hono routes, reports). `src/connect/ui/client/` holds the Vue frontend (Vite, Tailwind), built to `static/dist`
-- `src/connect/mcp/` – MCP tools on the connect process at `/mcp`: cluster health and on-air lookup for a publisher or institution
-- `src/schemas/` – Zod request/response schemas (runtime validation + OpenAPI)
-- `src/openapi/` – OpenAPI document assembly / `openapi.json` generator
-- `src/asyncapi/` – AsyncAPI document assembly / `asyncapi.json` generator (Eventhub Connect / MQTT)
-- `src/utils/` – Shared utilities (Pub/Sub, MQTT inbox hop, NATS client, Datastore, Firebase, plugins)
-- `cli/` – Command-line utilities
-- `config/` – Application configuration (ARD prefixes, allow-lists)
-- `infra/` – Local NATS config and NATS kustomize manifests (`infra/kubernetes`)
-- `just/` – Split just recipes (`docs.just`, `encryption.just`, `integration.just`, `mqtt.just`, `nats.just`)
-- `integration/` – Hurl HTTP suite (`ingest-api.hurl`) mirroring `src/ingest/server.test.ts` (run with `just integration`)
-- `docs/` – Documentation (Markdown, built with Blume)
-- `blume.config.ts` – Docs site configuration
-- `tests/` – Test files (co-located with source files using `.test.ts` extension)
+Never use Python. Not for scripts, recipes, generators, glue, or one-off helpers. Use TypeScript, or shell in a `just` recipe.
 
-## Code Style
+## Changes
 
-Follow SWR Audio Lab engineering principles:
+- Match the surrounding code. Oxfmt owns formatting; `just lint` checks and `just format` fixes.
+- A behavior change includes or updates a co-located `*.test.ts`. Tests use `@cross/test`, `@std/assert`, and sinon so the same file runs on Bun, Node, and Deno. Fix a failing test and keep it in the suite. `just test` and `just lint` pass before a PR.
+- A `package.json` change that feeds the OpenAPI or AsyncAPI `info` block, including `version`, needs `just openapi` so `openapi.json` and `asyncapi.json` stay in sync. Schema and path edits are covered in [docs/openapi.md](docs/openapi.md) and [docs/asyncapi.md](docs/asyncapi.md).
+- Update `docs/` when user-facing behavior changes.
 
-- **Language:** Code, filenames, variables, comments, and JSDoc are always English. Operator UI copy and `docs/` are German. Internal developer docs in `docs/development/` and RFCs in `docs/context-rfc/` are English (US).
-- **Formatting:** Oxfmt handles formatting (single quotes, no semicolons, tabs for indentation, 120 char line width)
-- **TypeScript:** Strict mode enabled, prefer explicit types over inference where it improves clarity
-- **Naming:** Use descriptive, clear names. Follow existing patterns in the codebase
-- **Comments:** Include inline comments for complex logic, but prefer self-documenting code
+## Logs
 
-## Testing
+Each host in [infra/nixos/hosts.toml](infra/nixos/hosts.toml) runs its own k3s cluster. Pass that host's kubeconfig to every `kubectl` call with `--kubeconfig`, and never rely on the current context. If `keys/<host>-k3s-cert.yaml` is missing, restore it with `just k3s-decrypt <host>`. Namespaces are listed in [infra/kubernetes/README.md](infra/kubernetes/README.md).
 
-- All code changes should include or update tests
-- Tests use [`@cross/test`](https://jsr.io/@cross/test) with [`@std/assert`](https://jsr.io/@std/assert) (and [sinon](https://sinonjs.org/) for stubs/spies) so they run on Bun, Node, or Deno
-- Test files are co-located with source files (`.test.ts` extension)
-- Run with `just test` (Bun via sops env) or `bun test`; Node/Deno: `node --import tsx --test` / `deno test` against the same files
-- Tests must pass before merging PRs
+```sh
+kc=keys/eventhub-connect-mnz-k3s-cert.yaml
+kubectl --kubeconfig "$kc" get pods -n eventhub-dev
+kubectl --kubeconfig "$kc" logs -n eventhub-dev deployment/eventhub-connect --since=1h
+kubectl --kubeconfig "$kc" logs -n eventhub-dev statefulset/nats --tail=200 -f
+kubectl --kubeconfig "$kc" logs -n eventhub-dev <pod> --previous  # after a crash or restart
+```
 
-## Git Workflow
+To search logs with LogsQL, ask the user to run `just k8s-logs-mcp`, then use the `victorialogs-<zone>` MCP servers from `.cursor/mcp.json`.
 
-- **Commits:** Follow [Conventional Commits](https://www.conventionalcommits.org/) format (`feat:`, `fix:`, `docs:`, etc.)
-- **Signing:** Commits must be signed (SSH or GPG)
-- **Branches:** Use `dev/*` or `feature/*` for development branches. Only `main` deploys to production
-- **PRs:** Run `just test` and `just lint` before opening a PR
+Read logs only. Do not run `apply`, `delete`, `rollout restart`, or `exec` without asking. Logs of the k3s unit itself are on the host: `journalctl -u k3s`.
+
+## Git
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/) and are signed (SSH or GPG). Development branches are `dev/*` or `feature/*`. Only `main` deploys to production.
 
 ## Boundaries
 
-- ✅ **Always do:** Write tests for new code, run linter before committing, keep code and comments in English, follow existing patterns, run `just openapi` after changing `package.json` version (keeps `openapi.json` and `asyncapi.json` in sync)
-- ⚠️ **Ask first:** Modifying Google Cloud configuration, changing authentication flows, updating dependencies, major architectural changes
-- 🚫 **Never do:** Commit unencrypted secrets or API keys (use Secret Manager), modify `node_modules/` or `bun.lock`, remove failing tests without fixing them, use German in identifiers, comments, or JSDoc
+Ask before changing Google Cloud configuration, authentication, dependencies, or the architecture.
 
-## Documentation
-
-Code comments and JSDoc are always English. Operator UI copy and `docs/` are German, except internal developer docs in `docs/development/` and RFCs in `docs/context-rfc/`, which are English (US).
-
-- Write documentation in Markdown files in the `docs/` directory
-- Keep documentation clear, concise, and practical
-- Update documentation when changing functionality
-- Use the existing documentation structure as a guide
-
-## Security
-
-- Never commit unencrypted secrets, API keys, or credentials
-- Use Google Cloud Secret Manager for sensitive data
-- Check `.env.example` for required environment variables
-- All secrets should be GPG- or age-encrypted (using sops) if shared
-
-## Dependencies
-
-- Use `bun install` to add dependencies
-- Keep dependencies up-to-date for security patches
-- Test thoroughly after dependency upgrades
-- Check license compatibility (project uses MIT)
+Leave secrets encrypted. Shared secrets use sops; runtime secrets use Secret Manager. See [docs/development/secrets.md](docs/development/secrets.md). Add dependencies with `bun install` and leave `node_modules/` and `bun.lock` to that command. The project license is MIT.

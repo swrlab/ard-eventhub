@@ -1,0 +1,17 @@
+# Vector DaemonSet: pod logs on this machine to the local VictoriaLogs.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - rbac.yaml
+  - daemonset.yaml
+
+configMapGenerator:
+  - name: vector-config
+    files:
+      - vector.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: vector
+      app.kubernetes.io/component: log-shipper

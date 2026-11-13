@@ -1,0 +1,14 @@
+# Inside the cluster only. Browsers reach the hub through Traefik with TLS (ingressroute.yaml).
+apiVersion: v1
+kind: Service
+metadata:
+  name: beszel-hub
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: beszel-hub
+  ports:
+    - name: http
+      port: 8090
+      targetPort: http
+      protocol: TCP
