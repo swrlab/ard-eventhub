@@ -1,6 +1,6 @@
 ---
 title: 'Eventhub Connect MQTT'
-description: 'MQTT-Anbindung an Eventhub Connect: Verbindung, Client, Payload und Feedback.'
+description: 'MQTT-Anbindung an Eventhub Connect: Firewall, Verbindung, Client, Payload und Feedback.'
 sidebar:
   order: 2
   icon: rocket
@@ -8,22 +8,51 @@ sidebar:
 
 Eventhub Connect nimmt Events über **MQTT 3.1.1** an. Du publizierst auf `inbox/{institutionId}` und liest Ablehnungen auf `feedback/{institutionId}`. Die validierten Events schreibt die Eventhub Validierung auf `radio/`, mit Retain und QoS 1.
 
-Zugangsdaten, die drei Hosts im ARD CN, das Passwort und das Präfix für die Client-ID kommen vom Eventhub-Team. Topics stehen unter [_Topics_](./topics), Rechte unter [_Zugangsdaten_](./acl). Support steht unter [_Betrieb und Support_](./betrieb), der Teststatus unter [_Stages_](../development/stages), die Firewall-Freigaben unter [_Firewall_](../development/firewall). Breaking Changes beim Umstieg von der HTTPS-API stehen unter [_Migration auf Eventhub v3_](./migration-v3).
+Zugangsdaten, das Passwort, das Präfix für die Client-ID und das CA-Zertifikat kommen vom Eventhub-Team. Topics stehen unter [_Topics_](./topics), Rechte unter [_Zugangsdaten_](./acl). Support steht unter [_Betrieb und Support_](./betrieb). Breaking Changes beim Umstieg von der HTTPS-API stehen unter [_Migration auf Eventhub v3_](./migration-v3).
+
+## Vor dem Start
+
+Vor dem ersten Connect braucht jedes Haus drei Dinge:
+
+- **Zugang ins ARD CN.** Eventhub Connect ist nur aus dem ARD CN erreichbar. Es gibt keinen Internet-Endpunkt und keinen eingehenden Port beim Haus — dein Client baut die TCP-Verbindung ausgehend auf. Den ARD-CN-Zugang und die eigene Firewall-Freigabe regelt jedes Haus über seinen eigenen Prozess.
+- **Zugangsdaten vom Eventhub-Team.** Du bekommst Benutzername (`pub-…` zum Senden, `sub-…` zum Empfangen), Passwort, das Präfix für deine Client-IDs, die freigeschalteten Institutions-URNs und das CA-PEM für die TLS-Prüfung, siehe [_Zugangsdaten_](./acl).
+- **Ausgehende Firewall-Freigabe im Haus.** Alle drei Stages (`dev`, `test`, `prod`) laufen auf denselben drei Maschinen unter eigenen Hostnamen. Alle drei Zonen (`bad`, `mnz`, `stg`) und alle drei Stages gehören in einen gemeinsamen Antrag — fällt eine Zone aus, übernehmen die anderen beiden.
+
+### Firewall-Werte für Häuser
+
+**Quelle**
+
+Eigene Systeme im Haus (Playout, Adapter oder Subscriber) im ARD CN.
+
+**Ziel**
+
+- `eventhub-connect-{bad,mnz,stg}-{dev,test,prod}.swr.cn.ard.de` — alle neun FQDNs eintragen (`bad`, `mnz` und `stg`, jeweils für `dev`, `test` und `prod`)
+
+**Ports**
+
+- MQTT
+  - TCP `28883` — `dev`
+  - TCP `18883` — `test`
+  - TCP `8883` — `prod`
+- Operator-UI im Browser (optional)
+  - TCP `443` — Operator-UI
+  - TCP `29222` — NATS WebSocket, `dev`
+  - TCP `19222` — NATS WebSocket, `test`
+  - TCP `9222` — NATS WebSocket, `prod`
 
 ## Verbindung
 
 - **Protokoll MQTT 3.1.1.** Ein Client, der Version 5 anbietet, bekommt CONNACK-Code 1 (_unacceptable protocol version_) und kann sich nicht verbinden. In mqtt.js ist 3.1.1 der Wert `protocolVersion: 4`. Bibliotheken, die still auf v5 stehen, muss man explizit auf 3.1.1 stellen.
-- **TLS, Port `8883`.** (Klartext `1883` ist nur am lokalen Dev-Broker offen.)
-- **Drei Namen, alle drei im Client:** `connect-bad`, `connect-stg`, `connect-mnz`. Jeder Name ist eine Zone. Test und Produktion haben getrennte Domains.
-- **Benutzername und Passwort.** Der Name hat die Form `pub-{label}-{datum}`, zum Beispiel `pub-swr-2026-06-26`. Das Datum gehört zum Namen. Das Passwort läuft nicht ab und steht nicht in dieser Doku.
-  - Das Eventhub Team behält sich vor in unregelmäßigen Intervallen oder Anlassbezogen die Kennung zu rotieren. Die Rotation ist additiv: ein neuer Nutzer + Passwort kommen zur alten, beide Kennungen gelten, bis die alte entfernt wird.
-- **Zertifikatsprüfung an.** Das Zertifikat deckt alle drei Namen ab. Wenn der Trust-Store die CA nicht kennt, liegt das CA-PEM bei den Zugangsdaten.
+- **TLS, Port je Stage:** `28883` (`dev`), `18883` (`test`), `8883` (`prod`).
+- **Drei Hostnamen pro Stage, alle drei im Client:** `eventhub-connect-{bad,mnz,stg}-{dev,test,prod}.swr.cn.ard.de` — jeder Name (`bad`, `mnz`, `stg`) ist eine Zone, und Stage sowie Port gehören zusammen (`*-dev` auf `28883`, `*-test` auf `18883`, `*-prod` auf `8883`).
+- **Benutzername und Passwort.** Der Name hat die Form `pub-{label}-{datum}`, zum Beispiel `pub-swr-2026-06-26`. Das Datum gehört zum Namen. Das Passwort läuft nicht ab und steht nicht in dieser Doku. Das Eventhub-Team rotiert Kennungen in unregelmäßigen Intervallen oder anlassbezogen additiv: ein neuer Nutzer plus Passwort kommen zur alten Kennung hinzu, beide gelten parallel, bis die alte entfernt wird.
+- **Zertifikatsprüfung an.** Jede Stage hat ein eigenes Zertifikat über alle drei Zonen-Namen unter der `Rundfunk-Root-CA-2015`. Wenn der Trust-Store die CA nicht kennt, liegt das CA-PEM bei den Zugangsdaten.
 
 ## Client
 
 **Stabile Client-ID.** Die Session hängt an der Client-ID, innerhalb des Accounts, unabhängig vom Benutzernamen. Eine neue ID bei jedem Start verwirft die persistente Session: QoS-1-Nachrichten, die während eines Abbruchs in der Warteschlange lagen, sind weg. Dieselbe ID über Neustart und Passwort-Wechsel behält die Session. Zwei Verbindungen mit derselben ID werfen sich gegenseitig aus der Session, auch wenn sie zu verschiedenen Benutzern gehören. Das Eventhub-Team gibt mit den Zugangsdaten ein Präfix vor. Jede Client-ID muss damit beginnen, eine pro Verbindung, fest vergeben, zum Beispiel `swr-swr3-playout`.
 
-**Alle drei DNS-Namen.** Die Liste gehört in die Client-Konfiguration, mit Reconnect und Keep-Alive 30–60 Sekunden. Ein Client mit nur `connect-bad` publiziert nichts, sobald diese Zone ausfällt, obwohl die anderen beiden Quorum halten und Events annehmen würden.
+**Alle drei DNS-Namen.** Die Liste gehört in die Client-Konfiguration, mit Reconnect und Keep-Alive 30–60 Sekunden. Ein Client mit nur `eventhub-connect-bad-prod.swr.cn.ard.de` publiziert nichts, sobald diese Zone ausfällt, obwohl die anderen beiden Quorum halten und Events annehmen würden.
 
 **QoS 1.** QoS 1 ist at-least-once. Ein Reconnect liefert dieselbe Nachricht ein zweites Mal. Wer jedes Paket als neues Event zählt, doppelt Titel oder Steuerbits. Deduplizierung über `playlistItemId` (Track) bzw. `name` plus `start` (Control). Ein erfolgreicher Publish schreibt nichts auf `feedback/`. Stille nach dem eigenen `playlistItemId` heißt angenommen.
 
@@ -62,10 +91,11 @@ const client = mqtt.connect({
 	clean: false, // Clean Session false: QoS 1 überlebt den Reconnect.
 	keepalive: 45,
 	reconnectPeriod: 5000,
+	// Für dev: *-dev.swr.cn.ard.de (Port 28883); für test: *-test.swr.cn.ard.de (Port 18883).
 	servers: [
-		{ protocol: 'mqtts', host: 'connect-bad', port: 8883 },
-		{ protocol: 'mqtts', host: 'connect-stg', port: 8883 },
-		{ protocol: 'mqtts', host: 'connect-mnz', port: 8883 },
+		{ protocol: 'mqtts', host: 'eventhub-connect-bad-prod.swr.cn.ard.de', port: 8883 },
+		{ protocol: 'mqtts', host: 'eventhub-connect-mnz-prod.swr.cn.ard.de', port: 8883 },
+		{ protocol: 'mqtts', host: 'eventhub-connect-stg-prod.swr.cn.ard.de', port: 8883 },
 	],
 })
 
