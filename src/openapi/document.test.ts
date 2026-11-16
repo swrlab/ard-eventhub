@@ -117,4 +117,8 @@ test('buildOpenApiDocument hoists nested Zod definitions so docs can expand medi
 	const errorBadRequest = schemas.errorBadRequest
 	assertEquals(errorBadRequest?.properties?.errors?.items?.$ref, '#/components/schemas/openApiErrorItem')
 	assertExists(schemas.openApiErrorItem?.properties?.errorCode)
+
+	assertEquals('eventV1RadioControlPostBody' in schemas, false)
+	assertEquals('eventV1RadioDataPostBody' in schemas, false)
+	assertEquals('servicesUrn' in schemas, false)
 })

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - feat: `radio.control` `name` is `TA` or `REGIO`; optional `details` string
+- docs: drop `radio.control` and `radio.data` from OpenAPI; both stay in AsyncAPI
 
 ### Fixed
 
