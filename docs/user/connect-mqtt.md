@@ -8,6 +8,8 @@ sidebar:
 
 Eventhub Connect nimmt Events über **MQTT 3.1.1** an. Du publizierst auf `inbox/{institutionId}` und liest Ablehnungen auf `feedback/{institutionId}`. Die validierten Events schreibt die Eventhub Validierung auf `radio/`, mit Retain und QoS 1.
 
+Events schickst du nur hier **oder** an `POST /events/…`. Der HTTPS-Ingest legt angenommene Track-Events selbst auf die Inbox, ein zweiter Publish doppelt die Zustellung. Siehe [_Migration auf Eventhub v3_](./migration-v3).
+
 Zugangsdaten, das Passwort, das Präfix für die Client-ID und das CA-Zertifikat kommen vom Eventhub-Team. Topics stehen unter [_Topics_](./topics), Rechte unter [_Zugangsdaten_](./acl). Support steht unter [_Betrieb und Support_](./betrieb). Breaking Changes beim Umstieg von der HTTPS-API stehen unter [_Migration auf Eventhub v3_](./migration-v3).
 
 ## Vor dem Start

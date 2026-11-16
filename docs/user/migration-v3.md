@@ -20,6 +20,19 @@ Diese neuen Features für v3 wurden ursprünglich in der GitHub Discussion [Even
 
 Die vollständige Historie aller Changes findest du im [Changelog](https://github.com/swrlab/ard-eventhub/blob/main/CHANGELOG.md).
 
+## HTTPS oder MQTT, nicht beides
+
+Der HTTPS-Ingest schreibt jedes angenommene Track-Event zusätzlich auf `inbox/{institutionId}`. Die Eventhub Validierung verteilt es von dort auf `radio/`, genauso wie einen Publish, den du selbst über MQTT schickst.
+
+Dasselbe Event schickst du auf **einem** Weg:
+
+- `POST /events/…`, oder
+- MQTT auf `inbox/{institutionId}`
+
+Beide Wege zusammen stellen dasselbe Event zweimal zu. `radio.control` und `radio.data` gibt es nur auf MQTT. Track-Events, die weiter über HTTPS laufen, nicht noch einmal per MQTT publizieren.
+
+**Aktion:** Vor dem ersten MQTT-Publish den HTTPS-Versand für dieselben Events abschalten.
+
 ## Überblick
 
 - Mit `3.0.0-beta.1` (auf `test` ab `2026-08-11`, auf `prod` ab `2026-10-21`)
@@ -28,6 +41,7 @@ Die vollständige Historie aller Changes findest du im [Changelog](https://githu
   - 🛑 **Feld `trace` deprecated und `null`** — in manchen Responses war das Feld enthalten, nun ist es immer `null` und wird bald entfernt
   - ⏳ **Feld `length` Pflicht und positiv** — betrifft alle Publisher von Track-Events
 - Mit `3.0.0-beta.2`
+  - 🛑 **Ein Event nur auf HTTPS oder nur auf MQTT** — beide Wege zusammen doppeln die Zustellung auf `radio/`
   - 🛑 **Temporäres Publisher-Mapping entfernt** — betrifft rbb und hr, die noch eine der alten Publisher-URNs senden
   - 🛑 **`publisherId` streng gegen ARD Core geprüft** — betrifft Publisher, die eine falsche oder fremde Publisher-ID senden, und die gemeinsamen Nachtprogramme
   - 🛑 **MQTT nimmt in `services[]` nur URNs** — Core-ID und CRID werden abgelehnt

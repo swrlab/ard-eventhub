@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - feat: `radio.control` `name` is `TA` or `REGIO`; optional `details` string
 - docs: drop `radio.control` and `radio.data` from OpenAPI; both stay in AsyncAPI
+- docs: send each event on HTTPS or MQTT, not both, so subscribers do not see it twice
 
 ### Fixed
 
