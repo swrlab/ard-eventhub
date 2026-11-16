@@ -11,8 +11,48 @@ Dieses Event ist für Eventhub Connect vorgesehen und wird über `POST /events/d
 
 Steuerbits (TA, TP, EON, Regio und weitere). `name` ist ein freier String und kein Enum. Neue Steuerfunktionen brauchen keine Schema-Änderung.
 
+## Beispiel
+
+**Minimal** setzt die Pflichtfelder. **Maximal** ist der Diff dagegen und markiert `validUntil`. `created` setzt die Eventhub Validierung.
+
+### Minimal
+
 ```json
 {
+	"event": "de.ard.eventhub.v1.radio.control",
+	"start": "2026-05-27T16:03:00+01:00",
+	"name": "TA",
+	"state": true,
+	"services": [
+		{
+			"publisherId": "urn:ard:publisher:75dbb3dace15f610",
+			"institutionId": "urn:ard:institution:a3004ff924ece1a2",
+			"id": "urn:ard:permanent-livestream:49267f7d67be180d"
+		}
+	],
+	"creator": "example@swr.de"
+}
+```
+
+### Maximal
+
+<Diff
+	lang="json"
+	old={`{
+	"event": "de.ard.eventhub.v1.radio.control",
+	"start": "2026-05-27T16:03:00+01:00",
+	"name": "TA",
+	"state": true,
+	"services": [
+		{
+			"publisherId": "urn:ard:publisher:75dbb3dace15f610",
+			"institutionId": "urn:ard:institution:a3004ff924ece1a2",
+			"id": "urn:ard:permanent-livestream:49267f7d67be180d"
+		}
+	],
+	"creator": "example@swr.de"
+}`}
+	new={`{
 	"event": "de.ard.eventhub.v1.radio.control",
 	"start": "2026-05-27T16:03:00+01:00",
 	"validUntil": "2026-05-27T16:18:00+01:00",
@@ -26,7 +66,7 @@ Steuerbits (TA, TP, EON, Regio und weitere). `name` ist ein freier String und ke
 		}
 	],
 	"creator": "example@swr.de"
-}
-```
+}`}
+/>
 
 Die Spezifikation steht im [Eventhub v3 Connect RFC](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#13-new-event-schemas). Wohin publiziert wird, steht unter [_Topics_](../user/topics), die Verbindung unter [_Eventhub Connect_](../user/connect-mqtt). Der Kanal steht in der [Events-Referenz](/events/subscribe/receive-radio-control).

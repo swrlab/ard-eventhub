@@ -1,0 +1,4 @@
+/* blume-specific theme changes https://useblume.dev/docs/configuration/theming */
+:root {
+	--blume-content-width: 56rem;
+}

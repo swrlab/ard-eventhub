@@ -13,8 +13,52 @@ sidebar:
 
 `event` ist das abgelehnte Event, so wie es ankam: ein JSON-Wert, sonst Text. Über 64 KiB steht dort `{ "truncated": true, "bytes": …, "head": "…" }`.
 
+## Beispiel
+
+**Minimal** setzt die Pflichtfelder. **Maximal** ist der Diff dagegen und markiert `playlistItemId`, `start`, `deprecated` und das vollständigere `event`.
+
+### Minimal
+
 ```json
 {
+	"created": "2026-10-08T10:00:01.000Z",
+	"institutionId": "urn:ard:institution:a3004ff924ece1a2",
+	"subject": "inbox.urn:ard:institution:a3004ff924ece1a2",
+	"errors": [
+		{
+			"path": ".body.title",
+			"message": "should have required property 'title'",
+			"errorCode": "required.openapi.validation"
+		}
+	],
+	"event": {
+		"event": "de.ard.eventhub.v1.radio.track.playing",
+		"creator": "example@swr.de"
+	}
+}
+```
+
+### Maximal
+
+<Diff
+	lang="json"
+	old={`{
+	"created": "2026-10-08T10:00:01.000Z",
+	"institutionId": "urn:ard:institution:a3004ff924ece1a2",
+	"subject": "inbox.urn:ard:institution:a3004ff924ece1a2",
+	"errors": [
+		{
+			"path": ".body.title",
+			"message": "should have required property 'title'",
+			"errorCode": "required.openapi.validation"
+		}
+	],
+	"event": {
+		"event": "de.ard.eventhub.v1.radio.track.playing",
+		"creator": "example@swr.de"
+	}
+}`}
+	new={`{
 	"created": "2026-10-08T10:00:01.000Z",
 	"institutionId": "urn:ard:institution:a3004ff924ece1a2",
 	"subject": "inbox.urn:ard:institution:a3004ff924ece1a2",
@@ -26,7 +70,7 @@ sidebar:
 		},
 		{
 			"path": ".body.services.0.publisherId",
-			"message": "should match format \"regex\"",
+			"message": "should match format \\"regex\\"",
 			"errorCode": "format.openapi.validation"
 		},
 		{
@@ -45,11 +89,17 @@ sidebar:
 		"length": 180,
 		"title": "Song name",
 		"playlistItemId": "swr3-demo-1",
-		"services": [{ "type": "PermanentLivestream", "externalId": "crid://swr.de/282310", "publisherId": "282310" }],
+		"services": [
+			{
+				"type": "PermanentLivestream",
+				"externalId": "crid://swr.de/282310",
+				"publisherId": "282310"
+			}
+		],
 		"creator": "example@swr.de"
 	}
-}
-```
+}`}
+/>
 
 Schema-Fehler tragen `*.openapi.validation`. Passt ein Service nicht zur Inbox oder zum ARD-Feed, steht der Fehler am betroffenen Feld:
 
