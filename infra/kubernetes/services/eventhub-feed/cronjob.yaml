@@ -1,0 +1,86 @@
+# Hourly ARD core feed refresh into JetStream KV. Uses the same image and config as eventhub-connect.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: eventhub-feed
+spec:
+  schedule: '0 * * * *'
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 300
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 120
+      template:
+        # Labels come from kustomization.yaml (includeTemplates).
+        metadata: {}
+        spec:
+          restartPolicy: Never
+          # components/machine sets the zone from clusters/<host>. Until then the pod stays Pending.
+          nodeSelector:
+            topology.kubernetes.io/zone: unset
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          # zot requires a login. Secret registry comes from components/registry-pull.
+          imagePullSecrets:
+            - name: registry
+          containers:
+            - name: eventhub-feed
+              # Placeholder name; the environment layer pins the real image with `images:`.
+              image: eventhub-connect
+              imagePullPolicy: IfNotPresent
+              command: ['bun', 'run', 'update-feed']
+              envFrom:
+                # STAGE and PORT_* from the stage layer.
+                - configMapRef:
+                    name: eventhub-stage
+                # NATS_USER, NATS_PASSWORD, ARD_FEED_URL from environments/<stage>/connect.sops.yaml.
+                - secretRef:
+                    name: eventhub-connect
+              env:
+                # Client and monitor ports stay inside the namespace, plain TCP.
+                - name: NATS_URL
+                  value: nats://nats:4222
+                - name: NATS_MONITOR_URL
+                  value: http://nats:8222
+                - name: NATS_USERS_CONF
+                  value: /etc/nats-users/nats-users.conf
+                # Bun ships its own root store without the ARD CA. It adds this file at start.
+                - name: NODE_EXTRA_CA_CERTS
+                  value: /etc/ard-ca/root.pem
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  memory: 512Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ['ALL']
+              volumeMounts:
+                # liveInstitutions() reads the broker's users file to protect connected publishers.
+                - name: nats-users
+                  mountPath: /etc/nats-users
+                  readOnly: true
+                - name: ard-ca
+                  mountPath: /etc/ard-ca
+                  readOnly: true
+          volumes:
+            # From components/ard-ca, which environments/shared includes.
+            - name: ard-ca
+              configMap:
+                name: ard-ca
+            - name: nats-users
+              configMap:
+                name: nats
+                items:
+                  - key: nats-users.conf
+                    path: nats-users.conf

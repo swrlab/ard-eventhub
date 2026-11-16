@@ -24,7 +24,8 @@
 		"format:check": "oxfmt --check",
 		"ingest": "bun run --hot ./src/ingest/server.ts",
 		"start": "bun ./src/ingest/server.ts",
-		"start:connect": "bun ./src/connect/index.ts"
+		"start:connect": "bun ./src/connect/index.ts",
+		"update-feed": "bun ./src/cli/update-feed.ts"
 	},
 	"dependencies": {
 		"@frytg/check-required-env": "npm:@jsr/frytg__check-required-env@0.2.0",
