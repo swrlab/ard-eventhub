@@ -132,9 +132,27 @@ test('eventV1RadioControlPostBody accepts a valid control event', () => {
 	assertStrictEquals(result.success, true)
 })
 
-test('eventV1RadioControlPostBody accepts a non-standard control name', () => {
-	const result = eventV1RadioControlPostBody.safeParse({ ...controlBody, name: 'CustomBit' })
+test('eventV1RadioControlPostBody accepts REGIO', () => {
+	const result = eventV1RadioControlPostBody.safeParse({ ...controlBody, name: 'REGIO' })
 	assertStrictEquals(result.success, true)
+})
+
+test('eventV1RadioControlPostBody accepts optional details', () => {
+	const result = eventV1RadioControlPostBody.safeParse({ ...controlBody, details: 'Beispiel' })
+	assertStrictEquals(result.success, true)
+	if (result.success) assertEquals(result.data.details, 'Beispiel')
+})
+
+test('eventV1RadioControlPostBody rejects a name outside TA and REGIO', () => {
+	for (const name of ['Regio', 'TP', 'EON', 'CustomBit']) {
+		const result = eventV1RadioControlPostBody.safeParse({ ...controlBody, name })
+		assertStrictEquals(result.success, false)
+	}
+})
+
+test('eventV1RadioControlPostBody rejects a non-string details', () => {
+	const result = eventV1RadioControlPostBody.safeParse({ ...controlBody, details: 1 })
+	assertStrictEquals(result.success, false)
 })
 
 test('eventV1RadioControlPostBody rejects a missing state', () => {

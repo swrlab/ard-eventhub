@@ -462,9 +462,12 @@ export const eventV1RadioControlPostBody = z
 		validUntil: iso8601Timestamp.optional().meta({
 			description: 'Backstop TTL. Receivers drop the state when it passes. Omit for states with no natural expiry.',
 		}),
-		name: z.string().meta({
-			description: 'Control element identifier (TA, TP, EON, Regio, …). Not an enum — new functions need no release.',
+		name: requiredEnum(['TA', 'REGIO']).meta({
+			description: 'Control element identifier.',
 			examples: ['TA'],
+		}),
+		details: z.string().optional().meta({
+			description: 'Optional free-text detail for this control element.',
 		}),
 		state: z.boolean().meta({ description: 'New control state', examples: [true] }),
 		services: z.array(servicesUrn).meta({

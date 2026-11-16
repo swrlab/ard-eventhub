@@ -1,6 +1,6 @@
 ---
 title: 'radio.control'
-description: 'Steuerbits wie TA, TP, EON und Regio.'
+description: 'Steuerbits TA und REGIO.'
 sidebar:
   order: 3
 ---
@@ -9,11 +9,11 @@ Dieses Event ist für Eventhub Connect vorgesehen und wird über `POST /events/d
 
 `services[]` ist URN-only (`id`, `publisherId` und `institutionId` als `urn:ard:…`). `start` ist ISO8601. `creator` setzt der Publisher. `created` setzt die Eventhub Validierung auf den Zeitpunkt der Zustellung und überschreibt einen mitgeschickten Wert.
 
-Steuerbits (TA, TP, EON, Regio und weitere). `name` ist ein freier String und kein Enum. Neue Steuerfunktionen brauchen keine Schema-Änderung.
+`name` ist `TA` oder `REGIO`. `details` ist ein optionaler String.
 
 ## Beispiel
 
-**Minimal** setzt die Pflichtfelder. **Maximal** ist der Diff dagegen und markiert `validUntil`. `created` setzt die Eventhub Validierung.
+**Minimal** setzt die Pflichtfelder. **Maximal** ist der Diff dagegen und markiert `validUntil` und `details`. `created` setzt die Eventhub Validierung.
 
 ### Minimal
 
@@ -57,6 +57,7 @@ Steuerbits (TA, TP, EON, Regio und weitere). `name` ist ein freier String und ke
 	"start": "2026-05-27T16:03:00+01:00",
 	"validUntil": "2026-05-27T16:18:00+01:00",
 	"name": "TA",
+	"details": "Beispiel",
 	"state": true,
 	"services": [
 		{

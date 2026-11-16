@@ -1412,9 +1412,14 @@
 						"examples": ["2020-01-19T06:00:00+01:00"]
 					},
 					"name": {
+						"description": "Control element identifier.",
+						"examples": ["TA"],
 						"type": "string",
-						"description": "Control element identifier (TA, TP, EON, Regio, …). Not an enum — new functions need no release.",
-						"examples": ["TA"]
+						"enum": ["TA", "REGIO"]
+					},
+					"details": {
+						"description": "Optional free-text detail for this control element.",
+						"type": "string"
 					},
 					"state": {
 						"type": "boolean",
