@@ -68,6 +68,8 @@ Panels:
 
 `UI_HOST` (default `0.0.0.0`), `UI_PORT` (default `4173`). `UI_ALLOW_CIDR` is a comma-separated source list checked against the socket address. Empty allows every peer, which is the local default. Set it when the UI is reachable on a shared network.
 
+`AVAILABLE_ZONES` and `AVAILABLE_STAGES` are comma-separated lists for the header dropdowns. Clusters set `bad,mnz,stg` and `dev,test,prod`. Empty hides them.
+
 Tail limits are also in the page footer.
 
 ## MCP

@@ -40,6 +40,10 @@ test('stats routes answer without a websocket', async () => {
 	assertEquals(tail.status, 404)
 	assertEquals(typeof metaBody.wsUrl, 'string')
 	assertEquals(String(metaBody.wsUrl).startsWith('ws'), true)
+	assertEquals(typeof metaBody.zone, 'string')
+	assertEquals(typeof metaBody.stage, 'string')
+	assertEquals(Array.isArray(metaBody.zones), true)
+	assertEquals(Array.isArray(metaBody.stages), true)
 })
 
 test('update-feed route is not exposed over HTTP', async () => {

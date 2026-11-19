@@ -6,7 +6,16 @@ import { natsUrl, natsUser } from '../env.ts'
 import { currentFeed, currentFeedReport } from '../feed/current-feed.ts'
 import { buildFeedCatalog } from '../feed/feed-catalog.ts'
 import { sampleMonitor } from './cluster.ts'
-import { natsMonitorUrl, natsWsUrl, usersConfPath } from './env.ts'
+import {
+	availableStages,
+	availableZones,
+	natsMonitorUrl,
+	natsWsUrl,
+	stage,
+	switcherNames,
+	usersConfPath,
+	zone,
+} from './env.ts'
 import { errorMessage } from './json.ts'
 import { foldOnAir, nameOnAirStations } from './on-air.ts'
 import { DEFAULT_TAIL_FILTER, STATS_POLL_MS, TAIL_CAP_MS, TAIL_IDLE_MS, TAIL_MAX_PER_SECOND } from './policy.ts'
@@ -33,6 +42,10 @@ const meta = (): MetaReport => ({
 	natsUrl,
 	wsUrl: natsWsUrl,
 	user: natsUser,
+	zone,
+	stage,
+	zones: switcherNames(availableZones, zone),
+	stages: switcherNames(availableStages, stage),
 })
 
 /**

@@ -2,6 +2,7 @@
 import type { ClusterReport, MetaReport } from '#types'
 import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { envSwitchUrl } from './env-switch'
 import { tailPhase } from './tail-state'
 
 const route = useRoute()
@@ -19,6 +20,29 @@ const nav = [
 	{ to: '/cluster', label: 'cluster' },
 	{ to: '/tail', label: 'tail' },
 ]
+
+const showZones = computed(() => (meta.value?.zones.length ?? 0) > 0)
+const showStages = computed(() => (meta.value?.stages.length ?? 0) > 0)
+const canSwitch = computed(() => Boolean(meta.value?.zone && meta.value?.stage))
+
+/**
+ * Open the same board on the zone or stage the operator picked.
+ * @param event - Change event from the zone or stage select
+ * @param which - Which dropdown moved
+ * @returns Nothing. The browser navigates when this host is the current name.
+ */
+const onSwitch = (event: Event, which: 'zone' | 'stage'): void => {
+	const select = event.target
+	if (!(select instanceof HTMLSelectElement) || !meta.value) return
+	const nextZone = which === 'zone' ? select.value : meta.value.zone
+	const nextStage = which === 'stage' ? select.value : meta.value.stage
+	const url = envSwitchUrl(meta.value.zone, meta.value.stage, nextZone, nextStage, window.location)
+	if (!url) {
+		select.value = which === 'zone' ? meta.value.zone : meta.value.stage
+		return
+	}
+	window.location.assign(url)
+}
 
 const clusterLine = computed(() => {
 	if (clusterError.value && !cluster.value?.nodes.length) return 'monitor unreachable'
@@ -137,12 +161,38 @@ onUnmounted(() => {
 						docs
 					</a>
 				</div>
-				<p
-					class="max-w-full min-w-0 truncate font-mono text-sm tabular-nums sm:text-right"
-					:class="clusterError && !cluster?.nodes.length ? 'text-warning' : 'text-muted'"
-				>
-					{{ clusterLine }}
-				</p>
+				<div class="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2 sm:justify-end">
+					<p
+						class="max-w-full min-w-0 truncate font-mono text-sm tabular-nums sm:text-right"
+						:class="clusterError && !cluster?.nodes.length ? 'text-warning' : 'text-muted'"
+					>
+						{{ clusterLine }}
+					</p>
+					<div v-if="showZones || showStages" class="flex shrink-0 items-center gap-2">
+						<label v-if="showZones" class="flex items-center gap-1.5 font-mono text-xs text-muted">
+							<span>zone</span>
+							<select
+								class="cursor-pointer border border-border bg-canvas px-1.5 py-1 font-mono text-sm text-heading hover:border-[#444444] disabled:cursor-default disabled:opacity-40"
+								:value="meta?.zone ?? ''"
+								:disabled="!canSwitch"
+								@change="onSwitch($event, 'zone')"
+							>
+								<option v-for="name in meta?.zones ?? []" :key="name" :value="name">{{ name }}</option>
+							</select>
+						</label>
+						<label v-if="showStages" class="flex items-center gap-1.5 font-mono text-xs text-muted">
+							<span>stage</span>
+							<select
+								class="cursor-pointer border border-border bg-canvas px-1.5 py-1 font-mono text-sm text-heading hover:border-[#444444] disabled:cursor-default disabled:opacity-40"
+								:value="meta?.stage ?? ''"
+								:disabled="!canSwitch"
+								@change="onSwitch($event, 'stage')"
+							>
+								<option v-for="name in meta?.stages ?? []" :key="name" :value="name">{{ name }}</option>
+							</select>
+						</label>
+					</div>
+				</div>
 			</div>
 			<nav class="mt-3 flex flex-wrap gap-1 font-mono text-sm" aria-label="Boards">
 				<RouterLink

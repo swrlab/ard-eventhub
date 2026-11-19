@@ -48,6 +48,11 @@ spec:
             # components/machine sets ZONE by name.
             - name: ZONE
               value: unset
+            # Header dropdowns. Empty hides them.
+            - name: AVAILABLE_ZONES
+              value: bad,mnz,stg
+            - name: AVAILABLE_STAGES
+              value: dev,test,prod
             # Client and monitor ports stay inside the namespace, plain TCP. They are not on a host
             # port, so the public names refuse them.
             - name: NATS_URL

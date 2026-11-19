@@ -66,6 +66,14 @@ export type MetaReport = {
 	/** WebSocket listener the tail opens. The username is hardcoded in the page. */
 	wsUrl: string
 	user: string
+	/** This process's zone. Empty when `ZONE` is unset. */
+	zone: string
+	/** This process's stage. Empty when `STAGE` is unset. */
+	stage: string
+	/** Header zone options. Empty hides the dropdown. */
+	zones: string[]
+	/** Header stage options. Empty hides the dropdown. */
+	stages: string[]
 }
 
 export type ClusterNode = {
