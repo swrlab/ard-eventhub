@@ -50,6 +50,18 @@ Beide Wege zusammen stellen dasselbe Event zweimal zu. `radio.control` und `radi
   - 🛑 **Feedback-Body umgestellt** — `errors[]` und `created` ersetzen die früheren Felder
   - **Feld `media[].templateUrl` deprecated** — eine konkrete `url` schicken; ein Template mit `{width}` und `{height}` wird noch akzeptiert
 
+## Erwarteter Zeitplan
+
+Die Termine sind Planung und können sich verschieben.
+
+1. **Evaluierung des aktualisierten Datenschemas:** November 2026 (erledigt)
+2. **Onboarding der Early Adopter:** Ende November 2026
+3. **Testing & Feedback-Loops mit den Early Adopters:** Dezember 2026 und Januar 2027
+4. **Release für alle:** voraussichtlich Februar 2027
+5. **Abschaltung der alten GCP-Infrastruktur (HTTPS-Auslieferung):** spätestens Herbst 2027
+
+Publisher, die eine [gemeinsame nächtliche Sendung](./common-ids) produzieren, liefern parallel an beide Systeme (ZI Gateway + Eventhub v3), bis alle Nutzer des ZI-Gateways umgezogen sind.
+
 ## Radiotext-Event entfernt
 
 _Ab Version `3.0.0-beta.1` und aufwärts._
