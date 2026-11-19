@@ -118,7 +118,7 @@ csr env force='':
 	echo
 	cat "$csr"
 
-# check a CA leaf against its key and store both in the stage's sops file, dev also for registry and Beszel (just tls-store dev tls.crt)
+# check a CA leaf against its key, write the fullchain under .local/certs, and store both in the stage's sops file (just tls-store dev tls.crt)
 [group('CERTIFICATES')]
 tls-store env cert='tls.crt':
 	#!/usr/bin/env bash
@@ -168,12 +168,19 @@ tls-store env cert='tls.crt':
 	ca=$(mktemp -d)
 	trap 'rm -rf "$ca"' EXIT
 	sops exec-env --same-process .env.k3s.sops.yaml "just _ard-ca '$ca'"
-	fullchain="$ca/fullchain.pem"
-	{ openssl x509 -in "$cert"; cat "$ca/chain.pem"; } > "$fullchain"
-	if ! openssl verify -CAfile "$ca/root.pem" -untrusted "$ca/chain.pem" "$fullchain" >/dev/null; then
+	built="$ca/fullchain.pem"
+	{ openssl x509 -in "$cert"; cat "$ca/chain.pem"; } > "$built"
+	if ! openssl verify -CAfile "$ca/root.pem" -untrusted "$ca/chain.pem" "$built" >/dev/null; then
 		echo "$cert does not chain to the ARD root through ARD_CA_CHAIN_URLS" >&2
 		exit 1
 	fi
+
+	certs="{{ CERT_DIR }}/$env"
+	mkdir -p "$certs"
+	fullchain="$certs/eventhub-connect-$env.fullchain.pem"
+	cp "$built" "$fullchain"
+	chmod 644 "$fullchain"
+	echo "wrote $fullchain"
 
 	# Secret name, sops file. The plaintext only passes through the pipe.
 	store() {
