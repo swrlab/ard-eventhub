@@ -71,7 +71,31 @@
           - "http://10.43.0.50:5000"
   '';
 
-  networking.firewall.enable = false;
+  # Default-deny host firewall on the nftables backend (table inet nixos-fw).
+  # Only host-local listeners hit the input chain: SSH (22, opened by openssh),
+  # the k3s API (6443), and Beszel agent (45876, hostNetwork). Traefik and NATS
+  # hostPorts are DNAT'd in prerouting and traverse forward (filterForward stays
+  # false). All non-echo ICMPv4 requests, including timestamp (type 13), drop by
+  # default; ping stays allowed.
+  #
+  # flushRuleset defaults to false on stateVersion 26.05 when ruleset is unset,
+  # so firewall reloads replace only nixos-fw and leave k3s tables intact.
+  networking.nftables.enable = true;
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [
+      6443 # k3s API server (kubectl, k9s, radar, k8s-logs-mcp)
+      45876 # Beszel agent (hostNetwork, polled by hubs on all three hosts)
+    ];
+    # Trust pod/overlay interfaces so pods can reach the host API, DNS, and the
+    # local registry ClusterIP (10.43.0.50:5000). NixOS always trusts lo.
+    trustedInterfaces = [
+      "cni0"
+      "flannel.1"
+    ];
+    # Strict rpfilter in prerouting can drop asymmetric pod/overlay packets.
+    checkReversePath = "loose";
+  };
 
   programs.zsh.enable = true;
 
