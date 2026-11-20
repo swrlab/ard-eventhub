@@ -1,102 +1,98 @@
 ---
 title: 'Firewall'
-description: 'SWR firewall form values for the three Eventhub Connect hosts.'
+description: 'SWR firewall form values. Each request lists source, destination, and ports.'
 sidebar:
   icon: brick-wall-shield
 ---
 
-Server numbers are the `server` values in [`infra/nixos/hosts.toml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nixos/hosts.toml). The three stage names of one machine resolve to the same host. Cluster routes, MQTT, WebSocket, and the operator UI use the `.swr.cn.ard.de` name.
+One request is one form: source, destination, and ports. Names on `.swr.ard` are the internal hostnames. Names on `.swr.cn.ard.de` are what the ARD CN dials. Dev, test, and prod are the same three machines under different hostnames, so every stage name and every stage port go on the same request. Server numbers are the `server` values in [`infra/nixos/hosts.toml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nixos/hosts.toml):
 
-## Broadcasters
+- `s0006669.swr.ard` — eventhub-connect-bad
+- `s0006663.swr.ard` — eventhub-connect-mnz
+- `s0006670.swr.ard` — eventhub-connect-stg
 
-A house connects outbound from the ARD CN only. There is no internet endpoint and no inbound port on the house side. Each house arranges its own ARD CN access through the ARD process.
+A request with several ports stays one request when the form accepts several ports. With a single port field, file that request once per port and keep the same source and destination.
 
-The house opens TCP to the three MQTT names below: prod `8883`, test `18883`. TLS verification uses the CA PEM shipped with the credentials. All three names go in the client. When the test servers are ready is covered under [Stages](./stages).
+## Hosts to the internet
 
-## Requests
+### Outbound HTTPS
 
-Each block is one request: every FQDN under it is a source, a destination, or both. A block with more than one port stays one request when the form accepts several ports. With a single port field, file that block once per port and keep all three names on it.
+**Source**
 
-### 1. Outbound HTTPS — hosts to internet
+- `s0006669.swr.ard`
+- `s0006663.swr.ard`
+- `s0006670.swr.ard`
 
-TCP `443`. Destination empty. Source FQDN is `<server-number>.swr.ard` for each host in [`infra/nixos/hosts.toml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nixos/hosts.toml).
+**Destination**
 
-Needed for NixOS, images, `ARD_FEED_URL`, Radioplayer (`np-ingest.radioplayer.cloud`), and DTS. Same rule as [NixOS Install](./nixos-install).
+Leave empty. Any host on the internet.
 
-### 2. NATS cluster — host to host, bidirectional
+**Ports**
 
-Same list as source and as destination. TCP.
+- TCP `443`
 
-**prod `6222`**
+NixOS, images, `ARD_FEED_URL`, Radioplayer, and DTS. Same rule as [NixOS Install](./nixos-install).
 
-- `eventhub-connect-bad-prod.swr.ard`
-- `eventhub-connect-mnz-prod.swr.ard`
-- `eventhub-connect-stg-prod.swr.ard`
+## Host to host
 
-**test `16222`**
+The same names go in source and in destination. Each machine dials the other two.
 
-- `eventhub-connect-bad-test.swr.ard`
-- `eventhub-connect-mnz-test.swr.ard`
-- `eventhub-connect-stg-test.swr.ard`
+**Source**
 
-**dev `26222`**
+- `eventhub-connect-{bad,mnz,stg}-{dev,test,prod}.swr.ard`
 
-- `eventhub-connect-bad-dev.swr.ard`
-- `eventhub-connect-mnz-dev.swr.ard`
-- `eventhub-connect-stg-dev.swr.ard`
+**Destination**
 
-### 3. MQTT TLS — ARD CN to hosts
+- `eventhub-connect-{bad,mnz,stg}-{dev,test,prod}.swr.ard`
 
-Source empty (ARD CN). Destinations below. TCP.
+**Ports**
 
-**prod `8883`**
+- NATS cluster
+  - TCP `26222` — dev
+  - TCP `16222` — test
+  - TCP `6222` — prod
+- Beszel agent
+  - TCP `45876`
 
-- `eventhub-connect-bad-prod.swr.cn.ard.de`
-- `eventhub-connect-mnz-prod.swr.cn.ard.de`
-- `eventhub-connect-stg-prod.swr.cn.ard.de`
+## ARD CN to hosts
 
-**test `18883`**
+Leave the source empty. That covers the ARD CN. MQTT, the NATS WebSocket, and the operator UI share the `.swr.cn.ard.de` names. Port `443` is the operator UI on every stage; the hostname selects the stage.
 
-- `eventhub-connect-bad-test.swr.cn.ard.de`
-- `eventhub-connect-mnz-test.swr.cn.ard.de`
-- `eventhub-connect-stg-test.swr.cn.ard.de`
+### Connect
 
-**dev `28883`**
+**Source**
 
-- `eventhub-connect-bad-dev.swr.cn.ard.de`
-- `eventhub-connect-mnz-dev.swr.cn.ard.de`
-- `eventhub-connect-stg-dev.swr.cn.ard.de`
+Leave empty.
 
-### 4. NATS WebSocket TLS — ARD CN to hosts
+**Destination**
 
-Source empty (ARD CN). Same destinations as MQTT. TCP.
+- `eventhub-connect-{bad,mnz,stg}-{dev,test,prod}.swr.cn.ard.de`
 
-- **prod** `9222`
-- **test** `19222`
-- **dev** `29222`
+**Ports**
 
-### 5. Operator UI — ARD CN to hosts
+- TCP `443` — operator UI
+- TCP `28883` — MQTT, dev
+- TCP `18883` — MQTT, test
+- TCP `8883` — MQTT, prod
+- TCP `29222` — NATS WebSocket, dev
+- TCP `19222` — NATS WebSocket, test
+- TCP `9222` — NATS WebSocket, prod
 
-Source empty (ARD CN). Same destinations as MQTT. TCP `443` for every stage. The hostname selects the stage.
+## Workstations to hosts
 
-### 6. Beszel agent — host to host, bidirectional
+**Source**
 
-Same list as source and as destination. TCP `45876`. The hub on each machine polls the agent on every machine.
+Local workstations.
 
-- `<server-number>.swr.ard` for each host in [`infra/nixos/hosts.toml`](https://github.com/swrlab/ard-eventhub/blob/main/infra/nixos/hosts.toml)
+**Destination**
 
-### 7. Beszel hub UI — ARD CN to hosts
+- `eventhub-connect-{bad, mnz,stg}-dev.swr.ard`
 
-Source empty (ARD CN). TCP `8081`. Destinations:
+**Ports**
 
-- `eventhub-connect-bad-dev.swr.ard`
-- `eventhub-connect-mnz-dev.swr.ard`
-- `eventhub-connect-stg-dev.swr.ard`
-
-### 8. Registry TLS — workstations to hosts
-
-Source: the workstations that push images. TCP `5000`. Destinations:
-
-- `eventhub-connect-bad-dev.swr.ard`
-- `eventhub-connect-mnz-dev.swr.ard`
-- `eventhub-connect-stg-dev.swr.ard`
+- Beszel hub
+  - TCP `8081`
+- registry
+  - TCP `5000`
+- UI
+  - TCP `443`

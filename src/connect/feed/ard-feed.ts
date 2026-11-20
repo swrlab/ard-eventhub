@@ -7,7 +7,7 @@ export const ARD_FEED_STREAM = 'KV_ARD_FEED'
 /** One document per revision. History is `max_msgs_per_subject` on the stream. */
 export const ARD_FEED_SUBJECT = '$KV.ARD_FEED.livestreams'
 
-/** Missed refreshes. `/api/update-feed` is triggered hourly. */
+/** Missed refreshes. The feed CronJob runs hourly. */
 export const FEED_STALE_WARN_MS = 3 * 60 * 60 * 1000
 
 /** Twelve missed refreshes. */

@@ -7,7 +7,7 @@ import { sampleMonitor } from '../ui/cluster.ts'
 import { natsMonitorUrl, usersConfPath } from '../ui/env.ts'
 import { parseUsersConf } from '../ui/users-conf.ts'
 import { openArdFeedStore } from './ard-feed-kv.ts'
-import { applyKvSnapshot, connectedInstitutionIds, decideUpstream } from './ard-feed.ts'
+import { applyKvSnapshot, connectedInstitutionIds, createArdFeedState, decideUpstream } from './ard-feed.ts'
 import { feedState } from './current-feed.ts'
 
 const source = 'connect.ard-feed'
@@ -179,6 +179,30 @@ export const followArdFeed = async (
 	return { kvReady, unwatch }
 }
 
+/**
+ * Read the current KV revision into a fresh state, then download and store a newer feed once.
+ * For one-shot callers such as the CLI and Kubernetes CronJob.
+ * @param store - Open KV store
+ * @param input - Optional overrides for URL, fetch, live institutions, and clock (tests)
+ * @returns Outcome of the refresh
+ */
+export const refreshArdFeedOnce = async (
+	store: ArdFeedStore,
+	input?: Partial<Omit<RefreshInput, 'store'>>
+): Promise<FeedOutcome> => {
+	const state = createArdFeedState()
+	const existing = await store.read()
+	if (existing) applyKvSnapshot(state, existing)
+	const connected = input && 'connected' in input ? input.connected : await liveInstitutions()
+	return refreshArdFeed(state, {
+		store,
+		url: input?.url ?? ardFeedUrl,
+		...(input?.fetchFeed ? { fetchFeed: input.fetchFeed } : {}),
+		...(connected !== undefined ? { connected } : {}),
+		...(input?.now ? { now: input.now } : {}),
+	})
+}
+
 let activeStore: ArdFeedStore | null = null
 let stopWatch: (() => void) | null = null
 let inflight: Promise<FeedOutcome> | null = null
@@ -188,7 +212,7 @@ let inflight: Promise<FeedOutcome> | null = null
  * Concurrent calls share one download.
  * @returns What the download did, or null when no bucket is open (NATS is down)
  */
-export const updateArdFeed = (): Promise<FeedOutcome | null> => {
+const updateArdFeed = (): Promise<FeedOutcome | null> => {
 	const store = activeStore
 	if (!store) return Promise.resolve(null)
 	inflight ??= (async () => {

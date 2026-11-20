@@ -9,7 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- feat: switch zone and stage in the operator UI header (`AVAILABLE_ZONES`, `AVAILABLE_STAGES`)
 - feat: allow hr-info to publish the cooperation livestream `urn:ard:permanent-livestream:5edfe1cef52b1e2c` (`crid://hr-online/radio/hr-info/koop/`)
+
+### Changed
+
+- feat: `radio.control` `name` is `TA` or `REGIO`; optional `details` string
+- docs: drop `radio.control` and `radio.data` from OpenAPI; both stay in AsyncAPI
+- docs: send each event on HTTPS or MQTT, not both, so subscribers do not see it twice
 
 ### Fixed
 

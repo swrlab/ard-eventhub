@@ -10,7 +10,7 @@ Für jeden Livestream sind **Now** und **Control** Pflicht. **Next** und **Data*
 ## Pflicht
 
 - **Now:** [_radio.track.playing_](./radio.track.playing) — der aktuell laufende Titel
-- **Control:** [_radio.control_](./radio.control) — Steuerbits wie TA, TP, EON und Regio
+- **Control:** [_radio.control_](./radio.control) — Steuerbits TA und REGIO
 
 ## Optional
 

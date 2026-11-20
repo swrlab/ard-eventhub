@@ -1,0 +1,14 @@
+# Hourly feed loader into KV_ARD_FEED. Kept separate from eventhub-connect so its pods do not
+# match service/eventhub-connect. Applied only through environments/<stage>.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - cronjob.yaml
+
+labels:
+  - includeTemplates: true
+    pairs:
+      app.kubernetes.io/name: eventhub-feed
+      app.kubernetes.io/part-of: eventhub
+      app.kubernetes.io/component: feed

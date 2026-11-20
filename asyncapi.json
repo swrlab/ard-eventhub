@@ -421,7 +421,7 @@
 			"radioControl": {
 				"name": "de.ard.eventhub.v1.radio.control",
 				"title": "radio.control",
-				"summary": "Control bits (TA, TP, EON, Regio, …). `name` is a free string, not an enum.",
+				"summary": "Control bits. `name` is `TA` or `REGIO`. `details` is an optional string.",
 				"contentType": "application/json",
 				"payload": {
 					"$ref": "#/components/schemas/eventV1RadioControlPostBody"
@@ -1185,9 +1185,14 @@
 						"examples": ["2020-01-19T06:00:00+01:00"]
 					},
 					"name": {
+						"description": "Control element identifier.",
+						"examples": ["TA"],
 						"type": "string",
-						"description": "Control element identifier (TA, TP, EON, Regio, …). Not an enum — new functions need no release.",
-						"examples": ["TA"]
+						"enum": ["TA", "REGIO"]
+					},
+					"details": {
+						"description": "Optional free-text detail for this control element.",
+						"type": "string"
 					},
 					"state": {
 						"type": "boolean",

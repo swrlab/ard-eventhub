@@ -3,7 +3,7 @@ import { test } from '@cross/test'
 import { assert, assertEquals } from '@std/assert'
 import { createSandbox } from 'sinon'
 import { ardFeedRules } from '../../utils/feed/ard-feed-rules.ts'
-import { followArdFeed, refreshArdFeed } from './ard-feed-loader.ts'
+import { followArdFeed, refreshArdFeed, refreshArdFeedOnce } from './ard-feed-loader.ts'
 import {
 	FEED_STALE_ALERT_MS,
 	FEED_STALE_PAGE_MS,
@@ -377,5 +377,43 @@ test('every follower of the bucket swaps to a revision another process wrote', a
 			followedA.unwatch()
 			followedB.unwatch()
 		}
+	})
+})
+
+test('refreshArdFeedOnce reads the current KV revision before comparing the upstream candidate', async () => {
+	await withRules(async () => {
+		const { store, writes } = memoryStore()
+		const cold = await refreshArdFeedOnce(store, {
+			url: 'https://example.test/feed',
+			fetchFeed: () => Promise.resolve(at(makeValidFeed('urn:ard:institution:one'), '2026-06-02T00:00:00.000Z')),
+			connected: null,
+		})
+		assertEquals(cold, 'stored')
+		assertEquals(writes(), 1)
+
+		const unchanged = await refreshArdFeedOnce(store, {
+			url: 'https://example.test/feed',
+			fetchFeed: () => Promise.resolve(at(makeValidFeed('urn:ard:institution:one'), '2026-06-02T00:00:00.000Z')),
+			connected: null,
+		})
+		assertEquals(unchanged, 'unchanged')
+		assertEquals(writes(), 1)
+
+		const missingConnected = await refreshArdFeedOnce(store, {
+			url: 'https://example.test/feed',
+			fetchFeed: () => Promise.resolve(at(makeValidFeed('urn:ard:institution:one'), '2026-06-03T00:00:00.000Z')),
+			connected: new Set(['urn:ard:institution:two']),
+		})
+		assertEquals(missingConnected, 'rejected')
+		assertEquals(writes(), 1)
+
+		const newer = await refreshArdFeedOnce(store, {
+			url: 'https://example.test/feed',
+			fetchFeed: () => Promise.resolve(at(makeValidFeed('urn:ard:institution:one'), '2026-06-03T00:00:00.000Z')),
+			connected: new Set(['urn:ard:institution:one']),
+		})
+		assertEquals(newer, 'stored')
+		assertEquals(writes(), 2)
+		assertEquals(feedGeneratedAt((await store.read())!.feed), '2026-06-03T00:00:00.000Z')
 	})
 })
