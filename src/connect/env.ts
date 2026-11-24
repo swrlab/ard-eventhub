@@ -59,7 +59,7 @@ export const natsPassword = natsAuth.password
 export const natsMqttUrl = getEnv<string>('NATS_MQTT_URL', { defaultValue: mqttUrlForNats(natsUrl) })
 
 /**
- * ARD core livestream feed, downloaded on a cold KV and by `/api/update-feed`.
+ * ARD core livestream feed, downloaded on a cold KV and by `bun run update-feed` (CronJob or manual pod exec).
  * Empty skips the download, so the process serves whatever another process wrote to KV.
  * `just env` injects it from sops. The UI still starts when it is unset.
  */

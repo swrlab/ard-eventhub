@@ -9,6 +9,7 @@ resources:
   - network-policies.yaml
   - ../../services/nats
   - ../../services/eventhub-connect
+  - ../../services/eventhub-feed
 
 components:
   - ../../components/registry-pull

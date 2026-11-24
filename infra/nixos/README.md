@@ -4,7 +4,7 @@ Central NixOS configuration for the Eventhub Connect hosts. One tree, uploaded i
 
 ## Structure
 
-- `common/base.nix` — shared module imported by every host: systemd-boot, NetworkManager, key-only OpenSSH, base packages, zsh, flakes, and a single-node k3s server. List options merge by concatenation; strings use `mkDefault` so a host's plain assignment wins. Each host overlay sets the k3s zone label (`mnz`, `bad`, `stg`). The Kubernetes manifests pin NATS and connect to it, and Vector tags logs with it.
+- `common/base.nix` — shared module imported by every host: systemd-boot, NetworkManager, nftables host firewall, key-only OpenSSH, base packages, zsh, flakes, and a single-node k3s server. List options merge by concatenation; strings use `mkDefault` so a host's plain assignment wins. Each host overlay sets the k3s zone label (`mnz`, `bad`, `stg`). The Kubernetes manifests pin NATS and connect to it, and Vector tags logs with it.
 - `common/herdr-core.nix` — imported by `base.nix`. Installs the herdr-core release binary (`herdr-core` and `hc`) for the Herdr app. It also enables linger for root, so `/run/user/0` (the herdr-core socket) stays after SSH logout. Bump the version and hash together from `releases.herdr.dev/core/latest.json`.
 - `common/authorized_keys` — root SSH keys, one per line, loaded by the base module. Hosts can still append keys through `authorizedKeys.keys`.
 - `hosts` — one line per host: friendly name, then server number. The friendly name is the directory, the flake attribute, and the `just nix-*` argument. The server number is the NixOS hostname and the SSH target.
@@ -47,6 +47,10 @@ The flake also works standalone on the host: `nixos-rebuild switch --flake "/etc
 ## Time synchronization
 
 All hosts use chrony with the three internal SWR NTP servers configured in `common/base.nix`. Each server uses `iburst` for rapid initial synchronization. The NixOS chrony module disables systemd-timesyncd automatically. After applying the configuration, run `just ntp` from `/etc/nixos` on the host to inspect synchronization and source status.
+
+## Host firewall
+
+[`common/base.nix`](common/base.nix) enables the nftables host firewall (`table inet nixos-fw`), which drops unsolicited inbound traffic by default — including non-echo ICMPv4 such as timestamp requests (type 13) — while keeping ping allowed. Only host-local ports (`22` SSH, `6443` k3s API, `45876` Beszel agent) and pod interfaces (`cni0`, `flannel.1`) are opened on `input`; Traefik and NATS `hostPort` traffic is DNAT'd into `forward` (`filterForward` stays off) and gated by the SWR firewall ([`docs/development/firewall.md`](../../docs/development/firewall.md)). Inspect active rules on a host with `nft list table inet nixos-fw`.
 
 ## Local k3s access
 

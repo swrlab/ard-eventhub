@@ -89,7 +89,7 @@ nixos-generate-config --root /mnt
 Check IP config to set static IP.
 
 ```bash
-ip -br addr; ip route; nmcli -t -f NAME,DEVICE,TYPE con show'
+ip -br addr; ip route; nmcli -t -f NAME,DEVICE,TYPE con show
 ```
 
 The first block in the second line print something like `ens33` or `eth0`. This is the network interface name. The line also shows the IP address of the interface (e.g. `10.xxx.xxx.xxx/24`).

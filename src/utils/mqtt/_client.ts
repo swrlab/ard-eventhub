@@ -2,19 +2,13 @@ import { hostname } from 'node:os'
 import process from 'node:process'
 import { logger } from '@frytg/logger'
 import mqtt, { type MqttClient } from 'mqtt'
-import { mqttBrokerUrl, mqttPassword, mqttTlsCa, mqttUsername } from '#env'
+import { mqttBrokers, mqttTlsCa } from '#env'
+import { mqttBrokerClientOptions, mqttBrokerLabel } from './broker-urls.ts'
 import { ingestMqttConnectOptions } from './connect-options.ts'
 import { mqttTlsConnectOptions } from './tls-ca.ts'
 
 const source = 'utils.mqtt.client'
 const CONNECT_TIMEOUT_MS = 5_000
-
-/**
- * True when `MQTT_BROKER_URL` names a broker. Blank means ingest stays on Pub/Sub.
- * @param brokerUrl - Raw `MQTT_BROKER_URL`
- * @returns Whether the CN gateway client should start
- */
-export const isMqttBrokerConfigured = (brokerUrl: string): boolean => brokerUrl.trim().length > 0
 
 /**
  * Extra CA for mqtts://. Missing `MQTT_TLS_CA` is fine (local mqtt://).
@@ -36,20 +30,38 @@ const loadMqttTlsConnectOptions = (): ReturnType<typeof mqttTlsConnectOptions> =
 }
 
 /**
- * One mqtt.js client for the process when a broker URL is set. Undefined otherwise.
- * Authenticates with the userinfo on `MQTT_BROKER_URL`.
- * Reconnects on its own; do not call `connect` again.
+ * One mqtt.js client for the process when `MQTT_BROKER_URL` names a gateway.
+ * Undefined otherwise. A comma-separated list is one connection: mqtt.js walks the
+ * hosts when the current zone drops. It does not publish a copy to each zone.
+ * Authenticates with the shared userinfo. Reconnects on its own; do not call `connect` again.
  */
-export const mqttClient: MqttClient | undefined = isMqttBrokerConfigured(mqttBrokerUrl)
-	? mqtt.connect(mqttBrokerUrl, {
-			...ingestMqttConnectOptions(`eventhub-ingest-${hostname()}-${process.pid}`),
-			...(mqttUsername ? { username: mqttUsername } : {}),
-			...(mqttPassword ? { password: mqttPassword } : {}),
-			...loadMqttTlsConnectOptions(),
-		})
-	: undefined
+export const mqttClient: MqttClient | undefined =
+	mqttBrokers.servers.length > 0
+		? mqtt.connect({
+				...ingestMqttConnectOptions(`eventhub-ingest-${hostname()}-${process.pid}`),
+				...mqttBrokerClientOptions(mqttBrokers),
+				...loadMqttTlsConnectOptions(),
+			})
+		: undefined
+
+if (mqttBrokers.rejectedHosts.length > 0 || mqttBrokers.invalidCount > 0) {
+	logger.warning({
+		message: 'mqtt broker list skipped entries',
+		source,
+		data: {
+			rejectedHosts: mqttBrokers.rejectedHosts,
+			invalidCount: mqttBrokers.invalidCount,
+		},
+	})
+}
 
 if (mqttClient) {
+	logger.info({
+		message: 'mqtt brokers configured',
+		source,
+		data: { hosts: mqttBrokers.servers.map(mqttBrokerLabel) },
+	})
+
 	mqttClient.on('connect', () => {
 		logger.info({ message: 'mqtt connected', source })
 	})
@@ -66,8 +78,11 @@ if (mqttClient) {
  */
 export const startMqttClient = async (): Promise<void> => {
 	if (!mqttClient) {
+		const unusable = mqttBrokers.invalidCount > 0 || mqttBrokers.rejectedHosts.length > 0
 		logger.info({
-			message: 'mqtt disabled, MQTT_BROKER_URL unset',
+			message: unusable
+				? 'mqtt disabled, MQTT_BROKER_URL has no usable broker'
+				: 'mqtt disabled, MQTT_BROKER_URL unset',
 			source,
 		})
 		return

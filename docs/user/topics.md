@@ -18,7 +18,7 @@ Publisher schreiben nur nach `inbox/{institutionId}` und lesen nur `feedback/{in
 | Ablehnung an den Publisher         | `feedback/{institutionId}`           | `feedback.{institutionId}`           |
 | angenommener Now-Playing           | `radio/{livestreamId}/track/playing` | `radio.{livestreamId}.track.playing` |
 | angenommener nächster Titel        | `radio/{livestreamId}/track/next`    | `radio.{livestreamId}.track.next`    |
-| Steuerbits (TA, Regio, …)          | `radio/{livestreamId}/control`       | `radio.{livestreamId}.control`       |
+| Steuerbits (TA, REGIO)             | `radio/{livestreamId}/control`       | `radio.{livestreamId}.control`       |
 | Radiotext, Dynamic Label, RT+      | `radio/{livestreamId}/data`          | `radio.{livestreamId}.data`          |
 
 `plugin.{target}.{livestreamId}.{class}` ist die interne Warteschlange der Plugin-Adapter. Kein MQTT-Benutzer darf sie lesen oder schreiben.

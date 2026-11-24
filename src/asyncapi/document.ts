@@ -448,7 +448,7 @@ export const buildAsyncApiDocument = () => {
 				radioControl: {
 					name: 'de.ard.eventhub.v1.radio.control',
 					title: 'radio.control',
-					summary: 'Control bits (TA, TP, EON, Regio, …). `name` is a free string, not an enum.',
+					summary: 'Control bits. `name` is `TA` or `REGIO`. `details` is an optional string.',
 					contentType: 'application/json',
 					payload: schemaRef('eventV1RadioControlPostBody'),
 				},

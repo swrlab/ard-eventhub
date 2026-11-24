@@ -3,6 +3,7 @@ import { getRequiredEnv } from '@frytg/check-required-env/get'
 import { PubSub, type Message } from '@google-cloud/pubsub'
 import mqtt from 'mqtt'
 import { ulid } from 'ulid'
+import { mqttBrokerClientOptions, parseMqttBrokerList } from '../utils/mqtt/broker-urls.ts'
 import { mqttTlsConnectOptions } from '../utils/mqtt/tls-ca.ts'
 
 const MQTT_V311 = 4
@@ -45,11 +46,16 @@ export const eventInstitutionId = (payload: unknown): string | undefined => {
  */
 const relay = async (subscriptionName: string): Promise<void> => {
 	const projectId = getRequiredEnv('GCP_PROJECT_ID')
-	const brokerUrl = getRequiredEnv('MQTT_BROKER_URL').trim()
-	const client = await mqtt.connectAsync(brokerUrl, {
+	const brokers = parseMqttBrokerList(getRequiredEnv('MQTT_BROKER_URL'))
+	if (brokers.servers.length === 0) {
+		console.error('MQTT_BROKER_URL has no usable mqtt:// or mqtts:// broker')
+		process.exit(1)
+	}
+	const client = await mqtt.connectAsync({
 		protocolVersion: MQTT_V311,
 		clientId: `eventhub-pubsub-mqtt-${process.pid}-${ulid()}`,
 		clean: true,
+		...mqttBrokerClientOptions(brokers),
 		...mqttTlsConnectOptions(process.env.MQTT_TLS_CA ?? ''),
 	})
 

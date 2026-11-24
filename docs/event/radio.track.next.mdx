@@ -12,3 +12,110 @@ Das `next`-Event hat Ähnlichkeiten zum [`playing`-Event](./radio.track.playing)
 Ein Paar aus `next` und `playing` sollte `playlistItemId` teilen, damit Abonnenten diese beiden Events miteinander verknüpfen können.
 
 Auf MQTT sind `id`, `publisherId` und `institutionId` in `services[]` URNs (`urn:ard:…`). `creator` setzt der Publisher. `created` setzt die Eventhub Validierung auf den Zeitpunkt der Zustellung und überschreibt einen mitgeschickten Wert. Wohin publiziert wird, steht unter [_Topics_](../user/topics), die Verbindung unter [_Eventhub Connect_](../user/connect-mqtt). Der Kanal steht in der [Events-Referenz](/events/subscribe/receive-radio-track-next).
+
+## Beispiel
+
+Dieselbe Form wie [`playing`](./radio.track.playing), mit `event` `de.ard.eventhub.v1.radio.track.next`. **Minimal** setzt die Pflichtfelder. **Maximal** ist der Diff dagegen und markiert dieselben optionalen Felder. `created` setzt die Eventhub Validierung.
+
+### Minimal
+
+```json
+{
+	"event": "de.ard.eventhub.v1.radio.track.next",
+	"type": "music",
+	"start": "2020-01-19T06:00:00+01:00",
+	"length": 240,
+	"title": "Song name",
+	"playlistItemId": "swr3-5678",
+	"services": [
+		{
+			"publisherId": "urn:ard:publisher:75dbb3dace15f610",
+			"institutionId": "urn:ard:institution:a3004ff924ece1a2",
+			"id": "urn:ard:permanent-livestream:49267f7d67be180d"
+		}
+	],
+	"creator": "example@swr.de"
+}
+```
+
+### Maximal
+
+<Diff
+	lang="json"
+	old={`{
+	"event": "de.ard.eventhub.v1.radio.track.next",
+	"type": "music",
+	"start": "2020-01-19T06:00:00+01:00",
+	"length": 240,
+	"title": "Song name",
+	"playlistItemId": "swr3-5678",
+	"services": [
+		{
+			"publisherId": "urn:ard:publisher:75dbb3dace15f610",
+			"institutionId": "urn:ard:institution:a3004ff924ece1a2",
+			"id": "urn:ard:permanent-livestream:49267f7d67be180d"
+		}
+	],
+	"creator": "example@swr.de"
+}`}
+	new={`{
+	"event": "de.ard.eventhub.v1.radio.track.next",
+	"type": "music",
+	"start": "2020-01-19T06:00:00+01:00",
+	"length": 240,
+	"title": "Song name",
+	"playlistItemId": "swr3-5678",
+	"services": [
+		{
+			"publisherId": "urn:ard:publisher:75dbb3dace15f610",
+			"institutionId": "urn:ard:institution:a3004ff924ece1a2",
+			"id": "urn:ard:permanent-livestream:49267f7d67be180d"
+		}
+	],
+	"artist": "Sam Feldt feat. Someone Else",
+	"contributors": [
+		{
+			"name": "Sam Feldt",
+			"role": "artist",
+			"normDb": {
+				"type": "Person",
+				"id": "1641010"
+			},
+			"isni": "0000000123456789",
+			"url": "https://example.com/sam-feldt"
+		}
+	],
+	"references": [
+		{
+			"type": "Show",
+			"id": "urn:ard:show:49267f7d67be180d",
+			"externalId": "crid://swr.de/123450",
+			"title": "ARD Popnacht",
+			"url": "https://example.com/ard-popnacht",
+			"alternateIds": ["https://normdb.ivz.cn.ard.de/sendereihe/427"]
+		}
+	],
+	"hfdbIds": ["swrhfdb1.KONF.12345", "zskhfdb1.KONF.12345"],
+	"externalId": "M012345.001",
+	"isrc": "DE012345678",
+	"upc": "123456789012",
+	"mpn": "MPN012345",
+	"media": [
+		{
+			"type": "cover",
+			"url": "https://example.com/cover.jpg",
+			"description": "Cover Demo Artist",
+			"attribution": "Photographer XYZ",
+			"isFallback": false
+		}
+	],
+	"plugins": [
+		{
+			"type": "dts",
+			"isDeactivated": false
+		}
+	],
+	"id": "1234567890",
+	"creator": "example@swr.de"
+}`}
+/>

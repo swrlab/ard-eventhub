@@ -21,7 +21,7 @@ Welche Klassen Pflicht sind, steht im [_Überblick_](./event/index): Now und Con
 - [_de.ard.eventhub.v1.radio.data_](./event/radio.data)
 - [_feedback/{institutionId}_](./event/feedback)
 
-`radio.control` und `radio.data` nutzen dieselben Zod-Schemas wie die OpenAPI-Komponenten. Track-Events nutzen die URN-only Inbox-Form (`creator`, von der Eventhub Validierung gesetztes `created`, `services[]` ohne CRID). Das Feedback-Schema ist der Body, den die Eventhub Validierung auf `feedback/` ablegt. MQTT-Bindings (QoS, Retain) kommen aus dem [v3 Connect RFC](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#62-topic-tree).
+`radio.control` und `radio.data` stehen nur in dieser AsyncAPI-Spezifikation. Die HTTPS-API lehnt beide Klassen ab, deshalb fehlen sie in OpenAPI. Track-Events nutzen die URN-only Inbox-Form (`creator`, von der Eventhub Validierung gesetztes `created`, `services[]` ohne CRID). Das Feedback-Schema ist der Body, den die Eventhub Validierung auf `feedback/` ablegt. MQTT-Bindings (QoS, Retain) kommen aus dem [v3 Connect RFC](https://swrlab.github.io/ard-eventhub/context-rfc/eventhub-v3-connect#62-topic-tree).
 
 ## Spezifikation pflegen
 

@@ -358,7 +358,7 @@ NATS subjects are the source of truth. Both notations are given.
 | validation feedback to publisher | `feedback.{institutionId}`               | `feedback/{institutionId}`           |
 | validated now-playing            | `radio.{livestreamId}.track.playing`     | `radio/{livestreamId}/track/playing` |
 | validated next track             | `radio.{livestreamId}.track.next`        | `radio/{livestreamId}/track/next`    |
-| control bits (TA, Regio, …)      | `radio.{livestreamId}.control`           | `radio/{livestreamId}/control`       |
+| control bits (TA, REGIO)         | `radio.{livestreamId}.control`           | `radio/{livestreamId}/control`       |
 | radiotext + dynamic label + DL+  | `radio.{livestreamId}.data`              | `radio/{livestreamId}/data`          |
 | per-target plugin work queue     | `plugin.{target}.{livestreamId}.{class}` | _not exposed_                        |
 
@@ -1219,7 +1219,7 @@ proposals in [discussion #771](https://github.com/swrlab/ard-eventhub/discussion
 
 ### 13.1 `de.ard.eventhub.v1.radio.control`
 
-Control bits — TA, Regio, and whatever comes next.
+Control bits — `TA` and `REGIO`.
 
 ```json
 {
@@ -1227,6 +1227,7 @@ Control bits — TA, Regio, and whatever comes next.
 	"start": "2026-05-27T16:03:00+01:00",
 	"validUntil": "2026-05-27T16:18:00+01:00",
 	"name": "TA",
+	"details": "Beispiel",
 	"state": true,
 	"services": [
 		{
@@ -1238,18 +1239,17 @@ Control bits — TA, Regio, and whatever comes next.
 }
 ```
 
-| Field        | Type    | Required | Notes                                                                                                                         |
-| ------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `event`      | string  | –        | must match the target event type if set                                                                                       |
-| `start`      | ISO8601 | ✓        | when the source changed the state.                                                                                            |
-| `validUntil` | ISO8601 | –        | backstop TTL. receivers drop the state when it passes. omit for states with no natural expiry                                 |
-| `name`       | string  | ✓        | control element identifier — `TA`, `TP`, `EON`, `Regio`, … **not an enum**, so future control functions need no schema change |
-| `state`      | boolean | ✓        | new state                                                                                                                     |
-| `services`   | array   | ✓        | as in track events, pre-encoded ARD URNs only ([§12.4](#124-identifiers))                                                     |
+| Field        | Type    | Required | Notes                                                                                         |
+| ------------ | ------- | -------- | --------------------------------------------------------------------------------------------- |
+| `event`      | string  | –        | must match the target event type if set                                                       |
+| `start`      | ISO8601 | ✓        | when the source changed the state.                                                            |
+| `validUntil` | ISO8601 | –        | backstop TTL. receivers drop the state when it passes. omit for states with no natural expiry |
+| `name`       | enum    | ✓        | `TA` or `REGIO`                                                                               |
+| `details`    | string  | –        | optional free-text detail for this control element                                            |
+| `state`      | boolean | ✓        | new state                                                                                     |
+| `services`   | array   | ✓        | as in track events, pre-encoded ARD URNs only ([§12.4](#124-identifiers))                     |
 
-`name` is unconstrained because the ZI schema's fixed element list is one of the limitations v3
-exists to remove. A typo costs one broken control bit for one publisher; an enum costs a release
-cycle every time someone needs a new element.
+`name` is `TA` or `REGIO`. Anything else is rejected. `details` is an optional string.
 
 ### 13.2 `de.ard.eventhub.v1.radio.data`
 

@@ -13,7 +13,7 @@ Several environment variables need to be set in `.env` config in order to run th
 - REQUIRED `GOOGLE_APPLICATION_CREDENTIALS` - where the Google Cloud Service Account Key can be found (usually a path to a .json file)
 - REQUIRED `PUBSUB_SERVICE_ACCOUNT_EMAIL_INTERNAL` - for verification of internal publisher service account
 - REQUIRED `STAGE` - can be one of the Stages below to switch several settings
-- OPTIONAL `MQTT_BROKER_URL` - CN MQTT gateway. Credentials go in the URL (`mqtt://user:password@host:1883`). The plaintext is only in sops. Unset skips the inbox dual-write so ingest stays on Pub/Sub. A failed publish never fails the HTTP response.
+- OPTIONAL `MQTT_BROKER_URL` - CN MQTT gateway, or a comma-separated failover list of the three zone hostnames (`mqtts://user:password@eventhub-connect-bad-prod.swr.cn.ard.de:8883,mqtts://...-mnz-...,mqtts://...-stg-...`). One shared account: put the user and password on the first URL, or repeat the same pair. A later URL with a different user or password is skipped. A comma inside the password must be `%2C`. mqtt.js keeps one connection and moves to the next host when the current zone drops. Ingest does not publish a copy to each zone. The plaintext is only in sops. Unset skips the inbox dual-write so ingest stays on Pub/Sub. A failed publish never fails the HTTP response.
 - OPTIONAL `MQTT_TLS_CA` - PEM of the gateway CA, or a path to that PEM. Needed for `mqtts://` against a private CA. Omit for local `mqtt://`.
 - OPTIONAL `INGEST_PUBLISH_PLUGINS` - must be the exact string `true` to publish DTS / Radioplayer jobs to the internal Pub/Sub topic. Unset or any other value (`1`, `TRUE`, `false`) leaves dispatch off. Independent of per-event `plugins[].isDeactivated`. Restart the process after changing it. The flag is logged on boot and on every processed event as `ingestPublishPlugins`.
 - OPTIONAL `PORT` - override server port setting, default is 8080
@@ -64,7 +64,7 @@ GitHub Actions builds and pushes the Docker image to the Eventhub Artifact Regis
 
 ## Local MQTT publish
 
-Ingest dual-writes each accepted event to `inbox/{institutionId}` on the CN MQTT gateway as `svc-ingest` when `MQTT_BROKER_URL` is set. Unset, the publish stays off and Pub/Sub stays the path of record. A failed publish is logged and does not fail the HTTP response. `just test` still injects the URL from sops. Point it at local NATS (`just nats-up`). Anonymous connects are rejected.
+Ingest dual-writes each accepted event to `inbox/{institutionId}` on the CN MQTT gateway as `svc-ingest` when `MQTT_BROKER_URL` is set. A comma-separated list is the bad, mnz, and stg gateways for that stage: one connection, next host when the current zone drops. Unset, the publish stays off and Pub/Sub stays the path of record. A failed publish is logged and does not fail the HTTP response. `just test` still injects the URL from sops. Point it at local NATS (`just nats-up`). Anonymous connects are rejected.
 
 ```sh
 just nats-up

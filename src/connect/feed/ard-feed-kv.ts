@@ -101,7 +101,7 @@ const ensureBucket = async (nc: NatsConnection): Promise<void> => {
 }
 
 /**
- * Open the JetStream bucket that `/api/update-feed` writes and every connect process watches.
+ * Open the JetStream bucket that the feed updater writes and every connect process watches.
  * @param nc - Open NATS connection. `svc-eventhub-connect` must be allowed to publish `$KV.ARD_FEED.>`
  * @returns A store bound to that connection
  */

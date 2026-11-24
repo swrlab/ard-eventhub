@@ -100,12 +100,15 @@ spec:
               # Stage host port, set by environments/shared from ConfigMap eventhub-stage.
               hostPort: 0
               protocol: TCP
+          # Full /healthz needs a JetStream meta leader, which needs two of the three machines up at the
+          # same time. The window must outlast a cold start of every machine, or the probe kills each
+          # pod before its peers are back and crash-loop backoff keeps the up-windows from overlapping.
           startupProbe:
             httpGet:
               path: /healthz
               port: monitor
-            periodSeconds: 2
-            failureThreshold: 30
+            periodSeconds: 5
+            failureThreshold: 120
           readinessProbe:
             httpGet:
               path: /healthz?js-enabled-only=true
@@ -113,9 +116,11 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 2
             failureThreshold: 3
+          # Process-level only. A lost meta quorum is a cluster problem; restarting the survivors over it
+          # would only make it worse.
           livenessProbe:
             httpGet:
-              path: /healthz
+              path: /healthz?js-enabled-only=true
               port: monitor
             periodSeconds: 15
             timeoutSeconds: 2

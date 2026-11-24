@@ -20,14 +20,14 @@ Users live in [`services/nats/users/nats-users.conf`](../../infra/kubernetes/ser
 The JetStream bucket `KV_ARD_FEED` (subject `$KV.ARD_FEED.livestreams`) holds the latest feed. Every connect process watches it, so a write by any one of them reaches all of them.
 
 1. **Boot.** Read the latest revision from KV. Only when the bucket is empty, download `ARD_FEED_URL` and write it. Validation starts once a revision is serving.
-2. **Refresh.** `POST /api/update-feed` downloads again and writes a newer document to KV. A Kubernetes CronJob calls it hourly (manifest not in this tree yet). The endpoint takes no body. It answers with the `/api/feed` report: `200` when stored or unchanged, `502` when the fetch failed or the document was rejected, `503` without NATS. Concurrent calls share one download.
+2. **Refresh.** `bun run update-feed` (`src/cli/update-feed.ts`) reads the current KV revision, downloads again, and writes a newer document to KV. A Kubernetes CronJob (`infra/kubernetes/services/eventhub-feed/cronjob.yaml`) runs it hourly. It exits `0` when stored or unchanged, `1` when the fetch failed, the document was rejected, or NATS is down. No HTTP route triggers a refresh.
 3. **Read.** [`feed/current-feed.ts`](feed/current-feed.ts) holds the serving revision in memory. `currentFeed()`, `currentOwners()`, and `currentFeedReport()` are synchronous. Only KV revisions are written into it.
 
 A failed fetch, a malformed body, a dropped institution count, a missing connected institution, or a `generatedAt` that is not newer leaves the previous revision serving. `/api/feed` reports the age of this process's last successful fetch (`warn` at 3h, `alert` at 12h, `page` at 48h). The feed page shows when the snapshot was built and when it was last fetched.
 
-`svc-eventhub-connect` publishes `$KV.ARD_FEED.>` and subscribes to `feedback.>` for the rejection board. A cluster that is already running needs that users file reapplied (`just nats-reload` locally, or a config reload on the dev cluster) before the first write succeeds. Trigger a refresh locally with `curl -X POST http://127.0.0.1:4173/api/update-feed`.
+`svc-eventhub-connect` publishes `$KV.ARD_FEED.>` and subscribes to `feedback.>` for the rejection board. A cluster that is already running needs that users file reapplied (`just nats-reload` locally, or a config reload on the dev cluster) before the first write succeeds. Trigger a refresh locally with `just update-feed`, or manually inside a pod with `kubectl exec -n eventhub-dev deployment/eventhub-connect -- bun run update-feed`.
 
-Ingest dual-writes only when `MQTT_BROKER_URL` is set. Put the user and password in that URL (`mqtt://user:password@host:1883`). The plaintext is only in sops. Unset, ingest stays on Pub/Sub. The local broker's MQTT listener is `:1883`. Anonymous connects are rejected (`no_auth_user` is unset).
+Ingest dual-writes only when `MQTT_BROKER_URL` is set. Put the user and password in that URL (`mqtt://user:password@host:1883`). A comma-separated list is a failover set across zones; ingest keeps one connection and does not publish a copy to each host. The plaintext is only in sops. Unset, ingest stays on Pub/Sub. The local broker's MQTT listener is `:1883`. Anonymous connects are rejected (`no_auth_user` is unset).
 
 ## Local NATS (Mac / Homebrew)
 
@@ -67,6 +67,8 @@ Panels:
 - **Tail.** Default filter `radio/+/track/playing` (MQTT). The page rewrites that to the NATS subject `radio.*.track.playing` and shows the subject under the field. Incoming frames are shown as MQTT topics. The browser opens NATS WebSocket as `sub-ui` (no password) and subscribes itself. Closes after 2 minutes with no click, key, or scroll, and after 30 minutes even if someone is still there. Over 20 frames/s the page drops frames and shows `sampled`. Reopening is a click.
 
 `UI_HOST` (default `0.0.0.0`), `UI_PORT` (default `4173`). `UI_ALLOW_CIDR` is a comma-separated source list checked against the socket address. Empty allows every peer, which is the local default. Set it when the UI is reachable on a shared network.
+
+`AVAILABLE_ZONES` and `AVAILABLE_STAGES` are comma-separated lists for the header dropdowns. Clusters set `bad,mnz,stg` and `dev,test,prod`. Empty hides them.
 
 Tail limits are also in the page footer.
 

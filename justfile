@@ -58,6 +58,11 @@ coreId text:
 feed:
 	bun run ./src/cli/feed.ts
 
+# refresh the ARD feed in NATS JetStream KV
+[group('LOCAL')]
+update-feed:
+	just env "bun run update-feed"
+
 # start the ingest service in development mode
 [group('LOCAL')]
 ingest:
