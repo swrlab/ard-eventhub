@@ -46,7 +46,7 @@ The connect process serves MCP at `/mcp`. `cluster` is the cluster board. `on-ai
 
 Ein Publish auf `inbox.urn:…` über MQTT landet auf `inbox//urn:…` — ein Token, das niemand abonniert. Richtig ist `inbox/urn:…`.
 
-Ingest publiziert bei gesetztem `MQTT_BROKER_URL` direkt auf das Gateway als `svc-ingest`. Ingest-CI startet dafür NATS (`just nats-up-docker`). Die `svc-ingest`-ACL prüft der eigene NATS-Job.
+Ingest publiziert bei gesetztem `MQTT_BROKER_URL` direkt auf das Gateway als `svc-ingest`. Mehrere Zonen stehen komma-getrennt in derselben Variable: eine Verbindung, der nächste Host wenn die aktuelle Zone ausfällt, kein zweites Exemplar pro Host. Ingest-CI startet dafür NATS (`just nats-up-docker`). Die `svc-ingest`-ACL prüft der eigene NATS-Job.
 
 ## Kubernetes
 

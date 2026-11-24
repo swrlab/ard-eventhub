@@ -27,7 +27,7 @@ A failed fetch, a malformed body, a dropped institution count, a missing connect
 
 `svc-eventhub-connect` publishes `$KV.ARD_FEED.>` and subscribes to `feedback.>` for the rejection board. A cluster that is already running needs that users file reapplied (`just nats-reload` locally, or a config reload on the dev cluster) before the first write succeeds. Trigger a refresh locally with `just update-feed`, or manually inside a pod with `kubectl exec -n eventhub-dev deployment/eventhub-connect -- bun run update-feed`.
 
-Ingest dual-writes only when `MQTT_BROKER_URL` is set. Put the user and password in that URL (`mqtt://user:password@host:1883`). The plaintext is only in sops. Unset, ingest stays on Pub/Sub. The local broker's MQTT listener is `:1883`. Anonymous connects are rejected (`no_auth_user` is unset).
+Ingest dual-writes only when `MQTT_BROKER_URL` is set. Put the user and password in that URL (`mqtt://user:password@host:1883`). A comma-separated list is a failover set across zones; ingest keeps one connection and does not publish a copy to each host. The plaintext is only in sops. Unset, ingest stays on Pub/Sub. The local broker's MQTT listener is `:1883`. Anonymous connects are rejected (`no_auth_user` is unset).
 
 ## Local NATS (Mac / Homebrew)
 

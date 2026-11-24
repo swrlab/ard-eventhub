@@ -1,7 +1,7 @@
 import type { DTSKeys, RadioplayerApiKeys, Stage } from './schemas/config.ts'
 import { getRequiredEnv } from '@frytg/check-required-env/get'
 import { getEnv, getEnvBase64, getEnvBoolean, getEnvNumber } from './utils/env.ts'
-import { parseUserinfoUrl } from './utils/url-auth.ts'
+import { parseMqttBrokerList } from './utils/mqtt/broker-urls.ts'
 
 // NOTE: keys without a default are required and cause an error if missing.
 
@@ -38,23 +38,14 @@ export const isIngestPublishPluginsEnabled = (): boolean =>
 	getEnv<string>('INGEST_PUBLISH_PLUGINS', { defaultValue: '' }) === 'true'
 
 /**
- * CN MQTT gateway for the inbox dual-write.
- * `mqtt://user:password@host:1883`. Empty when unset so ingest stays on Pub/Sub.
- * The exported value has userinfo removed.
+ * CN MQTT gateways for the inbox dual-write.
+ * One URL, or a comma-separated failover list (`mqtts://user:password@host:8883,...`).
+ * Empty when unset so ingest stays on Pub/Sub. Userinfo is not on `servers`.
  */
-const mqttEndpoint = parseUserinfoUrl(getEnv<string>('MQTT_BROKER_URL', { defaultValue: '' }))
-
-/** MQTT server URL with userinfo removed. */
-export const mqttBrokerUrl = mqttEndpoint.url
+export const mqttBrokers = parseMqttBrokerList(getEnv<string>('MQTT_BROKER_URL', { defaultValue: '' }))
 
 /**
  * Optional gateway CA for mqtts://. PEM text, or a path to a PEM file.
- * Unset for local `mqtt://`.
+ * Unset for local `mqtt://`. The same CA is used for every host in `MQTT_BROKER_URL`.
  */
 export const mqttTlsCa = getEnv<string>('MQTT_TLS_CA', { defaultValue: '' })
-
-/** Username from `MQTT_BROKER_URL` userinfo. Empty when the URL has none. */
-export const mqttUsername = mqttEndpoint.user
-
-/** Password from `MQTT_BROKER_URL` userinfo. Empty when the URL has none. */
-export const mqttPassword = mqttEndpoint.password

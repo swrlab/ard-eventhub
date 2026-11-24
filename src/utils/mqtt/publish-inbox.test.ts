@@ -2,7 +2,7 @@ import { test } from '@cross/test'
 import { logger } from '@frytg/logger'
 import { assert, assertEquals } from '@std/assert'
 import { createSandbox } from 'sinon'
-import { isMqttBrokerConfigured, mqttClient } from './_client.ts'
+import { mqttClient } from './_client.ts'
 import { inboxTopic, mqttInbox, publishInboxMessage } from './publish-inbox.ts'
 
 const INSTITUTION_ID = 'urn:ard:institution:a3004ff924ece1a2'
@@ -10,12 +10,6 @@ const PAYLOAD = { id: `${INSTITUTION_ID}-01`, event: 'de.ard.eventhub.v1.radio.t
 
 test('inboxTopic prefixes the institution URN', () => {
 	assertEquals(inboxTopic(INSTITUTION_ID), `inbox/${INSTITUTION_ID}`)
-})
-
-test('isMqttBrokerConfigured treats a blank URL as Pub/Sub only', () => {
-	assertEquals(isMqttBrokerConfigured(''), false)
-	assertEquals(isMqttBrokerConfigured('   '), false)
-	assertEquals(isMqttBrokerConfigured('mqtt://127.0.0.1:1883'), true)
 })
 
 test('publishInboxMessage does nothing when no client is configured', async () => {
